@@ -1,0 +1,8 @@
+*.Rdata
+__pycache__/
+*.pyc
+.venv/
+venv/
+.DS_Store
+f4/
+*.prepatch
