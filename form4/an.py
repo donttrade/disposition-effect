@@ -26,7 +26,7 @@ for k in (2,3,4,5):
 # Two tradable specifications are reported side by side, dollar-volume floor identical:
 #   PUBLISHED : px    >= $5  -- px is the yfinance split/dividend-ADJUSTED close (rets.py);
 #               retroactively deflated for old events (NFLX 2006 = $0.29), so era-asymmetric.
-#   AS-TRADED : px_f4 >= $5  -- Form 4 TRANS_PRICEPERSHARE, the price actually paid.
+#   AS-TRADED : px_f4 >= $5  -- Form 4 TRANS_PRICEPERSHARE, the price the insider reported paying.
 SPECS=[("PUBLISHED px>=5 (adjusted close)","px")]
 if HAS_F4: SPECS.append(("AS-TRADED px_f4>=5 (Form 4 price)","px_f4"))
 def tradable(fr,col): return fr[(fr[col]>=5)&(fr.dvol>=1e6)]
