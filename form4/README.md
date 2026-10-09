@@ -76,7 +76,7 @@ Tradable, as-traded, at both insider thresholds, with 95% intervals:
 | window | >=2 insiders | >=3 insiders |
 |---|---|---|
 | 2006-2016 | +0.66% (t 3.01), N 2,958 | +0.89% (t 2.70), N 1,524 |
-| excluding 2008-09 | **+0.18%** (t 0.80), [-0.26, +0.62] | **+0.06%** (t 0.18), N 1,178 |
+| excluding 2008-09 | **+0.18%** (t 0.80), median **-0.14%**, [-0.26, +0.62] | **+0.06%** (t 0.18), median **-0.16%**, N 1,178 |
 | excluding 2008-09-10 | +0.15% (t 0.62) | +0.02% (t 0.05), N 1,073 |
 | 2010-2016 only | +0.15% (t 0.58) | +0.14% (t 0.35), N 946 |
 | 2006-2007 only | +0.33% (t 0.73) | **-0.25%** (t -0.38), N 232 |
@@ -85,6 +85,12 @@ By year, tradable >=3: **2008 +3.17% (t 4.04, N 278)** and **2009 +5.80% (N 68)*
 94% of the tradable, three-or-more-insider early era's excess-return sum** — 31% of the unscreened
 early era's. 2009 is 68 events with a 95% interval of
 [+0.94, +10.67] and should not carry weight alone; the claim rests on 2008.
+
+**Medians by year, where they diverge from the mean.** 2008 is +1.93% against its +3.17% mean and 2009
++2.63% against +5.80% — the crisis years are the two where the typical trade moved with the average.
+2017, the best post-2017 year, is **+0.13% against a +2.47% mean**: carried almost entirely by a tail.
+The widest gap in the table is 2013 — **+2.24% on the mean against -1.88% on the median**, on 69
+events.
 
 **This is a failure to detect, not a proof of zero.** The ex-crisis interval is [-0.26%, +0.62%] over
 21 days. Jeng-Metrick-Zeckhauser's 50 bp a month sits inside it; Cohen-Malloy-Pomorski's 82 bp sits
@@ -151,8 +157,10 @@ before the screen was corrected, and it stays on disk so the two can be compared
 
 **What `an.py` prints, and what it does not.** It prints both price screens at insider thresholds
 n in {2,3,4,5}, horizons {21,63} and tradable thresholds n in {3,4}, the year table, win rates and the
-dollar-volume quartiles. It does **not** compute the cut-point sweep, the regime pools, the crisis
-windows beyond `ex 2008-09`, the common-core decomposition or the notional sensitivity. Those are
+dollar-volume quartiles — though the year table it prints carries no median column. It does **not**
+compute the cut-point sweep, the regime pools, the contiguous-window enumeration, the crisis windows
+beyond `ex 2008-09`, the common-core decomposition, the non-tradable complement or the notional
+sensitivity. Those are
 computed on top of `f4/events_px.csv.gz`, **which is gitignored and not in this repository** — it is
 built from 923MB of SEC archives by the four commands above. There is no one-click reproduction and it
 would be dishonest to imply one.
@@ -179,8 +187,8 @@ is skipped, so it can be run repeatedly until it reports `DONE`. `MAX_BATCHES=n`
 
 **Caveat on re-running.** The event output is reproducible, but the *drop ledger* is not: a discarded
 batch writes `drops.json` with its counters already incremented and then raises, so the refetched batch
-increments them again. The published decomposition therefore overstates its absolute counts by about
-10%. The shape is unaffected — pushing the entire excess into the largest category still leaves it at
+increments them again. The published decomposition therefore overstates its absolute drop count by 2,211
+events, about 12%. The shape is unaffected — pushing the entire excess into the largest category still leaves it at
 93.8%.
 
 It also verifies each batch before marking it done, by re-requesting a sample of the tickers that came
