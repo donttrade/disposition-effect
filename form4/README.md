@@ -1,8 +1,8 @@
 # Insider clusters on SEC Form 4 bulk data, 2006-2026
 
 A measurement of whether clustered insider buying still predicts returns. **In the names you could
-actually trade, the effect is not distinguishable from zero outside the 2008-09 crisis** — and the
-honest version of that sentence is narrower than it sounds. See "What is wrong with this" below.
+actually trade, the early era's result is 2008 and 2009 and nothing else** — and the honest version of
+that sentence is narrower than it sounds. See "What is wrong with this" below.
 
 Independent of the disposition-effect replication in the repository root. Different data, different
 question, different code.
@@ -82,8 +82,8 @@ Tradable, as-traded, at both insider thresholds, with 95% intervals:
 | 2006-2007 only | +0.33% (t 0.73) | **-0.25%** (t -0.38), N 232 |
 
 By year, tradable >=3: **2008 +3.17% (t 4.04, N 278)** and **2009 +5.80% (N 68)**. **2008-09 supplies
-94% of the early era's entire excess-return sum.** 2009 is 68 events with an interval of
-[+1.03, +10.58] and should not carry weight alone; the claim rests on 2008.
+94% of the early era's entire excess-return sum.** 2009 is 68 events with a 95% interval of
+[+0.94, +10.67] and should not carry weight alone; the claim rests on 2008.
 
 **This is a failure to detect, not a proof of zero.** The ex-crisis interval is [-0.26%, +0.62%] over
 21 days. Jeng-Metrick-Zeckhauser's 50 bp a month sits inside it; Cohen-Malloy-Pomorski's 82 bp sits
@@ -104,9 +104,9 @@ regime in advance) applies equally to 2008-09. Both exclusions are constructed a
 and neither should be believed.
 
 **Robustness.** **21.9%** of the 17,018 analysed events are a single jointly-filed Form 4 rather than
-several independent decisions — 28.6% across both tradable eras, **30.4%** of the events behind the
-headline figure. Requiring two or more *separate filings* gives tradable 2017-2026 of **-0.29%
-(t -1.31)** against -0.20% on owners; `events.csv.gz` carries `n_acc` so both can be computed. The
+several independent decisions — 28.6% of the tradable universe at three or more insiders, **30.4%** of the events behind the
+headline figure. Requiring two or more *separate filings* gives tradable 2017-2026 of **-0.30%
+(t -1.33, N 4,048)** against -0.20% on owners (and 2006-2016 of +0.71%, t 3.11, N 2,442); `events.csv.gz` carries `n_acc` so both can be computed. The
 contamination is era-asymmetric: 19.8% pre-2017 against 23.5% after.
 
 **Win rate**, 21d, tradable >=3: **51.0%** in 2006-2016, **45.7%** in 2017-2026, 47.6% all eras.
@@ -222,10 +222,16 @@ contamination, that is three ways the two eras are measured differently, all pus
 
 ## What is wrong with this, in order of how much it matters
 
-- **The central claim is narrower than it looks.** "Not distinguishable from zero outside the crisis"
-  holds for every *contiguous* window inside the early era. It does not hold for windows constructed
-  after seeing the result: 2025-2026 Q1 is +1.77% (t 2.05) and 2017-2026 excluding 2021-24 is +0.90%
-  (t 2.00). Neither should be believed, and the same scepticism must then apply to excluding 2008-09.
+- **The central claim is narrower than it looks, and here is exactly how narrow.** Enumerating all 231
+  contiguous runs of calendar years: inside the early era, excluding 2008-09, **no window reaches
+  significance at three or more insiders** — the largest |t| is 1.85 (2014 alone, N 143, -1.56%). At two
+  or more insiders **exactly one does**, and it is negative: 2014-2015, -0.82% (t -2.13, N 709). It does
+  not generalise past the early era: across the full sample **32 crisis-free contiguous windows are
+  significant at three or more insiders and 41 at two or more**, of which 30 of 32 and 29 of 41 are
+  negative. The positive ones include 2016-2018 (+1.10%, t 3.41, N 1,238) and 2016-2019 (+0.89%, t 3.20,
+  N 1,679) at two or more insiders — both straddling the era break, both more significant than the early
+  era itself (+0.66%, t 3.01). With 231 windows tested per threshold, a handful at t = 3 is what noise
+  looks like; none of them should be believed, and the same scepticism applies to excluding 2008-09.
 - **Filing date, not transaction date.** Kang, Kim & Wang measure from the transaction; this measures
   from the filing, because that is when a reader could act. Their table shows 2.06% of their 3.80%
   accrues in the first five days, so starting ~2 days later forfeits a large share of it. This is most
