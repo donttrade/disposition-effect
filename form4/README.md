@@ -82,7 +82,8 @@ Tradable, as-traded, at both insider thresholds, with 95% intervals:
 | 2006-2007 only | +0.33% (t 0.73) | **-0.25%** (t -0.38), N 232 |
 
 By year, tradable >=3: **2008 +3.17% (t 4.04, N 278)** and **2009 +5.80% (N 68)**. **2008-09 supplies
-94% of the early era's entire excess-return sum.** 2009 is 68 events with a 95% interval of
+94% of the tradable, three-or-more-insider early era's excess-return sum** — 31% of the unscreened
+early era's. 2009 is 68 events with a 95% interval of
 [+0.94, +10.67] and should not carry weight alone; the claim rests on 2008.
 
 **This is a failure to detect, not a proof of zero.** The ex-crisis interval is [-0.26%, +0.62%] over
@@ -99,9 +100,18 @@ just outside, so an effect that size is about the smallest thing this window cou
 | **2017-2026 excluding 2021-24** | **1,512** | **+0.90%** | **+2.00** |
 
 Set that last row against the early era with *its* exceptional years removed — **+0.06% (t 0.18,
-N 1,178)** — and the era called dead is the stronger of the two. The rebuttal (nothing tells you the
-regime in advance) applies equally to 2008-09. Both exclusions are constructed after seeing the result
-and neither should be believed.
+N 1,178)** — and on means the era called dead is the stronger of the two. **On medians the comparison
+reverses against both: -0.16% early against -0.38% late.** Neither residue has a positive median, so
+neither exclusion produces anything tradable.
+
+The rebuttal to the +0.90% is that nothing tells you the regime in advance. That is true, and it is
+weaker than it looks, because the two exclusions are not the same kind of thing: 2008-09 is a named
+macro event whose dates were fixed by history before anyone looked at this data, while 2021-24 is four
+consecutive years selected because of their returns — there, the boundaries *are* the data. So the
+symmetry is not perfect and it would be wrong to claim it is. What survives is narrower: this sample
+holds one fifteen-month episode supplying the entire positive mean and four years supplying the entire
+negative one, on an annual-mean standard deviation of 2.05 percentage points. That describes variance,
+not an effect.
 
 **Robustness.** **21.9%** of the 17,018 analysed events are a single jointly-filed Form 4 rather than
 several independent decisions — 28.6% of the tradable universe at three or more insiders, **30.4%** of the events behind the
