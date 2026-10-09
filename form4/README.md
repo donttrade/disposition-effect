@@ -98,12 +98,18 @@ just outside, so an effect that size is about the smallest thing this window cou
 
 ### The argument against the conclusion
 
-| pool, tradable >=3 | N | mean | t |
-|---|---|---|---|
-| 2017-2020 | 1,073 | +0.55% | +1.03 |
-| 2021-2024 | 1,203 | **-2.09%** | **-4.79** |
-| 2025-2026 Q1 | 439 | **+1.77%** | **+2.05** |
-| **2017-2026 excluding 2021-24** | **1,512** | **+0.90%** | **+2.00** |
+| pool, tradable >=3 | N | mean | median | t |
+|---|---|---|---|---|
+| 2017-2020 | 1,073 | +0.55% | **-0.51%** | +1.03 |
+| 2021-2024 | 1,203 | **-2.09%** | **-2.11%** | **-4.79** |
+| 2025-2026 Q1 | 439 | **+1.77%** | **-0.25%** | **+2.05** |
+| **2017-2026 excluding 2021-24** | **1,512** | **+0.90%** | **-0.38%** | **+2.00** |
+
+**Every pool in that table has a negative median, including both pools with a positive mean and the
+one that reaches t = +2.05.** 2025-2026 Q1 is the sharpest case: a mean of +1.77% over a median of
+-0.25%. The median column is given here because this README states above that medians are reported
+wherever the gap between mean and median carries the finding, and this is the table where that gap is
+widest.
 
 Set that last row against the early era with *its* exceptional years removed — **+0.06% (t 0.18,
 N 1,178)** — and on means the era called dead is the stronger of the two. **On medians the comparison
