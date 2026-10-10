@@ -12,112 +12,117 @@ pip install pyreadr pandas numpy scipy
 python reproduce_pdde.py
 ```
 
-## Verdict: weak replication
+## Result
 
-**The direction replicates robustly. The magnitude does not clear the bar I set in advance.**
+**Direction replicates. Magnitude is not established.**
 
-| Specification | Interaction | p | Gap ratio (down ÷ up) |
-|---|---|---|---|
-| **Headline** — count proxy, leave-one-out, trader FE | **−0.024977** | 2.2e-45 | **2.041×** |
-| + 428 date fixed effects | −0.025084 | 3.0e-47 | 2.041× |
-| **+ portfolio size control** | −0.021841 | 1.5e-38 | **1.351×** |
-| **`ret` portfolio index**, no exclusions, 97.8% of panel | −0.028726 | 2.9e-45 | 2.065× |
+| # | Specification | Interaction | t | Gap ratio | 95% CI |
+|---|---|---|---|---|---|
+| **1** | **Pre-specified: trader FE** | **−0.024977** | **−14.30** | **2.041** | [1.862, 2.220] |
+| 2 | + 428 date fixed effects | −0.025084 | −14.61 | 2.041 | [1.864, 2.219] |
+| 3 | + portfolio size | −0.021841 | −13.11 | 1.862 † | [1.706, 2.018] |
+| 4 | + size, holding period, activity, market | −0.018651 | −12.37 | 1.856 † | [1.689, 2.023] |
+| 5 | `ret` portfolio index, no exclusions | −0.028726 | −14.27 | 2.065 | [1.876, 2.254] |
 
-Standard errors clustered by trader throughout.
+† evaluated **at sample means**. Specifications 3 and 4 interact `gain` with continuous controls, so
+the ratio has no single value — see below.
 
-The interaction is negative and overwhelmingly significant in every specification. **The ratio is
-not stable.** The pre-registration made the verdict turn on it being ≥ 2×, and:
+**Only specification 1 is pre-registered.** Standard errors clustered by trader throughout.
 
-- the headline 2.041× has a **95% CI of [1.862, 2.220]** — the bar sits inside it, and
-  **P(ratio < 2.00) ≈ 0.33**
-- controlling for **portfolio size** — which the pre-registration did not think of — takes it to
-  **1.351×, CI [1.290, 1.412]**, under the bar decisively
+The interaction is negative with |t| > 12 in all five. **The ratio is not stable, and the
+pre-registered verdict turns entirely on the ratio.** Applied literally, the rule returns
+*replicated* (2.041 ≥ 2.00). But that point estimate has a CI containing 2.00, and so does every
+other specification here.
 
-So: something real is happening, in the direction An et al. describe. How big it is depends on how
-you ask, and the honest range across defensible specifications is roughly **1.35× to 2.07×**.
+## The placebo, and what it cost
 
-## The design decision the whole thing rests on
+Building the same leave-one-out share from an **irrelevant** column — the share of the trader's other
+positions whose stock code ends in an even digit — should return nothing. It returns
+**−0.005434, t = −4.06**.
 
-The panel has no position weights, so the headline portfolio state is a **count** of the trader's
-other holdings in profit — a proxy, not An et al.'s value-weighted return.
+That is 22% of the headline magnitude, from a variable that cannot possibly matter.
 
-It is computed **leave-one-out**, excluding the focal position. The focal position's own `gain` is
-part of any naive portfolio measure built from the same column, which would mechanically correlate
-the conditioning variable with what is being conditioned on and produce a strong, entirely spurious
-interaction **that would look exactly like a successful replication**.
+The cause is identifiable. Portfolio state correlates with portfolio size, holding period and trader
+activity, and all three modulate the disposition gap independently. Controlling for them
+(specification 4):
 
-That defence was tested adversarially and held. Replacing `sale` with a draw depending only on own
-`gain` — a pure unconditional disposition effect with zero portfolio dependence by construction —
-returns an interaction of |t| ≤ 2.4 against the real −14.3.
+| | Uncontrolled | Controlled |
+|---|---|---|
+| **Placebo** interaction | −0.005434 (t −4.06) | **−0.001012 (t −0.91)** |
+| **Real** interaction | −0.024977 (t −14.30) | **−0.018651 (t −12.37)** |
 
-Cost: 11.7% of rows to single-position trader-days, 10.1% to ties where the other holdings split
-exactly in half. **78.2% survives — 2,175,069 position-days, 4,482 of 4,731 traders.**
+**The placebo goes to null and 75% of the real effect survives at t beyond −12.** That is the
+strongest evidence here that the finding is behavioural rather than mechanical — and it also means
+the uncontrolled headline is inflated.
 
-## What `ret` is — and a correction
+## Two corrections to earlier versions of this README
 
-An earlier version of this README said `ret` was a position-level gross price ratio, and discarded
-it because it "does not reproduce `gain`" at 62.7% agreement. **That was wrong, and the test used to
-justify it was a category error.**
+**1. What `ret` is, and what it is not.** An earlier version called it a position-level gross price
+ratio and discarded it. It is a **trader-day** series — the portfolio net-value index; 0 of 951,885
+trader-days carry more than one value. A later version then claimed it is *"immune by construction"*
+to dependence on the focal position. **That is also wrong, and is the same category error.** A
+portfolio index contains the focal position. Measured: regressing it on own `gain` with trader fixed
+effects gives **+0.051066**. **Neither conditioning variable in this repository is independent of the
+focal position.**
 
-`ret` is a **trader-day** series — the trader's portfolio net-value index. **0 of 951,885 trader-days
-carry more than one distinct value**, while 365,814 of 684,171 (date, stock) pairs do. Comparing a
-portfolio-level index against a position-level flag and calling the disagreement a defect was
-nonsense.
+**2. A ratio reported at a point the sample cannot contain.** An earlier version reported
+specification 3's ratio as **1.351** — evaluated at `log(n_pos) = 0`, a one-position portfolio, which
+this sample **excludes by construction** (the minimum is 2). The ratio depends entirely on where it
+is evaluated:
 
-It is now the fourth specification above, and it is in several ways the better one: **zero dependence
-on the focal position**, so it is immune by construction to the trap the leave-one-out construction
-exists to avoid, and it needs **no exclusions at all** — 97.8% of the panel against 78.2%.
+| Evaluated at | Ratio |
+|---|---|
+| n_pos = 2 | 1.478 |
+| **sample mean** | **1.862** |
+| n_pos = 5 (median) | 1.914 |
+| n_pos = 8 | 2.722 |
 
-Its official definition in Jin, Li & Zhu is still unverified; the grouping structure was established
-empirically here.
+Every ratio from a specification with interacted controls is now reported at sample means and at a
+range of points.
 
-## What else is wrong with this, in order
+## What limits this, in order
 
-**1. The pre-registration had a hole, and it is wider than one hole.** It required "the gap at least
-2× larger" and never said *which* gap. Pooled gives 4.42×; per-trader gives **0.86× — the opposite
-direction**; within-trader gives 2.041×. The case for the within-trader measure is that the primary
-test *is* that regression, and per-trader averages compare partly different people. That reasoning is
-correct and it is **post hoc**. Beyond those three, a fixed-effects logit on average marginal effects
-gives about 1.74×, and a continuous specification runs from 1.54× to 2.47× depending purely on where
-it is evaluated.
+**1. A third of the sample cannot identify the interaction at all.** Because
+`frac_excl = (k − gain_i)/(n − 1)`, within one trader-day a winner's share is always below a loser's.
+Either the portfolio state is constant within the day, or it equals `1 − gain` exactly and the
+interaction term is identically zero. **718,973 of 2,175,069 rows (33.06%)** are the second kind.
+Leave-one-out **halves** the mechanical dependence between own `gain` and portfolio state; it does
+not remove it, and all identification is **between** trader-days — which is why trader-day confounds
+like the ones above bite.
 
-**2. Portfolio size is an uncontrolled confound and it was not pre-registered.** The disposition gap
-collapses with portfolio size independently of portfolio state (`gain × log(n_pos)` has t = −20.1,
-a larger t than the headline interaction). A placebo built from an irrelevant column — the share of
-the trader's other positions with an even-numbered stock code — returns an interaction of t = −4.1,
-which should be zero. Something is leaking through the size channel.
+**2. The conditioning variable is a count, not a value-weighted return.** One holding up 1% and one
+down 40% is a tie and is dropped — 10.1% of rows. This is the central difference from An et al.
+Specification 5 uses a genuine portfolio index instead and needs no exclusions.
 
-**3. The effect is far weaker than the paper being replicated.** An et al. find roughly 4–10×. Levels
-are not comparable at all — percentage points here against basis points there, because this
-denominator is the daily chance of closing a position — so only the ratio travels, and this one is
-below half their lowest figure.
+**3. The pre-registration had a hole.** It required "the gap at least 2× larger" and never said
+*which* gap. Pooled gives 4.420×; averaged equally across traders gives **0.857× — the opposite
+direction**; within-trader gives 2.041×. The case for the within-trader measure is that the
+pre-specified test *is* that regression. That reasoning is **post hoc**.
 
-**4. The tie exclusion is not random.** A tie needs an even number of other positions split exactly
-in half, so it can only occur on days when the trader holds an **odd** total number. All 280,771 tie
-rows have an odd count; zero have an even one. Tie rates run 38.6% at 3 positions down to 0% at every
-even size.
+**4. It is weaker than the paper being replicated.** An et al. report roughly 4–10×. Levels are not
+comparable — percentage points here against basis points there, because this denominator is the daily
+chance of closing a position — so only the ratio travels.
 
-**5. At two positions the design is degenerate in a specific way.** In a mixed pair the winner is
-necessarily labelled portfolio-down and the loser necessarily portfolio-up — the same pairs counted
-from each side. That is 20.6% of the sample, and it explains the low 1.41× ratio in that stratum.
-The synthetic null above shows it does not manufacture the result.
+**5. The tie exclusion is not random.** A tie needs an even number of other positions split exactly in
+half, so it occurs only on days with an **odd** total count. All 280,771 excluded tie rows have an odd
+count; zero have an even one.
 
-**6. Chinese A-shares, one social-trading platform, 24 June 2016 – 27 March 2018**, a population
-selected twice over. Unchanged from the parent study. And this measures the effect; it tests no
-remedy for it.
+**6. At two positions the design is degenerate.** In a mixed pair the winner is necessarily labelled
+portfolio-down and the loser portfolio-up — the same pairs counted from both sides, contributing zero
+to the interaction. That stratum is 20.6% of the sample.
 
-## What is pre-specified and what is not
+**7. Chinese A-shares, one social-trading platform, June 2016 to March 2018**, a population selected
+twice over. Nothing here is a claim about retail investors generally, and it tests no remedy.
 
-Pre-specified: the leave-one-out construction, the exclusions, the lot-level unit, one specification
-with trader fixed effects and trader-clustered errors, and the four named outcomes with thresholds.
+## What is pre-specified
 
-**Not pre-specified, and labelled as such in the output:** the date fixed effects, the portfolio-size
-control, and the `ret` specification. None of them may be the headline.
+Specification 1 only, plus the exclusion ladder, the lot-level unit, trader clustering and the four
+named outcome thresholds. **Specifications 2–5, the placebo and every control are not
+pre-registered**, are labelled so in the output, and none may be the headline.
 
 ## Review
 
-This was stress-tested adversarially before publication by an independent pass that recomputed every
-figure from the raw data with its own code, attempted to break the construction with a synthetic null
-and a non-flip subsample, checked the clustered standard errors against a 2,000-replication trader
-bootstrap, and found four blocking errors. All four are corrected above. The bootstrap agreed with
-the analytic standard error to within 0.6%.
+Stress-tested twice before publication by independent adversarial passes that recomputed every figure
+from the raw data with their own code. The first found four blocking errors; the second found seven
+more, including two cases where a correction introduced a new error of the same kind. All are fixed
+above, and the two most consequential are stated as corrections rather than quietly amended.
