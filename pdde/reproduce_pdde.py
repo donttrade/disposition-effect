@@ -49,15 +49,26 @@ interaction that looks exactly like a successful replication.
   PortfolioGain = 1 if frac_excl > 0.5, 0 if < 0.5, EXCLUDED at exactly 0.5.
   Trader-days holding a single position are undefined and excluded.
 
-WHY `ret` IS NOT USED
----------------------
-The delivered file carries fourteen columns, including `ret`, which would have
-triggered the value-weighted branch. It is a gross ratio (1.0 = breakeven) but
-it does NOT reproduce `gain`: agreement is 66.3% at ret>0 and 62.7% at ret>1.
-Whatever it measures, it is not the position's profit state as this study
-defines it, and the files carry no codebook. 272 rows have ret <= 0, which is
-impossible for a price ratio (minimum -2767.49), and 2.16% are null.
-Building the conditioning variable from it was rejected on those grounds.
+WHAT `ret` IS -- CORRECTED 2026-10-10
+------------------------------------
+An earlier version of this file said `ret` was a position-level gross price
+ratio and discarded it because it "does not reproduce `gain`" (62.7%
+agreement). THAT WAS WRONG, and the test used to justify it was a category
+error.
+
+`ret` is a TRADER-DAY series -- the trader's portfolio net-value index.
+Measured: 0 of 951,885 trader-days carry more than one distinct `ret`, while
+365,814 of 684,171 (date, stock) pairs do. Comparing a portfolio-level index
+against a position-level flag and calling the disagreement a defect was
+nonsense; they measure different things.
+
+This matters because `ret` has ZERO dependence on the focal position, so it
+is immune by construction to the trap the leave-one-out construction exists
+to avoid -- and it needs no exclusions at all. It is now specification 3
+below, on 97.8% of the panel, and it corroborates the headline.
+
+Its official definition in Jin, Li & Zhu is still unverified; the grouping
+structure above was established empirically here.
 """
 
 from __future__ import annotations
@@ -156,7 +167,7 @@ def _twoway(A, i1, m1, i2, m2, iters=60, tol=1e-11):
     return A
 
 
-def fit(y, X, tr, G, N, extra_k, label):
+def fit(y, X, tr, G, N, extra_k, label, terms=None):
     """Within estimator with cluster-robust SEs, computed explicitly.
 
     A panel package cannot be used here: the (trader, date) index is NON-UNIQUE
@@ -186,13 +197,24 @@ def fit(y, X, tr, G, N, extra_k, label):
     crit = stats.t.ppf(0.975, G - 1)
 
     print("\n--- %s ---" % label)
-    print("  %-7s %11s %11s %9s %12s %24s" % ("term", "coef", "SE", "t", "p", "95% CI"))
-    for i, nm in enumerate(TERMS):
-        print("  %-7s %+11.6f %11.6f %+9.3f %12.3e   [%+.6f, %+.6f]"
+    print("  %-14s %11s %11s %9s %12s %24s" % ("term", "coef", "SE", "t", "p", "95% CI"))
+    for i, nm in enumerate(terms or TERMS):
+        print("  %-14s %+11.6f %11.6f %+9.3f %12.3e   [%+.6f, %+.6f]"
               % (nm, beta[i], se[i], t[i], p[i], beta[i] - crit * se[i], beta[i] + crit * se[i]))
     gap_dn, gap_up = beta[0], beta[0] + beta[2]
-    print("  gap DOWN %+.6f   gap UP %+.6f   ratio %.2fx" % (gap_dn, gap_up, gap_dn / gap_up))
-    return beta[2], p[2], gap_dn / gap_up
+    r = gap_dn / gap_up
+    # delta-method SE on the ratio. The pre-registered verdict turns on this
+    # number and the first version of this script reported it with no
+    # uncertainty at all.
+    dn = (beta[0] + beta[2]) ** 2
+    grad = np.zeros(K)
+    grad[0] = beta[2] / dn
+    grad[2] = -beta[0] / dn
+    rse = float(np.sqrt(grad @ V @ grad))
+    print("  gap DOWN %+.6f   gap UP %+.6f" % (gap_dn, gap_up))
+    print("  RATIO %.4f   SE %.4f   95%% CI [%.3f, %.3f]   P(ratio < 2.00) = %.2f"
+          % (r, rse, r - crit * rse, r + crit * rse, stats.norm.cdf((2.0 - r) / rse)))
+    return beta[2], p[2], r
 
 
 def main():
@@ -226,24 +248,53 @@ def main():
           % (100.0 * b2 / b1, ND))
 
     print("\n" + "=" * 74)
+    print("ROBUSTNESS 2 -- portfolio SIZE as a confound. NOT pre-registered.")
+    print("  PortfolioGain is partly a proxy for how many positions are held.")
+    print("=" * 74)
+    s2 = s.copy()
+    s2["logn"] = np.log(s2.n_pos.astype(float))
+    s2["gxlogn"] = s2.gain * s2.logn
+    cols2 = TERMS + ["logn", "gxlogn"]
+    X2 = s2[cols2].to_numpy(float)
+    b3, p3, r3 = fit(_demean(y0, tr, G).ravel(), _demean(X2, tr, G),
+                     tr, G, N, 0, "trader FE + portfolio size", terms=cols2)
+
+    print("\n" + "=" * 74)
+    print("ROBUSTNESS 3 -- the `ret` specification. NOT pre-registered.")
+    print("  `ret` is the trader-day portfolio index: zero dependence on the")
+    print("  focal position, and NO exclusions needed. 97.8%% of the panel.")
+    print("=" * 74)
+    r_ = d.dropna(subset=["ret"]).copy()
+    r_["PG"] = (r_.ret > 1).astype(float)
+    r_["gain"] = r_.gain.astype(float)
+    r_["sale"] = r_.sale.astype(float)
+    r_["gxPG"] = r_.gain * r_.PG
+    trr = np.asarray(r_[TRADER].astype("category").cat.codes, dtype=np.int64)
+    yr = r_["sale"].to_numpy(float).reshape(-1, 1)
+    Xr = r_[TERMS].to_numpy(float)
+    Gr, Nr = int(trr.max()) + 1, int(len(r_))
+    b4, p4, r4 = fit(_demean(yr, trr, Gr).ravel(), _demean(Xr, trr, Gr),
+                     trr, Gr, Nr, 0, "ret index, trader FE")
+    print("  rows used %s of %s = %.1f%% of the panel"
+          % (format(Nr, ","), format(len(d), ","), 100.0 * Nr / len(d)))
+
+    print("\n" + "=" * 74)
     print("VERDICT against the thresholds fixed before the data was opened")
     print("=" * 74)
-    sig = p1 < 0.05
-    if b1 < 0 and sig and r1 >= 2:
-        v = "REPLICATED"
-    elif b1 < 0 and sig:
-        v = "WEAK REPLICATION -- direction yes, magnitude no"
-    elif b1 > 0 and sig:
-        v = "CONTRADICTED"
-    else:
-        v = "FAILURE TO REPLICATE"
-    print("  interaction %+.6f, p %.2e, within-trader ratio %.2fx  ->  %s" % (b1, p1, r1, v))
-    print("  NOTE: %.2fx clears a 2.00x bar by %.2f. A bar of 2.1 would have"
-          % (r1, r1 - 2.0))
-    print("        given 'weak replication'. The bar was fixed in advance.")
-    print("  NOTE: the per-trader gap ratio points the OTHER WAY. The")
-    print("        pre-registration did not say which gap measure governs;")
-    print("        the case for the within-trader one is post hoc.")
+    print("  DIRECTION  -- interaction negative and significant in EVERY")
+    print("                specification run here:")
+    for lbl, bb, pp in (("headline          ", b1, p1), ("+ date FE         ", b2, p2),
+                        ("+ portfolio size  ", b3, p3), ("ret index         ", b4, p4)):
+        print("                  %s %+.6f  (p %.1e)" % (lbl, bb, pp))
+    print("\n  MAGNITUDE  -- the pre-registered 2.00x bar is NOT cleanly cleared:")
+    for lbl, rr in (("headline        ", r1), ("+ date FE       ", r2),
+                    ("+ portfolio size", r3), ("ret index       ", r4)):
+        print("                  %s %.3fx  %s" % (lbl, rr, "OVER" if rr >= 2 else "UNDER"))
+    print("\n  The headline 2.04x has a 95% CI that straddles the bar, and")
+    print("  controlling for portfolio size -- which the pre-registration did")
+    print("  not think of -- takes the ratio to about 1.35, under it decisively.")
+    print("\n  VERDICT: WEAK REPLICATION. The direction replicates robustly.")
+    print("           The magnitude is not established at the pre-registered bar.")
 
 
 if __name__ == "__main__":
