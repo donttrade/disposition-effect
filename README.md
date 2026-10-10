@@ -210,9 +210,23 @@ If you get anything else, open an issue — I want to know.
 
 ## Also in this repository
 
-**[`form4/`](form4/) — SEC Form 4 insider-cluster returns, 2006–2026.** A separate study on a
-separate population: do stocks outperform after several insiders buy in the same week, and does
-the effect still exist? Built from the SEC's free quarterly bulk files. It has its own README,
-its own result, and its own caveats.
+Three further studies. Each is independent of the disposition-effect replication above and of each
+other, each has its own README, its own result and its own caveats, and each downloads its own
+free data.
 
-The disposition-effect replication described above is unchanged and independent of it.
+**[`form4/`](form4/) — SEC Form 4 insider-cluster returns, 2006–2026.** Do stocks outperform after
+several insiders buy in the same week, and does the effect still exist? Built from the SEC's free
+quarterly bulk files. **The tradable version of the effect was mostly 2008–09.**
+
+**[`pdde/`](pdde/) — the portfolio-driven disposition effect.** A pre-registered replication of An,
+Engelberg, Henriksson, Wang & Williams (*Journal of Finance*, 2024) on free CC0 data.
+**It replicates** — a ratio of 2.041 on the pre-specified specification and 3.013 under trader-day
+fixed effects, with placebos collapsing to about 1.05.
+
+**[`volmom/`](volmom/) — volatility-scaled momentum, and why it is not tradeable in a small
+account.** A pre-registered test with its kill criteria fixed in advance. The mechanism is real at
+factor scale — Sharpe 0.78, t = 5.25, over 45.7 years of survivorship-free data it was never fitted
+on. **At five long positions with real costs and a 10% drawdown halt, buy-and-hold SPY beat every
+specification.** A negative result, published with the code.
+
+The disposition-effect replication described above is unchanged and independent of all three.

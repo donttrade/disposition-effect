@@ -6,3 +6,4 @@ venv/
 .DS_Store
 f4/
 *.prepatch
+volmom/cache/
