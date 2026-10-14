@@ -141,7 +141,8 @@ account-level alternative on the same data gives PGR 0.57 / PLR 0.36:
 | Odean, account-level alternative | 0.57 / 0.36 | **1.58** |
 | This dataset (all held days) | 0.1925 / 0.1200 | **1.61** |
 
-**Levels move by a factor of four to six. The ratio moves under 5%.** Ratios
+**Levels move by nearly a factor of four across these three conventions, and the
+ratio moves under 7%.** Ratios
 survive the change of denominator; levels do not. Be suspicious of anyone
 putting a PGR level from one study beside a PGR level from another without
 saying which denominator each used.
@@ -226,7 +227,8 @@ fixed effects, with placebos collapsing to about 1.05.
 **[`volmom/`](volmom/) — volatility-scaled momentum, and why it is not tradeable in a small
 account.** A pre-registered test with its kill criteria fixed in advance. The mechanism is real at
 factor scale — Sharpe 0.78, t = 5.25, over 45.7 years of survivorship-free data it was never fitted
-on. **At five long positions with real costs and a 10% drawdown halt, buy-and-hold SPY beat every
-specification.** A negative result, published with the code.
+on. **At five long positions with real costs, buy-and-hold SPY beat every specification on
+risk-adjusted return, and the two that earned the returns would have tripped a 10% drawdown
+halt eleven and nine times in 13.75 years -- the halt is measured, not applied.** A negative result, published with the code.
 
 The disposition-effect replication described above is unchanged and independent of all three.

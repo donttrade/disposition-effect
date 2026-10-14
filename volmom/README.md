@@ -4,8 +4,10 @@ A pre-registered test of whether scaling cross-sectional momentum by its own rec
 volatility survives the constraints of a small retail account.
 
 **It does not.** The mechanism is real — Sharpe 0.78 with t = 5.25 over 45.7 years of
-survivorship-free data it was never fitted on. At five long positions, with real costs and a 10%
-drawdown halt, **buy-and-hold SPY beat every specification on risk-adjusted return.**
+survivorship-free data it was never fitted on. At five long positions, with real costs,
+**buy-and-hold SPY beat every specification on risk-adjusted return** — and the two specifications
+that did earn the returns would have tripped a 10% drawdown halt eleven and nine times in 13.75
+years.
 
 ```bash
 pip install -r requirements.txt
@@ -55,6 +57,21 @@ Kenneth French's momentum factor, built from CRSP, which retains delisted firms.
 kurtosis **5.07**. Scaling removes the crash asymmetry almost entirely. The extra return is not free
 money; it is what you get for not being wiped out in the crash months.
 
+### Three conventions, stated because the table does not divide
+
+`Sharpe` is **not** `ann return / ann vol`, and S2's row is where you will notice: 13.31 / 16.16 =
+0.82, against the 0.78 printed. Nothing is wrong. The annualised return compounds the arithmetic
+monthly mean, `(1 + mean)^12 - 1`, while the Sharpe annualises linearly, `(mean / sd) * sqrt(12)`.
+The two agree for small means and diverge as the mean grows, which is why S1 and S3 look fine and
+S2 does not.
+
+Two more, for anyone reimplementing: **realised volatility is Barroso & Santa-Clara's uncentred
+RMS**, `sqrt(252 * mean(r^2))` — the daily mean is never subtracted, which is their published
+formula. Using the centred sample standard deviation instead moves S2's annualised volatility by
++0.25pp and its holdout Sharpe from 0.777 to 0.776; no conclusion here turns on it. And **kurtosis
+is raw, not excess** (normal = 3), computed over the sample standard deviation.
+
+
 ### Why believe the implementation
 
 Checked against Barroso & Santa-Clara's own window, 1927:03–2011:12:
@@ -72,13 +89,62 @@ cause is construction — the paper builds WML from the six size-by-momentum por
 uses French's published `Mom` factor, and volatility scaling suppresses exactly the tail where the
 two differ. **It has not been verified**, and S1 is the control, so the gap stays on the record.
 
+### Part A's kill criteria, including one that cannot be answered
+
+| | Criterion | Measured | |
+|---|---|---|---|
+| **K1a** | S2 holdout Sharpe >= 0.50 | **0.78** | PASS |
+| **K1b** | S2 beats S1 by >= 0.15 Sharpe | **0.41** | PASS |
+| **K2** | Probability of backtest overfitting <= 0.50 | **0.00 to 0.76** | **INDETERMINATE** |
+| **K3** | Deflated Sharpe "<= 0" | 0.876 / 1.000 / 0.973 | **CANNOT FIRE** |
+
+**K2 has no determinate answer, and that is a defect in the pre-registration rather than a result.**
+The pre-registration fixed the threshold but never fixed which return matrix the statistic runs on.
+It matters:
+
+| PBO computed on | Value | K2 |
+|---|---|---|
+| In-sample 1927-11…1980-12 | **0.7638** | **FAIL** |
+| Holdout 1981-01…2026-08 | 0.0000 | PASS |
+| Common sample 1927-11…2026-08 | 0.0828 | PASS |
+
+Same three specifications, same procedure, opposite verdicts. The underlying reason is that **PBO
+has almost no resolution at three variants.** It was designed for sweeps of dozens to thousands; with
+three columns the out-of-sample rank can only be 1, 2 or 3, so the rank statistic takes three values
+and the estimate is nearly all noise. A number that swings from 0.00 to 0.76 on an unstated choice is
+not evidence either way, and it is reported here as a range rather than as the single flattering
+value.
+
+**K3 could never have fired.** It was pre-registered as *"deflated Sharpe ratio <= 0 retires
+everything"*, but the deflated Sharpe is a **probability in [0, 1]**, so the threshold is unreachable
+by construction. The measured probabilities are reported above as descriptive statistics only. No
+specification was retired by K3, because none could have been. Under the conventional > 0.95
+threshold from Bailey & López de Prado, S2 would pass — **but that threshold was not pre-registered**,
+and adopting it after seeing the numbers is exactly what a pre-registration exists to prevent. It is
+recorded as an amendment, not as a clean pass.
+
+### An independent reimplementation agrees
+
+Part A was reimplemented a second time, from the pre-registration text alone, by someone who had not
+read this code's computation. Every figure in both tables above — return, volatility, Sharpe, maximum
+drawdown, worst month, t-statistic, skew and kurtosis, across both splits — reproduced to the printed
+precision. That second implementation is in [`verify/`](verify/), and it is also what produces the
+PBO range above.
+
+
 ---
 
 ## Part B — five positions, long only, real costs
 
 Point-in-time S&P 500 membership from [`fja05680/sp500`](https://github.com/fja05680/sp500) (MIT),
-2,720 dated snapshots, 1996–2026. Monthly closes from Yahoo. Constraints: 5 positions, long only,
-minimum price $5, 0.20% round-trip cost charged on turnover, and a **10% drawdown halt**.
+2,720 dated snapshots, 1996–2026. Monthly closes from Yahoo. Constraints applied: 5 positions, long
+only, minimum price $5, and a 0.20% cost charged on **each side** of every trade.
+
+**The 10% drawdown halt is measured, not applied.** K6 was pre-registered as whether the holdout
+*"would trip"* the halt more than three times, so trips are counted on the unhalted return series and
+trading never actually stops. The consequence is visible in the table below: a −42.9% maximum
+drawdown cannot occur under a rule that stops trading at −10%. An earlier version of this section
+listed the halt among the applied constraints, which was wrong.
 
 | Holdout 2013–2026 (n=165), 0.20% cost | ann return | **Sharpe** | max DD | **halt trips** |
 |---|---|---|---|---|
@@ -93,17 +159,34 @@ trips and loses to buying the index and doing nothing.
 
 In-sample was no better: **nothing reached t = 2**, and SPY's 0.42 Sharpe matched S2's 0.43.
 
-### Kill criteria — every specification fails at least two
+### Costs are charged per side, and the pre-registration asked for both
 
-| | K4 Sharpe ≥ 0.30 | K5 beats SPY | K6 ≤ 3 halt trips | K7 breakeven ≥ 0.50% |
+`turnover` is the one-way fraction of the portfolio replaced, and the code charges
+`cost x 2 x turnover` — so the 0.20% base case is **0.20% on each side, 0.40% round trip.** The
+breakevens below are per-side figures for the same reason.
+
+That is not a coding slip so much as a third defect in the pre-registration, alongside the two
+already published above. It specified a **"base-case round-trip cost: 0.20% of notional, charged on
+every entry and every exit"** — and those two halves contradict each other, because a round trip
+*is* both sides. The code implemented one reading and an earlier version of this page published the
+other.
+
+### Kill criteria — no specification passes all four
+
+| | K4 Sharpe ≥ 0.30 | K5 beats SPY | K6 ≤ 3 halt trips | K7 breakeven ≥ 0.50% round trip |
 |---|---|---|---|---|
-| S1 | 0.71 PASS | PASS | **11 FAIL** | **0.434% FAIL** |
-| S2 | 0.66 PASS | **FAIL** | 2 PASS | **0.234% FAIL** |
-| S3 | 0.71 PASS | PASS | **9 FAIL** | **0.433% FAIL** |
+| S1 | 0.71 PASS | PASS | **11 FAIL** | 0.868% PASS |
+| S2 | 0.66 PASS | **FAIL** | 2 PASS | **0.468% FAIL** |
+| S3 | 0.71 PASS | PASS | **9 FAIL** | 0.866% PASS |
 
-The breakeven cost — the round trip at which a result stops clearing |t| = 2.394 — is **0.234% for
-S2** and about **0.43%** for the others. All three sit below the 0.50% floor fixed in advance, so a
-realistic spread plus slippage erases the result.
+K7 names a **round trip**, so the per-side breakevens of 0.434%, 0.234% and 0.433% double to
+**0.868%, 0.468% and 0.866%**. On those figures S1 and S3 clear K7 and fail only K6; S2 clears K6 and
+fails K5 and K7. An earlier version of this page headed this section *"every specification fails at
+least two"* and marked all three K7 cells FAIL, by comparing per-side breakevens against a
+round-trip floor. That heading was false and is corrected here.
+
+**The conclusion is unchanged: no specification passes all four, so no money moves.** What changed is
+which criterion kills which specification.
 
 ---
 

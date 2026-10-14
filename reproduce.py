@@ -168,7 +168,7 @@ def main() -> None:
     print("  Odean Table I  (sale-day denominator) : 0.148 / 0.098 = 1.51")
     print("  Odean account-level alternative       : 0.57  / 0.36  = 1.58")
     print("  this dataset  (all held days)         : 0.1925/ 0.1200= 1.61")
-    print("  -> levels differ by 4-6x; the ratio moves <5%. Compare ratios only.")
+    print("  -> levels differ by nearly 4x; the ratio moves <7%. Compare ratios only.")
 
 
 if __name__ == "__main__":
