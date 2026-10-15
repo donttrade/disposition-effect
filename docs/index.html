@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Disposition Baseline — donttrade</title>
+<meta name="description" content="A published, reproducible baseline for the disposition effect: 76.1% of 4,659 retail traders realised gains more readily than losses. Code and data are open.">
+<meta property="og:title" content="The Disposition Baseline">
+<meta property="og:description" content="76.1% of 4,659 retail traders sold their winners more readily than their losers. A reproducible baseline, with the code.">
+<meta property="og:type" content="article">
+<link rel="canonical" href="https://donttrade.github.io/disposition-effect/">
+<style>
+  :root {
+    --bg: #faf8f5; --panel: #ffffff; --fg: #1a1916; --muted: #5f5b53;
+    --rule: #e2ddd3; --accent: #7c3f1d; --accent-soft: #f2e6da;
+    --pos: #3d5c3a; --neg: #8f2d20;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15141a; --panel: #1e1d24; --fg: #ecebe6; --muted: #a39e95;
+      --rule: #32303a; --accent: #d99a68; --accent-soft: #2f2419;
+      --pos: #9dc098; --neg: #e8897a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #15141a; --panel: #1e1d24; --fg: #ecebe6; --muted: #a39e95;
+    --rule: #32303a; --accent: #d99a68; --accent-soft: #2f2419;
+    --pos: #9dc098; --neg: #e8897a;
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--bg); color: var(--fg); margin: 0;
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    font-size: 18px; line-height: 1.62;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding-inline: 16px; padding-block: 56px 80px; }
+
+  .kicker {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--muted); margin: 0 0 14px;
+  }
+  h1 {
+    font-size: clamp(30px, 6vw, 46px); line-height: 1.08; letter-spacing: -0.02em;
+    margin: 0 0 18px; text-wrap: balance;
+  }
+  .lede { font-size: 20px; color: var(--muted); margin: 0 0 10px; max-width: 60ch; }
+  h2 {
+    font-size: 23px; letter-spacing: -0.01em; margin: 56px 0 16px;
+    padding-top: 20px; border-top: 1px solid var(--rule); text-wrap: balance;
+  }
+  p { margin: 0 0 16px; max-width: 66ch; }
+  ul { margin: 0 0 16px; padding-left: 22px; max-width: 66ch; }
+  li { margin-bottom: 10px; }
+  a { color: var(--accent); }
+  code {
+    font-family: var(--mono); font-size: 0.86em; background: var(--accent-soft);
+    padding: 1px 5px; border-radius: 3px;
+  }
+
+  .headline {
+    background: var(--panel); border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent); border-radius: 5px;
+    padding: 28px 26px; margin: 0 0 20px; text-align: center;
+  }
+  .headline .big {
+    font-family: var(--mono); font-size: clamp(42px, 11vw, 68px);
+    font-weight: 600; line-height: 1; letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums; display: block; margin-bottom: 12px;
+  }
+  .headline .cap { font-size: 17px; color: var(--muted); margin: 0; max-width: none; }
+
+  .formula {
+    background: var(--panel); border: 1px solid var(--rule); border-radius: 5px;
+    padding: 20px 22px; margin: 0 0 18px;
+    font-family: var(--mono); font-size: 15px; line-height: 1.8; overflow-x: auto;
+  }
+  .formula .lbl {
+    display: block; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 10px;
+  }
+
+  figure { margin: 26px 0; }
+  svg { max-width: 100%; height: auto; display: block; }
+  figcaption { font-size: 14px; color: var(--muted); margin-top: 12px; max-width: 66ch; }
+
+  .reading { display: flex; flex-wrap: wrap; gap: 14px; margin: 0 0 18px; }
+  .reading > div {
+    flex: 1 1 200px; min-width: 0; background: var(--panel);
+    border: 1px solid var(--rule); border-radius: 5px; padding: 16px 18px;
+  }
+  .reading .n {
+    font-family: var(--mono); font-size: 24px; font-weight: 600;
+    font-variant-numeric: tabular-nums; display: block; margin-bottom: 6px;
+  }
+  .reading .d { font-size: 15px; color: var(--muted); }
+  .above .n { color: var(--neg); }
+  .at .n { color: var(--muted); }
+  .below .n { color: var(--pos); }
+
+  .note {
+    background: var(--panel); border: 1px solid var(--rule);
+    border-radius: 5px; padding: 18px 20px; margin: 0 0 18px;
+  }
+  .note p:last-child { margin-bottom: 0; }
+
+  footer {
+    margin-top: 64px; padding-top: 22px; border-top: 1px solid var(--rule);
+    font-size: 14px; color: var(--muted);
+  }
+  footer p { max-width: none; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <p class="kicker">donttrade &middot; the disposition baseline</p>
+  <h1>Most traders sell their winners and keep their losers. Here is the number.</h1>
+  <p class="lede">A published, reproducible baseline for one measurable habit &mdash; so that
+  anyone measuring it on their own book has something to compare against.</p>
+
+  <div class="headline">
+    <span class="big">76.1%</span>
+    <p class="cap">of 4,659 retail traders realised gains more readily than losses</p>
+  </div>
+
+  <p>That figure comes from a replication of Odean (1998) on a public, CC0-licensed panel
+  of Chinese retail traders from Harvard Dataverse: a 4,731-trader panel covering
+  2,780,879 trader-stock-lot-days, June 2016 to March 2018. Of those, 4,659 held at
+  least one winner and at least one loser on some day &mdash; which is what it takes for
+  both halves of the measure to be defined.</p>
+
+  <p><strong>3,547 of those 4,659 showed the effect.</strong> The code is public and runs
+  from a clean checkout.</p>
+
+  <h2>What is actually being measured</h2>
+
+  <p>Two proportions, and then the ratio between them. Nothing more.</p>
+
+  <div class="formula">
+    <span class="lbl">on every day a trader sold something</span>
+    PGR = realised gains &divide; (realised gains + paper gains)
+    <br>PLR = realised losses &divide; (realised losses + paper losses)
+    <br>
+    <br>ratio = PGR &divide; PLR
+  </div>
+
+  <p>In plain terms: of all the winning positions you were holding on a day you sold
+  something, what fraction did you actually sell? Then the same question for losing
+  positions. <strong>If you sell winners more readily than losers, the first number is
+  bigger than the second and the ratio is above 1.</strong></p>
+
+  <p>The day condition matters. It only counts days you sold <em>something</em>, so a
+  trader who simply does not trade much is not counted as disciplined. That is Odean's
+  rule and it is the one most informal versions get wrong.</p>
+
+  <figure>
+    <svg viewBox="0 0 620 260" role="img" aria-label="On this dataset, the proportion of gains realised was 0.1925 and the proportion of losses realised was 0.1200, giving a ratio of 1.61. Winners were sold roughly six times for every ten holdings, against roughly four for losers.">
+      <defs>
+        <marker id="bx" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+
+      <line x1="150" y1="210" x2="590" y2="210" stroke="currentColor" stroke-width="1.2" marker-end="url(#bx)"/>
+
+      <g font-size="13" fill="currentColor" text-anchor="end" font-family="ui-monospace, Menlo, monospace">
+        <text x="140" y="80">PGR</text>
+        <text x="140" y="150">PLR</text>
+      </g>
+      <g font-size="11" fill="currentColor" opacity="0.65" text-anchor="end">
+        <text x="140" y="96">gains realised</text>
+        <text x="140" y="166">losses realised</text>
+      </g>
+
+      <rect x="150" y="56" width="327" height="34" fill="currentColor" opacity="0.82" rx="2"/>
+      <text x="489" y="79" font-size="15" fill="currentColor" font-family="ui-monospace, Menlo, monospace" font-weight="600">0.1925</text>
+
+      <rect x="150" y="126" width="204" height="34" fill="currentColor" opacity="0.38" rx="2"/>
+      <text x="366" y="149" font-size="15" fill="currentColor" font-family="ui-monospace, Menlo, monospace" font-weight="600">0.1200</text>
+
+      <line x1="150" y1="205" x2="150" y2="215" stroke="currentColor" stroke-width="1.2"/>
+      <text x="150" y="232" font-size="11" fill="currentColor" opacity="0.65" text-anchor="middle" font-family="ui-monospace, Menlo, monospace">0</text>
+      <line x1="490" y1="205" x2="490" y2="215" stroke="currentColor" stroke-width="1.2"/>
+      <text x="490" y="232" font-size="11" fill="currentColor" opacity="0.65" text-anchor="middle" font-family="ui-monospace, Menlo, monospace">0.20</text>
+
+      <text x="300" y="30" font-size="14" fill="currentColor" text-anchor="middle" font-weight="600">ratio 1.61 &mdash; winners sold about 1.6&times; as readily</text>
+    </svg>
+    <figcaption>Per trader, then averaged. Levels like these move a long way depending on
+    which denominator a study uses &mdash; which is why the ratio, not the level, is the
+    thing to compare across studies.</figcaption>
+  </figure>
+
+  <h2>How to read your own number</h2>
+
+  <div class="reading">
+    <div class="above">
+      <span class="n">&gt; 1.0</span>
+      <span class="d">You close winners more readily than losers. This is the common case &mdash;
+      three quarters of the traders in the panel sat here.</span>
+    </div>
+    <div class="at">
+      <span class="n">&asymp; 1.0</span>
+      <span class="d">You close winners and losers at about the same rate. Uncommon, and
+      what a rule followed consistently tends to look like.</span>
+    </div>
+    <div class="below">
+      <span class="n">&lt; 1.0</span>
+      <span class="d">You cut losers more readily than winners. Rare. Worth checking it is
+      not an artefact of a small number of trading days.</span>
+    </div>
+  </div>
+
+  <div class="note">
+    <p><strong>A ratio above 1 is not proof you are losing money.</strong> It is a
+    description of one habit, measured one way. Whether it costs you depends on your
+    strategy, your holding period and your costs &mdash; none of which this measures.</p>
+    <p>And a single trader's ratio is noisy. The baseline above is an average across
+    thousands of people; one account over a few months can land anywhere by chance.</p>
+  </div>
+
+  <h2>Why the baseline is public</h2>
+
+  <p>A number is only useful if you can check it. Everything behind the figure on this
+  page is open: the dataset is CC0, the code is MIT licensed, and the README's longest
+  section lists what is wrong with the study, in order of how much it matters &mdash;
+  including that the archive's two files are nested rather than independent, which moves
+  the result.</p>
+
+  <p>Two other studies sit in the same repository. One of them came out
+  <strong>negative</strong> &mdash; twenty years of SEC Form 4 insider clusters where the
+  long-run edge turned out to be concentrated in a single crisis year &mdash; and was
+  published as written. A third, a pre-registered test of volatility-scaled momentum,
+  failed its own kill criteria at retail position sizes. The pre-registration, the
+  failure and the corrections are all in the repository.</p>
+
+  <p>There is nothing to sign up for here and no data to submit. The baseline is the
+  product of this page.</p>
+
+  <h2>Running it yourself</h2>
+
+  <p>The measurement script is public, is two files of standard-library Python with no
+  network calls, and takes a five-column CSV exported from your own records. It prints
+  aggregate totals to a terminal and nothing leaves the machine it runs on.</p>
+
+  <ul>
+    <li><a href="https://github.com/donttrade/disposition-effect">github.com/donttrade/disposition-effect</a>
+      &mdash; the studies, the data pipeline and the replication code</li>
+    <li><a href="https://github.com/donttrade/disposition-effect/tree/main/partner">the <code>partner/</code> folder</a>
+      &mdash; the script, an export guide, and the privacy checks you can run against it
+      yourself</li>
+    <li><a href="https://donttrade.substack.com">donttrade.substack.com</a> &mdash; the write-ups</li>
+  </ul>
+
+  <footer>
+    <p>Baseline from Jin, Li and Zhu, <em>&ldquo;Could social interaction reduce the
+    disposition effect?&rdquo;</em>, PLoS ONE 16(2), 2021 &mdash; replication files,
+    CC0, Harvard Dataverse. Method from Odean (1998). Figures as computed by
+    <code>reproduce.py</code> in the repository above; re-run it rather than taking them
+    on trust.</p>
+    <p>Nothing on this page is advice about what to buy or sell, and nothing here
+    forecasts anything.</p>
+    <p style="margin-top:18px">
+      <a href="https://quantocracy.com" rel="noopener"><img
+        src="https://quantocracy.com/wp-content/uploads/2015/10/quantocracy-badge-130.png"
+        alt="Featured on Quantocracy" width="130" height="130"
+        style="display:block;margin:0 auto 6px"></a>
+      <span style="display:block;text-align:center">Featured on <a href="https://quantocracy.com">Quantocracy</a></span>
+    </p>
+  </footer>
+
+</div>
+</body>
+</html>
