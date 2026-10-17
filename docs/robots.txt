@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://donttrade.github.io/disposition-effect/sitemap.xml

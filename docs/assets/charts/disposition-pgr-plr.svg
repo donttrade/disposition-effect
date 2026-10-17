@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -16 752 236" width="1504" height="472" role="img" aria-label="Proportion of gains realised 0.1925 versus proportion of losses realised 0.1200, per trader then averaged: a ratio of 1.61.">
+<title>Proportion of gains realised vs losses realised, per trader then averaged (donttrade, disposition-effect study)</title>
+<style>:root{--bg:#FBF8F3;--surface:#F3EEE6;--text:#1C1A17;--text-2:#4F4A43;--text-muted:#6B655C;--border-ui:#8A8275;--border-hairline:#C9C1B4;--grid:#E4DED4;--chart-1:#1F5F8B;--chart-2:#B5471C;--chart-3:#2E6B3D;--chart-4:#6A4C93;--chart-5:#8A6D00;--chart-6:#5A5A5A;} @media (prefers-color-scheme:dark){:root{--bg:#16181C;--surface:#1F2227;--text:#E9E6E0;--text-2:#BAB5AC;--text-muted:#9A958B;--border-ui:#6E7480;--border-hairline:#3A3E45;--grid:#2C3036;--chart-1:#6FAEDC;--chart-2:#F0925F;--chart-3:#7CC28C;--chart-4:#B79BE0;--chart-5:#E3C04C;--chart-6:#A7A7A7;}}</style>
+<rect x="-16" y="-16" width="752" height="236" fill="var(--bg)"/>
+
+  <text x="370" y="28" font-family="system-ui,sans-serif" font-size="15" font-weight="600" fill="var(--text)" text-anchor="middle">Ratio 1.61: gains realised more readily than losses</text>
+  <g font-family="system-ui,sans-serif">
+    <text x="128" y="76" text-anchor="end" font-size="14" fill="var(--text)">PGR</text>
+    <text x="128" y="92" text-anchor="end" font-size="13" fill="var(--text-muted)">gains realised</text>
+    <text x="128" y="148" text-anchor="end" font-size="14" fill="var(--text)">PLR</text>
+    <text x="128" y="164" text-anchor="end" font-size="13" fill="var(--text-muted)">losses realised</text>
+  </g>
+  <line x1="140" y1="174" x2="600" y2="174" stroke="var(--border-ui)" stroke-width="1"/>
+  <g font-family="system-ui,sans-serif" font-size="13" fill="var(--text-muted)" text-anchor="middle">
+    <text x="140" y="192">0</text><text x="370" y="192">0.10</text><text x="600" y="192">0.20</text>
+  </g>
+  <rect x="140" y="56" width="443" height="32" fill="var(--chart-1)" rx="2"/>
+  <text x="591" y="77" font-family="system-ui,sans-serif" font-size="15" font-weight="600" fill="var(--text)">0.1925</text>
+  <rect x="140" y="128" width="276" height="32" fill="var(--chart-6)" rx="2"/>
+  <text x="424" y="149" font-family="system-ui,sans-serif" font-size="15" font-weight="600" fill="var(--text)">0.1200</text>
+</svg>

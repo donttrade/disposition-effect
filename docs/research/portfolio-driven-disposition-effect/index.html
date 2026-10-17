@@ -1,0 +1,807 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portfolio-driven disposition effect: headline corrected — donttrade</title>
+<meta name="description" content="Corrected 17 Oct 2026: the “about twice as strong” headline did not survive a stricter within-trader test. A pre-registered replication on public CC0 data.">
+<link rel="canonical" href="https://donttrade.github.io/disposition-effect/research/portfolio-driven-disposition-effect/">
+<link rel="preload" href="/disposition-effect/assets/fonts/dt-serif.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" type="image/svg+xml" href="/disposition-effect/assets/favicon.svg">
+<link rel="apple-touch-icon" href="/disposition-effect/assets/apple-touch-icon.png">
+<meta property="og:title" content="Portfolio-driven disposition effect: headline corrected — donttrade">
+<meta property="og:description" content="Corrected 17 Oct 2026: the “about twice as strong” headline did not survive a stricter within-trader test. A pre-registered replication on public CC0 data.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://donttrade.github.io/disposition-effect/research/portfolio-driven-disposition-effect/">
+<meta property="og:image" content="https://donttrade.github.io/disposition-effect/assets/og/pdde.png">
+<meta property="og:image:alt" content="Portfolio-driven disposition effect: headline corrected — donttrade">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="citation_title" content="Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)">
+<meta name="citation_author" content="donttrade">
+<meta name="citation_publication_date" content="2026/10/16">
+<meta name="citation_pdf_url" content="https://donttrade.github.io/disposition-effect/research/portfolio-driven-disposition-effect/donttrade-portfolio-driven-disposition-effect.pdf">
+<!-- citation_doi placeholder: 10.5281/zenodo.TODO (set the real Zenodo DOI in SCHOLAR, then rebuild) -->
+<meta name="theme-color" content="#FBF8F3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16181C" media="(prefers-color-scheme: dark)">
+<link rel="alternate" type="application/rss+xml" title="donttrade" href="https://donttrade.substack.com/feed">
+<link rel="alternate" type="application/atom+xml" title="donttrade: studies and corrections" href="/disposition-effect/feed.xml">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)", "description": "A pre-registered replication of the portfolio-driven disposition effect on public CC0 data; its headline was corrected on 17 Oct 2026.", "url": "https://donttrade.github.io/disposition-effect/research/portfolio-driven-disposition-effect/", "mainEntityOfPage": "https://donttrade.github.io/disposition-effect/research/portfolio-driven-disposition-effect/", "datePublished": "2026-10-16", "dateModified": "2026-10-17", "image": "https://donttrade.github.io/disposition-effect/assets/og/pdde.png", "author": {"@type": "Organization", "name": "donttrade", "url": "https://donttrade.github.io/disposition-effect/", "email": "donttrade.research@gmail.com", "sameAs": ["https://donttrade.substack.com", "https://github.com/donttrade"]}, "publisher": {"@type": "Organization", "name": "donttrade", "url": "https://donttrade.github.io/disposition-effect/", "email": "donttrade.research@gmail.com", "sameAs": ["https://donttrade.substack.com", "https://github.com/donttrade"]}, "isAccessibleForFree": true, "license": "https://creativecommons.org/licenses/by-nc/4.0/"}</script>
+<style>
+@font-face{font-family:"DT Serif";src:url(/disposition-effect/assets/fonts/dt-serif.woff2) format("woff2");font-weight:400 600;font-style:normal;font-display:swap}
+@font-face{font-family:"DT Serif Fallback";src:local("Georgia"),local("Times New Roman");size-adjust:104%;ascent-override:92%;descent-override:30%}
+:root{
+  --bg:#FBF8F3;--surface:#F3EEE6;--text:#1C1A17;--text-2:#4F4A43;--text-muted:#6B655C;
+  --link:#0A5280;--accent:#9A3B1C;--on-accent:#FFFFFF;--border-ui:#8A8275;--border-hairline:#C9C1B4;--grid:#E4DED4;
+  --chart-1:#1F5F8B;--chart-2:#B5471C;--chart-3:#2E6B3D;--chart-4:#6A4C93;--chart-5:#8A6D00;--chart-6:#5A5A5A;
+  --scroll-shadow:rgba(28,26,23,.28);
+  --measure:65ch;
+  --fs-body:clamp(1rem,0.95rem + 0.3vw,1.125rem);--lh-body:1.55;
+  --font-body:"DT Serif","DT Serif Fallback",Georgia,"Times New Roman",serif;
+  --font-ui:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#16181C;--surface:#1F2227;--text:#E9E6E0;--text-2:#BAB5AC;--text-muted:#9A958B;
+  --link:#7DB9E6;--accent:#E88A5E;--on-accent:#16181C;--border-ui:#6E7480;--border-hairline:#3A3E45;--grid:#2C3036;
+  --chart-1:#6FAEDC;--chart-2:#F0925F;--chart-3:#7CC28C;--chart-4:#B79BE0;--chart-5:#E3C04C;--chart-6:#A7A7A7;
+  --scroll-shadow:rgba(233,230,224,.30);
+  color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#16181C;--surface:#1F2227;--text:#E9E6E0;--text-2:#BAB5AC;--text-muted:#9A958B;
+  --link:#7DB9E6;--accent:#E88A5E;--on-accent:#16181C;--border-ui:#6E7480;--border-hairline:#3A3E45;--grid:#2C3036;
+  --chart-1:#6FAEDC;--chart-2:#F0925F;--chart-3:#7CC28C;--chart-4:#B79BE0;--chart-5:#E3C04C;--chart-6:#A7A7A7;
+  --scroll-shadow:rgba(233,230,224,.30);
+  color-scheme:dark;}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:var(--fs-body)/var(--lh-body) var(--font-body);font-feature-settings:"kern","liga";text-rendering:optimizeLegibility}
+a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:3px}
+a:hover{text-decoration-thickness:2px}
+.wrap{max-width:1200px;margin:0 auto;padding-inline:16px}
+@media (min-width:768px){.wrap{padding-inline:32px}}
+.col{max-width:calc(var(--measure) + 8ch)}
+main{padding-block:0 72px}
+.page-head{padding-block:48px 8px}
+h1{font-size:clamp(2.125rem,1.5rem + 3vw,4rem);font-weight:600;line-height:1.08;letter-spacing:-0.02em;margin:0 0 18px;text-wrap:balance;max-width:22ch}
+h1.long{max-width:28ch;font-size:clamp(1.875rem,1.35rem + 2.4vw,3.25rem)}
+h2{font-size:clamp(1.5rem,1.2rem + 1vw,2rem);font-weight:600;line-height:1.18;letter-spacing:-0.01em;margin:clamp(48px,6vw,88px) 0 14px;padding-top:24px;border-top:1px solid var(--border-hairline);text-wrap:balance;max-width:30ch}
+h3{font-size:1.25rem;font-weight:600;line-height:1.25;margin:32px 0 8px;max-width:40ch}
+p,ul,ol,blockquote,dl{max-width:var(--measure);margin:0 0 1em}
+p,li,dd,td,figcaption{overflow-wrap:break-word}
+.post p{overflow-wrap:anywhere}
+.vh{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+ul,ol{padding-left:1.35em}
+li{margin-bottom:.4em}
+blockquote{border-left:3px solid var(--border-hairline);margin-left:0;padding-left:16px;color:var(--text-2)}
+hr{border:0;border-top:1px solid var(--border-hairline);margin:36px 0}
+code{font-family:var(--font-mono);font-size:max(.84em,14px);background:var(--surface);padding:1px 5px;border-radius:3px}
+pre{background:var(--surface);border:1px solid var(--border-hairline);border-radius:4px;padding:14px 16px;overflow-x:auto;max-width:min(90ch,100%);font-size:.875rem;line-height:1.5}
+pre code{background:none;padding:0;font-size:inherit}
+strong{font-weight:600}
+.lede{font-size:clamp(1.125rem,1rem + .5vw,1.375rem);line-height:1.45;color:var(--text-2);max-width:46ch;margin:0 0 22px}
+.mono,.kicker,.meta,.prov{font-family:var(--font-mono);font-size:.875rem;letter-spacing:.02em;color:var(--text-muted)}
+.kicker{margin:0 0 10px;letter-spacing:.06em}
+.meta{margin:0 0 22px;line-height:1.6;max-width:none}
+.meta a,.prov a{color:var(--text-muted)}
+.prov{margin:10px 0 0;line-height:1.55}
+.hero-band{background:var(--surface) radial-gradient(var(--grid) 1px,transparent 1px) 0 0/22px 22px;border-bottom:1px solid var(--border-hairline);padding-block:clamp(40px,6vw,88px)}
+@media print{.hero-band{background:none}}
+.hero{display:grid;grid-template-columns:minmax(0,1fr);gap:36px;align-items:center}
+.hero>*{min-width:0}
+@media (min-width:960px){.hero{grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:56px}}
+.hero h1{margin-bottom:20px}
+.panel{background:var(--bg);border:1px solid var(--border-hairline);border-radius:6px;padding:22px 22px 18px}
+.hero-num{font-family:var(--font-body);font-size:clamp(3.5rem,2rem + 5vw,6rem);font-weight:600;letter-spacing:-0.03em;line-height:1;margin:0 0 10px;color:var(--text)}
+.hero-num .unit{font-size:.55em;letter-spacing:-0.01em}
+.finding{font-size:clamp(1.375rem,1.15rem + 1vw,1.875rem);line-height:1.22;font-weight:600;letter-spacing:-0.01em;margin:0 0 10px;max-width:32ch;text-wrap:balance}
+.receipts{font-family:var(--font-ui);font-variant-numeric:tabular-nums;font-size:clamp(.9375rem,.9rem + .2vw,1rem);color:var(--text-2);display:flex;flex-wrap:wrap;gap:6px 0;margin:0 0 26px;padding:0;list-style:none;max-width:none}
+.receipts li{margin:0}
+.receipts li:not(:last-child)::after{content:"·";margin:0 12px;color:var(--border-ui)}
+.receipts a{color:var(--text-2);display:inline-block;padding-block:11px}
+.inline-sub{margin:4px 0 0;max-width:560px}
+.inline-sub .lead{font-family:var(--font-ui);font-size:.9375rem;color:var(--text-2);margin:0 0 10px}
+.inline-sub form,.subscribe form{display:flex;gap:8px;flex-wrap:wrap}
+input[type=email]{flex:1 1 220px;min-width:0;font:inherit;font-family:var(--font-ui);font-size:max(16px,1rem);padding:11px 12px;border:1px solid var(--border-ui);border-radius:4px;background:var(--bg);color:var(--text)}
+input[type=email]:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+.btn,.subscribe button,.inline-sub button,.next-block button{display:inline-block;font:inherit;font-family:var(--font-ui);font-size:1rem;font-weight:600;padding:12px 18px;border:0;border-radius:4px;background:var(--accent);color:var(--on-accent);cursor:pointer;text-decoration:none;line-height:1.3}
+.btn:hover,.subscribe button:hover,.inline-sub button:hover,.next-block button:hover{text-decoration:underline;text-underline-offset:3px}
+.fine{font-family:var(--font-ui);font-size:.875rem;color:var(--text-muted);margin:10px 0 0}
+.fine a{color:var(--text-muted)}
+.subscribe{border-top:1px solid var(--border-hairline);border-bottom:1px solid var(--border-hairline);padding:22px 0;margin:36px 0;max-width:var(--measure)}
+.subscribe p.lead{margin:0 0 12px;font-family:var(--font-ui);font-size:1rem;color:var(--text)}
+.study-list{list-style:none;padding:0;margin:0;max-width:880px}
+.study-list li{border-top:1px solid var(--border-hairline);padding:26px 0;margin:0}
+.study-list li:last-child{border-bottom:1px solid var(--border-hairline)}
+.study-list .t{font-size:clamp(1.25rem,1.1rem + .6vw,1.5rem);font-weight:600;line-height:1.25;margin:0 0 8px;letter-spacing:-0.01em;max-width:none}
+.study-list .t a{color:var(--text);text-decoration:none}
+.study-list .t a:hover{text-decoration:underline}
+.study-list .d{color:var(--text-2);margin:0 0 10px}
+.tag{display:inline-block;font-family:var(--font-mono);font-size:.875rem;letter-spacing:.04em;color:var(--text-muted);border:1px solid var(--border-hairline);border-radius:3px;padding:1px 7px;margin:0 6px 0 0;vertical-align:middle}
+.links{font-family:var(--font-ui);font-size:.9375rem;display:flex;gap:0 22px;flex-wrap:wrap;margin:4px 0 0;max-width:none}
+.links a{display:inline-block;padding-block:11px}
+.also{padding-block:44px 0}
+.also .item{border-top:1px solid var(--border-hairline);padding-top:22px;max-width:760px}
+figure{margin:28px 0;max-width:min(92ch,100%)}
+figure svg,.panel svg{width:100%;height:auto;display:block}
+svg.chart-m{display:none}
+@media (max-width:820px){svg.chart-d{display:none} svg.chart-m{display:block;max-width:440px}}
+figcaption{font-family:var(--font-ui);font-size:.875rem;color:var(--text-muted);margin-top:10px;max-width:var(--measure)}
+.chart-title{font-family:var(--font-ui);font-size:.9375rem;font-weight:600;margin:0 0 6px;max-width:none;color:var(--text)}
+.standing{border:1px solid var(--border-ui);border-left:3px solid var(--accent);border-radius:4px;padding:12px 16px;margin:0 0 24px;max-width:var(--measure);font-family:var(--font-ui);font-size:.9375rem;color:var(--text-2)}
+.funding{font-family:var(--font-ui);font-size:.9375rem;color:var(--text-2);margin:0 0 14px}
+table{border-collapse:collapse;width:100%;font-size:.9375rem;font-family:var(--font-ui);font-variant-numeric:tabular-nums}
+th,td{text-align:left;vertical-align:top;padding:12px 12px;border-bottom:1px solid var(--border-hairline)}
+th{font-weight:600;color:var(--text-2);font-size:.875rem;letter-spacing:.03em;border-bottom:1px solid var(--border-ui)}
+td.price{white-space:nowrap;font-weight:700;font-size:1.0625rem;color:var(--text)}
+td .label{display:inline-block;font-family:var(--font-mono);font-size:.875rem;color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:0 6px;margin-top:6px}
+.table-scroll{overflow-x:auto;max-width:100%;margin:0 0 1em;-webkit-overflow-scrolling:touch;
+ background:linear-gradient(to right,var(--bg) 30%,transparent) left center/40px 100% no-repeat local,
+  linear-gradient(to left,var(--bg) 30%,transparent) right center/40px 100% no-repeat local,
+  radial-gradient(farthest-side at 0 50%,var(--scroll-shadow),transparent) left center/16px 100% no-repeat scroll,
+  radial-gradient(farthest-side at 100% 50%,var(--scroll-shadow),transparent) right center/16px 100% no-repeat scroll;
+ background-color:var(--bg)}
+.scroll-hint{display:none;font-family:var(--font-ui);font-size:.875rem;color:var(--text-2);margin:0 0 6px;max-width:none}
+@media (max-width:820px){
+ .scroll-hint{display:block}
+ .scroll-hint.fits{display:none}
+ .table-scroll.sticky1 tr>:first-child{position:sticky;left:0;z-index:1;background:var(--bg);min-width:8.5rem;box-shadow:inset -1px 0 var(--border-hairline)}
+}
+.price-table{min-width:900px}
+@media (max-width:800px){
+ .price-table{min-width:0}
+ .price-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+ .price-table,.price-table tbody{display:block}
+ .price-table tr{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 16px;border:1px solid var(--border-hairline);border-radius:6px;padding:14px 16px;margin:0 0 14px}
+ .price-table td{display:block;border:0;padding:0;width:100%}
+ .price-table td.eng{width:auto;flex:1 1 14ch;order:0;font-size:1.0625rem}
+ .price-table td.price{width:auto;order:1}
+ .price-table td.det{order:2;margin-top:10px}
+ .price-table td.det::before{content:attr(data-label);display:block;font-size:.875rem;letter-spacing:.03em;color:var(--text-muted);font-weight:600;margin-bottom:2px}
+}
+.terms{font-family:var(--font-ui);font-size:.9375rem;color:var(--text-2);margin:14px 0 6px;max-width:none}
+.veto{font-size:1.0625rem;color:var(--text);margin:16px 0 8px}
+.cta-row{display:flex;gap:10px 16px;align-items:center;flex-wrap:wrap;margin:26px 0 6px}
+.cta-row .note{font-family:var(--font-ui);font-size:.875rem;color:var(--text-muted);max-width:44ch}
+.router{font-family:var(--font-ui);font-size:.875rem;color:var(--text-muted);margin:0}
+.router a{color:var(--text-muted)}
+.pipeline{list-style:none;padding:0;margin:0;display:grid;gap:12px;counter-reset:step;max-width:none}
+.pipeline li{position:relative;margin:0;background:var(--bg);border:1px solid var(--border-ui);border-radius:6px;padding:14px 16px 14px 48px;font-family:var(--font-ui);font-size:.9375rem;line-height:1.4;color:var(--text-2)}
+.pipeline li strong{display:block;color:var(--text);font-size:1rem;margin-bottom:2px}
+.pipeline li::before{counter-increment:step;content:counter(step);position:absolute;left:14px;top:14px;width:22px;height:22px;border-radius:50%;border:1px solid var(--border-ui);font-family:var(--font-mono);font-size:.875rem;line-height:20px;text-align:center;color:var(--text-2)}
+.pipeline li:last-child{border:1.5px solid var(--accent)}
+.pipeline li:not(:last-child)::after{content:"";position:absolute;left:24px;bottom:-13px;width:1px;height:12px;background:var(--border-ui)}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{position:relative;padding-left:44px;margin-bottom:16px}
+.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:var(--surface);border:1px solid var(--border-hairline);font-family:var(--font-mono);font-size:.875rem;line-height:26px;text-align:center;color:var(--text-2)}
+dl.skeleton{display:grid;grid-template-columns:max-content 1fr;gap:8px 20px;font-family:var(--font-ui);font-size:.9375rem;max-width:720px}
+dl.skeleton dt{color:var(--text);font-weight:600}
+dl.skeleton dd{margin:0;color:var(--text-2)}
+@media (max-width:560px){dl.skeleton{grid-template-columns:1fr} dl.skeleton dd{margin-bottom:8px}}
+.memo dl{display:grid;grid-template-columns:minmax(150px,max-content) 1fr;gap:12px 24px;max-width:860px}
+.memo dt{font-family:var(--font-ui);font-weight:600;font-size:.9375rem;color:var(--text)}
+.memo dd{margin:0}
+@media (max-width:560px){.memo dl{grid-template-columns:1fr} .memo dd{margin-bottom:12px}}
+.risk{list-style:none;padding:0}
+.risk li{padding:10px 0 10px 16px;border-left:2px solid var(--border-hairline);margin:0 0 6px}
+details{border-top:1px solid var(--border-hairline);padding:4px 0;max-width:var(--measure)}
+details:last-of-type{border-bottom:1px solid var(--border-hairline)}
+summary{cursor:pointer;font-family:var(--font-ui);font-weight:600;font-size:1rem;color:var(--text);padding-block:10px}
+details p{margin:4px 0 10px;color:var(--text-2)}
+.faq-intro{margin-bottom:12px}
+.toc{font-family:var(--font-ui);font-size:.9375rem;background:var(--surface);border:1px solid var(--border-hairline);border-radius:6px;padding:14px 18px;margin:0 0 28px;max-width:var(--measure)}
+.toc ol{margin:6px 0 0;padding-left:1.3em}
+.toc li{margin:0 0 4px}
+.versions td,.versions th{font-size:.875rem}
+.cite pre{white-space:pre-wrap}
+.client-out{font-size:.875rem}
+.box{border:1px solid var(--border-ui);border-radius:6px;padding:16px 18px 6px;margin:0 0 24px;max-width:var(--measure)}
+.box h3{margin-top:0}
+.banner{border:1px solid var(--accent);border-left:4px solid var(--accent);border-radius:4px;padding:12px 16px;margin:0 0 24px;max-width:var(--measure);font-family:var(--font-ui);font-size:.9375rem;color:var(--text)}
+.hero-links{font-family:var(--font-ui);font-size:.9375rem;margin:0 0 18px}
+.hero-links a{display:inline-block;padding-block:11px}
+.next-block{border-top:1px solid var(--border-hairline);margin-top:48px;padding-top:8px;max-width:var(--measure)}
+.next-block ol{list-style:none;padding:0}
+.next-block form{display:flex;gap:8px;flex-wrap:wrap}
+.next-block li{padding:14px 0;border-bottom:1px solid var(--border-hairline);margin:0}
+.next-block li>a{display:inline-block;padding-block:10px}
+.correction{border:2px solid var(--accent);border-radius:6px;background:var(--surface);padding:14px 18px 4px;margin:0 0 24px;max-width:var(--measure);font-family:var(--font-ui);font-size:1rem;color:var(--text)}
+.correction p{margin:0 0 10px}
+.correction .corr-h{font-size:1.0625rem}
+.correction .corr-old{color:var(--text-2);border-left:3px solid var(--border-ui);padding-left:12px}
+.corr-tag{display:inline-block;font-family:var(--font-mono);font-size:.875rem;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:0 6px;margin-right:6px}
+.correction .corr-links a{display:inline-block;padding-block:11px}
+.update{border-left:3px solid var(--chart-1);background:var(--surface);padding:12px 16px;border-radius:0 4px 4px 0;font-family:var(--font-ui);font-size:.9375rem;color:var(--text-2)}
+.code-shot{background:var(--surface);border:1px solid var(--border-hairline);border-radius:6px;padding:16px 18px;font-family:var(--font-mono);font-size:.875rem;line-height:1.6;overflow-x:auto;max-width:min(90ch,100%);color:var(--text-2);margin:0 0 1em;white-space:pre}
+.track{list-style:none;padding:0}
+.track li{display:grid;grid-template-columns:7.5rem 1fr;gap:12px;padding:10px 0;border-top:1px solid var(--border-hairline);margin:0}
+.track .when{font-family:var(--font-mono);font-size:.875rem;color:var(--text-muted);padding-top:3px}
+@media (max-width:480px){.track li{grid-template-columns:1fr;gap:2px}}
+.gloss dt{font-weight:600;font-size:1.125rem;margin-top:24px}
+.gloss dd{margin:6px 0 0}
+.gloss dd .src{font-family:var(--font-ui);font-size:.875rem;color:var(--text-muted)}
+dfn{font-style:normal}
+.skip{position:absolute;left:-9999px}
+.skip:focus{left:16px;top:8px;background:var(--surface);padding:6px 10px;z-index:9}
+.post :is(h2,h3){max-width:36ch}
+.post h2{font-size:clamp(1.375rem,1.15rem + .8vw,1.75rem)}
+.post p,.post ul,.post ol{max-width:var(--measure)}
+@media (prefers-reduced-motion:no-preference){a,.btn,nav.main a{transition:color .12s ease,box-shadow .12s ease}}
+header.site{border-bottom:1px solid var(--border-hairline);background:var(--bg)}
+header.site .hdr{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px}
+.wordmark{color:var(--text);display:inline-flex;align-items:center;line-height:0;min-height:44px}
+.wordmark svg{height:24px;width:auto;display:block}
+nav.main{display:flex;gap:0 16px;flex-wrap:nowrap;white-space:nowrap;font-family:var(--font-ui);font-size:.9375rem;align-items:center}
+nav.main a{color:var(--text-2);text-decoration:none;display:inline-flex;align-items:center;min-height:44px}
+nav.main a[aria-current="page"],.menu-panel a[aria-current="page"]{color:var(--text);box-shadow:inset 0 -2px var(--accent)}
+nav.main a:hover{color:var(--text)}
+.theme{background:none;border:1px solid var(--border-ui);color:var(--text-2);border-radius:4px;padding:0 12px;min-height:44px;font:inherit;font-family:var(--font-ui);font-size:.875rem;cursor:pointer}
+.theme[aria-pressed="true"]{background:var(--surface);color:var(--text)}
+header.site details{border:0;padding:0;max-width:none}
+header.site summary{list-style:none;min-height:44px;display:inline-flex;align-items:center;cursor:pointer;color:var(--text-2);font-weight:400;font-size:.9375rem;font-family:var(--font-ui);padding:0}
+header.site summary::-webkit-details-marker{display:none}
+header.site summary::after{content:"▾";margin-left:6px}
+header.site summary.is-current{color:var(--text);box-shadow:inset 0 -2px var(--accent)}
+.dd{position:relative}
+.dd ul{position:absolute;right:0;top:100%;z-index:10;min-width:300px;list-style:none;margin:4px 0 0;padding:6px;background:var(--bg);border:1px solid var(--border-ui);border-radius:6px;white-space:normal}
+.dd li{margin:0}
+.dd a{white-space:nowrap}
+.dd a,.menu a{display:flex;align-items:center;min-height:44px;padding:0 10px}
+nav.main a.btn,header.site a.btn{color:var(--on-accent);min-height:44px;display:inline-flex;align-items:center;padding:0 16px;box-shadow:none}
+nav.main a.btn-2,header.site a.btn-2{color:var(--text);min-height:44px;display:inline-flex;align-items:center;padding:0 16px;box-shadow:none;font-size:.9375rem}
+.mob{display:flex;align-items:center;gap:10px}
+.menu{position:static}
+.menu-panel{overscroll-behavior:contain;position:absolute;left:16px;right:16px;top:100%;z-index:10;margin-top:4px;padding:8px;background:linear-gradient(var(--bg) 30%,transparent) center top/100% 40px no-repeat local,linear-gradient(transparent,var(--bg) 70%) center bottom/100% 40px no-repeat local,radial-gradient(farthest-side at 50% 0,var(--scroll-shadow),transparent) center top/100% 18px no-repeat scroll,radial-gradient(farthest-side at 50% 100%,var(--scroll-shadow),transparent) center bottom/100% 18px no-repeat scroll;background-color:var(--bg);border:1px solid var(--border-ui);border-radius:6px;max-height:70vh;max-height:70dvh;overflow:auto;font-family:var(--font-ui);font-size:1rem;display:flex;flex-direction:column}
+.menu-panel a{color:var(--text-2);text-decoration:none}
+.menu-panel .menu-lbl{margin:8px 10px 0;font-size:.875rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted)}
+.menu-panel .theme{margin:8px 10px 4px;align-self:flex-start}
+header.site .menu-panel a.menu-cta{display:none;justify-content:center;margin:0 0 6px}
+@media (max-width:419px){header.site a.nav-cta-hdr{padding:0 10px;font-size:.875rem} header.site .menu-panel a.menu-cta{display:flex} header.site .hdr{gap:8px} .mob{gap:8px}}
+@media (max-width:339px){header.site a.nav-cta-hdr{display:none}}
+@media (max-width:999px){header.site nav.main.nav-desk{display:none}}
+@media (min-width:1000px){header.site .mob{display:none}}
+.btn{min-height:44px;display:inline-flex;align-items:center}
+.btn-2{display:inline-flex;align-items:center;min-height:44px;font-family:var(--font-ui);font-size:1rem;font-weight:600;padding:12px 18px;line-height:1.3;border:1px solid var(--accent);border-radius:4px;background:transparent;color:var(--text);text-decoration:none}
+.btn-2:hover{text-decoration:underline;text-underline-offset:3px}
+.soon{white-space:nowrap;font-family:var(--font-mono);font-size:.875rem;color:var(--text-muted);border:1px solid var(--border-hairline);border-radius:3px;padding:0 5px;margin-left:6px}
+input,select,textarea{font-size:max(16px,1rem)}
+.copy[hidden]{display:none}
+.copy-msg{font-family:var(--font-ui);font-size:.875rem;color:var(--text-2);margin:6px 0 0}
+.copy{display:block;margin:6px 0 0;font:inherit;font-family:var(--font-ui);font-size:.875rem;min-height:44px;padding:0 12px;border:1px solid var(--border-ui);border-radius:4px;background:var(--bg);color:var(--text);cursor:pointer;vertical-align:middle}
+.addr{font-family:var(--font-mono);font-size:max(.875em,14px);overflow-wrap:anywhere}
+.cta-block{margin:18px 0 8px}
+.cta-block .fine{max-width:60ch}
+.btn-row{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 14px}
+.cards{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin:0 0 8px;list-style:none;padding:0;max-width:none}
+@media (min-width:720px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.card{border:1px solid var(--border-ui);border-radius:6px;padding:18px 18px 14px;margin:0;background:var(--bg)}
+.card h3{margin:0 0 8px}
+.card .anchor{font-family:var(--font-ui);font-size:.9375rem;font-weight:600;color:var(--text);margin:0 0 10px}
+.card p{margin:0 0 10px}
+.card .go{display:inline-flex;align-items:center;min-height:44px;font-family:var(--font-ui)}
+.start-card{scroll-margin-top:16px}
+@media (min-width:801px){.price-table.compact{min-width:700px}}
+.risk-line{font-family:var(--font-ui);font-size:.9375rem;color:var(--text);margin:0 0 8px;max-width:52ch}
+.sample pre{font-size:.875rem;margin:0 0 8px;max-width:100%}
+.sample-lbl{font-family:var(--font-ui);font-size:.875rem;color:var(--text-2);margin:0 0 10px}
+.card h3 a{color:var(--text)}
+footer.site{border-top:1px solid var(--border-hairline);padding-block:32px 48px;font-family:var(--font-ui);font-size:.875rem;color:var(--text-muted)}
+footer.site .fcols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px;margin:0 0 20px}
+@media (min-width:860px){footer.site .fcols{grid-template-columns:repeat(4,minmax(0,1fr))}}
+footer.site nav{display:flex;flex-direction:column}
+footer.site nav .fh{margin:0 0 2px;font-weight:600;color:var(--text);font-size:.875rem}
+footer.site nav a{display:flex;align-items:center;min-height:44px}
+footer.site a{color:var(--text-2)}
+footer.site p{margin:0 0 8px;max-width:none}
+footer.site .whopays,footer.site .contact{color:var(--text-2);font-size:.9375rem}
+footer .wordmark svg{height:20px}
+@media (pointer:coarse),(max-width:1000px){
+ footer.site p a,footer.site .contact a,footer.site .whopays a{display:inline-flex;align-items:center;min-height:44px}
+ main p a:not(.btn):not(.btn-2),main td a,main dd a,main span>a,figcaption a,.banner a,.standing a,.update a,.meta a,.prov a,.fine a,.router a{padding-block:14px}
+ main li>a{display:inline-block;padding-block:10px;min-height:44px}
+ main h2>a{display:inline-flex;align-items:center;min-height:44px}
+ td code{overflow-wrap:anywhere;word-break:break-all}
+ .card h3 a{display:inline-flex;align-items:center;min-height:44px}
+ .card .anchor a{display:inline-flex;align-items:center;min-height:44px}
+}
+.fig-open{font-family:var(--font-ui);font-size:.9375rem;margin:8px 0 0;max-width:none}
+.fig-open a{display:inline-flex;align-items:center;min-height:44px}
+.study-firms{font-family:var(--font-ui);font-size:.9375rem;color:var(--text-2);margin:18px 0 0}
+.study-firms a{display:inline-flex;align-items:center;min-height:44px}
+.hero-band .kicker,.hero-band .fine,.hero-band .fine a{color:var(--text-2)}
+</style>
+<script>(function(){var k='donttrade-theme',d=document.documentElement,C={dark:'#16181C',light:'#FBF8F3'};
+function meta(t){var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++){m[i].setAttribute('content',C[t]);}}
+try{var t=localStorage.getItem(k);if(t==='dark'||t==='light'){d.setAttribute('data-theme',t);meta(t);}}catch(e){}
+document.addEventListener('DOMContentLoaded',function(){var bs=document.querySelectorAll('[data-theme-toggle]'),i;
+function cur(){var a=d.getAttribute('data-theme');if(a)return a;return (window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';}
+function sync(){for(var j=0;j<bs.length;j++){bs[j].setAttribute('aria-pressed',cur()==='dark'?'true':'false');}}
+for(i=0;i<bs.length;i++){bs[i].addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';d.setAttribute('data-theme',n);try{localStorage.setItem(k,n);}catch(e){}meta(n);sync();});bs[i].hidden=false;}sync();
+var ds=document.querySelectorAll('header.site details');
+for(i=0;i<ds.length;i++){ds[i].addEventListener('toggle',function(){if(!this.open)return;for(var j=0;j<ds.length;j++){if(ds[j]!==this)ds[j].open=false;}});}
+function outside(e){for(var j=0;j<ds.length;j++){if(ds[j].open&&!ds[j].contains(e.target))ds[j].open=false;}}
+document.addEventListener('pointerdown',outside);document.addEventListener('click',outside);
+document.addEventListener('keydown',function(e){if(e.key!=='Escape')return;for(var j=0;j<ds.length;j++){if(ds[j].open){ds[j].open=false;ds[j].querySelector('summary').focus();}}});
+var hs=document.querySelectorAll('.scroll-hint');function fit(){for(var j=0;j<hs.length;j++){var t=hs[j].nextElementSibling;if(t){if(t.scrollWidth<=t.clientWidth+1){hs[j].classList.add('fits');}else{hs[j].classList.remove('fits');}}}}fit();window.addEventListener('resize',fit);window.addEventListener('load',fit);
+var cs=document.querySelectorAll('button.copy[data-copy]');for(i=0;i<cs.length;i++){(function(c){c.hidden=false;function fail(){var blk=c.parentNode,a=blk.querySelector('.addr'),m=blk.querySelector('.copy-msg');if(a&&window.getSelection){var r=document.createRange();r.selectNodeContents(a);var sel=window.getSelection();sel.removeAllRanges();sel.addRange(r);}if(!m){m=document.createElement('p');m.className='copy-msg';m.setAttribute('role','status');blk.appendChild(m);}m.textContent='Copy failed — select the address above and copy it.';}c.addEventListener('click',function(){if(!navigator.clipboard||!navigator.clipboard.writeText){fail();return;}navigator.clipboard.writeText(c.getAttribute('data-copy')).then(function(){var o=c.textContent;c.textContent='Copied';setTimeout(function(){c.textContent=o;},2000);},fail);});})(cs[i]);}
+});})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap hdr">
+  <a class="wordmark" href="/disposition-effect/" aria-label="donttrade, home"><svg class="wm" height="26" xmlns="http://www.w3.org/2000/svg" viewBox="0 -744 4362 768" role="img" aria-label="donttrade"><g fill="currentColor" transform="scale(1 -1)"><path transform="translate(0.0 0)" d="M239 -14Q180 -14 134.5 16.0Q89 46 63.0 102.0Q37 158 37 235Q37 314 67.0 372.0Q97 430 146.0 461.5Q195 493 254 493Q284 493 309.0 484.5Q334 476 356.5 457.5Q379 439 400 409H420L410 351Q373 390 345.5 406.5Q318 423 288 423Q254 423 226.0 403.0Q198 383 181.0 342.0Q164 301 164 237Q164 177 180.0 137.0Q196 97 223.5 77.0Q251 57 287 57Q324 57 352.5 78.0Q381 99 410 140L420 82H401Q381 50 357.0 28.5Q333 7 304.0 -3.5Q275 -14 239 -14ZM387 -11 376 85V87V397L380 409V640L302 650V689L484 734L499 725L495 583V52L561 41V0Z"/><path transform="translate(565.0 0)" d="M278 -14Q211 -14 156.0 16.0Q101 46 69.0 103.0Q37 160 37 239Q37 319 70.5 376.0Q104 433 159.0 463.0Q214 493 278 493Q342 493 397.0 463.0Q452 433 485.5 376.5Q519 320 519 239Q519 159 486.5 102.0Q454 45 399.5 15.5Q345 -14 278 -14ZM278 34Q314 34 338.5 56.5Q363 79 376.5 124.0Q390 169 390 238Q390 308 376.5 353.5Q363 399 338.5 421.5Q314 444 278 444Q242 444 217.0 421.5Q192 399 179.5 353.5Q167 308 167 238Q167 169 179.5 124.0Q192 79 217.0 56.5Q242 34 278 34Z"/><path transform="translate(1107.0 0)" d="M34 0V41L136 61H184L281 41V0ZM98 0Q99 23 99.5 60.5Q100 98 100.5 138.5Q101 179 101 210V263Q101 291 100.5 310.0Q100 329 99.5 346.0Q99 363 98 383L27 392V429L194 493L210 483L220 369V367V210Q220 179 220.5 138.5Q221 98 221.5 60.5Q222 23 223 0ZM338 0V41L438 61H486L585 41V0ZM400 0Q401 23 401.5 60.0Q402 97 402.5 137.5Q403 178 403 210V304Q403 364 386.5 386.5Q370 409 333 409Q312 409 290.0 401.5Q268 394 245.0 378.5Q222 363 197 338L189 390H203Q230 424 260.0 446.5Q290 469 322.5 481.0Q355 493 387 493Q452 493 487.0 450.0Q522 407 522 314V210Q522 178 522.5 137.5Q523 97 523.5 60.0Q524 23 525 0Z"/><path transform="translate(1703.0 0)" d="M144 419V479H326V419ZM211 -14Q152 -14 117.5 16.0Q83 46 83 112Q83 134 83.5 154.5Q84 175 84 204V419H10V470L131 485L83 449L129 617H209L204 459V439V123Q204 86 218.5 69.0Q233 52 257 52Q273 52 287.0 58.5Q301 65 318 77L342 52Q329 31 310.0 16.0Q291 1 266.5 -6.5Q242 -14 211 -14Z"/><path transform="translate(2029.0 0)" d="M144 419V479H326V419ZM211 -14Q152 -14 117.5 16.0Q83 46 83 112Q83 134 83.5 154.5Q84 175 84 204V419H10V470L131 485L83 449L129 617H209L204 459V439V123Q204 86 218.5 69.0Q233 52 257 52Q273 52 287.0 58.5Q301 65 318 77L342 52Q329 31 310.0 16.0Q291 1 266.5 -6.5Q242 -14 211 -14Z"/><path transform="translate(2355.0 0)" d="M35 0V41L138 61H200L303 41V0ZM98 0Q99 23 99.5 60.5Q100 98 100.5 138.5Q101 179 101 210V263Q101 291 100.5 310.5Q100 330 99.5 346.5Q99 363 98 383L27 392V429L194 493L210 483L220 359V357V210Q220 179 220.5 138.5Q221 98 221.5 60.5Q222 23 223 0ZM219 276 195 345H213Q228 393 251.5 426.0Q275 459 303.5 476.0Q332 493 360 493Q387 493 409.0 479.0Q431 465 438 439Q438 402 421.0 382.0Q404 362 374 362Q354 362 337.5 370.5Q321 379 305 397L277 427L322 425Q285 403 259.0 365.5Q233 328 219 276Z"/><path transform="translate(2783.0 0)" d="M171 -14Q115 -14 76.5 18.5Q38 51 38 112Q38 145 52.5 172.5Q67 200 105.5 224.0Q144 248 217 268Q244 276 270.0 283.5Q296 291 322.0 298.0Q348 305 374 312V274Q341 264 309.0 253.5Q277 243 247 234Q209 222 189.0 205.0Q169 188 162.0 169.0Q155 150 155 130Q155 93 175.5 76.0Q196 59 226 59Q242 59 257.0 64.0Q272 69 293.0 83.0Q314 97 348 122L360 71H325Q297 43 275.0 24.0Q253 5 229.0 -4.5Q205 -14 171 -14ZM415 -12Q369 -12 342.5 14.5Q316 41 313 86V91V326Q313 373 304.5 398.5Q296 424 277.0 434.0Q258 444 225 444Q207 444 185.5 441.0Q164 438 133 428L188 463L171 386Q167 350 150.0 333.0Q133 316 109 316Q86 316 71.5 328.0Q57 340 53 362Q62 421 117.5 457.0Q173 493 264 493Q322 493 358.5 474.5Q395 456 412.5 416.5Q430 377 430 312V94Q430 70 438.0 59.5Q446 49 460 49Q471 49 479.0 54.5Q487 60 495 71L518 51Q500 16 475.0 2.0Q450 -12 415 -12Z"/><path transform="translate(3287.0 0)" d="M239 -14Q180 -14 134.5 16.0Q89 46 63.0 102.0Q37 158 37 235Q37 314 67.0 372.0Q97 430 146.0 461.5Q195 493 254 493Q284 493 309.0 484.5Q334 476 356.5 457.5Q379 439 400 409H420L410 351Q373 390 345.5 406.5Q318 423 288 423Q254 423 226.0 403.0Q198 383 181.0 342.0Q164 301 164 237Q164 177 180.0 137.0Q196 97 223.5 77.0Q251 57 287 57Q324 57 352.5 78.0Q381 99 410 140L420 82H401Q381 50 357.0 28.5Q333 7 304.0 -3.5Q275 -14 239 -14ZM387 -11 376 85V87V397L380 409V640L302 650V689L484 734L499 725L495 583V52L561 41V0Z"/><path transform="translate(3852.0 0)" d="M281 -14Q208 -14 153.0 15.0Q98 44 67.5 99.5Q37 155 37 234Q37 314 69.0 372.0Q101 430 155.5 461.5Q210 493 276 493Q336 493 380.5 468.0Q425 443 450.5 398.0Q476 353 476 292Q476 275 474.5 261.5Q473 248 470 237H90V284H298Q338 284 350.0 299.0Q362 314 362 341Q362 376 351.0 399.0Q340 422 320.5 433.0Q301 444 276 444Q248 444 221.5 425.5Q195 407 178.5 365.0Q162 323 162 250Q162 189 182.0 147.5Q202 106 237.5 85.5Q273 65 319 65Q362 65 394.5 79.5Q427 94 454 124L481 102Q460 66 433.0 40.0Q406 14 369.0 0.0Q332 -14 281 -14Z"/></g></svg></a>
+  <nav class="main nav-desk" aria-label="Site">
+    <details class="dd"><summary>Who it’s for</summary><ul><li><a href="/disposition-effect/for-firms/">Prop firms &amp; brokers</a></li><li><a href="/disposition-effect/for-platforms/">Journals &amp; platforms</a></li><li><a href="/disposition-effect/for-firms/#copy-leader">Copy-trading platforms</a></li><li><a href="/disposition-effect/for-firms/#claims-test">Firms making behaviour claims</a></li><li><a href="/disposition-effect/for-traders/">Individual traders <span class="soon">coming soon</span></a></li><li><a href="/disposition-effect/for-researchers/">Researchers &amp; press</a></li></ul></details>
+    <a href="/disposition-effect/pricing/">Pricing</a><a href="/disposition-effect/research/" aria-current="page">Research</a><a href="/disposition-effect/sample-memo/">Sample &amp; method</a><a href="/disposition-effect/about/">About</a>
+    <a class="btn-2 nav-cta" href="/disposition-effect/start/#firm">Firms: start a trial</a>
+    <button class="theme" data-theme-toggle type="button" aria-pressed="false" hidden>Dark mode</button>
+  </nav>
+  <div class="mob">
+    <a class="btn-2 nav-cta nav-cta-hdr" href="/disposition-effect/start/#firm">Firms: trial</a>
+    <details class="menu"><summary>Menu</summary>
+      <nav class="menu-panel" aria-label="Site menu">
+        <a class="btn menu-cta" href="/disposition-effect/start/#firm">Firms: start a trial</a>
+        <p class="menu-lbl">Who it’s for</p>
+        <a href="/disposition-effect/for-firms/">Prop firms &amp; brokers</a><a href="/disposition-effect/for-platforms/">Journals &amp; platforms</a><a href="/disposition-effect/for-firms/#copy-leader">Copy-trading platforms</a><a href="/disposition-effect/for-firms/#claims-test">Firms making behaviour claims</a><a href="/disposition-effect/for-traders/">Individual traders <span class="soon">coming soon</span></a><a href="/disposition-effect/for-researchers/">Researchers &amp; press</a>
+        <a href="/disposition-effect/pricing/">Pricing</a><a href="/disposition-effect/research/" aria-current="page">Research</a><a href="/disposition-effect/sample-memo/">Sample &amp; method</a><a href="/disposition-effect/about/">About</a>
+        <button class="theme" data-theme-toggle type="button" aria-pressed="false" hidden>Dark mode</button>
+      </nav>
+    </details>
+  </div>
+</div></header>
+<main id="main">
+
+<div class="wrap page-head"><div class="col">
+  <p class="kicker">STUDY · PRE-REGISTERED REPLICATION · 16 OCT 2026 · CORRECTED 17 OCT 2026</p>
+  <h1 class="long">Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)</h1>
+  <div class="correction" id="correction" role="note" aria-labelledby="correction-h">
+  <p class="corr-h" id="correction-h"><strong>Correction, 17 Oct 2026</strong></p>
+  <p><strong>The headline of this study is not supported.</strong> It was first published as:</p>
+  <p class="corr-old"><span class="corr-tag">Corrected</span> “Retail traders’ preference for selling winners was about twice as strong on days their other holdings were mostly down” (ratio 2.041, 95% CI [1.862, 2.220]).</p>
+  <p>A pre-registered robustness test that compares each trader with themselves at the same holding day gives a ratio of <strong>1.03 (95% CI 0.95–1.13)</strong>, not about 2. Only in positions held a day or less does a larger gap on down days remain (1.11, 95% CI 1.04–1.18). The specification this study used also reports an effect like the published one in synthetic panels that contain none. What drove the figure was a difference between traders, not a change within the same trader, which is what the hypothesis is about.</p>
+  <p>The stricter test leans against finding the effect, so 1.03 does not show the effect is zero; it shows the published size is not supported. The pre-registered verdict recorded at the time is kept below as the record of what was run.</p>
+  <p class="corr-links"><a href="#robustness-update">Read the robustness update ↓</a> · <a href="/disposition-effect/corrections/">Corrections log →</a></p>
+</div>
+  <p class="lede" style="max-width:var(--measure)">A pre-registered test of the portfolio-driven disposition effect (An et al., 2024) on the same public CC0 panel as the disposition-effect study. It passed its own replication bar by a margin inside the noise, and a later, stricter test showed the headline does not hold: see the correction above.</p>
+  <p class="meta">Pre-registered 9 Oct 2026 · Run 10 Oct 2026 · Re-run from the public script and published 16 Oct 2026 · Corrected 17 Oct 2026 · Script: <a href="https://github.com/donttrade/disposition-effect/tree/main/pdde">pdde/</a> · Data: Jin, Li &amp; Zhu (2021), CC0, Harvard Dataverse</p>
+  <p class="funding"><strong>Funding: none.</strong> No firm paid for, saw or approved this study. <a href="/disposition-effect/independence/">How donttrade is paid →</a></p>
+  <div class="standing">Published whether or not the result was interesting. The test, the data, the exclusion rules and the pass mark were written down on 9 October, before any portfolio-level variable had been computed. It measures a habit; it is not a trading rule or a signal.</div>
+  <nav class="toc" aria-label="Contents"><strong>Contents</strong><ol><li><a href="#the-short-version">The short version</a></li><li><a href="#what-was-tested-and-why">What was tested, and why</a></li><li><a href="#the-data-and-the-period">The data and the period</a></li><li><a href="#method">Method</a></li><li><a href="#results">Results</a></li><li><a href="#what-this-does-not-show">What this does not show</a></li><li><a href="#robustness-update">Robustness update, 17 Oct 2026: does the result survive holding age?</a></li><li><a href="#reproduce-it">Reproduce it</a></li><li><a href="#references">References</a></li></ol></nav>
+  <div class="post">
+  <h2 id="the-short-version">The short version</h2>
+<p class="update"><strong>Corrected 17 Oct 2026:</strong> the “2.041 times larger” figure in this section did not survive a stricter test. The text is kept as published; <a href="#correction">see the correction</a> and the <a href="#robustness-update">robustness update</a>.</p>
+<p>The <a href="/disposition-effect/research/disposition-effect/">disposition-effect study</a> found that traders on a public CC0
+panel sold winning positions more readily than losing ones. A 2024 <em>Journal of Finance</em> paper by An,
+Engelberg, Henriksson, Wang and Williams argues that this habit depends on the <strong>whole portfolio</strong>:
+it is strong when the portfolio is down and weak when it is up. Averaging over both states, as the
+first study did, hides that.</p>
+<p>So I wrote the test down, fixed a pass mark of 2× in advance, and then ran it on the same panel. On
+the one pre-registered specification, the gap between selling winners and selling losers was
+<strong>2.041 times larger</strong> on trader-days when the trader’s other holdings were mostly at a loss than when
+they were mostly at a gain. That clears the 2.00 bar, <strong>by 0.04</strong>, and the 95% interval
+<strong>[1.862, 2.220]</strong> contains 2.00, so the margin is inside the noise. The direction is not in doubt:
+the interaction is negative in every specification run, including the strictest one, where the ratio
+is <strong>3.013</strong>. Two placebo tests are the reason to think it is behaviour rather than an artefact of
+how the variable is built.</p>
+<p>This is a measurement of a published finding on one public dataset. It is not a trading rule and
+says nothing about what anyone should buy or sell.</p>
+<h2 id="what-was-tested-and-why">What was tested, and why</h2>
+<p><strong>The objection.</strong> The first study measured the disposition effect unconditionally. An et al. find
+the effect is concentrated when the investor’s portfolio is at a loss. If that is right, an
+unconditional measurement averages across exactly the state that matters. This was the strongest
+objection to the first study, the data was already public, and as far as I could find nobody had run
+this test on this panel.</p>
+<p><strong>The hypothesis, fixed in advance.</strong> On the Xueqiu panel, the gap between the proportion of gains
+realised and the proportion of losses realised is larger on trader-days when the trader’s <em>other</em>
+holdings are mostly at a loss. In regression terms, the coefficient on <code>gain × PortfolioGain</code> is
+negative.</p>
+<p><strong>The pass mark, fixed in advance.</strong></p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Table 1"><table>
+<thead>
+<tr>
+<th>Outcome</th>
+<th>Pre-registered verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Interaction negative, significant with trader-clustered errors, <strong>and</strong> gap at least 2× larger when the portfolio is down</td>
+<td>Replicated</td>
+</tr>
+<tr>
+<td>Negative and significant, gap ratio under 2×</td>
+<td>Weak replication</td>
+</tr>
+<tr>
+<td>Not distinguishable from zero</td>
+<td>Failure to replicate</td>
+</tr>
+<tr>
+<td>Positive and significant</td>
+<td>Contradicted</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="the-data-and-the-period">The data and the period</h2>
+<ul>
+<li><strong>Source:</strong> Jin, Li &amp; Zhu (2021), <em>PLoS ONE</em> 16(2), doi:10.1371/journal.pone.0246759. Replication
+  files doi:10.7910/DVN/NI6SBJ, <strong>CC0 1.0</strong>. Main panel <code>sample2.Rdata</code>, Dataverse file 4053809.</li>
+<li><strong>What it is:</strong> public portfolios on Xueqiu.com, a Chinese social-trading platform, holding
+  Shanghai and Shenzhen A-shares.</li>
+<li><strong>Size:</strong> 2,780,879 trader-stock-lot-days, 4,731 traders, 3,501 stocks, 428 trading dates.</li>
+<li><strong>Period:</strong> 24 June 2016 to 27 March 2018.</li>
+<li><strong>Integrity check:</strong> the file downloaded on 16 October 2026 has sha256
+  <code>0ebd88d9719cebbc56246cef5c14dcb5513b2d84d4a97d18ba0000dbadcbe8de</code>, the same hash recorded when the
+  study was first run on 10 October.</li>
+</ul>
+<p>Each row carries two yes/no flags: was the position closed that day (<code>sale</code>), and was it in profit
+that day (<code>gain</code>).</p>
+<h2 id="method">Method</h2>
+<p><strong>Portfolio state is a count, not a return.</strong> The panel has no position weights that could be used,
+so "the rest of the portfolio is down" is measured as: of the trader’s <em>other</em> positions held that
+day, what share are in profit. <code>PortfolioGain = 1</code> if that share is above 0.5 and <code>0</code> if below.</p>
+<p><strong>Leave-one-out.</strong> The focal position is excluded from its own portfolio measure. Without that, the
+conditioning variable would be built partly from the thing being conditioned on.</p>
+<p><strong>Exclusions, all fixed in advance.</strong></p>
+<p class="scroll-hint" aria-hidden="true">Swipe the table sideways for more columns →</p><div class="table-scroll sticky1" tabindex="0" role="region" aria-label="Table 2"><table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Rows</th>
+<th>Share of panel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Start</td>
+<td>2,780,879</td>
+<td>100.00%</td>
+</tr>
+<tr>
+<td>Single-position trader-days (no "other" holdings)</td>
+<td>−325,039</td>
+<td>11.69%</td>
+</tr>
+<tr>
+<td>Ties at exactly 0.50</td>
+<td>−280,771</td>
+<td>10.10%</td>
+</tr>
+<tr>
+<td><strong>Analysis sample</strong></td>
+<td><strong>2,175,069</strong></td>
+<td><strong>78.22%</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>The analysis sample covers 4,482 of the 4,731 traders.</p>
+<p><strong>The test.</strong> A linear probability model, <code>sale ~ gain + PortfolioGain + gain × PortfolioGain</code>, with
+trader fixed effects and standard errors clustered by trader. The ratio reported is the implied gap
+when the portfolio is down divided by the gap when it is up.</p>
+<p>A column called <code>ret</code> exists in the file and was not used for the primary test: it disagrees with the
+study’s own <code>gain</code> flag on more than a third of rows, and no codebook settles what it measures. That
+decision was recorded before any outcome was computed.</p>
+<h2 id="results">Results</h2>
+<h3 id="the-pre-registered-test">The pre-registered test</h3>
+<p class="scroll-hint" aria-hidden="true">Swipe the table sideways for more columns →</p><div class="table-scroll sticky1" tabindex="0" role="region" aria-label="Table 3"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Coefficient</th>
+<th>SE</th>
+<th>t</th>
+<th>p</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gain</code></td>
+<td>+0.048971</td>
+<td>0.001772</td>
+<td>+27.64</td>
+<td>2.17e-155</td>
+</tr>
+<tr>
+<td><code>PortfolioGain</code></td>
+<td>+0.024398</td>
+<td>0.001474</td>
+<td>+16.56</td>
+<td>8.20e-60</td>
+</tr>
+<tr>
+<td><strong><code>gain × PortfolioGain</code></strong></td>
+<td><strong>−0.024977</strong></td>
+<td>0.001747</td>
+<td><strong>−14.30</strong></td>
+<td><strong>2.23e-45</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>Ratio: <strong>2.041</strong>, 95% CI <strong>[1.862, 2.220]</strong>. N = 2,175,069 position-days, 4,482 trader clusters.</p>
+<p>Applied literally, the pre-registered rule returns <strong>replicated</strong>: negative, significant, and the
+ratio is above 2.00. It is above 2.00 by 0.04, and the interval contains 2.00.</p>
+<h3 id="every-other-specification-not-pre-registered">Every other specification (not pre-registered)</h3>
+<p class="scroll-hint" aria-hidden="true">Swipe the table sideways for more columns →</p><div class="table-scroll sticky1" tabindex="0" role="region" aria-label="Table 4"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Specification</th>
+<th>Interaction</th>
+<th>t</th>
+<th>Ratio</th>
+<th>95% CI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1</strong></td>
+<td><strong>Pre-specified: trader FE</strong></td>
+<td><strong>−0.024977</strong></td>
+<td><strong>−14.30</strong></td>
+<td><strong>2.041</strong></td>
+<td><strong>[1.862, 2.220]</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td>+ 428 date fixed effects</td>
+<td>−0.025084</td>
+<td>−14.61</td>
+<td>2.041</td>
+<td>[1.866, 2.217]</td>
+</tr>
+<tr>
+<td>3</td>
+<td>+ portfolio size</td>
+<td>−0.021841</td>
+<td>−13.11</td>
+<td>1.862 †</td>
+<td>[1.706, 2.018]</td>
+</tr>
+<tr>
+<td>4</td>
+<td>+ size, holding period, activity, market</td>
+<td>−0.018651</td>
+<td>−12.37</td>
+<td>1.856 †</td>
+<td>[1.689, 2.023]</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>ret</code> portfolio index, no exclusions (N = 2,720,871)</td>
+<td>−0.028726</td>
+<td>−14.27</td>
+<td>2.065</td>
+<td>[1.876, 2.254]</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Trader-day fixed effects (strictest)</td>
+<td>−0.023752</td>
+<td>−9.63</td>
+<td>3.013</td>
+<td>[2.442, 3.584]</td>
+</tr>
+</tbody>
+</table></div>
+<p>† At sample means. Specifications 3 and 4 interact with continuous controls, so the ratio has no
+single value: in specification 3 it is 1.478 at two positions, 1.914 at five (the median) and 2.722
+at eight. Specification 6 is the placebo below.</p>
+<p><strong>Only specification 1 was pre-registered.</strong> Specification 7 was added because a third review pointed
+out it had never been run. It absorbs everything that is constant within a trader on a given day,
+including portfolio size, holding period and activity, and it gives the largest ratio of any
+specification. An et al.'s own comparable regression figure is 3.368 (0.293% at a portfolio loss
+against 0.087% at a gain, their Table 2 Panel A); 3.013 sits about 1.2 standard errors below it.</p>
+<h3 id="the-placebos">The placebos</h3>
+<p><strong>Parity placebo.</strong> The same leave-one-out share, built from a column that cannot matter: whether the
+trader’s other stock codes end in an even digit.</p>
+<p class="scroll-hint" aria-hidden="true">Swipe the table sideways for more columns →</p><div class="table-scroll sticky1" tabindex="0" role="region" aria-label="Table 5"><table>
+<thead>
+<tr>
+<th><span class="vh">Row</span></th>
+<th>Uncontrolled</th>
+<th>With specification 4's controls</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Placebo interaction</td>
+<td>−0.005434 (t −4.06)</td>
+<td><strong>−0.001012 (t −0.91)</strong></td>
+</tr>
+<tr>
+<td>Real interaction</td>
+<td>−0.024977 (t −14.30)</td>
+<td><strong>−0.018651 (t −12.37)</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>Uncontrolled, the placebo is 21.8% of the headline. With controls it goes to nothing while the real
+interaction holds.</p>
+<p><strong>Foreign-portfolio placebo.</strong> The other positions' gain counts are shuffled across trader-days
+within the same date, portfolio size and own-gain cell. That keeps everything mechanical about the
+variable and removes only the fact that it is <em>this</em> trader’s book.</p>
+<p class="scroll-hint" aria-hidden="true">Swipe the table sideways for more columns →</p><div class="table-scroll sticky1" tabindex="0" role="region" aria-label="Table 6"><table>
+<thead>
+<tr>
+<th>Design</th>
+<th>Real</th>
+<th>Placebo, three random seeds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Trader FE</td>
+<td>−0.024977</td>
+<td>−0.003015 / −0.003168 / −0.003315 (12.1% / 12.7% / 13.3% of real)</td>
+</tr>
+<tr>
+<td>Trader-day FE</td>
+<td>−0.023752, ratio 3.013</td>
+<td>ratio 1.057 / 1.035 / 1.083</td>
+</tr>
+</tbody>
+</table></div>
+<p>Without trader-day effects, about 12–13% of the uncontrolled headline is structural. Under
+trader-day fixed effects the placebo ratio falls to roughly 1, while the real variable gives 3.013.</p>
+<h3 id="a-side-finding">A side finding</h3>
+<p><code>PortfolioGain</code> has a positive main effect of +0.024398 (t +16.56) in the pre-registered model:
+a position was more likely to be closed on a day when the rest of the holdings were up, whether or
+not the position itself was in profit. That is not the disposition effect, it was not what the test
+was looking for, and under trader-day fixed effects it is absorbed (+0.000341, t +0.13).</p>
+<h2 id="what-this-does-not-show">What this does not show</h2>
+<ol>
+<li><strong>The conditioning variable is a count, not a value-weighted return.</strong> One holding up 1% and one
+   down 40% count as a 50/50 tie and are dropped. An et al. condition on the size of the gain or
+   loss. This is the central difference between the two studies, and it is not resolved.</li>
+<li><strong>Neither conditioning variable is independent of the focal position.</strong> Leave-one-out reduces the
+   dependence but does not remove it. The <code>ret</code> index used in specification 5 is a portfolio index,
+   so it contains the focal position too: regressed on the position’s own <code>gain</code> flag it gives
+   +0.051066.</li>
+<li><strong>The pre-registration named a statistic it did not pin down.</strong> It required "the PGR − PLR gap at
+   least 2× larger" without saying which gap. Pooled, the ratio is 4.420. Averaged per trader, it is
+   0.857, which is <strong>the opposite direction</strong>. Both figures are stated in <code>pdde/README.md</code>; the public
+   script does not print them. The regression ratio used above is a third measure, and the choice of
+   it was made after seeing the numbers. The argument for it, that the pre-registered test is that
+   regression, is reasonable but post hoc.</li>
+<li><strong>The tie exclusion is not neutral.</strong> A tie needs an even number of other holdings split in half,
+   so it can only happen on days with an odd number of positions. All 280,771 excluded tie rows are
+   from such days.</li>
+<li><strong>At two positions the design is degenerate.</strong> In a mixed pair the winner is always labelled
+   "portfolio down" and the loser "portfolio up". That stratum is 20.6% of the analysis sample.</li>
+<li><strong>One placebo seed is not clean.</strong> Under trader-day fixed effects, seed 2 of the
+   foreign-portfolio placebo gives t = −2.22. Its ratio, 1.083, is still close to 1 against the real
+   3.013.</li>
+<li><strong>Levels do not travel; only ratios do.</strong> Here the outcome is the daily chance of closing a held
+   position, so the coefficients are in a different unit from An et al.'s. Their interaction is
+   −0.206%; this one is −0.024977.</li>
+<li><strong>Chinese A-shares, one social-trading platform, June 2016 to March 2018.</strong> The traders chose to
+   run public portfolios on that platform, so the population is selected. Nothing here is a claim
+   about retail investors in general, or about any firm’s clients.</li>
+<li><strong>It measures a habit. It tests no remedy for it</strong>, and it is not a signal for anyone’s trades.</li>
+</ol>
+<h2 id="robustness-update">Robustness update, 17 Oct 2026: does the result survive holding age?</h2>
+<p><strong>In short: no. The “about twice as strong” figure does not hold up when each trader is compared with themselves
+at the same holding age. Holding age itself turned out not to be the reason; differences between traders were.</strong></p>
+<p><strong>Why we checked.</strong> A robustness check of the <a href="/disposition-effect/research/disposition-effect/">disposition-effect study</a> found that
+the habit of selling winners is concentrated in positions held a day or less, and that mixing holding ages
+distorts the figures. This study compares that habit between two kinds of day. On this panel, positions on days
+when the rest of the book was mostly down were younger (median 25 days held, against 30). So I wrote a new test and
+a pass mark down, tried them on made-up data first, and sealed them before running them on this panel. The seal
+hash is recorded in SEAL-ROBUST-PDDE.md and will be published in the study repository’s commit history.</p>
+<p><strong>The made-up data came first, and it matters.</strong> In synthetic panels where the rest of the book has no influence on
+selling at all, only the habit of selling winners and the fact that old positions are sold less, the specification
+this study used found the effect, in the published direction, in 25, 37 and 30 of 40 panels, depending on the
+setup. In one setup its typical ratio was 1.72, not far from the 2.04 published here.</p>
+<p><strong>What came out.</strong></p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Robustness update results"><table>
+<thead>
+<tr>
+<th>Measure</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Published ratio (specification 1)</td>
+<td>2.04 (95% CI 1.86–2.22)</td>
+</tr>
+<tr>
+<td>Same, plus a fixed effect for every holding day</td>
+<td>2.09 (95% CI 1.90–2.28)</td>
+</tr>
+<tr>
+<td>Same, with the winner–loser gap allowed to differ by holding age</td>
+<td>2.01 (95% CI 1.84–2.18)</td>
+</tr>
+<tr>
+<td><strong>Each trader compared with themselves, same holding day (the pre-registered test)</strong></td>
+<td><strong>1.03 (95% CI 0.95–1.13)</strong></td>
+</tr>
+<tr>
+<td>That test, positions held ≤ 1 day</td>
+<td>1.11 (95% CI 1.04–1.18)</td>
+</tr>
+<tr>
+<td>That test, positions held 2–5 / 6–20 / 21–60 / 61–250 days</td>
+<td>1.13 / 0.93 / 0.52 / 0.22 (all intervals wide)</td>
+</tr>
+</tbody>
+</table></div>
+<p>The pre-registered rule says the result <strong>fails</strong>: the ratio is not above 1 with any confidence, let alone near 2.</p>
+<p><strong>What this changes.</strong> Holding the holding age fixed barely moves the figure (2.09, 2.01). What removes it is
+letting each trader have their own winner–loser gap: done that way, in a check I made after seeing the result, the
+effect is gone. Traders differ in how strongly they sell winners. If the traders with the strongest habit also spend
+more days with their book down, a single pooled gap makes it look as if being down strengthens the habit. That is a
+difference between people, not a change within the same person, and the study’s hypothesis is about the second.</p>
+<p><strong>Two caveats that limit this result.</strong> First, the stricter test leans against finding the effect: on the made-up
+panels with no effect, it came out below 1 more often than above. So 1.03 does not show the effect is zero; it
+shows the published size is not supported. (On made-up panels with a real effect it did find it, every time.)
+Second, it can use only the trader-and-holding-day groups that contain a winner and a loser on both kinds of day,
+about a quarter of the rows. Using each position’s gain or loss from the day before, instead of the same day, makes
+the effect weaker in every version, not stronger.</p>
+<p><strong>What still stands.</strong> The pre-registered verdict, replicated by 0.04, is recorded as it was. The data, the
+code and every figure above are published. Like the original, this shows a pattern, not why traders sell, and it is
+not a signal for anyone’s trades.</p>
+<h2 id="reproduce-it">Reproduce it</h2>
+<p>Folder: <a href="https://github.com/donttrade/disposition-effect/tree/main/pdde"><code>pdde/</code></a> in
+<code>donttrade/disposition-effect</code>.</p>
+<pre tabindex="0" role="region" aria-label="Commands, block 1"><code>pip install pyreadr pandas numpy scipy
+python reproduce_pdde.py
+</code></pre>
+<p>Run it from inside <code>pdde/</code>. The script downloads the panel from Harvard Dataverse itself; since
+16 October 2026 its download step sends an explicit User-Agent (see Versions).</p>
+<p>On 16 October 2026 the public script was re-run from a fresh download. Every figure in the tables
+above matched its output to the printed precision.</p>
+<h2 id="references">References</h2>
+<ul>
+<li>An, L., Engelberg, J., Henriksson, M., Wang, B. &amp; Williams, J. (2024). "The Portfolio-Driven
+  Disposition Effect." <em>Journal of Finance</em> 79(5). doi:10.1111/jofi.13378</li>
+<li>Jin, X., Li, R. &amp; Zhu, Y. (2021). "Could social interaction reduce the disposition effect? Evidence
+  from retail investors in a directed social trading network." <em>PLoS ONE</em> 16(2): e0246759.
+  doi:10.1371/journal.pone.0246759. Data doi:10.7910/DVN/NI6SBJ, CC0 1.0.</li>
+<li>Odean, T. (1998). "Are Investors Reluctant to Realize Their Losses?" <em>Journal of Finance</em> 53(5),
+  1775–1798.</li>
+</ul>
+<p>Methods and negative results, yes. Live signals, never.</p>
+
+  </div>
+  <h2 id="versions">Versions</h2>
+<div class="table-scroll versions" tabindex="0" role="region" aria-label="Versions table"><table><thead><tr><th>Date</th><th>What changed</th></tr></thead><tbody><tr><td>9 Oct 2026</td><td>Pre-registration written, before any portfolio-level variable was computed.</td></tr><tr><td>10 Oct 2026</td><td>Gate check passed (78.22% of rows survive the exclusions). <code>ret</code> recorded as unused, with the reason. Primary test run.</td></tr><tr><td>Before 16 Oct 2026</td><td>Corrections to earlier versions of the public script and README, stated in them: <code>ret</code> is a trader-day series, not a position-level price ratio, and an earlier claim that it was “immune by construction” to dependence on the focal position was wrong; the size-controlled ratio is now reported at sample means and at a range of points, not at a one-position portfolio the sample excludes; the 718,973 off-diagonal rows (33.06%) are the whole contrast that identifies the interaction, not rows “contributing nothing”. An earlier draft write-up, never published here, gave An et al.’s effect as “roughly 4–10×”; their comparable regression figure is 3.368.</td></tr><tr><td>Before 16 Oct 2026</td><td>Stress-tested three times by independent passes that recomputed every figure from the raw data with their own code. Every figure reproduced; the errors found were in interpretation and are corrected here.</td></tr><tr><td>16 Oct 2026</td><td>Published on this site. Re-run from a fresh download (sha256 matches the 10 Oct file): every figure matched the script’s printed output. The script’s download step now sends an explicit User-Agent, because Harvard Dataverse refused Python’s default client with HTTP 403; see Corrections. No figure changed. The pooled (4.420) and per-trader (0.857) gap ratios are taken from <code>pdde/README.md</code>; the public script does not print them.</td></tr><tr><td>17 Oct 2026</td><td>Correction. Its headline, “Retail traders’ preference for selling winners was about twice as strong on days their other holdings were mostly down”, did not survive a pre-registered robustness test that compares each trader with themselves at the same holding day (1.03, 95% CI 0.95–1.13). Added: a dated correction box at the top, a note under “The short version”, and the robustness update as a section after “What this does not show”. Changed: the title (now “Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)”), the lede, which no longer states 2.041 as the result, the page description, the social card, and the listings on Research, About, Code and the Atom feed. The study text below the correction is kept as published. See <a href="/disposition-effect/corrections/">Corrections</a>.</td></tr></tbody></table></div>
+  <p class="meta">Text and charts: <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>. Study code: MIT. The numbers are facts: quote them freely, with a link. A figure may be described as “measured by donttrade under a fixed-scope agreement” only when it comes from a signed engagement; no one may describe it as audited, certified or verified.</p>
+  <details class="cite"><summary>Cite this study</summary>
+<p>donttrade (2026). <em>Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)</em>. Published 16 Oct 2026. https://donttrade.github.io/disposition-effect/research/portfolio-driven-disposition-effect/</p>
+<pre tabindex="0" role="region" aria-label="BibTeX citation"><code>@misc{donttrade2026pdde,
+  author = {donttrade},
+  title  = {Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)},
+  year   = {2026},
+  url    = {https://donttrade.github.io/disposition-effect/research/portfolio-driven-disposition-effect/},
+  note   = {Code: https://github.com/donttrade/disposition-effect}
+}</code></pre></details>
+  <section class="next-block" aria-label="What next">
+  <p class="kicker">WHAT NEXT</p>
+  <ol>
+    <li><p class="lead" style="margin:0 0 10px;font-family:var(--font-ui)">Get the next study by email</p><form action="https://donttrade.substack.com/subscribe" method="get">
+    <label class="skip" for="em">Email address</label>
+    <input id="em" type="email" name="email" placeholder="you@example.com" required autocomplete="email">
+    <button type="submit">Email me the next study</button>
+  </form></li>
+    <li><a href="/disposition-effect/research/disposition-effect/">Read the disposition-effect study it builds on →</a></li>
+    <li><a href="https://github.com/donttrade/disposition-effect/tree/main/pdde">Re-run this one (script) →</a></li>
+  </ol>
+</section>
+<p class="study-firms">Work at a prop firm or broker? <a href="/disposition-effect/for-firms/">For firms →</a></p>
+</div></div>
+
+</main>
+<footer class="site"><div class="wrap">
+  <div class="fcols"><nav aria-label="Who it’s for"><p class="fh">Who it’s for</p><a href="/disposition-effect/for-firms/">Prop firms &amp; brokers</a><a href="/disposition-effect/for-platforms/">Journals &amp; platforms</a><a href="/disposition-effect/for-firms/#copy-leader">Copy-trading platforms</a><a href="/disposition-effect/for-firms/#claims-test">Firms making behaviour claims</a><a href="/disposition-effect/for-traders/">Individual traders</a><a href="/disposition-effect/for-researchers/">Researchers &amp; press</a></nav><nav aria-label="Buying"><p class="fh">Buying</p><a href="/disposition-effect/pricing/">Pricing</a><a href="/disposition-effect/start/">Start a trial</a><a href="/disposition-effect/terms/">Terms</a><a href="/disposition-effect/terms/#cancellation">Cancellations &amp; refunds</a></nav><nav aria-label="Research"><p class="fh">Research</p><a href="/disposition-effect/research/">Research</a><a href="/disposition-effect/plan-gap/">The plan gap</a><a href="/disposition-effect/sample-memo/">Sample &amp; method</a><a href="/disposition-effect/code/">Code</a><a href="/disposition-effect/glossary/">Glossary</a><a href="/disposition-effect/corrections/">Corrections</a><a href="/disposition-effect/feed.xml">Atom feed</a></nav><nav aria-label="Trust"><p class="fh">Trust</p><a href="/disposition-effect/tools/">Free tools</a><a href="/disposition-effect/independence/">Independence</a><a href="/disposition-effect/about/">About</a><a href="/disposition-effect/privacy/">Privacy</a></nav></div>
+  <p class="contact">Email <a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a>. We reply within 1 business day (Eastern Time, Monday to Friday). We work by email only, with no calls, so everything is in writing.</p>
+  <p class="whopays"><strong>Firms pay for fixed-scope measurements of their own data. Readers pay nothing. No firm can pay to change a number.</strong> <a href="/disposition-effect/independence/">Independence policy →</a></p>
+  <p>Nothing here is investment advice or tailored to anyone’s circumstances, and nothing here forecasts anything.</p>
+  <p>This site sets no cookies and runs no analytics; it stores only your light/dark choice, in your own browser. Forms open on Tally and subscribing opens Substack; their privacy policies apply. <a href="/disposition-effect/privacy/">Privacy →</a></p>
+  <p>Published only at <a href="https://donttrade.substack.com">donttrade.substack.com</a>, this site and <a href="https://github.com/donttrade">github.com/donttrade</a>. Any other channel or handle is not us.</p>
+  <p>&copy; 2026 donttrade. Text and charts <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>; numbers are facts, quote them with a link.</p>
+  <p><a class="wordmark" href="/disposition-effect/" aria-label="donttrade, home"><svg class="wm" height="26" xmlns="http://www.w3.org/2000/svg" viewBox="0 -744 4362 768" role="img" aria-label="donttrade"><g fill="currentColor" transform="scale(1 -1)"><path transform="translate(0.0 0)" d="M239 -14Q180 -14 134.5 16.0Q89 46 63.0 102.0Q37 158 37 235Q37 314 67.0 372.0Q97 430 146.0 461.5Q195 493 254 493Q284 493 309.0 484.5Q334 476 356.5 457.5Q379 439 400 409H420L410 351Q373 390 345.5 406.5Q318 423 288 423Q254 423 226.0 403.0Q198 383 181.0 342.0Q164 301 164 237Q164 177 180.0 137.0Q196 97 223.5 77.0Q251 57 287 57Q324 57 352.5 78.0Q381 99 410 140L420 82H401Q381 50 357.0 28.5Q333 7 304.0 -3.5Q275 -14 239 -14ZM387 -11 376 85V87V397L380 409V640L302 650V689L484 734L499 725L495 583V52L561 41V0Z"/><path transform="translate(565.0 0)" d="M278 -14Q211 -14 156.0 16.0Q101 46 69.0 103.0Q37 160 37 239Q37 319 70.5 376.0Q104 433 159.0 463.0Q214 493 278 493Q342 493 397.0 463.0Q452 433 485.5 376.5Q519 320 519 239Q519 159 486.5 102.0Q454 45 399.5 15.5Q345 -14 278 -14ZM278 34Q314 34 338.5 56.5Q363 79 376.5 124.0Q390 169 390 238Q390 308 376.5 353.5Q363 399 338.5 421.5Q314 444 278 444Q242 444 217.0 421.5Q192 399 179.5 353.5Q167 308 167 238Q167 169 179.5 124.0Q192 79 217.0 56.5Q242 34 278 34Z"/><path transform="translate(1107.0 0)" d="M34 0V41L136 61H184L281 41V0ZM98 0Q99 23 99.5 60.5Q100 98 100.5 138.5Q101 179 101 210V263Q101 291 100.5 310.0Q100 329 99.5 346.0Q99 363 98 383L27 392V429L194 493L210 483L220 369V367V210Q220 179 220.5 138.5Q221 98 221.5 60.5Q222 23 223 0ZM338 0V41L438 61H486L585 41V0ZM400 0Q401 23 401.5 60.0Q402 97 402.5 137.5Q403 178 403 210V304Q403 364 386.5 386.5Q370 409 333 409Q312 409 290.0 401.5Q268 394 245.0 378.5Q222 363 197 338L189 390H203Q230 424 260.0 446.5Q290 469 322.5 481.0Q355 493 387 493Q452 493 487.0 450.0Q522 407 522 314V210Q522 178 522.5 137.5Q523 97 523.5 60.0Q524 23 525 0Z"/><path transform="translate(1703.0 0)" d="M144 419V479H326V419ZM211 -14Q152 -14 117.5 16.0Q83 46 83 112Q83 134 83.5 154.5Q84 175 84 204V419H10V470L131 485L83 449L129 617H209L204 459V439V123Q204 86 218.5 69.0Q233 52 257 52Q273 52 287.0 58.5Q301 65 318 77L342 52Q329 31 310.0 16.0Q291 1 266.5 -6.5Q242 -14 211 -14Z"/><path transform="translate(2029.0 0)" d="M144 419V479H326V419ZM211 -14Q152 -14 117.5 16.0Q83 46 83 112Q83 134 83.5 154.5Q84 175 84 204V419H10V470L131 485L83 449L129 617H209L204 459V439V123Q204 86 218.5 69.0Q233 52 257 52Q273 52 287.0 58.5Q301 65 318 77L342 52Q329 31 310.0 16.0Q291 1 266.5 -6.5Q242 -14 211 -14Z"/><path transform="translate(2355.0 0)" d="M35 0V41L138 61H200L303 41V0ZM98 0Q99 23 99.5 60.5Q100 98 100.5 138.5Q101 179 101 210V263Q101 291 100.5 310.5Q100 330 99.5 346.5Q99 363 98 383L27 392V429L194 493L210 483L220 359V357V210Q220 179 220.5 138.5Q221 98 221.5 60.5Q222 23 223 0ZM219 276 195 345H213Q228 393 251.5 426.0Q275 459 303.5 476.0Q332 493 360 493Q387 493 409.0 479.0Q431 465 438 439Q438 402 421.0 382.0Q404 362 374 362Q354 362 337.5 370.5Q321 379 305 397L277 427L322 425Q285 403 259.0 365.5Q233 328 219 276Z"/><path transform="translate(2783.0 0)" d="M171 -14Q115 -14 76.5 18.5Q38 51 38 112Q38 145 52.5 172.5Q67 200 105.5 224.0Q144 248 217 268Q244 276 270.0 283.5Q296 291 322.0 298.0Q348 305 374 312V274Q341 264 309.0 253.5Q277 243 247 234Q209 222 189.0 205.0Q169 188 162.0 169.0Q155 150 155 130Q155 93 175.5 76.0Q196 59 226 59Q242 59 257.0 64.0Q272 69 293.0 83.0Q314 97 348 122L360 71H325Q297 43 275.0 24.0Q253 5 229.0 -4.5Q205 -14 171 -14ZM415 -12Q369 -12 342.5 14.5Q316 41 313 86V91V326Q313 373 304.5 398.5Q296 424 277.0 434.0Q258 444 225 444Q207 444 185.5 441.0Q164 438 133 428L188 463L171 386Q167 350 150.0 333.0Q133 316 109 316Q86 316 71.5 328.0Q57 340 53 362Q62 421 117.5 457.0Q173 493 264 493Q322 493 358.5 474.5Q395 456 412.5 416.5Q430 377 430 312V94Q430 70 438.0 59.5Q446 49 460 49Q471 49 479.0 54.5Q487 60 495 71L518 51Q500 16 475.0 2.0Q450 -12 415 -12Z"/><path transform="translate(3287.0 0)" d="M239 -14Q180 -14 134.5 16.0Q89 46 63.0 102.0Q37 158 37 235Q37 314 67.0 372.0Q97 430 146.0 461.5Q195 493 254 493Q284 493 309.0 484.5Q334 476 356.5 457.5Q379 439 400 409H420L410 351Q373 390 345.5 406.5Q318 423 288 423Q254 423 226.0 403.0Q198 383 181.0 342.0Q164 301 164 237Q164 177 180.0 137.0Q196 97 223.5 77.0Q251 57 287 57Q324 57 352.5 78.0Q381 99 410 140L420 82H401Q381 50 357.0 28.5Q333 7 304.0 -3.5Q275 -14 239 -14ZM387 -11 376 85V87V397L380 409V640L302 650V689L484 734L499 725L495 583V52L561 41V0Z"/><path transform="translate(3852.0 0)" d="M281 -14Q208 -14 153.0 15.0Q98 44 67.5 99.5Q37 155 37 234Q37 314 69.0 372.0Q101 430 155.5 461.5Q210 493 276 493Q336 493 380.5 468.0Q425 443 450.5 398.0Q476 353 476 292Q476 275 474.5 261.5Q473 248 470 237H90V284H298Q338 284 350.0 299.0Q362 314 362 341Q362 376 351.0 399.0Q340 422 320.5 433.0Q301 444 276 444Q248 444 221.5 425.5Q195 407 178.5 365.0Q162 323 162 250Q162 189 182.0 147.5Q202 106 237.5 85.5Q273 65 319 65Q362 65 394.5 79.5Q427 94 454 124L481 102Q460 66 433.0 40.0Q406 14 369.0 0.0Q332 -14 281 -14Z"/></g></svg></a></p>
+</div></footer>
+</body>
+</html>

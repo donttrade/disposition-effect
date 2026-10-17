@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -16 792 232" width="1584" height="464" role="img" aria-label="The ex-crisis 95% interval runs from minus 0.26% to plus 0.62% over 21 days. A 50 basis point estimate sits inside the interval; an 82 basis point estimate sits just outside it.">
+<title>What this sample could and could not rule out: 21-day excess return of insider-buying clusters, 2008–09 removed (donttrade, insider-buying study)</title>
+<style>:root{--bg:#FBF8F3;--surface:#F3EEE6;--text:#1C1A17;--text-2:#4F4A43;--text-muted:#6B655C;--border-ui:#8A8275;--border-hairline:#C9C1B4;--grid:#E4DED4;--chart-1:#1F5F8B;--chart-2:#B5471C;--chart-3:#2E6B3D;--chart-4:#6A4C93;--chart-5:#8A6D00;--chart-6:#5A5A5A;} @media (prefers-color-scheme:dark){:root{--bg:#16181C;--surface:#1F2227;--text:#E9E6E0;--text-2:#BAB5AC;--text-muted:#9A958B;--border-ui:#6E7480;--border-hairline:#3A3E45;--grid:#2C3036;--chart-1:#6FAEDC;--chart-2:#F0925F;--chart-3:#7CC28C;--chart-4:#B79BE0;--chart-5:#E3C04C;--chart-6:#A7A7A7;}}</style>
+<rect x="-16" y="-16" width="792" height="232" fill="var(--bg)"/>
+
+  <line x1="200" y1="120" x2="700" y2="120" stroke="var(--border-ui)" stroke-width="1"/>
+  <g font-family="system-ui,sans-serif" font-size="13" fill="var(--text-muted)" text-anchor="middle">
+    <text x="200" y="138">−0.5%</text><text x="367" y="138">0</text><text x="533" y="138">+0.5%</text><text x="700" y="138">+1.0%</text>
+  </g>
+  <line x1="367" y1="40" x2="367" y2="120" stroke="var(--grid)" stroke-width="1"/>
+  <rect x="280" y="62" width="293" height="22" fill="var(--chart-1)" opacity="0.22"/>
+  <line x1="280" y1="73" x2="573" y2="73" stroke="var(--chart-1)" stroke-width="3"/>
+  <line x1="280" y1="62" x2="280" y2="84" stroke="var(--chart-1)" stroke-width="2"/>
+  <line x1="573" y1="62" x2="573" y2="84" stroke="var(--chart-1)" stroke-width="2"/>
+  <text x="427" y="52" font-family="system-ui,sans-serif" font-size="13" font-weight="600" fill="var(--text)" text-anchor="middle">95% interval, this study: [−0.26%, +0.62%]</text>
+  <circle cx="533" cy="100" r="5" fill="var(--chart-2)"/>
+  <line x1="533" y1="106" x2="533" y2="150" stroke="var(--chart-2)" stroke-width="1" stroke-dasharray="2 3"/>
+  <text x="527" y="164" font-family="system-ui,sans-serif" font-size="13.5" fill="var(--text-2)" text-anchor="end">50 bp/month — Jeng, Metrick &amp; Zeckhauser (inside)</text>
+  <circle cx="640" cy="100" r="5" fill="var(--chart-2)"/>
+  <line x1="640" y1="106" x2="640" y2="174" stroke="var(--chart-2)" stroke-width="1" stroke-dasharray="2 3"/>
+  <text x="646" y="188" font-family="system-ui,sans-serif" font-size="13.5" fill="var(--text-2)" text-anchor="end" dx="-12">82 bp — Cohen, Malloy &amp; Pomorski (just outside)</text>
+</svg>

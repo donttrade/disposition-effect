@@ -1,0 +1,9 @@
+measure,value,basis,source
+PGR,0.1925,per trader then averaged,reproduce.py
+PLR,0.1200,per trader then averaged,reproduce.py
+ratio,1.61,per trader then averaged,reproduce.py
+PGR,0.0785,pooled,reproduce.py
+PLR,0.0535,pooled,reproduce.py
+ratio,1.47,pooled,reproduce.py
+traders_with_both_sides,4659,,reproduce.py
+traders_pgr_gt_plr,3547,,reproduce.py

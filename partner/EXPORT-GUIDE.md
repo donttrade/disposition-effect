@@ -70,9 +70,16 @@ population accurately.
 python3 partner_disposition.py your_export.csv --pnl-basis price
 ```
 
-It prints about eighteen lines: six headline figures, the four raw counts behind them, and a
-reconciliation block showing how many rows were read, used and discarded. Every line is a population
-aggregate. Send back whatever it prints — including any `CHECK THIS` or `WARNING` line, which tells
+It prints six headline figures, the four raw counts behind them, a reconciliation block showing how
+many rows were read, used and discarded, and (since 17 Oct 2026) an age-controlled block: the same
+comparison made between positions of the same holding age, with a short note on how to read it. Every
+line is a population aggregate.
+
+**Holding age needs no extra column.** The script dates each position from its first row in your file.
+Positions already open on the first date of your export cannot be dated and are left out of the
+age-controlled figures (they still count in the headline figures). So a mark row on every day a position
+was held matters even more now: a missing day in the middle is harmless, but if a position's early days
+are missing, its age is understated. Send back whatever it prints — including any `CHECK THIS` or `WARNING` line, which tells
 us something about the export rather than about your traders.
 
 Run it on `make_fixture.py`'s synthetic output first if you want to see the shape before pointing it

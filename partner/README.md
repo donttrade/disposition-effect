@@ -5,9 +5,11 @@ readily gains are realised than losses -- on a CSV that **you** export from
 **your** systems and run **yourselves**. It prints aggregate numbers to the
 terminal. Nothing leaves your machine.
 
-Two scripts, standard library only, Python 3.8 or later (see "Python version and reproducibility" below):
+Two scripts, standard library only, Python 3.8 or later (see "Python version and reproducibility" below), plus
+the tests in `tests/` (standard library, synthetic data only):
 
-- `partner_disposition.py` -- the analysis. Read it top to bottom; it is short.
+- `partner_disposition.py` -- the analysis. Read it top to bottom; the AUDIT MAP at its head names every
+  line that reads a file or writes output, so the review starts there.
 - `make_fixture.py` -- writes a synthetic CSV with a planted effect, so you can
   see the tool work before pointing it at real data.
 
@@ -100,7 +102,7 @@ python3 make_fixture.py --out fixture.csv --seed 7
 python3 partner_disposition.py fixture.csv --pnl-basis price
 ```
 
-Expected stdout, copied from a real run of exactly those two commands (on CPython 3.11; the `unicode data version` line depends on your Python and is explained under "Python version and reproducibility"):
+Expected stdout, copied from a real run of exactly those two commands (on CPython 3.11.15; the `unicode data version` line depends on your Python and is explained under "Python version and reproducibility"). The block from `AGE-CONTROLLED FIGURES` down was added on 17 Oct 2026; everything above it is unchanged, line for line, from the earlier version:
 
 ```
 pnl basis:            price (funding excluded)
@@ -128,10 +130,103 @@ paper gains      PG   783
 realised losses  RL   117
 paper losses     PL   929
 zero-pnl rows excluded 1
+AGE-CONTROLLED FIGURES (holding age = calendar days since the
+position's first row in this file)
+positions with a known open date:               329
+positions open on the first date (left out):    240
+rows used (qualifying pairs, pnl not 0):        975
+
+ratio, ages pooled, same rows:                  2.0325
+within-age ratio (Mantel-Haenszel):             1.9273
+                                                95% interval 1.3825 to 2.6867, by account
+
+holding age      gain rows  loss rows     PGR     PLR   ratio  within-age
+<=1 day                 43         32  0.2093  0.0938   2.233       2.232
+2-5 days                73         75  0.2055  0.1333   1.541       1.618
+6-20 days              192        224  0.2240  0.0804   2.787       2.595
+21-60 days             168        168  0.1667  0.1071   1.556       1.441
+61-250 days              0          0       -       -       -           -
+251+ days                0          0       -       -       -           -
+
+fixed effects (account + holding day), linear probability model:
+  gain coefficient:                             0.103986
+  standard error (account and date):            0.021478
+  ratio implied for gain rows (ATT):            2.0878
+                                                95% interval 1.4495 to 3.7307
+
+gain timing (rows that have a previous row for the same position):
+  rows:                                         933
+  ratio, ages pooled: same day / previous row:  2.0604 / 1.8627
+  within-age ratio: same day / previous row:    1.9488 / 1.7481
+  fixed-effects ATT: same day / previous row:   2.0993 / 1.8586
+  sign changed since previous row, sold rows:   10 of 138
+  sign changed since previous row, unsold rows: 60 of 795
+
+
+HOW TO READ THE AGE-CONTROLLED FIGURES
+... (a fixed block of plain-language caveats, printed every time; see below)
 ```
 
 (`make_fixture.py` itself also prints one line, `wrote 14400 synthetic rows to
 fixture.csv (seed 7)`. The same seed always gives a byte-identical file.)
+
+## Age-controlled figures (added 17 Oct 2026)
+
+**Why.** Positions are sold less often the longer they are held. If losing positions are on average older than
+winning ones, a PLR pooled over all holding ages is pulled down by age rather than by any reluctance to sell, and
+the pooled ratio overstates the effect. On synthetic data with **no** preference for selling winners, only that age
+pattern (`tests/calibrate.py`, 40 files), the pooled ratio on the rows below was above 1.25 in **40 of 40** files
+(median 1.42). Our public study found the same mechanism in real data: holding age fixed, its pooled ratio fell from
+1.45 to 1.33 (robustness update on the disposition-effect study page, 17 Oct 2026). So the output now adds the same
+comparison made between positions of the **same holding age**. The pooled figures above it are unchanged.
+
+**Holding age comes from the same five columns; nothing is added to the input.** A position's open date is the
+date of its first row in the file (its first mark, or its close if it was opened and closed the same day). Its age
+on a row is the number of calendar days since then. One case cannot be dated: a position whose first row is on the
+**first date in the file** may have been opened before the export began. Those positions are left out of the
+age-controlled figures and counted on the line `positions open on the first date (left out)`; the pooled figures
+still use them. If that count is large, starting the export earlier dates more positions, but it also changes the
+period the pooled figure covers, so agree it with us first.
+
+**Rows used.** Exactly the rows behind the pooled figure (Odean's days with a sale; pnl = 0 excluded; a same-day
+mark and close count once, as the close), minus the undated positions. `ratio, ages pooled, same rows` is the plain
+pooled ratio on those rows, so the effect of holding age is seen like for like.
+
+| Line | What it is |
+|---|---|
+| `within-age ratio (Mantel-Haenszel)` | PGR/PLR with one stratum per exact holding day: sum over days k of a_k n0_k / N_k, divided by the sum of c_k n1_k / N_k (a = sold gains, c = sold losses, n1 / n0 = gain / loss rows, N = n1 + n0). **Use this, not the pooled ratio, for the size of the effect.** |
+| `95% interval ..., by account` | Clustered by account (each account's share of the numerator and denominator; stratum sizes held fixed). On the 40 synthetic no-effect files it excluded 1 in 0 of 40. `NOT MEASURED` with a single account. |
+| holding-age table | Six buckets (<=1, 2-5, 6-20, 21-60, 61-250, 251+ days): rows, PGR, PLR, plain ratio, and the within-bucket ratio (again one stratum per exact day: six wide buckets alone are not enough, because inside a bucket the sale rate still falls with age). `-` means not measurable. |
+| fixed effects | A linear probability model: sold = beta x gain + one effect per account + one effect per exact holding day; standard error clustered by account and by date (Cameron-Gelbach-Miller). `ratio implied for gain rows (ATT)` = sale rate of gain rows / (that rate - beta). It compares each account with itself at the same holding day, so it is a different average from the pooled ratio. On the 40 no-effect files its interval excluded 1 in 3. |
+| gain timing | On rows that have a previous row for the same position: the ratios with the gain/loss sign from the same day and from the previous row, and how often the sign changed since the previous row on sold and unsold rows. A gain or loss on the sale day may partly reflect the sale itself (the fill, the closing mark); if the previous-row figures are much smaller, the result depends on that timing. A higher change rate on sold rows is not proof of that: on synthetic data with no look-ahead at all it also appears, because a position that has just turned into a gain is then sold at the gain rate. |
+
+**What none of these figures can rule out.** Traders may sell large moves in either direction more often (a
+V-shaped selling pattern; Ben-David and Hirshleifer 2012), which also produces PGR > PLR without any preference for
+gains. Separating the two needs the size of each gain or loss relative to the position, which these five columns do
+not carry (pnl is an amount, not a return). The output says so every time.
+
+**How the fixed effects are computed without numpy.** By the Frisch-Waugh theorem the gain coefficient depends on
+gain and sold only through their fitted account + holding-day effects, and those fits depend only on the totals of
+each (account, holding day) cell. So the projection (alternating projections to a tolerance of 1e-10) runs on
+cells, not rows, and the clustered standard error needs one more pass over the rows. If the projection does not
+converge, the lines say `NOT MEASURED`.
+
+**Cost.** Measured on Linux, CPython 3.11, a 2-core machine with another job running (so slower than an idle one):
+
+| File (synthetic) | Rows | Earlier version | This version |
+|---|---|---|---|
+| positions repeat across days | 569,907 | 5.7 s, 240 MB | 8.8 s, 264 MB |
+| every row a different position | 500,000 | 7.1 s, 470 MB | 10.4 s, 553 MB |
+| positions repeat across days | 2,318,010 | 27.8 s, 926 MB | 42.6 s, 1,020 MB |
+| every row a different position | 2,000,000 | 25.2 s, 1,509 MB | 41.2 s, 1,835 MB |
+
+**Tests.** `tests/test_partner_age.py` (standard library, synthetic data only): a hand-built file whose every
+age-controlled number is worked out by hand in the comments; an independent re-implementation (plain dicts and a
+dense least-squares solve) on a random file; five duration-only no-effect files (the pooled ratio shows an effect,
+the within-age and fixed-effects intervals do not); five planted-effect files (both detect it); the earlier
+version's output is an exact prefix of this one's on the fixture and on error messages; static checks of the
+claims below; and a run under a real Python 3.9. `tests/mutate.py` reverts each part of the change in a copy and
+shows the suite fails each time.
 
 ## What it computes
 
@@ -305,7 +400,7 @@ Each claim is also an assertion you can verify in under a minute.
 1. **No network code.** This returns nothing:
    `grep -n 'socket\|urllib\|http\|requests\|ssl\|ftplib\|smtplib\|subprocess\|os.system' partner_disposition.py`
 2. **Standard library only.** The imports are exactly:
-   `grep -n '^import\|^from' partner_disposition.py` returns nine lines: the eight modules `argparse, csv, datetime, decimal, math, re, sys, unicodedata` plus `from decimal import Decimal`.
+   `grep -n '^import\|^from' partner_disposition.py` returns ten lines: `from __future__ import annotations` (a compiler directive, not a module), the eight modules `argparse, csv, datetime, decimal, math, re, sys, unicodedata`, and `from decimal import Decimal`.
 3. **Writes no files.** The only `open(...)` is the read-only open of the input
    CSV: `grep -n 'open(' partner_disposition.py` shows one line, mode `"r"`.
    Output goes to stdout (statistics) and stderr (errors) only. You can also run
@@ -319,7 +414,8 @@ Each claim is also an assertion you can verify in under a minute.
 5. **No traceback can echo your data.** `main()` catches every exception and
    prints only the exception class name. Re-run with a deliberately broken file
    to see it.
-6. **Output is aggregate only:** counts and statistics, as shown above. Nothing is per account.
+6. **Output is aggregate only:** counts and statistics, as shown above. Nothing is per account. The
+   age-controlled block adds counts per holding-age bucket, still pooled over all accounts.
 7. **Fixture is fake.** `make_fixture.py` makes random labels from a seeded
    generator; it reads no input files.
 
@@ -337,14 +433,19 @@ are unaffected, because they are plain pooled proportions. A significance claim
 that must withstand scrutiny needs a method that accounts for this clustering
 (for example, standard errors clustered by account). This tool does not do that.
 
+The age-controlled block (above) does give intervals that allow for this: the within-age ratio's is clustered by
+account, the fixed-effects one by account and date. The t statistic itself is unchanged, so that the earlier output
+stays identical.
+
 ## Memory and size
 
 The whole file is validated before anything is printed, which means the script
 keeps several entries per row in memory (duplicate detection and the collision
 check need them). Measured by our tester on Linux with CPython 3.11, on a
-worst-case file (every row a different position): **311 MB and 4.9 seconds at
+worst-case file (every row a different position), for the version before 17 Oct 2026: **311 MB and 4.9 seconds at
 500,000 rows; 1,206 MB and 24.8 seconds at 2,000,000 rows**, roughly 640 bytes
-per row, linear. These will vary with your machine, Python version and the shape
+per row, linear. The age-controlled figures add one small integer per row and a few passes over the data; see
+the Cost table under "Age-controlled figures" for measurements of both versions on the same machine. These will vary with your machine, Python version and the shape
 of your file (a file where positions repeat across days is cheaper). Above a few
 million rows, split the export by date range and run each piece separately. Do
 not split an (account, date) pair or a position across files, or the duplicate,
@@ -361,3 +462,10 @@ The exposure is narrow (only unusual characters in identifiers), but so that a
 published number can be reproduced, the output prints `unicode data version`,
 the version your Python used. Everything else in the output is identical across
 Python versions. If you publish a result, publish that line with it.
+
+The version of 17 Oct 2026 was run on the fixture under CPython 3.8.20, 3.9.23, 3.10.20, 3.11.15, 3.12.3 and
+3.13.13: the output was identical apart from that line. Its test suite passes under 3.9.23 and 3.11.15.
+
+## Licence
+
+From version 2, this folder is licensed under **PolyForm Noncommercial 1.0.0**: free for traders, researchers, schools, charities, journalists and government; a business using it for its business needs a commercial licence, which comes with every engagement. `partner-v1` (commit `2ff165c`) was released under MIT and stays MIT. Organisations may evaluate any version on synthetic or test data for 32 days. Full terms: [LICENSING.md](LICENSING.md).

@@ -34,40 +34,55 @@ A mark (closed=0) and a close (closed=1) for the same account, date and position
 are merged: the close wins and the mark is discarded and counted (the position
 was sold that day, so it is a realisation, not a paper position). Two rows with
 the same key and the same closed value are a duplicate and abort the run.
+
+Age-controlled figures (added 17 Oct 2026). After the pooled figures above, the
+output adds the same comparison made between positions of the same HOLDING AGE,
+because positions are sold less often the longer they are held and a pooled
+ratio mixes ages. Holding age is derived from the same five columns: a
+position's open date is the date of its first row in the file, and its age on a
+row is the number of calendar days since then. Positions already open on the
+first date in the file cannot be dated and are left out of those figures (and
+counted). No column is added to the input.
 """
 
 # ==========================================================================
 # SECTION 1 of 6: AUDIT MAP -- read this, then spot-check the lines it names.
 # The question it answers: can this program send your data anywhere, or print it?
 #
-#   Imports, complete list ...... lines 71-79. No network module, no os,
+#   Imports, complete list ...... lines 85-94. No network module, no os,
 #                                 no process launcher. (grep the file to confirm.)
-#   The only file opened ........ line 316, mode "r" (read-only). Nothing is written.
-#   Everything sent to stdout ... line 711 (the results text) and line 714
-#                                 (flush); line 730 only assigns None to stdout
+#   The only file opened ........ line 336, mode "r" (read-only). Nothing is written.
+#   Everything sent to stdout ... line 1161 (the results text) and line 1162
+#                                 (flush); line 1178 only assigns None to stdout
 #                                 after a broken pipe, it is not output. These
 #                                 are the only three lines a text search for the
 #                                 module-qualified stdout name finds. argparse prints
 #                                 usage/--help text only. The built-in print
 #                                 function is never used.
-#   Everything sent to stderr ... lines 724, 733, 739, all inside main().
+#   Everything sent to stderr ... lines 1172, 1181, 1187, all inside main().
 #   Error messages .............. built only at the ValidationError(...) sites
 #                                 (grep -n 'ValidationError(' lists them all) and
-#                                 printed only by main(), line 724. They cannot
+#                                 printed only by main(), line 1172. They cannot
 #                                 contain a cell: each is a fixed sentence into
 #                                 which only a row number, a count, our own column
 #                                 names or the OS's reason text is substituted.
-#   The catch-all ............... line 735, "except Exception". It prints the
+#   The catch-all ............... line 1183, "except Exception". It prints the
 #                                 exception's CLASS NAME only, never its text.
-#   Input validation ............ lines 124-252. Everything between them is
+#   Input validation ............ lines 139-267. Everything between them is
 #                                 input validation; it reads no new state and
 #                                 writes no output (each function takes one row's
 #                                 strings and returns a value or raises).
+#   Age-controlled figures ...... lines 533-949 (added 17 Oct 2026). Arithmetic
+#                                 on the counts read_pairs() already holds in
+#                                 memory: it opens nothing and writes nothing;
+#                                 its text is returned to run() and printed by
+#                                 the one stdout line above.
 # ==========================================================================
 
 # ==========================================================================
 # SECTION 2 of 6: IMPORTS AND CONSTANTS
 # ==========================================================================
+from __future__ import annotations
 import argparse
 import csv
 import datetime
@@ -310,6 +325,11 @@ def read_pairs(path, trim_ids):
     account_spellings = {}
     position_spellings = {}
     mark_count = {}     # (account, position) -> marks that survived into the tally
+    # For the age-controlled figures: every row of every position, as one int
+    # per row: date ordinal * 8 + closed * 4 + (sign + 1). Sorting a position's
+    # list puts its rows in date order, and a same-day mark before its close.
+    pos_codes = {}      # (account, position) -> [code, ...]
+    ordinal_of = {}     # validated date string -> proleptic ordinal (day number)
     after = " (after --trim-ids was applied)" if trim_ids else ""
 
     try:
@@ -362,6 +382,13 @@ def read_pairs(path, trim_ids):
                 seen_keys[key] = RESOLVED if prior is not None else closed * 3 + sign + 1
 
                 pos_key = (account, position)
+                ordinal = ordinal_of.get(date)
+                if ordinal is None:
+                    ordinal = datetime.date(int(date[0:4]), int(date[5:7]),
+                                            int(date[8:10])).toordinal()
+                    ordinal_of[date] = ordinal
+                pos_codes.setdefault(pos_key, []).append(
+                    ordinal * 8 + closed * 4 + sign + 1)
                 if closed == 1:
                     if pos_key in closed_on and closed_on[pos_key] != date:
                         raise ValidationError(
@@ -449,7 +476,8 @@ def read_pairs(path, trim_ids):
              "trimmed": trimmed, "raw_spellings": raw_spellings,
              "superseded": superseded,
              "closed_positions": closed_positions,
-             "orphan_closes": orphan_closes}
+             "orphan_closes": orphan_closes,
+             "pos_codes": pos_codes, "ordinal_of": ordinal_of}
     return pairs, stats
 
 
@@ -500,6 +528,425 @@ def summarise(pairs):
         "zero": zero_rows,
         "rows_in_pairs": rows_in_pairs,
     }
+
+
+# ---- Age-controlled figures (added 17 Oct 2026) ---------------------------
+# Why (for the reviewer): positions are sold less often the longer they are
+# held. If losing positions are on average older, a PLR pooled over all ages
+# is pulled down by age rather than by any reluctance to sell, and the pooled
+# ratio above overstates the effect. The figures below compare positions of
+# the SAME holding age. Everything here reads only the in-memory tallies built
+# by read_pairs(); it opens nothing and prints nothing.
+
+AGE_BUCKETS = ((0, 1, "<=1 day"), (2, 5, "2-5 days"), (6, 20, "6-20 days"),
+               (21, 60, "21-60 days"), (61, 250, "61-250 days"),
+               (251, None, "251+ days"))
+Z95 = 1.959964
+FE_TOL = 1e-10          # convergence of the fixed-effects projection
+FE_MAX_ITER = 20000
+
+
+def stratum_of(age):
+    """The Mantel-Haenszel stratum: one per exact holding day. (Six wide
+    buckets alone are not enough: within a bucket the sale rate still falls
+    with age while the share of losers rises.)"""
+    return age
+
+
+def bucket_label(age):
+    for low, high, label in AGE_BUCKETS:
+        if age >= low and (high is None or age <= high):
+            return label
+    return AGE_BUCKETS[-1][2]
+
+
+def aged_rows(pairs, stats):
+    """Yield one tuple per row that the age-controlled figures use:
+    (account, date ordinal, age, sold, sign, previous sign).
+
+    Same rows as the pooled figure (qualifying (account, date) pairs, pnl not 0;
+    a same-day mark and close count once, as the close), restricted to positions
+    whose open date is known. A position's open date is the date of its first
+    row; it is unknown (left-censored) when that first row is on the first date
+    in the file, because the position may have been opened before the export
+    began. 'previous sign' is the pnl sign on the position's previous row (any
+    earlier date, qualifying or not), or None on its first row."""
+    ordinal_of = stats["ordinal_of"]
+    first_ordinal = min(ordinal_of.values())
+    qualifying = set()
+    for (account, date), tally in pairs.items():
+        if tally[CLOSED_ROWS] > 0:
+            qualifying.add((account, ordinal_of[date]))
+    for (account, _position), codes in stats["pos_codes"].items():
+        codes.sort()
+        if codes[0] >> 3 == first_ordinal:
+            continue                       # opened on or before the first date: age unknown
+        open_ordinal = codes[0] >> 3
+        prev_sign = None
+        last = len(codes) - 1
+        for i, code in enumerate(codes):
+            ordinal = code >> 3
+            if i < last and codes[i + 1] >> 3 == ordinal:
+                continue                   # a same-day mark: the close that follows wins
+            sold = (code >> 2) & 1
+            sign = (code & 3) - 1
+            if sign != 0 and (account, ordinal) in qualifying:
+                yield account, ordinal, ordinal - open_ordinal, sold, sign, prev_sign
+            prev_sign = sign
+
+
+def censor_counts(stats):
+    """(positions with a known open date, positions open on the first date)."""
+    first_ordinal = min(stats["ordinal_of"].values())
+    censored = 0
+    for codes in stats["pos_codes"].values():
+        if min(codes) >> 3 == first_ordinal:
+            censored += 1
+    return len(stats["pos_codes"]) - censored, censored
+
+
+def add_cell(cells, key, gain, sold):
+    """cells[key] = [gain rows, loss rows, sold gains, sold losses]."""
+    c = cells.get(key)
+    if c is None:
+        c = [0, 0, 0, 0]
+        cells[key] = c
+    if gain:
+        c[0] += 1
+        c[2] += sold
+    else:
+        c[1] += 1
+        c[3] += sold
+
+
+def crude(cells, keep=None):
+    """Plain pooled PGR, PLR and ratio over (account, age) cells."""
+    n1 = n0 = a = c = 0
+    for (_account, age), v in cells.items():
+        if keep is None or keep(age):
+            n1 += v[0]
+            n0 += v[1]
+            a += v[2]
+            c += v[3]
+    pgr = a / n1 if n1 else None
+    plr = c / n0 if n0 else None
+    ratio = pgr / plr if (pgr is not None and plr) else None
+    return {"n1": n1, "n0": n0, "a": a, "c": c, "pgr": pgr, "plr": plr, "ratio": ratio}
+
+
+def mantel_haenszel(cells, keep=None):
+    """Mantel-Haenszel ratio of the sale rate of gains to that of losses, with
+    one stratum per exact holding day:  R = sum_k a_k n0_k / N_k  /  sum_k c_k n1_k / N_k.
+    95% interval clustered by account: each account's share of the numerator
+    and denominator, A_g and B_g, with the stratum sizes held fixed;
+    var(log R) = G/(G-1) * sum_g (A_g - R B_g)^2 / A^2 (a ratio estimator)."""
+    strata = {}
+    for (_account, age), v in cells.items():
+        if keep is None or keep(age):
+            k = stratum_of(age)
+            t = strata.get(k)
+            if t is None:
+                t = [0, 0]
+                strata[k] = t
+            t[0] += v[0]
+            t[1] += v[1]
+    per_account = {}
+    for (account, age), v in cells.items():
+        if keep is not None and not keep(age):
+            continue
+        n1, n0 = strata[stratum_of(age)]
+        total = n1 + n0
+        pa = per_account.get(account)
+        if pa is None:
+            pa = [[], []]
+            per_account[account] = pa
+        pa[0].append(v[2] * n0 / total)
+        pa[1].append(v[3] * n1 / total)
+    a_g = [math.fsum(v[0]) for v in per_account.values()]
+    b_g = [math.fsum(v[1]) for v in per_account.values()]
+    num = math.fsum(a_g)
+    den = math.fsum(b_g)
+    out = {"ratio": None, "lo": None, "hi": None, "accounts": len(a_g)}
+    if den <= 0:
+        return out
+    ratio = num / den
+    out["ratio"] = ratio
+    g = len(a_g)
+    if num > 0 and g > 1:
+        var = (g / (g - 1.0)) * math.fsum((x - ratio * y) ** 2
+                                          for x, y in zip(a_g, b_g)) / (num * num)
+        se = math.sqrt(var)
+        out["lo"] = ratio * math.exp(-Z95 * se)
+        out["hi"] = ratio * math.exp(Z95 * se)
+    return out
+
+
+def fe_projection(index_a, index_t, n, x, n_a, n_t):
+    """Least-squares fit of a cell total x on account and holding-day effects,
+    weighted by the cell's row count n, by alternating projections (backfitting).
+    The fit depends only on cell totals, so it runs on (account, age) cells,
+    not on rows. Returns (fitted value per cell, converged, iterations)."""
+    alpha = [0.0] * len(n_a)
+    gamma = [0.0] * len(n_t)
+    cells = range(len(n))
+    for iteration in range(1, FE_MAX_ITER + 1):
+        sa = [0.0] * len(n_a)
+        for i in cells:
+            sa[index_a[i]] += x[i] - n[i] * gamma[index_t[i]]
+        new_alpha = [sa[j] / n_a[j] for j in range(len(n_a))]
+        st = [0.0] * len(n_t)
+        for i in cells:
+            st[index_t[i]] += x[i] - n[i] * new_alpha[index_a[i]]
+        new_gamma = [st[j] / n_t[j] for j in range(len(n_t))]
+        change = max(max(abs(p - q) for p, q in zip(alpha, new_alpha)),
+                     max(abs(p - q) for p, q in zip(gamma, new_gamma)))
+        alpha, gamma = new_alpha, new_gamma
+        if change < FE_TOL:
+            return [alpha[index_a[i]] + gamma[index_t[i]] for i in cells], True, iteration
+    return [alpha[index_a[i]] + gamma[index_t[i]] for i in cells], False, FE_MAX_ITER
+
+
+def fixed_effects(cells, row_source):
+    """Linear probability model  sold = beta * gain + account effect + holding-day
+    effect, one effect per exact holding day (the discrete-time form of a sale
+    hazard with a fully flexible baseline in holding age). By the Frisch-Waugh
+    theorem beta = sum(g~ s~) / sum(g~^2), where g~ and s~ are gain and sold
+    minus their fitted account + holding-day effects; those fits depend only on
+    (account, age) cell totals. Standard error clustered by account and by date
+    (Cameron-Gelbach-Miller): one more pass over the rows (row_source()) for the
+    date sums. ATT ratio = sale rate of gain rows / (that rate - beta)."""
+    keys = list(cells)
+    acc_ix, age_ix = {}, {}
+    index_a, index_t, n, gx, sx, gsx = [], [], [], [], [], []
+    for key in keys:
+        v = cells[key]
+        index_a.append(acc_ix.setdefault(key[0], len(acc_ix)))
+        index_t.append(age_ix.setdefault(key[1], len(age_ix)))
+        n.append(v[0] + v[1])
+        gx.append(v[0])
+        sx.append(v[2] + v[3])
+        gsx.append(v[2])
+    n_a = [0] * len(acc_ix)
+    n_t = [0] * len(age_ix)
+    for i in range(len(n)):
+        n_a[index_a[i]] += n[i]
+        n_t[index_t[i]] += n[i]
+    out = {"beta": None, "se": None, "att": None, "att_lo": None, "att_hi": None,
+           "converged": False, "iterations": 0, "twoway_fallback": False}
+    if not n:
+        return out
+    fg, ok_g, it_g = fe_projection(index_a, index_t, n, gx, n_a, n_t)
+    fs, ok_s, it_s = fe_projection(index_a, index_t, n, sx, n_a, n_t)
+    out["converged"] = ok_g and ok_s
+    out["iterations"] = max(it_g, it_s)
+    if not out["converged"]:
+        return out
+    sgg = math.fsum(gx[i] - 2.0 * fg[i] * gx[i] + n[i] * fg[i] * fg[i]
+                    for i in range(len(n)))
+    sgs = math.fsum(gsx[i] - fs[i] * gx[i] - fg[i] * sx[i] + n[i] * fg[i] * fs[i]
+                    for i in range(len(n)))
+    if sgg <= 1e-9:
+        return out                       # gain does not vary within account and age
+    beta = sgs / sgg
+    out["beta"] = beta
+    n1 = math.fsum(gx)
+    sale_gain = math.fsum(gsx) / n1 if n1 else None
+    if sale_gain is not None and sale_gain - beta > 0:
+        out["att"] = sale_gain / (sale_gain - beta)
+    # scores: account sums from cells; date and account-date sums from rows
+    score_a = [0.0] * len(acc_ix)
+    for i in range(len(n)):
+        cell_sgg = gx[i] - 2.0 * fg[i] * gx[i] + n[i] * fg[i] * fg[i]
+        cell_sgs = gsx[i] - fs[i] * gx[i] - fg[i] * sx[i] + n[i] * fg[i] * fs[i]
+        score_a[index_a[i]] += cell_sgs - beta * cell_sgg
+    cell_ix = {key: i for i, key in enumerate(keys)}
+    score_d, score_ad = {}, {}
+    for account, ordinal, age, sold, gain in row_source():
+        i = cell_ix[(account, age)]
+        gt = gain - fg[i]
+        u = gt * (sold - fs[i] - beta * gt)
+        score_d[ordinal] = score_d.get(ordinal, 0.0) + u
+        score_ad[(account, ordinal)] = score_ad.get((account, ordinal), 0.0) + u
+
+    def meat(scores):
+        g = len(scores)
+        return (g / (g - 1.0)) * math.fsum(x * x for x in scores)
+    if len(score_a) < 2:
+        return out                       # one account: no clustered standard error
+    v_a = meat(score_a)
+    if len(score_d) < 2:
+        v = v_a                          # one date: account clusters only
+        out["twoway_fallback"] = True
+    else:
+        v = v_a + meat(list(score_d.values())) - meat(list(score_ad.values()))
+        if v <= 0:
+            v = max(v_a, meat(list(score_d.values())))
+            out["twoway_fallback"] = True
+    se = math.sqrt(v) / sgg
+    out["se"] = se
+    if out["att"] is not None:
+        if sale_gain - (beta - Z95 * se) > 0:
+            out["att_lo"] = sale_gain / (sale_gain - (beta - Z95 * se))
+        if sale_gain - (beta + Z95 * se) > 0:
+            out["att_hi"] = sale_gain / (sale_gain - (beta + Z95 * se))
+    return out
+
+
+def age_controlled(pairs, stats):
+    """All age-controlled figures, as a dict for age_lines()."""
+    cells = {}          # (account, age) -> counts, same-day gain, all dated rows
+    same_p = {}         # rows with a previous row: same-day gain
+    prev_p = {}         # rows with a previous row: gain from the previous row
+    flips = [0, 0, 0, 0]    # sold rows, sold rows whose sign changed, unsold, unsold changed
+    for account, _ordinal, age, sold, sign, prev_sign in aged_rows(pairs, stats):
+        add_cell(cells, (account, age), sign > 0, sold)
+        if prev_sign is not None and prev_sign != 0:
+            add_cell(same_p, (account, age), sign > 0, sold)
+            add_cell(prev_p, (account, age), prev_sign > 0, sold)
+            changed = 1 if (sign > 0) != (prev_sign > 0) else 0
+            if sold:
+                flips[0] += 1
+                flips[1] += changed
+            else:
+                flips[2] += 1
+                flips[3] += changed
+
+    def rows_same():
+        for account, ordinal, age, sold, sign, _p in aged_rows(pairs, stats):
+            yield account, ordinal, age, sold, 1 if sign > 0 else 0
+
+    def rows_with_prev(use_prev):
+        def source():
+            for account, ordinal, age, sold, sign, prev in aged_rows(pairs, stats):
+                if prev is not None and prev != 0:
+                    g = prev if use_prev else sign
+                    yield account, ordinal, age, sold, 1 if g > 0 else 0
+        return source
+
+    dated, censored = censor_counts(stats)
+    res = {"dated": dated, "censored": censored, "flips": flips,
+           "all": crude(cells), "mh": mantel_haenszel(cells), "buckets": []}
+    for low, high, label in AGE_BUCKETS:
+        def keep(age, low=low, high=high):
+            return age >= low and (high is None or age <= high)
+        b = crude(cells, keep)
+        b["label"] = label
+        b["mh"] = mantel_haenszel(cells, keep)
+        res["buckets"].append(b)
+    res["fe"] = fixed_effects(cells, rows_same)
+    res["same_crude"] = crude(same_p)
+    res["prev_crude"] = crude(prev_p)
+    res["same_mh"] = mantel_haenszel(same_p)
+    res["prev_mh"] = mantel_haenszel(prev_p)
+    res["same_fe"] = fixed_effects(same_p, rows_with_prev(False))
+    res["prev_fe"] = fixed_effects(prev_p, rows_with_prev(True))
+    return res
+
+
+def num(value, places):
+    """Fixed-point text for a float; None -> NOT MEASURED; never '-0.000'."""
+    if value is None:
+        return "NOT MEASURED"
+    text = "%.*f" % (places, value)
+    if text.lstrip("-").strip("0.") == "":
+        text = text.lstrip("-")
+    return text
+
+
+def interval(lo, hi, places=4):
+    if lo is None and hi is None:      # else each bound on its own (OBMS 0.1, 6.4)
+        return "interval NOT MEASURED"
+    return "95%% interval %s to %s" % (num(lo, places), num(hi, places))
+
+
+AGE_WIDTH = 48
+
+CAVEAT = (
+    "",
+    "HOW TO READ THE AGE-CONTROLLED FIGURES",
+    "- Positions are sold less often the longer they are held. If losing",
+    "  positions are on average older than winning ones, the pooled ratio at",
+    "  the top can show an effect that is only an age pattern. The within-age",
+    "  ratio compares winners and losers of the same holding age; use it, not",
+    "  the pooled ratio, for the size of the effect.",
+    "- Holding age is counted from each position's first row in this file.",
+    "  Positions already open on the file's first date are left out of these",
+    "  figures because their age is unknown; the pooled figures still use them.",
+    "- The fixed-effects line compares each account with itself, at the same",
+    "  holding day. It is a different average from the pooled ratio, so the two",
+    "  are not expected to match.",
+    "- Gain timing: a position's gain or loss on the day it is sold may partly",
+    "  reflect the sale itself (the fill or the closing mark). The lines that",
+    "  take the gain or loss from the position's previous row avoid that. If",
+    "  they are much smaller, the effect depends on same-day timing.",
+    "- Not ruled out: traders may sell large moves in either direction more",
+    "  often (a V-shaped pattern, Ben-David and Hirshleifer 2012). Separating",
+    "  that from a preference for selling winners needs the size of each gain",
+    "  or loss relative to the position, which these five columns do not carry.",
+    "- The intervals here are clustered by account (the within-age ratio) and",
+    "  by account and date (fixed effects). The t statistic at the top treats",
+    "  every row as independent and is not.",
+    "- NOT MEASURED means the data cannot support the figure, never zero.",
+)
+
+
+def age_lines(res):
+    """The age-controlled block, appended after the original output."""
+    w = AGE_WIDTH
+    a = res["all"]
+    out = [
+        "",
+        "AGE-CONTROLLED FIGURES (holding age = calendar days since the",
+        "position's first row in this file)",
+        line("positions with a known open date:", str(res["dated"]), w),
+        line("positions open on the first date (left out):", str(res["censored"]), w),
+        line("rows used (qualifying pairs, pnl not 0):", str(a["n1"] + a["n0"]), w),
+        "",
+        line("ratio, ages pooled, same rows:", num(a["ratio"], 4), w),
+        line("within-age ratio (Mantel-Haenszel):", num(res["mh"]["ratio"], 4), w),
+        line("", interval(res["mh"]["lo"], res["mh"]["hi"]) + ", by account", w),
+        "",
+        "holding age      gain rows  loss rows     PGR     PLR   ratio  within-age",
+    ]
+    for b in res["buckets"]:
+        out.append("%-15s %10d %10d %7s %7s %7s %11s" % (
+            b["label"], b["n1"], b["n0"],
+            num(b["pgr"], 4) if b["pgr"] is not None else "-",
+            num(b["plr"], 4) if b["plr"] is not None else "-",
+            num(b["ratio"], 3) if b["ratio"] is not None else "-",
+            num(b["mh"]["ratio"], 3) if b["mh"]["ratio"] is not None else "-"))
+    fe = res["fe"]
+    out += [
+        "",
+        "fixed effects (account + holding day), linear probability model:",
+        line("  gain coefficient:", num(fe["beta"], 6), w),
+        line("  standard error (account and date):", num(fe["se"], 6), w),
+        line("  ratio implied for gain rows (ATT):", num(fe["att"], 4), w),
+        line("", interval(fe["att_lo"], fe["att_hi"]), w),
+    ]
+    if not fe["converged"]:
+        out.append("  fixed effects NOT MEASURED: the fit did not converge")
+    if fe["twoway_fallback"]:
+        out.append("  (two-way variance not usable: one date, or not positive; one-way used)")
+    sc, pc = res["same_crude"], res["prev_crude"]
+    f = res["flips"]
+    out += [
+        "",
+        "gain timing (rows that have a previous row for the same position):",
+        line("  rows:", str(sc["n1"] + sc["n0"]), w),
+        line("  ratio, ages pooled: same day / previous row:",
+             "%s / %s" % (num(sc["ratio"], 4), num(pc["ratio"], 4)), w),
+        line("  within-age ratio: same day / previous row:",
+             "%s / %s" % (num(res["same_mh"]["ratio"], 4), num(res["prev_mh"]["ratio"], 4)), w),
+        line("  fixed-effects ATT: same day / previous row:",
+             "%s / %s" % (num(res["same_fe"]["att"], 4), num(res["prev_fe"]["att"], 4)), w),
+        line("  sign changed since previous row, sold rows:",
+             "%d of %d" % (f[1], f[0]), w),
+        line("  sign changed since previous row, unsold rows:",
+             "%d of %d" % (f[3], f[2]), w),
+    ]
+    out += list(CAVEAT)
+    return "\n".join(out) + "\n"
 
 
 def line(label, value, width=LABEL_WIDTH):
@@ -708,9 +1155,10 @@ def run(argv):
             "book genuinely never holds a second position on a sale day. If "
             "(2), re-run with --allow-orphan-closes." % summary["days"])
 
-    sys.stdout.write(render(args.pnl_basis, summary, stats, args.trim_ids,
-                            args.allow_orphan_closes,
-                            args.allow_identifier_collisions))
+    text = render(args.pnl_basis, summary, stats, args.trim_ids,
+                  args.allow_orphan_closes, args.allow_identifier_collisions)
+    text += age_lines(age_controlled(pairs, stats))
+    sys.stdout.write(text)
     sys.stdout.flush()
     return 0
 

@@ -1,0 +1,4 @@
+series,low_pct,high_pct,horizon_trading_days,note
+this_study_ex_2008_09_95ci,-0.26,0.62,21,tradable as-traded screen; three or more insiders
+jeng_metrick_zeckhauser,0.50,0.50,21,~50 bp per month (published estimate)
+cohen_malloy_pomorski,0.82,0.82,21,82 bp per month (published estimate)
