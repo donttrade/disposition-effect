@@ -2,86 +2,86 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>donttrade: studies and corrections</title>
   <subtitle>New studies and every logged correction. No prices, no advice.</subtitle>
-  <id>https://donttrade.github.io/disposition-effect/feed.xml</id>
-  <link rel="self" type="application/atom+xml" href="https://donttrade.github.io/disposition-effect/feed.xml"/>
-  <link rel="alternate" type="text/html" href="https://donttrade.github.io/disposition-effect/research/"/>
+  <id>https://donttrade.ca/feed.xml</id>
+  <link rel="self" type="application/atom+xml" href="https://donttrade.ca/feed.xml"/>
+  <link rel="alternate" type="text/html" href="https://donttrade.ca/research/"/>
   <updated>2026-10-17T00:00:00Z</updated>
   <author><name>donttrade</name><email>donttrade.research@gmail.com</email></author>
   <rights>Text CC BY-NC 4.0</rights>
   <entry>
     <title>Study: Fifty trading strategies across four styles, a combined negative result (17 Oct 2026)</title>
     <id>tag:donttrade.github.io,2026-10-17:study/research/strategy-tests/</id>
-    <link rel="alternate" type="text/html" href="https://donttrade.github.io/disposition-effect/research/strategy-tests/"/>
+    <link rel="alternate" type="text/html" href="https://donttrade.ca/research/strategy-tests/"/>
     <updated>2026-10-17T00:00:00Z</updated>
     <summary>A new study; its code is to be published with it. Published whether or not the result was interesting.</summary>
   </entry>
   <entry>
     <title>Correction: Portfolio-driven disposition effect (17 Oct 2026)</title>
     <id>tag:donttrade.github.io,2026-10-17:correction-5</id>
-    <link rel="alternate" type="text/html" href="https://donttrade.github.io/disposition-effect/corrections/"/>
+    <link rel="alternate" type="text/html" href="https://donttrade.ca/corrections/"/>
     <updated>2026-10-17T00:00:00Z</updated>
     <summary>What was wrong: The headline said retail traders’ preference for selling winners was “about twice as strong on days their other holdings were mostly down” (ratio 2.041). A pre-registered robustness test that compares each trader with themselves at the same holding day gives 1.03 (95% CI 0.95–1.13), and the specification the study used reports an effect of similar size in synthetic panels that contain none. The headline claim is not supported. What changed: The title, summary, list entries, page description and social card now say the headline did not survive a stricter test. A dated correction box sits at the top of the study and the robustness update is in its body; the original figure is kept there, marked as corrected. The replication verdict recorded on 10 Oct 2026 is kept as the record of what was run; it no longer supports the headline.</summary>
   </entry>
   <entry>
     <title>Study: Volatility-scaled momentum, a pre-registered negative result (16 Oct 2026)</title>
     <id>tag:donttrade.github.io,2026-10-16:study/research/volatility-scaled-momentum/</id>
-    <link rel="alternate" type="text/html" href="https://donttrade.github.io/disposition-effect/research/volatility-scaled-momentum/"/>
+    <link rel="alternate" type="text/html" href="https://donttrade.ca/research/volatility-scaled-momentum/"/>
     <updated>2026-10-16T00:00:00Z</updated>
     <summary>A new study, with its script and data linked. Published whether or not the result was interesting.</summary>
   </entry>
   <entry>
     <title>Study: Swing-trading strategies under sealed pre-registration, a negative result (16 Oct 2026)</title>
     <id>tag:donttrade.github.io,2026-10-16:study/research/swing-trading-strategies/</id>
-    <link rel="alternate" type="text/html" href="https://donttrade.github.io/disposition-effect/research/swing-trading-strategies/"/>
+    <link rel="alternate" type="text/html" href="https://donttrade.ca/research/swing-trading-strategies/"/>
     <updated>2026-10-16T00:00:00Z</updated>
     <summary>A new study; its code is to be published with it. Published whether or not the result was interesting.</summary>
   </entry>
   <entry>
     <title>Study: Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)</title>
     <id>tag:donttrade.github.io,2026-10-16:study/research/portfolio-driven-disposition-effect/</id>
-    <link rel="alternate" type="text/html" href="https://donttrade.github.io/disposition-effect/research/portfolio-driven-disposition-effect/"/>
+    <link rel="alternate" type="text/html" href="https://donttrade.ca/research/portfolio-driven-disposition-effect/"/>
     <updated>2026-10-16T00:00:00Z</updated>
     <summary>A new study, with its script and data linked. Published whether or not the result was interesting.</summary>
   </entry>
   <entry>
     <title>Correction: Volatility-scaled momentum (16 Oct 2026)</title>
     <id>tag:donttrade.github.io,2026-10-16:correction-4</id>
-    <link rel="alternate" type="text/html" href="https://donttrade.github.io/disposition-effect/corrections/"/>
+    <link rel="alternate" type="text/html" href="https://donttrade.ca/corrections/"/>
     <updated>2026-10-16T00:00:00Z</updated>
     <summary>What was wrong: volmom/reproduce_volmom.py labelled per-side breakeven costs “round-trip”, printed K7 FAIL for all three specifications, and described the 10% drawdown limit as applied. What changed: The script now prints per-side and round-trip breakevens, compares the round trip with K7’s 0.50% floor (S1 pass, S2 fail, S3 pass) and says the limit is counted, not applied. In volmom/README.md the S2 round trip now reads 0.467% (the script’s figure; 0.468% was a doubling of a rounded number), the holdout coverage reads 84.8% as the script prints on a fresh download (85.0% could not be reproduced), and the replication window is labelled November 1927 – December 2011. No computed number changed; the verdict, no specification passes all four, is unchanged.</summary>
   </entry>
   <entry>
     <title>Correction: Disposition effect; portfolio-driven disposition effect (16 Oct 2026)</title>
     <id>tag:donttrade.github.io,2026-10-16:correction-3</id>
-    <link rel="alternate" type="text/html" href="https://donttrade.github.io/disposition-effect/corrections/"/>
+    <link rel="alternate" type="text/html" href="https://donttrade.ca/corrections/"/>
     <updated>2026-10-16T00:00:00Z</updated>
     <summary>What was wrong: reproduce.py and pdde/reproduce_pdde.py downloaded the CC0 panel with Python’s default client, which Harvard Dataverse refused with HTTP 403, so a clean checkout could not fetch the data. What changed: Both scripts now send an explicit User-Agent and write to a temporary file first; the downloads in volmom/ send the same User-Agent. Re-run end to end from fresh downloads: no figure changed.</summary>
   </entry>
   <entry>
     <title>Study: Insider-buying study, a negative result (11 Oct 2026)</title>
     <id>tag:donttrade.github.io,2026-10-11:study/research/insider-buying-edge/</id>
-    <link rel="alternate" type="text/html" href="https://donttrade.github.io/disposition-effect/research/insider-buying-edge/"/>
+    <link rel="alternate" type="text/html" href="https://donttrade.ca/research/insider-buying-edge/"/>
     <updated>2026-10-11T00:00:00Z</updated>
     <summary>A new study, with its script and data linked. Published whether or not the result was interesting.</summary>
   </entry>
   <entry>
     <title>Correction: Insider-buying edge (11 Oct 2026)</title>
     <id>tag:donttrade.github.io,2026-10-11:correction-2</id>
-    <link rel="alternate" type="text/html" href="https://donttrade.github.io/disposition-effect/corrections/"/>
+    <link rel="alternate" type="text/html" href="https://donttrade.ca/corrections/"/>
     <updated>2026-10-11T00:00:00Z</updated>
     <summary>What was wrong: An earlier draft claimed the 63-day horizon told the same story as the 21-day one (2017–2026: −0.41%, t −0.71). What changed: Withdrawn. On the corrected screen the 63-day figure is +0.93% (t 1.45), the opposite sign, and the sign of that 2,715-event result is set by 66 observations. No claim is made about the three-month horizon.</summary>
   </entry>
   <entry>
     <title>Correction: Insider-buying edge (11 Oct 2026)</title>
     <id>tag:donttrade.github.io,2026-10-11:correction-1</id>
-    <link rel="alternate" type="text/html" href="https://donttrade.github.io/disposition-effect/corrections/"/>
+    <link rel="alternate" type="text/html" href="https://donttrade.ca/corrections/"/>
     <updated>2026-10-11T00:00:00Z</updated>
     <summary>What was wrong: An earlier version of the pipeline claimed to exclude 10b5-1 plan transactions. It never did: the flag lives in the SEC's SUBMISSION table and the code looked for it in the transactions table, where it does not exist, and the reader silently dropped the missing column. What changed: The filter is now applied where the field actually is. It exists only from 2023 Q1 (13 of 81 quarters) and removes 3.89% of filing-owner records in those quarters. The two eras are therefore not filtered alike, and the post says so.</summary>
   </entry>
   <entry>
     <title>Study: Disposition-effect replication (6 Oct 2026)</title>
     <id>tag:donttrade.github.io,2026-10-06:study/research/disposition-effect/</id>
-    <link rel="alternate" type="text/html" href="https://donttrade.github.io/disposition-effect/research/disposition-effect/"/>
+    <link rel="alternate" type="text/html" href="https://donttrade.ca/research/disposition-effect/"/>
     <updated>2026-10-06T00:00:00Z</updated>
     <summary>A new study, with its script and data linked. Published whether or not the result was interesting.</summary>
   </entry>
