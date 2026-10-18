@@ -51,15 +51,31 @@ import pandas as pd
 from scipy import stats
 
 DATAVERSE = "https://dataverse.harvard.edu/api/access/datafile/"
+# Harvard Dataverse refuses Python's default "Python-urllib/3.x" User-Agent
+# with HTTP 403, so every request names itself honestly instead.
+USER_AGENT = "donttrade-reproduce/1.0 (+https://github.com/donttrade/disposition-effect)"
 MAIN_PANEL = "sample2.Rdata"
 FILE_ID = "4053809"
 TRADER, DATE = "cube.symbol", "date"
 
 
+def download(url: str, dest: str) -> None:
+    """Fetch url to dest with an explicit User-Agent; never leaves a partial file."""
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    tmp = dest + ".part"
+    with urllib.request.urlopen(req, timeout=300) as resp, open(tmp, "wb") as fh:
+        while True:
+            chunk = resp.read(1 << 20)
+            if not chunk:
+                break
+            fh.write(chunk)
+    os.replace(tmp, dest)
+
+
 def fetch():
     if not os.path.exists(MAIN_PANEL):
         print("downloading %s ..." % MAIN_PANEL, file=sys.stderr)
-        urllib.request.urlretrieve(DATAVERSE + FILE_ID, MAIN_PANEL)
+        download(DATAVERSE + FILE_ID, MAIN_PANEL)
 
 
 def load():

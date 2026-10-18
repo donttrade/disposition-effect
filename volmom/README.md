@@ -74,7 +74,7 @@ is raw, not excess** (normal = 3), computed over the sample standard deviation.
 
 ### Why believe the implementation
 
-Checked against Barroso & Santa-Clara's own window, 1927:03–2011:12:
+Checked against Barroso & Santa-Clara's window, on the common sample November 1927 – December 2011 (after the scaled strategy's warm-up; `verify/volmom.py` prints this table; on the paper's exact 1927:03–2011:12 window this code's 0.48 and 0.93 become 0.49 and 0.94):
 
 | | this code | the paper |
 |---|---|---|
@@ -176,11 +176,11 @@ other.
 | | K4 Sharpe ≥ 0.30 | K5 beats SPY | K6 ≤ 3 halt trips | K7 breakeven ≥ 0.50% round trip |
 |---|---|---|---|---|
 | S1 | 0.71 PASS | PASS | **11 FAIL** | 0.868% PASS |
-| S2 | 0.66 PASS | **FAIL** | 2 PASS | **0.468% FAIL** |
+| S2 | 0.66 PASS | **FAIL** | 2 PASS | **0.467% FAIL** |
 | S3 | 0.71 PASS | PASS | **9 FAIL** | 0.866% PASS |
 
 K7 names a **round trip**, so the per-side breakevens of 0.434%, 0.234% and 0.433% double to
-**0.868%, 0.468% and 0.866%**. On those figures S1 and S3 clear K7 and fail only K6; S2 clears K6 and
+**0.868%, 0.467% and 0.866%**. On those figures S1 and S3 clear K7 and fail only K6; S2 clears K6 and
 fails K5 and K7. An earlier version of this page headed this section *"every specification fails at
 least two"* and marked all three K7 cells FAIL, by comparing per-side breakevens against a
 round-trip floor. That heading was false and is corrected here.
@@ -200,7 +200,7 @@ which criterion kills which specification.
 | **Departed members** | 706 | 261 | **37.0%** |
 
 Zero throttling across the whole fetch, so this is real absence and not a rate limit. At rebalance
-dates, median index coverage is **52.6% in-sample and 85.0% in the holdout.**
+dates, median index coverage is **52.6% in-sample and 84.8% in the holdout (re-run 16 Oct 2026; earlier runs printed 85.0%).**
 
 **Every Part B return above is therefore an upper bound.** The names that cannot be fetched are
 disproportionately the ones that failed.

@@ -18,9 +18,10 @@ model and seven numeric kill criteria were written down first. They are
 reproduced in README.md verbatim. Two deviations were forced afterwards and
 are named in the README rather than quietly absorbed.
 
-THE RESULT IS NEGATIVE AND THAT IS THE FINDING. Part A passes. Part B fails
-K5, K6 and K7 -- buy-and-hold SPY beat every specification on risk-adjusted
-return over the holdout. No money was committed.
+THE RESULT IS NEGATIVE AND THAT IS THE FINDING. Part A passes. In Part B no
+specification passes all four of K4-K7: S1 and S3 fail K6 (halt trips), S2
+fails K5 and K7, and buy-and-hold SPY beat every specification on
+risk-adjusted return over the holdout. No money was committed.
 """
 from __future__ import annotations
 
@@ -44,6 +45,9 @@ MEMBERSHIP_URL = ("https://raw.githubusercontent.com/fja05680/sp500/master/"
                   "S%26P%20500%20Historical%20Components%20%26%20Changes%20"
                   "(Updated).csv")
 CACHE = "cache"
+# Some servers (Harvard Dataverse among them) answer HTTP 403 to Python's
+# default "Python-urllib/3.x" User-Agent, so every request names itself.
+USER_AGENT = "donttrade-reproduce/1.0 (+https://github.com/donttrade/disposition-effect)"
 
 # ---- fixed before the data was touched -----------------------------------
 TARGET_VOL = 0.12          # Barroso & Santa-Clara's own annualised target
@@ -52,7 +56,8 @@ RANK_SKIP_MONTHS = 1       # 12-1 momentum: skip the most recent month
 N_POSITIONS = 5            # CapLimits.max_positions
 MIN_PRICE = 5.00           # CapLimits.min_price
 DRAWDOWN_HALT = 0.10       # CapLimits.max_drawdown_halt_pct
-BASE_COST = 0.0020         # round trip, charged on turnover
+BASE_COST = 0.0020         # PER SIDE: charged as cost x 2 x one-way turnover
+K7_ROUND_TRIP_FLOOR = 0.0050  # K7 names a ROUND trip, i.e. 2 x per-side
 COST_GRID = (0.0010, 0.0020, 0.0050, 0.0100)
 BONFERRONI_T = 2.394       # 3 specifications, alpha 0.05/3, two-sided
 DELISTING = {"sell_at_last": 0.0, "crsp_minus30": -0.30, "total_loss": -1.00}
@@ -71,7 +76,9 @@ def fetch(url, timeout=90):
     ctx = _ctx()
     if ctx is not None:
         kw["context"] = ctx
-    return urllib.request.urlopen(url, **kw).read()
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    with urllib.request.urlopen(req, **kw) as resp:
+        return resp.read()
 
 
 def french(name):
@@ -318,10 +325,30 @@ def load_prices(universe):
     return store
 
 
+PART_B_BANNER = ("PART B -- five positions, long only, 0.20% cost per side; "
+                 "10% halt trips counted, not applied")
+
+
+def breakeven_line(spec, per_side):
+    """One breakeven row. The search returns a PER-SIDE cost (see BASE_COST)."""
+    return "  %-4s per side %6.3f%%   round trip %6.3f%%" % (
+        spec, 100 * per_side, 100 * 2.0 * per_side)
+
+
+def kill_checks(s, bench, breakeven_per_side):
+    """K4-K7 for one specification. K7's floor is a round trip, so the
+    per-side breakeven is doubled before it is compared."""
+    return [("K4 Sharpe>=0.30", s["sharpe"] >= 0.30),
+            ("K5 beats SPY", s["ann"] > bench["ann"]),
+            ("K6 halts<=3", s["halts"] <= 3),
+            ("K7 round-trip breakeven>=0.50%",
+             2.0 * breakeven_per_side >= K7_ROUND_TRIP_FLOOR)]
+
+
 def part_b():
     """The five-position, long-only version a small account could hold."""
     print("=" * 74)
-    print("PART B -- five positions, long only, real costs and a 10% halt")
+    print(PART_B_BANNER)
     print("=" * 74)
     if not os.path.isdir(CACHE):
         os.makedirs(CACHE)
@@ -392,7 +419,7 @@ def part_b():
 
 
 def part_b_returns(picks, hold_months, months, price):
-    """Returns, costs, the 10% halt, and the three delisting assumptions."""
+    """Returns, costs, and the three delisting assumptions (halts are counted later)."""
     gross, turnover, previous = [], [], set()
     for m in hold_months:
         names = picks[m]
@@ -521,7 +548,7 @@ def report_part_b(hold_months, gross, turnover, scale, s3):
         print("  %-14s ann %7.2f%%  Sharpe %5.2f  halts %d"
               % (key, 100 * s["ann"], s["sharpe"], s["halts"]))
 
-    print("\n--- breakeven round-trip cost (holdout, t falls below %.3f) ---"
+    print("\n--- breakeven cost, per side and round trip (holdout, t falls below %.3f) ---"
           % BONFERRONI_T)
     breakeven = {}
     for spec in ("S1", "S2", "S3"):
@@ -533,18 +560,16 @@ def report_part_b(hold_months, gross, turnover, scale, s3):
             else:
                 hi = mid
         breakeven[spec] = lo
-        print("  %-4s %6.3f%%" % (spec, 100 * lo))
+        print(breakeven_line(spec, lo))
 
-    print("\n--- KILL CRITERIA, holdout, %.2f%% cost ---" % (100 * BASE_COST))
+    print("\n--- KILL CRITERIA, holdout, %.2f%% cost per side ---"
+          % (100 * BASE_COST))
     holdout = "HOLDOUT   2013..2026"
     bench = results[(holdout, "SPY")]
     verdicts = []
     for spec in ("S1", "S2", "S3"):
         s = results[(holdout, spec)]
-        checks = [("K4 Sharpe>=0.30", s["sharpe"] >= 0.30),
-                  ("K5 beats SPY", s["ann"] > bench["ann"]),
-                  ("K6 halts<=3", s["halts"] <= 3),
-                  ("K7 breakeven>=0.50%", breakeven[spec] >= 0.0050)]
+        checks = kill_checks(s, bench, breakeven[spec])
         verdicts.append(all(ok for _, ok in checks))
         print("  %-4s %s" % (spec, "  ".join(
             "%s %s" % (n, "PASS" if ok else "FAIL") for n, ok in checks)))

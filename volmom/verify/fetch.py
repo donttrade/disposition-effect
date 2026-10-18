@@ -34,6 +34,10 @@ DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 # "present AND larger than this", not merely "present".
 MIN_PLAUSIBLE_BYTES = 1024
 
+# Some servers (Harvard Dataverse among them) answer HTTP 403 to Python's
+# default "Python-urllib/3.x" User-Agent, so every request names itself.
+USER_AGENT = "donttrade-reproduce/1.0 (+https://github.com/donttrade/disposition-effect)"
+
 
 def _ssl_context() -> ssl.SSLContext | None:
     """Honour an outbound proxy's CA bundle if the environment names one.
@@ -78,7 +82,8 @@ def download_dataset(dataset_name: str, zip_filename: str) -> str:
         request_kwargs["context"] = context
 
     print("fetching %-26s %s" % (dataset_name, url))
-    with urllib.request.urlopen(url, **request_kwargs) as response:
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    with urllib.request.urlopen(request, **request_kwargs) as response:
         payload = response.read()
 
     with open(zip_path, "wb") as handle:
