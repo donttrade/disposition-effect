@@ -12,7 +12,16 @@ pip install pyreadr pandas numpy scipy
 python reproduce_pdde.py
 ```
 
-## Result: replicated
+## Result: replicated (superseded — corrected 17 Oct 2026)
+
+> **Correction, 17 Oct 2026.** The original headline did not survive a stricter, pre-registered
+> test. Comparing each trader with themselves at the same holding day gives a ratio of 1.03 (95% CI
+> 0.95–1.13), not about 2; only in positions held a day or less does a larger gap on down days remain
+> (1.11, 95% CI 1.04–1.18). The specification used below also reports an effect of similar size in
+> synthetic panels that contain none. The headline claim is not supported. The table and text below
+> are kept as the record of what was run on 10 Oct 2026 and are superseded as a headline. Corrected
+> study: https://donttrade.ca/research/portfolio-driven-disposition-effect/ · Corrections log:
+> https://donttrade.ca/corrections/
 
 | # | Specification | Interaction | t | Ratio | 95% CI |
 |---|---|---|---|---|---|
@@ -104,8 +113,8 @@ placebos are not pre-registered** and are labelled so in the output.
 
 ## Review history
 
-Stress-tested three times by independent adversarial passes that recomputed every figure from the raw
-data with their own code. They found four, then seven, then eleven blocking errors — several of them
+Re-computed three separate times by the author, adversarially, recomputing every figure from the raw
+data each time. The three passes found four, then seven, then eleven blocking errors — several of them
 new errors introduced inside the fixes for earlier ones. Every figure reproduced exactly on every
 pass; the failures were all in interpretation. Two corrections are stated in the text above rather
 than quietly made, and specification 7 exists because the third pass pointed out it had never been

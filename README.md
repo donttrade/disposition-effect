@@ -221,8 +221,16 @@ quarterly bulk files. **The tradable version of the effect was mostly 2008–09.
 
 **[`pdde/`](pdde/) — the portfolio-driven disposition effect.** A pre-registered replication of An,
 Engelberg, Henriksson, Wang & Williams (*Journal of Finance*, 2024) on free CC0 data.
-**It replicates** — a ratio of 2.041 on the pre-specified specification and 3.013 under trader-day
-fixed effects, with placebos collapsing to about 1.05.
+*Superseded (see the correction below):* **It replicates** — a ratio of 2.041 on the pre-specified
+specification and 3.013 under trader-day fixed effects, with placebos collapsing to about 1.05.
+
+> **Correction, 17 Oct 2026.** The original headline did not survive a stricter, pre-registered
+> test. Comparing each trader with themselves at the same holding day gives a ratio of 1.03 (95% CI
+> 0.95–1.13), not about 2, and the specification the study used reports an effect of similar size in
+> synthetic panels that contain none. The headline claim is not supported. The figures above are
+> kept as the record of what was run, marked as superseded. Corrected study:
+> https://donttrade.ca/research/portfolio-driven-disposition-effect/ · Corrections log:
+> https://donttrade.ca/corrections/
 
 **[`volmom/`](volmom/) — volatility-scaled momentum, and why it is not tradeable in a small
 account.** A pre-registered test with its kill criteria fixed in advance. The mechanism is real at
