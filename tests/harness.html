@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Engine harness</title>
+<!-- Test-only page: loads the browser engine so Playwright can feed it fixture bytes.
+     Not part of the site build. -->
+</head>
+<body>
+<p id="status">loading</p>
+<script type="module">
+import { runFile } from '/site/static/js/engine/index.js';
+function bytesOf(b64) {
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+window.runEngine = (b64) => JSON.stringify(runFile(bytesOf(b64)));
+window.runEngineTimed = (b64) => {
+  const bytes = bytesOf(b64);
+  const t0 = performance.now();
+  const r = runFile(bytes);
+  const ms = performance.now() - t0;
+  return JSON.stringify({ ms, error: r.error || null, trades: r.result ? r.result.trades.length : 0 });
+};
+document.getElementById('status').textContent = 'ready';
+</script>
+</body>
+</html>
