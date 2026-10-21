@@ -303,3 +303,22 @@ def test_french_privacy_section_is_marked_translation_pending(builds):
     assert "TRANSLATION PENDING" in src and "do not machine-translate" in src
     fr = _page(builds["paid"][0], "/fr/confidentialite/")
     assert "75" not in _text(fr) and "TRANSLATION PENDING" not in fr     # nothing machine-translated, no marker shown
+
+
+# ------------------------------------------------------------------ ruling #2: the key's end
+# The server (dt-private, KEY_AFTER_FIRST_REPORT_DAYS) moves the key's end at the first report to
+# max(purchase + 90 days, first report + 75 days). Every page that states how long access lasts says so.
+KEY_EN_TERMS = "Your key is valid for 90 days after purchase, or until 75 days after your first report if that is later."
+KEY_EN_PRICING = "Access lasts 90 days after purchase, or until 75 days after your first report if that is later."
+KEY_FR = ("Votre clé d’accès est valide 90 jours après l’achat, ou jusqu’à 75 jours après votre premier rapport "
+          "si cette date est plus tardive.")
+
+
+@pytest.mark.parametrize("path,sentence", [("/terms/", KEY_EN_TERMS), ("/pricing/", KEY_EN_PRICING),
+                                           ("/fr/conditions/", KEY_FR), ("/fr/avant-de-payer/", KEY_FR)])
+def test_key_lifetime_matches_the_server_rule(builds, path, sentence):
+    text = _text(_page(builds["paid"][0], path))
+    assert sentence in text
+    for old in ("valid for 90 days.", "Access lasts 90 days.", "valide 90 jours.", "valide 90 jours après l’achat. "):
+        assert old not in text
+    assert "TRANSLATOR CHECK" not in text
