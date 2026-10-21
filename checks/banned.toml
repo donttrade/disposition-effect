@@ -112,7 +112,10 @@ dated_pricing = ["launch pricing", "launch price", "launch prices", "valid befor
                  "tarif de lancement", "tarifs de lancement", "prix de lancement", "valable jusqu’au", "valable jusqu'au",
                  "valables jusqu’au", "valables jusqu'au"]
 not_on_sale_allow = ["Founding price for the first 100 on the trader waitlist added.",
-                     "its own research page reads “Coming Soon.”"]
+                     "its own research page reads “Coming Soon.”",
+                     # C1: the free tools' neutral line names a check, not the report's sale status
+                     "‘real or noise’ check for this number is coming soon.",
+                     "‘real or noise’ check for three of the numbers is coming soon."]
 
 [secrets]
 patterns = ['sk_live_[0-9A-Za-z]{8,}', 'sk_test_[0-9A-Za-z]{8,}', 'rk_live_[0-9A-Za-z]{8,}', 'rk_test_[0-9A-Za-z]{8,}', 'whsec_[0-9A-Za-z]{8,}', '-----BEGIN [A-Z ]*PRIVATE KEY-----']
