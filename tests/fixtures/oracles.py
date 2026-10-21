@@ -254,3 +254,11 @@ ORACLES["mt5/deals_netting_40.htm"] = {
 # Tester v2 D5: an unquoted comma in Account shifts "CANARY-T3" into the Date column. The
 # error names row 2, column date, and its message never repeats the cell (golden test checks).
 ERRORS["errors/tv2_unquoted_comma_account.csv"] = ("E_BAD_DATE", 2, "date")
+
+# Tester v2 D6: the same two rows pasted twice. Kept (two identical fills can be real) but
+# flagged: W_DUPLICATE_ROWS 2. Buys at 09:30 x2, sells at 10:30 x2 -> one trade, qty 2, +2.
+ORACLES["generic/tv2_duplicate_rows.csv"] = {
+    "trades": [dict(symbol="AAA", dir="long", qty=2, pnl=2.0, hold_s=3600, fills_n=4)],
+    "warnings": {"W_DUPLICATE_ROWS": 2},
+    "skipped": {},
+}

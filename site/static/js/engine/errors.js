@@ -52,6 +52,8 @@ export const WARNING_TEXT = Object.freeze({
   W_UNVERIFIED_FORMAT:
     'Beta: this format was built from public documentation, not yet from a real export. Check a few trades by hand, or use the generic template.',
   W_SKIPPED_ROWS: 'Rows that are not trades (balance, credit, cancelled or unfilled rows) were skipped.',
+  W_DUPLICATE_ROWS:
+    'Some rows are exact copies of an earlier row, as when two overlapping exports are pasted together. They were kept, because two identical fills can be real. If you did not expect them, remove the copies and load the file again.',
   W_HEDGING:
     'Buys and sells overlapped on the same symbol (a hedging account). They were netted per symbol, so trade counts may differ from your platform.',
   W_OPEN_POSITIONS: 'Positions still open at the end of the file were left out.',

@@ -1254,6 +1254,22 @@ def _strip(d):
     return {k: v for k, v in d.items() if not k.startswith("_")}
 
 
+def count_duplicate_rows(rows, m):
+    """Rows whose whitelisted cells all equal an earlier row's. Mirrors countDuplicateRows()."""
+    idx = list(m.values())
+    seen = set()
+    n = 0
+    for r in rows:
+        if _empty(r["cells"]):
+            continue
+        key = "\u0001".join(r["cells"][i] if i < len(r["cells"]) else "" for i in idx)
+        if key in seen:
+            n += 1
+        else:
+            seen.add(key)
+    return n
+
+
 def _html_number_group(t):
     """The number cells of one MetaTrader table: only rows of its own section(s)."""
     kind = "mt5_positions" if t["kind"].startswith("mt5_positions") else t["kind"]
@@ -1269,7 +1285,11 @@ def parse_file(data):
     if is_html(text):
         rows = html_rows(text)
         det = detect_html(rows)
-        resolve_number_style([_html_number_group(t) for t in det["tables"]], "dot")
+        groups = [_html_number_group(t) for t in det["tables"]]
+        resolve_number_style(groups, "dot")
+        dup = 0
+        for g in groups:
+            dup += count_duplicate_rows(g["rows"], g["map"])
         fmt = det["format"]
         verified = False
         res = parse_mt(det["tables"])
@@ -1290,6 +1310,7 @@ def parse_file(data):
         resolve_number_style([{"rows": rows[hi + 1:], "map": m, "fields": NUMERIC_FIELDS[name]}],
                              "dot" if delim == "," else None)
         verified = SIGNATURES[name]["verified"]
+        dup = count_duplicate_rows(rows[hi + 1:], m)
         if name == "mt5_deals":
             fmt = "mt5"
             res = parse_mt([{"kind": "mt5_deals", "section": "deals", "map": m,
@@ -1314,6 +1335,8 @@ def parse_file(data):
         for v in skipped.values():
             n += v
         warnings.append(warning("W_SKIPPED_ROWS", n))
+    if dup:
+        warnings.append(warning("W_DUPLICATE_ROWS", dup))
 
     executions = res["executions"]
     open_n = extra.get("open_positions", 0)

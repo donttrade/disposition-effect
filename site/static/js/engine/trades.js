@@ -202,6 +202,7 @@ export function finish(fmt, verified, res, mode, tzLabel) {
     for (const k of skipKeys) n += skipped[k];
     warnings.push(warning('W_SKIPPED_ROWS', n, skipKeys.map((k) => `${k.replace(/_/g, ' ')}: ${skipped[k]}`).join(', ') + '.'));
   }
+  if (extra.duplicate_rows) warnings.push(warning('W_DUPLICATE_ROWS', extra.duplicate_rows, `${extra.duplicate_rows} found.`));
   let executions = res.executions;
   let openN = extra.open_positions || 0;
   let hedging = 0;
