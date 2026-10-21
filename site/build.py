@@ -244,9 +244,14 @@ def check_private(private, on):
             out[k] = normalise_private(v)[0]
     return out
 
+# Motion plan (21 Oct 2026): motion.js (fade-up, hero wipe, count-up) loads on these 4 marketing pages
+# only; verify() refuses it anywhere else, and refuses motion markup on a page without it.
+MOTION_JS = "/static/js/motion.js"
+MOTION_PAGES = {"/", "/for-firms/", "/for-traders/", "/for-platforms/"}
+
 # Pages owned by templates. path → template, metadata, and the flag that must be on.
 PAGES = [
-    {"template": "pages/home.html", "path": "/", "requires_flag": None,
+    {"template": "pages/home.html", "path": "/", "requires_flag": None, "scripts": [MOTION_JS],
      "title": "donttrade — behavioural measurement for trading firms",
      "description": "We measure the plan gap: how traders plan to act versus how they act. Fixed price, "
                     "public script, run on your own systems.", "og_image": "/assets/og/home.png",
