@@ -603,3 +603,38 @@ def test_nit9_enquiry_form_refuses_pilot_from_the_url(browser, pilot_site, path,
 def test_nit9_flag_off_firm_form_still_takes_pilot(browser, built_site):
     from test_fix_merge import _post
     assert _post(browser, built_site["url"] + "/start/?product=pilot#firm", "#sf")["product"] == "pilot"
+
+
+# ------------------------------------------------------------------ NIT 2, 16: lint reads the same config as the build
+def _lint_cli(*args, **env):
+    return subprocess.run([sys.executable, os.path.join(REPO, "checks", "lint.py"), *args],
+                          capture_output=True, text=True, env={**os.environ, **env})
+
+
+def test_nit2_lint_uses_dt_site_toml_seller_switch(tmp_path):
+    from test_legal import build, private_with, toml_with
+    toml = _toml_edit(tmp_path, r"^show_seller_for_pilot = false", "show_seller_for_pilot = true", pilot_checkout=True)
+    priv = private_with(tmp_path)
+    r, out = build(tmp_path, "ps", DT_SITE_TOML=toml, DT_PRIVATE_TOML=priv)
+    assert r.returncode == 0, r.stderr
+    assert "data-seller-block" in (out / "privacy" / "index.html").read_text(encoding="utf-8")
+    r = _lint_cli(str(out), DT_SITE_TOML=toml, DT_PRIVATE_TOML=priv)
+    assert r.returncode == 0 and "PASS" in r.stdout, r.stdout   # before: 3 false flag:seller_block problems
+
+
+def test_nit2_lint_reads_dt_private_toml_and_names_the_switch(tmp_path):
+    from test_legal import FAKE, build, private_with, toml_with
+    toml, priv = toml_with(tmp_path, pilot_checkout=True), private_with(tmp_path)
+    r, out = build(tmp_path, "p", DT_SITE_TOML=toml, DT_PRIVATE_TOML=priv)
+    assert r.returncode == 0, r.stderr
+    fp = out / "about" / "index.html"
+    fp.write_text(fp.read_text(encoding="utf-8").replace("</main>", f"<p>{FAKE['premises_address']}</p><p data-seller-block></p></main>"),
+                  encoding="utf-8")
+    r = _lint_cli(str(out), DT_SITE_TOML=toml, DT_PRIVATE_TOML=priv)
+    assert r.returncode == 1 and "flag:seller_identity" in r.stdout, r.stdout
+    assert "every commerce flag off" not in r.stdout
+
+
+def test_nit16_lint_on_a_missing_directory_is_one_clear_line(tmp_path):
+    r = _lint_cli(str(tmp_path / "nonexistent"))
+    assert r.returncode == 2 and "no such directory" in r.stdout and "page missing" not in r.stdout, r.stdout
