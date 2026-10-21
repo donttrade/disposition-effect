@@ -182,6 +182,27 @@ def _gh(path, raw=False):
     return subprocess.run(cmd, capture_output=True, text=True, check=True).stdout
 
 
+def _gh_bytes(path):
+    """A raw blob as bytes: history holds binary files, and text=True crashed on them (UnicodeDecodeError)."""
+    cmd = ["gh", "api", path, "-H", "Accept: application/vnd.github.raw"]
+    return subprocess.run(cmd, capture_output=True, check=True).stdout
+
+
+def blob_findings(path, sha, data):
+    """Secrets and stray emails in one blob. A blob with a NUL byte in its first 8 KB is binary and
+    skipped; text is decoded with errors='replace', so a stray non-UTF-8 byte cannot hide a finding."""
+    if b"\x00" in data[:8192]:
+        return []
+    text = data.decode("utf-8", errors="replace")
+    bad = []
+    for m in SECRET_RE.finditer(text):
+        bad.append((path, sha[:7], m.group(0)[:4] + "…"))  # never print full secret
+    for m in EMAIL_RE.findall(text):
+        if m.lower() not in ALLOWED_EMAILS and not m.lower().endswith("users.noreply.github.com"):
+            bad.append((path, sha[:7], "email:" + m.split("@")[0][:4] + "…@" + m.split("@")[1]))
+    return bad
+
+
 @pytest.mark.skipif(os.environ.get("DT_SKIP_REPO") == "1", reason="repo scan disabled")
 def test_repo_history_has_no_secrets_or_stray_emails():
     try:
@@ -196,10 +217,5 @@ def test_repo_history_has_no_secrets_or_stray_emails():
                 blobs.setdefault(e["sha"], e["path"])
     bad = []
     for sha, path in blobs.items():
-        text = _gh(f"repos/{REPO}/git/blobs/{sha}", raw=True)
-        for m in SECRET_RE.finditer(text):
-            bad.append((path, sha[:7], m.group(0)[:4] + "…"))  # never print full secret
-        for m in EMAIL_RE.findall(text):
-            if m.lower() not in ALLOWED_EMAILS and not m.lower().endswith("users.noreply.github.com"):
-                bad.append((path, sha[:7], "email:" + m.split("@")[0][:4] + "…@" + m.split("@")[1]))
+        bad += blob_findings(path, sha, _gh_bytes(f"repos/{REPO}/git/blobs/{sha}"))
     assert not bad, bad

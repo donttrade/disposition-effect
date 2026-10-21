@@ -39,6 +39,11 @@ BOT_BLOCKING_HOSTS = {
     "laws-lois.justice.gc.ca",
 }
 
+# Absolute URLs found in <a href> during the crawl. The external-link check reads only these:
+# a <form action> such as https://api.web3forms.com/submit is a POST-only endpoint that answers
+# 403 to GET, so it is not a link and cannot be checked like one.
+_ANCHOR_URLS = set()
+
 _session = requests.Session()
 _session.headers["User-Agent"] = "donttrade-site-tests/1.0 (+read-only QA)"
 _last = [0.0]
@@ -90,6 +95,8 @@ def crawl():
                     continue
                 a = _localise(urljoin(u, h))
                 links.append((u, h, a))
+                if tag == "a":
+                    _ANCHOR_URLS.add(a)
                 d = urldefrag(a)[0]
                 if tag == "a" and _is_internal(d) and d not in seen and not re.search(r"\.(svg|csv|txt|png|xml|pdf)$", d):
                     seen.add(d)
@@ -135,11 +142,17 @@ def test_in_page_anchors_exist():
     assert not broken, "\n".join(broken)
 
 
+def external_link_targets(links, anchor_urls):
+    """External http(s) URLs to check: <a href> targets only (no form actions, scripts or stylesheets)."""
+    return sorted({urldefrag(a)[0] for _, _, a in links
+                   if a in anchor_urls and not _is_internal(a) and a.startswith("http")})
+
+
 @pytest.mark.skipif(SKIP_EXTERNAL, reason="DT_SKIP_EXTERNAL=1")
 def test_external_links_not_404():
     """Fails on definite breakage (404/410/5xx/DNS). Bot-blocked hosts are reported, not failed."""
     _, links, _ = crawl()
-    targets = sorted({urldefrag(a)[0] for _, _, a in links if not _is_internal(a) and a.startswith("http")})
+    targets = external_link_targets(links, _ANCHOR_URLS)
     hard, soft = [], []
     for t in targets:
         try:
