@@ -1,0 +1,95 @@
+{
+ "result": {
+  "currency_groups": {
+   "USD": 1
+  },
+  "executions": [
+   {
+    "currency": "USD",
+    "fee": 1.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 560.2,
+    "qty": 100.0,
+    "row": 2,
+    "side": "buy",
+    "symbol": "SPY",
+    "ts": 1788255305000
+   },
+   {
+    "currency": "USD",
+    "fee": 0.4,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 566.1,
+    "qty": 40.0,
+    "row": 3,
+    "side": "sell",
+    "symbol": "SPY",
+    "ts": 1788429731000
+   },
+   {
+    "currency": "USD",
+    "fee": 0.3,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 480.0,
+    "qty": 30.0,
+    "row": 4,
+    "side": "sell",
+    "symbol": "QQQ",
+    "ts": 1788528000000
+   },
+   {
+    "currency": "USD",
+    "fee": 0.6,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 552.75,
+    "qty": 60.0,
+    "row": 5,
+    "side": "sell",
+    "symbol": "SPY",
+    "ts": 1788882330000
+   }
+  ],
+  "format": "generic",
+  "skipped": {},
+  "trades": [
+   {
+    "close_ts": 1788882330000,
+    "currency": "USD",
+    "dir": "long",
+    "entry_vwap": 560.2,
+    "exit_vwap": 558.09,
+    "fees": 2.0,
+    "fills_n": 3,
+    "hold_s": 627025,
+    "id": "t1",
+    "open_ts": 1788255305000,
+    "pnl": -213.00000000000136,
+    "pnl_gross": -211.00000000000136,
+    "pnl_source": "computed",
+    "pnl_unit": "USD",
+    "qty": 100.0,
+    "symbol": "SPY"
+   }
+  ],
+  "tz_label": "as in the file",
+  "verified_format": true,
+  "warnings": [
+   {
+    "code": "W_OPEN_POSITIONS",
+    "n": 1
+   }
+  ]
+ }
+}

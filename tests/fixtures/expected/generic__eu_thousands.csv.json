@@ -1,0 +1,108 @@
+{
+ "result": {
+  "currency_groups": {
+   "USD": 2
+  },
+  "executions": [
+   {
+    "currency": "USD",
+    "fee": 1.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 1234.5,
+    "qty": 2.0,
+    "row": 2,
+    "side": "buy",
+    "symbol": "BRK",
+    "ts": 1788255000000
+   },
+   {
+    "currency": "USD",
+    "fee": 1.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 1240.25,
+    "qty": 2.0,
+    "row": 3,
+    "side": "sell",
+    "symbol": "BRK",
+    "ts": 1788343200000
+   },
+   {
+    "currency": "USD",
+    "fee": 0.5,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 1230.0,
+    "qty": 1.0,
+    "row": 4,
+    "side": "buy",
+    "symbol": "BRK",
+    "ts": 1788429600000
+   },
+   {
+    "currency": "USD",
+    "fee": 0.5,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 1229.5,
+    "qty": 1.0,
+    "row": 5,
+    "side": "sell",
+    "symbol": "BRK",
+    "ts": 1788433200000
+   }
+  ],
+  "format": "generic",
+  "skipped": {},
+  "trades": [
+   {
+    "close_ts": 1788343200000,
+    "currency": "USD",
+    "dir": "long",
+    "entry_vwap": 1234.5,
+    "exit_vwap": 1240.25,
+    "fees": 2.0,
+    "fills_n": 2,
+    "hold_s": 88200,
+    "id": "t1",
+    "open_ts": 1788255000000,
+    "pnl": 9.5,
+    "pnl_gross": 11.5,
+    "pnl_source": "computed",
+    "pnl_unit": "USD",
+    "qty": 2.0,
+    "symbol": "BRK"
+   },
+   {
+    "close_ts": 1788433200000,
+    "currency": "USD",
+    "dir": "long",
+    "entry_vwap": 1230.0,
+    "exit_vwap": 1229.5,
+    "fees": 1.0,
+    "fills_n": 2,
+    "hold_s": 3600,
+    "id": "t2",
+    "open_ts": 1788429600000,
+    "pnl": -1.5,
+    "pnl_gross": -0.5,
+    "pnl_source": "computed",
+    "pnl_unit": "USD",
+    "qty": 1.0,
+    "symbol": "BRK"
+   }
+  ],
+  "tz_label": "as in the file",
+  "verified_format": true,
+  "warnings": []
+ }
+}

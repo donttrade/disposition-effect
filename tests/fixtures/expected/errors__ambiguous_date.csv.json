@@ -1,0 +1,7 @@
+{
+ "error": {
+  "code": "E_AMBIGUOUS_DATE",
+  "column": "date",
+  "row": 2
+ }
+}

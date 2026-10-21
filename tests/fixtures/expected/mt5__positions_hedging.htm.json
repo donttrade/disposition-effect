@@ -1,0 +1,169 @@
+{
+ "result": {
+  "currency_groups": {
+   "account": 3
+  },
+  "executions": [
+   {
+    "currency": null,
+    "fee": 3.5,
+    "multiplier": 1,
+    "oc": "open",
+    "pnl_reported": 0.0,
+    "pos_id": null,
+    "price": 1.08,
+    "qty": 1.0,
+    "row": 16,
+    "side": "buy",
+    "symbol": "EURUSD",
+    "ts": 1788253200000
+   },
+   {
+    "currency": null,
+    "fee": 1.75,
+    "multiplier": 1,
+    "oc": "open",
+    "pnl_reported": 0.0,
+    "pos_id": null,
+    "price": 1.081,
+    "qty": 0.5,
+    "row": 17,
+    "side": "sell",
+    "symbol": "EURUSD",
+    "ts": 1788256800000
+   },
+   {
+    "currency": null,
+    "fee": 1.75,
+    "multiplier": 1,
+    "oc": "close",
+    "pnl_reported": 25.0,
+    "pos_id": null,
+    "price": 1.0805,
+    "qty": 0.5,
+    "row": 18,
+    "side": "buy",
+    "symbol": "EURUSD",
+    "ts": 1788264000000
+   },
+   {
+    "currency": null,
+    "fee": 3.5,
+    "multiplier": 1,
+    "oc": "close",
+    "pnl_reported": 200.0,
+    "pos_id": null,
+    "price": 1.082,
+    "qty": 1.0,
+    "row": 19,
+    "side": "sell",
+    "symbol": "EURUSD",
+    "ts": 1788274800000
+   },
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": "open",
+    "pnl_reported": 0.0,
+    "pos_id": null,
+    "price": 6600.0,
+    "qty": 2.0,
+    "row": 20,
+    "side": "sell",
+    "symbol": "US500",
+    "ts": 1788339600000
+   },
+   {
+    "currency": null,
+    "fee": 1.2,
+    "multiplier": 1,
+    "oc": "close",
+    "pnl_reported": -21.0,
+    "pos_id": null,
+    "price": 6610.5,
+    "qty": 2.0,
+    "row": 21,
+    "side": "buy",
+    "symbol": "US500",
+    "ts": 1788342330000
+   }
+  ],
+  "format": "mt5",
+  "skipped": {
+   "balance": 1
+  },
+  "trades": [
+   {
+    "close_ts": 1788264000000,
+    "currency": null,
+    "dir": "short",
+    "entry_vwap": 1.081,
+    "exit_vwap": 1.0805,
+    "fees": 3.5,
+    "fills_n": 2,
+    "hold_s": 7200,
+    "id": "t1",
+    "open_ts": 1788256800000,
+    "pnl": 21.5,
+    "pnl_gross": 25.0,
+    "pnl_source": "reported",
+    "pnl_unit": "account",
+    "qty": 0.5,
+    "symbol": "EURUSD"
+   },
+   {
+    "close_ts": 1788274800000,
+    "currency": null,
+    "dir": "long",
+    "entry_vwap": 1.08,
+    "exit_vwap": 1.082,
+    "fees": 7.0,
+    "fills_n": 2,
+    "hold_s": 21600,
+    "id": "t2",
+    "open_ts": 1788253200000,
+    "pnl": 193.0,
+    "pnl_gross": 200.0,
+    "pnl_source": "reported",
+    "pnl_unit": "account",
+    "qty": 1.0,
+    "symbol": "EURUSD"
+   },
+   {
+    "close_ts": 1788342330000,
+    "currency": null,
+    "dir": "short",
+    "entry_vwap": 6600.0,
+    "exit_vwap": 6610.5,
+    "fees": 1.2,
+    "fills_n": 2,
+    "hold_s": 2730,
+    "id": "t3",
+    "open_ts": 1788339600000,
+    "pnl": -22.2,
+    "pnl_gross": -21.0,
+    "pnl_source": "reported",
+    "pnl_unit": "account",
+    "qty": 2.0,
+    "symbol": "US500"
+   }
+  ],
+  "tz_label": "broker server time",
+  "verified_format": false,
+  "warnings": [
+   {
+    "code": "W_UNVERIFIED_FORMAT",
+    "n": 0
+   },
+   {
+    "code": "W_SKIPPED_ROWS",
+    "n": 1
+   },
+   {
+    "code": "W_OPEN_POSITIONS",
+    "n": 1
+   }
+  ]
+ }
+}

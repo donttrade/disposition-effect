@@ -1,0 +1,141 @@
+{
+ "result": {
+  "currency_groups": {
+   "base": 2
+  },
+  "executions": [
+   {
+    "currency": "USD",
+    "fee": 1.0,
+    "multiplier": 1.0,
+    "oc": "open",
+    "pnl_reported": 0.0,
+    "pos_id": null,
+    "price": 245.0,
+    "qty": 10.0,
+    "row": 2,
+    "side": "buy",
+    "symbol": "TSLA",
+    "ts": 1788861600000
+   },
+   {
+    "currency": "CAD",
+    "fee": 1.0,
+    "multiplier": 1.0,
+    "oc": "close",
+    "pnl_reported": 5.0,
+    "pos_id": null,
+    "price": 139.9,
+    "qty": 20.0,
+    "row": 3,
+    "side": "buy",
+    "symbol": "SHOP",
+    "ts": 1788620580000
+   },
+   {
+    "currency": "USD",
+    "fee": 0.6,
+    "multiplier": 1.0,
+    "oc": "close",
+    "pnl_reported": 328.4,
+    "pos_id": null,
+    "price": 231.4,
+    "qty": 100.0,
+    "row": 4,
+    "side": "sell",
+    "symbol": "AAPL",
+    "ts": 1788620461000
+   },
+   {
+    "currency": "CAD",
+    "fee": 1.0,
+    "multiplier": 1.0,
+    "oc": "open",
+    "pnl_reported": 0.0,
+    "pos_id": null,
+    "price": 140.25,
+    "qty": 20.0,
+    "row": 5,
+    "side": "sell",
+    "symbol": "SHOP",
+    "ts": 1788430500000
+   },
+   {
+    "currency": "USD",
+    "fee": 1.0,
+    "multiplier": 1.0,
+    "oc": "open",
+    "pnl_reported": 0.0,
+    "pos_id": null,
+    "price": 228.1,
+    "qty": 100.0,
+    "row": 7,
+    "side": "buy",
+    "symbol": "AAPL",
+    "ts": 1788341712000
+   }
+  ],
+  "format": "ibkr_flex",
+  "skipped": {
+   "not_execution": 1
+  },
+  "trades": [
+   {
+    "close_ts": 1788620461000,
+    "currency": "base",
+    "dir": "long",
+    "entry_vwap": 228.1,
+    "exit_vwap": 231.4,
+    "fees": 1.6,
+    "fills_n": 2,
+    "hold_s": 278749,
+    "id": "t1",
+    "open_ts": 1788341712000,
+    "pnl": 328.4,
+    "pnl_gross": 330.0,
+    "pnl_source": "reported",
+    "pnl_unit": "base",
+    "qty": 100.0,
+    "symbol": "AAPL"
+   },
+   {
+    "close_ts": 1788620580000,
+    "currency": "base",
+    "dir": "short",
+    "entry_vwap": 140.25,
+    "exit_vwap": 139.9,
+    "fees": 1.48,
+    "fills_n": 2,
+    "hold_s": 190080,
+    "id": "t2",
+    "open_ts": 1788430500000,
+    "pnl": 3.7,
+    "pnl_gross": 5.18,
+    "pnl_source": "reported",
+    "pnl_unit": "base",
+    "qty": 20.0,
+    "symbol": "SHOP"
+   }
+  ],
+  "tz_label": "as exported",
+  "verified_format": false,
+  "warnings": [
+   {
+    "code": "W_UNVERIFIED_FORMAT",
+    "n": 0
+   },
+   {
+    "code": "W_SKIPPED_ROWS",
+    "n": 1
+   },
+   {
+    "code": "W_OPEN_POSITIONS",
+    "n": 1
+   },
+   {
+    "code": "W_MIXED_CURRENCY",
+    "n": 0
+   }
+  ]
+ }
+}
