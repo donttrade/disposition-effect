@@ -81,7 +81,7 @@ export function parseIbkr(rows, hi, m) {
     let fx = null;
     if ('fx' in m && cell(r, m, 'fx') !== '') fx = reqNumber(cell(r, m, 'fx'), row, 'fx');
     const e = { row, ts, symbol, side, qty, price, fee, currency: cur, oc, pos_id: null,
-      pnl_reported: realized, multiplier: mult, _unit: cur ? cur : 'points', _fx: fx };
+      pnl_reported: realized, multiplier: mult, _unit: cur ? cur : 'points', _fx: fx, _rev: hasO && hasC };
     if (isCancel) cancels.push(e); else execs.push(e);
   }
   return { executions: applyCancels(execs, cancels, skipped), roundtrips: [], skipped, extra: {} };

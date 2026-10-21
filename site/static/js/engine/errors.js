@@ -59,6 +59,8 @@ export const WARNING_TEXT = Object.freeze({
   W_OPEN_POSITIONS: 'Positions still open at the end of the file were left out.',
   W_OPEN_AT_START:
     'Positions that were already open when the file starts were left out: their opening fills are before the date range of this export, so their hold time and direction are unknown.',
+  W_AMBIGUOUS_FILLS:
+    'Some fills could not be placed in a position for certain, so they and the trades they belong to were left out: either fills on one symbol have the same time to the second and their order decides which position they close, or one fill closed a position opened before the file and opened a new one, so the size of the new one is unknown.',
   W_POINTS_ONLY: 'Some contracts are not in the built-in table, so their results are in price points, not dollars.',
   W_MIXED_CURRENCY: 'The file mixes currencies.',
   W_DST:

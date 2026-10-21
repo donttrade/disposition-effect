@@ -115,7 +115,7 @@ export function parseMt(tables) {
         const oc = d === 'in' ? 'open' : (d === 'out' || d === 'out by') ? 'close' : null;
         const pos = cell(r, m, 'position');
         execs.push({ row, ts, symbol, side, qty, price, fee, currency: null, oc, pos_id: pos !== '' ? pos : null,
-          pnl_reported: profit + credit, multiplier: 1, _unit: 'account', _fx: null });
+          pnl_reported: profit + credit, multiplier: 1, _unit: 'account', _fx: null, _rev: d === 'in/out' });
       } else {
         const sizeField = kind === 'mt5_positions_closed' ? 'volume' : 'size';
         const ot = parseDate(cell(r, m, 'open_time'), 'mt', row, 'open_time');
