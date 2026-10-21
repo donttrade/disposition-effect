@@ -546,6 +546,36 @@ def check_flags(flags, toml_path):
             die(f"[flags] {k} = {flags[k]!r} must be true or false without quotes (a TOML boolean) in {toml_path}")
 
 
+# NIT 3 + 4: the shape of site.toml. A missing table or key is a BUILD FAILED line, not a
+# KeyError traceback; an unknown key in a closed table (a typo such as show_seller_for_pilt)
+# fails instead of being silently ignored. "flags" is checked by check_flags.
+SITE_SCHEMA = {
+    "site": ({"name", "base_url", "contact_email", "reply_promise"}, None),
+    "flags": (set(), None),
+    "analytics": ({"cf_beacon_token"}, {"cf_beacon_token"}),
+    "stripe": ({"mode"}, {"mode"}),
+    "forms": ({"endpoint", "firm_key", "trader_key", "redirect_firm", "redirect_trader"}, None),
+    "worker": ({"api_base"}, {"api_base"}),
+    "legal": ({"terms_version", "disclaimer_short", "disclaimer_long"},
+              {"terms_version", "disclaimer_short", "disclaimer_long", "show_seller_for_pilot"}),
+}  # table: (required keys, every allowed key or None when the table is open)
+
+
+def check_schema(cfg, toml_path):
+    for table, (required, allowed) in SITE_SCHEMA.items():
+        t = cfg.get(table)
+        if not isinstance(t, dict):
+            die(f"site.toml has no [{table}] table ({toml_path})")
+        for k in sorted(required - set(t)):
+            die(f"[{table}] {k} is missing from {toml_path}")
+        if allowed is not None:
+            for k in sorted(set(t) - allowed):
+                die(f"[{table}] {k} is not a known key ({', '.join(sorted(allowed))}) in {toml_path}: a typo?")
+    for table in ("nav", "footer"):
+        if not isinstance(cfg.get(table), list):
+            die(f"site.toml has no [[{table}]] entries ({toml_path})")
+
+
 def read_toml(path, label):
     """tomllib.load, but a syntax error is a BUILD FAILED line, not a traceback (Tester NIT 1)."""
     try:
@@ -641,6 +671,7 @@ def load_config():
     prices_path = os.environ.get("DT_PRICES_JSON") or os.path.join(SITE, "config", "prices.json")
     with open(prices_path, encoding="utf-8") as f:
         prices = json.load(f)
+    check_schema(cfg, toml_path)
     flags = cfg["flags"]
     check_flags(flags, toml_path)
     if flags["trader_first_home"] != flags["paid_report"]:
