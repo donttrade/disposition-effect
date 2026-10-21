@@ -61,7 +61,8 @@ async function load(bytes, label) {
   const r = out.result;
   loaded = { days: tradingDays(r.trades), unit: r.trades[0].pnl_unit, n: r.trades.length, label,
     beta: !r.verified_format };
-  setFileStatus(`Read ${label}: ${intText(loaded.n)} closed trades on ${intText(loaded.days.length)} trading days.` +
+  const plural = (n, one, many) => `${intText(n)} ${n === 1 ? one : many}`;
+  setFileStatus(`Read ${label}: ${plural(loaded.n, 'closed trade', 'closed trades')} on ${plural(loaded.days.length, 'trading day', 'trading days')}.` +
     (loaded.beta ? ' This file format is in beta.' : ''), false);
 }
 

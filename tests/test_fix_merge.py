@@ -530,7 +530,7 @@ def rows_file(path, trades):
 
 @pytest.mark.parametrize("tool,inp,done", [
     ("/tools/trade-stats/", "#ts-file", "() => !!document.querySelector('#ts-noise table') || !document.getElementById('ts-error').hidden"),
-    ("/tools/prop-challenge-simulator/", "#ps-file", "() => /closed trades on|error code/.test(document.getElementById('ps-file-status').textContent)"),
+    ("/tools/prop-challenge-simulator/", "#ps-file", "() => /closed trades? on|error code/.test(document.getElementById('ps-file-status').textContent)"),
 ])
 def test_d7_100k_rows_keep_the_main_thread_free(browser, built_site, tmp_path, tool, inp, done):
     f = rows_file(tmp_path / "rows100k.csv", 50_000)
@@ -595,3 +595,16 @@ def test_d7_prop_sim_run_waits_for_a_file_still_being_read(browser, built_site, 
     page.wait_for_selector("#ps-out:not([hidden])", timeout=180000)
     assert page.is_hidden("#ps-errors")
     ctx.close()
+
+
+# ------------------------------------------------------------------ NIT 4: singular in the prop-sim file status
+def test_nit4_one_trade_one_day_reads_singular(browser, built_site, tmp_path):
+    f = rows_file(tmp_path / "one.csv", 1)
+    ctx = browser.new_context()
+    page = ctx.new_page()
+    page.goto(built_site["url"] + "/tools/prop-challenge-simulator/")
+    page.set_input_files("#ps-file", f)
+    page.wait_for_function("() => /closed trades? on/.test(document.getElementById('ps-file-status').textContent)")
+    text = page.inner_text("#ps-file-status")
+    ctx.close()
+    assert "1 closed trade on 1 trading day." in text, text
