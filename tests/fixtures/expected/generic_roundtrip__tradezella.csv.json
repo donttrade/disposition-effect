@@ -1,0 +1,113 @@
+{
+ "result": {
+  "currency_groups": {
+   "points": 2
+  },
+  "executions": [
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": "open",
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 120.1,
+    "qty": 50.0,
+    "row": 2,
+    "side": "buy",
+    "symbol": "NVDA",
+    "ts": 1788255000000
+   },
+   {
+    "currency": null,
+    "fee": 1.0,
+    "multiplier": 1,
+    "oc": "close",
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 121.0,
+    "qty": 50.0,
+    "row": 2,
+    "side": "sell",
+    "symbol": "NVDA",
+    "ts": 1788257730000
+   },
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": "open",
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 160.0,
+    "qty": 30.0,
+    "row": 3,
+    "side": "sell",
+    "symbol": "AMD",
+    "ts": 1788354000000
+   },
+   {
+    "currency": null,
+    "fee": 0.6,
+    "multiplier": 1,
+    "oc": "close",
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 162.5,
+    "qty": 30.0,
+    "row": 3,
+    "side": "buy",
+    "symbol": "AMD",
+    "ts": 1788428700000
+   }
+  ],
+  "format": "generic_roundtrip",
+  "skipped": {},
+  "trades": [
+   {
+    "close_ts": 1788257730000,
+    "currency": null,
+    "dir": "long",
+    "entry_vwap": 120.1,
+    "exit_vwap": 121.0,
+    "fees": 1.0,
+    "fills_n": 2,
+    "hold_s": 2730,
+    "id": "t1",
+    "open_ts": 1788255000000,
+    "pnl": 44.000000000000284,
+    "pnl_gross": 45.000000000000284,
+    "pnl_source": "computed",
+    "pnl_unit": "points",
+    "qty": 50.0,
+    "symbol": "NVDA"
+   },
+   {
+    "close_ts": 1788428700000,
+    "currency": null,
+    "dir": "short",
+    "entry_vwap": 160.0,
+    "exit_vwap": 162.5,
+    "fees": 0.6,
+    "fills_n": 2,
+    "hold_s": 74700,
+    "id": "t2",
+    "open_ts": 1788354000000,
+    "pnl": -75.6,
+    "pnl_gross": -75.0,
+    "pnl_source": "computed",
+    "pnl_unit": "points",
+    "qty": 30.0,
+    "symbol": "AMD"
+   }
+  ],
+  "tz_label": "as in the file",
+  "verified_format": false,
+  "warnings": [
+   {
+    "code": "W_UNVERIFIED_FORMAT",
+    "n": 0
+   }
+  ]
+ }
+}

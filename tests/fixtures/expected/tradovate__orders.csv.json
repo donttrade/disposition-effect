@@ -1,0 +1,170 @@
+{
+ "result": {
+  "currency_groups": {
+   "USD": 2,
+   "points": 1
+  },
+  "executions": [
+   {
+    "currency": "USD",
+    "fee": 0.0,
+    "multiplier": 2,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 21010.25,
+    "qty": 2.0,
+    "row": 2,
+    "side": "buy",
+    "symbol": "MNQZ6",
+    "ts": 1789464664000
+   },
+   {
+    "currency": "USD",
+    "fee": 0.0,
+    "multiplier": 2,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 21030.0,
+    "qty": 1.0,
+    "row": 3,
+    "side": "sell",
+    "symbol": "MNQZ6",
+    "ts": 1789465720000
+   },
+   {
+    "currency": "USD",
+    "fee": 0.0,
+    "multiplier": 2,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 20995.5,
+    "qty": 1.0,
+    "row": 4,
+    "side": "sell",
+    "symbol": "MNQZ6",
+    "ts": 1789467129000
+   },
+   {
+    "currency": "USD",
+    "fee": 0.0,
+    "multiplier": 5,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 6620.25,
+    "qty": 1.0,
+    "row": 5,
+    "side": "sell",
+    "symbol": "MESZ6",
+    "ts": 1789468200000
+   },
+   {
+    "currency": "USD",
+    "fee": 0.0,
+    "multiplier": 5,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 6610.0,
+    "qty": 1.0,
+    "row": 6,
+    "side": "buy",
+    "symbol": "MESZ6",
+    "ts": 1789470000000
+   },
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 100.0,
+    "qty": 1.0,
+    "row": 8,
+    "side": "buy",
+    "symbol": "XYZZ6",
+    "ts": 1789473600000
+   },
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 101.5,
+    "qty": 1.0,
+    "row": 9,
+    "side": "sell",
+    "symbol": "XYZZ6",
+    "ts": 1789475400000
+   }
+  ],
+  "format": "tradovate_orders",
+  "skipped": {
+   "not_filled": 1
+  },
+  "trades": [
+   {
+    "close_ts": 1789467129000,
+    "currency": "USD",
+    "dir": "long",
+    "entry_vwap": 21010.25,
+    "exit_vwap": 21012.75,
+    "fees": 0.0,
+    "fills_n": 3,
+    "hold_s": 2465,
+    "id": "t1",
+    "open_ts": 1789464664000,
+    "pnl": 10.0,
+    "pnl_gross": 10.0,
+    "pnl_source": "computed",
+    "pnl_unit": "USD",
+    "qty": 2.0,
+    "symbol": "MNQZ6"
+   },
+   {
+    "close_ts": 1789470000000,
+    "currency": "USD",
+    "dir": "short",
+    "entry_vwap": 6620.25,
+    "exit_vwap": 6610.0,
+    "fees": 0.0,
+    "fills_n": 2,
+    "hold_s": 1800,
+    "id": "t2",
+    "open_ts": 1789468200000,
+    "pnl": 51.25,
+    "pnl_gross": 51.25,
+    "pnl_source": "computed",
+    "pnl_unit": "USD",
+    "qty": 1.0,
+    "symbol": "MESZ6"
+   }
+  ],
+  "tz_label": "local time, as exported",
+  "verified_format": false,
+  "warnings": [
+   {
+    "code": "W_UNVERIFIED_FORMAT",
+    "n": 0
+   },
+   {
+    "code": "W_SKIPPED_ROWS",
+    "n": 1
+   },
+   {
+    "code": "W_POINTS_ONLY",
+    "n": 1
+   },
+   {
+    "code": "W_MIXED_CURRENCY",
+    "n": 1
+   }
+  ]
+ }
+}

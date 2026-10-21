@@ -1,0 +1,99 @@
+{
+ "result": {
+  "currency_groups": {
+   "account": 1
+  },
+  "executions": [
+   {
+    "currency": null,
+    "fee": 3.5,
+    "multiplier": 1,
+    "oc": "open",
+    "pnl_reported": 0.0,
+    "pos_id": null,
+    "price": 1.0841,
+    "qty": 1.0,
+    "row": 2,
+    "side": "buy",
+    "symbol": "EURUSD",
+    "ts": 1788254102000
+   },
+   {
+    "currency": null,
+    "fee": 1.75,
+    "multiplier": 1,
+    "oc": "close",
+    "pnl_reported": 100.0,
+    "pos_id": null,
+    "price": 1.0861,
+    "qty": 0.5,
+    "row": 3,
+    "side": "sell",
+    "symbol": "EURUSD",
+    "ts": 1788262810000
+   },
+   {
+    "currency": null,
+    "fee": 1.75,
+    "multiplier": 1,
+    "oc": "close",
+    "pnl_reported": -55.0,
+    "pos_id": null,
+    "price": 1.083,
+    "qty": 0.5,
+    "row": 4,
+    "side": "sell",
+    "symbol": "EURUSD",
+    "ts": 1788271375000
+   },
+   {
+    "currency": null,
+    "fee": 1.0,
+    "multiplier": 1,
+    "oc": "open",
+    "pnl_reported": 0.0,
+    "pos_id": null,
+    "price": 2501.2,
+    "qty": 0.1,
+    "row": 5,
+    "side": "sell",
+    "symbol": "XAUUSD",
+    "ts": 1788336060000
+   }
+  ],
+  "format": "mt5",
+  "skipped": {},
+  "trades": [
+   {
+    "close_ts": 1788271375000,
+    "currency": null,
+    "dir": "long",
+    "entry_vwap": 1.0841,
+    "exit_vwap": 1.0845500000000001,
+    "fees": 7.0,
+    "fills_n": 3,
+    "hold_s": 17273,
+    "id": "t1",
+    "open_ts": 1788254102000,
+    "pnl": 38.0,
+    "pnl_gross": 45.0,
+    "pnl_source": "reported",
+    "pnl_unit": "account",
+    "qty": 1.0,
+    "symbol": "EURUSD"
+   }
+  ],
+  "tz_label": "broker server time",
+  "verified_format": false,
+  "warnings": [
+   {
+    "code": "W_UNVERIFIED_FORMAT",
+    "n": 0
+   },
+   {
+    "code": "W_OPEN_POSITIONS",
+    "n": 1
+   }
+  ]
+ }
+}

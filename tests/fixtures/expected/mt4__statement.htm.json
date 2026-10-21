@@ -1,0 +1,170 @@
+{
+ "result": {
+  "currency_groups": {
+   "account": 3
+  },
+  "executions": [
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": "open",
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 1.08,
+    "qty": 1.0,
+    "row": 6,
+    "side": "buy",
+    "symbol": "eurusd",
+    "ts": 1788253200000
+   },
+   {
+    "currency": null,
+    "fee": 7.0,
+    "multiplier": 1,
+    "oc": "close",
+    "pnl_reported": 350.0,
+    "pos_id": null,
+    "price": 1.0835,
+    "qty": 1.0,
+    "row": 6,
+    "side": "sell",
+    "symbol": "eurusd",
+    "ts": 1788269400000
+   },
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": "open",
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 1.27,
+    "qty": 0.5,
+    "row": 7,
+    "side": "sell",
+    "symbol": "gbpusd",
+    "ts": 1788344100000
+   },
+   {
+    "currency": null,
+    "fee": 4.6,
+    "multiplier": 1,
+    "oc": "close",
+    "pnl_reported": -200.0,
+    "pos_id": null,
+    "price": 1.274,
+    "qty": 0.5,
+    "row": 7,
+    "side": "buy",
+    "symbol": "gbpusd",
+    "ts": 1788430500000
+   },
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": "open",
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 147.0,
+    "qty": 0.1,
+    "row": 9,
+    "side": "buy",
+    "symbol": "usdjpy",
+    "ts": 1788512400000
+   },
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": "close",
+    "pnl_reported": -5.3,
+    "pos_id": null,
+    "price": 146.9,
+    "qty": 0.1,
+    "row": 9,
+    "side": "sell",
+    "symbol": "usdjpy",
+    "ts": 1788771600000
+   }
+  ],
+  "format": "mt4",
+  "skipped": {
+   "balance": 1,
+   "cancelled": 1
+  },
+  "trades": [
+   {
+    "close_ts": 1788269400000,
+    "currency": null,
+    "dir": "long",
+    "entry_vwap": 1.08,
+    "exit_vwap": 1.0835,
+    "fees": 7.0,
+    "fills_n": 2,
+    "hold_s": 16200,
+    "id": "t1",
+    "open_ts": 1788253200000,
+    "pnl": 343.0,
+    "pnl_gross": 350.0,
+    "pnl_source": "reported",
+    "pnl_unit": "account",
+    "qty": 1.0,
+    "symbol": "eurusd"
+   },
+   {
+    "close_ts": 1788430500000,
+    "currency": null,
+    "dir": "short",
+    "entry_vwap": 1.27,
+    "exit_vwap": 1.274,
+    "fees": 4.6,
+    "fills_n": 2,
+    "hold_s": 86400,
+    "id": "t2",
+    "open_ts": 1788344100000,
+    "pnl": -204.6,
+    "pnl_gross": -200.0,
+    "pnl_source": "reported",
+    "pnl_unit": "account",
+    "qty": 0.5,
+    "symbol": "gbpusd"
+   },
+   {
+    "close_ts": 1788771600000,
+    "currency": null,
+    "dir": "long",
+    "entry_vwap": 147.0,
+    "exit_vwap": 146.9,
+    "fees": 0.0,
+    "fills_n": 2,
+    "hold_s": 259200,
+    "id": "t3",
+    "open_ts": 1788512400000,
+    "pnl": -5.3,
+    "pnl_gross": -5.3,
+    "pnl_source": "reported",
+    "pnl_unit": "account",
+    "qty": 0.1,
+    "symbol": "usdjpy"
+   }
+  ],
+  "tz_label": "broker server time",
+  "verified_format": false,
+  "warnings": [
+   {
+    "code": "W_UNVERIFIED_FORMAT",
+    "n": 0
+   },
+   {
+    "code": "W_SKIPPED_ROWS",
+    "n": 2
+   },
+   {
+    "code": "W_OPEN_POSITIONS",
+    "n": 1
+   }
+  ]
+ }
+}
