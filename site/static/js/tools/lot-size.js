@@ -94,8 +94,14 @@ function calculate(ev) {
   render(v, lotSize(v));
 }
 
+// NIT 6: a positive number too small for the decimals shown reads "under 0.0001", never 0.0000.
+function shown(x, dp) {
+  if (x > 0 && Number(x.toFixed(dp)) === 0) return `under ${(10 ** -dp).toFixed(dp)}`;
+  return plain(x, dp);
+}
+
 function render(v, r) {
-  const n = (x, dp = 2) => plain(x, dp);
+  const n = (x, dp = 2) => shown(x, dp);
   const lines = [];
   if (v.mode === 'pct') lines.push(`Risk amount = ${n(v.balance)} × ${n(v.risk, decimalsOf(v.risk))}% = ${n(r.riskAmount)}`);
   lines.push(`Loss for one lot at the stop = ${n(v.stop, Math.max(2, decimalsOf(v.stop)))} points × ${n(v.vpp, Math.max(2, decimalsOf(v.vpp)))} per point = ${n(r.perLot)}`);
@@ -110,6 +116,10 @@ function render(v, r) {
       v.balance ? el('div', { class: 'stat' }, el('dt', { text: 'As a % of the balance' }),
         el('dd', { 'data-k': 'risk_pct', text: `${n((100 * (r.step ? r.riskAtRounded : r.riskAmount)) / v.balance, 2)}%` })) : null),
   ];
+  if (!r.step && r.lots > 0 && r.lots < 0.0001) {
+    kids.push(el('p', { class: 'notice notice-caution', id: 'ls-tiny' }, el('strong', { text: 'Under 0.0001 lots' }),
+      `At this stop, ${n(r.riskAmount)} covers less than 0.0001 lots. Check the amount, the stop distance and the value per point.`));
+  }
   if (r.belowMin) {
     kids.push(el('p', { class: 'notice notice-caution', id: 'ls-belowmin' }, el('strong', { text: 'Smaller than one lot step' }),
       `Even ${v.step} lots would lose ${n(v.step * r.perLot)} at this stop, more than the ${n(r.riskAmount)} entered. Rounded down, the size is 0 lots.`));

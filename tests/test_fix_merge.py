@@ -620,3 +620,28 @@ def test_nit5_no_losing_trades_streak_label(browser, built_site):
     row = page.inner_text('[data-check="longest_losing_streak"]')
     ctx.close()
     assert "no losing trades" in row and "may be noise" not in row, row
+
+
+# ------------------------------------------------------------------ NIT 6: tiny lot-size results are not shown as 0
+def _lots(browser, built_site, fields):
+    ctx = browser.new_context()
+    page = ctx.new_page()
+    page.goto(built_site["url"] + "/tools/lot-size-calculator/")
+    for sel, v in fields.items():
+        page.fill(sel, v)
+    page.click("#ls-form button[type=submit]")
+    page.wait_for_selector("#ls-out:not([hidden])")
+    out = {k: page.inner_text(f'[data-k="{k}"]') for k in ("lots", "risk_at")}
+    out["pct"] = page.inner_text('[data-k="risk_pct"]') if page.locator('[data-k="risk_pct"]').count() else None
+    out["tiny"] = page.locator("#ls-tiny").count() == 1
+    ctx.close()
+    return out
+
+
+def test_nit6_tiny_risk_is_not_rounded_to_zero(browser, built_site):
+    # repro: tools_test.py lot size — risk 0.0000001 showed "0.0000 lots / 0.00" with no notice
+    r = _lots(browser, built_site, {"#ls-risk": "0.0000001", "#ls-stop": "40", "#ls-vpp": "1"})
+    assert r["lots"] == "under 0.0001 lots" and r["risk_at"] == "under 0.01" and r["tiny"], r
+    # risk .5 on a 25,000 balance showed "0.00%"
+    r = _lots(browser, built_site, {"#ls-risk": "0.5", "#ls-balance": "25000", "#ls-stop": "40", "#ls-vpp": "1"})
+    assert r["pct"] == "under 0.01%", r
