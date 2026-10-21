@@ -287,11 +287,12 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
     if not commerce:
         for v in private_values:
             if v and v in html:
-                out.append(("flag:seller_identity", where, "seller name/address/phone with paid_report = false"))
+                out.append(("flag:seller_identity", where, "seller name/address/phone where the seller block is off"))
         if re.search(r"\[(SELLER|ADDRESS|PHONE) —", html):
-            out.append(("flag:seller_placeholder", where, "seller placeholder with paid_report = false"))
+            out.append(("flag:seller_placeholder", where, "seller placeholder where the seller block is off"))
         if "data-seller-block" in html:
-            out.append(("flag:seller_block", where, "seller disclosure markup with every commerce flag off"))
+            out.append(("flag:seller_block", where, "seller disclosure markup where the seller block is off "
+                        "(paid_report off, and pilot_checkout off or [legal] show_seller_for_pilot = false)"))
     if french:
         out += lint_text_fr(readable_text(strip_disclaimers(html)), where)
     if analytics is False and "cloudflareinsights" in html:
@@ -338,12 +339,23 @@ def allowed_amounts():
 
 
 def private_values():
-    p = os.path.join(REPO, "site", "config", "private.toml")
+    """The seller values to look for, from the same private.toml the build reads (DT_PRIVATE_TOML,
+    else site/config/private.toml; Tester NIT 2), as written and as published (normalised)."""
+    import build
+    p = os.environ.get("DT_PRIVATE_TOML") or os.path.join(REPO, "site", "config", "private.toml")
     if not os.path.exists(p):
         return []
     with open(p, "rb") as f:
         d = tomllib.load(f)
-    return [d.get(k, "") for k in ("seller_legal_name", "premises_address", "phone")]
+    out = []
+    for k in ("seller_legal_name", "premises_address", "phone"):
+        v = d.get(k, "")
+        if isinstance(v, str) and v.strip():
+            out.append(v)
+            norm = build.normalise_private(v)[0]
+            if norm and norm != v:
+                out.append(norm)
+    return out
 
 
 def owned_paths(paid, pilot=False):
@@ -358,9 +370,11 @@ def owned_paths(paid, pilot=False):
 
 
 def seller_allowed(paid, pilot):
-    """build.show_seller for these flags, with the committed [legal] show_seller_for_pilot switch."""
+    """build.show_seller for these flags, with the [legal] show_seller_for_pilot switch of the same
+    site.toml the build reads (DT_SITE_TOML, else the committed one; Tester NIT 2)."""
     import build
-    cfg = build.read_toml(os.path.join(REPO, "site", "config", "site.toml"), "site.toml")
+    p = os.environ.get("DT_SITE_TOML") or os.path.join(REPO, "site", "config", "site.toml")
+    cfg = build.read_toml(p, "site.toml")
     return build.show_seller({"flags": {"paid_report": paid, "pilot_checkout": pilot}, "legal": cfg["legal"]})
 
 
@@ -402,7 +416,7 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None):
             if not seller:
                 for v in priv:
                     if v and v in s:
-                        problems.append(("flag:seller_identity", rel, "private.toml value in the build"))
+                        problems.append(("flag:seller_identity", rel, "private.toml value in the build, where the seller block is off"))
             if not analytics and "cloudflareinsights" in s:
                 problems.append(("flag:beacon", rel, "analytics beacon"))
     return problems
@@ -422,6 +436,9 @@ def flags_of_build(out_dir):
 
 def main(argv):
     out_dir = next((a for a in argv if not a.startswith("--")), os.path.join(REPO, "site", "_site"))
+    if not os.path.isdir(out_dir):  # Tester NIT 16: one clear line, not 15 "page missing"
+        print(f"lint: {out_dir}: no such directory (build first: ./site/run.sh build)")
+        return 2
     found = flags_of_build(out_dir)
     given = {k: f"--{k}" in argv for k in found}
     if any(f"--{k}" in argv for k in found) or "--flags-from-args" in argv:
