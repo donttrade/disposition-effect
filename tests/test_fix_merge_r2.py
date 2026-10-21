@@ -187,7 +187,7 @@ def test_r3_slow_first_file_never_replaces_the_second(browser, built_site, big_f
     page.set_input_files(f"#{tool}-file", T30)
     page.wait_for_timeout(4000)
     if tool == "ts":
-        page.wait_for_selector("#ts-noise table", timeout=30000)
+        page.wait_for_selector("#ts-noise", timeout=30000)   # C1: the table only with free_badges
     shown = page.inner_text("#ts-out" if tool == "ts" else "#ps-file-status")
     made, live = page.evaluate("() => [window.__made, window.__live]")
     ctx.close()
@@ -383,7 +383,8 @@ def test_r5_tool_teaser_script_wording_follows_the_offer(browser, paid_site, bui
         texts[name] = page.inner_text("#ts-teaser")
         ctx.close()
     # one of the five habits is described, not tested (CODER-WIRING-REPORT-2026-10-21)
-    assert "The habit report measures five habits like this one, tests four of them" in texts["paid"] and "We're building" not in texts["paid"]
+    # C1: without free_badges the teaser names no check ("tests four of them" is on the badges build)
+    assert "The habit report measures five habits like this one" in texts["paid"] and "We're building" not in texts["paid"]
     assert "We're building a habit report" in texts["off"]
 
 

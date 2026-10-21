@@ -534,8 +534,30 @@ def seller_allowed(paid, pilot):
 WARNINGS = []   # printed by main(): checks lint could not run (Tester delta N2)
 
 
-def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None):
-    """seller: whether the seller block may appear; defaults to the committed switch (seller_allowed)."""
+# Free-launch condition C1 (21 Oct 2026): with [flags] free_badges off, no page and no shipped
+# script outside the statistics engine (static/js/engine/, unchanged by rule) and the paid report
+# (static/js/paid/, its own statistics) may carry the free tools' badges or their footnote.
+# The neutral line ("A ‘real or noise’ check for this number is coming soon.") is allowed.
+FREE_BADGE_STRINGS = (
+    "Real or noise?", "Real-or-noise check", "real-or-noise result", "three real-or-noise checks",
+    "Trade stats with a real-or-noise check", "trade stats with a real-or-noise check",
+    "streaks, with a real-or-noise check", "file shows, with a real-or-noise check",
+    "Three of the numbers get a real-or-noise check", "which numbers are more than noise",
+    "1 time in 20", "1 file in 7", "badge-real", "badge-noise", "ts-noise-footnote", "Running the checks",
+    "FREE_CHECKS_FOOTNOTE",
+)
+BADGE_EXEMPT = ("/static/js/engine/", "/static/js/paid/")
+
+
+def free_badge_problems(s, where):
+    if where.startswith(BADGE_EXEMPT):
+        return []
+    return [("flag:free_badges", where, f"{x!r} while free_badges = false") for x in FREE_BADGE_STRINGS if x in s]
+
+
+def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, badges=False):
+    """seller: whether the seller block may appear; defaults to the committed switch (seller_allowed).
+    badges: the build's free_badges flag (C1); off, free_badge_problems applies to every file."""
     import build
     problems = []
     seller = seller_allowed(paid, pilot) if seller is None else seller
@@ -594,6 +616,8 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None):
                         problems.append(("flag:seller_identity", rel, "private.toml value in the build, where the seller block is off"))
             if not analytics and "cloudflareinsights" in s:
                 problems.append(("flag:beacon", rel, "analytics beacon"))
+            if not badges and name.endswith((".html", ".js")):
+                problems += free_badge_problems(s, rel)
     return problems
 
 
@@ -606,7 +630,9 @@ def flags_of_build(out_dir):
     pilot = os.path.exists(build.out_file(out_dir, "/start/pilot-thanks/"))
     home = build.out_file(out_dir, "/")
     analytics = os.path.exists(home) and "cloudflareinsights" in open(home, encoding="utf-8", errors="replace").read()
-    return {"paid": paid, "pilot": pilot, "analytics": analytics}
+    # C1: the badge module is in the build only with free_badges (build.BADGES_JS)
+    badges = os.path.exists(os.path.join(out_dir, "static", build.BADGES_JS))
+    return {"paid": paid, "pilot": pilot, "analytics": analytics, "badges": badges}
 
 
 def main(argv):
@@ -629,7 +655,7 @@ def main(argv):
         flags = found
         print("lint: flags read from the build: " + ", ".join(f"{k}={'on' if v else 'off'}" for k, v in flags.items()))
     paid, analytics = flags["paid"], flags["analytics"]
-    problems = lint_build(out_dir, paid, analytics, pilot=flags["pilot"])
+    problems = lint_build(out_dir, paid, analytics, pilot=flags["pilot"], badges=flags["badges"])
     for w in WARNINGS:
         print("lint: WARNING: " + w)
     for rule, where, detail in problems:

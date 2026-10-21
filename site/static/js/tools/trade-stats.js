@@ -11,11 +11,15 @@
 //
 // Every figure shown is computed by the engine (stats.js, noise.js). The teaser line uses
 // only those figures. Missing values print as "—", never NaN/Infinity/undefined.
+//
+// Free-launch condition C1: the "real or noise" badges are drawn by trade-stats-badges.js, which
+// the build ships only with [flags] free_badges = true (the page says so in data-free-badges).
+// Without it this page shows only the descriptive numbers, no checks are run, and a neutral
+// line says a check is coming.
 
 import { createFileSlot, renderReadError, fieldError } from './tool-state.js';
 import { freeStats, equityCurve, NO_LOSSES } from '../engine/stats.js';
-import { LABELS, N_PERM, guardSentence, FREE_CHECKS_FOOTNOTE } from '../engine/noise.js';
-import { money, unitNote, pct, ratio, duration, day, intText, el, signClass, DASH } from './format.js';
+import { money, unitNote, pct, ratio, duration, day, intText, el, signClass } from './format.js';
 import { parsePositive, InputError } from './num.js';
 
 const $ = (id) => document.getElementById(id);
@@ -26,12 +30,12 @@ const FORMAT_NAMES = {
   generic_roundtrip: 'CSV with one row per round trip',
 };
 
-const CHECK_TEXT = {
-  // a bootstrap-t (noise.js), not a sign flip: the question names no method it does not use
-  expectancy: ['Mean result per trade', 'Is the average result per trade different from zero, or could chance alone give one this far from zero with trades like these?'],
-  hold_gap_s: ['Hold time, losers vs winners', 'Is the gap between how long losing and winning trades were held larger than shuffling the win/loss labels gives?'],
-  longest_losing_streak: ['Longest losing streak', 'Is the longest run of losses longer than the same trades in a random order give?'],
-};
+// C1: the badges only when the build includes them (see the header comment).
+const BADGES = $('ts-out').dataset.freeBadges === 'true';
+const B = BADGES ? await import('./trade-stats-badges.js') : null;
+const SOON = 'A ‘real or noise’ check for this number is coming soon.';
+
+const plural = (n, one, many) => `${intText(n)} ${n === 1 ? one : many}`;
 
 let state = null; // {result, unit, fileLabel} of the file on screen; never persisted
 let worker = null;  // the noise-check worker, used after an HTML report read on the page
@@ -61,13 +65,14 @@ async function showResult(out, fileLabel, job) {
   state = { result: r, unit: r.trades[0].pnl_unit, fileLabel };
   await render();
   if (!job.isCurrent() || !state || state.result !== r) return; // a newer file replaced this one
+  if (!B) { teaser(null); return; }
   if (out.onPage) runNoise(r.trades); // an HTML report was read on the page
   else job.runNoise();
 }
 
 function onNoise(noise) {
-  if (!state) return;
-  if (!noise) { $('ts-noise-status').textContent = 'The checks could not run in this browser.'; return; }
+  if (!state || !B) return;
+  if (!noise) { $('ts-noise-status').textContent = B.FAILED; return; }
   renderNoise(noise, state.result.trades.length);
 }
 
@@ -119,7 +124,7 @@ function rowsTable(caption, head, rows) {
 
 // "8 trades, −$195.40" in two unbreakable pieces, so a phone never wraps after the minus.
 const streak = (st, k) => el('span', { 'data-k': k },
-  el('span', { class: 'nowrap', text: `${intText(st.n)} trades,` }), ' ', el('span', { class: 'nowrap', text: money(st.pnl, state.unit) }));
+  el('span', { class: 'nowrap', text: `${plural(st.n, 'trade', 'trades')},` }), ' ', el('span', { class: 'nowrap', text: money(st.pnl, state.unit) }));
 
 const m = (n, k) => ({ text: money(n, state.unit), cls: signClass(n) || '', k });
 
@@ -141,7 +146,7 @@ async function render(focus = true) {
   const read = el('section', { 'aria-labelledby': 'ts-read-h' },
     el('h3', { id: 'ts-read-h', text: 'What was read' }),
     el('p', {}, `Format: ${FORMAT_NAMES[r.format] || r.format}${r.verified_format ? '' : ' (beta)'}. `,
-      `${intText(r.trades.length)} closed trades from ${intText(r.n_fills)} fills, closed ${day(first.close_ts)} to ${day(last.close_ts)}. `,
+      `${plural(r.trades.length, 'closed trade', 'closed trades')} from ${plural(r.n_fills, 'fill', 'fills')}, closed ${day(first.close_ts)} to ${day(last.close_ts)}. `,
       `Times are ${r.tz_label}. ${unitNote(state.unit)}`),
   );
   if (state.fileLabel === 'the synthetic sample file') {
@@ -197,11 +202,13 @@ async function render(focus = true) {
       ['Short', intText(s.short.n), pct(s.short.win_rate), m(s.short.pnl)],
     ]))));
 
-  // Noise checks: filled in by the worker
-  out.append(el('section', { 'aria-labelledby': 'ts-noise-h', id: 'ts-noise' },
-    el('h3', { id: 'ts-noise-h', text: 'Real or noise?' }),
-    el('p', { text: `Three checks, each repeated ${intText(N_PERM)} times on random copies of your own trades: resampled for the mean result, shuffled for the other two. A figure is "${LABELS.real}" when fewer than 5% of the copies come out as extreme as your real trades; otherwise it "${LABELS.noise}". Under 30 trades in a group the check is not run, and the result says "${LABELS.tooFew}". The mean result also says so when a few very large trades make up most of a short file's gains or losses.` }),
-    el('p', { id: 'ts-noise-status', role: 'status', text: 'Running the checks…' })));
+  // The checks (badges build: filled in by the worker), or the three numbers they would cover
+  // with the neutral line where each badge was.
+  out.append(B ? B.section() : el('section', { id: 'ts-noise', 'aria-label': 'Checks coming soon' },
+    el('ul', { class: 'soon-list' },
+      el('li', {}, el('strong', { text: 'Mean result per trade' }), ` (${money(s.expectancy, state.unit)}): ${SOON}`),
+      el('li', {}, el('strong', { text: 'Hold time, losers vs winners' }), ` (${ratio(s.hold_ratio)}): ${SOON}`),
+      el('li', {}, el('strong', { text: 'Longest losing streak' }), ` (${plural(s.max_consec_losses.n, 'trade', 'trades')}): ${SOON}`))));
 
   out.hidden = false;
   if (focus) $('ts-out-h').focus();
@@ -237,7 +244,7 @@ function chart(points) {
   }
   if (idx[idx.length - 1] !== n - 1) idx.push(n - 1);
   const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-labelledby': 'ts-chart-t' });
-  svg.append(Object.assign(svgEl('title', { id: 'ts-chart-t' }), { textContent: `Equity and drawdown after each of ${n} closed trades` }));
+  svg.append(Object.assign(svgEl('title', { id: 'ts-chart-t' }), { textContent: n === 1 ? 'Equity and drawdown after the one closed trade' : `Equity and drawdown after each of ${n} closed trades` }));
   const ticks = [hi, lo];
   // zero gets its own gridline only inside the range and when its label would not collide
   if (lo < 0 && hi > 0 && Math.abs(yEq(0) - yEq(lo)) > 16 && Math.abs(yEq(0) - yEq(hi)) > 16) ticks.push(0);
@@ -272,84 +279,38 @@ function chart(points) {
   return el('section', { 'aria-labelledby': 'ts-chart-h' },
     el('h3', { id: 'ts-chart-h', text: 'Equity and drawdown' }),
     el('figure', { class: 'chart' }, svg,
-      el('figcaption', { text: `n = ${intText(n)} closed trades, in closing order · ${state.fileLabel === 'the synthetic sample file' ? 'synthetic sample data, not a real trader' : 'from your file'} · equity starts at 0` }),
+      el('figcaption', { text: `n = ${plural(n, 'closed trade', 'closed trades')}, in closing order · ${state.fileLabel === 'the synthetic sample file' ? 'synthetic sample data, not a real trader' : 'from your file'} · equity starts at 0` }),
       el('details', {}, el('summary', { text: 'Show the chart as a table' }), tableWrap('Equity and drawdown as a table', table))));
 }
 
-// ------------------------------------------------------------------ noise checks
+// ------------------------------------------------------------------ checks (badges build only)
 function runNoise(trades) {
-  worker = new Worker(new URL('../engine/noise-worker.js', import.meta.url), { type: 'module' });
   const started = trades.length;
-  worker.onmessage = (ev) => {
-    worker.terminate(); worker = null;
-    if (ev.data.error || !ev.data.noise) { $('ts-noise-status').textContent = 'The checks could not run in this browser.'; return; }
-    renderNoise(ev.data.noise, started);
-  };
-  const failed = (e) => {
-    if (e && e.preventDefault) e.preventDefault();
-    if (worker) { worker.terminate(); worker = null; }
-    $('ts-noise-status').textContent = 'The checks could not run in this browser.';
-  };
-  worker.onerror = failed;
-  worker.onmessageerror = failed;
-  // Only two numbers per trade go to the worker: no symbol, no time, nothing else.
-  worker.postMessage({ trades: trades.map((t) => ({ pnl: t.pnl, hold_s: t.hold_s })) });
-}
-
-function badge(label) {
-  const cls = label === LABELS.real ? 'badge badge-real' : (label === LABELS.tooFew || label === NO_LOSSES) ? 'badge badge-few' : 'badge badge-noise';
-  return el('span', { class: cls, text: label });
-}
-
-function observed(c) {
-  if (c.value === null) return DASH;
-  if (c.stat === 'expectancy') return money(c.value, state.unit);
-  if (c.stat === 'hold_gap_s') return (c.value < 0 ? 'losers shorter by ' : 'losers longer by ') + duration(Math.abs(c.value));
-  return `${intText(c.value)} losses in a row`;
+  worker = B.runOnPage(trades, (noise) => {
+    worker = null;
+    if (!state) return;
+    if (!noise) { $('ts-noise-status').textContent = B.FAILED; return; }
+    renderNoise(noise, started);
+  });
 }
 
 function renderNoise(noise, total) {
-  const st = $('ts-noise-status');
-  st.textContent = noise.limited ? `Checked on your most recent ${intText(noise.n_used)} of ${intText(total)} trades (the limit for these checks).` : 'Done.';
-  const rows = noise.checks.map((c) => {
-    const [name, q] = CHECK_TEXT[c.stat];
-    // NIT 5: a streak of 0 losses has nothing to test; say so rather than "may be noise"
-    const noLosses = c.stat === 'longest_losing_streak' && c.value === 0;
-    const n = c.n_b === null ? intText(c.n_a) : `${intText(c.n_a)} losing, ${intText(c.n_b)} winning`;
-    return el('tr', { 'data-check': c.stat },
-      el('th', { scope: 'row' }, el('span', { text: name }), el('br'), el('span', { class: 'small muted', text: q })),
-      el('td', { class: 'num', text: n }),
-      el('td', { class: 'num', text: observed(c) }),
-      el('td', { class: 'num', text: c.p === null || noLosses ? DASH : c.p.toFixed(4) }),
-      el('td', {}, badge(noLosses ? NO_LOSSES : c.label)));
-  });
-  const table = el('table', {},
-    el('caption', { text: 'Real-or-noise checks on this file' }),
-    el('thead', {}, el('tr', {}, ...['Check', 'Trades', 'In your file', 'p', 'Result'].map((h, i) => el('th', { scope: 'col', class: i && i < 4 ? 'num' : null, text: h })))),
-    el('tbody', {}, ...rows));
-  // ARCHITECT-STATS-AMENDMENT §7.2: a guarded expectancy check says why it withholds a verdict.
-  // Only the expectancy check carries a guard field (the other two have none, not null).
-  const guarded = noise.checks.filter((c) => c.stat === 'expectancy')
-    .map((c) => guardSentence(c, (x) => money(x, state.unit))).filter((s) => s);
-  $('ts-noise').append(tableWrap('Real-or-noise checks', table),
-    ...guarded.map((s) => el('p', { class: 'ts-guard', text: s })),
-    el('p', { class: 'small muted', text: 'p is the share of random copies at least as extreme as your file. A small p says the pattern is unlikely to be luck in this file; it does not say it will continue.' }),
-    el('p', { class: 'small muted', id: 'ts-noise-footnote', text: FREE_CHECKS_FOOTNOTE }));
+  B.render($('ts-noise'), noise, total, state.unit, tableWrap);
   teaser(noise);
 }
 
 // R5: the teaser box says data-on-sale="true" when the build sells the report (partials/trader_offer.html).
 const reportLead = () => ($('ts-teaser').dataset.onSale === 'true' ? 'The habit report' : "We're building a habit report that");
 
-// The teaser states only figures computed above: the hold gap and its check result.
+// The teaser states only figures computed above: the hold gap (and, with badges, its check result).
 function teaser(noise) {
   const s = state.stats || freeStats(state.result.trades);
-  const gap = noise.checks.find((c) => c.stat === 'hold_gap_s');
   const text = $('ts-teaser-text');
-  if (s.hold_ratio !== null && gap) {
-    text.textContent = `In this file, losing trades were held ${ratio(s.hold_ratio)} as long as winning trades (median ${duration(s.hold_median_loss_s)} against ${duration(s.hold_median_win_s)}), and the check above says: ${gap.label}. ${reportLead()} measures five habits like this one, tests four of them against noise, and shows what the matching trades totalled in your file.`;
+  if (noise) text.textContent = B.teaserText(noise, s, reportLead());
+  else if (s.hold_ratio !== null) {
+    text.textContent = `In this file, losing trades were held ${ratio(s.hold_ratio)} as long as winning trades (median ${duration(s.hold_median_loss_s)} against ${duration(s.hold_median_win_s)}). ${reportLead()} measures five habits like this one and shows what the matching trades totalled in your file.`;
   } else {
-    text.textContent = `${reportLead()} looks for patterns in what you do after a loss, and tests each one for noise.`;
+    text.textContent = `${reportLead()} looks for patterns in what you do after a loss.`;
   }
   $('ts-teaser').hidden = false;
 }
@@ -357,7 +318,7 @@ function teaser(noise) {
 // ------------------------------------------------------------------ wiring
 function init() {
   slot = createFileSlot({
-    progressBox: $('ts-progress'), noise: true, onStage: status, onClear: clearOutput,
+    progressBox: $('ts-progress'), noise: BADGES, onStage: status, onClear: clearOutput,
     onResult: showResult, onNoise,
     onError: (err, retry) => renderReadError($('ts-error'), err, retry),
   });

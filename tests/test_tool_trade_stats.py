@@ -22,6 +22,14 @@ from a11y import axe_violations, horizontal_overflow  # noqa: E402
 import lint as L  # noqa: E402
 import engine_ref as E  # noqa: E402
 
+# Free-launch condition C1: the badges are off by default (site.toml free_badges = false). These
+# tests are about the badges, so this module runs on the badges build (conftest.badges_site);
+# tests/test_free_badges.py covers the default build.
+@pytest.fixture(scope="session")
+def built_site(badges_site):
+    return badges_site
+
+
 FIX = os.path.join(HERE, "fixtures")
 DEMO = os.path.join(REPO, "site", "static", "samples", "demo-trades.csv")
 CANARY = "CANARY-ZQ7X"

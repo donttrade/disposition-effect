@@ -21,6 +21,7 @@ paid_report = false        # the $39 report, its pages and the trader Stripe lin
 analytics = false          # Cloudflare Web Analytics beacon
 trader_first_home = false  # must equal paid_report (the build fails otherwise)
 pilot_checkout = false     # "Start a Pilot" block + thanks page with the live Stripe Pilot link
+free_badges = false        # free tools' "real or noise" badges + footnote (off: free-launch condition C1, being redesigned)
 
 [analytics]
 cf_beacon_token = ""       # required when analytics = true
