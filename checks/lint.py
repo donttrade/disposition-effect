@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """lint.py — wording, flag and leak rules for the v2 site (and for report strings).
 
-    python3 checks/lint.py site/_site [--paid] [--analytics]   # lint a build
+    python3 checks/lint.py site/_site [--paid] [--analytics] [--pilot]   # lint a build
     from lint import lint_text                                  # lint any text (report strings)
 
 Rules (banned.toml): A3 banned words outside allowlisted negations/disclaimer; AI-tell
@@ -51,13 +51,34 @@ def visible_text(html):
     return _h.unescape(text + " " + attrs)
 
 
-def lint_text(text, where="text", paid=False, analytics=False):
-    """Wording rules on plain text. Returns a list of (rule, where, detail)."""
+FR_WORDS = [(w, re.compile(r"(?<![\w])" + re.escape(w.rstrip("*")) + (r"\w*" if w.endswith("*") else r"(?![\w])"),
+                           re.IGNORECASE)) for w in RULES["words_fr"]["banned"]]
+
+
+def strip_disclaimers(html):
+    """Remove elements marked data-lint="disclaimer" (the French disclaimer blocks, FRENCH-LEGAL §8.3),
+    the only places where conseil/recommand* may appear. Marked elements must not nest their own tag."""
+    return re.sub(r'(?s)<(\w+)\b[^>]*\bdata-lint="disclaimer"[^>]*>.*?</\1>', " ", html)
+
+
+def lint_text_fr(text, where="text"):
+    """French banned words (FRENCH-LEGAL-AND-CHECKOUT-DRAFTS §8.3), outside disclaimer blocks."""
+    out = []
+    for w, rx in FR_WORDS:
+        for m in rx.finditer(text):
+            ctx = text[max(0, m.start() - 40):m.end() + 40].replace("\n", " ")
+            out.append(("banned:fr", where, f"“{w}” in …{ctx}…"))
+    return out
+
+
+def lint_text(text, where="text", paid=False, analytics=False, english=True):
+    """Wording rules on plain text. Returns a list of (rule, where, detail).
+    english=False (French pages) skips the English word list; lint_text_fr covers those pages."""
     out = []
     masked = text
     for a in ALLOW:
         masked = a.sub(lambda m: " " * len(m.group(0)), masked)
-    for cat, w, rx in WORDS:
+    for cat, w, rx in (WORDS if english else []):
         for m in rx.finditer(masked):
             ctx = text[max(0, m.start() - 40):m.end() + 40].replace("\n", " ")
             out.append((f"banned:{cat}", where, f"“{w}” in …{ctx}…"))
@@ -72,8 +93,11 @@ def lint_text(text, where="text", paid=False, analytics=False):
     return out
 
 
-def lint_html(html, where, paid, analytics, allowed_amounts, private_values):
-    out = lint_text(visible_text(html), where, paid, analytics)
+def lint_html(html, where, paid, analytics, allowed_amounts, private_values, commerce=None):
+    """commerce: True when any commerce flag (paid_report, pilot_checkout) is on; defaults to paid."""
+    commerce = paid if commerce is None else commerce
+    french = bool(re.search(r'<html lang="fr', html))
+    out = lint_text(visible_text(html), where, paid, analytics, english=not french)
     if "tally.so" in html:
         out.append(("tally", where, "tally.so"))
     from harvest_prices import amounts_in
@@ -88,11 +112,16 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values):
             out.append(("flag:paid_markup", where, "paid-only markup with paid_report = false"))
         if '"@type": "Product"' in html or '"@type":"Product"' in html:
             out.append(("flag:product_jsonld", where, "Product JSON-LD with paid_report = false"))
+    if not commerce:
         for v in private_values:
             if v and v in html:
                 out.append(("flag:seller_identity", where, "seller name/address/phone with paid_report = false"))
         if re.search(r"\[(SELLER|ADDRESS|PHONE) —", html):
             out.append(("flag:seller_placeholder", where, "seller placeholder with paid_report = false"))
+        if "data-seller-block" in html:
+            out.append(("flag:seller_block", where, "seller disclosure markup with every commerce flag off"))
+    if french:
+        out += lint_text_fr(visible_text(strip_disclaimers(html)), where)
     if analytics is False and "cloudflareinsights" in html:
         out.append(("flag:beacon", where, "analytics beacon with analytics = false"))
     return out
@@ -123,7 +152,7 @@ def owned_paths(paid):
     return out
 
 
-def lint_build(out_dir, paid=False, analytics=False):
+def lint_build(out_dir, paid=False, analytics=False, pilot=False):
     import build
     problems = []
     if os.path.isdir(os.path.join(out_dir, "dev")):
@@ -133,7 +162,7 @@ def lint_build(out_dir, paid=False, analytics=False):
     for path in owned_paths(paid):
         fp = build.out_file(out_dir, path)
         with open(fp, encoding="utf-8") as f:
-            problems += lint_html(f.read(), path, paid, analytics, amounts, priv)
+            problems += lint_html(f.read(), path, paid, analytics, amounts, priv, commerce=paid or pilot)
     # leaks and flag rules apply to EVERY file in the build, passthrough included
     for root, _, files in os.walk(out_dir):
         for name in files:
@@ -146,7 +175,7 @@ def lint_build(out_dir, paid=False, analytics=False):
             for rx in SECRETS:
                 if rx.search(s):
                     problems.append(("secret", rel, rx.pattern))
-            if not paid:
+            if not (paid or pilot):
                 for v in priv:
                     if v and v in s:
                         problems.append(("flag:seller_identity", rel, "private.toml value in the build"))
@@ -159,7 +188,7 @@ def main(argv):
     out_dir = argv[0] if argv else os.path.join(REPO, "site", "_site")
     paid = "--paid" in argv
     analytics = "--analytics" in argv
-    problems = lint_build(out_dir, paid, analytics)
+    problems = lint_build(out_dir, paid, analytics, pilot="--pilot" in argv)
     for rule, where, detail in problems:
         print(f"LINT {rule:22} {where}: {detail}")
     print("lint:", "PASS" if not problems else f"{len(problems)} problem(s)")

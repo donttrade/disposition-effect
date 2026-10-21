@@ -30,7 +30,7 @@ async function redeem(sessionId) {
 const params = new URLSearchParams(location.search);
 const sid = params.get('session_id');
 if (!sid) {
-  $('w-error-msg').textContent = 'No checkout was found in this link. If you paid, use the link in your Stripe receipt email, or restore by email.';
+  $('w-error-msg').textContent = 'No checkout was found in this link. If you paid, open the restore link or file you saved, or write to us within 14 days for a refund.';
   show('w-error');
 } else {
   history.replaceState(null, '', location.pathname); // the session id never stays in the address bar

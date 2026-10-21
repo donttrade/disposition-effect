@@ -1,4 +1,5 @@
-// restore.js — /restore/#t=<token> (restore link or file), or restore by email.
+// restore.js — /restore/#t=<token>: the restore link or file saved after payment. There is no
+// restore by email in v1 (decision 20 Oct): the link on the welcome screen is the only way back.
 import { api, saveToken, tokenFromHash, OUTAGE } from './token.js';
 
 const $ = (id) => document.getElementById(id);
@@ -17,21 +18,4 @@ async function fromToken(token) {
 
 const token = tokenFromHash();
 if (token) fromToken(token);
-
-$('r-form').addEventListener('submit', async (ev) => {
-  ev.preventDefault();
-  const email = $('r-email').value.trim();
-  const err = $('r-email-err');
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    err.textContent = 'Enter the email address you paid with, like name@example.com.';
-    err.hidden = false;
-    $('r-email').setAttribute('aria-invalid', 'true');
-    return;
-  }
-  err.hidden = true;
-  $('r-email').removeAttribute('aria-invalid');
-  const r = await api('/restore', { email });
-  $('r-sent').textContent = r.status === 0 || r.status >= 500
-    ? OUTAGE
-    : 'If that email paid for a report, a restore link is on its way. It works for 15 minutes.';
-});
+else $('r-status').textContent = 'Open the restore link or the restore file you saved after payment. Restore by email is not offered.';

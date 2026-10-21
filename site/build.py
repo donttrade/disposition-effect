@@ -122,6 +122,45 @@ PAGES += [
      "description": "Your message reached donttrade. Firms get a reply within 1 business day; traders get one email at launch."},
 ]
 
+# Legal pages (step 17). The French versions (/fr/…) exist only with paid_report on; the
+# hreflang pair is declared only then (alternates_if_paid).
+PAGES += [
+    {"template": "pages/privacy.html", "path": "/privacy/", "requires_flag": None, "updated": "2026-10-21",
+     "crumb": "Privacy", "alternates_if_paid": [("en", "/privacy/"), ("fr", "/fr/confidentialite/"), ("x-default", "/privacy/")],
+     "title": "Privacy Notice — donttrade",
+     "description": "What donttrade collects and why: no cookies, free tools that read your file in your browser, "
+                    "Web3Forms forms, Gmail, Stripe and your rights."},
+    {"template": "pages/terms.html", "path": "/terms/", "requires_flag": None, "updated": "2026-10-21",
+     "crumb": "Terms", "alternates_if_paid": [("en", "/terms/"), ("fr", "/fr/conditions/"), ("x-default", "/terms/")],
+     "title": "Terms, Refunds and the Pilot — donttrade",
+     "description": "Payment, delivery, refund and Pilot terms for donttrade engagements, and the current status of "
+                    "the trader report, in plain language."},
+]
+
+# French versions (FRENCH-LEGAL-AND-CHECKOUT-DRAFTS §8.1), habit report only, behind the same
+# commerce flag as the English consumer clauses. Unreviewed drafts: lawyer + legal translator first.
+PAGES += [
+    {"template": "pages/fr/avant-de-payer.html", "path": "/fr/avant-de-payer/", "requires_flag": "paid_report",
+     "lang": "fr", "crumb": "Avant de payer", "updated": "2026-10-21", "scripts": ["/static/js/print.js"],
+     "alternates": [("fr", "/fr/avant-de-payer/"), ("en", "/pricing/"), ("x-default", "/pricing/")],
+     "title": "Avant de payer : Rapport d’habitudes — donttrade",
+     "description": "Ce que vous acceptez avant de payer le Rapport d’habitudes : vendeur, prix en dollars américains, "
+                    "exigences techniques, remboursements et restrictions."},
+    {"template": "pages/fr/conditions.html", "path": "/fr/conditions/", "requires_flag": "paid_report",
+     "lang": "fr", "crumb": "Conditions", "updated": "2026-10-21",
+     "alternates": [("fr", "/fr/conditions/"), ("en", "/terms/"), ("x-default", "/terms/")],
+     "title": "Conditions de service et de vente — donttrade",
+     "description": "Conditions du Rapport d’habitudes donttrade : prix, paiement, livraison, nouveau test, "
+                    "remboursements et droit de rétractation."},
+    {"template": "pages/fr/confidentialite.html", "path": "/fr/confidentialite/", "requires_flag": "paid_report",
+     "lang": "fr", "crumb": "Confidentialité", "updated": "2026-10-21",
+     "alternates": [("fr", "/fr/confidentialite/"), ("en", "/privacy/"), ("x-default", "/privacy/")],
+     "title": "Politique de confidentialité — donttrade",
+     "description": "Ce que donttrade recueille et pourquoi : aucun témoin, fichier lu dans votre navigateur, "
+                    "chiffres épurés pour le rapport payant, et vos droits."},
+]
+PAID_ONLY_PATHS_FR = ["/fr/avant-de-payer/", "/fr/conditions/", "/fr/confidentialite/"]
+
 # The /tools/ index rows: tool, the question it answers, input, Open (plan step 12).
 TOOLS = [
     {"name": "Trade stats", "href": "/tools/trade-stats/",
@@ -203,7 +242,8 @@ PAGES.append({"template": "pages/pricing.html", "path": "/pricing/", "requires_f
                              "same for everyone and fixed in writing before anyone sees data."})
 
 # Paths that may exist only when paid_report = true.
-PAID_ONLY_PATHS = ["/welcome/", "/restore/", "/report/"]
+PAID_APP_PATHS = ["/welcome/", "/restore/", "/report/"]  # noindex, and disallowed in robots.txt
+PAID_ONLY_PATHS = PAID_APP_PATHS + PAID_ONLY_PATHS_FR
 
 
 class BuildError(Exception):
@@ -282,6 +322,13 @@ def usd(n):
     if n != int(n):
         die(f"price {n} is not a whole number of dollars")
     return "${:,}".format(int(n))
+
+
+def usd_fr(n):
+    """39,00 $ US — Québec style (FRENCH-LEGAL: amounts written « 79,00 $ US »)."""
+    if n != int(n):
+        die(f"price {n} is not a whole number of dollars")
+    return "{:,}".format(int(n)).replace(",", "\u00a0") + ",00\u00a0$\u00a0US"
 
 
 def csp_for(page, cfg):
@@ -381,7 +428,7 @@ def write_sitemap_and_robots(out, cfg, built_pages, flags):
         f.write("\n".join(lines) + "\n")
     robots = ["User-agent: *", "Allow: /"]
     if flags["paid_report"]:
-        robots += [f"Disallow: {p}" for p in PAID_ONLY_PATHS]
+        robots += [f"Disallow: {p}" for p in PAID_APP_PATHS]
     robots.append(f"Sitemap: {base}/sitemap.xml")
     with open(os.path.join(out, "robots.txt"), "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(robots) + "\n")
@@ -431,6 +478,14 @@ def verify(out, flags):
             html = f.read()
         if not re.search(r'\sid="' + re.escape(i) + '"', html):
             die(f"externally linked id missing: {p}#{i}")
+    if not any(flags.get(f) for f in COMMERCE_FLAGS):
+        for root, _, files in os.walk(out):
+            for name in sorted(files):
+                if name.endswith(".html"):
+                    fp = os.path.join(root, name)
+                    with open(fp, encoding="utf-8", errors="replace") as f:
+                        if "data-seller-block" in f.read():
+                            die(f"seller disclosure in {os.path.relpath(fp, out)} while every commerce flag is off")
     if not flags["paid_report"]:
         for p in PAID_ONLY_PATHS:
             if os.path.exists(out_file(out, p)):
@@ -470,6 +525,7 @@ def build():
     env = Environment(loader=FileSystemLoader(os.path.join(SITE, "templates")), undefined=StrictUndefined,
                       autoescape=True, keep_trailing_newline=True)
     env.filters["usd"] = usd
+    env.filters["usd_fr"] = usd_fr
     products = {p["id"]: p for p in prices["products"]}
     base_ctx = {"site": cfg["site"], "flags": flags, "nav": cfg["nav"], "footer": cfg["footer"],
                 "legal": cfg["legal"], "forms": cfg["forms"], "analytics": cfg["analytics"],
@@ -482,6 +538,7 @@ def build():
                 "alternates": [], **page}
         if flags["paid_report"]:
             page["scripts"] = page["scripts"] + page.get("scripts_if_paid", [])
+            page["alternates"] = page.get("alternates_if_paid", page["alternates"])
         extra = {"sample_csv": sample_csv()} if page.get("sample") else {}
         html = env.get_template(page["template"]).render(page=page, csp=csp_for(page, cfg), **base_ctx, **extra)
         if html.count(LD_MARKER) != 1:

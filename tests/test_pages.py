@@ -21,7 +21,7 @@ from a11y import axe_violations, horizontal_overflow  # noqa: E402
 import build as B  # noqa: E402
 
 PAGES = ["/", "/for-traders/", "/for-firms/", "/pricing/", "/start/", "/for-platforms/", "/start/thanks/",
-         "/for-traders/thanks/", "/thanks/"]
+         "/for-traders/thanks/", "/thanks/", "/privacy/", "/terms/"]
 # Links to anchors that the NEXT step builds. Each step that builds one removes it here.
 FORWARD = set()
 
