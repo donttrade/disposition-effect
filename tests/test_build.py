@@ -121,15 +121,23 @@ def test_private_toml_is_gitignored():
     assert r.returncode == 0
 
 
-def test_home_is_new_template_and_others_pass_through(tmp_path):
+def test_home_and_lifted_pages_are_templates_and_passthrough_still_works(tmp_path, monkeypatch):
     r, out = run_build(tmp_path, "x")
     assert r.returncode == 0
     home = (out / "index.html").read_text()
     assert "/static/css/site.css" in home and "Measure the gap between your traders" in home
-    # passthrough = the docs/ page byte for byte, except the site-wide chrome fixes (header/footer wording)
+    # steps 28–29: /about/ is a lifted template page (v2 head, header and footer; old body frozen)
+    about = (out / "about" / "index.html").read_text(encoding="utf-8")
+    assert "/static/css/site.css" in about and '<main id="main" class="lifted">' in about
+    assert about.count("<!--frozen:start-->") == 1 and '<header class="site">' not in about
+    # a docs/ page that no template owns still passes through: byte for byte, except the
+    # site-wide chrome fixes, which fail loudly when they don't match (pre-bundle docs/)
+    monkeypatch.setattr(B, "PAGES", [p for p in B.PAGES if p["path"] != "/about/"])
+    monkeypatch.setenv("DT_OUT", str(tmp_path / "pt"))
+    B.build()
     docs = open(os.path.join(REPO, "docs/about/index.html"), encoding="utf-8").read()
     flags = {"paid_report": False, "analytics": False, "pilot_checkout": False, "trader_first_home": False}
-    assert (out / "about" / "index.html").read_text(encoding="utf-8") == B.fix_passthrough_chrome(docs, "about/index.html", flags)
+    assert (tmp_path / "pt" / "about" / "index.html").read_text(encoding="utf-8") == B.fix_passthrough_chrome(docs, "about/index.html", flags)
 
 
 def test_harvest_check_passes_on_live_pricing():

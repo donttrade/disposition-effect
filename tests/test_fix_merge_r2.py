@@ -357,10 +357,13 @@ def test_r5_flag_off_build_keeps_the_waitlist(built_site):
 
 
 def test_r5_passthrough_nav_drops_coming_soon_only_when_paid(paid_site, built_site):
-    for out, soon in ((paid_site["out"], 0), (built_site["out"], 2)):
+    # steps 28–29: /about/ (lifted) has the v2 header, whose trader link never says "coming soon"
+    for out in (paid_site["out"], built_site["out"]):
         h = open(os.path.join(out, "about", "index.html"), encoding="utf-8").read()
-        assert h.count('Individual traders <span class="soon">coming soon</span></a>') == soon
-        assert h.count('href="/for-traders/">Individual traders') >= 2   # nav + mobile menu (+ footer)
+        nav = h[h.index('<nav class="site-nav"'):h.index("</nav>")]
+        assert "coming soon" not in nav.lower() and 'href="/for-traders/"' in nav
+    paid = open(os.path.join(paid_site["out"], "about", "index.html"), encoding="utf-8").read()
+    assert 'Individual traders <span class="soon">coming soon</span>' not in paid
 
 
 def test_r5_paid_metadata_and_faq_jsonld(paid_site):
@@ -390,12 +393,12 @@ def test_r5_lint_fails_a_paid_build_that_says_waitlist(paid_site, tmp_path, plan
     import shutil
     out = tmp_path / "site"
     shutil.copytree(paid_site["out"], out)
-    for rel in ("tools/trade-stats/index.html", "about/index.html"):   # an owned page and a passthrough page
+    for rel in ("tools/trade-stats/index.html", "about/index.html"):   # a template page and a lifted page
         fp = out / rel
         fp.write_text(fp.read_text(encoding="utf-8").replace("</head>", plant + "</head>", 1).replace("<main", plant + "<main", 1), encoding="utf-8")
     problems = L.lint_build(str(out), paid=True)
     where = {w for r, w, _ in problems if r == "claim:not_on_sale"}
-    assert {"/tools/trade-stats/", "/about/index.html"} <= where, problems
+    assert {"/tools/trade-stats/", "/about/"} <= where, problems
 
 
 # ------------------------------------------------------------------ R6: the French legal pages promise what the English ones do

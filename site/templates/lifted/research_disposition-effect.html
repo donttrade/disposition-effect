@@ -1,0 +1,150 @@
+
+
+<div class="wrap page-head"><div class="col">
+  <p class="kicker">STUDY · REPLICATION · 6 OCT 2026</p>
+  <h1 class="long">76.1% of 4,659 retail traders realised their gains more readily than their losses.</h1>
+  <p class="lede ls-measure">Disposition effect measured with Odean’s method on a public CC0 panel. 3,547 of 4,659 traders showed the effect; a 95% interval on that share, treating traders as independent, is 74.9–77.3% — and the post explains why they are not quite independent.</p>
+  <p class="meta">Published 6 Oct 2026 · Reviewed 17 Oct 2026 · Script: <a href="https://github.com/donttrade/disposition-effect">github.com/donttrade/disposition-effect</a> · Data: Jin, Li &amp; Zhu (2021), CC0, Harvard Dataverse · Originally at <a href="https://donttrade.substack.com/p/76-of-4659-retail-traders-sold-their">Substack</a></p>
+  <p class="funding"><strong>Funding: none.</strong> No firm paid for, saw or approved this study. <a href="/independence/">How donttrade is paid →</a></p>
+  <div class="standing">Published whether or not the result was interesting. The script and data are linked above.</div>
+  <p class="update"><strong>Update, 17 Oct 2026:</strong> a robustness update tests whether the effect survives when holding age is held fixed. The direction does; the size depends on how “gain” is timed, and a V-shaped selling pattern is not ruled out. The headline figures above are unchanged. <a href="#robustness-update">Read the update ↓</a></p>
+  <figure>
+<p class="chart-title">Proportion of gains realised vs losses realised, per trader then averaged (share of held positions closed per day, counted on every day a position is held)</p>
+<svg class="chart-d" viewBox="0 0 720 204" width="720" height="204" role="img" aria-label="Proportion of gains realised 0.1925 versus proportion of losses realised 0.1200, per trader then averaged: a ratio of 1.61.">
+  <text x="370" y="28" font-family="system-ui,sans-serif" font-size="15" font-weight="600" fill="var(--text)" text-anchor="middle">Ratio 1.61: gains realised more readily than losses</text>
+  <g font-family="system-ui,sans-serif">
+    <text x="128" y="76" text-anchor="end" font-size="14" fill="var(--text)">PGR</text>
+    <text x="128" y="92" text-anchor="end" font-size="13" fill="var(--text-muted)">gains realised</text>
+    <text x="128" y="148" text-anchor="end" font-size="14" fill="var(--text)">PLR</text>
+    <text x="128" y="164" text-anchor="end" font-size="13" fill="var(--text-muted)">losses realised</text>
+  </g>
+  <line x1="140" y1="174" x2="600" y2="174" stroke="var(--border-ui)" stroke-width="1"/>
+  <g font-family="system-ui,sans-serif" font-size="13" fill="var(--text-muted)" text-anchor="middle">
+    <text x="140" y="192">0</text><text x="370" y="192">0.10</text><text x="600" y="192">0.20</text>
+  </g>
+  <rect x="140" y="56" width="443" height="32" fill="var(--chart-1)" rx="2"/>
+  <text x="591" y="77" font-family="system-ui,sans-serif" font-size="15" font-weight="600" fill="var(--text)">0.1925</text>
+  <rect x="140" y="128" width="276" height="32" fill="var(--chart-6)" rx="2"/>
+  <text x="424" y="149" font-family="system-ui,sans-serif" font-size="15" font-weight="600" fill="var(--text)">0.1200</text>
+</svg>
+<svg class="chart-m" viewBox="0 0 272 178" width="272" height="178" role="img" aria-label="Proportion of gains realised 0.1925 versus proportion of losses realised 0.1200, per trader then averaged: a ratio of 1.61.">
+ <g font-family="system-ui,sans-serif">
+  <text x="8" y="17" font-size="14" font-weight="600" fill="var(--text)">Ratio 1.61</text>
+  <text x="8" y="42" font-size="13" fill="var(--text)">PGR · gains realised</text>
+  <rect x="8" y="50" width="189" height="28" fill="var(--chart-1)" rx="2"/>
+  <text x="203" y="69" font-size="15" font-weight="600" fill="var(--text)">0.1925</text>
+  <text x="8" y="102" font-size="13" fill="var(--text)">PLR · losses realised</text>
+  <rect x="8" y="110" width="118" height="28" fill="var(--chart-6)" rx="2"/>
+  <text x="132" y="129" font-size="15" font-weight="600" fill="var(--text)">0.1200</text>
+  <line x1="8" y1="150" x2="204" y2="150" stroke="var(--border-ui)" stroke-width="1"/>
+  <g font-size="13" fill="var(--text-muted)">
+   <text x="8" y="168">0</text><text x="106" y="168" text-anchor="middle">0.10</text><text x="204" y="168" text-anchor="middle">0.20</text>
+  </g>
+ </g>
+</svg>
+<p class="fig-open"><a href="/assets/charts/disposition-pgr-plr.svg" target="_blank" rel="noopener">Open the chart full size (SVG, new tab) ↗</a></p>
+<figcaption>Figures as computed by <code>reproduce.py</code>, which counts every day a position is held, not only days on which the trader sold something. Pooled across every observation instead, the ratio is 1.47 (PGR 0.0785, PLR 0.0535); the denominators differ, and quoting one without the other is picking. <a href="/data/disposition-pgr-plr.csv" download>Download the numbers behind this chart (CSV)</a></figcaption>
+</figure>
+  <p class="funding ls-mtn8">This figure describes one public panel. It says nothing about any firm’s traders.</p>
+  <div class="post">
+  <p>Every broker and prop firm will tell you discipline is what separates traders who last from traders who don’t. Several of them ship apps to help with it.</p><p>I went looking for a controlled evaluation of any of those tools — a holdout, a before-and-after, any counterfactual at all. There isn’t one. Not a single company in the category has published one.</p><p>There are numbers. Topstep publishes “50% Longer” for accounts that set a Daily Loss Limit, footnoted to internal data with no sample and no control — and confounded, because setting a limit also unlocks payout benefits, so the people who set one are self-selected. Capital.com’s 2019 white paper is the most methodologically explicit document in the category and still only reports that newcomers who chose to read its messages improved 6.5%. hoc-trade publishes dozens of percentages attributed to “TradeMedic Research, 2026” on 500,000+ accounts; its own research page reads “Coming Soon.”</p><p>The only randomised trial I could find in this space is the Ontario Securities Commission’s 2022 gamification study — 2,430 participants — and it measured harm from gamification rather than benefit from remediation. Points made people trade 39% more.</p><p>So instead of a fix, I measured the problem. From public portfolios on a social-trading platform, on data anyone can download free in about ten minutes.</p><h2 id="the-thing-being-measured">The thing being measured</h2><p>In 1998 Terrance Odean published a paper with a deliberately boring title — “Are Investors Reluctant to Realize Their Losses?” — and a finding that has refused to go away.</p><p>He took brokerage records and asked one question. When someone was sitting on a winner and a loser, which did they sell?</p><p>PGR is, of the winning positions someone could have sold, the fraction they sold. PLR is the same, for losing positions. If people were indifferent, these would be about equal.</p><p>Odean found PGR 0.148 and PLR 0.098 — winners sold, in his words, “a little over 1.5” times more readily than losers. The dataset was 10,000 accounts at a large discount brokerage, 1987 to 1993; the PGR/PLR test rests on the 6,380 of those accounts trading CRSP-listed stocks, across 97,483 transactions.</p><p>That is the disposition effect. It is why “cut your losses, let your winners run” is advice that needs repeating — most people do the opposite and do not notice.</p><h2 id="the-data">The data</h2><p>Replication files for a 2021 PLoS ONE study sit on Harvard Dataverse under CC0 1.0 — public domain, no permission, no request form, no login.</p><p>Xuejun Jin, Rui Li and Yu Zhu, “Could social interaction reduce the disposition effect? Evidence from retail investors in a directed social trading network,” PLoS ONE 16(2), 11 February 2021, doi:10.1371/journal.pone.0246759. Data: doi:10.7910/DVN/NI6SBJ.</p><p>The platform is Xueqiu.com, which the authors describe as China’s largest social trading platform. The holdings are Shanghai and Shenzhen A-shares. The dataset covers 4,732 traders. The main panel file I compute on contains 4,731 of them, across 3,501 distinct stocks and 2,780,879 trader-stock-lot-days, from 24 June 2016 to 27 March 2018.</p><p>Each row carries two binary flags: did you close this position today, and was it in profit. PGR and PLR are a two-way crosstab of those two columns. There is no model and nothing to tune — which is the point. There is nowhere to hide a researcher degree of freedom.</p><p>One thing to be clear about up front, because it is the first question a careful reader should ask. This dataset’s unit of observation is every stock-day a position is held, not every day a sale happened. So my PGR and PLR are daily hazards: P(close today, given in profit today). That is the authors’ own design, not a choice I imposed. Odean’s convention is different, and it changes which comparisons are legitimate — more on that below.</p><h2 id="the-result">The result</h2><p>Pooled across every observation: PGR 0.0785, PLR 0.0535. A ratio of 1.47x.</p><p>Computed per trader and then averaged, so that one hyperactive account cannot carry the result: PGR 0.1925, PLR 0.1200. A ratio of 1.61x.</p><p>And the number I would actually put in front of someone: 76.1% of individual traders realised gains more readily than losses. That is 3,547 of the 4,659 traders who held at least one winner and at least one loser, so that both measures are defined for them. Paired t = 33.5. Cohen’s d = 0.49. Binomial p on the order of 10^-293.</p><p>Three in four, counted trader by trader, so not an artifact of pooling. Whether it reflects a preference for selling gains is not established: the direction survives a holding-age control, but the size depends on how “gain” is timed, and a V-shaped selling pattern is not ruled out (see the <a href="#robustness-update">robustness update, 17 Oct 2026</a>, below).</p><p>Worth noting: Jin, Li and Zhu never report PGR or PLR. They report hazard and odds ratios from survival and logistic models. So this particular measurement appears to be new even on their own data, though it is arithmetic rather than anything clever.</p><h2 id="three-caveats-that-move-the-number">Three caveats that move the number</h2><p>I would rather state these than have them found.</p><h3 id="s-1-the-dataset-s-two-files-are-nested-not-independent">1. The dataset’s two files are nested, not independent</h3><p>The archive ships two files. It is tempting to treat them as two samples and report both. They are not independent, and I checked: 2,648 of file 1’s 2,649 traders are also in file 2 — 100.0% — along with all 3,468 of its stocks and 99.6% of its trader-stock-day keys.</p><p>File 1 is the subsample of traders selected on having acquired at least one follower; it carries the follow-date columns for the paper’s pre/post-follow design. Selecting on being followed is selecting on a behavioural variable, plausibly correlated with activity and skill.</p><p>It gives 1.75x — same sign, larger magnitude. I report it as a robustness check and not as a replication. Anyone adding the two trader counts together to claim 7,380 traders is double-counting. The union is 4,732.</p><h3 id="s-2-multiple-lots-in-the-same-stock-on-the-same-day">2. Multiple lots in the same stock on the same day</h3><p>About 0.18% of rows share the same trader, stock and day; in most of those groups the profit flag differs — multiple lots opened at different prices, one in profit and one under water. So the true unit is trader-stock-lot-day.</p><p>I keep every lot. Collapsing them to one row per trader-stock-day instead moves the per-trader ratio from 1.61x to 1.78x, and the share from 76.1% to 78.8%.</p><p>Robust in sign, sensitive in magnitude. The alternative treatment gives a stronger result, which is exactly why it should be disclosed rather than quietly chosen.</p><h3 id="s-3-my-levels-are-not-comparable-to-odean-s-only-the-ratio-is">3. My levels are not comparable to Odean’s. Only the ratio is.</h3><p>Odean counted only days on which a sale occurred. In his words: “On days when no sales take place in an account, no gains or losses, realized or paper, are counted.” Mine counts every held day.</p><p>That is not a small difference, and Odean’s own paper shows how large it is. His account-level alternative, on the same data, gives PGR 0.57 and PLR 0.36 — against the 0.148 and 0.098 of his Table I.</p><p>So: Odean’s sale-day denominator gives a ratio of 1.51. His account-level alternative gives 1.58. This dataset gives 1.61. The levels move by a factor of roughly four — 3.85× on PGR and 3.67× on PLR. Within Odean’s own data the ratio moves under 5% (1.51 to 1.58); from his 1.51 to this dataset’s 1.61 it moves more, and <code>reproduce.py</code> prints “the ratio moves &lt;7%”.</p><p>Ratios survive the change of denominator and levels do not. That is why every comparison in this post is a ratio, and why you should be suspicious of anyone putting a PGR level from one study beside a PGR level from another without saying which denominator each used.</p><h2 id="check-it-yourself">Check it yourself</h2><p>Download the file and run a few lines.</p><pre tabindex="0" role="region" aria-label="Code example"><code>
+curl -sL "https://dataverse.harvard.edu/api/access/datafile/4053809" -o sample2.Rdata
+pip install pyreadr
+
+import pyreadr
+df = list(pyreadr.read_r("sample2.Rdata").values())[0]
+print(df[df.gain == 1].sale.mean(), df[df.gain == 0].sale.mean())</code></pre><p>You should get 0.078536 and 0.053510. If you get anything else, I want to hear about it. There are no nulls in either column, so there is nothing to drop first.</p><p>The full code — the download, every number in this post, and the robustness checks — is in a public repo: <a href="https://github.com/donttrade/disposition-effect">github.com/donttrade/disposition-effect</a>. One script, MIT licensed, no dependencies beyond pandas, numpy, scipy and pyreadr. If it does not reproduce for you, open an issue. The robustness update below (17 Oct 2026) was computed with separate scripts that are not yet in the repository.</p><h2 id="what-this-does-not-show">What this does not show</h2><p>It measures the problem, not a fix. Nothing here says whether anything corrects the disposition effect.</p><p>Chinese A-shares, mid-2016 to early 2018, one social-trading platform. Whether it holds for North American retail today is an assumption, not a result.</p><p>Social-trading users are a selected population. Xueqiu cube operators chose to run public portfolios.</p><p>I did not collect this data. It is someone else’s replication file, released CC0. The contribution is the computation and publishing it.</p><p>The pooled and per-trader ratios differ, 1.47x against 1.61x, because the denominators differ. Both are above 1. Quoting one without the other is picking.</p><p>Significance is not effect size. The t-statistics are enormous because n is enormous. Cohen’s d of 0.49 is the honest magnitude of this measure: moderate, not overwhelming. The robustness update below shows the size also depends on how “gain” is timed.</p><p>No minimum activity was required. A trader with one winning and one losing held day counts the same as one with thousands; how sensitive the share is to a minimum-activity rule has not been computed.</p><p>Traders whose two rates are exactly equal are counted as not showing the effect; reproduce.py does not report how many there are.</p><p>The source data’s gain flag is 1 only when a position was in profit, so a break-even day counts on the loss side. The client script, partner_disposition.py, drops break-even rows instead.</p><h2 id="robustness-update">Robustness update, 17 Oct 2026: does the effect survive holding age?</h2>
+<p><strong>In short: the pattern does not go away when holding age is held fixed, but its size depends on how
+“gain” is timed and on one test that could not be run.</strong></p>
+<p><strong>Why we checked.</strong> Positions get sold less often the longer they are held. If losing positions tend to be
+older, they will look “held on to” even when nobody is reluctant to sell them. On made-up data with no
+disposition effect, only that age pattern, the method used in this study reported an effect in 20 of 20
+trials. So I wrote a new test and a pass mark down before running it on this panel. The seal hash is
+recorded in SEAL-ROBUST.md and will be published in the study repository’s commit history.</p>
+<p><strong>What came out.</strong></p>
+<div class="table-scroll" tabindex="0" role="region" aria-label="Robustness update results"><table>
+<thead>
+<tr>
+<th>Measure</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Original pooled ratio (all ages mixed)</td>
+<td>1.47</td>
+</tr>
+<tr>
+<td>Same, holding age fixed</td>
+<td><strong>1.33</strong> (95% CI 1.31–1.36)</td>
+</tr>
+<tr>
+<td>Each trader compared with themselves, same holding day (the pre-registered test)</td>
+<td><strong>1.70</strong> (95% CI 1.63–1.78)</td>
+</tr>
+<tr>
+<td>Positions held ≤ 1 day</td>
+<td>2.27</td>
+</tr>
+<tr>
+<td>Held 2–5 / 6–20 / 21–60 / 61–250 days</td>
+<td>1.21 / 1.07 / 1.13 / 1.10</td>
+</tr>
+<tr>
+<td>Held more than 250 days</td>
+<td>0.98 (95% CI 0.85–1.12): no detectable effect</td>
+</tr>
+<tr>
+<td>Traders showing the effect, same sample: before / after holding age is fixed</td>
+<td>75.3% / 74.9%</td>
+</tr>
+</tbody>
+</table></div>
+<p>The pre-registered rule says the effect <strong>survives</strong>. The 1.70 is higher than the pooled 1.47 because it
+compares each trader with themselves; pooling mixes traders, and that dilutes the gap.</p>
+<p><strong>What this changes.</strong> More than a quarter of the pooled gap was an age effect. Positions held a day or less
+are 6% of the rows, but most of the pooled effect sits there: without them (a check made after seeing the
+results), the age-fixed ratio falls from 1.33 to 1.13, and the within-trader estimate falls by about 40%.</p>
+<p><strong>Two caveats that limit the result.</strong> The pass rule counted the effect as surviving without the
+Ben-David &amp; Hirshleifer (2012) test, which separates a preference for selling gains from a habit of selling
+big moves in either direction. That test failed its data check, so a V-shaped selling pattern is not ruled
+out. And in a second check, also made after seeing the results, I used each position’s gain or loss from the
+day before instead of the same day. The within-trader ratio then fell to 1.29 and the age-fixed pooled ratio
+to 1.01, though the within-trader estimate stayed clearly above zero. The same-day flag may partly reflect
+the sale itself. This is not proven. The flag changes from the day before on 8.22% of sale rows against 3.90% of
+other rows, but that asymmetry is not by itself evidence of look-ahead: in made-up data with no look-ahead at all,
+built for the portfolio-driven study’s checks, it was 18.1% against 11.0%.</p>
+<p><strong>About the gain flag.</strong> “Gain” is the platform’s own flag, from the dataset. It matches the sign of the
+price change since purchase on 72% of rows, and on only 62% for positions a day old or less. What it is
+calculated from is not documented.</p>
+<p>This shows the pattern is not just an age effect. It does not show how large it is, or why traders sell
+winners.</p>
+<h2 id="next">Next</h2><p class="update"><strong>Update, 15 Oct 2026:</strong> the next study published was a different one, on whether insider buying predicts returns (<a href="/research/insider-buying-edge/">read it</a>). The PGR/PLR estimate from Form 4 described below has not been published yet. The original text is kept below; the wording corrections made on this site are listed under Versions.</p><p>A second estimate, from a population with nothing in common with this one. SEC Form 4 insider transactions — bulk files, free, 2006 to present. Restricted to open-market purchases followed by open-market sales, dropping grants, vesting, option exercises and scheduled 10b5-1 plan sales, none of which are decisions. As far as I can tell nobody has computed PGR/PLR from it.</p><p>Two uncorrelated sources agreeing would be worth having. If they disagree, that is more interesting still, and it gets published either way.</p><p>Methods and negative results, yes. Live signals, never.</p><p>This is independent research published for informational and educational purposes. It is not investment advice, it is not tailored to anyone’s circumstances, and it recommends no security or strategy. No position is held in anything named here, because nothing is named here.</p>
+  </div>
+  <h2 id="versions">Versions</h2>
+<div class="table-scroll versions" tabindex="0" role="region" aria-label="Versions table"><table><thead><tr><th>Date</th><th>What changed</th></tr></thead><tbody><tr><td>6 Oct 2026</td><td>Published.</td></tr><tr><td>15 Oct 2026</td><td>Dated update note added above the “Next” section: the next study published was a different one. On-site wording corrections, no figure changed: the unit is now stated as trader-stock-lot-days; the headline share in the body is now 76.1% and uses the same wording as the title, gains realised more readily than losses; “four lines” is now “a few lines”; the dependency list now names numpy and scipy, as requirements.txt does. Later the same day: “From real traders” now reads “From public portfolios on a social-trading platform”, because whether the portfolios held real money is not verified here; “The ratio moves under 5%” now says that holds within Odean’s own data and quotes what reproduce.py prints for this dataset; three limitations added under “What this does not show” (no minimum activity, ties, break-even handling).</td></tr><tr><td>15 Oct 2026</td><td>Licence notice below the study: the permitted wording is now “measured by donttrade under a fixed-scope agreement”, and the notice no longer lists “verified” among the permitted terms. No figure changed.</td></tr><tr><td>16 Oct 2026</td><td>reproduce.py’s download step now sends an explicit User-Agent, because Harvard Dataverse refused Python’s default client with HTTP 403; it also writes to a temporary file first. Re-run end to end from a fresh download: no figure changed. See Corrections.</td></tr><tr><td>16 Oct 2026</td><td>Wording: the 0.18% figure is now described as the share of rows that share a trader-stock-day key (in most of those groups the profit flag differs), as the root README states. No figure changed.</td></tr><tr><td>17 Oct 2026</td><td>Robustness update added as a dated section after “What this does not show”: a pre-registered test of whether the effect survives when holding age is held fixed, with two post-hoc checks. A robustness disclosure, not a correction: no published figure changed. Wording qualified to match it: a dated update note under the standing note; “Three in four. Not an aggregate artifact — a property of most individual people in the sample” now reads “Three in four, counted trader by trader, so not an artifact of pooling”, and says that a preference for selling gains is not established; “Cohen’s d of 0.49 is the honest magnitude” now says “of this measure” and points to the update; the “full code” paragraph now says the update’s scripts are not yet in the repository. See <a href="/corrections/#disclosures">Corrections</a>.</td></tr><tr><td>17 Oct 2026</td><td>Later the same day, one sentence added to the robustness update’s gain-timing caveat: the gain flag changes from the day before on 8.22% of sale rows against 3.90% of other rows, but that asymmetry is not by itself evidence of look-ahead, because made-up data with no look-ahead show a similar gap (18.1% against 11.0%). No figure changed.</td></tr></tbody></table></div>
+  <p class="meta">Text and charts: <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>. Study code: MIT. The numbers are facts: quote them freely, with a link. A figure may be described as “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a fixed-scope agreement” only when it comes from a signed engagement; no one may describe it as audited, certified or verified.</p>
+  <details class="cite"><summary>Cite this study</summary>
+<p>donttrade (2026). <em>76.1% of 4,659 retail traders realised their gains more readily than their losses</em>. Published 6 Oct 2026. https://donttrade.ca/research/disposition-effect/</p>
+<pre tabindex="0" role="region" aria-label="BibTeX citation"><code>@misc{donttrade2026disposition,
+  author = {donttrade},
+  title  = {76.1\% of 4,659 retail traders realised their gains more readily than their losses},
+  year   = {2026},
+  url    = {https://donttrade.ca/research/disposition-effect/},
+  note   = {Code: https://github.com/donttrade/disposition-effect}
+}</code></pre></details>
+  <section class="next-block" aria-label="What next">
+  <p class="kicker">WHAT NEXT</p>
+  <ol>
+    <li><p class="lead ls-mb10-ui">Get the next study by email</p><form action="https://donttrade.substack.com/subscribe" method="get">
+    <label class="skip" for="em">Email address</label>
+    <input id="em" type="email" name="email" placeholder="you@example.com" required autocomplete="email">
+    <button type="submit">Email me the next study</button>
+  </form></li>
+    <li><a href="/research/insider-buying-edge/">Read another study: the insider-buying edge was mostly 2008 →</a></li>
+    <li><a href="https://github.com/donttrade/disposition-effect">Re-run this one (script) →</a></li>
+  </ol>
+</section>
+<p class="study-firms">Work at a prop firm or broker? <a href="/for-firms/">For firms →</a></p>
+</div></div>
+

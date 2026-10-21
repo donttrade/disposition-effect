@@ -1,0 +1,295 @@
+{
+ "attrs": [
+  "nav[aria-label]=Contents",
+  "div[aria-label]=Table 1",
+  "div[aria-label]=Table 2",
+  "div[aria-label]=Table 3",
+  "div[aria-label]=Table 4",
+  "div[aria-label]=Table 5",
+  "div[aria-label]=Table 6",
+  "pre[aria-label]=Commands, block 1",
+  "pre[aria-label]=Commands, block 2",
+  "div[aria-label]=Versions table",
+  "pre[aria-label]=BibTeX citation",
+  "section[aria-label]=What next",
+  "input[placeholder]=you@example.com"
+ ],
+ "citation": [
+  [
+   "citation_title",
+   "A pre-registered test of volatility-scaled momentum failed its own kill criteria at five positions"
+  ],
+  [
+   "citation_author",
+   "donttrade"
+  ],
+  [
+   "citation_publication_date",
+   "2026/10/16"
+  ],
+  [
+   "citation_pdf_url",
+   "https://donttrade.ca/research/volatility-scaled-momentum/donttrade-volatility-scaled-momentum.pdf"
+  ]
+ ],
+ "fixes": [],
+ "ids": [
+  "the-short-version",
+  "what-was-tested-and-why",
+  "what-was-fixed-before-any-return-was-computed",
+  "data-and-period",
+  "method",
+  "results",
+  "part-a-the-mechanism-survivorship-free-holdout-1981-2026-n-5",
+  "part-b-five-positions-long-only-costs-charged-holdout-2013-2",
+  "what-this-does-not-show",
+  "reproduce-it",
+  "references",
+  "versions",
+  "em"
+ ],
+ "links": [
+  "a[href]=https://github.com/donttrade/disposition-effect/tree/main/volmom",
+  "a[href]=/independence/",
+  "a[href]=#the-short-version",
+  "a[href]=#what-was-tested-and-why",
+  "a[href]=#what-was-fixed-before-any-return-was-computed",
+  "a[href]=#data-and-period",
+  "a[href]=#method",
+  "a[href]=#results",
+  "a[href]=#what-this-does-not-show",
+  "a[href]=#reproduce-it",
+  "a[href]=#references",
+  "a[href]=https://github.com/donttrade/disposition-effect/tree/main/volmom",
+  "a[href]=https://github.com/donttrade/disposition-effect/tree/main/volmom/verify",
+  "a[href]=https://creativecommons.org/licenses/by-nc/4.0/",
+  "form[action]=https://donttrade.substack.com/subscribe",
+  "a[href]=/research/insider-buying-edge/",
+  "a[href]=https://github.com/donttrade/disposition-effect/tree/main/volmom",
+  "a[href]=/for-firms/"
+ ],
+ "path": "/research/volatility-scaled-momentum/",
+ "source": "docs/research/volatility-scaled-momentum/index.html",
+ "source_sha256": "7709c633936c4428f30527108697aa3186579d4f48c8ac2cf701c7822156ca23",
+ "tables": [
+  [
+   [
+    "Row",
+    "Specification",
+    "Part A (factor)",
+    "Part B (five positions)"
+   ],
+   [
+    "S1",
+    "Plain momentum (control)",
+    "Momentum factor, monthly",
+    "Top 5 by 12-1 month return, equal weight"
+   ],
+   [
+    "S2",
+    "Volatility-scaled",
+    "Scale by 0.12 ÷ realised volatility",
+    "Same scaling on total exposure"
+   ],
+   [
+    "S3",
+    "Trend filter",
+    "Hold only when the market index is above its 10-month average",
+    "Hold a name only above its own average"
+   ]
+  ],
+  [
+   [
+    "Specification",
+    "Annual return",
+    "Sharpe",
+    "Max drawdown",
+    "Worst month",
+    "t"
+   ],
+   [
+    "S1 plain momentum",
+    "5.75%",
+    "0.37",
+    "−57.8%",
+    "−34.4%",
+    "2.49"
+   ],
+   [
+    "S2 volatility-scaled",
+    "13.31%",
+    "0.78",
+    "−27.8%",
+    "−20.6%",
+    "5.25"
+   ],
+   [
+    "S3 trend filter",
+    "4.99%",
+    "0.47",
+    "−26.0%",
+    "−12.6%",
+    "3.18"
+   ]
+  ],
+  [
+   [
+    "Row",
+    "This code",
+    "The paper"
+   ],
+   [
+    "S1 Sharpe",
+    "0.48",
+    "0.53"
+   ],
+   [
+    "S2 Sharpe",
+    "0.93",
+    "0.97"
+   ],
+   [
+    "S2 max drawdown",
+    "−42.6%",
+    "−45.2%"
+   ],
+   [
+    "S2 worst month",
+    "−29.0%",
+    "−28.4%"
+   ],
+   [
+    "S1 worst month",
+    "−52.6%",
+    "−79.0%"
+   ]
+  ],
+  [
+   [
+    "Row",
+    "Criterion",
+    "Measured",
+    "Verdict"
+   ],
+   [
+    "K1a",
+    "S2 holdout Sharpe ≥ 0.50",
+    "0.78",
+    "Pass"
+   ],
+   [
+    "K1b",
+    "S2 beats S1 by ≥ 0.15 Sharpe",
+    "0.41",
+    "Pass"
+   ],
+   [
+    "K2",
+    "Probability of backtest overfitting ≤ 0.50",
+    "0.00 to 0.76",
+    "Indeterminate"
+   ],
+   [
+    "K3",
+    "Deflated Sharpe \"≤ 0\"",
+    "0.876 / 1.000 / 0.973",
+    "Cannot fire"
+   ]
+  ],
+  [
+   [
+    "Specification, 0.20% per side",
+    "Annual return",
+    "Sharpe",
+    "Max drawdown",
+    "Times a 10% limit would trip"
+   ],
+   [
+    "S1 plain momentum",
+    "25.49%",
+    "0.71",
+    "−37.3%",
+    "11"
+   ],
+   [
+    "S2 volatility-scaled",
+    "10.57%",
+    "0.66",
+    "−24.6%",
+    "2"
+   ],
+   [
+    "S3 trend filter",
+    "25.69%",
+    "0.71",
+    "−42.9%",
+    "9"
+   ],
+   [
+    "SPY, held throughout (benchmark)",
+    "16.05%",
+    "1.06",
+    "−23.9%",
+    "3"
+   ]
+  ],
+  [
+   [
+    "Row",
+    "K4 Sharpe ≥ 0.30",
+    "K5 beats SPY",
+    "K6 ≤ 3 limit trips",
+    "K7 breakeven cost ≥ 0.50% round trip"
+   ],
+   [
+    "S1",
+    "0.71 Pass",
+    "Pass",
+    "11 Fail",
+    "0.868% Pass"
+   ],
+   [
+    "S2",
+    "0.66 Pass",
+    "Fail",
+    "2 Pass",
+    "0.467% Fail"
+   ],
+   [
+    "S3",
+    "0.71 Pass",
+    "Pass",
+    "9 Fail",
+    "0.866% Pass"
+   ]
+  ],
+  [
+   [
+    "Date",
+    "What changed"
+   ],
+   [
+    "10 Oct 2026",
+    "Pre-registration written before any return was computed. Part A and Part B run."
+   ],
+   [
+    "10 Oct 2026",
+    "Correction: the first write-up said a look-ahead filter in the Part B portfolio builder inflated returns. Measured afterwards, it changed nothing: there were 0 delistings in 1,775 position-months. The claim was withdrawn."
+   ],
+   [
+    "13 Oct 2026",
+    "Write-up and code prepared for volmom/. Added the three conventions in Method, the K2 range and the K3 defect, and the independent Part A reimplementation."
+   ],
+   [
+    "After 13 Oct 2026",
+    "Three corrections to volmom/README.md: the 10% drawdown limit is measured, not applied; costs are 0.20% per side (0.40% round trip), and the pre-registration’s own wording allowed both readings, a third defect in it; the heading “every specification fails at least two” was false, because per-side breakevens had been compared against a round-trip floor. Doubled to round trips, S1 and S3 pass K7. The conclusion did not change: no specification passes all four."
+   ],
+   [
+    "16 Oct 2026",
+    "Published on this site. Re-run from a clean directory with fresh downloads: every figure matched. The script’s labels now match this page: it prints breakevens per side and round trip, the K7 verdicts S1 pass, S2 fail, S3 pass, and a banner saying the 10% limit is counted, not applied; its downloads send an explicit User-Agent. No computed number changed. S2’s round-trip breakeven is 0.467%, as the script prints. Holdout median coverage is 84.8%, as printed on two fresh fetches; an earlier README figure of 85.0% could not be reproduced. See Corrections."
+   ]
+  ]
+ ],
+ "text": "\n\n\n  STUDY · NEGATIVE RESULT · 16 OCT 2026\n  A pre-registered test of volatility-scaled momentum failed its own kill criteria at five positions\n  This page reports a negative research result. It is not a strategy, a recommendation or a signal, and nothing on it says what anyone should hold.\n  The mechanism passed on 45.7 years of survivorship-free factor data. The version a small account could hold, five long positions with costs charged, failed: no specification passed all four of its kill criteria, so no money was committed.\n  Pre-registered 10 Oct 2026 · Run 10 Oct 2026 · Re-run and published 16 Oct 2026 · Script: volmom/ · Data: Kenneth French data library; S&P 500 membership history (fja05680/sp500, MIT); Yahoo monthly closes\n  Funding: none. No firm paid for, saw or approved this study. How donttrade is paid →\n  Published whether or not the result was interesting. This one was not the result its author hoped for: the test was set up to decide whether a strategy would be used, and it said no.\n  ContentsThe short versionWhat was tested, and whyWhat was fixed before any return was computedData and periodMethodResultsWhat this does not showReproduce itReferences\n  \n  The short version\nVolatility-scaled momentum is a published idea (Barroso & Santa-Clara, 2015): take the classic\nmomentum factor and shrink exposure when its recent volatility is high. Before any return was\ncomputed, I wrote down three specifications, the sample splits, a cost model and seven numeric kill\ncriteria.\nPart A, the mechanism, passed. On 45.7 years of survivorship-free factor data the specification\nhad never been fitted on, the volatility-scaled version had a Sharpe ratio of 0.78 (t = 5.25)\nagainst 0.37 for plain momentum, and it removed most of the crash risk in the return\ndistribution.\nPart B, the version a small account could hold, failed. With five long positions, a minimum price\nand costs charged, no specification passed all four of its kill criteria. Over the same\n2013–2026 holdout, simply holding the S&P 500 index fund (SPY) had a higher Sharpe ratio (1.06)\nthan any of the three specifications (best 0.71). The two specifications that earned high returns\nwould have hit a 10% drawdown limit 11 and 9 times in 13.75 years. Under the pre-registration,\nthat meant no money was committed and the result was to be published.\nWhat was tested, and why\nThe question had two parts, and the second was the one that mattered:\n\nDoes scaling momentum by its own recent volatility improve risk-adjusted returns at all?\nDoes it survive a small retail account’s constraints: five positions, long only, real costs, and a\n   10% drawdown limit?\n\nThe academic literature answers the first, on long-short portfolios of hundreds of stocks. It does\nnot answer the second. A pre-registered test with kill criteria set in advance was the way to get an\nanswer that could not be adjusted after seeing it.\nWhat was fixed before any return was computed\nSwipe the table sideways for more columns →\n\n\nRow\nSpecification\nPart A (factor)\nPart B (five positions)\n\n\n\n\nS1\nPlain momentum (control)\nMomentum factor, monthly\nTop 5 by 12-1 month return, equal weight\n\n\nS2\nVolatility-scaled\nScale by 0.12 ÷ realised volatility\nSame scaling on total exposure\n\n\nS3\nTrend filter\nHold only when the market index is above its 10-month average\nHold a name only above its own average\n\n\n\n\nRanking: 12-1 momentum, the return from 12 months ago to 1 month ago, skipping the latest month.\nParameters: 12% target volatility, 126-trading-day window. These are Barroso & Santa-Clara’s own\n  values and were not tuned. No parameter sweep was allowed.\nSignificance bar: three specifications, Bonferroni-corrected, so nothing counts below\n  |t| = 2.394.\nSplits, holdout evaluated once: Part A in-sample 1927–1980, holdout Jan 1981 – Aug 2026\n  (548 months). Part B in-sample 1997–2012, holdout Jan 2013 – Sep 2026 (165 months).\n\nData and period\n\nPart A: Kenneth French’s momentum factor and market data, built from CRSP, which keeps delisted\n  firms, so this part has no survivorship bias. 1,196 monthly observations from January\n  1927 and 26,216 daily observations from November 1926, both to August 2026; no rows dropped in parsing.\nPart B: point-in-time S&P 500 membership from fja05680/sp500 (MIT), 2,720 dated snapshots;\n  monthly closing prices from Yahoo. Constraints: 5 positions, long only, minimum price $5, and a\n  0.20% cost charged on each side of every trade.\n\nMethod\nPart A uses the published factor directly. Part B rebuilds the strategy from individual stocks each\nmonth, with costs charged on the fraction of the portfolio replaced. Three conventions are worth\nknowing before reading the tables:\n\nThe Sharpe ratio is not annual return ÷ annual volatility here. Annual return compounds the\n  monthly mean; the Sharpe ratio scales it linearly. The two drift apart as the mean grows, which is\n  why S2's row in Part A (13.31% return, Sharpe 0.78) does not divide neatly.\nRealised volatility is uncentred, sqrt(252 × mean(r²)), which is Barroso & Santa-Clara’s\n  published formula. The centred version moves S2's holdout Sharpe from 0.777 to 0.776.\nKurtosis is raw, not excess (a normal distribution has 3).\nThe 10% drawdown limit was measured, not applied. The pre-registration asked whether the holdout\n  would trip it more than three times, so trips are counted on the uninterrupted return series and\n  trading never actually stops. That is why a −42.9% drawdown can appear in Part B.\n\nResults\nPart A: the mechanism, survivorship-free (holdout 1981–2026, n = 548 months)\nSwipe the table sideways for more columns →\n\n\nSpecification\nAnnual return\nSharpe\nMax drawdown\nWorst month\nt\n\n\n\n\nS1 plain momentum\n5.75%\n0.37\n−57.8%\n−34.4%\n2.49\n\n\nS2 volatility-scaled\n13.31%\n0.78\n−27.8%\n−20.6%\n5.25\n\n\nS3 trend filter\n4.99%\n0.47\n−26.0%\n−12.6%\n3.18\n\n\n\nThe crash risk is visible in the shape of the returns. Plain momentum’s holdout skew is −1.43 with\nkurtosis 13.22. Volatility-scaled: skew +0.05, kurtosis 5.07.\nImplementation check against Barroso & Santa-Clara’s published figures for 1927–2011. This\ncode’s figures are for November 1927 – December 2011, the paper’s window after the 10-month warm-up\nthe trend filter needs; they come from the independent implementation in verify/:\nSwipe the table sideways for more columns →\n\n\nRow\nThis code\nThe paper\n\n\n\n\nS1 Sharpe\n0.48\n0.53\n\n\nS2 Sharpe\n0.93\n0.97\n\n\nS2 max drawdown\n−42.6%\n−45.2%\n\n\nS2 worst month\n−29.0%\n−28.4%\n\n\nS1 worst month\n−52.6%\n−79.0%\n\n\n\nS2 reproduces closely. S1's worst month does not. The likely cause is that the paper builds its\nfactor from six size-by-momentum portfolios while this code uses French’s published factor. That has\nnot been verified, and the gap stays on the record.\nPart A kill criteria\nSwipe the table sideways for more columns →\n\n\nRow\nCriterion\nMeasured\nVerdict\n\n\n\n\nK1a\nS2 holdout Sharpe ≥ 0.50\n0.78\nPass\n\n\nK1b\nS2 beats S1 by ≥ 0.15 Sharpe\n0.41\nPass\n\n\nK2\nProbability of backtest overfitting ≤ 0.50\n0.00 to 0.76\nIndeterminate\n\n\nK3\nDeflated Sharpe \"≤ 0\"\n0.876 / 1.000 / 0.973\nCannot fire\n\n\n\nK2 and K3 are defects in the pre-registration, not results. K2 never said which return matrix to use:\nin-sample gives 0.7638 (fail), holdout 0.0000 (pass), the common sample 0.0828 (pass). With\nonly three specifications the statistic has almost no resolution, so it is reported as a range. K3\nwas written as \"≤ 0\", but the deflated Sharpe is a probability between 0 and 1, so it could never have\nfired. A conventional > 0.95 threshold would pass S2, but that threshold was not pre-registered and is\nnot used here as a pass.\nPart B: five positions, long only, costs charged (holdout 2013–2026, n = 165 months)\nSwipe the table sideways for more columns →\n\n\nSpecification, 0.20% per side\nAnnual return\nSharpe\nMax drawdown\nTimes a 10% limit would trip\n\n\n\n\nS1 plain momentum\n25.49%\n0.71\n−37.3%\n11\n\n\nS2 volatility-scaled\n10.57%\n0.66\n−24.6%\n2\n\n\nS3 trend filter\n25.69%\n0.71\n−42.9%\n9\n\n\nSPY, held throughout (benchmark)\n16.05%\n1.06\n−23.9%\n3\n\n\n\nEvery Part B return is an upper bound, for the survivorship reason below.\nIn-sample (1997–2012) was no better: no specification reached t = 2, and SPY’s Sharpe of 0.42\nmatched S2's 0.43.\nPart B kill criteria: no specification passes all four\nSwipe the table sideways for more columns →\n\n\nRow\nK4 Sharpe ≥ 0.30\nK5 beats SPY\nK6 ≤ 3 limit trips\nK7 breakeven cost ≥ 0.50% round trip\n\n\n\n\nS1\n0.71 Pass\nPass\n11 Fail\n0.868% Pass\n\n\nS2\n0.66 Pass\nFail\n2 Pass\n0.467% Fail\n\n\nS3\n0.71 Pass\nPass\n9 Fail\n0.866% Pass\n\n\n\nS1 and S3 earn the returns and fail on drawdown. S2 stays within the limit and loses to the\nbenchmark. No specification passes everything, so under the pre-registration nothing was traded.\nWhat this does not show\n\nIt is not a strategy, a recommendation or a signal, and it is not a recommendation to hold SPY\n   or anything else. It is a negative research result. SPY is the benchmark the pre-registration\n   named. Beating a strategy over one 13.75-year window is a fact about that window.\nFree price data cannot see the stocks that failed. Of 503 current index members, 501 had\n   prices (99.6%); of 706 departed members, only 261 did (37.0%). At rebalance dates, median\n   index coverage was 52.6% in-sample and 84.8% in the holdout, as printed by the public script on\n   fresh downloads on 16 October 2026 (an earlier README figure of 85.0% could not be\n   reproduced; see Versions). The missing names are\n   disproportionately the ones that went bust, so Part B returns are biased upward. Pricing\n   delistings at 0%, −30% (Shumway 1997) or −100% gives identical results, because the missing names\n   never enter the panel at all.\nThe \"zero throttling\" check on the price download is weak. The fetch logged no rate-limiting,\n   but the detector cannot see a batch that silently comes back empty. Some of the missing departed\n   names could be missing for that reason rather than because the source lacks them.\n2013–2026 was an unusual period for large-cap momentum. A top-5 screen on US large caps over\n   that window is largely a concentrated bet on a few mega-cap technology names. 25% a year with a\n   −37% drawdown and 11 limit trips looks like a sector bet, not a durable edge.\nPart A is not tradeable as measured. It is a long-short factor across hundreds of stocks with\n   no costs. Every difference between that and five long positions cuts the same way.\nTwo forced deviations in Part B. The pre-registration specified daily windows but Part B has\n   monthly prices, so S2 uses 12 monthly returns for volatility (noisier, leverage capped at 3×) and\n   S3 uses a 10-month average instead of 200 days. Neither was chosen after seeing a result.\nOnly Part A has a second implementation. Part A was rebuilt from the pre-registration text by\n   code written without reading the original computation, and every Part A figure matched. Part B has\n   no independent reimplementation.\n\nReproduce it\nFolder: volmom/ in\ndonttrade/disposition-effect.\npip install -r requirements.txt\npython reproduce_volmom.py\n\nPart A takes about a minute. Part B fetches monthly closes for 1,209 tickers on first run (about ten\nminutes), then caches them. Both download their own data; no data is shipped in the repository.\nOn 16 October 2026 the public script was re-run from a clean directory, downloading all of its own\ndata. Every Part A and Part B figure on this page matched its output.\nSince 16 October 2026 the script prints each breakeven cost both per side (0.434%, 0.234%, 0.433%) and\nas a round trip (0.868%, 0.467%, 0.866%), and the K7 verdicts S1 pass, S2 fail, S3 pass, matching this\npage. Its Part B banner says the 10% limit is counted, not applied (see Versions).\nThe independent Part A reimplementation, which also produces the K2 range, is in\nvolmom/verify/:\npip install pandas numpy scipy\npython fetch.py\npython volmom.py\n\nReferences\n\nBarroso, P. & Santa-Clara, P. (2015). \"Momentum has its moments.\" Journal of Financial Economics\n  116(1), 111–120.\nJegadeesh, N. & Titman, S. (1993). \"Returns to Buying Winners and Selling Losers.\" Journal of\n  Finance 48(1), 65–91.\nBailey, D. & López de Prado, M. (2014). \"The Deflated Sharpe Ratio.\" Journal of Portfolio\n  Management 40(5).\nShumway, T. (1997). \"The Delisting Bias in CRSP Data.\" Journal of Finance 52(1), 327–340.\nKenneth French data library. fja05680/sp500 (MIT).\n\nMethods and negative results, yes. Live signals, never.\n\n  \n  Again: this is a negative research result, not a strategy, a recommendation or a signal. Nothing here says what anyone should buy, sell or hold.\n  Versions\nDateWhat changed10 Oct 2026Pre-registration written before any return was computed. Part A and Part B run.10 Oct 2026Correction: the first write-up said a look-ahead filter in the Part B portfolio builder inflated returns. Measured afterwards, it changed nothing: there were 0 delistings in 1,775 position-months. The claim was withdrawn.13 Oct 2026Write-up and code prepared for volmom/. Added the three conventions in Method, the K2 range and the K3 defect, and the independent Part A reimplementation.After 13 Oct 2026Three corrections to volmom/README.md: the 10% drawdown limit is measured, not applied; costs are 0.20% per side (0.40% round trip), and the pre-registration’s own wording allowed both readings, a third defect in it; the heading “every specification fails at least two” was false, because per-side breakevens had been compared against a round-trip floor. Doubled to round trips, S1 and S3 pass K7. The conclusion did not change: no specification passes all four.16 Oct 2026Published on this site. Re-run from a clean directory with fresh downloads: every figure matched. The script’s labels now match this page: it prints breakevens per side and round trip, the K7 verdicts S1 pass, S2 fail, S3 pass, and a banner saying the 10% limit is counted, not applied; its downloads send an explicit User-Agent. No computed number changed. S2’s round-trip breakeven is 0.467%, as the script prints. Holdout median coverage is 84.8%, as printed on two fresh fetches; an earlier README figure of 85.0% could not be reproduced. See Corrections.\n  Text and charts: CC BY-NC 4.0. Study code: MIT. The numbers are facts: quote them freely, with a link. A figure may be described as “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a fixed-scope agreement” only when it comes from a signed engagement; no one may describe it as audited, certified or verified.\n  Cite this study\ndonttrade (2026). A pre-registered test of volatility-scaled momentum failed its own kill criteria at five positions. Published 16 Oct 2026. https://donttrade.ca/research/volatility-scaled-momentum/\n@misc{donttrade2026volmom,\n  author = {donttrade},\n  title  = {A pre-registered test of volatility-scaled momentum failed its own kill criteria at five positions},\n  year   = {2026},\n  url    = {https://donttrade.ca/research/volatility-scaled-momentum/},\n  note   = {Code: https://github.com/donttrade/disposition-effect}\n}\n  \n  WHAT NEXT\n  \n    Get the next study by email\n    Email address\n    \n    Email me the next study\n  \n    Read the other negative result: the insider-buying edge was mostly 2008 →\n    Re-run this one (script) →\n  \n\nWork at a prop firm or broker? For firms →\n\n\n",
+ "text_collapsed": "STUDY · NEGATIVE RESULT · 16 OCT 2026 A pre-registered test of volatility-scaled momentum failed its own kill criteria at five positions This page reports a negative research result. It is not a strategy, a recommendation or a signal, and nothing on it says what anyone should hold. The mechanism passed on 45.7 years of survivorship-free factor data. The version a small account could hold, five long positions with costs charged, failed: no specification passed all four of its kill criteria, so no money was committed. Pre-registered 10 Oct 2026 · Run 10 Oct 2026 · Re-run and published 16 Oct 2026 · Script: volmom/ · Data: Kenneth French data library; S&P 500 membership history (fja05680/sp500, MIT); Yahoo monthly closes Funding: none. No firm paid for, saw or approved this study. How donttrade is paid → Published whether or not the result was interesting. This one was not the result its author hoped for: the test was set up to decide whether a strategy would be used, and it said no. ContentsThe short versionWhat was tested, and whyWhat was fixed before any return was computedData and periodMethodResultsWhat this does not showReproduce itReferences The short version Volatility-scaled momentum is a published idea (Barroso & Santa-Clara, 2015): take the classic momentum factor and shrink exposure when its recent volatility is high. Before any return was computed, I wrote down three specifications, the sample splits, a cost model and seven numeric kill criteria. Part A, the mechanism, passed. On 45.7 years of survivorship-free factor data the specification had never been fitted on, the volatility-scaled version had a Sharpe ratio of 0.78 (t = 5.25) against 0.37 for plain momentum, and it removed most of the crash risk in the return distribution. Part B, the version a small account could hold, failed. With five long positions, a minimum price and costs charged, no specification passed all four of its kill criteria. Over the same 2013–2026 holdout, simply holding the S&P 500 index fund (SPY) had a higher Sharpe ratio (1.06) than any of the three specifications (best 0.71). The two specifications that earned high returns would have hit a 10% drawdown limit 11 and 9 times in 13.75 years. Under the pre-registration, that meant no money was committed and the result was to be published. What was tested, and why The question had two parts, and the second was the one that mattered: Does scaling momentum by its own recent volatility improve risk-adjusted returns at all? Does it survive a small retail account’s constraints: five positions, long only, real costs, and a 10% drawdown limit? The academic literature answers the first, on long-short portfolios of hundreds of stocks. It does not answer the second. A pre-registered test with kill criteria set in advance was the way to get an answer that could not be adjusted after seeing it. What was fixed before any return was computed Swipe the table sideways for more columns → Row Specification Part A (factor) Part B (five positions) S1 Plain momentum (control) Momentum factor, monthly Top 5 by 12-1 month return, equal weight S2 Volatility-scaled Scale by 0.12 ÷ realised volatility Same scaling on total exposure S3 Trend filter Hold only when the market index is above its 10-month average Hold a name only above its own average Ranking: 12-1 momentum, the return from 12 months ago to 1 month ago, skipping the latest month. Parameters: 12% target volatility, 126-trading-day window. These are Barroso & Santa-Clara’s own values and were not tuned. No parameter sweep was allowed. Significance bar: three specifications, Bonferroni-corrected, so nothing counts below |t| = 2.394. Splits, holdout evaluated once: Part A in-sample 1927–1980, holdout Jan 1981 – Aug 2026 (548 months). Part B in-sample 1997–2012, holdout Jan 2013 – Sep 2026 (165 months). Data and period Part A: Kenneth French’s momentum factor and market data, built from CRSP, which keeps delisted firms, so this part has no survivorship bias. 1,196 monthly observations from January 1927 and 26,216 daily observations from November 1926, both to August 2026; no rows dropped in parsing. Part B: point-in-time S&P 500 membership from fja05680/sp500 (MIT), 2,720 dated snapshots; monthly closing prices from Yahoo. Constraints: 5 positions, long only, minimum price $5, and a 0.20% cost charged on each side of every trade. Method Part A uses the published factor directly. Part B rebuilds the strategy from individual stocks each month, with costs charged on the fraction of the portfolio replaced. Three conventions are worth knowing before reading the tables: The Sharpe ratio is not annual return ÷ annual volatility here. Annual return compounds the monthly mean; the Sharpe ratio scales it linearly. The two drift apart as the mean grows, which is why S2's row in Part A (13.31% return, Sharpe 0.78) does not divide neatly. Realised volatility is uncentred, sqrt(252 × mean(r²)), which is Barroso & Santa-Clara’s published formula. The centred version moves S2's holdout Sharpe from 0.777 to 0.776. Kurtosis is raw, not excess (a normal distribution has 3). The 10% drawdown limit was measured, not applied. The pre-registration asked whether the holdout would trip it more than three times, so trips are counted on the uninterrupted return series and trading never actually stops. That is why a −42.9% drawdown can appear in Part B. Results Part A: the mechanism, survivorship-free (holdout 1981–2026, n = 548 months) Swipe the table sideways for more columns → Specification Annual return Sharpe Max drawdown Worst month t S1 plain momentum 5.75% 0.37 −57.8% −34.4% 2.49 S2 volatility-scaled 13.31% 0.78 −27.8% −20.6% 5.25 S3 trend filter 4.99% 0.47 −26.0% −12.6% 3.18 The crash risk is visible in the shape of the returns. Plain momentum’s holdout skew is −1.43 with kurtosis 13.22. Volatility-scaled: skew +0.05, kurtosis 5.07. Implementation check against Barroso & Santa-Clara’s published figures for 1927–2011. This code’s figures are for November 1927 – December 2011, the paper’s window after the 10-month warm-up the trend filter needs; they come from the independent implementation in verify/: Swipe the table sideways for more columns → Row This code The paper S1 Sharpe 0.48 0.53 S2 Sharpe 0.93 0.97 S2 max drawdown −42.6% −45.2% S2 worst month −29.0% −28.4% S1 worst month −52.6% −79.0% S2 reproduces closely. S1's worst month does not. The likely cause is that the paper builds its factor from six size-by-momentum portfolios while this code uses French’s published factor. That has not been verified, and the gap stays on the record. Part A kill criteria Swipe the table sideways for more columns → Row Criterion Measured Verdict K1a S2 holdout Sharpe ≥ 0.50 0.78 Pass K1b S2 beats S1 by ≥ 0.15 Sharpe 0.41 Pass K2 Probability of backtest overfitting ≤ 0.50 0.00 to 0.76 Indeterminate K3 Deflated Sharpe \"≤ 0\" 0.876 / 1.000 / 0.973 Cannot fire K2 and K3 are defects in the pre-registration, not results. K2 never said which return matrix to use: in-sample gives 0.7638 (fail), holdout 0.0000 (pass), the common sample 0.0828 (pass). With only three specifications the statistic has almost no resolution, so it is reported as a range. K3 was written as \"≤ 0\", but the deflated Sharpe is a probability between 0 and 1, so it could never have fired. A conventional > 0.95 threshold would pass S2, but that threshold was not pre-registered and is not used here as a pass. Part B: five positions, long only, costs charged (holdout 2013–2026, n = 165 months) Swipe the table sideways for more columns → Specification, 0.20% per side Annual return Sharpe Max drawdown Times a 10% limit would trip S1 plain momentum 25.49% 0.71 −37.3% 11 S2 volatility-scaled 10.57% 0.66 −24.6% 2 S3 trend filter 25.69% 0.71 −42.9% 9 SPY, held throughout (benchmark) 16.05% 1.06 −23.9% 3 Every Part B return is an upper bound, for the survivorship reason below. In-sample (1997–2012) was no better: no specification reached t = 2, and SPY’s Sharpe of 0.42 matched S2's 0.43. Part B kill criteria: no specification passes all four Swipe the table sideways for more columns → Row K4 Sharpe ≥ 0.30 K5 beats SPY K6 ≤ 3 limit trips K7 breakeven cost ≥ 0.50% round trip S1 0.71 Pass Pass 11 Fail 0.868% Pass S2 0.66 Pass Fail 2 Pass 0.467% Fail S3 0.71 Pass Pass 9 Fail 0.866% Pass S1 and S3 earn the returns and fail on drawdown. S2 stays within the limit and loses to the benchmark. No specification passes everything, so under the pre-registration nothing was traded. What this does not show It is not a strategy, a recommendation or a signal, and it is not a recommendation to hold SPY or anything else. It is a negative research result. SPY is the benchmark the pre-registration named. Beating a strategy over one 13.75-year window is a fact about that window. Free price data cannot see the stocks that failed. Of 503 current index members, 501 had prices (99.6%); of 706 departed members, only 261 did (37.0%). At rebalance dates, median index coverage was 52.6% in-sample and 84.8% in the holdout, as printed by the public script on fresh downloads on 16 October 2026 (an earlier README figure of 85.0% could not be reproduced; see Versions). The missing names are disproportionately the ones that went bust, so Part B returns are biased upward. Pricing delistings at 0%, −30% (Shumway 1997) or −100% gives identical results, because the missing names never enter the panel at all. The \"zero throttling\" check on the price download is weak. The fetch logged no rate-limiting, but the detector cannot see a batch that silently comes back empty. Some of the missing departed names could be missing for that reason rather than because the source lacks them. 2013–2026 was an unusual period for large-cap momentum. A top-5 screen on US large caps over that window is largely a concentrated bet on a few mega-cap technology names. 25% a year with a −37% drawdown and 11 limit trips looks like a sector bet, not a durable edge. Part A is not tradeable as measured. It is a long-short factor across hundreds of stocks with no costs. Every difference between that and five long positions cuts the same way. Two forced deviations in Part B. The pre-registration specified daily windows but Part B has monthly prices, so S2 uses 12 monthly returns for volatility (noisier, leverage capped at 3×) and S3 uses a 10-month average instead of 200 days. Neither was chosen after seeing a result. Only Part A has a second implementation. Part A was rebuilt from the pre-registration text by code written without reading the original computation, and every Part A figure matched. Part B has no independent reimplementation. Reproduce it Folder: volmom/ in donttrade/disposition-effect. pip install -r requirements.txt python reproduce_volmom.py Part A takes about a minute. Part B fetches monthly closes for 1,209 tickers on first run (about ten minutes), then caches them. Both download their own data; no data is shipped in the repository. On 16 October 2026 the public script was re-run from a clean directory, downloading all of its own data. Every Part A and Part B figure on this page matched its output. Since 16 October 2026 the script prints each breakeven cost both per side (0.434%, 0.234%, 0.433%) and as a round trip (0.868%, 0.467%, 0.866%), and the K7 verdicts S1 pass, S2 fail, S3 pass, matching this page. Its Part B banner says the 10% limit is counted, not applied (see Versions). The independent Part A reimplementation, which also produces the K2 range, is in volmom/verify/: pip install pandas numpy scipy python fetch.py python volmom.py References Barroso, P. & Santa-Clara, P. (2015). \"Momentum has its moments.\" Journal of Financial Economics 116(1), 111–120. Jegadeesh, N. & Titman, S. (1993). \"Returns to Buying Winners and Selling Losers.\" Journal of Finance 48(1), 65–91. Bailey, D. & López de Prado, M. (2014). \"The Deflated Sharpe Ratio.\" Journal of Portfolio Management 40(5). Shumway, T. (1997). \"The Delisting Bias in CRSP Data.\" Journal of Finance 52(1), 327–340. Kenneth French data library. fja05680/sp500 (MIT). Methods and negative results, yes. Live signals, never. Again: this is a negative research result, not a strategy, a recommendation or a signal. Nothing here says what anyone should buy, sell or hold. Versions DateWhat changed10 Oct 2026Pre-registration written before any return was computed. Part A and Part B run.10 Oct 2026Correction: the first write-up said a look-ahead filter in the Part B portfolio builder inflated returns. Measured afterwards, it changed nothing: there were 0 delistings in 1,775 position-months. The claim was withdrawn.13 Oct 2026Write-up and code prepared for volmom/. Added the three conventions in Method, the K2 range and the K3 defect, and the independent Part A reimplementation.After 13 Oct 2026Three corrections to volmom/README.md: the 10% drawdown limit is measured, not applied; costs are 0.20% per side (0.40% round trip), and the pre-registration’s own wording allowed both readings, a third defect in it; the heading “every specification fails at least two” was false, because per-side breakevens had been compared against a round-trip floor. Doubled to round trips, S1 and S3 pass K7. The conclusion did not change: no specification passes all four.16 Oct 2026Published on this site. Re-run from a clean directory with fresh downloads: every figure matched. The script’s labels now match this page: it prints breakevens per side and round trip, the K7 verdicts S1 pass, S2 fail, S3 pass, and a banner saying the 10% limit is counted, not applied; its downloads send an explicit User-Agent. No computed number changed. S2’s round-trip breakeven is 0.467%, as the script prints. Holdout median coverage is 84.8%, as printed on two fresh fetches; an earlier README figure of 85.0% could not be reproduced. See Corrections. Text and charts: CC BY-NC 4.0. Study code: MIT. The numbers are facts: quote them freely, with a link. A figure may be described as “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a fixed-scope agreement” only when it comes from a signed engagement; no one may describe it as audited, certified or verified. Cite this study donttrade (2026). A pre-registered test of volatility-scaled momentum failed its own kill criteria at five positions. Published 16 Oct 2026. https://donttrade.ca/research/volatility-scaled-momentum/ @misc{donttrade2026volmom, author = {donttrade}, title = {A pre-registered test of volatility-scaled momentum failed its own kill criteria at five positions}, year = {2026}, url = {https://donttrade.ca/research/volatility-scaled-momentum/}, note = {Code: https://github.com/donttrade/disposition-effect} } WHAT NEXT Get the next study by email Email address Email me the next study Read the other negative result: the insider-buying edge was mostly 2008 → Re-run this one (script) → Work at a prop firm or broker? For firms →"
+}
