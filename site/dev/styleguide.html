@@ -9,14 +9,17 @@
 <link rel="preload" href="../static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="../static/css/site.css">
 <script src="../static/js/theme.js"></script>
+<script src="../static/js/nav.js" defer></script>
 <script src="../static/js/tabs.js" defer></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header"><div class="wrap">
   <a class="brand" href="#">donttrade</a>
-  <nav class="site-nav" aria-label="Main"><ul><li><a href="#buttons">Buttons</a></li><li><a href="#tables">Tables</a></li><li><a href="#forms">Forms</a></li><li><a href="#charts" aria-current="page">Charts</a></li></ul></nav>
-  <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" hidden>Dark mode</button>
+  <nav class="site-nav" aria-label="Main"><ul class="nav-row"><li><a href="#buttons">Buttons</a></li><li><a href="#tables">Tables</a></li><li><a href="#forms">Forms</a></li><li><a href="#charts" aria-current="page">Charts</a></li></ul>
+  <details class="nav-menu" data-nav-menu><summary><svg class="i-menu" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg><svg class="i-close" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>Menu</summary>
+    <ul class="nav-panel"><li><a href="#buttons">Buttons</a></li><li><a href="#tables">Tables</a></li><li><a href="#forms">Forms</a></li><li><a href="#charts" aria-current="page">Charts</a></li></ul></details></nav>
+  <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" hidden><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg><span class="tt-label">Dark mode</span></button>
 </div></header>
 <main id="main" class="wrap">
 <h1>Styleguide</h1>

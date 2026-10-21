@@ -1,9 +1,24 @@
-<header class="site-header"><div class="wrap">
-  <a class="brand" href="/">{{ site.name }}</a>
-  <nav class="site-nav" aria-label="Main"><ul>
+{#- The shared header (Manager V3, 21 Oct 2026). From 900 px: brand, the nav row, the theme toggle,
+    on one 64 px line. Below 900 px: brand, a "Menu" disclosure and the theme toggle as an icon
+    button, still 64 px; the menu opens a list over the page. The menu is a <details>, so it works
+    without JavaScript; nav.js only adds Escape and click-outside closing. Both lists sit in the one
+    "Main" nav landmark and CSS shows one of them, so a screen reader meets one list at a time.
+    No button or offer in the header (independence: no finding next to an offer). -#}
+{%- macro nav_items() %}
   {%- for item in nav %}
     <li><a href="{{ item.href }}"{% if page.path == item.href %} aria-current="page"{% elif page.get("section") == item.href %} aria-current="true"{% endif %}>{{ item.label }}</a></li>
   {%- endfor %}
-  </ul></nav>
-  <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" hidden>Dark mode</button>
+{%- endmacro %}
+<header class="site-header"><div class="wrap">
+  <a class="brand" href="/">{{ site.name }}</a>
+  <nav class="site-nav" aria-label="Main"><ul class="nav-row">
+  {{- nav_items() }}
+  </ul>
+  <details class="nav-menu" data-nav-menu>
+    <summary><svg class="i-menu" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg><svg class="i-close" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>Menu</summary>
+    <ul class="nav-panel">
+    {{- nav_items() }}
+    </ul>
+  </details></nav>
+  <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" hidden><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg><span class="tt-label">Dark mode</span></button>
 </div></header>
