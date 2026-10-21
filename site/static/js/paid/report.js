@@ -7,7 +7,7 @@
 // tab; the wording only describes past trades (NON-ADVISER A3).
 
 import { runFile } from '../engine/index.js';
-import { ics, RETEST_LINE } from './retest-copy.js';
+import { ics, retestLine, RETEST_LINE } from './retest-copy.js';
 import { pgrPlrCounts } from '../engine/pgr.js';
 import { stripRows } from './strip.js';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js';
@@ -173,7 +173,7 @@ function habitSection(h, unit, report) {
   return sec;
 }
 
-export { ics };  // moved to retest-copy.js with the re-test wording (fix D2)
+export { ics };  // in retest-copy.js with the re-test wording (fix D2); takes the server's window (delta D1)
 
 function download(name, type, text) {
   const a = el('a', { download: name });
@@ -236,15 +236,22 @@ export function renderReport(report, out, meta) {
   lib.append(fs, el('div', { class: 'field' }, el('label', { for: 'own-rule', text: 'Your own rule' }), el('textarea', { id: 'own-rule', maxlength: '300' })));
   out.append(lib);
 
-  const ics_ = el('button', { class: 'btn btn-secondary', type: 'button', text: 'Add a re-test reminder (.ics)' });
-  ics_.addEventListener('click', () => download('donttrade-retest.ics', 'text/calendar', ics()));
+  // Delta D1: the re-test line and the .ics come from the window the server returned with the
+  // first report (to the second). The re-test's own report has no window and shows neither (N8).
+  const win = meta && meta.retest ? meta.retest : null;
+  const firstReport = !!win || (meta && meta.uses_left === 1);
+  let ics_ = null;
+  if (win && ics(win)) {
+    ics_ = el('button', { class: 'btn btn-secondary', type: 'button', text: 'Add a re-test reminder (.ics)' });
+    ics_.addEventListener('click', () => download('donttrade-retest.ics', 'text/calendar', ics(win)));
+  }
   const print = el('button', { class: 'btn btn-secondary', type: 'button', text: 'Print or save as PDF' });
   print.addEventListener('click', () => window.print());
   const body = 'I ran a donttrade habit report on my own trades. Your firm can measure the same on its own records: https://donttrade.ca/for-firms/?ref=report';
   const mail = el('a', { class: 'btn btn-secondary', href: 'mailto:?subject=' + encodeURIComponent('A trading-habit measurement for your firm') + '&body=' + encodeURIComponent(body), text: 'Send to your firm' });
   out.append(el('section', { class: 'section no-print' }, el('h2', { text: 'Next' }),
-    el('p', { text: RETEST_LINE }),
-    el('p', {}, ics_, ' ', print, ' ', mail)));
+    firstReport ? el('p', { id: 'rp-retest', text: win ? retestLine(win) : RETEST_LINE }) : null,
+    el('p', {}, ...(ics_ ? [ics_, ' '] : []), print, ' ', mail)));
   out.append(el('p', { class: 'small muted', text: `Engine ${report.engine_commit} · rule library ${report.rule_library_version}.` }));
 }
 
@@ -277,7 +284,7 @@ async function run(file) {
   if (r.status === 0 || r.status >= 500) { status(OUTAGE, 'error'); return; }
   if (!r.ok) { status(r.json && r.json.error ? r.json.error.message : 'The report could not be made.', 'error'); return; }
   $('rp-status').hidden = true;
-  renderReport(r.json.report, $('rp-out'), { limited: stripped.limited });
+  renderReport(r.json.report, $('rp-out'), { limited: stripped.limited, retest: r.json.retest || null, uses_left: r.json.uses_left });
   if (r.json.uses_left !== null) $('rp-uses').textContent = r.json.uses_left === 1 ? 'One re-test left on this purchase.' : r.json.uses_left === 0 ? 'Both runs on this purchase are used.' : '';
 }
 
