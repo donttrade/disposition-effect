@@ -23,7 +23,7 @@
   <p>Le paiement se fait en entier au moment de l’achat, par carte, sur la page sécurisée de Stripe.</p>
 
   <h2 id="livraison">4. Livraison et exigences techniques</h2>
-  <p>Le produit est fourni en ligne seulement, sur donttrade.ca, dès le paiement. Votre clé d’accès est enregistrée dans votre navigateur. Conservez le lien et le fichier de restauration affichés après le paiement : ils sont le seul moyen de rouvrir votre achat dans un autre navigateur.</p>
+  <p>Le produit est fourni en ligne seulement, sur donttrade.ca, dès le paiement. Votre clé d’accès est enregistrée dans votre navigateur. Conservez le lien et le fichier de restauration affichés après le paiement : ils sont le seul moyen {% if site.manual_restore %}automatique {% endif %}de rouvrir votre achat dans un autre navigateur.{% if site.manual_restore %} Si votre lien d’accès cesse de fonctionner, écrivez-nous depuis l’adresse utilisée pour payer et nous vous en enverrons un nouveau.{# TRANSLATOR CHECK: manual restore sentence (EN /terms/ Delivery), drafted by the Coder 21 Oct #}{% endif %}</p>
   <p><strong>Exigences :</strong> une version récente de Chrome, Edge, Firefox ou Safari avec JavaScript activé, et un fichier dans un format pris en charge (rapport MT4/MT5, requête Flex d’IBKR ou fichier CSV des ordres Tradovate, en version bêta, ou notre modèle CSV), d’au plus 20 000 lignes. Sous 30 transactions, une habitude affiche « pas assez de transactions pour conclure ». Ce n’est pas un défaut du produit.</p>
   <p><strong>Si notre serveur est hors service,</strong> votre achat n’est pas perdu et aucune analyse n’est comptée. Réessayez plus tard. Si le service est interrompu plus de 24 heures, nous vous remboursons sur demande.</p>
 

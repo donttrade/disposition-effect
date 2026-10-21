@@ -49,7 +49,9 @@ def test_paid_scripts_are_checked_for_restore_email_strings():
 def test_welcome_template_offers_only_the_link():
     html = open(os.path.join(REPO, "site", "templates", "pages", "welcome.html"), encoding="utf-8").read()
     assert not L.restore_email_claims(L.visible_text(html), "welcome.html")
-    assert "address you paid with" not in html
+    # owner decision 21 Oct ~11:00 (manual restore = YES): the sentence exists only behind [site] manual_restore
+    branch = html[html.index("{%- if site.manual_restore %}"):html.index("{%- else %}")]
+    assert html.count("address you paid with") == branch.count("address you paid with") == 1
 
 
 # ------------------------------------------------------------------ owner's first name not in tracked files

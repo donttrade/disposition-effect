@@ -362,3 +362,56 @@ def test_owner_launch_pricing_is_gone_from_every_build_and_prices_json(both_buil
     pricing = (off / "pricing" / "index.html").read_text(encoding="utf-8")
     assert "Firm prices are in US dollars (USD), before any applicable sales tax." in L.visible_text(pricing)
     assert "The end date once shown with the firm prices is removed" in L.visible_text(pricing)
+
+
+# ------------------------------------------------------------------ Manager / owner: manual restore wording
+MANUAL = "If your access link stops working, email us from the address you paid with and we’ll send a new one."
+
+
+def _paid_toml_manual(tmp, value):
+    from test_legal import paid_env
+    env = paid_env(tmp)
+    src = open(env["DT_SITE_TOML"], encoding="utf-8").read()
+    src, n = re.subn(r"(?m)^manual_restore = true$", f"manual_restore = {value}", src)
+    assert n == 1
+    p = tmp / f"manual-{value}.toml"
+    p.write_text(src, encoding="utf-8")
+    env["DT_SITE_TOML"] = str(p)
+    return env
+
+
+def test_manual_restore_on_by_default_says_email_us_never_not_offered(both_build):
+    welcome = _visible(both_build, "/welcome/")
+    assert MANUAL in welcome and "restore by email is not offered" not in welcome
+    assert MANUAL.replace("email us", "email us") in _visible(both_build, "/restore/")
+    terms = _visible(both_build, "/terms/")
+    assert "they are the only automatic way to reopen your purchase in another browser. " + MANUAL in terms
+    assert "écrivez-nous depuis l’adresse utilisée pour payer" in _visible(both_build, "/fr/conditions/")
+    for p in both_build.rglob("*.html"):
+        assert "restore by email is not offered" not in p.read_text(encoding="utf-8"), p
+    import tomllib
+    assert tomllib.load(open(os.path.join(REPO, "site", "config", "site.toml"), "rb"))["site"]["manual_restore"] is True
+
+
+def test_manual_restore_false_keeps_the_old_wording_and_lints_clean(tmp_path, monkeypatch):
+    from test_legal import build
+    env = _paid_toml_manual(tmp_path, "false")
+    r, out = build(tmp_path, "off", **env)
+    assert r.returncode == 0, r.stderr
+    assert "restore by email is not offered" in _visible(out, "/welcome/")
+    assert "they are the only way to reopen your purchase in another browser." in _visible(out, "/terms/")
+    for p in out.rglob("*.html"):
+        assert "from the address you paid with" not in L.visible_text(p.read_text(encoding="utf-8")), p
+    for k, v in env.items():
+        monkeypatch.setenv(k, v)
+    assert L.lint_build(str(out), paid=True) == []
+
+
+def test_manual_restore_must_be_a_boolean(tmp_path):
+    from test_legal import build
+    r, _ = build(tmp_path, "bad", **_paid_toml_manual(tmp_path, '"yes"'))
+    assert r.returncode == 1 and "manual_restore must be true or false" in r.stderr, r.stderr
+
+
+def test_manual_restore_sentence_passes_the_restore_email_rule():
+    assert not L.restore_email_claims(L.normalise(MANUAL), "/welcome/")
