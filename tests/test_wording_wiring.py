@@ -76,6 +76,11 @@ CASES = {
                      "over": {"tilt": {"direction": "opposite", "effect": 4}, "hold_gap": ND, "size_up": ND, "revenge": ND}},
     "too_few": {"n": 300, "nMed": 10000, "nSeq": 10000, "focus": None,
                 "over": {"revenge": TF, "size_up": {**TF, "n_a_compared": 9}, "hold_gap": ND, "tilt": ND}},
+    # PLAN CONFLICT §7.1: revenge distinguishable in its own direction, but its trades totalled a gain
+    "own_gain": {"n": 300, "nMed": 10000, "nSeq": 10000, "focus": None,
+                 "over": {"revenge": {"dollars": {"label": "Trades opened within 15 minutes of a losing trade's close",
+                                                  "amount": 120, "n_trades": 40}},
+                          "hold_gap": ND, "size_up": ND, "tilt": ND}},
     "none": {"n": 300, "nMed": 10000, "nSeq": 10000, "focus": None,
              "over": {k: ND for k in ("hold_gap", "revenge", "size_up", "tilt")}},
 }
@@ -122,6 +127,9 @@ def test_page_one_uses_the_amendment_lines(rendered):
     opp = rendered["mid_opposite"]["page1"]
     assert "No pattern in this file is distinguishable from noise." not in opp
     assert "The distinguishable gap runs the opposite way to its pattern name, so no pattern is shown first." in opp
+    own = rendered["own_gain"]["page1"]      # pending Architect sign-off (CODER-WIRING-REPORT)
+    assert "The distinguishable gap in this pattern's direction did not total a loss, so no pattern is shown first." in own
+    assert "No pattern in this file is distinguishable" not in own and "opposite way" not in own
     none = rendered["none"]["page1"]
     assert "No pattern in this file is distinguishable from noise." in none
     assert "That does not show the patterns are absent; it means this file cannot tell them apart from chance." in none
