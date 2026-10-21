@@ -53,6 +53,8 @@ export const WARNING_TEXT = Object.freeze({
   W_HEDGING:
     'Buys and sells overlapped on the same symbol (a hedging account). They were netted per symbol, so trade counts may differ from your platform.',
   W_OPEN_POSITIONS: 'Positions still open at the end of the file were left out.',
+  W_OPEN_AT_START:
+    'Positions that were already open when the file starts were left out: their opening fills are before the date range of this export, so their hold time and direction are unknown.',
   W_POINTS_ONLY: 'Some contracts are not in the built-in table, so their results are in price points, not dollars.',
   W_MIXED_CURRENCY: 'The file mixes currencies.',
 });

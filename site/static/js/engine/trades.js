@@ -18,18 +18,30 @@ function roundHalfAway(x) {
 function newTrade(e, dir, seq) {
   return { symbol: e.symbol, dir, open_ts: e.ts, close_ts: null, peak: 0, entry_qty: 0, entry_not: 0,
     exit_qty: 0, exit_not: 0, fees: 0, rep_sum: 0, rep_missing: false, fills: 0, multiplier: e.multiplier,
-    currency: e.currency, unit: e._unit, fx: null, seq };
+    currency: e.currency, unit: e._unit, fx: null, seq, ks: [], by_reversal: false };
 }
 
 // reportedMode: null (compute P&L) | 'gross' (reported profit before fees, MetaTrader)
 //             | 'net' (reported P&L after fees, IBKR realized P&L)
+//
+// Positions opened before the file starts (an export whose date range begins
+// mid-position). Formats with open/close codes (IBKR O/C, MT5 in/out) say which
+// fills close a position. `inv` counts, per symbol, the units opened in this file
+// and not yet closed, direction-blind so hedged legs count too. A closing fill
+// bigger than `inv` closes something opened before the file: that fill, and any
+// trade in progress on the symbol (it was never flat since before the file), are
+// left out and counted once per position in openAtStart (W_OPEN_AT_START). They
+// are never turned into an opposite trade. Files without codes are unaffected.
 export function buildTrades(execs, reportedMode, detectHedging) {
-  const order = execs.map((_, k) => k);
-  order.sort((a, b) => (execs[a].ts - execs[b].ts) || (execs[a].row - execs[b].row) || (a - b));
+  const order = chronoOrder(execs);
   const pos = new Map();
   const cur = new Map();
+  const inv = new Map();
+  const carried = new Map();
   const done = [];
+  const excluded = new Set(); // execution indexes left out as part of a pre-file position
   let hedging = 0;
+  let openAtStart = 0;
   let seq = 0;
   for (const k of order) {
     const e = execs[k];
@@ -38,10 +50,35 @@ export function buildTrades(execs, reportedMode, detectHedging) {
     const qUnits = roundHalfAway(e.qty * UNIT);
     if (qUnits === 0) continue;
     let p = pos.has(sym) ? pos.get(sym) : 0;
+    const have = inv.has(sym) ? inv.get(sym) : 0;
+    if (e.oc === 'close') {
+      if (qUnits > have) {
+        if (!carried.get(sym)) { openAtStart++; carried.set(sym, true); }
+        excluded.add(k);
+        if (cur.has(sym)) {
+          const t = cur.get(sym);
+          // A fill that reversed into this trade also closed a finished trade: keep it.
+          for (const j of t.by_reversal ? t.ks.slice(1) : t.ks) excluded.add(j);
+        }
+        cur.delete(sym);
+        pos.set(sym, 0);
+        inv.set(sym, 0);
+        continue;
+      }
+      inv.set(sym, have - qUnits);
+    } else if (e.oc === 'open') {
+      inv.set(sym, have + qUnits);
+      carried.set(sym, false);
+    } else {
+      // No code, or both codes (a reversal): the netting walk decides what closes.
+      const closing = p !== 0 && (p > 0) !== (s > 0) ? Math.min(qUnits, Math.abs(p)) : 0;
+      inv.set(sym, Math.max(0, have - closing) + (qUnits - closing));
+    }
     if (detectHedging && e.oc === 'open' && p !== 0 && (p > 0) !== (s > 0)) hedging++;
     if (p === 0 || (p > 0) === (s > 0)) {
       if (p === 0) { cur.set(sym, newTrade(e, s > 0 ? 'long' : 'short', seq)); seq++; }
       const t = cur.get(sym);
+      t.ks.push(k);
       t.entry_qty += e.qty;
       t.entry_not += e.qty * e.price;
       t.fees += e.fee;
@@ -55,6 +92,7 @@ export function buildTrades(execs, reportedMode, detectHedging) {
     }
     // Reducing: close part (and reverse with any remainder).
     const t = cur.get(sym);
+    t.ks.push(k);
     const closeUnits = Math.min(qUnits, Math.abs(p));
     const remUnits = qUnits - closeUnits;
     let cq, cf;
@@ -72,6 +110,8 @@ export function buildTrades(execs, reportedMode, detectHedging) {
     if (remUnits) {
       const nt = newTrade(e, s > 0 ? 'long' : 'short', seq);
       seq++;
+      nt.ks.push(k);
+      nt.by_reversal = true;
       const rq = remUnits / UNIT;
       nt.entry_qty += rq;
       nt.entry_not += rq * e.price;
@@ -107,7 +147,14 @@ export function buildTrades(execs, reportedMode, detectHedging) {
       exit_vwap: exitVwap, pnl, pnl_gross: gross, fees: t.fees, pnl_source: src, pnl_unit: t.unit,
       fills_n: t.fills, currency: t.currency, _fx: t.fx, _seq: t.seq };
   });
-  return { trades, openN, hedging };
+  return { trades, openN, hedging, openAtStart, excluded };
+}
+
+// Execution indexes in time order; same-time fills keep their file order.
+export function chronoOrder(execs) {
+  const order = execs.map((_, k) => k);
+  order.sort((a, b) => (execs[a].ts - execs[b].ts) || (execs[a].row - execs[b].row) || (a - b));
+  return order;
 }
 
 export function roundtripTrades(rts, startSeq) {
@@ -158,6 +205,7 @@ export function finish(fmt, verified, res, mode, tzLabel) {
   let executions = res.executions;
   let openN = extra.open_positions || 0;
   let hedging = 0;
+  let openAtStart = 0;
   let trades;
   if (fmt === 'mt5' && extra.has_closed_positions) {
     trades = roundtripTrades(res.roundtrips, 0);
@@ -169,9 +217,13 @@ export function finish(fmt, verified, res, mode, tzLabel) {
     trades = b.trades;
     openN += b.openN;
     hedging = b.hedging;
+    openAtStart = b.openAtStart;
+    // Fills of positions opened before the file are left out of every later step (PGR/PLR too).
+    if (b.excluded.size) executions = executions.filter((_, k) => !b.excluded.has(k));
   }
   if (hedging) warnings.push(warning('W_HEDGING', hedging));
   if (openN) warnings.push(warning('W_OPEN_POSITIONS', openN, `${openN} left out.`));
+  if (openAtStart) warnings.push(warning('W_OPEN_AT_START', openAtStart, `${openAtStart} left out.`));
   if (fmt === 'tradovate_orders') {
     let pts = 0;
     for (const t of trades) if (t.pnl_unit === 'points') pts++;

@@ -960,16 +960,31 @@ def _new_trade(e, dr, seq):
     return {"symbol": e["symbol"], "dir": dr, "open_ts": e["ts"], "close_ts": None, "peak": 0,
             "entry_qty": 0.0, "entry_not": 0.0, "exit_qty": 0.0, "exit_not": 0.0, "fees": 0.0,
             "rep_sum": 0.0, "rep_missing": False, "fills": 0, "multiplier": e["multiplier"],
-            "currency": e["currency"], "unit": e["_unit"], "fx": None, "seq": seq}
+            "currency": e["currency"], "unit": e["_unit"], "fx": None, "seq": seq, "ks": [], "by_reversal": False}
+
+
+def chrono_order(execs):
+    """Execution indexes in time order; same-time fills keep their file order."""
+    return sorted(range(len(execs)), key=lambda k: (execs[k]["ts"], execs[k]["row"], k))
 
 
 def build_trades(execs, reported_mode, detect_hedging=False):
-    """Flat-to-flat round trips per symbol. reported_mode: None | "gross" | "net"."""
-    order = sorted(range(len(execs)), key=lambda k: (execs[k]["ts"], execs[k]["row"], k))
+    """Flat-to-flat round trips per symbol. reported_mode: None | "gross" | "net".
+
+    Positions opened before the file starts: with open/close codes (IBKR O/C, MT5
+    in/out), inv[sym] counts units opened in this file and not yet closed
+    (direction-blind). A closing fill bigger than inv closes a position opened
+    before the file; that fill and any trade in progress on the symbol are left
+    out and counted once per position (W_OPEN_AT_START), never inverted."""
+    order = chrono_order(execs)
     pos = {}
     cur = {}
+    inv = {}
+    carried = {}
     done = []
+    excluded = set()  # execution indexes left out as part of a pre-file position
     hedging = 0
+    open_at_start = 0
     seq = 0
     for k in order:
         e = execs[k]
@@ -979,6 +994,29 @@ def build_trades(execs, reported_mode, detect_hedging=False):
         if q_units == 0:
             continue
         p = pos.get(sym, 0)
+        have = inv.get(sym, 0)
+        if e["oc"] == "close":
+            if q_units > have:
+                if not carried.get(sym):
+                    open_at_start += 1
+                    carried[sym] = True
+                excluded.add(k)
+                if sym in cur:
+                    t = cur[sym]
+                    # a fill that reversed into this trade also closed a finished trade: keep it
+                    for j in (t["ks"][1:] if t["by_reversal"] else t["ks"]):
+                        excluded.add(j)
+                cur.pop(sym, None)
+                pos[sym] = 0
+                inv[sym] = 0
+                continue
+            inv[sym] = have - q_units
+        elif e["oc"] == "open":
+            inv[sym] = have + q_units
+            carried[sym] = False
+        else:
+            closing = min(q_units, abs(p)) if (p != 0 and (p > 0) != (s > 0)) else 0
+            inv[sym] = max(0, have - closing) + (q_units - closing)
         if detect_hedging and e["oc"] == "open" and p != 0 and (p > 0) != (s > 0):
             hedging += 1
         if p == 0 or (p > 0) == (s > 0):
@@ -986,6 +1024,7 @@ def build_trades(execs, reported_mode, detect_hedging=False):
                 cur[sym] = _new_trade(e, "long" if s > 0 else "short", seq)
                 seq += 1
             t = cur[sym]
+            t["ks"].append(k)
             t["entry_qty"] += e["qty"]
             t["entry_not"] += e["qty"] * e["price"]
             t["fees"] += e["fee"]
@@ -1000,6 +1039,7 @@ def build_trades(execs, reported_mode, detect_hedging=False):
             continue
         # reducing: close part (and maybe reverse with the remainder)
         t = cur[sym]
+        t["ks"].append(k)
         close_units = min(q_units, abs(p))
         rem_units = q_units - close_units
         if rem_units == 0:
@@ -1025,6 +1065,8 @@ def build_trades(execs, reported_mode, detect_hedging=False):
         if rem_units:
             nt = _new_trade(e, "long" if s > 0 else "short", seq)
             seq += 1
+            nt["ks"].append(k)
+            nt["by_reversal"] = True
             rq = rem_units / UNIT
             nt["entry_qty"] += rq
             nt["entry_not"] += rq * e["price"]
@@ -1061,7 +1103,7 @@ def build_trades(execs, reported_mode, detect_hedging=False):
                        "entry_vwap": entry_vwap, "exit_vwap": exit_vwap, "pnl": pnl, "pnl_gross": gross,
                        "fees": t["fees"], "pnl_source": src, "pnl_unit": t["unit"], "fills_n": t["fills"],
                        "currency": t["currency"], "_fx": t["fx"], "_seq": t["seq"]})
-    return trades, open_n, hedging
+    return trades, open_n, hedging, open_at_start, excluded
 
 
 def roundtrip_trades(rts, start_seq):
@@ -1154,18 +1196,24 @@ def parse_file(data):
     executions = res["executions"]
     open_n = extra.get("open_positions", 0)
     hedging = 0
+    open_at_start = 0
     if fmt == "mt5" and extra.get("has_closed_positions"):
         trades = roundtrip_trades(res["roundtrips"], 0)
     elif res["roundtrips"]:
         trades = roundtrip_trades(res["roundtrips"], 0)
         executions = roundtrip_executions(res["roundtrips"])
     else:
-        trades, o, hedging = build_trades(executions, mode, detect_hedging=(fmt == "mt5"))
+        trades, o, hedging, open_at_start, excluded = build_trades(executions, mode, detect_hedging=(fmt == "mt5"))
         open_n += o
+        # fills of positions opened before the file are left out of every later step (PGR/PLR too)
+        if excluded:
+            executions = [e for k, e in enumerate(executions) if k not in excluded]
     if hedging:
         warnings.append(warning("W_HEDGING", hedging))
     if open_n:
         warnings.append(warning("W_OPEN_POSITIONS", open_n))
+    if open_at_start:
+        warnings.append(warning("W_OPEN_AT_START", open_at_start))
     pts = 0
     if fmt == "tradovate_orders":
         for t in trades:
