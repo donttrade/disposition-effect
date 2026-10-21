@@ -1,4 +1,4 @@
-// motion.js: hero wipe, count-up. Enhancement only; any error drops .dt-motion.
+// motion.js: fade-up, hero wipe, count-up. Enhancement only; any error drops .dt-motion.
 (function () {
   'use strict';
   var root = document.documentElement;
@@ -23,7 +23,13 @@
     });
   }
   function below(el) { return el.getBoundingClientRect().top > vh * 0.9; }
-  function show(el) { el.classList.remove('is-waiting'); if (nums.length) count(); }
+  function parts(el) { return el.hasAttribute('data-reveal-stagger') ? [].slice.call(el.children) : [el]; }
+  function show(el) {
+    if (el.classList.contains('hero-dash')) { el.classList.remove('is-waiting'); if (nums.length) count(); return; }
+    var p = parts(el);
+    p.forEach(function (k) { k.classList.add('rv-in'); });
+    setTimeout(function () { p.forEach(function (k) { k.classList.remove('rv', 'rv-in', 'rv-d1', 'rv-d2', 'rv-d3'); }); }, 800);
+  }
 
   try {
     var nav = (performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || {};
@@ -39,6 +45,12 @@
       nums.push(n); el.setAttribute('data-cu', txt(n, 0)); el.classList.add('cu-on');
     });
     if (dash && below(dash)) { dash.classList.add('is-waiting'); io.observe(dash); } else if (nums.length) count();
+    if (fresh) {
+      [].filter.call(document.querySelectorAll('[data-reveal]'), below).forEach(function (el) {
+        parts(el).forEach(function (k, i) { k.classList.add('rv'); if (i && i < 4) k.classList.add('rv-d' + i); });
+        io.observe(el);
+      });
+    }
     var mq = matchMedia('(prefers-reduced-motion: reduce)');
     if (mq.addEventListener) mq.addEventListener('change', function (e) { if (e.matches) stop(); });
     addEventListener('beforeprint', stop);
