@@ -437,3 +437,39 @@ def test_d4_analytics_build_footers_drop_no_analytics(tmp_path):
         h = p.read_text(encoding="utf-8")
         if "<footer" in h:
             assert "runs no analytics" not in L.visible_text(h[h.index("<footer"):]), p
+
+
+# ------------------------------------------------------------------ D6: reciprocal hreflang + visible language links
+PAIRS = [("/pricing/", "/fr/avant-de-payer/"), ("/terms/", "/fr/conditions/"), ("/privacy/", "/fr/confidentialite/")]
+
+
+def _alts(out, path):
+    return dict(B.ALT_RE.findall((out / path.strip("/") / "index.html").read_text(encoding="utf-8")))
+
+
+@pytest.mark.parametrize("en,fr", PAIRS)
+def test_d6_pairs_are_reciprocal_with_visible_links(paid_site, en, fr):
+    # repro: sc-both.json — /pricing/ had hreflang=[] while /fr/avant-de-payer/ pointed en at it
+    base = "https://donttrade.ca"
+    out = paid_site["out"]
+    assert _alts(out, en) == {"en": base + en, "fr": base + fr, "x-default": base + en}
+    assert _alts(out, fr) == {"fr": base + fr, "en": base + en, "x-default": base + en}
+    en_html = (out / en.strip("/") / "index.html").read_text(encoding="utf-8")
+    fr_html = (out / fr.strip("/") / "index.html").read_text(encoding="utf-8")
+    assert re.search(rf'<a href="{re.escape(fr)}"[^>]*hreflang="fr"', en_html)
+    assert re.search(rf'<a href="{re.escape(en)}[#"][^>]*hreflang="en"', fr_html)
+
+
+def test_d6_flag_off_pages_declare_no_alternates(built_site):
+    for en, _ in PAIRS:
+        assert _alts(built_site["out"], en) == {}
+
+
+def test_d6_one_sided_pair_fails_the_build_check(paid_site, tmp_path):
+    import shutil
+    out = tmp_path / "copy"
+    shutil.copytree(paid_site["out"], out)
+    p = out / "pricing" / "index.html"
+    p.write_text(re.sub(r'<link rel="alternate"[^>]*>\n?', "", p.read_text(encoding="utf-8")), encoding="utf-8")
+    with pytest.raises(B.BuildError, match="hreflang"):
+        B.check_language_pairs(str(out), "https://donttrade.ca")

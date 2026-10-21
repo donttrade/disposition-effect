@@ -81,6 +81,9 @@
 <div class="wrap">
   <h1>Pricing</h1>
   <p class="lede">Published prices in USD, the same for everyone, fixed in writing before anyone sees data. Every price on this site comes from one list.</p>
+  {%- if flags.paid_report %}
+  <p class="small"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Version française : Avant de payer</a></p>
+  {%- endif %}
   <p><strong>Firm prices are launch pricing, valid for engagements signed before 31 March 2027, before any applicable sales tax.</strong></p>
   {%- if flags.paid_report %}
   <div data-requires-flag="paid_report">
