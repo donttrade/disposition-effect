@@ -260,3 +260,51 @@ def test_d10_escapes_refused_in_live_mode(tmp_path):
     open(env["DT_SITE_TOML"], "w", encoding="utf-8").write(src)
     r, _ = build(tmp_path, "o", **env, DT_ALLOW_PLACEHOLDERS="1")
     assert r.returncode == 1 and "live" in r.stderr, r.stderr
+
+
+# ------------------------------------------------------------------ D1: the partner form's product is fixed (+ NIT 8, 9)
+def _post(browser, url, form):
+    from urllib.parse import parse_qs
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+    pg = ctx.new_page()
+    posted = []
+    pg.route("https://api.web3forms.com/**", lambda route: (posted.append(route.request.post_data or ""),
+                                                             route.fulfill(status=200, body="ok")))
+    pg.goto(url)
+    pg.fill(form + " input[type=email]", "test-ignore@example.org")
+    pg.fill(form + " input[name=firm]", "TEST - ignore")
+    pg.click(form + " button[type=submit]")
+    pg.wait_for_timeout(400)
+    ctx.close()
+    assert len(posted) == 1
+    return {k: v[0] for k, v in parse_qs(posted[0], keep_blank_values=True).items()}
+
+
+@pytest.mark.parametrize("path,form", [("/for-platforms/?product=memo#apply", "#fp"),
+                                       ("/start/?product=copy-leader#platform", "#sp"),
+                                       ("/start/?product=platform#platform", "#sp")])
+def test_d1_partner_form_ignores_product_in_url(browser, built_site, path, form):
+    # repro: forms_test.py — /for-platforms/?product=memo sent product=memo before the fix
+    body = _post(browser, built_site["url"] + path, form)
+    assert body["product"] == "platform" and body["subject"] == "donttrade: partner application"
+
+
+def test_d1_firm_form_still_takes_product_but_not_platform(browser, built_site):
+    assert _post(browser, built_site["url"] + "/start/?product=memo#firm", "#sf")["product"] == "memo"
+    assert _post(browser, built_site["url"] + "/start/?product=platform#firm", "#sf")["product"] == "pilot"
+
+
+def test_nit8_partner_mailto_subject(built_site):
+    html = (built_site["out"] / "for-platforms" / "index.html").read_text(encoding="utf-8")
+    assert "subject=Partner%20application" in html and "Pilot request" not in html
+
+
+def test_nit9_general_enquiry_form_is_not_tagged_snapshot(tmp_path):
+    from test_legal import build, private_with, toml_with
+    r, out = build(tmp_path, "p", DT_SITE_TOML=toml_with(tmp_path, pilot_checkout=True), DT_PRIVATE_TOML=private_with(tmp_path))
+    assert r.returncode == 0, r.stderr
+    for page, fid in (("start", "sf"), ("for-firms", "ff")):
+        html = (out / page / "index.html").read_text(encoding="utf-8")
+        form = html[html.index(f'id="{fid}"'):]
+        form = form[:form.index("</form>")]
+        assert 'name="product" value="enquiry"' in form, page

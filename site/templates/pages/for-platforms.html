@@ -39,7 +39,7 @@
 
   <section class="section" aria-labelledby="apply">
     <h2 id="apply">Apply to partner</h2>
-    {%- with fid = "fp", product = "platform", heading_id = "apply" %}{% include "partials/form_firm.html" %}{% endwith %}
+    {%- with fid = "fp", product = "platform", partner = true, heading_id = "apply" %}{% include "partials/form_firm.html" %}{% endwith %}
   </section>
   {% include "partials/disclaimer.html" %}
 </div>

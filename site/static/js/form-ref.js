@@ -5,7 +5,8 @@
   'use strict';
   var params;
   try { params = new URLSearchParams(window.location.search); } catch (e) { return; }
-  var PRODUCTS = ['pilot', 'snapshot', 'memo', 'outcomes', 'copy-leader', 'claims-test', 'platform'];
+  // Firm products only: the partner form's product is fixed in the HTML (Tester D1).
+  var PRODUCTS = ['pilot', 'snapshot', 'memo', 'outcomes', 'copy-leader', 'claims-test'];
   function apply() {
     var inputs = document.querySelectorAll('input[data-from-query]');
     for (var i = 0; i < inputs.length; i++) {

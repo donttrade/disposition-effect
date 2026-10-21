@@ -17,7 +17,7 @@
     {%- if flags.pilot_checkout %}
     {%- with heading_id = "firm" %}{% include "partials/pilot_block.html" %}{% endwith %}
     <details><summary id="sf-other-h">Asking about a Snapshot, Memo, Outcomes pack or another test?</summary>
-    {%- with fid = "sf", product = "snapshot", heading_id = "sf-other-h" %}{% include "partials/form_firm.html" %}{% endwith %}
+    {%- with fid = "sf", product = "enquiry", heading_id = "sf-other-h" %}{% include "partials/form_firm.html" %}{% endwith %}
     </details>
     {%- else %}
     {%- with fid = "sf", product = "pilot", heading_id = "firm" %}{% include "partials/form_firm.html" %}{% endwith %}
@@ -33,7 +33,7 @@
   <section class="section" aria-labelledby="platform">
     <h2 id="platform">Trading journals and platforms</h2>
     <p>Apply to be one of the first three partners: a free 12-month licence and a co-published study. <a href="/for-platforms/">What partners get</a></p>
-    {%- with fid = "sp", product = "platform", heading_id = "platform" %}{% include "partials/form_firm.html" %}{% endwith %}
+    {%- with fid = "sp", product = "platform", partner = true, heading_id = "platform" %}{% include "partials/form_firm.html" %}{% endwith %}
   </section>
 
   <section class="section" aria-labelledby="trader">
