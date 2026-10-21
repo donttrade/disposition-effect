@@ -425,6 +425,8 @@ pre { font-family: var(--font-mono); font-size: var(--fs-0); background: var(--s
   padding-bottom: var(--s5);
 }
 .lifted .page-head { padding: var(--s5) var(--gutter) var(--s1); }
+.lifted .lifted-pre .notice { margin: var(--s2) 0 0; }
+.lifted .lifted-pre + .page-head { padding-top: var(--s1); }   /* the crumb sits right above the H1, as on the new tools */
 .lifted .col { max-width: calc(var(--measure) + 8ch); }
 .lifted h1 { font-size: var(--fs-5); margin: 0 0 var(--s2); max-width: 24ch; }
 .lifted h1.long { max-width: 30ch; font-size: var(--fs-4); }
