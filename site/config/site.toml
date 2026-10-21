@@ -32,6 +32,7 @@ redirect_trader = "https://donttrade.ca/for-traders/thanks/"
 api_base = "http://127.0.0.1:8787"  # local dev server only; no production value yet
 
 [legal]
+terms_version = "2026-10-22"  # the version date printed on /terms/ and /privacy/ (and the French pages); change it with every legal edit
 # Verbatim from NON-ADVISER-DESIGN-AND-AUTORENEW A3 (the only approved wording).
 disclaimer_short = "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results."
 disclaimer_long = "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results."

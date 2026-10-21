@@ -360,3 +360,5 @@ pre { font-family: var(--font-mono); font-size: var(--fs-0); background: var(--s
   border-radius: var(--radius); padding: var(--s2); overflow-x: auto; max-width: 100%; }
 .jump { padding-left: 1.25rem; }
 .jump li a { display: inline-flex; align-items: center; min-height: var(--target); }
+.prose { max-width: 46rem; }
+.prose .byp { margin-bottom: var(--s3); }

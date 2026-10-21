@@ -1,17 +1,17 @@
 {#- "Before you pay" (GET-PAID L1 / O. Reg. 17/05 s. 32, shown before Stripe, printable).
     Rendered only when paid_report = true; the supplier block comes from the gitignored private.toml. -#}
 {%- set r = products["report39"] %}
+{%- from "partials/seller.html" import seller_rows %}
 <section class="notice" id="before-you-pay" aria-labelledby="byp-h" data-requires-flag="paid_report">
-  <h3 id="byp-h">Before you pay</h3>
+  <h3 id="byp-h">Before you pay: what you’re agreeing to</h3>
+  <p class="small"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Version française</a></p>
   <dl class="byp">
-    <dt>Supplier</dt><dd>{{ private.seller_legal_name }}, operating as {{ site.name }}</dd>
-    <dt>Business address</dt><dd>{{ private.premises_address }}</dd>
-    <dt>Phone</dt><dd>{{ private.phone }}</dd>
-    <dt>Email</dt><dd><a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a></dd>
+    {{ seller_rows(private, site, "en") }}
     <dt>What you buy</dt><dd>{{ r.name }}: a report on habits in your own past trades, built from a trade file you choose.
       It describes what happened; it does not tell you what to trade.</dd>
     <dt>Technical requirements</dt><dd>A current version of Chrome, Edge, Firefox or Safari. Files: MetaTrader 5 or 4 HTML report,
-      Interactive Brokers Flex Query CSV, Tradovate Orders CSV, or the donttrade CSV template. Your browser reads the file and sends
+      Interactive Brokers Flex Query CSV or Tradovate Orders CSV (all three in beta until a real export confirms the
+      columns), or the donttrade CSV template. Your browser reads the file and sends
       our server only stripped trade numbers (no names, account numbers or symbols) to compute the report.</dd>
     <dt>Price</dt><dd>{{ r.price_usd|usd }} USD, one time. No sales tax is charged. Total: {{ r.price_usd|usd }} USD.</dd>
     <dt>Currency and fees</dt><dd>Charged in US dollars. Stripe may show an amount in your own currency, and your card issuer may

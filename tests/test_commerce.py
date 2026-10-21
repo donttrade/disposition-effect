@@ -62,7 +62,7 @@ def test_flag_on_build_passes_lint(paid_site):
 
 def test_before_you_pay_has_every_l1_item(paid_site):
     html = (paid_site["out"] / "pricing/index.html").read_text()
-    for item in ["Supplier", "Business address", "Phone", "Email", "Technical requirements", "No sales tax is charged",
+    for item in ["Seller", "Business address", "Phone", "Email", "Technical requirements", "No sales tax is charged",
                  "currency conversion fee", "Card, through Stripe", "Right after payment", "re-test", "20,000 trades",
                  "Refunds", "$39 USD", "[SELLER — lawyer to confirm]", "[PHONE — pending]"]:
         assert item in html, item

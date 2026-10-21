@@ -1,0 +1,18 @@
+{#- Seller disclosure rows (O. Reg. 17/05 s. 32 paras 1–2): legal name, premises address, phone,
+    email. The values come ONLY from the gitignored private.toml, which the build reads only
+    while a commerce flag (paid_report or pilot_checkout) is on. build.verify() fails if a
+    data-seller-block element appears in a build with both flags off.
+    Usage: {% from "partials/seller.html" import seller_rows %}<dl>{{ seller_rows(private, site, "en") }}</dl> -#}
+{%- macro seller_rows(private, site, lang="en") -%}
+{%- if lang == "fr" %}
+    <dt data-seller-block>Vendeur</dt><dd>{{ private.seller_legal_name }}, faisant affaire sous le nom {{ site.name }} (Ontario, Canada)</dd>
+    <dt>Adresse de l’établissement</dt><dd>{{ private.premises_address }}</dd>
+    <dt>Téléphone</dt><dd>{{ private.phone }}</dd>
+    <dt>Courriel</dt><dd><a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>. Réponse en 1 jour ouvrable (heure de l’Est, du lundi au vendredi).</dd>
+{%- else %}
+    <dt data-seller-block>Seller</dt><dd>{{ private.seller_legal_name }}, doing business as {{ site.name }} (Ontario, Canada)</dd>
+    <dt>Business address</dt><dd>{{ private.premises_address }}</dd>
+    <dt>Phone</dt><dd>{{ private.phone }}</dd>
+    <dt>Email</dt><dd><a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>. {{ site.reply_promise }}</dd>
+{%- endif %}
+{%- endmacro %}

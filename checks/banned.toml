@@ -49,6 +49,14 @@ phrases = [
   "Is this advice?",
 ]
 
+[words_fr]
+# FRENCH-LEGAL-AND-CHECKOUT-DRAFTS §8.3, mirroring NON-ADVISER A3. A trailing * matches any ending.
+# conseil/conseils/conseiller/recommand* are allowed only inside data-lint="disclaimer" blocks,
+# which lint.py removes before this list is applied.
+banned = ["conseil*", "recommand*", "devriez", "devez", "il faut", "corriger", "coach*", "mentor*", "signal", "signaux",
+          "alerte de trade", "meilleur pour vous", "améliorer vos rendements", "devenir rentable", "garanti*",
+          "anonyme*", "rien ne quitte", "un clic", "certifié*", "vérifié*", "audité*"]
+
 [claims]
 # Phrases that become false once a paid flow exists (CONCERN 6).
 no_upload = ["nothing leaves", "nothing is uploaded", "never leaves your browser"]
