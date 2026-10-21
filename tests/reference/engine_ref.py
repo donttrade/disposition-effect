@@ -187,9 +187,11 @@ def sniff_delimiter(text):
 
 
 def parse_csv(text, delim):
-    """Mirrors parseCsv() in csv.js, including the stray-quote checks:
+    """Mirrors parseCsv() in csv.js, including the stray-quote bookkeeping:
     a quoted cell open at the end of the file is E_BAD_QUOTE at the row it opened in;
-    swallow = most delimiters on one physical line inside a quoted cell after a line break."""
+    swallow = most delimiters on one physical line inside a quoted cell after a line break;
+    ml = indexes of cells spanning a line break; broken = such a cell closed by a quote
+    followed by more text (the next row's opening quote closing a stray one)."""
     out = []
     cells = []
     field = []
@@ -199,6 +201,9 @@ def parse_csv(text, delim):
     rec_line = 1
     swallow = 0
     line_delims = -1
+    ml = []
+    broken = False
+    closed_ml = False
     n = len(text)
 
     def end_field():
@@ -208,14 +213,17 @@ def parse_csv(text, delim):
         at_start = True
 
     def end_record():
-        nonlocal cells, swallow
+        nonlocal cells, swallow, ml, broken
         end_field()
         if not (len(cells) == 1 and clean(cells[0]) == ""):
-            out.append({"row": rec_line, "cells": [clean(c) for c in cells], "swallow": swallow})
+            out.append({"row": rec_line, "cells": [clean(c) for c in cells], "swallow": swallow, "ml": ml,
+                        "broken": broken})
             if len(out) > MAX_ROWS + 1:
                 fail("E_TOO_LARGE")
         cells = []
         swallow = 0
+        ml = []
+        broken = False
 
     i = 0
     while i < n:
@@ -226,6 +234,9 @@ def parse_csv(text, delim):
                     field.append('"')
                     i += 2
                     continue
+                if line_delims >= 0:
+                    ml.append(len(cells))
+                    closed_ml = True
                 in_q = False
                 line_delims = -1
                 i += 1
@@ -247,6 +258,10 @@ def parse_csv(text, delim):
             field.append(ch)
             i += 1
             continue
+        if closed_ml:
+            if ch != delim and ch not in "\r\n":
+                broken = True
+            closed_ml = False
         if ch == '"' and at_start:
             in_q = True
             at_start = False
@@ -275,14 +290,18 @@ def parse_csv(text, delim):
     return out
 
 
-def check_swallowed_rows(rows, hi):
-    """A quoted cell that holds whole rows (two stray quote marks): E_BAD_QUOTE at that row."""
+def check_quoting(rows, hi, m):
+    """Data records whose quoting shows merged or cut rows: E_BAD_QUOTE. Mirrors checkQuoting()."""
     width = len(rows[hi]["cells"])
-    if width < 3:
-        return
+    idx = list(m.values())
+    if rows[hi]["ml"] or rows[hi]["broken"]:
+        fail("E_BAD_QUOTE", "header cell spans lines", rows[hi]["row"])
     for r in rows[hi + 1:]:
-        if r["swallow"] >= width - 1:
-            fail("E_BAD_QUOTE", "quoted cell holds whole rows", r["row"])
+        if r["broken"] or (r["ml"] and len(r["cells"]) > width) or (width >= 3 and r["swallow"] >= width - 1):
+            fail("E_BAD_QUOTE", "quoting merged rows", r["row"])
+        for i in idx:
+            if i in r["ml"] or (i < len(r["cells"]) and '"' in r["cells"][i]):
+                fail("E_BAD_QUOTE", "quote or line break in a read column", r["row"])
 
 
 # ----------------------------------------------------------------- HTML rows
@@ -1586,7 +1605,7 @@ def parse_file(data):
             fail("E_HEADER_ONLY")
         if len(data_rows) > MAX_ROWS:
             fail("E_TOO_LARGE")
-        check_swallowed_rows(rows, hi)
+        check_quoting(rows, hi, m)
         resolve_number_style([{"rows": rows[hi + 1:], "map": m, "fields": NUMERIC_FIELDS[name]}],
                              "dot" if delim == "," else None)
         verified = SIGNATURES[name]["verified"]

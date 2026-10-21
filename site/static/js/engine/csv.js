@@ -101,13 +101,17 @@ export function sniffDelimiter(text) {
   return counts[best] === 0 ? ',' : cands[best];
 }
 
-// RFC 4180 with the usual leniencies. Returns [{row, cells, swallow}] where row is the
-// 1-based physical line the record starts on. Blank lines are dropped.
-// A stray quote mark must never hide rows silently:
+// RFC 4180 with the usual leniencies. Returns [{row, cells, swallow, ml, broken}] where row
+// is the 1-based physical line the record starts on. Blank lines are dropped.
+// A stray quote mark must never hide rows silently. parseCsv records what checkQuoting
+// (below) needs, once the header is known:
 //   * a quoted cell still open at the end of the file → E_BAD_QUOTE at the row it opened in;
 //   * swallow = the most delimiters on one physical line *inside* a quoted cell after a
-//     line break. A cell that swallowed whole rows has (columns − 1) of them; index.js
-//     checks that against the header (checkSwallowedRows).
+//     line break. A cell that swallowed whole rows has (columns − 1) of them;
+//   * ml = the indexes of the cells that span a line break;
+//   * broken = a cell that spans a line break was closed by a quote followed by more text.
+//     That is the next row's opening quote closing a stray one (an all-quoted file:
+//     `"moved stop to 5` + newline + `"2026-01-05","10:21:00",…`), never a real note.
 export function parseCsv(text, delim) {
   const out = [];
   let cells = [];
@@ -118,16 +122,21 @@ export function parseCsv(text, delim) {
   let recLine = 1;
   let swallow = 0;
   let lineDelims = -1; // delimiters on the current inner line of a quoted cell; -1 = no line break yet
+  let ml = [];
+  let broken = false;
+  let closedMl = false; // the quote of a multi-line cell has just closed
   const n = text.length;
   const endField = () => { cells.push(field); field = ''; atStart = true; };
   const endRecord = () => {
     endField();
     if (!(cells.length === 1 && clean(cells[0]) === '')) {
-      out.push({ row: recLine, cells: cells.map(clean), swallow });
+      out.push({ row: recLine, cells: cells.map(clean), swallow, ml, broken });
       if (out.length > LIMITS.MAX_ROWS + 1) fail('E_TOO_LARGE');
     }
     cells = [];
     swallow = 0;
+    ml = [];
+    broken = false;
   };
   let i = 0;
   while (i < n) {
@@ -135,6 +144,7 @@ export function parseCsv(text, delim) {
     if (inQ) {
       if (ch === '"') {
         if (i + 1 < n && text[i + 1] === '"') { field += '"'; i += 2; continue; }
+        if (lineDelims >= 0) { ml.push(cells.length); closedMl = true; }
         inQ = false; lineDelims = -1; i++; continue;
       }
       if (ch === '\r' || ch === '\n') {
@@ -146,6 +156,10 @@ export function parseCsv(text, delim) {
       }
       if (ch === delim && lineDelims >= 0) { lineDelims++; if (lineDelims > swallow) swallow = lineDelims; }
       field += ch; i++; continue;
+    }
+    if (closedMl) {
+      if (ch !== delim && ch !== '\r' && ch !== '\n') broken = true;
+      closedMl = false;
     }
     if (ch === '"' && atStart) { inQ = true; atStart = false; i++; continue; }
     if (ch === delim) { endField(); i++; continue; }
@@ -163,12 +177,28 @@ export function parseCsv(text, delim) {
   return out;
 }
 
-// A quoted cell that holds whole rows (two stray quote marks): refuse, naming the row.
-export function checkSwallowedRows(rows, hi) {
+// After the header is known: refuse, naming the row, any data record whose quoting shows
+// that rows were merged or cut (Tester B3, F-B2). A whitelisted cell never holds a quote
+// mark or a line break (symbols, sides, dates and numbers have neither), so one that does
+// came from a stray quote. Free-text columns we never read (notes) may hold both.
+//   * broken (see parseCsv);
+//   * a multi-line record with more cells than the header (the next row's cells were
+//     appended to it);
+//   * a quoted cell holding whole rows (columns − 1 delimiters on one inner line);
+//   * a quote mark or a line break inside a whitelisted cell;
+//   * a header cell that spans a line break (the first data row went into it).
+export function checkQuoting(rows, hi, map) {
   const width = rows[hi].cells.length;
-  if (width < 3) return;
+  const idx = Object.values(map);
+  if (rows[hi].ml.length || rows[hi].broken) fail('E_BAD_QUOTE', '', rows[hi].row);
   for (let k = hi + 1; k < rows.length; k++) {
-    if (rows[k].swallow >= width - 1) fail('E_BAD_QUOTE', '', rows[k].row);
+    const r = rows[k];
+    if (r.broken || (r.ml.length && r.cells.length > width) || (width >= 3 && r.swallow >= width - 1)) {
+      fail('E_BAD_QUOTE', '', r.row);
+    }
+    for (const i of idx) {
+      if (r.ml.includes(i) || (i < r.cells.length && r.cells[i].indexOf('"') !== -1)) fail('E_BAD_QUOTE', '', r.row);
+    }
   }
 }
 
