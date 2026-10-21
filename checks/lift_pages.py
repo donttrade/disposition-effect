@@ -11,7 +11,10 @@ What it writes, per page (slug = the path with / → _, "404" for /404.html):
   checks/lifted-baseline/<slug>.json  what the body must still say (compare.py): visible text,
                                       ids, links, tables and citation meta of the OLD page, with
                                       the documented LIFT_FIXES applied
-  site/static/js/legacy/<name>.js     the two old calculators' inline scripts, byte for byte
+  site/static/js/legacy/<name>.js     the two old calculators' inline scripts, byte for byte, except
+                                      for a calculator in CODE_FIXED: its v1 script goes to
+                                      checks/lifted-baseline/legacy-v1/<name>.js (the record) and
+                                      the live file is maintained by hand (the dated code fixes)
 
 The ONLY changes to the body markup are mechanical, forced by the v2 CSP
 (script-src 'self'; style-src 'self': no inline script, style element, style attribute or
@@ -125,6 +128,15 @@ DESC_FIX = {
 }
 LEGACY_JS = {"/tools/disposition-calculator/": "disposition-calculator.js",
              "/tools/pass-rate-calculator/": "pass-rate-calculator.js"}
+# Code fixes (not text): the calculators' logic was frozen by steps 28–29; on 21 Oct 2026 the
+# owner's pipeline fixed two recorded v1 defects in it (Manager §1.1): "1,5" read as 15 (now the
+# engine's decimal rule, static/js/legacy/numbers.js) and every box marked invalid on first load.
+# The page text is unchanged (compare.py). For these pages the lift writes the v1 inline script
+# to LEGACY_V1_DIR, so the v1 code stays on record and --check still proves it is docs/'s, and
+# the page loads numbers.js before its own script.
+CODE_FIXED = {"/tools/disposition-calculator/": "2026-10-21", "/tools/pass-rate-calculator/": "2026-10-21"}
+LEGACY_DEPS = ["/static/js/legacy/numbers.js"]
+LEGACY_V1_DIR = os.path.join(HERE, "lifted-baseline", "legacy-v1")
 
 
 class LiftError(Exception):
@@ -244,7 +256,7 @@ def page_json(path, rel, crumb, parent, section, facts, dates, fragment):
         art.pop("author"), art.pop("publisher")  # → the site Organization node (build.jsonld)
         out["article"] = art
     if path in LEGACY_JS:
-        out["scripts"] = ["/static/js/legacy/" + LEGACY_JS[path]]
+        out["scripts"] = (LEGACY_DEPS if path in CODE_FIXED else []) + ["/static/js/legacy/" + LEGACY_JS[path]]
     if 'action="https://donttrade.substack.com/subscribe"' in fragment:
         out["form_action"] = ["https://donttrade.substack.com"]
     return out
@@ -271,7 +283,8 @@ def lift(write=True):
         outputs[os.path.join(FRAG_DIR, s + ".json")] = json.dumps(meta, ensure_ascii=False, indent=1, sort_keys=True) + "\n"
         outputs[os.path.join(BASE_DIR, s + ".json")] = json.dumps(base, ensure_ascii=False, indent=1, sort_keys=True) + "\n"
         if script is not None:
-            outputs[os.path.join(JS_DIR, LEGACY_JS[path])] = script.lstrip("\n")
+            where = LEGACY_V1_DIR if path in CODE_FIXED else JS_DIR
+            outputs[os.path.join(where, LEGACY_JS[path])] = script.lstrip("\n")
     for p in LIFT_FIXES:
         if p not in {x[0] for x in PAGES}:
             raise LiftError(f"LIFT_FIXES names {p}, which is not a lifted page")

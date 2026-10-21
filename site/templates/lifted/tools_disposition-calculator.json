@@ -9,6 +9,7 @@
  ],
  "path": "/tools/disposition-calculator/",
  "scripts": [
+  "/static/js/legacy/numbers.js",
   "/static/js/legacy/disposition-calculator.js"
  ],
  "section": "/tools/",
