@@ -18,6 +18,7 @@ let loaded = null;           // {days, unit, n, label} — the file's trading da
 let worker = null;
 let reading = null;          // the file being read: {cancel()}
 let readSeq = 0;             // which read is the latest; an older result is dropped
+let readDone = null;         // settles when the latest read finishes, so "Run" can wait for it
 let stopProgress = () => {};
 
 function mode() { return document.querySelector('input[name="ps-mode"]:checked').value; }
@@ -52,8 +53,9 @@ async function load(bytes, label) {
   const mine = ++readSeq;
   const job = readTradeFile(bytes, { onStage: (t) => setFileStatus(t, false) });
   reading = job;
+  readDone = job.done.catch(() => {});
   let out;
-  try { out = await job.done; } finally { if (mine === readSeq) { reading = null; stopProgress(); } }
+  try { out = await job.done; } finally { if (mine === readSeq) { reading = null; readDone = null; stopProgress(); } }
   if (mine !== readSeq) return; // a newer file replaced this one
   if (out.error) { setFileStatus(`${out.error.message} (error code ${out.error.code})`, true); return; }
   const r = out.result;
@@ -105,8 +107,7 @@ function read() {
   const seed = get('ps-seed', (v, l) => parseWhole(v, l, 0, 4294967295));
   const p = { rules, seed, runs: RUNS, mode: mode() };
   if (p.mode === 'file') {
-    if (reading) problems.push({ id: 'ps-file', message: 'Your file is still being read. Run again when it says how many trades it found.' });
-    else if (!loaded) problems.push({ id: 'ps-file', message: 'Choose a trade file, or try the sample file, or switch to manual numbers.' });
+    if (!loaded) problems.push({ id: 'ps-file', message: 'Choose a trade file, or try the sample file, or switch to manual numbers.' });
     else p.days = loaded.days;
   } else {
     const wr = get('ps-wr', parseStrict);
@@ -132,8 +133,14 @@ function read() {
 }
 
 // ------------------------------------------------------------------ run and render
-function run(ev) {
+async function run(ev) {
   ev.preventDefault();
+  if (readDone && mode() === 'file') { // the file is still being read: run as soon as it is
+    $('ps-run').disabled = true;
+    await readDone;
+    await new Promise((resolve) => setTimeout(resolve, 0)); // let load() finish first
+    $('ps-run').disabled = false;
+  }
   const p = read();
   if (!p) return;
   if (worker) worker.terminate();

@@ -581,3 +581,17 @@ def test_d7_html_report_still_read_on_the_page(browser, built_site):
     page.wait_for_selector("#ts-noise table", timeout=90000)
     assert "MetaTrader 5 report" in page.inner_text("#ts-out")
     ctx.close()
+
+
+def test_d7_prop_sim_run_waits_for_a_file_still_being_read(browser, built_site, tmp_path):
+    f = rows_file(tmp_path / "rows20k.csv", 20_000)
+    ctx = browser.new_context()
+    page = ctx.new_page()
+    page.goto(built_site["url"] + "/tools/prop-challenge-simulator/")
+    page.set_input_files("#ps-file", f)
+    for sel, v in (("#ps-target", "100"), ("#ps-maxloss", "100"), ("#ps-days", "10")):
+        page.fill(sel, v)
+    page.click("#ps-run")  # before the read has finished
+    page.wait_for_selector("#ps-out:not([hidden])", timeout=180000)
+    assert page.is_hidden("#ps-errors")
+    ctx.close()
