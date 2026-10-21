@@ -671,3 +671,20 @@ def test_nit11_privacy_processor_list(built_site, paid_site):
     on = L.visible_text((paid_site["out"] / "privacy" / "index.html").read_text(encoding="utf-8"))
     assert "Web3Forms, Google, GitHub, Stripe and Substack are mostly in the United States" in off
     assert "Web3Forms, Google, GitHub, Stripe, Substack and Cloudflare are mostly in the United States" in on
+
+
+# ------------------------------------------------------------------ NIT 13, 14, 15: paid welcome and Pilot thanks copy
+def test_nit13_welcome_does_not_rely_on_the_receipt_link(paid_site):
+    js = open(os.path.join(REPO, "site", "static", "js", "paid", "welcome.js"), encoding="utf-8").read()
+    assert "use the link in your Stripe receipt" not in js and "email us (address below)" in js
+    html = (paid_site["out"] / "welcome" / "index.html").read_text(encoding="utf-8")
+    err = html[html.index('id="w-error"'):]
+    assert 'href="mailto:donttrade.research@gmail.com?subject=' in err[:err.index("</section>")]
+
+
+def test_nit14_15_pilot_thanks_links_and_direct_visit_note(tmp_path):
+    r, out = _pilot_build(tmp_path, "t")
+    assert r.returncode == 0, r.stderr
+    h = (out / "start" / "pilot-thanks" / "index.html").read_text(encoding="utf-8")
+    assert 'href="/terms/#pilot-card"' in h and 'href="/terms/#trial"' not in h
+    assert "Reached this page without sending the Pilot form?" in h and 'href="/start/?product=pilot#firm"' in h

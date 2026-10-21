@@ -7,11 +7,12 @@
 {%- set pilot = products["pilot"] %}
 <div class="wrap" data-requires-flag="pilot_checkout"><div class="prose">
   <h1>Got it. Two ways to pay for the {{ pilot.name }}.</h1>
+  <p class="notice">Reached this page without sending the Pilot form? <a href="/start/?product=pilot#firm">Send it first</a>, so we know which firm a payment is for.</p>
   <p class="lede">You’ll get a reply from <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a> within 1 business day with the written scope: which traders and which dates. You can pay now or wait for the scope.</p>
   <section class="section" aria-labelledby="pay-card">
     <h2 id="pay-card">Pay by card now</h2>
     <p><a class="btn" href="{{ pilot.stripe_link_live }}" rel="noopener">Pay {{ pilot.price_usd|usd }} USD by card (Stripe)</a></p>
-    <p class="small">Paying accepts the <a href="/terms/#trial">{{ pilot.name }} terms</a>. If we can’t agree the scope with you, the fee is refunded in full. It is also refunded if your extract can’t be made to run, or if your own re-run of the same script version on the same export does not reproduce the figure. {{ pilot.credit_rule }} of delivery.</p>
+    <p class="small">Paying accepts the <a href="/terms/#pilot-card">{{ pilot.name }} terms for paying by card first</a>. If we can’t agree the scope with you, the fee is refunded in full. It is also refunded if your extract can’t be made to run, or if your own re-run of the same script version on the same export does not reproduce the figure. {{ pilot.credit_rule }} of delivery.</p>
   </section>
   <section class="section" aria-labelledby="pay-later">
     <h2 id="pay-later">Or pay after the scope, by invoice</h2>
