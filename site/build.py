@@ -9,8 +9,9 @@ Rules (V2-BUILD-PLAN, STRUCTURE and step 3):
       - an externally linked id (path#id in the baseline) missing from its page,
       - trader_first_home != paid_report, or analytics on without a beacon token,
       - a paid-only page or paid-flagged markup in the output while paid_report is off,
-      - a placeholder left in private.toml when paid_report is on
-        (unless DT_ALLOW_PLACEHOLDERS=1, for local test builds only).
+      - a placeholder left in private.toml while a commerce flag is on (placeholder_reason();
+        DT_ALLOW_PLACEHOLDERS=1 skips only this check, for local test builds),
+      - a malformed site.toml or private.toml (a BUILD FAILED line, not a traceback).
   * Output is deterministic: sorted walks, no timestamps, so two builds are byte-identical.
 
 Environment:
@@ -43,7 +44,50 @@ PAID_FLAG_MARKER = 'data-requires-flag="paid_report"'
 COMMERCE_FLAGS = ("paid_report", "pilot_checkout")
 PRIVATE_FIELDS = ("seller_legal_name", "premises_address", "phone")
 LD_MARKER = "<!--jsonld-->"
-PLACEHOLDER_RE = re.compile(r"\[[A-Z ]+ — [^\]]+\]")
+# B2: what counts as "still a placeholder" in private.toml. Case-insensitive; any bracket or
+# dash style. A value matching any of these fails a commerce build loudly.
+PLACEHOLDER_WORDS = re.compile(
+    r"(?<![a-z0-9])(tbd|tbc|todo|fixme|xx+|lorem|ipsum|example|placeholder|dummy|fake|changeme|"
+    r"n/a|none|null|pending|to confirm|lawyer to confirm|fill in|fill me in|your (legal )?name|"
+    r"your address|your phone)(?![a-z0-9])", re.IGNORECASE)
+PLACEHOLDER_BRACKETS = re.compile(r"[\[\]{}<>]")                     # [SELLER — …], {name}, <address>
+PLACEHOLDER_LABEL = re.compile(r"^\W*(seller|name|address|phone)\b\s*[-–—:]", re.IGNORECASE)  # "SELLER - …"
+INVISIBLE = re.compile(r"[\s\u200b-\u200d\u2060\ufeff]+")
+
+
+def placeholder_reason(value):
+    """Why a private.toml value is not a real value, or None. Strings only; callers check type."""
+    bare = INVISIBLE.sub("", value)
+    if not bare:
+        return "it is empty"
+    if not re.search(r"[A-Za-z0-9]", bare):
+        return "it has no letter or digit"
+    if PLACEHOLDER_BRACKETS.search(value):
+        return "it contains a bracket ([ ] { } < >), the placeholder style"
+    m = PLACEHOLDER_WORDS.search(value)
+    if m:
+        return f"it contains the placeholder word {m.group(0)!r}"
+    if PLACEHOLDER_LABEL.search(value):
+        return "it starts with a field label and a dash, the placeholder style"
+    return None
+
+
+def check_private(private, on):
+    """Seller fields (O. Reg. 17/05 s. 32) must be real text under either commerce flag. The
+    placeholder check alone can be skipped with DT_ALLOW_PLACEHOLDERS=1 (local test builds)."""
+    allow = os.environ.get("DT_ALLOW_PLACEHOLDERS") == "1"
+    for k in PRIVATE_FIELDS:
+        v = private.get(k)
+        if not isinstance(v, str) or not INVISIBLE.sub("", v):
+            die(f"{', '.join(on)} = true but private.toml is missing {k} (or it is empty)")
+        why = placeholder_reason(v)
+        if k == "phone" and not why and len(re.sub(r"\D", "", v)) < 7:
+            why = "a phone number needs at least 7 digits"
+        if k == "phone" and not why and not re.fullmatch(r"[0-9+()./ \-]+(?:\s*(?:ext\.?|x)\s*\d+)?", v.strip(), re.IGNORECASE):
+            why = "a phone number may hold only digits, spaces and + ( ) - . /"
+        if why and not allow:
+            die(f"private.toml {k} still looks like a placeholder: {why}. Fill it in "
+                "(or set DT_ALLOW_PLACEHOLDERS=1 for a local test build only)")
 
 # Pages owned by templates. path → template, metadata, and the flag that must be on.
 PAGES = [
@@ -320,6 +364,15 @@ def die(msg):
     raise BuildError(msg)
 
 
+def read_toml(path, label):
+    """tomllib.load, but a syntax error is a BUILD FAILED line, not a traceback (Tester NIT 1)."""
+    try:
+        with open(path, "rb") as f:
+            return tomllib.load(f)
+    except tomllib.TOMLDecodeError as e:
+        die(f"{label} ({path}) is not valid TOML: {e}")
+
+
 LOCAL_API_RE = re.compile(r"^http://(127\.0\.0\.1|localhost)(:\d+)?$")
 
 
@@ -339,8 +392,7 @@ def check_api_base(api):
 
 def load_config():
     toml_path = os.environ.get("DT_SITE_TOML") or os.path.join(SITE, "config", "site.toml")
-    with open(toml_path, "rb") as f:
-        cfg = tomllib.load(f)
+    cfg = read_toml(toml_path, "site.toml")
     with open(os.path.join(SITE, "config", "prices.json"), encoding="utf-8") as f:
         prices = json.load(f)
     flags = cfg["flags"]
@@ -358,14 +410,8 @@ def load_config():
         p = os.environ.get("DT_PRIVATE_TOML") or os.path.join(SITE, "config", "private.toml")
         if not os.path.exists(p):
             die(f"{', '.join(on)} = true needs site/config/private.toml (copy private.example.toml)")
-        with open(p, "rb") as f:
-            private = tomllib.load(f)
-        for k in PRIVATE_FIELDS:
-            if not isinstance(private.get(k), str) or not private[k].strip():
-                die(f"{', '.join(on)} = true but private.toml is missing {k} (or it is empty)")
-            if PLACEHOLDER_RE.search(private[k]) and os.environ.get("DT_ALLOW_PLACEHOLDERS") != "1":
-                die(f"private.toml {k} still holds a placeholder; fill it in "
-                    "(or set DT_ALLOW_PLACEHOLDERS=1 for a local test build only)")
+        private = read_toml(p, "private.toml")
+        check_private(private, on)
     if flags["paid_report"]:
         check_api_base(cfg["worker"]["api_base"])
     if flags["pilot_checkout"]:

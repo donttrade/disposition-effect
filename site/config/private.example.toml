@@ -1,6 +1,7 @@
 # private.example.toml — copy to private.toml (gitignored) and fill in.
-# Read by the build ONLY when paid_report = true. The build fails while any
-# placeholder remains, unless DT_ALLOW_PLACEHOLDERS=1 (local test mode only).
+# Read by the build ONLY while a commerce flag (paid_report or pilot_checkout) is on. The build
+# fails while any value still looks like a placeholder (brackets, TBD/TODO/XXX, "lawyer to
+# confirm", "pending", empty, …), unless DT_ALLOW_PLACEHOLDERS=1 (local test mode only).
 seller_legal_name = "[SELLER — lawyer to confirm]"
 premises_address = "[ADDRESS — virtual mailbox pending]"
 phone = "[PHONE — pending]"
