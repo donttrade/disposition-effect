@@ -63,6 +63,8 @@ export const WARNING_TEXT = Object.freeze({
     'Some fills could not be placed in a position for certain, so they and the trades they belong to were left out: either fills on one symbol have the same time to the second and their order decides which position they close, or one fill closed a position opened before the file and opened a new one, so the size of the new one is unknown.',
   W_POINTS_ONLY: 'Some contracts are not in the built-in table, so their results are in price points, not dollars.',
   W_MIXED_CURRENCY: 'The file mixes currencies.',
+  W_CURRENCY_IGNORED:
+    'The currency column holds values that are not currency codes, so it was not used: results are shown without a currency unit. Check that no cell before it holds an extra comma.',
   W_DST:
     'Some trades were open during a daylight-saving clock change (US or EU dates). The file\'s times have no time zone, so the hold time of these trades may be off by one hour, and a buy and a sell in the repeated hour may be in the wrong order.',
 });

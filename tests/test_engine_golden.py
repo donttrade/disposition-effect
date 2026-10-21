@@ -174,3 +174,15 @@ def test_quote_mutations_match_reference(engine_page):
             assert not diff, (name, label, diff)
             n += 1
     assert n > 300
+
+
+def test_currency_column_never_echoes_a_name(engine_page):
+    """F-D3: a name shifted into Currency is never shown (messages included) or used as a unit."""
+    for rel in ("generic/fd3_name_shifted_into_currency.csv", "generic/fd3_three_letter_fragment.csv"):
+        with open(os.path.join(FIX, rel), "rb") as f:
+            raw = json.dumps(run_js(engine_page, f.read()), ensure_ascii=False)
+        for word in ("JANE", "Jane", "jane", "ANN", "Ann", "Doe", "DOE", "U123"):
+            assert word not in raw, (rel, word)
+        res = json.loads(raw)["result"]
+        assert res["currency_groups"] == {"points": 40}
+        assert [w["code"] for w in res["warnings"]] == ["W_CURRENCY_IGNORED"]

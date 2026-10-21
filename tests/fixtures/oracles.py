@@ -396,3 +396,16 @@ ERRORS["errors/fb2_stray_note_into_next_row.csv"] = ("E_BAD_QUOTE", 12, None)  #
 # A thousands group never starts with 0, so "0.125" is a decimal point: with "12,50" in the same
 # file that is two number formats -> E_BAD_NUMBER at the first comma cell after the dot evidence.
 ERRORS["errors/fd7_leading_zero_dot_in_comma_file.csv"] = ("E_BAD_NUMBER", 2, "price")
+
+# Tester fix round 2, F-D3: an unquoted comma in Account ("Doe, Jane", "Lee, Ann") shifts the
+# name's second half into Currency. That column is now read only if every non-empty cell is an
+# ISO 4217 code; otherwise it is ignored as a whole (W_CURRENCY_IGNORED, which repeats no cell),
+# so no name reaches the page or the paid request. 40 round trips: (101 - 100) x 1 - fees 0.5 x 2
+# = 0 points each, 60 s.
+for _rel in ("generic/fd3_name_shifted_into_currency.csv", "generic/fd3_three_letter_fragment.csv"):
+    ORACLES[_rel] = {
+        "trades": [dict(symbol="AAA", dir="long", qty=1, pnl=0.0, fees=1.0, hold_s=60, pnl_unit="points",
+                        currency=None)] * 40,
+        "warnings": {"W_CURRENCY_IGNORED": 0},
+        "skipped": {},
+    }

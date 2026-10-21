@@ -5,7 +5,7 @@
 // survive into executions and trades.
 
 import { decodeBytes, isHtml, parseCsv, sniffDelimiter, resolveNumberStyle, checkQuoting } from './csv.js';
-import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS } from './detect.js';
+import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS, checkCurrencyColumn } from './detect.js';
 import { fail, LIMITS } from './errors.js';
 import { htmlRows, parseMt, isEmptyRow } from './mt.js';
 import { parseGeneric, parseGenericRoundtrip } from './generic.js';
@@ -35,8 +35,9 @@ function countDuplicateRows(rows, map) {
   return n;
 }
 
-function withDuplicates(res, n) {
+function withDuplicates(res, n, currencyIgnored = false) {
   res.extra.duplicate_rows = n;
+  res.extra.currency_ignored = currencyIgnored;
   return res;
 }
 
@@ -62,24 +63,26 @@ export function parseFile(bytes) {
   const rows = parseCsv(text, delim);
   if (!rows.length) fail('E_EMPTY');
   const det = detectCsv(rows);
-  const { format: name, headerIndex: hi, map: m } = det;
+  const { format: name, headerIndex: hi } = det;
+  // A Currency column whose cells are not all ISO codes is not read at all (F-D3).
+  const { map: m, ignored: curIgnored } = checkCurrencyColumn(rows.slice(hi + 1), det.map);
   let dataRows = 0;
   for (let i = hi + 1; i < rows.length; i++) if (!isEmptyRow(rows[i].cells)) dataRows++;
   if (dataRows === 0) fail('E_HEADER_ONLY');
   if (dataRows > LIMITS.MAX_ROWS) fail('E_TOO_LARGE');
-  checkQuoting(rows, hi, m);
+  checkQuoting(rows, hi, det.map);
   resolveNumberStyle([{ rows: rows.slice(hi + 1), map: m, fields: NUMERIC_FIELDS[name] }], delim === ',' ? 'dot' : null);
   const verified = SIGNATURES[name].verified;
   const dup = countDuplicateRows(rows.slice(hi + 1), m);
   if (name === 'mt5_deals') {
     const table = { kind: 'mt5_deals', section: 'deals', map: m,
       rows: rows.slice(hi + 1).map((r) => ({ row: r.row, cells: r.cells, section: 'deals' })) };
-    return finish('mt5', verified, withDuplicates(parseMt([table]), dup), 'gross', TZ_LABELS.mt5);
+    return finish('mt5', verified, withDuplicates(parseMt([table]), dup, curIgnored), 'gross', TZ_LABELS.mt5);
   }
-  if (name === 'ibkr_flex') return finish(name, verified, withDuplicates(parseIbkr(rows, hi, m), dup), 'net', TZ_LABELS[name]);
-  if (name === 'tradovate_orders') return finish(name, verified, withDuplicates(parseTradovate(rows, hi, m), dup), null, TZ_LABELS[name]);
-  if (name === 'generic_roundtrip') return finish(name, verified, withDuplicates(parseGenericRoundtrip(rows, hi, m), dup), null, TZ_LABELS[name]);
-  return finish('generic', verified, withDuplicates(parseGeneric(rows, hi, m), dup), null, TZ_LABELS.generic);
+  if (name === 'ibkr_flex') return finish(name, verified, withDuplicates(parseIbkr(rows, hi, m), dup, curIgnored), 'net', TZ_LABELS[name]);
+  if (name === 'tradovate_orders') return finish(name, verified, withDuplicates(parseTradovate(rows, hi, m), dup, curIgnored), null, TZ_LABELS[name]);
+  if (name === 'generic_roundtrip') return finish(name, verified, withDuplicates(parseGenericRoundtrip(rows, hi, m), dup, curIgnored), null, TZ_LABELS[name]);
+  return finish('generic', verified, withDuplicates(parseGeneric(rows, hi, m), dup, curIgnored), null, TZ_LABELS.generic);
 }
 
 // The same, but never throws: {result} or {error}. Used by the pages and the golden test.
