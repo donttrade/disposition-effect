@@ -3,7 +3,7 @@
   'use strict';
   var root = document.documentElement;
   if (!root.classList.contains('dt-motion')) return;
-  var raf = 0, nums = [], io = null, RV = ['rv', 'rv-in'];
+  var raf = 0, nums = [], io = null;
 
   function done(el) { el.removeAttribute('data-cu'); el.classList.remove('cu-on'); el.classList.add('cu-done'); }
   function stop() {
@@ -13,7 +13,7 @@
     nums.forEach(function (n) { done(n.el); });
     [].forEach.call(document.querySelectorAll('.rv'), un);
   }
-  function txt(n, v) { return n.pre + v.toFixed(n.dec) + n.post; }
+  function txt(n, v) { var s = v.toFixed(n.dec); return (+s ? n.pre : n.pre.replace(/[+−-]/, '')) + s + n.post; }
   function count() {
     var t0 = 0;
     raf = requestAnimationFrame(function frame(now) {
@@ -23,7 +23,7 @@
       raf = p < 1 ? requestAnimationFrame(frame) : 0;
     });
   }
-  function un(k) { k.classList.remove.apply(k.classList, RV); }
+  function un(k) { k.classList.remove('rv', 'rv-in'); }
   function below(el) { return el.getBoundingClientRect().top > innerHeight * 0.9; }
   function parts(el) { return el.hasAttribute('data-reveal-stagger') ? [].slice.call(el.children) : [el]; }
   function show(el) {
@@ -39,7 +39,7 @@
     var dash = document.querySelector('.hero-dash');
     io = new IntersectionObserver(function (es) {
       es.forEach(function (e) { if (e.isIntersecting) { io.unobserve(e.target); show(e.target); } });
-    }, { rootMargin: '0px 0px -10% 0px' });
+    }, { rootMargin: '0px 0px -10%' });
     [].forEach.call(document.querySelectorAll('.hero-dash [data-count]'), function (el) {
       var m = early && /^(\D*?)(\d+(?:\.\d+)?)(\D*)$/.exec(el.textContent);
       if (!m) return done(el);
@@ -56,5 +56,5 @@
     var mq = matchMedia('(prefers-reduced-motion: reduce)');
     if (mq.addEventListener) mq.addEventListener('change', function (e) { if (e.matches) stop(); });
     addEventListener('beforeprint', stop);
-  } catch (err) { stop(); }
+  } catch (e) { stop(); }
 })();
