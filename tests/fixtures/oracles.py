@@ -262,3 +262,14 @@ ORACLES["generic/tv2_duplicate_rows.csv"] = {
     "warnings": {"W_DUPLICATE_ROWS": 2},
     "skipped": {},
 }
+
+# Tester v2 D7 (t_oracles.py same_second_reversed, inside a file that shows its direction):
+# times fall down the rows (11:00, 10:00, 09:30), so the file is newest first, and the A sell
+# and buy in the same second are read bottom-up too: buy @10 then sell @11 -> long +1, hold 0.
+# (The Tester's 2-row file has no other rows, so its direction cannot be known; file order is kept.)
+ORACLES["generic/tv2_same_second_newest_first.csv"] = {
+    "trades": [dict(symbol="A", dir="long", qty=1, pnl=1.0, hold_s=0),
+               dict(symbol="B", dir="long", qty=1, pnl=1.0, hold_s=3600)],
+    "warnings": {},
+    "skipped": {},
+}

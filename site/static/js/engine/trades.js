@@ -150,10 +150,20 @@ export function buildTrades(execs, reportedMode, detectHedging) {
   return { trades, openN, hedging, openAtStart, excluded };
 }
 
-// Execution indexes in time order; same-time fills keep their file order.
+// Execution indexes in time order. Fills with the same time keep their file order,
+// read in the file's own direction: in a newest-first file (times mostly falling down
+// the rows) same-second fills are newest first too, so they are taken bottom-up
+// (Tester D7: a buy and a sell in one second came out as a short).
 export function chronoOrder(execs) {
+  let up = 0;
+  let down = 0;
+  for (let k = 1; k < execs.length; k++) {
+    const d = execs[k].ts - execs[k - 1].ts;
+    if (d > 0) up++; else if (d < 0) down++;
+  }
+  const dir = down > up ? -1 : 1;
   const order = execs.map((_, k) => k);
-  order.sort((a, b) => (execs[a].ts - execs[b].ts) || (execs[a].row - execs[b].row) || (a - b));
+  order.sort((a, b) => (execs[a].ts - execs[b].ts) || dir * (execs[a].row - execs[b].row) || dir * (a - b));
   return order;
 }
 

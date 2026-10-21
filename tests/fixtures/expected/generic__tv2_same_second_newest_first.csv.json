@@ -1,0 +1,191 @@
+{
+ "noise": {
+  "checks": [
+   {
+    "label": "not enough trades to tell",
+    "method": "bootstrap-t",
+    "n_a": 2,
+    "n_b": null,
+    "p": null,
+    "stat": "expectancy",
+    "value": null
+   },
+   {
+    "label": "not enough trades to tell",
+    "method": "label permutation",
+    "n_a": 0,
+    "n_b": 2,
+    "p": null,
+    "stat": "hold_gap_s",
+    "value": null
+   },
+   {
+    "label": "not enough trades to tell",
+    "method": "order shuffle",
+    "n_a": 2,
+    "n_b": null,
+    "p": null,
+    "stat": "longest_losing_streak",
+    "value": null
+   }
+  ],
+  "limited": false,
+  "n_used": 2
+ },
+ "pgr_plr": {
+  "coverage_pct": null,
+  "pg": 0,
+  "pl": 0,
+  "rg": 2,
+  "rl": 0
+ },
+ "result": {
+  "currency_groups": {
+   "points": 2
+  },
+  "executions": [
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 21.0,
+    "qty": 1.0,
+    "row": 2,
+    "side": "sell",
+    "symbol": "B",
+    "ts": 1767610800000
+   },
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 20.0,
+    "qty": 1.0,
+    "row": 3,
+    "side": "buy",
+    "symbol": "B",
+    "ts": 1767607200000
+   },
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 11.0,
+    "qty": 1.0,
+    "row": 4,
+    "side": "sell",
+    "symbol": "A",
+    "ts": 1767605400000
+   },
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 10.0,
+    "qty": 1.0,
+    "row": 5,
+    "side": "buy",
+    "symbol": "A",
+    "ts": 1767605400000
+   }
+  ],
+  "format": "generic",
+  "skipped": {},
+  "trades": [
+   {
+    "close_ts": 1767605400000,
+    "currency": null,
+    "dir": "long",
+    "entry_vwap": 10.0,
+    "exit_vwap": 11.0,
+    "fees": 0.0,
+    "fills_n": 2,
+    "hold_s": 0,
+    "id": "t1",
+    "open_ts": 1767605400000,
+    "pnl": 1.0,
+    "pnl_gross": 1.0,
+    "pnl_source": "computed",
+    "pnl_unit": "points",
+    "qty": 1.0,
+    "symbol": "A"
+   },
+   {
+    "close_ts": 1767610800000,
+    "currency": null,
+    "dir": "long",
+    "entry_vwap": 20.0,
+    "exit_vwap": 21.0,
+    "fees": 0.0,
+    "fills_n": 2,
+    "hold_s": 3600,
+    "id": "t2",
+    "open_ts": 1767607200000,
+    "pnl": 1.0,
+    "pnl_gross": 1.0,
+    "pnl_source": "computed",
+    "pnl_unit": "points",
+    "qty": 1.0,
+    "symbol": "B"
+   }
+  ],
+  "tz_label": "as in the file",
+  "verified_format": true,
+  "warnings": []
+ },
+ "stats": {
+  "avg_loss": null,
+  "avg_win": 1.0,
+  "expectancy": 1.0,
+  "gross_loss": 0.0,
+  "gross_profit": 2.0,
+  "hold_median_loss_s": null,
+  "hold_median_win_s": 1800.0,
+  "hold_ratio": null,
+  "largest_loss": null,
+  "largest_win": 1.0,
+  "long": {
+   "losses": 0,
+   "n": 2,
+   "pnl": 2.0,
+   "win_rate": 1.0,
+   "wins": 2
+  },
+  "losses": 0,
+  "max_consec_losses": {
+   "n": 0,
+   "pnl": 0.0
+  },
+  "max_consec_wins": {
+   "n": 2,
+   "pnl": 2.0
+  },
+  "max_drawdown_abs": 0.0,
+  "max_drawdown_pct": null,
+  "n": 2,
+  "net_pnl": 2.0,
+  "profit_factor": "no losing trades",
+  "scratch": 0,
+  "short": {
+   "losses": 0,
+   "n": 0,
+   "pnl": 0.0,
+   "win_rate": null,
+   "wins": 0
+  },
+  "win_rate": 1.0,
+  "wins": 2
+ }
+}

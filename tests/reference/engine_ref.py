@@ -1071,8 +1071,17 @@ def _new_trade(e, dr, seq):
 
 
 def chrono_order(execs):
-    """Execution indexes in time order; same-time fills keep their file order."""
-    return sorted(range(len(execs)), key=lambda k: (execs[k]["ts"], execs[k]["row"], k))
+    """Execution indexes in time order; same-time fills keep their file order, read in the
+    file's own direction (newest-first file -> bottom-up). Mirrors chronoOrder()."""
+    up = down = 0
+    for k in range(1, len(execs)):
+        d = execs[k]["ts"] - execs[k - 1]["ts"]
+        if d > 0:
+            up += 1
+        elif d < 0:
+            down += 1
+    sign = -1 if down > up else 1
+    return sorted(range(len(execs)), key=lambda k: (execs[k]["ts"], sign * execs[k]["row"], sign * k))
 
 
 def build_trades(execs, reported_mode, detect_hedging=False):
@@ -1681,7 +1690,7 @@ DAY_MS = 86400000
 
 
 def pgr_plr_counts(executions):
-    order = sorted(range(len(executions)), key=lambda k: (executions[k]["ts"], executions[k]["row"], k))
+    order = chrono_order(executions)
     pos = {}  # symbol -> [units (signed int), avg entry price]
     rg = rl = pg = pl = 0
     marked = total = 0
