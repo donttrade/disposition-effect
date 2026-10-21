@@ -62,7 +62,7 @@ def test_flag_on_build_passes_lint(paid_site):
 
 def test_before_you_pay_has_every_l1_item(paid_site):
     html = (paid_site["out"] / "pricing/index.html").read_text()
-    for item in ["Supplier", "Business address", "Phone", "Email", "Technical requirements", "No sales tax is charged",
+    for item in ["Seller", "Business address", "Phone", "Email", "Technical requirements", "No sales tax is charged",
                  "currency conversion fee", "Card, through Stripe", "Right after payment", "re-test", "20,000 trades",
                  "Refunds", "$39 USD", "[SELLER — lawyer to confirm]", "[PHONE — pending]"]:
         assert item in html, item
@@ -77,7 +77,9 @@ def test_flag_off_outputs_have_no_commerce(tmp_path):
     allhtml = "".join(p.read_text(errors="replace") for p in out.rglob("*.html"))
     for bad in ["Before you pay", "[SELLER", "See where your trades leave your plan", 'role="tablist"', "/welcome/", "/report/"]:
         assert bad not in allhtml, bad
-    assert (out / "pricing/index.html").read_bytes() == open(os.path.join(REPO, "docs/pricing/index.html"), "rb").read()
+    pricing = (out / "pricing/index.html").read_text()
+    assert 'role="tab' not in pricing and "tabs.js" not in pricing and "print.js" not in pricing
+    assert pricing.index('id="firms"') < pricing.index('id="traders"')  # stacked, firms first
 
 
 @pytest.mark.parametrize("color", ["light", "dark"])

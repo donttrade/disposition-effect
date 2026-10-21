@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="wrap">
+  <h1>You’re on the waitlist.</h1>
+  <p class="lede">Nothing is charged. We email you once, when the trader report launches. That’s all.</p>
+  <p>To be removed, reply “remove” to that email or write to <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>.</p>
+  <h2>Meanwhile</h2>
+  <ul>
+    <li><a href="/tools/trade-stats/">Free trade stats</a>: your own file, read in your browser, with three real-or-noise checks.</li>
+    <li><a href="/tools/">All free tools</a></li>
+    <li><a href="/research/">The research is free</a></li>
+  </ul>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{#- "Start a Pilot" (hybrid), rendered only with pilot_checkout on: 3 fields + a required
+    "I've read the Pilot scope and terms" box → Web3Forms (firm key) → /start/pilot-thanks/,
+    which shows the Stripe Pilot link and the mailto fallback. Plain HTML: works with JS off.
+    Set before including: heading_id. Never place it next to a study finding. -#}
+{%- set pilot = products["pilot"] %}
+<form class="request-form" id="pc" method="POST" action="{{ forms.endpoint }}" aria-labelledby="{{ heading_id }}" data-requires-flag="pilot_checkout">
+  <input type="hidden" name="access_key" value="{{ forms.firm_key }}">
+  <input type="hidden" name="subject" value="donttrade: Pilot request (card link shown)">
+  <input type="hidden" name="from_name" value="donttrade site">
+  <input type="hidden" name="redirect" value="{{ forms.redirect_pilot }}">
+  <input type="hidden" name="product" value="pilot">
+  <input type="hidden" name="page" value="{{ page.path }}">
+  <input type="hidden" name="ref" value="" data-from-query="ref">
+  <input type="checkbox" name="botcheck" class="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" hidden>
+  <div class="field"><label for="pc-email">Work email <span class="req">(required)</span></label>
+    <input id="pc-email" name="email" type="email" autocomplete="email" required></div>
+  <div class="field"><label for="pc-firm">Firm <span class="req">(required)</span></label>
+    <input id="pc-firm" name="firm" type="text" autocomplete="organization" required></div>
+  <div class="field"><label for="pc-what">What do you want measured? <span class="opt">(optional)</span></label>
+    <textarea id="pc-what" name="message" rows="3" placeholder="e.g. funded accounts, January to June"></textarea></div>
+  <div class="check field"><input id="pc-read" name="read_scope_and_terms" type="checkbox" value="yes" required aria-describedby="pc-read-links">
+    <label for="pc-read">I’ve read the {{ pilot.name }} scope and terms. <span class="req">(required)</span></label></div>
+  <p class="small" id="pc-read-links">Read them first: <a href="/for-firms/#what-it-costs">the {{ pilot.name }} scope</a> and <a href="/terms/#trial">the {{ pilot.name }} terms</a>.</p>
+  <p><button class="btn" type="submit">Send and see the payment options</button></p>
+  <p class="small muted">{{ pilot.name }}: {{ pilot.price_usd|usd }} USD, one per firm. The next page shows a card link and an email option; paying now is optional. We use these details only to reply. <a href="/privacy/">Privacy notice</a></p>
+</form>
+<p class="mailto-line">Prefer email? Write to <a href="mailto:{{ site.contact_email }}?subject={{ ('Pilot request — [your firm]')|urlencode }}">{{ site.contact_email }}</a>.</p>

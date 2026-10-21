@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{#- /terms/ (plan step 17). Old ids kept: prices payment delivery trial cancellation refunds
+    traders publication not-advice liability agreement law contact. Consumer clauses for the
+    habit report (seller block, EU/UK withdrawal, Quebec carve-out) render only with
+    paid_report on; the Pilot card-before-scope clause only with pilot_checkout on. The
+    Habit Tracker renewal clause is drafted in partials/terms_tracker_renewal.html and is
+    not rendered anywhere: the Tracker is not built (V2 NOT IN SCOPE). #}
+{% block content %}
+{%- from "partials/seller.html" import seller_rows %}
+{%- set pilot = products["pilot"] %}{%- set r = products["report39"] %}{%- set t = products["tracker79"] %}
+{%- set pct = prices.rules.recheck.percent_of_engagement %}
+{%- set ex = products[prices.rules.recheck.example_product] %}
+{%- set commerce = flags.paid_report or flags.pilot_checkout %}
+<div class="wrap"><div class="prose">
+  <h1>Terms, refunds and the {{ pilot.name }}</h1>
+  <p class="notice">Plain-language terms, version {{ legal.terms_version }}. Where a signed engagement agreement differs, the agreement governs.{% if flags.paid_report %} <a href="/fr/conditions/" hreflang="fr" lang="fr">Version française</a>{% endif %}</p>
+
+  <h2 id="prices">Prices</h2>
+  <p>Firm prices are launch pricing, valid for engagements signed before 31 March 2027. Prices are in US dollars (USD), before any applicable sales tax. <a href="/pricing/">Pricing</a></p>
+
+  <h2 id="payment">Payment</h2>
+  <ul>
+    <li>Every firm engagement is invoiced by email.</li>
+    <li>Snapshot, Memo and Outcomes pack: {{ products.memo.payment_terms }}.</li>
+    <li>{{ pilot.name }}: {{ pilot.payment_terms }}.</li>
+    <li>Quarterly re-check: {{ pct }}% of the price of the engagement being repeated (for example {{ (ex.price_usd * pct / 100)|usd }} for a {{ ex.name }}), payable in advance.</li>
+    <li>Invoices are in USD. Pay by bank transfer, or, in Canada, the CAD equivalent by Interac e-Transfer at the Bank of Canada daily rate on the invoice date. Transfer and bank fees are paid by the sender. {% include "partials/card_timing.html" %}</li>
+    <li>We never ask for card details by email.</li>
+  </ul>
+
+  <h2 id="delivery">Delivery</h2>
+  <ul>
+    <li>Delivery times are in business days.</li>
+    <li>The clock starts when payment is received and the script’s output comes back without validation errors.</li>
+    <li>The clock pauses while a question to you is open.</li>
+  </ul>
+
+  <h2 id="trial">The {{ pilot.name }}</h2>
+  <p class="small muted">{{ pilot.name }} (called “{{ pilot.former_name }}” before 22 Oct 2026). The anchor of this section is unchanged.</p>
+  <ul>
+    <li>One disposition figure; one per firm; {{ pilot.turnaround_days }} business days.</li>
+    <li>What result would make a Memo worth doing is agreed in writing before work starts.</li>
+    <li>The fee is credited in full toward a Memo signed within {{ prices.rules.pilot_credit_days }} days of {{ pilot.name }} delivery. The credit has no cash value and cannot be transferred.</li>
+    <li><strong>Extract refund:</strong> if your extract can’t be made to run with the script, even with our help by email, the fee is refunded in full.</li>
+    <li><strong>Reproduction refund:</strong> if your own re-run of the same published script version on the same export (same file hash) does not reproduce the figure, the fee is refunded in full, by the original payment method, within 10 business days.</li>
+    {%- if flags.pilot_checkout %}
+    <li id="pilot-card"><strong>Paying by card before the scope:</strong> after you send the {{ pilot.name }} request form and confirm you have read these terms, a card link is shown. Paying through it accepts these {{ pilot.name }} terms. We then send the written scope naming the traders and dates. If we can’t agree the scope with you, the fee is refunded in full. The delivery clock starts only once the scope is agreed, payment is received and the script’s output comes back clean.</li>
+    {%- endif %}
+  </ul>
+
+  <h2 id="cancellation">Cancellations and refunds</h2>
+  <p>No cancellation fees, for firms or traders.</p>
+  <h3 id="refunds">Firms</h3>
+  <ul>
+    <li>The {{ pilot.name }} is refundable in full until data kick-off, the day your staff first run the script on your records. After that, it is refunded if your extract can’t be made to run, or through the reproduction refund above.</li>
+    <li>Snapshot, Memo and Outcomes pack are paid 50% on acceptance and 50% within 7 days of delivery. Either side may stop in writing. If either side stops, completed work is billed pro rata.</li>
+    <li>A “no measurable effect” answer is a finished deliverable.</li>
+  </ul>
+
+  <h3 id="traders">Individual traders</h3>
+  {%- if flags.paid_report %}
+  <div data-requires-flag="paid_report">
+    <p>These terms apply to the {{ r.name|lower }} bought for personal use. The “Before you pay” summary shown before checkout is part of them.</p>
+    <dl class="byp">{{ seller_rows(private, site, "en") }}</dl>
+    <ul>
+      <li><strong>What you buy:</strong> a one-off measurement of your own past trades, from a file you export (MetaTrader 5/4 report, IBKR Flex Query or Tradovate orders, all three in beta until a real export confirms the columns, or the donttrade CSV template), with one free re-test.</li>
+      <li><strong>Price:</strong> {{ r.price_usd|usd }} USD, one time; {{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers. No sales tax is charged. Your card issuer may add a currency conversion fee; donttrade does not receive it. The price you accept at checkout is the price that applies.</li>
+      <li><strong>Payment:</strong> in full at checkout, by card, on Stripe’s payment page.</li>
+      <li><strong>Delivery:</strong> online only, on donttrade.ca, right after payment. Your access key is saved in your browser. Keep the restore link and file shown after payment: they are the only way to reopen your purchase in another browser.</li>
+      <li><strong>Two analyses:</strong> your report and one re-test, which opens 30 days after your first report and closes 60 days after it. The re-test is for the same trading history: at least half of its trades have to match the first file. Your key is valid for 90 days. An analysis is counted only when a report is produced.</li>
+      <li><strong>Limits:</strong> up to 20,000 rows per file, supported formats only. A habit with fewer than 30 trades in either group shows “not enough trades to tell”; that is not a fault in the product.</li>
+      <li><strong>If our server is down,</strong> your purchase is not lost and no analysis is counted. If the service is down for more than 24 hours, we refund you on request.</li>
+      <li><strong>Refunds:</strong> a full refund if you ask by email within {{ prices.rules.trader_refund_days }} days of buying, even if you have already run your report. The refund goes to the card you paid with, usually within 5 to 10 business days, and the access key then stops working. This adds to your rights under consumer law; it does not replace them.</li>
+      <li><strong>Misuse:</strong> if a key appears to be shared, a person reviews it and writes to you before anything is paused.</li>
+    </ul>
+    <h4 id="withdrawal">Right of withdrawal (EU and UK)</h4>
+    <p>If you live in the European Union or the United Kingdom, you have in principle a 14-day legal right of withdrawal. If you ask for immediate access to the digital content and acknowledge that you lose this right (the field shown at checkout), it ends once the report is supplied. Our voluntary {{ prices.rules.trader_refund_days }}-day refund still applies.</p>
+  </div>
+  {%- else %}
+  <p>The trader report is waitlist only for now: nothing is sold and no money is taken. {{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers, in USD. A yearly {{ t.name|lower }} comes later and is not sold until it exists.</p>
+  <p>Before anything is sold, these terms will be updated, and the seller’s details, the full terms and a printable summary will be shown before anyone pays. When the report launches, a full refund is available if you ask within {{ prices.rules.trader_refund_days }} days of buying.</p>
+  {%- endif %}
+
+  <h2 id="publication">Publication and use of our name</h2>
+  <p>Nothing about your data is published without your consent. You may say a figure was “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a fixed-scope agreement”, and nothing stronger: never audited, certified or verified.</p>
+
+  <h2 id="not-advice">What this is not</h2>
+  <p>It is not investment advice. It is not an audit, and we issue no badge or seal.</p>
+  <p class="disclaimer">{{ legal.disclaimer_long }}</p>
+
+  <h2 id="liability">Liability</h2>
+  {%- if flags.paid_report %}
+  <p><strong>This paragraph does not apply to consumers in Quebec.</strong> Our liability is capped at the fees paid for the product or engagement concerned. We are not responsible for trading decisions you make or their results.</p>
+  <p>For everyone: nothing in these terms limits rights you have under consumer protection law that cannot be excluded.</p>
+  {%- else %}
+  <p>Our liability is capped at the fees paid. Nothing in these terms limits rights you have under consumer protection law that cannot be excluded.</p>
+  {%- endif %}
+
+  <h2 id="agreement">The engagement agreement</h2>
+  <p>Every firm engagement is governed by a short written agreement (scope, data terms and the licence for the engagement), sent with the scope for you to review before you pay. A blank template is available on request by email.</p>
+
+  <h2 id="law">Governing law</h2>
+  <p>These terms are governed by the laws of the Province of Ontario and the federal laws of Canada applicable there, and disputes go to the courts of Ontario.{% if flags.paid_report %} If you are a consumer, this does not take away the protection of the mandatory rules of the law where you live, or your right to go to the courts there.{% endif %}</p>
+
+  <h2 id="contact">Contact</h2>
+  {%- if commerce %}
+  <dl class="byp">{{ seller_rows(private, site, "en") }}</dl>
+  {%- else %}
+  <p>Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>. {{ site.reply_promise }}</p>
+  {%- endif %}
+  <p class="small muted">Version {{ legal.terms_version }}.</p>
+</div></div>
+{% endblock %}

@@ -29,12 +29,20 @@ def rules(html, paid=False, analytics=False, priv=()):
     ("<p>You lost $500 because of tilt.</p>", "banned:cause"),
     ("<p>Unlock your edge.</p>", "banned:ai_tells"),
     ("<p>The #1 journal.</p>", "banned:ai_tells"),
+    ("<p>A certified result.</p>", "banned:assurance"),
+    ("<p>Your figure, audited.</p>", "banned:assurance"),
+    ("<p>Start the trial today.</p>", "banned:renamed"),
+    ("<p>Standard prices after launch apply.</p>", "banned:regular_price"),
     ('<a href="https://tally.so/r/x">form</a>', "tally"),
     ("<p>Only $59 today.</p>", "price_literal"),
+    ("<p>Then $49 after the founding offer.</p>", "price_literal"),  # retired 20 Oct: allowed nowhere
     ("<p>key " + "sk_" + "live_abcdefgh1234</p>", "secret"),  # built at runtime so repo secret scans stay clean
     ('<div data-requires-flag="paid_report">x</div>', "flag:paid_markup"),
     ('<script type="application/ld+json">{"@type": "Product"}</script>', "flag:product_jsonld"),
     ("<p>[SELLER — lawyer to confirm]</p>", "flag:seller_placeholder"),
+    ("<dl><dt data-seller-block>Seller</dt></dl>", "flag:seller_block"),
+    ('<form data-requires-flag="pilot_checkout"></form>', "flag:pilot_markup"),
+    ('<a href="https://buy.stripe.com/x">pay</a>', "flag:stripe_link"),
     ('<script src="https://static.cloudflareinsights.com/beacon.min.js"></script>', "flag:beacon"),
 ])
 def test_planted_violation_fails(html, rule):
@@ -43,7 +51,8 @@ def test_planted_violation_fails(html, rule):
 
 def test_claims_flip_with_flags():
     assert "claim:no_upload" in rules("<p>Nothing leaves your computer.</p>", paid=True)
-    assert "claim:no_upload" not in rules("<p>Nothing leaves your computer.</p>", paid=False)
+    # fix D9 (21 Oct): these claims are false next to the paid pipeline, so they fail with the flag off too
+    assert "claim:no_upload" in rules("<p>Nothing leaves your computer.</p>", paid=False)
     assert "claim:no_analytics" in rules("<p>This site runs no analytics.</p>", analytics=True)
     assert "flag:seller_identity" in rules("<p>Jane Q Seller</p>", priv=["Jane Q Seller"])
 

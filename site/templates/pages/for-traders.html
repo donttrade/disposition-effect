@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+{%- set r = products["report39"] %}{%- set t = products["tracker79"] %}
+<div class="wrap">
+  <section class="section" aria-labelledby="ft-h">
+    <div class="grid">
+      <div class="span-7">
+        <h1 id="ft-h">A habit report built from your own trade file. Coming soon.</h1>
+        <p class="lede">It will measure behaviour in your own past trades, like holding losing trades longer than winning ones, and test whether each pattern is more than noise. It will not tell you what to trade.</p>
+        <div class="notice"><strong>Not on sale yet</strong><p>There is no launch date and nothing is charged now. Join the waitlist and we email you once, when it launches.</p></div>
+        <p class="btn-row"><a class="btn" href="#waitlist">Join the waitlist — {{ r.price_usd|usd }} founding price</a> <a class="btn btn-secondary" href="/tools/trade-stats/">Try the free trade stats</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="measure-h">
+    <h2 id="measure-h">What it is being built to measure</h2>
+    <p>Five habits, each measured in your own closed trades. These describe the report as it is being built; the final list is published before anyone pays.</p>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="The five habits">
+    <table>
+      <thead><tr><th scope="col">Habit</th><th scope="col">The question about your own trades</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Hold gap</th><td>Did you hold losing trades longer than winning ones?</td></tr>
+        <tr><th scope="row">Re-entry after a loss</th><td>Did trades opened within 15 minutes of a loss turn out differently from the rest?</td></tr>
+        <tr><th scope="row">Size after a loss</th><td>Was the trade after a loss larger than the trade after a win?</td></tr>
+        <tr><th scope="row">Trading after a losing run</th><td>Did trades after two or more losses in a row turn out differently?</td></tr>
+        <tr><th scope="row">Unusually large losses</th><td>How many losses were more than twice your typical loss, and what share of your losses they made up (described, not tested)</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>Each tested habit gets one of three results: “distinguishable from noise”, “may be noise”, or “not enough trades to tell” when either group has fewer than 30 trades. Dollar figures are historical totals from your file, such as “trades matching this pattern totalled −$X”. They describe what happened; they do not show that a habit caused a result.</p>
+  </section>
+
+  <section class="section" aria-labelledby="files-h">
+    <h2 id="files-h">Your file, and what is sent</h2>
+    <ul>
+      <li><strong>Files:</strong> the MetaTrader 5 or 4 history report, an Interactive Brokers Flex Query, a Tradovate orders export (all three in beta until a real export confirms the columns), or the donttrade CSV template.</li>
+      <li><strong>The free tools</strong> open your file in your browser. Those pages block outgoing requests, so the file is not uploaded.</li>
+      <li><strong>For the paid report</strong>, your browser will send our server only stripped trade numbers: open and close times, buy or sell, relative size, the realised result and a random symbol number. No name, account number or ticker is sent, and the numbers are not stored. The exact list is published before launch.</li>
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="founding">
+    <h2 id="founding">The founding offer</h2>
+    <p>{{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers of the habit report, one time, in US dollars. It includes one re-test of the same account. A yearly habit tracker comes later, at {{ t.price_usd|usd }} a year as its founding price; it is not sold until it exists.</p>
+    <p>Joining the waitlist is free and commits you to nothing. You see the price, the seller’s details and the terms again before paying anything. When it launches, a full refund is available if you ask within {{ prices.rules.trader_refund_days }} days of buying. <a href="/terms/#traders">Trader terms</a></p>
+  </section>
+
+  <section class="section" aria-labelledby="waitlist">
+    <h2 id="waitlist">Join the waitlist</h2>
+    {%- with heading_id = "waitlist" %}{% include "partials/form_waitlist.html" %}{% endwith %}
+  </section>
+
+  <section class="section" aria-labelledby="free-h">
+    <h2 id="free-h">Free now</h2>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Free tools">
+    <table class="tool-list">
+      <thead><tr><th scope="col">Tool</th><th scope="col">The question it answers</th><th scope="col">What you give it</th></tr></thead>
+      <tbody>
+      {%- for tl in tools[:3] %}
+        <tr><th scope="row"><a href="{{ tl.href }}">{{ tl.name }}</a></th><td>{{ tl.question }}</td><td>{{ tl.input }}</td></tr>
+      {%- endfor %}
+      </tbody>
+    </table>
+    </div>
+    <p><a href="/tools/">All free tools</a> · <a href="/research/">The research is free</a></p>
+  </section>
+
+  <section class="section" aria-labelledby="faq-h">
+    <h2 id="faq-h">Questions</h2>
+    <details><summary>Is this investment advice?</summary><p>No. It will describe your own past trades. It does not recommend any security, trade, size or exit, and past results do not predict future results.</p></details>
+    <details><summary>When does it launch?</summary><p>There is no launch date yet. Everyone on the waitlist gets one email when it does.</p></details>
+    <details><summary>Is anything charged when I join?</summary><p>No. Joining is free, and no card is asked for.</p></details>
+    <details><summary>What can I use today?</summary><p>The free trade-stats dashboard reads the same files and runs three real-or-noise checks, in your browser.</p></details>
+  </section>
+  {% include "partials/disclaimer.html" %}
+  <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR and Tradovate are trademarks of their owners. donttrade is not affiliated with any of them.</p>
+</div>
+{% endblock %}

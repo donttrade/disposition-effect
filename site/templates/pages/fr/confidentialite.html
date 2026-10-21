@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{#- FRENCH-LEGAL §5, habit report only (no Tracker history items). paid_report only. Unreviewed draft. #}
+{% block content %}
+{%- from "partials/seller.html" import seller_rows %}
+<div class="wrap" data-requires-flag="paid_report"><div class="prose">
+  <p class="small"><a href="/privacy/" hreflang="en" lang="en">English</a></p>
+  <h1>Politique de confidentialité</h1>
+  <p class="notice">Version du {{ legal.terms_version }}.</p>
+
+  <h2 id="qui">Qui nous sommes</h2>
+  <dl class="byp">{{ seller_rows(private, site, "fr") }}</dl>
+  <p><strong>Responsable de la protection des renseignements personnels :</strong> le vendeur nommé ci-dessus, à la même adresse et au même courriel.</p>
+
+  <h2 id="fichier">Votre fichier de transactions</h2>
+  <p><strong>Outils gratuits :</strong> votre fichier est ouvert dans votre navigateur et n’est jamais téléversé.</p>
+  <p><strong>Rapport payant :</strong> votre navigateur envoie à notre serveur seulement une liste épurée de chiffres : heures d’ouverture et de fermeture, achat ou vente, taille relative, gain ou perte réalisé, et un numéro de symbole tiré au hasard. Cette liste ne contient ni nom, ni numéro de compte, ni symbole boursier. Notre serveur fonctionne sur Cloudflare et peut se trouver hors du Canada. Il utilise ces chiffres pour produire votre rapport, vous renvoie le rapport et ne conserve pas ces chiffres. La journalisation des requêtes est désactivée.</p>
+  <p><strong>Ce que notre serveur conserve :</strong></p>
+  <ul>
+    <li>une fiche d’achat sous un code brouillé : le produit, le nombre d’analyses utilisées, les dates et l’état de remboursement, sans votre nom ni votre courriel;</li>
+    <li>des empreintes brouillées des transactions de votre premier rapport, pour vérifier qu’un nouveau test porte sur le même historique;</li>
+    <li>des compteurs d’utilisation d’une heure, liés à votre clé et à une version brouillée de votre adresse IP, pour limiter les abus;</li>
+    <li>si vous l’acceptez (case non cochée au départ), un simple compte du nom de la firme de négociation que vous indiquez, sans lien avec vous.</li>
+  </ul>
+
+  <h2 id="profilage">Profilage</h2>
+  <p>Le Rapport analyse vos habitudes de négociation, ce qui peut constituer du profilage au sens de la loi québécoise. Cette analyse a lieu seulement quand vous lancez vous-même une analyse avec votre fichier; rien n’est analysé par défaut. Les résultats servent uniquement à vous être affichés. Ils ne servent pas à la publicité, ne vous comparent pas à d’autres personnes et ne servent à prendre aucune décision à votre sujet.</p>
+
+  <h2 id="fournisseurs">Paiements, formulaires, courriel, infolettre</h2>
+  <ul>
+    <li><strong>Paiements :</strong> Stripe traite votre nom, votre courriel, votre pays de facturation et les données de votre carte. donttrade ne voit jamais le numéro complet de votre carte. Pour les données de paiement, Stripe agit comme responsable indépendant; sa politique de confidentialité s’applique.</li>
+    <li><strong>Formulaires :</strong> nos formulaires passent par Web3Forms, qui nous transmet votre message par courriel. Ils demandent seulement ce qui est indiqué sur chaque formulaire.</li>
+    <li><strong>Courriel :</strong> notre boîte de réception est hébergée par Google (Gmail).</li>
+    <li><strong>Infolettre :</strong> si vous vous y abonnez, elle est envoyée par Substack; sa politique de confidentialité s’applique.</li>
+    <li><strong>Hébergement :</strong> le site est hébergé sur GitHub Pages. GitHub peut journaliser les adresses IP des visiteurs pour des raisons de sécurité.</li>
+    {%- if flags.analytics %}
+    <li><strong>Mesure d’audience :</strong> Cloudflare Web Analytics compte les visites sans déposer de témoin et sans vous suivre d’un site à l’autre.</li>
+    {%- endif %}
+  </ul>
+  <p>Nous ne vendons aucun renseignement. Nous n’utilisons ces fournisseurs que pour faire fonctionner le site, les paiements, les formulaires, le courriel et l’infolettre.</p>
+
+  <h2 id="navigateur">Stockage dans votre navigateur (aucun témoin)</h2>
+  <p>Ce site ne dépose aucun témoin. Il enregistre dans votre propre navigateur votre choix de thème clair ou foncé et, si vous achetez, votre clé d’accès au Rapport. Ces données restent sur votre appareil, et nous n’y avons pas accès. Pour les effacer, supprimez les données du site dans votre navigateur. Conservez d’abord votre lien de restauration, sinon vous perdrez l’accès.</p>
+
+  <h2 id="hors-quebec">Communication hors du Québec et hors du Canada</h2>
+  <p>Nos fournisseurs (Cloudflare, Stripe, Web3Forms, GitHub, Google et Substack) sont situés hors du Québec et, pour la plupart, aux États-Unis. Vos renseignements peuvent y être conservés et traités, et les autorités de ces pays peuvent y avoir accès selon leurs lois.</p>
+
+  <h2 id="conservation">Bases légales et conservation</h2>
+  <p><strong>Bases légales (UE et R.-U.) :</strong> l’exécution du contrat pour produire votre rapport et vous répondre; notre intérêt légitime pour limiter les abus et protéger le service.</p>
+  <ul>
+    <li>chiffres de transactions envoyés pour l’analyse payante : non conservés;</li>
+    <li>compteurs d’utilisation : environ une heure;</li>
+    <li>dossiers d’achat et de facturation : six ans, comme l’exige la loi fiscale canadienne;</li>
+    <li>demandes qui ne mènent à aucun achat ni contrat : supprimées dans les 12 mois;</li>
+    <li>adresses de la liste d’attente : utilisées une fois pour annoncer le lancement, puis supprimées, sauf si la personne achète.</li>
+  </ul>
+
+  <h2 id="droits">Vos droits</h2>
+  <p>Vous pouvez demander par courriel l’accès à vos renseignements, leur rectification ou leur suppression, ainsi qu’une copie dans un format courant. Nous répondons dans les 30 jours. Vous pouvez aussi porter plainte auprès du Commissariat à la protection de la vie privée du Canada et, au Québec, de la Commission d’accès à l’information. Dans l’Union européenne, vous pouvez vous adresser à l’autorité de protection des données de votre pays, et au Royaume-Uni, à l’Information Commissioner’s Office. Si un incident de confidentialité présente un risque de préjudice sérieux pour vous, nous vous en avisons.</p>
+
+  <h2 id="firmes">Clients d’affaires</h2>
+  <p>Pour les mandats auprès de firmes, nous ne recevons jamais de dossiers de comptes, seulement les totaux agrégés produits par le script.</p>
+  {% include "pages/fr/_disclaimer.html" %}
+  <p class="small"><a href="/fr/avant-de-payer/">Avant de payer</a> · <a href="/fr/conditions/">Conditions</a> · <a href="/privacy/" hreflang="en" lang="en">English</a></p>
+</div></div>
+{% endblock %}
