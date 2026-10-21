@@ -99,6 +99,29 @@ PAGES += [
                     "published script, run inside your own systems."},
 ]
 
+# Forms and the pages around them (step 16). Thank-you pages are noindex and stay out of the sitemap.
+PAGES += [
+    {"template": "pages/start.html", "path": "/start/", "requires_flag": None, "updated": "2026-10-21",
+     "crumb": "Start here", "og_image": "/assets/og/start.png", "scripts": [FORM_JS],
+     "title": "Start a Pilot, Apply to Partner or Join the Waitlist",
+     "description": "Request a Pilot measurement, apply to partner as a journal or platform, or join the trader "
+                    "waitlist. A short form or an email; no calls."},
+    {"template": "pages/for-platforms.html", "path": "/for-platforms/", "requires_flag": None, "updated": "2026-10-21",
+     "crumb": "Journals & platforms", "og_image": "/assets/og/platforms.png", "scripts": [FORM_JS],
+     "title": "Behavioural Measurement for Trading Journals and Platforms",
+     "description": "Show users how readily they close winning versus losing trades, with a public script run in "
+                    "your own product. Free licence for the first three partners."},
+    {"template": "pages/start-thanks.html", "path": "/start/thanks/", "requires_flag": None, "noindex": True,
+     "crumb": "Thank you", "title": "Request received — donttrade",
+     "description": "Your request reached donttrade. You get a reply within 1 business day, Eastern Time, Monday to Friday."},
+    {"template": "pages/trader-thanks.html", "path": "/for-traders/thanks/", "requires_flag": None, "noindex": True,
+     "crumb": "Thank you", "title": "You are on the waitlist — donttrade",
+     "description": "You joined the donttrade trader waitlist. Nothing is charged; one email when the report launches."},
+    {"template": "pages/thanks.html", "path": "/thanks/", "requires_flag": None, "noindex": True,
+     "crumb": "Thank you", "title": "Thank you — donttrade",
+     "description": "Your message reached donttrade. Firms get a reply within 1 business day; traders get one email at launch."},
+]
+
 # The /tools/ index rows: tool, the question it answers, input, Open (plan step 12).
 TOOLS = [
     {"name": "Trade stats", "href": "/tools/trade-stats/",

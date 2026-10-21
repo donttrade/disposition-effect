@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+{%- set pilot = products["pilot"] %}{%- set r = products["report39"] %}
+<div class="wrap">
+  <h1>Start here</h1>
+  <p class="lede">Pick the one that fits. Every route is a short form or an email. No calls.</p>
+  <ul class="jump">
+    <li><a href="#firm">I’m at a prop firm, broker or copy-trading platform</a></li>
+    <li><a href="#platform">I run a trading journal or platform</a></li>
+    <li><a href="#trader">I’m an individual trader</a></li>
+  </ul>
+
+  <section class="section" aria-labelledby="firm">
+    <h2 id="firm">Prop firms, brokers and copy-trading platforms</h2>
+    <p>Start with a {{ pilot.name }}: one disposition figure, measured on your own records, {{ pilot.price_usd|usd }} USD. {{ pilot.credit_rule }} of delivery. Want a Snapshot, Memo or Outcomes pack, the <a href="/for-firms/#copy-leader">copy-leader test</a> or a <a href="/for-firms/#claims-test">claims test</a> instead? Use the same form and say so.</p>
+    <p class="small muted">{{ pilot.name }} (called “{{ pilot.former_name }}” before 22 Oct 2026). <a href="/pricing/#firms">Firm pricing</a> · <a href="/terms/#trial">{{ pilot.name }} terms</a></p>
+    {%- with fid = "sf", product = "pilot", heading_id = "firm" %}{% include "partials/form_firm.html" %}{% endwith %}
+    <h3>What happens next</h3>
+    <ol class="steps">
+      <li>Within 1 business day you get a reply with a one-page scope, our data terms and the fixed price.</li>
+      <li>Nothing is owed until you accept the scope. Then pay by bank transfer, or Interac e-Transfer in Canada. {% include "partials/card_timing.html" %}</li>
+      <li>Your staff run the published script and send back what it prints; you get the figure and memo within {{ pilot.turnaround_days }} business days of payment and a clean run.</li>
+    </ol>
+  </section>
+
+  <section class="section" aria-labelledby="platform">
+    <h2 id="platform">Trading journals and platforms</h2>
+    <p>Apply to be one of the first three partners: a free 12-month licence and a co-published study. <a href="/for-platforms/">What partners get</a></p>
+    {%- with fid = "sp", product = "platform", heading_id = "platform" %}{% include "partials/form_firm.html" %}{% endwith %}
+  </section>
+
+  <section class="section" aria-labelledby="trader">
+    <h2 id="trader">Individual traders</h2>
+    <p>The trader report is not on sale yet. Join the waitlist and we email you once, when it launches. {{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers; nothing is charged now. <a href="/for-traders/#founding">Details</a></p>
+    {%- with heading_id = "trader" %}{% include "partials/form_waitlist.html" %}{% endwith %}
+  </section>
+
+  <p>Researchers and press: no form needed. Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>.</p>
+</div>
+{% endblock %}
