@@ -326,7 +326,7 @@ function runNoise(trades) {
 }
 
 function badge(label) {
-  const cls = label === LABELS.real ? 'badge badge-real' : label === LABELS.tooFew ? 'badge badge-few' : 'badge badge-noise';
+  const cls = label === LABELS.real ? 'badge badge-real' : (label === LABELS.tooFew || label === NO_LOSSES) ? 'badge badge-few' : 'badge badge-noise';
   return el('span', { class: cls, text: label });
 }
 
@@ -342,13 +342,15 @@ function renderNoise(noise, total) {
   st.textContent = noise.limited ? `Checked on your most recent ${intText(noise.n_used)} of ${intText(total)} trades (the limit for these checks).` : 'Done.';
   const rows = noise.checks.map((c) => {
     const [name, q] = CHECK_TEXT[c.stat];
+    // NIT 5: a streak of 0 losses has nothing to test; say so rather than "may be noise"
+    const noLosses = c.stat === 'longest_losing_streak' && c.value === 0;
     const n = c.n_b === null ? intText(c.n_a) : `${intText(c.n_a)} losing, ${intText(c.n_b)} winning`;
     return el('tr', { 'data-check': c.stat },
       el('th', { scope: 'row' }, el('span', { text: name }), el('br'), el('span', { class: 'small muted', text: q })),
       el('td', { class: 'num', text: n }),
       el('td', { class: 'num', text: observed(c) }),
-      el('td', { class: 'num', text: c.p === null ? DASH : c.p.toFixed(4) }),
-      el('td', {}, badge(c.label)));
+      el('td', { class: 'num', text: c.p === null || noLosses ? DASH : c.p.toFixed(4) }),
+      el('td', {}, badge(noLosses ? NO_LOSSES : c.label)));
   });
   const table = el('table', {},
     el('caption', { text: 'Real-or-noise checks on this file' }),
