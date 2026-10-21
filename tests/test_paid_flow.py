@@ -24,7 +24,8 @@ sys.path.insert(0, os.path.join(HERE, "reference"))
 import engine_ref as E  # noqa: E402
 
 pytestmark = pytest.mark.skipif(not os.path.isdir(PRIVATE), reason="dt-private (server) not present")
-FIXTURE = os.path.join(HERE, "fixtures", "mt5", "deals_netting.htm")
+# 40 trades: the server refuses a report on fewer than 30 (nothing is counted).
+FIXTURE = os.path.join(HERE, "fixtures", "mt5", "deals_netting_40.htm")
 SYMBOLS = ["EURUSD", "XAUUSD", "GBPUSD", "USDJPY"]
 ROW_KEYS = {"o", "h", "d", "q", "p", "s", "f"}
 REQ_KEYS = {"v", "token", "rows", "currency", "pgr_plr", "firm_name", "firm_consent"}

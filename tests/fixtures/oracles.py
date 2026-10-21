@@ -242,3 +242,11 @@ ORACLES["generic/quoted_multiline_note.csv"] = {
     "warnings": {},
     "skipped": {},
 }
+
+# 40 plain MT5 round trips (make_fixtures.mt5_netting_long): the paid-flow tests upload it,
+# because a paid report needs at least 30 trades. Each trade: two -3.50 commissions -> fees 7.
+ORACLES["mt5/deals_netting_40.htm"] = {
+    "trades": [dict(fees=7.0, fills_n=2, pnl_source="reported", pnl_unit="account")] * 40,
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_SKIPPED_ROWS": 1},
+    "skipped": {"balance": 1},
+}

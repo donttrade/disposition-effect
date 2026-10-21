@@ -103,6 +103,32 @@ def mt5_netting():
     return html_doc(b)
 
 
+def mt5_netting_long(n=40):
+    """deals_netting.htm's layout (canary header, balance row) with n plain round trips: a paid
+    report needs at least 30 trades, so the browser paid-flow tests upload this one."""
+    r = lcg(7)
+    b = mt5_header_block() + title("Deals") + DEALS_HEAD
+    b += tr("2026.09.01 08:00:00", "5000", "", "balance", "", "", "", "", "0.00", "0.00", "0.00", "10 000.00",
+            "10 000.00", f"{CANARY} deposit")
+    syms = [("EURUSD", 1.08), ("XAUUSD", 2500.0), ("GBPUSD", 1.27), ("USDJPY", 147.0)]
+    for i in range(n):
+        sym, base = syms[i % 4]
+        day = 1 + i // 4
+        win = r() < 0.5
+        profit = round(20 + r() * 80, 2) * (1 if win else -1)
+        hold_min = 10 + int(r() * 200)
+        open_m = 9 * 60 + (i % 4) * 5
+        close_m = open_m + hold_min
+        t_open = f"2026.09.{day:02d} {open_m // 60:02d}:{open_m % 60:02d}:00"
+        t_close = f"2026.09.{day:02d} {close_m // 60:02d}:{close_m % 60:02d}:00"
+        side, back = ("buy", "sell") if i % 3 else ("sell", "buy")
+        b += tr(t_open, str(5001 + 2 * i), sym, side, "in", "1.00", f"{base:.5f}", str(6001 + 2 * i), "-3.50",
+                "0.00", "0.00", "0.00", "", "")
+        b += tr(t_close, str(5002 + 2 * i), sym, back, "out", "1.00", f"{base * 1.001:.5f}", str(6002 + 2 * i),
+                "-3.50", "0.00", "0.00", f"{profit:.2f}", "", CANARY if i == 0 else "")
+    return html_doc(b)
+
+
 POSITIONS_HEAD = tr("Time", "Position", "Symbol", "Type", "Volume", "Price", "S / L", "T / P", "Time", "Price",
                     "Commission", "Swap", "Profit", ("", 1))
 OPEN_POS_HEAD = tr("Time", "Position", "Symbol", "Type", "Volume", "Price", "S / L", "T / P", "Market Price",
@@ -232,6 +258,7 @@ def main():
     w("mt5/positions_hedging.htm", mt5_positions())
     w("mt5/deals_hedging.htm", mt5_hedging_deals())
     # MT5 reports are often saved as UTF-16LE with a BOM (UNVERIFIED): same content, re-encoded.
+    w("mt5/deals_netting_40.htm", mt5_netting_long())
     w("mt5/deals_netting_utf16.htm", b"\xff\xfe" + mt5_netting().encode("utf-16-le"))
     w("mt4/statement.htm", mt4_statement())
 
