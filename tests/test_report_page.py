@@ -108,6 +108,13 @@ def test_axe_print_ics_mailto(browser, stack, color):
         page.click("text=Add a re-test reminder (.ics)")
     ics = open(dl.value.path(), encoding="utf-8").read()
     assert "BEGIN:VCALENDAR" in ics and "SUMMARY:donttrade re-test" in ics
+    # delta D1: the reminder starts at the second the server opens the re-test (first report + 30 d)
+    db = json.loads(page.request.get(stack["api"] + "/__test/db").text())
+    created = max(r["created"] for r in db["first_runs"]) // 1000
+    import datetime as dt
+    start = dt.datetime.fromtimestamp(created + 30 * 86400, dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    assert f"DTSTART:{start}" in ics.replace("\r\n ", ""), (start, ics)
+    assert "opens at" in page.inner_text("#rp-retest")
     href = page.get_attribute("text=Send to your firm", "href")
     assert href.startswith("mailto:") and "for-firms%2F%3Fref%3Dreport" in href
     page.emulate_media(media="print")

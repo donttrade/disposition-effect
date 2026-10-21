@@ -116,17 +116,19 @@ def test_paid_build_needs_https_api(tmp_path, api, env, ok):
 # ------------------------------------------------------------------ D2
 def test_retest_wording_on_page_and_in_ics():
     js = os.path.join(REPO, "site", "static", "js", "paid", "retest-copy.js")
-    code = ("import(process.argv[1]).then(m => { process.stdout.write(JSON.stringify("
-            "{line: m.RETEST_LINE, ics: m.ics(new Date('2026-10-22T12:00:00Z'))})); });")
+    # delta D1: the .ics takes the server's window (first report 2026-10-22 12:00Z + 30 / 60 days)
+    code = ("import(process.argv[1]).then(m => { const o = Date.UTC(2026, 10, 21, 12) / 1000; "
+            "const w = {opens_at: o, closes_at: o + 30 * 86400}; process.stdout.write(JSON.stringify("
+            "{line: m.retestLine(w, o - 30 * 86400), ics: m.ics(w, new Date('2026-10-22T12:00:00Z'))})); });")
     r = subprocess.run(["node", "--input-type=module", "-e", code, "file://" + js], capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
     d = json.loads(r.stdout)
-    assert PHRASE in d["line"] and "30 to 60 days" in d["line"]
+    assert PHRASE in d["line"] and "opens at 2026-11-21 12:00 UTC, in 30 days, 0 hours" in d["line"]
     lines = d["ics"].split("\r\n")
     assert all(len(x.encode("utf-8")) <= 75 for x in lines)
     unfolded = d["ics"].replace("\r\n ", "")
     desc = next(x for x in unfolded.split("\r\n") if x.startswith("DESCRIPTION:"))
-    assert PHRASE in desc.replace("\\,", ",") and "DTSTART;VALUE=DATE:20261121" in unfolded
+    assert PHRASE in desc.replace("\\,", ",") and "DTSTART:20261121T120000Z" in unfolded
     report_js = open(os.path.join(REPO, "site", "static", "js", "paid", "report.js"), encoding="utf-8").read()
-    assert "RETEST_LINE" in report_js and "from './retest-copy.js'" in report_js
+    assert "retestLine" in report_js and "from './retest-copy.js'" in report_js
     assert not L.lint_text(d["line"]) and not L.lint_text(desc)
