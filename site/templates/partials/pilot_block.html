@@ -20,7 +20,7 @@
   <div class="field"><label for="pc-what">What do you want measured? <span class="opt">(optional)</span></label>
     <textarea id="pc-what" name="message" rows="3" placeholder="e.g. funded accounts, January to June"></textarea></div>
   <p class="small" id="pc-refund"><strong>Automatic refund:</strong> {{ pilot_refund(products) }}</p>
-  <div class="check field"><input id="pc-read" name="read_scope_and_terms" type="checkbox" value="yes" required aria-describedby="pc-read-links">
+  <div class="check field"><input id="pc-read" name="read_scope_and_terms" type="checkbox" value="yes" required aria-describedby="pc-refund pc-read-links">
     <label for="pc-read">I’ve read the {{ pilot.name }} scope and terms. <span class="req">(required)</span></label></div>
   <p class="small" id="pc-read-links">Read them first: <a href="/for-firms/#what-it-costs">the {{ pilot.name }} scope</a> and <a href="/terms/#trial">the {{ pilot.name }} terms</a>.</p>
   <p><button class="btn" type="submit">Send and see the payment options</button></p>

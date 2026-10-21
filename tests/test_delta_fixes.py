@@ -455,3 +455,59 @@ def test_c4_old_calculators_still_work_and_cannot_send(browser, built_site, path
     page.close()
     assert blocked[:2] == ["blocked", "blocked"], blocked
     assert not [e for e in errors if "fetch" not in e.lower() and "beacon" not in e.lower() and "connect" not in e.lower()], errors
+
+
+# ------------------------------------------------------------------ NITs N2, N3, N6, N7
+def _pilot_build(tmp):
+    from test_legal import build, private_with, toml_with
+    priv = private_with(tmp, premises_address="PO Box 4417 STN Main, Zzqxville ON K9Z 9Z9")
+    r, out = build(tmp, "p", DT_SITE_TOML=toml_with(tmp, pilot_checkout=True), DT_PRIVATE_TOML=priv)
+    assert r.returncode == 0, r.stderr
+    return out, priv
+
+
+def test_n2_lint_warns_when_it_cannot_check_the_address(tmp_path):
+    out, _ = _pilot_build(tmp_path)
+    r = subprocess.run([sys.executable, os.path.join(REPO, "checks", "lint.py"), str(out)], capture_output=True, text=True,
+                       env={**os.environ, "DT_PRIVATE_TOML": str(tmp_path / "nonexistent.toml")})
+    assert "lint: WARNING: no private.toml at" in r.stdout and "NOT checked" in r.stdout, r.stdout
+
+
+def test_n3_lint_reads_the_builds_prices_json(tmp_path, monkeypatch):
+    p = json.load(open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8"))
+    for x in p["products"]:
+        if x["id"] == "pilot":
+            x["price_usd"] = 845
+    f = tmp_path / "prices.json"
+    f.write_text(json.dumps(p), encoding="utf-8")
+    monkeypatch.setenv("DT_PRICES_JSON", str(f))
+    assert 845 in L.allowed_amounts()
+    calls = []
+    real = L.read_private
+    monkeypatch.setattr(L, "read_private", lambda: calls.append(1) or real())
+    L.lint_build(os.path.join(REPO, "site", "_site"))
+    assert len(calls) == 1, "private.toml read once per run"
+
+
+def test_n6_a_placeholder_is_flagged_on_every_page_footer_included(tmp_path, monkeypatch):
+    from test_legal import build, private_with, toml_with
+    priv = private_with(tmp_path, premises_address="[ADDRESS — virtual mailbox pending]")
+    r, out = build(tmp_path, "ph", DT_SITE_TOML=toml_with(tmp_path, pilot_checkout=True), DT_PRIVATE_TOML=priv,
+                   DT_ALLOW_PLACEHOLDERS="1")
+    assert r.returncode == 0, r.stderr
+    monkeypatch.setenv("DT_PRIVATE_TOML", priv)
+    where = {w for rule, w, d in L.lint_build(str(out), pilot=True) if rule == "flag:seller_placeholder"}
+    pages = list(out.rglob("*.html"))
+    assert len(where) == len(pages) >= 36, (len(where), len(pages))
+    assert all("never publish" in d for rule, w, d in L.lint_build(str(out), pilot=True) if rule == "flag:seller_placeholder")
+
+
+def test_n7_the_refund_clause_describes_the_pilot_checkbox(tmp_path):
+    out, _ = _pilot_build(tmp_path)
+    for path in ("/start/", "/for-firms/"):
+        h = (out / path.strip("/") / "index.html").read_text(encoding="utf-8")
+        m = re.search(r'<input[^>]*id="pc-read"[^>]*>', h)
+        assert m, path
+        ids = re.search(r'aria-describedby="([^"]*)"', m.group(0)).group(1).split()
+        assert "pc-refund" in ids and "pc-read-links" in ids, (path, ids)
+        assert 'id="pc-refund"' in h
