@@ -35,6 +35,8 @@ export const MESSAGES = Object.freeze({
     'A date uses slashes, so day-first and month-first cannot be told apart. Write dates as yyyy-mm-dd (for example 2026-09-01).',
   E_BAD_NUMBER: 'A number could not be read',
   E_ENCODING: 'The file is not a text, CSV or HTML file that can be read.',
+  E_BAD_QUOTE:
+    'A quote mark (") opens a cell that is never closed, so the rows after it cannot be read. Remove the stray quote mark, or export the file again.',
   E_TOO_LARGE: 'The file is too large: the limit is 50 MB and 200,000 rows.',
   E_NO_CLOSED_TRADES: 'No closed trades were found: every position in the file is still open, or the file has no trades.',
 });
