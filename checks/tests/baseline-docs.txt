@@ -10,7 +10,7 @@ PASSED   test_site_content.py::test_pages_load
 FAILED   test_site_content.py::test_repo_commit_identities
 PASSED   test_site_content.py::test_repo_text_files
 PASSED   test_site_content.py::test_research_pages_carry_no_offer_prices
-FAILED   test_site_content.py::test_sample_report_trader_count_consistent
+PASSED   test_site_content.py::test_sample_report_trader_count_consistent
 PASSED   test_site_content.py::test_self_counts
 PASSED   test_site_content.py::test_site_anonymity
 PASSED   test_site_content.py::test_trader_prices_and_conditions
@@ -73,4 +73,3 @@ PASSED   test_site_security.py::test_sitemap_wellformed_and_on_canonical_host
 #  test_site_functional.py::test_too_large_input_gets_specific_message: AssertionError: Realised gains must be a whole number of zero or more (no decimals, no minus sign).
 #  test_site_content.py::test_banned_words_only_in_negations: AssertionError: [('/for-firms/', 'It asks for drawdown rules that are objective and verifiable, and certification runs on attestations...or certify our users?'), ('/for-researchers/', 'Verified errors are corrected withi
 #  test_site_content.py::test_repo_commit_identities: AssertionError: [('e5e6234', 'message', 'Claude-Session URL in commit message'), ('9446968', 'message', 'Claude-Session URL in commit ...c', 'message', 'Claude-Session URL in commit message'), ('4576fc8', 'message', 'Cla
-#  test_site_content.py::test_sample_report_trader_count_consistent: AssertionError: {'2,262', '2,264'}

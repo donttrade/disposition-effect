@@ -289,9 +289,19 @@ def test_self_counts():
 
 
 def test_sample_report_trader_count_consistent():
+    """/sample-report/ names two groups (samples/sample_trader_report.py): the traders with at least
+    30 sell-days the sample trader is chosen from (n_elig, 2,264), and the comparison group, those of
+    them with both a PGR and a PLR defined (n_grp, 2,262: two eligible traders never held a position
+    at a loss, so their PLR is undefined). Verified 21 Oct 2026 by re-running the script on the CC0
+    file. Each group must carry one count wherever it is named, and the comparison group cannot be
+    the larger. (Before 19 Oct both were worded alike; corrections log, 19 Oct 2026, item 3.)"""
     t = text_of(pages()["/sample-report/"].text)
-    counts = set(re.findall(r"([\d,]+) traders (?:in the same dataset )?with at least 30 sell-days", t))
-    assert len(counts) <= 1, counts
+    lead = r"([\d,]+) traders (?:in the same dataset )?with at least 30 sell-days"
+    grp = set(re.findall(lead + r" and both a PGR and a PLR defined", t))
+    elig = set(re.findall(lead + r"(?! and both a PGR and a PLR defined)", t))
+    assert len(grp) <= 1 and len(elig) <= 1, (grp, elig)
+    if grp and elig:
+        assert int(next(iter(grp)).replace(",", "")) <= int(next(iter(elig)).replace(",", "")), (grp, elig)
 
 
 def test_github_links_resolve():
