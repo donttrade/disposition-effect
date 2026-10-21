@@ -165,3 +165,59 @@ def test_d3_report_page_line_states_paid_terms_json():
     d = node("import(process.argv[1]).then(m => process.stdout.write(JSON.stringify({line: m.RETEST_LINE})));")
     m = re.search(rf"re-test on the same account, {N} to {N} days after your first report", d["line"])
     assert m and (int(m.group(1)), int(m.group(2))) == (OPENS, CLOSES)
+
+
+# ------------------------------------------------------------------ D5: claim:waive_dispute, sentence by sentence
+D5_EVASIONS = [   # the Tester's 18 that got through, word for word (report D5)
+    "You will not dispute this payment with your bank.",
+    "You may not initiate a chargeback.",
+    "You must not open a dispute with your card issuer.",
+    "No chargebacks: all sales are final.",
+    "You relinquish any right to a chargeback.",
+    "You forfeit any right to a chargeback.",
+    "You surrender any right to a chargeback.",
+    "You abandon any claim to contest the charge.",
+    "Payment is final and cannot be disputed.",
+    "This payment is non-disputable.",
+    "You agree to never dispute.",
+    "You agree you will not dispute.",
+    "You consent to not disputing this charge.",
+    "By paying you waive, to the fullest extent permitted by applicable law and without limitation of any kind "
+    "whatsoever, any dispute.",
+    "Vous acceptez de ne pas contester ce paiement.",
+    "Vous vous engagez à ne pas demander de rétrofacturation.",
+    "Aucune contestation de paiement ne sera acceptée.",
+    "Vous ne pourrez pas contester la transaction auprès de votre banque.",
+]
+D5_MORE = ["You forgo any dispute.", "You give up any chargeback right.", "You can't dispute this charge.",
+           "You won’t file a chargeback.", "Do not dispute this payment.", "Vous renoncez à contester ce paiement.",
+           "Vous n’allez pas contester ce paiement.", "Vous ne devez jamais ouvrir de litige.",
+           "We waive nothing. You waive " + "x " * 60 + "every dispute right."]
+
+
+@pytest.mark.parametrize("bad", D5_EVASIONS + D5_MORE)
+def test_d5_lint_catches_the_evasions_tester_repro(bad):
+    html = f'<html lang="en"><body><main><p>{bad}</p></main></body></html>'
+    assert any(p[0] == "claim:waive_dispute" for p in L.lint_html(html, "/x/", False, False, {745}, [], pilot=True)), bad
+    assert any(p[0] == "claim:waive_dispute" for p in L.passthrough_rules(html, "/x/", False)), bad
+    assert L.waive_dispute_claims(L.js_strings("const m = " + json.dumps(bad) + ";"), "/x.js"), bad
+
+
+@pytest.mark.parametrize("ok", [
+    # N1: the Tester's compliant reassurance
+    "Nothing here limits your right to dispute a charge with your bank. We never ask you to waive it.",
+    "We never ask you to waive your right to dispute a charge.",
+    "You do not have to give up your right to dispute a charge.",
+    "This does not affect your right to dispute a charge with your bank.",
+    "If we cannot resolve a dispute, it goes to the courts of Ontario.",
+    "We can’t help with disputes about a firm.",
+    "The evidence is indisputable.",
+    "En cas de litige, les tribunaux de l’Ontario sont compétents.",
+    "Nous ne pouvons pas vous aider avec un litige concernant une firme.",
+])
+def test_d5_no_false_positive_on_compliant_wording(ok):
+    assert L.waive_dispute_claims(L.normalise(ok), "/x/") == []
+
+
+def test_d5_sentences_split_on_punctuation_lines_and_bullets():
+    assert L.sentences("A dispute. We waive it.\nNext; one · two") == ["A dispute.", "We waive it.", "Next;", "one", "two"]
