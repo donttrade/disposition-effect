@@ -135,16 +135,59 @@ a:hover { color: var(--rust-hover); }
 .stack > * + * { margin-top: var(--s2); }
 
 /* ------------------------------------------------------------------ header / footer */
-/* Header (Manager V3): one 64 px line at every width. ≥ 900 px: brand · nav row · theme toggle.
-   < 900 px: brand · Menu (a <details>, works without JS) · theme toggle as an icon button; the
-   open menu is a list laid over the page under the header, so the page does not move. */
+/* Header (Manager V3; ARCHITECT-V3 §c.2): one 64 px line at every width. ≥ 900 px: brand · nav row
+   (3 drop-downs + 2 links) · theme toggle. < 900 px: brand · Menu (a <details>, works without JS) ·
+   theme toggle as an icon button; the open menu is an accordion laid over the page under the header.
+   Drop-down motion (B3): the panel fades in 6 px down in 200 ms, transform and opacity only; the
+   chevron turns in --dur-hover; nothing moves under prefers-reduced-motion. No close animation. */
+:root { --ease-nav: cubic-bezier(0.45, 0.05, 0.55, 0.95); } /* Stripe's nav easing [READ] */
 .site-header { border-bottom: 1px solid var(--border); position: relative; z-index: 20; background: var(--bg); }
 .site-header .wrap { display: flex; flex-wrap: nowrap; align-items: center; gap: var(--s1) var(--s3); min-height: 64px; }
 .brand { font-weight: 600; color: var(--text); text-decoration: none; font-size: var(--fs-2); margin-right: auto; display: inline-flex; align-items: center; min-height: var(--target); white-space: nowrap; }
 .site-nav ul { list-style: none; margin: 0; padding: 0; }
-.site-nav .nav-row { display: flex; flex-wrap: wrap; gap: 0 var(--s2); }
+.site-nav .nav-row { display: flex; flex-wrap: nowrap; align-items: center; gap: 0 var(--s2); }
 .site-nav a { display: inline-flex; align-items: center; min-height: var(--target); color: var(--text); text-decoration: none; white-space: nowrap; }
 .site-nav a:hover, .site-nav a[aria-current="page"], .site-nav a[aria-current="true"] { color: var(--rust); text-decoration: underline; }
+/* drop-downs (desktop) and the phone accordion share the summary look */
+details.nav-dd, details.nav-acc { border-bottom: 0; }
+.nav-dd > summary, .nav-acc > summary { list-style: none; display: flex; align-items: center; gap: 2px; min-height: var(--target);
+  padding: 0; font-weight: 400; color: var(--text); white-space: nowrap; transition: none; }
+.nav-dd > summary::-webkit-details-marker, .nav-acc > summary::-webkit-details-marker { display: none; }
+.nav-dd > summary:hover, .nav-dd[open] > summary, .nav-acc[open] > summary { color: var(--rust); }
+.nav-dd > summary.is-current, .nav-acc > summary.is-current { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.chev { flex: none; width: 16px; height: 16px; }
+details[open] > summary > .chev { transform: rotate(180deg); }
+.nav-dd-li { position: relative; }
+.nav-pop { position: absolute; top: calc(100% + 10px); left: -12px; z-index: 2; width: min(24rem, calc(100vw - 32px));
+  padding: var(--s1); background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--lift-shadow); }
+.nav-pop-end { left: auto; right: -12px; }
+.nav-pop::before { content: ""; position: absolute; left: 0; right: 0; top: -11px; height: 11px; } /* hover bridge over the gap */
+@media (min-width: 1100px) {
+  .nav-pop-2 { width: min(36rem, calc(100vw - 32px)); }
+  .nav-pop-2 .nav-items { display: grid; grid-template-columns: 1fr 1fr; }
+}
+.site-nav a.nav-item { display: flex; align-items: flex-start; gap: 12px; min-height: 48px; padding: 10px 12px; white-space: normal;
+  border-radius: var(--radius); text-decoration: none; }
+.site-nav a.nav-item:hover, .site-nav a.nav-item:focus-visible { background: var(--surface); }
+.site-nav a.nav-item:hover .ni-t, .site-nav a.nav-item[aria-current="page"] .ni-t { text-decoration: underline; }
+.ni { flex: none; margin-top: 2px; }
+.ni-text { display: flex; flex-direction: column; min-width: 0; }
+.ni-t { font-weight: 600; }
+.ni-d { font-size: var(--fs-0); color: var(--muted); }
+.nav-foot { border-top: 1px solid var(--border); margin-top: var(--s1); padding: 4px 12px 0; }
+/* a light veil over the page while a drop-down is open; it takes no clicks (nav.js closes on a click outside) */
+@media (min-width: 900px) {
+  .nav-dd[open] > summary::after { content: ""; position: fixed; left: 0; right: 0; top: 64px; bottom: 0; z-index: -1;
+    background: color-mix(in srgb, var(--text) 6%, transparent); pointer-events: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .nav-dd[open] > .nav-pop { animation: dt-pop 200ms var(--ease-nav) both; }
+  .nav-dd[open] > summary::after { animation: dt-fade 200ms var(--ease-nav) both; }
+  .nav-dd > summary > .chev, .nav-acc > summary > .chev { transition: transform var(--dur-hover) var(--ease-nav); }
+}
+@keyframes dt-pop { from { opacity: 0; transform: translateY(-6px); } }
+@keyframes dt-fade { from { opacity: 0; } }
+/* phone menu */
 .nav-menu { display: none; }
 .nav-menu > summary {
   list-style: none; display: inline-flex; align-items: center; gap: var(--s1);
@@ -158,12 +201,18 @@ a:hover { color: var(--rust-hover); }
 details.nav-menu { border-bottom: 0; }
 details.nav-menu[open] > summary { color: var(--text); background: var(--surface); }
 .site-nav .nav-panel {
-  position: absolute; left: 0; right: 0; top: 100%;
+  position: absolute; left: 0; right: 0; top: 100%; max-height: calc(100vh - 64px); overflow-y: auto;
   background: var(--bg); border-bottom: 1px solid var(--field-border);
   padding: var(--s1) var(--gutter) var(--s2); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
 }
-.site-nav .nav-panel a { display: flex; min-height: 48px; border-bottom: 1px solid var(--border); font-size: var(--fs-1); }
-.site-nav .nav-panel li:last-child a { border-bottom: 0; }
+.nav-panel .nav-acc > summary { min-height: 48px; justify-content: space-between; font-weight: 600; border-bottom: 1px solid var(--border); }
+.nav-panel .nav-acc > summary .chev { width: 20px; height: 20px; }
+.nav-panel .nav-items { padding: 4px 0; }
+.site-nav .nav-panel a.nav-item { padding: 10px 4px; }
+.nav-panel .nav-foot { margin: 0 0 var(--s1); padding: 4px 4px 0; }
+.site-nav .nav-panel .nav-foot a { min-height: 48px; }
+.site-nav .nav-panel .nav-links a { display: flex; min-height: 48px; border-bottom: 1px solid var(--border); font-size: var(--fs-1); font-weight: 600; }
+.site-nav .nav-panel .nav-links li:last-child a { border-bottom: 0; }
 .theme-toggle svg { display: block; flex: none; }
 .theme-toggle { display: inline-flex; align-items: center; gap: var(--s1); white-space: nowrap; }
 .theme-toggle[hidden] { display: none; }

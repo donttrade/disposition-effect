@@ -1,0 +1,26 @@
+{#- Nav and page icons (ARCHITECT-V3 B4): 20 px line icons drawn for donttrade, stroke currentColor, always
+    aria-hidden (the text next to each icon names the link). No icon font, no emoji, no external file.
+    build.NAV_ICONS lists the names the nav may use; the build refuses any other. -#}
+{%- set PATHS = {
+  "journal": '<path d="M5 3h10v14H5z"/><path d="M8 3v14"/><path d="M10.5 7h2.5M10.5 10h2.5"/>',
+  "stats": '<path d="M14.5 4h-9l5 6-5 6h9"/>',
+  "flag": '<path d="M5 18V3"/><path d="M5 4h10l-2.5 3.5L15 11H5"/>',
+  "scale": '<path d="M10 3v14M6 17h8M4 6h12"/><path d="M4 6l-2 5h4zM16 6l-2 5h4z"/>',
+  "hourglass": '<path d="M5 3h10M5 17h10"/><path d="M6.5 3v2.5L13.5 14.5V17M13.5 3v2.5L6.5 14.5V17"/>',
+  "list": '<path d="M4 5h12M4 10h12M4 15h8"/>',
+  "split": '<path d="M3 4h14v12H3z"/><path d="M10 4v12"/>',
+  "doc": '<path d="M5 2.5h6.5l3.5 3.5v11.5H5z"/><path d="M11.5 2.5V6H15M7.5 10h5M7.5 13h5"/>',
+  "code": '<path d="M7 6l-4 4 4 4M13 6l4 4-4 4M11.5 4l-3 12"/>',
+  "check": '<path d="M4 10.5l4 4 8-9"/>',
+  "bookmark": '<path d="M6 3h8v14l-4-3-4 3z"/>',
+  "building": '<path d="M4 17V4h8v13M12 8h4v9M3 17h14"/><path d="M7 7h2M7 10h2M7 13h2"/>',
+  "swap": '<path d="M4 7h12l-3-3M16 13H4l3 3"/>',
+  "windows": '<path d="M3 3h10v10H3z"/><path d="M7 13v4h10V7h-4"/>',
+  "percent": '<path d="M5 15L15 5"/><circle cx="6" cy="6" r="1.75"/><circle cx="14" cy="14" r="1.75"/>',
+  "shield": '<path d="M10 2.5l6 2.5v5c0 3.8-2.6 6-6 7.5-3.4-1.5-6-3.7-6-7.5V5z"/>',
+  "search": '<circle cx="8.5" cy="8.5" r="5"/><path d="M12.2 12.2L17 17"/>',
+  "chevron": '<path d="M5.5 8l4.5 4.5L14.5 8"/>',
+} %}
+{%- macro icon(name, cls="ni") -%}
+<svg class="{{ cls }}" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">{{ PATHS[name]|safe }}</svg>
+{%- endmacro %}

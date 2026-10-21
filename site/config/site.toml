@@ -22,6 +22,7 @@ analytics = false          # Cloudflare Web Analytics beacon
 trader_first_home = false  # must equal paid_report (the build fails otherwise)
 pilot_checkout = false     # "Start a Pilot" block + thanks page with the live Stripe Pilot link
 free_badges = false        # free tools' "real or noise" badges + footnote (off: free-launch condition C1, being redesigned)
+journal = false            # the free Trading Journal + P&L Calendar (/journal/, /tools/pnl-calendar/ and their nav row): off until the Tester passes J1-J38 and the owner approves
 
 [analytics]
 cf_beacon_token = ""       # required when analytics = true
@@ -55,21 +56,119 @@ launch_date = "2026-10-21"
 disclaimer_short = "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results."
 disclaimer_long = "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results."
 
-[[nav]]
-label = "For firms"
-href = "/for-firms/"
-[[nav]]
-label = "For traders"
-href = "/for-traders/"
+# Nav (ARCHITECT-V3 §c.2, owner decision Q1 21 Oct ~18:30): Free tools · Research · For firms · Pricing ·
+# About. A [[nav]] entry with [[nav.items]] is a drop-down (<details name="nav">, works without JS);
+# one without is a plain link. Each item: label, href, desc (one plain line: the build refuses a digit,
+# "$", "%" or a banned.toml word in any nav text), icon (partials/icons.html) and optional
+# requires_flag. [[nav.foot]] = text links under the panel's rule; label_if_paid replaces label
+# with paid_report on. The nav never shows a price, a % or a study number (D3).
 [[nav]]
 label = "Free tools"
 href = "/tools/"
-[[nav]]
-label = "Pricing"
-href = "/pricing/"
+columns = 2          # two columns from 1100 px
+[[nav.items]]
+label = "Trading journal"
+href = "/journal/"
+desc = "Your trades and a P&L calendar, saved on this device. No account."
+icon = "journal"
+requires_flag = "journal"
+[[nav.items]]
+label = "Trade stats"
+href = "/tools/trade-stats/"
+desc = "Totals from your trade file"
+icon = "stats"
+[[nav.items]]
+label = "Prop challenge simulator"
+href = "/tools/prop-challenge-simulator/"
+desc = "Your past days under a challenge’s rules"
+icon = "flag"
+[[nav.items]]
+label = "Lot size calculator"
+href = "/tools/lot-size-calculator/"
+desc = "Lots for the risk you chose"
+icon = "scale"
+[[nav.items]]
+label = "Disposition calculator"
+href = "/tools/disposition-calculator/"
+desc = "Winners vs losers sold, from four counts"
+icon = "hourglass"
+[[nav.foot]]
+label = "All free tools"
+href = "/tools/"
+[[nav.foot]]
+label = "For traders: the habit report (waitlist)"
+label_if_paid = "For traders: the habit report"
+href = "/for-traders/"
+
 [[nav]]
 label = "Research"
 href = "/research/"
+[[nav.items]]
+label = "All research"
+href = "/research/"
+desc = "Studies with their data and scripts"
+icon = "list"
+[[nav.items]]
+label = "The plan gap"
+href = "/plan-gap/"
+desc = "What we measure and why"
+icon = "split"
+[[nav.items]]
+label = "Sample memo & method"
+href = "/sample-memo/"
+desc = "What a firm receives"
+icon = "doc"
+[[nav.items]]
+label = "Code"
+href = "/code/"
+desc = "Every script, public"
+icon = "code"
+[[nav.items]]
+label = "Corrections"
+href = "/corrections/"
+desc = "Every change, dated"
+icon = "check"
+[[nav.items]]
+label = "Glossary"
+href = "/glossary/"
+desc = "Terms, defined"
+icon = "bookmark"
+
+[[nav]]
+label = "For firms"
+href = "/for-firms/"
+[[nav.items]]
+label = "For firms overview"
+href = "/for-firms/"
+desc = "Measure your traders’ plan gap"
+icon = "building"
+[[nav.items]]
+label = "Copy-trading platforms"
+href = "/for-firms/#copy-leader"
+desc = "A leader-ranking test, not yet available"
+icon = "swap"
+[[nav.items]]
+label = "Journals & platforms"
+href = "/for-platforms/"
+desc = "Partner with us"
+icon = "windows"
+[[nav.items]]
+label = "Pass-rate calculator"
+href = "/tools/pass-rate-calculator/"
+desc = "One cohort’s pass and payout rate"
+icon = "percent"
+[[nav.items]]
+label = "Independence"
+href = "/independence/"
+desc = "Why no firm can pay to change a number"
+icon = "shield"
+[[nav.foot]]
+label = "Start a Pilot"
+href = "/start/?product=pilot#pilot"
+
+[[nav]]
+label = "Pricing"
+href = "/pricing/"
 [[nav]]
 label = "About"
 href = "/about/"
