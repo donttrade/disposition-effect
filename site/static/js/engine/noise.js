@@ -2,9 +2,12 @@
 // (in a Web Worker) and the paid analysis (server side, Node). No DOM, no I/O.
 //
 // Fixed by the plan so the p-values equal the Python reference EXACTLY:
-//   N = 10,000 permutations; PRNG = mulberry32 seeded 20261022 + check index;
+//   N = 10,000 permutations (or resamples); PRNG = mulberry32 seeded 20261022 + check index;
 //   shuffle = Fisher–Yates from the end; two-sided p = (1 + #{|perm| >= |obs|}) / (N + 1);
 //   sums run in input order. A group under 30 trades → "not enough trades to tell".
+// Check 1 (expectancy) is a bootstrap-t, not the plan's sign-flip (Tester D3): a sign
+// flip assumes P&L is symmetric around zero, and on skewed zero-edge P&L ("many small
+// wins, rare big loss") it said "distinguishable" up to 19% of the time instead of 5%.
 // Mirrors tests/reference/engine_ref.py (mulberry32 … noise_checks).
 
 export const N_PERM = 10000;
@@ -108,23 +111,43 @@ function longestLossRun(xs) {
   return best;
 }
 
+export const EXPECTANCY_METHOD = 'bootstrap-t';
+
+// |mean - mu| / sd of xs[0..n) (sd with n - 1). Zero spread: 0 if mean = mu, else Infinity.
+function studentGap(xs, n, mu) {
+  let s = 0;
+  for (let i = 0; i < n; i++) s += xs[i];
+  const m = s / n;
+  let q = 0;
+  for (let i = 0; i < n; i++) { const d = xs[i] - m; q += d * d; }
+  const sd = Math.sqrt(q / (n - 1));
+  if (sd === 0) return m === mu ? 0 : Infinity;
+  return Math.abs(m - mu) / sd;
+}
+
+// Expectancy ≠ 0 by a studentized (bootstrap-t) test: resample the trades with
+// replacement N times; each resample's t around the file's own mean is the "noise"
+// t; p counts resamples at least as far out as the file's t around zero. (The √n of
+// a t statistic is the same on both sides, so it is left out.) Calibration on
+// zero-edge P&L: CODER-FIX-REPORT-v2-2026-10-21, D3.
 export function checkExpectancy(pnls, seed) {
   const n = pnls.length;
   if (n < MIN_GROUP) {
-    return { stat: 'expectancy', method: 'sign-flip permutation', n_a: n, n_b: null, value: null, p: null, label: labelFor(null, true) };
+    return { stat: 'expectancy', method: EXPECTANCY_METHOD, n_a: n, n_b: null, value: null, p: null, label: labelFor(null, true) };
   }
   let s = 0;
   for (const v of pnls) s += v;
   const obs = s / n;
+  const tObs = studentGap(pnls, n, 0);
   const rand = mulberry32(seed);
+  const draw = new Float64Array(n);
   let count = 0;
   for (let k = 0; k < N_PERM; k++) {
-    s = 0;
-    for (let i = 0; i < n; i++) { if (rand() < 0.5) s += pnls[i]; else s -= pnls[i]; }
-    if (Math.abs(s / n) >= Math.abs(obs)) count++;
+    for (let i = 0; i < n; i++) draw[i] = pnls[Math.floor(rand() * n)];
+    if (studentGap(draw, n, obs) >= tObs) count++;
   }
   const p = pValue(count);
-  return { stat: 'expectancy', method: 'sign-flip permutation', n_a: n, n_b: null, value: obs, p, label: labelFor(p, false) };
+  return { stat: 'expectancy', method: EXPECTANCY_METHOD, n_a: n, n_b: null, value: obs, p, label: labelFor(p, false) };
 }
 
 export function checkHoldGap(trades, seed) {

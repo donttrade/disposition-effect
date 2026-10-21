@@ -1548,28 +1548,49 @@ def _longest_loss_run(xs):
     return best
 
 
+EXPECTANCY_METHOD = "bootstrap-t"
+
+
+def _student_gap(xs, n, mu):
+    """|mean - mu| / sd (n - 1). Zero spread: 0 if mean == mu, else infinity. Mirrors studentGap()."""
+    s = 0.0
+    for i in range(n):
+        s += xs[i]
+    m = s / n
+    q = 0.0
+    for i in range(n):
+        d = xs[i] - m
+        q += d * d
+    sd = math.sqrt(q / (n - 1))
+    if sd == 0:
+        return 0.0 if m == mu else math.inf
+    return abs(m - mu) / sd
+
+
 def check_expectancy(pnls, seed):
+    """Expectancy != 0 by bootstrap-t (Tester D3: the plan's sign flip over-fires on skewed P&L).
+
+    Resample with replacement N times; count resamples whose t around the file's mean is at
+    least the file's t around zero."""
     n = len(pnls)
     if n < MIN_GROUP:
-        return {"stat": "expectancy", "method": "sign-flip permutation", "n_a": n, "n_b": None, "value": None,
+        return {"stat": "expectancy", "method": EXPECTANCY_METHOD, "n_a": n, "n_b": None, "value": None,
                 "p": None, "label": label_for(None, True)}
     s = 0.0
     for v in pnls:
         s += v
     obs = s / n
+    t_obs = _student_gap(pnls, n, 0.0)
     rand = mulberry32(seed)
+    draw = [0.0] * n
     count = 0
     for _ in range(N_PERM):
-        s = 0.0
-        for v in pnls:
-            if rand() < 0.5:
-                s += v
-            else:
-                s -= v
-        if abs(s / n) >= abs(obs):
+        for i in range(n):
+            draw[i] = pnls[int(rand() * n)]
+        if _student_gap(draw, n, obs) >= t_obs:
             count += 1
     p = p_value(count)
-    return {"stat": "expectancy", "method": "sign-flip permutation", "n_a": n, "n_b": None, "value": obs, "p": p,
+    return {"stat": "expectancy", "method": EXPECTANCY_METHOD, "n_a": n, "n_b": None, "value": obs, "p": p,
             "label": label_for(p, False)}
 
 
