@@ -255,10 +255,10 @@ PAGES += [
      "crumb": "Individual traders", "og_image": "/assets/og/traders.png", "scripts": [FORM_JS],
      "title": "Trader Habit Report: Waitlist and Founding Price",
      "description": "A habit report built from your own MT5, IBKR or Tradovate file, with a real-or-noise check "
-                    "for each habit. Coming soon; join the waitlist.",
+                    "for each tested habit. Coming soon; join the waitlist.",
      "if_paid": {"title": "Trader Habit Report: Founding Price",
                  "description": "A habit report built from your own MT5, IBKR or Tradovate file, with a "
-                                "real-or-noise check for each habit. Founding price, one free re-test."}},
+                                "real-or-noise check for each tested habit. Founding price, one free re-test."}},
     {"template": "pages/for-firms.html", "path": "/for-firms/", "requires_flag": None, "updated": "2026-10-21",
      "crumb": "Prop firms & brokers", "og_image": "/assets/og/firms.png", "scripts": [FORM_JS],
      "title": "Disposition-Effect Measurement for Prop Firms and Brokers",

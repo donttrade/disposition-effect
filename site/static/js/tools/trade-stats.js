@@ -14,7 +14,7 @@
 
 import { createFileSlot, renderReadError, fieldError } from './tool-state.js';
 import { freeStats, equityCurve, NO_LOSSES } from '../engine/stats.js';
-import { LABELS, N_PERM } from '../engine/noise.js';
+import { LABELS, N_PERM, guardSentence, FREE_CHECKS_FOOTNOTE } from '../engine/noise.js';
 import { money, unitNote, pct, ratio, duration, day, intText, el, signClass, DASH } from './format.js';
 import { parsePositive, InputError } from './num.js';
 
@@ -27,7 +27,8 @@ const FORMAT_NAMES = {
 };
 
 const CHECK_TEXT = {
-  expectancy: ['Mean result per trade', 'Is the average result per trade different from zero, or could random signs give one this far from zero?'],
+  // a bootstrap-t (noise.js), not a sign flip: the question names no method it does not use
+  expectancy: ['Mean result per trade', 'Is the average result per trade different from zero, or could chance alone give one this far from zero with trades like these?'],
   hold_gap_s: ['Hold time, losers vs winners', 'Is the gap between how long losing and winning trades were held larger than shuffling the win/loss labels gives?'],
   longest_losing_streak: ['Longest losing streak', 'Is the longest run of losses longer than the same trades in a random order give?'],
 };
@@ -199,7 +200,7 @@ async function render(focus = true) {
   // Noise checks: filled in by the worker
   out.append(el('section', { 'aria-labelledby': 'ts-noise-h', id: 'ts-noise' },
     el('h3', { id: 'ts-noise-h', text: 'Real or noise?' }),
-    el('p', { text: `Three checks, each repeated ${intText(N_PERM)} times on shuffled copies of your own trades. A figure is "${LABELS.real}" when fewer than 5% of the shuffles come out as far from zero as your real trades; otherwise it "${LABELS.noise}". Under 30 trades in a group the check is not run, and the result says "${LABELS.tooFew}".` }),
+    el('p', { text: `Three checks, each repeated ${intText(N_PERM)} times on random copies of your own trades: resampled for the mean result, shuffled for the other two. A figure is "${LABELS.real}" when fewer than 5% of the copies come out as extreme as your real trades; otherwise it "${LABELS.noise}". Under 30 trades in a group the check is not run, and the result says "${LABELS.tooFew}". The mean result also says so when a few very large trades make up most of a short file's gains or losses.` }),
     el('p', { id: 'ts-noise-status', role: 'status', text: 'Running the checks…' })));
 
   out.hidden = false;
@@ -326,8 +327,14 @@ function renderNoise(noise, total) {
     el('caption', { text: 'Real-or-noise checks on this file' }),
     el('thead', {}, el('tr', {}, ...['Check', 'Trades', 'In your file', 'p', 'Result'].map((h, i) => el('th', { scope: 'col', class: i && i < 4 ? 'num' : null, text: h })))),
     el('tbody', {}, ...rows));
+  // ARCHITECT-STATS-AMENDMENT §7.2: a guarded expectancy check says why it withholds a verdict.
+  // Only the expectancy check carries a guard field (the other two have none, not null).
+  const guarded = noise.checks.filter((c) => c.stat === 'expectancy')
+    .map((c) => guardSentence(c, (x) => money(x, state.unit))).filter((s) => s);
   $('ts-noise').append(tableWrap('Real-or-noise checks', table),
-    el('p', { class: 'small muted', text: 'p is the share of shuffles at least as extreme as your file. A small p says the pattern is unlikely to be luck in this file; it does not say it will continue.' }));
+    ...guarded.map((s) => el('p', { class: 'ts-guard', text: s })),
+    el('p', { class: 'small muted', text: 'p is the share of random copies at least as extreme as your file. A small p says the pattern is unlikely to be luck in this file; it does not say it will continue.' }),
+    el('p', { class: 'small muted', id: 'ts-noise-footnote', text: FREE_CHECKS_FOOTNOTE }));
   teaser(noise);
 }
 
@@ -340,7 +347,7 @@ function teaser(noise) {
   const gap = noise.checks.find((c) => c.stat === 'hold_gap_s');
   const text = $('ts-teaser-text');
   if (s.hold_ratio !== null && gap) {
-    text.textContent = `In this file, losing trades were held ${ratio(s.hold_ratio)} as long as winning trades (median ${duration(s.hold_median_loss_s)} against ${duration(s.hold_median_win_s)}), and the check above says: ${gap.label}. ${reportLead()} tests five habits like this one and shows what the matching trades totalled in your file.`;
+    text.textContent = `In this file, losing trades were held ${ratio(s.hold_ratio)} as long as winning trades (median ${duration(s.hold_median_loss_s)} against ${duration(s.hold_median_win_s)}), and the check above says: ${gap.label}. ${reportLead()} measures five habits like this one, tests four of them against noise, and shows what the matching trades totalled in your file.`;
   } else {
     text.textContent = `${reportLead()} looks for patterns in what you do after a loss, and tests each one for noise.`;
   }

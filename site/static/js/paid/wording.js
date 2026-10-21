@@ -57,12 +57,15 @@ export function habitSentences(h, report, fmt) {
   return [measureSentence(h, fmt), verdictSentence(h, report)];
 }
 
-// The method line (small text under each tested habit that has a p).
-export function methodLine(h) {
-  if (h.n_perm === null) return null;
-  if (h.id === 'revenge') return `Compared with your other trades from the same days, matched on whether another trade had just closed: the results were reshuffled within each day ${h.n_perm} times to see how large a gap chance alone produces.`;
-  if (h.id === 'tilt') return `Compared with your other trades from the same days: the results were reshuffled within each day ${h.n_perm} times to see how large a gap chance alone produces.`;
-  if (h.id === 'hold_gap' || h.id === 'size_up') return `Compared within the same days: the labels were reshuffled within each day ${h.n_perm} times to see how large a gap chance alone produces.`;
+// The method line (small text under each tested habit that has a p). {n_perm} is the habit's own
+// permutation count (it scales with the file size, D-4), never a fixed number. fmt.count formats
+// it (the page groups digits: 10,000); the default is plain.
+export function methodLine(h, fmt) {
+  if (h.n_perm === null || h.n_perm === undefined) return null;
+  const n = (fmt && fmt.count ? fmt.count : String)(h.n_perm);
+  if (h.id === 'revenge') return `Compared with your other trades from the same days, matched on whether another trade had just closed: the results were reshuffled within each day ${n} times to see how large a gap chance alone produces.`;
+  if (h.id === 'tilt') return `Compared with your other trades from the same days: the results were reshuffled within each day ${n} times to see how large a gap chance alone produces.`;
+  if (h.id === 'hold_gap' || h.id === 'size_up') return `Compared within the same days: the labels were reshuffled within each day ${n} times to see how large a gap chance alone produces.`;
   throw new Error(`methodLine: ${h.id} is not a tested habit`);
 }
 
