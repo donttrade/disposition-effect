@@ -326,3 +326,30 @@ ORACLES["generic_roundtrip/tv2_dst_fall.csv"] = {
     "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_DST": 1},
     "skipped": {},
 }
+
+# Tester fix round 2, F-B1 (t_b1b.py): a carried-in position that is ADDED TO inside the file.
+# The real position is not flat from the start of the file until the last close of the carried
+# lot, so under the flat-to-flat rule every fill of it is left out (never a trade carrying the
+# older lot's FIFO P&L). One W_OPEN_AT_START per symbol and direction.
+ORACLES["ibkr/fb1_carried_add_two_closes.csv"] = {
+    # AAPL: carried long 100; BUY 100 O 09-10 (inv 100); SELL 100 C 09-11 (inv 0); SELL 100 C 09-20
+    #   closes 100 more than the file opened -> a pre-file lot, closed 09-20: AAPL 09-10..09-20 left out.
+    # MSFT: BUY 10 O @400 09-03 -> SELL 10 C @410 09-04: realized 100 net, fees 2, gross 102, 1 day.
+    "trades": [dict(symbol="MSFT", dir="long", qty=10, pnl=100.0, pnl_gross=102.0, fees=2.0, hold_s=86400)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_OPEN_AT_START": 1},
+    "skipped": {},
+}
+ORACLES["ibkr/fb1_partial_carried_inner_trade.csv"] = {
+    # AAPL: SELL 50 C 09-02 (excess 50) ... BUY 10 O / SELL 10 C ... SELL 50 C 09-25 (excess 50):
+    #   50 carried shares are open the whole time, so the 10-share trade inside is left out; ONE position.
+    "trades": [dict(symbol="MSFT", dir="long", qty=10, pnl=100.0, hold_s=86400)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_OPEN_AT_START": 1},
+    "skipped": {},
+}
+ORACLES["mt5/fb1_carried_add_two_outs.csv"] = {
+    # EURUSD: carried long 1 + buy in 1; sell out (matched); sell out 09-08 (excess) -> all left out.
+    # GBPUSD: buy in 1.3000 09:00 -> sell out 1.3010 10:00, profit 100, no costs, 3600 s.
+    "trades": [dict(symbol="GBPUSD", dir="long", qty=1, pnl=100.0, pnl_gross=100.0, fees=0.0, hold_s=3600)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_OPEN_AT_START": 1},
+    "skipped": {},
+}
