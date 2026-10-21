@@ -20,7 +20,8 @@ sys.path.insert(0, os.path.join(REPO, "site"))
 from a11y import axe_violations, horizontal_overflow  # noqa: E402
 import build as B  # noqa: E402
 
-PAGES = ["/", "/for-traders/", "/for-firms/", "/pricing/"]
+PAGES = ["/", "/for-traders/", "/for-firms/", "/pricing/", "/start/", "/for-platforms/", "/start/thanks/",
+         "/for-traders/thanks/", "/thanks/"]
 # Links to anchors that the NEXT step builds. Each step that builds one removes it here.
 FORWARD = set()
 
@@ -29,6 +30,7 @@ FORWARD = set()
 OLD_IDS = {
     "/for-traders/": ["founding"],
     "/for-firms/": ["what-it-costs", "copy-leader", "claims-test"],
+    "/start/": ["firm", "platform", "trader"],
     "/pricing/": ["firms", "copy-leader", "claims-test", "platforms", "traders", "researchers", "payment",
                   "refunds", "history", "questions"],
 }
@@ -176,7 +178,8 @@ def test_old_ids_kept(built_site, path):
 
 
 # ------------------------------------------------------------------ step 14 (+16): forms
-FORM_PAGES = {"/for-traders/": "#wl", "/for-firms/": "#ff"}
+FORM_PAGES = {"/for-traders/": "#wl", "/for-firms/": "#ff", "/start/": "#sf", "/start/#platform": "#sp",
+              "/start/#trader": "#wl", "/for-platforms/": "#fp"}
 FIRM_KEY = "f8fdba04-71bb-4856-b700-01ac6796c252"
 TRADER_KEY = "54d01baf-5e02-4d93-988c-16cf5487732d"
 
@@ -206,7 +209,8 @@ def test_form_posts_with_javascript_off(browser, built_site, path):
         posted.append(route.request.post_data or "")
         route.fulfill(status=200, body="ok")
     pg.route("https://api.web3forms.com/**", handle)
-    pg.goto(built_site["url"] + path + "?ref=x1")
+    base, _, frag = path.partition("#")
+    pg.goto(built_site["url"] + base + "?ref=x1" + ("#" + frag if frag else ""))
     _fill(pg, form)
     pg.click(form + " button[type=submit]")
     pg.wait_for_timeout(500)
@@ -215,25 +219,27 @@ def test_form_posts_with_javascript_off(browser, built_site, path):
     from urllib.parse import parse_qs
     body = {k: v[0] for k, v in parse_qs(posted[0], keep_blank_values=True).items()}
     assert body["access_key"] == (TRADER_KEY if form == "#wl" else FIRM_KEY)
-    assert body["page"] == path and "botcheck" not in body  # unticked honeypot is not sent
+    assert body["page"] == base and "botcheck" not in body  # unticked honeypot is not sent
     assert body["redirect"].startswith("https://donttrade.ca/") and body["redirect"].endswith("/thanks/")
-    assert body["product"] in ("waitlist", "pilot") and body["ref"] == ""  # JS off: defaults
+    assert body["product"] in ("waitlist", "pilot", "platform") and body["ref"] == ""  # JS off: defaults
 
 
 @pytest.mark.parametrize("path", sorted(FORM_PAGES))
 def test_form_ref_capture_and_fields(browser, built_site, path):
     form = FORM_PAGES[path]
-    html = html_of(built_site, path)
+    base, _, frag = path.partition("#")
+    html = html_of(built_site, base)
     assert "tally.so" not in html
     ctx = browser.new_context(viewport={"width": 375, "height": 900})
     pg = ctx.new_page()
-    pg.goto(built_site["url"] + path + "?ref=report&product=copy-leader")
+    pg.goto(built_site["url"] + base + "?ref=report&product=copy-leader")
     assert pg.input_value(form + " input[name=ref]") == "report"
-    if form == "#ff":
+    if form in ("#ff", "#sf", "#sp", "#fp"):
         assert pg.input_value(form + " input[name=product]") == "copy-leader"
-        assert pg.get_attribute("#ff-email", "autocomplete") == "email"
-        assert pg.get_attribute("#ff-firm", "autocomplete") == "organization"
-        assert pg.get_attribute("#ff-role", "autocomplete") == "organization-title"
+        f = form.lstrip("#")
+        assert pg.get_attribute(f"#{f}-email", "autocomplete") == "email"
+        assert pg.get_attribute(f"#{f}-firm", "autocomplete") == "organization"
+        assert pg.get_attribute(f"#{f}-role", "autocomplete") == "organization-title"
     else:
         assert not pg.is_checked("#wl-consent") and pg.get_attribute("#wl-consent", "required") is not None
     # botcheck honeypot present and hidden; every visible field has a label; targets >= 44 px
@@ -243,7 +249,7 @@ def test_form_ref_capture_and_fields(browser, built_site, path):
     for el in pg.query_selector_all(form + " button, " + form + " input[type=email], " + form + " input[type=text]"):
         assert el.bounding_box()["height"] >= 44
     assert pg.locator("a[href^='mailto:']").count() >= 1
-    pg.goto(built_site["url"] + path + "?ref=<script>")
+    pg.goto(built_site["url"] + base + "?ref=<script>")
     assert pg.input_value(form + " input[name=ref]") == ""
     ctx.close()
 
@@ -279,3 +285,13 @@ def test_pricing_prices_match_prices_json(built_site):
     assert "$1,500 for a Memo" in text  # 25% of the Memo price, computed from the rule
     assert "$39 founding price for the first 100 buyers" in text
     assert 'role="tablist"' not in html and "Before you pay" not in text
+
+
+# ------------------------------------------------------------------ step 16: thank-you pages
+def test_form_redirects_land_on_built_thank_you_pages(built_site):
+    for path in ("/start/", "/for-traders/", "/for-firms/", "/for-platforms/"):
+        for url in re.findall(r'name="redirect" value="([^"]+)"', html_of(built_site, path)):
+            target = url.replace("https://donttrade.ca", "")
+            assert (built_site["out"] / target.lstrip("/") / "index.html").exists(), url
+    assert "within 1 business day" in visible(html_of(built_site, "/start/thanks/"))
+    assert "Nothing is charged" in visible(html_of(built_site, "/for-traders/thanks/"))

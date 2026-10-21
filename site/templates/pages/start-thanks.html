@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+{%- set pilot = products["pilot"] %}
+<div class="wrap">
+  <h1>Got it, thank you.</h1>
+  <p class="lede">You’ll get a reply from <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a> within 1 business day (Eastern Time, Monday to Friday), with one question about which traders and dates to cover.</p>
+  <p>Nothing is owed until you accept a written scope. Who signs, and is legal involved? Mention it in your reply, and the NDA comes first.</p>
+  <h2>While you wait</h2>
+  <ul>
+    <li><a href="/sample-memo/">The sample memo</a>: exactly what you would receive.</li>
+    <li><a href="https://github.com/donttrade/disposition-effect/tree/main/partner">The script on GitHub</a>: try it on the synthetic test file that make_fixture.py writes.</li>
+    <li><a href="/terms/#trial">The {{ pilot.name }} terms</a> and <a href="/pricing/#firms">firm pricing</a>.</li>
+  </ul>
+  <p class="small muted">No reply after 1 business day? Check your spam folder, then write to <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>.</p>
+</div>
+{% endblock %}
