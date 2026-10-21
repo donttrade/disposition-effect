@@ -29,6 +29,10 @@ def rules(html, paid=False, analytics=False, priv=()):
     ("<p>You lost $500 because of tilt.</p>", "banned:cause"),
     ("<p>Unlock your edge.</p>", "banned:ai_tells"),
     ("<p>The #1 journal.</p>", "banned:ai_tells"),
+    ("<p>A certified result.</p>", "banned:assurance"),
+    ("<p>Your figure, audited.</p>", "banned:assurance"),
+    ("<p>Start the trial today.</p>", "banned:renamed"),
+    ("<p>Standard prices after launch apply.</p>", "banned:regular_price"),
     ('<a href="https://tally.so/r/x">form</a>', "tally"),
     ("<p>Only $59 today.</p>", "price_literal"),
     ("<p>key " + "sk_" + "live_abcdefgh1234</p>", "secret"),  # built at runtime so repo secret scans stay clean

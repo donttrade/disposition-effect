@@ -81,6 +81,22 @@ PAGES += [
                     "simulator, a lot size calculator and more. No sign-up."},
 ]
 
+# Audience pages (step 14). Titles ≤ 60 and descriptions ≤ 155 characters (SEO-PLAN §3.1).
+# Search terms behind these titles are from autocomplete only; volumes are UNVERIFIED.
+FORM_JS = "/static/js/form-ref.js"
+PAGES += [
+    {"template": "pages/for-traders.html", "path": "/for-traders/", "requires_flag": None, "updated": "2026-10-21",
+     "crumb": "Individual traders", "og_image": "/assets/og/traders.png", "scripts": [FORM_JS],
+     "title": "Trader Habit Report: Waitlist and Founding Price",
+     "description": "A habit report built from your own MT5, IBKR or Tradovate file, with a real-or-noise check "
+                    "for each habit. Coming soon; join the waitlist."},
+    {"template": "pages/for-firms.html", "path": "/for-firms/", "requires_flag": None, "updated": "2026-10-21",
+     "crumb": "Prop firms & brokers", "og_image": "/assets/og/firms.png", "scripts": [FORM_JS],
+     "title": "Disposition-Effect Measurement for Prop Firms and Brokers",
+     "description": "Fixed-price measurement of whether your traders sell winners more readily than losers: a "
+                    "published script, run inside your own systems."},
+]
+
 # The /tools/ index rows: tool, the question it answers, input, Open (plan step 12).
 TOOLS = [
     {"name": "Trade stats", "href": "/tools/trade-stats/",

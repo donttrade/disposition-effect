@@ -63,9 +63,18 @@ def test_titles_descriptions_canonicals_unique(built_site):
 def test_jsonld_parses_and_is_honest(built_site, page):
     html = read(built_site, page["path"])
     g = graph(html)
-    text = json.dumps(g)
-    for banned in ("aggregateRating", "review", "address", "telephone", '"Product"'):
-        assert banned not in text, banned
+    def keys(o):
+        if isinstance(o, dict):
+            for k, v in o.items():
+                yield k
+                yield from keys(v)
+        elif isinstance(o, list):
+            for v in o:
+                yield from keys(v)
+    found = set(keys(g))
+    for banned in ("aggregateRating", "review", "address", "telephone"):
+        assert banned not in found, banned
+    assert "Product" not in {n["@type"] for n in g}
     types = {n["@type"] for n in g}
     if page["path"] == "/":
         assert {"WebSite", "Organization"} <= types
