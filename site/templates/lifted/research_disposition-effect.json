@@ -1,0 +1,48 @@
+{
+ "article": {
+  "@type": "Article",
+  "dateModified": "2026-10-17",
+  "datePublished": "2026-10-06",
+  "description": "A PGR/PLR replication of Odean (1998) on free CC0 data.",
+  "headline": "76.1% of 4,659 retail traders realised their gains more readily than their losses",
+  "image": "https://donttrade.ca/assets/og/disposition.png",
+  "isAccessibleForFree": true,
+  "license": "https://creativecommons.org/licenses/by-nc/4.0/",
+  "mainEntityOfPage": "https://donttrade.ca/research/disposition-effect/",
+  "url": "https://donttrade.ca/research/disposition-effect/"
+ },
+ "citation": [
+  [
+   "citation_title",
+   "76.1% of 4,659 retail traders realised their gains more readily than their losses"
+  ],
+  [
+   "citation_author",
+   "donttrade"
+  ],
+  [
+   "citation_publication_date",
+   "2026/10/06"
+  ],
+  [
+   "citation_pdf_url",
+   "https://donttrade.ca/research/disposition-effect/donttrade-disposition-effect.pdf"
+  ]
+ ],
+ "crumb": "The disposition effect, 4,659 traders",
+ "description": "A PGR/PLR replication of Odean (1998) on free CC0 data: 4,731 traders, 2,780,879 trader-stock-lot-days, and the three caveats that move the result.",
+ "form_action": [
+  "https://donttrade.substack.com"
+ ],
+ "og_image": "/assets/og/disposition.png",
+ "parent": [
+  "Research",
+  "/research/"
+ ],
+ "path": "/research/disposition-effect/",
+ "section": "/research/",
+ "source": "docs/research/disposition-effect/index.html",
+ "source_sha256": "36fc296762d3d8082f4837e794e1ed4f4819c75c794c04837fa0b2d16622ae2f",
+ "title": "76.1% of 4,659 traders: the disposition effect — donttrade",
+ "updated": "2026-10-19"
+}

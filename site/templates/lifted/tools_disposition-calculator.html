@@ -1,0 +1,51 @@
+
+
+<div class="wrap page-head"><div class="col">
+<h1>Disposition-effect calculator</h1>
+<p class="lede">Count your own wins and losses, and see whether you sold winners more readily than losers. Free. It runs in your browser and nothing is sent anywhere.</p>
+
+<h2>How to count</h2>
+<p>This follows Odean (1998). On each day an account sells something, look at every position in it. Each position sold at a gain is a realised gain. Each position still held at a gain is a paper gain. Losses work the same way: sold at a loss is a realised loss, still held at a loss is a paper loss. Positions with no gain or loss that day are left out. Add up the counts across all those days, then enter the four totals below.</p>
+
+<form class="calc" id="dc-form" novalidate>
+  <div class="calc-grid">
+    <div class="calc-field"><label for="dc-rg">Realised gains</label><input id="dc-rg" type="text" inputmode="numeric" autocomplete="off" aria-describedby="dc-msg"><p class="hint">Positions sold at a gain</p></div>
+    <div class="calc-field"><label for="dc-pg">Paper gains</label><input id="dc-pg" type="text" inputmode="numeric" autocomplete="off" aria-describedby="dc-msg"><p class="hint">Positions held at a gain</p></div>
+    <div class="calc-field"><label for="dc-rl">Realised losses</label><input id="dc-rl" type="text" inputmode="numeric" autocomplete="off" aria-describedby="dc-msg"><p class="hint">Positions sold at a loss</p></div>
+    <div class="calc-field"><label for="dc-pl">Paper losses</label><input id="dc-pl" type="text" inputmode="numeric" autocomplete="off" aria-describedby="dc-msg"><p class="hint">Positions held at a loss</p></div>
+  </div>
+  <div class="btn-row">
+    <button type="button" class="btn" id="dc-example">Fill a made-up example</button>
+    <button type="button" class="btn-2" id="dc-clear">Clear</button>
+  </div>
+  <p class="fine">The example (420, 1,780, 260, 2,240) is made-up. It is not real trading data.</p>
+  <p class="calc-msg" id="dc-msg" role="status" aria-live="polite"></p>
+
+  <div id="dc-results" hidden>
+    <h2>Result</h2>
+    <p class="calc-reading" id="dc-reading" aria-live="polite"></p>
+    <dl class="calc-out">
+      <div><dt>PGR (share of gains sold)</dt><dd id="dc-pgr">–</dd></div>
+      <div><dt>PLR (share of losses sold)</dt><dd id="dc-plr">–</dd></div>
+      <div><dt>Ratio PGR / PLR</dt><dd id="dc-ratio">–</dd></div>
+      <div><dt>Difference PGR − PLR</dt><dd id="dc-diff">–</dd></div>
+      <div><dt>Standard error (Odean 1998)</dt><dd id="dc-se">–</dd></div>
+      <div><dt>t-statistic</dt><dd id="dc-t">–</dd></div>
+    </dl>
+    <p class="fine">PGR = realised gains ÷ (realised gains + paper gains). PLR = realised losses ÷ (realised losses + paper losses). A t-statistic beyond about ±1.96 is conventionally treated as unlikely to be noise alone.</p>
+  </div>
+</form>
+
+<div class="box">
+  <h3>What this does not tell you</h3>
+  <p>This pools every position as if each one were independent. That overstates how precise the result is when a few accounts account for most of the positions. It is not the method of our client script, and it is not an audit.</p>
+  <p>It also ignores holding age. Positions are sold less often the longer they are held, so if your losing positions are older than your winning ones, these four counts can show an effect that is only an age pattern. Controlling for it needs each position’s open date, which four totals do not carry.</p>
+  <p><a href="/sample-memo/">How we measure it on a firm’s own records →</a> · <a href="/glossary/">Glossary →</a></p>
+</div>
+<div class="box"><h2 class="ls-boxhead">What this calculator can’t do</h2>
+<p>It needs the four counts already worked out, and that is the hard part: on every day an account sold anything, each position it still held has to be classed as a gain or a loss, from the full trade history. Done by hand, that stops being practical after a few dozen trades.</p>
+<p>The paid work starts from your raw records. A firm gets a figure computed by someone outside the firm, its significance and counts, a written comparison and the right to quote it. Traders, at launch, get their own report from a trade export, and where they stand against everyone else.</p>
+<p><a href="/for-firms/">For firms →</a> · <a href="/for-traders/">For traders →</a></p></div>
+</div></div>
+
+

@@ -1,0 +1,118 @@
+
+
+<div class="wrap page-head"><div class="col memo">
+  <p class="kicker">SPECIMEN</p>
+  <h1 class="long">Sample memo and method</h1>
+  <div class="box"><h2 class="ls-boxhead">Method</h2><p>How the figures are computed: the <a href="/code/">scripts and data</a>, the <a href="/glossary/">glossary</a>, the <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/EXPORT-GUIDE.md">export guide</a> for a firm’s own records, and the client script, <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/partner_disposition.py">partner_disposition.py</a>.</p></div>
+  <h2>Specimen memo, computed on public data</h2>
+  <div class="banner"><strong>Read this first.</strong> This specimen uses the public study’s script (<code>reproduce.py</code>). A client memo is produced by <code>partner_disposition.py</code> and contains pooled PGR, PLR, their ratio and a t statistic, with counts. It has no share of traders and no per-trader ratio. Its only intervals are for the age-controlled figures. <a href="#client-format">See the client script’s real output on a synthetic file ↓</a></div>
+  <div class="standing">Specimen. Not a client engagement. No firm commissioned or saw it. Every figure comes from the <a href="/research/disposition-effect/">published disposition-effect study</a>.</div>
+  <dl>
+    <dt>Question</dt><dd>In this panel, what share of traders realised gains more readily than losses, counting every day a position was held?</dd>
+    <dt>Figure</dt><dd><strong>76.1%</strong> (3,547 of 4,659 traders; Chinese A-share social-trading portfolios, 2016–18)</dd>
+    <dt>95% interval</dt><dd>74.9–77.3%, treating traders as independent; the study explains why they are not quite</dd>
+    <dt>Denominator</dt><dd>Traders with at least one winner and at least one loser on some day, so that both halves of the measure are defined: 4,659 of the 4,731 in the panel</dd>
+    <dt>Supporting figures</dt><dd>Per trader then averaged: PGR 0.1925, PLR 0.1200, ratio 1.61. Pooled across every observation: PGR 0.0785, PLR 0.0535, ratio 1.47</dd>
+    <dt>Period</dt><dd>24 Jun 2016 to 27 Mar 2018</dd>
+    <dt>Observations</dt><dd>2,780,879 trader-stock-lot-days across 3,501 stocks; every day a position was held counts</dd>
+    <dt>Data</dt><dd>Jin, Li &amp; Zhu, replication files for <a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0246759">PLoS ONE (2021)</a>, CC0, Harvard Dataverse</dd>
+    <dt>Script</dt><dd><code>reproduce.py</code> in the <a href="https://github.com/donttrade/disposition-effect">public repository</a>. Client engagements use <code>partner_disposition.py</code>, which computes pooled PGR and PLR from a five-column extract, counting only days on which an account sold something, as Odean did; since 17 Oct 2026 it also makes the same comparison with holding age held fixed. It does not produce a share of traders or a per-trader ratio. The like-for-like public figure is the pooled ratio, 1.47, and even that is only approximately comparable, because the two count days differently</dd>
+    <dt>What this does not show</dt><dd><ul><li>It measures the problem, not a fix. Nothing here says whether anything corrects the disposition effect.</li><li>Chinese A-shares, mid-2016 to early 2018, one social-trading platform. Whether it holds for North American retail today is an assumption, not a result.</li><li>Social-trading users are a selected population. Xueqiu cube operators chose to run public portfolios.</li><li>I did not collect this data. It is someone else’s replication file, released CC0. The contribution is the computation and publishing it.</li><li>The pooled and per-trader ratios differ, 1.47x against 1.61x, because the denominators differ. Both are above 1. Quoting one without the other is picking.</li><li>Significance is not effect size. The t-statistics are enormous because n is enormous. Cohen’s d of 0.49 is the honest magnitude of this measure: moderate, not overwhelming. The study’s <a href="/research/disposition-effect/#robustness-update">robustness update</a> shows the size also depends on how “gain” is timed.</li><li>No minimum activity was required. A trader with one winning and one losing held day counts the same as one with thousands; how sensitive the share is to a minimum-activity rule has not been computed.</li><li>Traders whose two rates are exactly equal are counted as not showing the effect; reproduce.py does not report how many there are.</li><li>The source data’s gain flag is 1 only when a position was in profit, so a break-even day counts on the loss side. The client script, partner_disposition.py, drops break-even rows instead.</li><li>Holding age: positions are sold less often the longer they are held. A robustness update to the study (17 Oct 2026) finds the direction survives when holding age is held fixed, but the size depends on how “gain” is timed, and a V-shaped selling pattern is not ruled out.</li></ul></dd>
+    <dt>Reliance</dt><dd>A client memo is for the client’s use only; no other party may rely on it.</dd>
+  </dl>
+  <h2 id="client-format">Client-format specimen, synthetic file</h2>
+  <div class="standing"><strong>Synthetic test file, not real traders.</strong> Synthetic data with a planted effect. Not a finding about anyone.</div>
+  <p>This is the complete output of the published client script, <code>partner_disposition.py</code>, run when this page was built on the synthetic file that the published <code>make_fixture.py</code> writes. It is what a client’s staff send back, and the figures a client memo is built from.</p>
+  <pre tabindex="0" role="region" aria-label="Client script output on the synthetic test file" class="client-out">$ python3 make_fixture.py --out fixture.csv --seed 7
+$ python3 partner_disposition.py fixture.csv --pnl-basis price
+pnl basis:            price (funding excluded)
+accounts:             30
+qualifying sale days: 256
+
+data rows parsed:                   14400
+blank records skipped:              0
+rows in qualifying pairs:           2048
+rows discarded (no close that day): 12352
+same-day marks superseded by close: 0
+orphan closes (no mark row):        14 of 335 (4.2%)
+identifier spelling collisions:     0
+unicode data version:               14.0.0
+
+PGR                   0.2178
+PLR                   0.1119
+ratio (PGR/PLR)       1.9470
+t statistic           6.51
+n gains  (RG+PG)      1001
+n losses (RL+PL)      1046
+
+realised gains   RG   218
+paper gains      PG   783
+realised losses  RL   117
+paper losses     PL   929
+zero-pnl rows excluded 1
+
+AGE-CONTROLLED FIGURES (holding age = calendar days since the
+position&#x27;s first row in this file)
+positions with a known open date:               329
+positions open on the first date (left out):    240
+rows used (qualifying pairs, pnl not 0):        975
+
+ratio, ages pooled, same rows:                  2.0325
+within-age ratio (Mantel-Haenszel):             1.9273
+                                                95% interval 1.3825 to 2.6867, by account
+
+holding age      gain rows  loss rows     PGR     PLR   ratio  within-age
+&lt;=1 day                 43         32  0.2093  0.0938   2.233       2.232
+2-5 days                73         75  0.2055  0.1333   1.541       1.618
+6-20 days              192        224  0.2240  0.0804   2.787       2.595
+21-60 days             168        168  0.1667  0.1071   1.556       1.441
+61-250 days              0          0       -       -       -           -
+251+ days                0          0       -       -       -           -
+
+fixed effects (account + holding day), linear probability model:
+  gain coefficient:                             0.103986
+  standard error (account and date):            0.021478
+  ratio implied for gain rows (ATT):            2.0878
+                                                95% interval 1.4495 to 3.7307
+
+gain timing (rows that have a previous row for the same position):
+  rows:                                         933
+  ratio, ages pooled: same day / previous row:  2.0604 / 1.8627
+  within-age ratio: same day / previous row:    1.9488 / 1.7481
+  fixed-effects ATT: same day / previous row:   2.0993 / 1.8586
+  sign changed since previous row, sold rows:   10 of 138
+  sign changed since previous row, unsold rows: 60 of 795
+
+HOW TO READ THE AGE-CONTROLLED FIGURES
+- Positions are sold less often the longer they are held. If losing
+  positions are on average older than winning ones, the pooled ratio at
+  the top can show an effect that is only an age pattern. The within-age
+  ratio compares winners and losers of the same holding age; use it, not
+  the pooled ratio, for the size of the effect.
+- Holding age is counted from each position&#x27;s first row in this file.
+  Positions already open on the file&#x27;s first date are left out of these
+  figures because their age is unknown; the pooled figures still use them.
+- The fixed-effects line compares each account with itself, at the same
+  holding day. It is a different average from the pooled ratio, so the two
+  are not expected to match.
+- Gain timing: a position&#x27;s gain or loss on the day it is sold may partly
+  reflect the sale itself (the fill or the closing mark). The lines that
+  take the gain or loss from the position&#x27;s previous row avoid that. If
+  they are much smaller, the effect depends on same-day timing.
+- Not ruled out: traders may sell large moves in either direction more
+  often (a V-shaped pattern, Ben-David and Hirshleifer 2012). Separating
+  that from a preference for selling winners needs the size of each gain
+  or loss relative to the position, which these five columns do not carry.
+- The intervals here are clustered by account (the within-age ratio) and
+  by account and date (fixed effects). The t statistic at the top treats
+  every row as independent and is not.
+- NOT MEASURED means the data cannot support the figure, never zero.</pre>
+  <h3 id="age-controlled">How to read the age-controlled figure</h3>
+  <p>The headline ratio compares the share of winning positions you sold with the share of losing positions you sold, pooled over every position however long it had been held. Positions are usually sold less often the older they get, so if losers tend to be older, part of the headline is an age pattern, not a habit. The <strong>within-age ratio</strong> makes the same comparison only between positions of the same age (same number of days since opened), then combines the days. That is the figure to use for the size of the effect. The <strong>table by holding age</strong> shows where the effect sits: often mostly in positions held a day or less. The <strong>fixed-effects ratio</strong> compares each account with itself at the same holding age; it is a different average and is not expected to equal the pooled one. If the within-age interval includes 1, the data do not show an effect once age is held fixed. NOT MEASURED means the data cannot support that figure; it never means zero.</p>
+  <p class="fine">Scripts: <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/partner_disposition.py">partner_disposition.py</a> · <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/make_fixture.py">make_fixture.py</a></p>
+</div></div>
+<div class="wrap"><div class="subscribe"><p class="lead">Get the next study by email. One email per finished study; free, no advice.</p><form action="https://donttrade.substack.com/subscribe" method="get">
+    <label class="skip" for="em">Email address</label>
+    <input id="em" type="email" name="email" placeholder="you@example.com" required autocomplete="email">
+    <button type="submit">Email me the next study</button>
+  </form><p class="fine">Or follow the <a href="/feed.xml">Atom feed</a> of new studies and corrections.</p></div></div>

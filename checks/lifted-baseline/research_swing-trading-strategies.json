@@ -1,0 +1,538 @@
+{
+ "attrs": [
+  "nav[aria-label]=Contents",
+  "div[aria-label]=Table 1",
+  "div[aria-label]=Table 2",
+  "div[aria-label]=Table 3",
+  "div[aria-label]=Table 4",
+  "div[aria-label]=Table 5",
+  "div[aria-label]=Table 6",
+  "div[aria-label]=Table 7",
+  "div[aria-label]=Versions table",
+  "pre[aria-label]=BibTeX citation",
+  "section[aria-label]=What next",
+  "input[placeholder]=you@example.com"
+ ],
+ "citation": [],
+ "fixes": [],
+ "ids": [
+  "s-1-the-short-version",
+  "s-2-why-most-backtests-lie",
+  "s-3-how-we-tested",
+  "pre-registration-sealed-with-a-hash",
+  "a-one-touch-holdout",
+  "kill-criteria",
+  "costs",
+  "the-trial-ledger",
+  "integrity-checks-before-the-final",
+  "how-we-counted",
+  "s-4-results-every-strategy",
+  "this-week-s-monthly-round-holdout-on-canadian-listed-etfs",
+  "this-week-s-daily-swing-tournament-practice-round-up-to-2012",
+  "earlier-in-the-project-different-protocols-listed-for-comple",
+  "s-5-the-near-misses-honestly",
+  "c2-passed-every-economic-test-failed-on-trade-count-then-fai",
+  "c22-connors-r3-the-practice-round-winner-that-faded",
+  "s-6-what-could-not-be-tested-and-why",
+  "s-7-what-this-means-for-a-small-account-trader",
+  "s-8-limitations",
+  "s-9-reproduce-it",
+  "versions",
+  "em"
+ ],
+ "links": [
+  "a[href]=/independence/",
+  "a[href]=/research/strategy-tests/",
+  "a[href]=#s-1-the-short-version",
+  "a[href]=#s-2-why-most-backtests-lie",
+  "a[href]=#s-3-how-we-tested",
+  "a[href]=#s-4-results-every-strategy",
+  "a[href]=#s-5-the-near-misses-honestly",
+  "a[href]=#s-6-what-could-not-be-tested-and-why",
+  "a[href]=#s-7-what-this-means-for-a-small-account-trader",
+  "a[href]=#s-8-limitations",
+  "a[href]=#s-9-reproduce-it",
+  "a[href]=/research/strategy-tests/",
+  "a[href]=https://creativecommons.org/licenses/by-nc/4.0/",
+  "form[action]=https://donttrade.substack.com/subscribe",
+  "a[href]=/research/volatility-scaled-momentum/",
+  "a[href]=/for-firms/"
+ ],
+ "path": "/research/swing-trading-strategies/",
+ "source": "docs/research/swing-trading-strategies/index.html",
+ "source_sha256": "e9d246ebd02c751b52369a35762a6b5467bfefb394ef223ae0dbfa21975f6e0c",
+ "tables": [
+  [
+   [
+    "Step",
+    "Count",
+    "Source"
+   ],
+   [
+    "Trials in the ledger",
+    "36",
+    "TOURNEY_LEDGER.md"
+   ],
+   [
+    "minus 3 \"shift variants\" (C1–C3 rerun one period late as an integrity check; counted as trials to be strict, but the same strategies)",
+    "33",
+    "LEDGER.md rows 7–9"
+   ],
+   [
+    "minus R1 (C2's exact rule rerun on US sector funds; a replication, not a new strategy)",
+    "32 distinct strategies",
+    "LEDGER.md row 12; PREREG-R1"
+   ],
+   [
+    "minus the 6 tested earlier in the project, under protocols that differed from this week’s sealed process",
+    "26 tested this week under sealed pre-registration",
+    "LEDGER.md decision D2"
+   ]
+  ],
+  [
+   [
+    "ID",
+    "Strategy",
+    "Family",
+    "Verdict",
+    "Killed by"
+   ],
+   [
+    "C1",
+    "Turn-of-the-month: buy XSP.TO at the month’s last close, sell 3 days later",
+    "Calendar",
+    "FAIL",
+    "Alpha t −1.30; Sharpe −0.01 vs SPY 0.77; breakeven cost 0.20%; 26.3% of placebos beat it; deflated Sharpe 0.047"
+   ],
+   [
+    "C2",
+    "Hold the top 3 of 7 TSX sector ETFs by 12-month momentum",
+    "Rotation",
+    "FAIL",
+    "Sample size only: 85 round trips vs 100 required"
+   ],
+   [
+    "C3",
+    "Hold the best of 5 region/bond ETFs, or cash",
+    "Rotation",
+    "FAIL",
+    "Alpha t −1.36; Sharpe 0.47 vs SPY 0.96; 36 round trips; 65.6% of placebos beat it; deflated Sharpe 0.469"
+   ],
+   [
+    "R1",
+    "Replication of C2 on 9 US sector ETFs, 2000–2026 (not a new strategy)",
+    "Rotation",
+    "FAIL",
+    "Alpha t 1.40 vs 1.96; 2.62 halt trips per 10 years vs 2; deflated Sharpe 0.931 vs 0.95"
+   ]
+  ],
+  [
+   [
+    "ID",
+    "Strategy",
+    "Family",
+    "Practice t",
+    "Placebo pct",
+    "Verdict",
+    "Killed by"
+   ],
+   [
+    "C22",
+    "Connors R3 (RSI(2) falls 3 days in a row, ends below 10, above 200-day average)",
+    "Mean reversion",
+    "+2.28",
+    "100.0",
+    "FAIL in final",
+    "See Section 5"
+   ],
+   [
+    "C21",
+    "Cumulative RSI(2)",
+    "Mean reversion",
+    "+1.78",
+    "100.0",
+    "FAIL",
+    "t below 2.0"
+   ],
+   [
+    "C02",
+    "RSI(2) < 5",
+    "Mean reversion",
+    "+1.74",
+    "100.0",
+    "FAIL",
+    "t below 2.0"
+   ],
+   [
+    "C23",
+    "Connors %b(5,1): close near the bottom of a 5-day Bollinger band 3 days running",
+    "Mean reversion",
+    "+1.46",
+    "100.0",
+    "FAIL",
+    "t below 2.0"
+   ],
+   [
+    "C17",
+    "Power-of-three, weekly",
+    "ICT-style",
+    "+1.44",
+    "100.0",
+    "FAIL",
+    "t below 2.0"
+   ],
+   [
+    "C03",
+    "Double 7s: close at a 7-day low, above 200-day average",
+    "Mean reversion",
+    "+1.29",
+    "100.0",
+    "FAIL",
+    "t below 2.0"
+   ],
+   [
+    "C04",
+    "3 down closes",
+    "Mean reversion",
+    "+1.24",
+    "100.0",
+    "FAIL",
+    "t below 2.0"
+   ],
+   [
+    "C01",
+    "Connors RSI(2) < 10",
+    "Mean reversion",
+    "+1.24",
+    "100.0",
+    "FAIL",
+    "t below 2.0"
+   ],
+   [
+    "C10",
+    "10-day average crosses above 50-day average",
+    "Trend",
+    "+1.04",
+    "84.1",
+    "FAIL",
+    "t below 2.0; placebo"
+   ],
+   [
+    "C19",
+    "Weekly sector loser reversal",
+    "Mean reversion",
+    "+0.68",
+    "92.1",
+    "FAIL",
+    "t below 2.0; placebo"
+   ],
+   [
+    "C06",
+    "Close below lower Bollinger band (20-day average minus 2 standard deviations)",
+    "Mean reversion",
+    "+0.48",
+    "77.2",
+    "FAIL",
+    "t below 2.0; placebo"
+   ],
+   [
+    "C20",
+    "Weekly time-series momentum: hold while price is above its level 20 days ago",
+    "Trend",
+    "+0.09",
+    "11.7",
+    "FAIL",
+    "t below 2.0; placebo"
+   ],
+   [
+    "C05",
+    "IBS < 0.2",
+    "Mean reversion",
+    "−0.45",
+    "99.7",
+    "FAIL",
+    "Net mean negative"
+   ],
+   [
+    "C07",
+    "Pullback to the 20-day exponential moving average in an uptrend",
+    "Trend",
+    "−0.65",
+    "26.4",
+    "FAIL",
+    "Net mean negative; placebo"
+   ],
+   [
+    "C08",
+    "Donchian breakout: close above the prior 20-day high",
+    "Breakout",
+    "−0.79",
+    "0.1",
+    "FAIL",
+    "Net mean negative; placebo"
+   ],
+   [
+    "C18",
+    "Weekly top sector by relative strength",
+    "Rotation",
+    "−1.09",
+    "14.9",
+    "FAIL",
+    "Net mean negative; placebo"
+   ],
+   [
+    "C12",
+    "NR7 (narrowest range of 7) breakout",
+    "Breakout",
+    "−1.12",
+    "0.0",
+    "FAIL",
+    "Net mean negative; placebo"
+   ],
+   [
+    "C13",
+    "Gap-down reversal",
+    "Mean reversion",
+    "−1.20",
+    "90.0",
+    "FAIL",
+    "Net mean negative; placebo"
+   ],
+   [
+    "C11",
+    "Inside-bar breakout",
+    "Breakout",
+    "−1.25",
+    "0.0",
+    "FAIL",
+    "Net mean negative; placebo"
+   ],
+   [
+    "C15",
+    "Inverse fair value gap",
+    "ICT-style",
+    "−1.54",
+    "0.0",
+    "FAIL",
+    "Net mean negative; placebo"
+   ],
+   [
+    "C14",
+    "Bullish fair value gap retest (daily)",
+    "ICT-style",
+    "−1.59",
+    "34.8",
+    "FAIL",
+    "Net mean negative; placebo"
+   ],
+   [
+    "C09",
+    "52-week-high breakout, 10-day hold",
+    "Breakout",
+    "−1.74",
+    "0.1",
+    "FAIL",
+    "Net mean negative; placebo"
+   ],
+   [
+    "C16",
+    "Turtle soup (liquidity sweep of a 20-day low)",
+    "ICT-style",
+    "−2.37",
+    "0.0",
+    "FAIL",
+    "Net mean negative, significantly"
+   ]
+  ],
+  [
+   [
+    "Strategy",
+    "Family",
+    "Verdict",
+    "What killed it"
+   ],
+   [
+    "Bull flag",
+    "Trend/breakout",
+    "No edge",
+    "87% of its profit was the market rising while trades were held"
+   ],
+   [
+    "Momentum decile",
+    "Momentum",
+    "No edge",
+    "t = 0.542"
+   ],
+   [
+    "Reversal after a ≥3% one-day drop (20 TSX large caps)",
+    "Mean reversion",
+    "FAIL",
+    "t between −0.22 and +0.41 across 1-, 3- and 5-day holds"
+   ],
+   [
+    "Insider cluster buying",
+    "Event",
+    "Do not build",
+    "Tradable names, 2017–2026: −0.30% over 21 days vs SPY, t −1.36"
+   ],
+   [
+    "Volatility-scaled momentum, 5 stocks (\"Part B\")",
+    "Momentum",
+    "FAIL",
+    "No version passed all four tests. Plain and trend-filtered versions tripped a 10% halt 11 and 9 times; the scaled version had a Sharpe of 0.66 vs SPY’s 1.06"
+   ],
+   [
+    "Short-term momentum (STMOM)",
+    "Momentum",
+    "Not significant",
+    "+0.395% a month net over its benchmark, t 1.64 over 254 months"
+   ]
+  ],
+  [
+   [
+    "Row",
+    "Practice (to 2012)",
+    "Final (2013 to Sep 2026)"
+   ],
+   [
+    "Trades",
+    "1,323",
+    "1,544"
+   ],
+   [
+    "Net mean per trade (after 0.20%)",
+    "+0.285%",
+    "+0.051%"
+   ],
+   [
+    "t-statistic",
+    "2.28",
+    "0.49 (bar 1.96)"
+   ],
+   [
+    "Win rate",
+    "68.0%",
+    "63.2%"
+   ],
+   [
+    "Breakeven round-trip cost",
+    "0.485%",
+    "0.251% (bar 0.50%)"
+   ],
+   [
+    "Placebo percentile",
+    "100.0",
+    "90.9 (bar 95)"
+   ],
+   [
+    "Deflated Sharpe (N = 36)",
+    "0.310",
+    "0.0005 (bar 0.95)"
+   ]
+  ],
+  [
+   [
+    "File",
+    "SHA-256"
+   ],
+   [
+    "prereg/C1.md (PREREG-C1)",
+    "a5047cac4772475843177b6933825aeb17b0492bf242507240dc45c96e9f544a"
+   ],
+   [
+    "prereg/C2.md (PREREG-C2)",
+    "e9f0e9dd7ecc56917cf3e2ddddb1531b60cd92e5d941678193f748239601e81d"
+   ],
+   [
+    "prereg/C3.md (PREREG-C3)",
+    "5c98b5783515207e29c3e7b726aec56bd3d99ba6964bb1c3214a5d71a859102c"
+   ],
+   [
+    "prereg/R1.md (PREREG-R1)",
+    "89ea575b2aabc2e47e7bf5769655b760bb129f9d4c54df615435aaf941745f82"
+   ],
+   [
+    "ADDENDUM-C1-2026-10-16.md",
+    "c7a9af1c7f35eb6d277a39962db9c161b4c0f3bd76e3a7e6e0462558eb892b60"
+   ],
+   [
+    "ADDENDUM-K7-2026-10-16.md",
+    "cbe29d1771c810ad08ebe721a8dea171bd1ae1c3efdbb032af56e36af7e15e9b"
+   ],
+   [
+    "ADDENDUM-GATE-2026-10-16.md",
+    "af6cc83e127dda1ddf47197b64e0d926c221d9a2cbaa5aa091994b829296d740"
+   ],
+   [
+    "data/DATA_SHA256.txt (23 raw data snapshots)",
+    "11e4d11a330ecf37873eac2d67f899ccd0d2e52a54ebdc05b09f6a67e539d4f0"
+   ],
+   [
+    "data/r1/DATA_SHA256.txt (R1 data)",
+    "4d03a57b7b2f04f6edd52fc6b1018f5153f9acf3876068328382074cf1967884"
+   ],
+   [
+    "out/insample_results.json",
+    "f65e225eb3bdb7264a7819b8f106e6641d8d104033e5a9f7c8428cef9356a166"
+   ],
+   [
+    "out/holdout_C1.json",
+    "3bdc4afb97ef6be0f390900674a9b2d31e300404bec3584a95f8294cd462866e"
+   ],
+   [
+    "out/holdout_C2.json",
+    "71ca35452c1e10e6931ba0ac0b636b8f933ad3ec832d3f22cdde784df7e2b99d"
+   ],
+   [
+    "out/holdout_C3.json",
+    "314cdfae01da10f003580ecb889d5e54e46cd3b0b6abd45637458cc4b83ca7fc"
+   ],
+   [
+    "out/holdout_R1.json",
+    "1be497497cfda3bd066f73d9c4129ac1d06e1f200661e79352cf92dc8aae0faa"
+   ],
+   [
+    "LEDGER.md, first 7,796 bytes (frozen part)",
+    "3c692c7a6a474c8cc7fe1e954c27103a9b7eb7551174d80f48de8121663dd0a4"
+   ]
+  ],
+  [
+   [
+    "File",
+    "SHA-256"
+   ],
+   [
+    "PREREG.md (17,232 bytes)",
+    "afce5e06d6b6f8ce9d0ef8d1d3961a55d8cc65fc107b41c8ebf741df8bf74d3f"
+   ],
+   [
+    "DATA_SHA256.txt (22 ETF files, snapshot 2026-10-16T19:58:23Z)",
+    "06660068df33105596b84eb65e7289b802bd225a93bb3c660342dbdd3f4349e0"
+   ],
+   [
+    "out/discovery.json",
+    "cdd8a3653c5e7113f765d5d978c0f1458fc96119364a7553acd7ede55ebb8870"
+   ],
+   [
+    "out/confirmation_C22.json",
+    "73c1be4b5a0fdcf82521e1542dd432d2514eaa1e01093a30195894abe9cd4c4e"
+   ]
+  ],
+  [
+   [
+    "Date",
+    "What changed"
+   ],
+   [
+    "16 Oct 2026",
+    "Both pre-registrations sealed with a hash before any result was computed (monthly round 17:55:14 UTC; daily tournament 19:57:57 UTC). Each holdout was run once. Published on this site the same day."
+   ],
+   [
+    "17 Oct 2026",
+    "Update line added at the top, linking to the combined strategy study. The study text did not change."
+   ]
+  ]
+ ],
+ "text": "\n\n\n  STUDY · PRE-REGISTERED · NEGATIVE RESULT · 16 OCT 2026\n  We tested 26 swing-trading strategies under pre-registered rules. None survived.\n  This page reports a negative research result. It is not a strategy, a recommendation or a signal, and nothing on it says what anyone should hold.\n  Three monthly rules on ETFs and 23 classic daily swing rules on 22 ETFs, each written down and sealed with a SHA-256 hash before any result was computed, then judged once on a locked holdout, net of costs. None passed. Across the project’s full ledger of 36 trials, 32 of them distinct strategies, nothing has passed.\n  Pre-registered and sealed 16 Oct 2026 (monthly round 17:55:14 UTC; daily tournament 19:57:57 UTC) · Run and published 16 Oct 2026 · Code: to be published with this study; the SHA-256 of every file is under “Reproduce it” · Data: free vendor-adjusted daily ETF prices, snapshot 16 Oct 2026\n  Funding: none. No firm paid for, saw or approved this study. How donttrade is paid →\n  Published whether or not the result was interesting. Every trial was written into an append-only ledger, and a trial that died still counts.\n  Update, 17 Oct 2026: these results are now combined with a later round of investing, overnight and day-trading rules in the combined strategy study. Nothing below has changed.\n  Contents1. The short version2. Why most backtests lie3. How we tested4. Results: every strategy5. The near-misses, honestly6. What could not be tested, and why7. What this means for a small-account trader8. Limitations9. Reproduce it\n  \n  The working title of this study was \"We tested 32 strategies\". When we counted the ledgers line by line, 26 is the number that fits the claim in the title. 32 is the number of distinct strategies across the whole project, including six tested earlier under different protocols. The section \"How we counted\" explains both numbers.\n1. The short version\n\n26 strategies were tested this week, every one under rules sealed before any result was computed. None passed. Three were monthly rules on ETFs (exchange-traded funds: single shares that each hold a whole basket of stocks or bonds) (turn-of-the-month, sector momentum, region momentum). Twenty-three were classic daily swing rules on 22 ETFs: RSI(2) dip-buys, breakouts, moving-average crosses, inside bars, fair value gaps, \"turtle soup\" and others. Across the project’s full ledger of 36 trials, 32 of them distinct strategies, nothing has passed.\nThe two near-misses failed in instructive ways. Canadian sector momentum (C2) passed every economic test but produced 85 completed trades against a pre-set minimum of 100. The same rule on US sector funds then failed. The best daily rule in the practice round, Connors R3 (C22), made +0.285% per trade after costs. On the sealed later data it made +0.051%. A simulated $200 account following it fell 53.2% from its peak, bottoming in March 2020.\nMost popular daily setups lost money after a 0.20% round-trip cost even before the final test. Every breakout rule, the weekly trend and sector-strength rules, both fair-value-gap rules and the liquidity-sweep rule had a negative or near-zero net result per trade in the practice data. The seven closely related RSI(2) dip-buy rules were all positive but weak. Only one of them cleared the bar to reach the final round.\n\n2. Why most backtests lie\nA backtest replays a trading rule on old prices to see what it would have earned. Backtests are easy to run and easy to fool yourself with, for two reasons.\nOverfitting. Every rule has choices in it: which indicator, which threshold, how many days to hold. If you try enough choices on the same data, some will fit the past by luck. They look brilliant on the data used to pick them and then do nothing on new data. The rule ends up describing the noise in that particular stretch of history, not a repeatable pattern.\nMultiple testing. Suppose you test 100 strategies that have no real edge at all. By chance alone, some of them will look good. In an idealised simulation recorded in this project (clean random noise, 200 trades per strategy), the best of 100 no-edge strategies reached a t-statistic of 2.56. A t-statistic measures how far a result sits from zero compared with how much it bounces around. Around 2 is the traditional \"probably not luck\" bar. So a test that cleared the usual bar would have been pure luck. The more strategies you try, the higher the bar a real winner has to clear.\nMost published or sold backtests report the winner and not the number of things tried to find it. You cannot judge the winner without that number. That is why this study counts every trial and publishes every loser.\n3. How we tested\nPre-registration, sealed with a hash\nPre-registration means writing down every rule before looking at any result: the strategy, the data, the dates, the costs and the exact pass/fail tests. Ours were then hashed. A hash (here SHA-256) is a 64-character fingerprint of a file. Change one character and the fingerprint changes completely. The fingerprints were recorded at sealing time:\n\nThe monthly round (C1–C3) was sealed at 17:55:14 UTC on 16 October 2026. It was sealed before any return, Sharpe, alpha or signal had been computed on any period.\nThe daily-swing tournament (C01–C23) was sealed at 19:57:57 UTC the same day. No price data for it had been downloaded at that point.\n\nThe fingerprints are listed in Section 9, so anyone can check that the rules we report are the rules we wrote.\nA one-touch holdout\nA holdout is a slice of data locked away while the rules are designed and checked. It is opened once, at the end, for the final verdict. Our holdouts were locked in code. The data loader refused any date in the holdout unless an unlock file held the exact fingerprint of the sealed pre-registration. Every read, allowed or refused, was written to an access log. After a run, the unlock was consumed and a second run was refused. If a bug had been found after a run, both outputs would have been published and the worse verdict would have stood.\n\nMonthly round: each strategy had an earlier \"in-sample\" period, ending where the original research paper’s data ended. It also had a later holdout on Canadian-listed ETFs. Only the holdout decided the verdict.\nDaily tournament: the practice round (\"discovery\") used every bar up to 31 December 2012. The final round (\"confirmation\") used 2013-01-01 to 2026-09-30.\n\nKill criteria\nEach strategy had to pass every test. Failing any one killed it. The tests, in plain words:\n\nAlpha t-statistic. Alpha is return beyond what simple exposure to the stock market explains. A strategy that only rides the market up has no alpha. Monthly round: alpha against SPY (an S&P 500 fund) with a t-statistic of at least 2.394. Daily tournament: the net return per trade itself with a t of at least 1.96. The bars differ because of the Bonferroni rule, explained below.\nSharpe ratio (monthly round only). The Sharpe ratio is average return divided by how much returns bounce around: return per unit of bumpiness. The strategy had to match or beat both SPY and simply holding its own ETFs over the same months.\nBreakeven cost. The round-trip cost at which the profit disappears had to be at least 0.50%. A round trip is one buy plus the matching sell.\nDrawdown halts. A drawdown is a fall from a running peak in account value. A halt \"trips\" whenever the simulated account falls 10% below its peak, and the peak resets at each trip. At most 2 trips per 10 years were allowed.\nSample size. At least 100 completed round trips. The monthly round also needed at least 120 holdout months.\nPlacebo. A placebo here is a fake strategy that trades at random times in the same instruments, with the same holding lengths and the same costs. We ran 1,000 of them. The real strategy had to beat nearly all of them. That meant the 98.333rd percentile in the monthly round and the 95th in the final of the daily tournament.\nDeflated Sharpe. The deflated Sharpe ratio (Bailey and López de Prado, 2014) asks how likely it is that a Sharpe ratio this high is real, given how many strategies were tried in total. It returns a probability between 0 and 1. We required at least 0.95.\n\nBonferroni is the simplest correction for multiple testing. If you test k strategies at once, you divide the allowed error rate by k, which raises the t-statistic bar. With k = 3 the two-sided bar is 2.394. With k = 1 it is 1.96. Only one daily strategy reached the final, so its bar was 1.96.\nCosts\nEvery result is net, meaning after costs. The base cost was 0.20% per round trip (0.10% on each side). We also published results at other cost levels. The monthly round used 0.057%, 0.10%, 0.50% and 1.00%; the daily tournament used 0.10% and 0.50%.\nThe trial ledger\nEvery trial was written into an append-only ledger, a log where rows can be added but never edited or deleted. A trial that died still counts. The ledger’s trial count, N, feeds the deflated Sharpe, so every extra attempt makes passing harder for all later ones. N was 12 for C1–C3, 13 for the replication R1, and 36 for the daily tournament.\nIntegrity checks before the final\nBefore the holdout was opened, the monthly strategies also had to show that the machinery worked:\n\nthey reached a t of at least 2.0 on the in-sample data;\nthey failed on random-walk fake prices (passing in no more than 10 of 100 fake panels);\nthey detected a planted +1% signal (t of at least 2.0);\ntheir loader refused an unauthorised read of the holdout.\n\nThe test suite passed 195 of 195 before the monthly holdout runs. In the daily tournament, the engine was cross-checked against a published figure. The basic RSI(2) rule on SPY produced 158 trades over 1994–2012, about 8 a year. That is in line with the roughly 7.9 a year published for that rule.\nHow we counted\nThe tournament ledger ends at N = 36 trials. That is more than the number of distinct strategies, for two reasons:\nSwipe the table sideways for more columns →\n\n\nStep\nCount\nSource\n\n\n\n\nTrials in the ledger\n36\nTOURNEY_LEDGER.md\n\n\nminus 3 \"shift variants\" (C1–C3 rerun one period late as an integrity check; counted as trials to be strict, but the same strategies)\n33\nLEDGER.md rows 7–9\n\n\nminus R1 (C2's exact rule rerun on US sector funds; a replication, not a new strategy)\n32 distinct strategies\nLEDGER.md row 12; PREREG-R1\n\n\nminus the 6 tested earlier in the project, under protocols that differed from this week’s sealed process\n26 tested this week under sealed pre-registration\nLEDGER.md decision D2\n\n\n\nThe six earlier strategies are a bull-flag pattern, a momentum-decile screen, a reversal after a 3% one-day drop, insider cluster buying, volatility-scaled momentum held as five stocks (\"Part B\"), and short-term momentum (STMOM). They were tested between late August and 10 October 2026. Three of them (the 3% drop, Part B and STMOM) had written pre-registrations. We did not find one for the other three in the project record, and none used this week’s fingerprint seal or locked holdout. So we do not claim \"32 under pre-registered rules\". Section 4 reports all 32. A December tax-loss test from the same period was judged invalid by the project, because the data held only two Decembers. It is not in the ledger and is not counted here.\nA note on the word \"swing\". The 23 tournament rules hold for a few days to about three weeks. C1 holds for four trading days. C2 and C3 rebalance monthly, which is the slow end of swing trading.\n4. Results: every strategy\nFamilies: mean reversion (buy a dip and expect a bounce), trend/breakout (buy strength and expect more), ICT-style (price-structure patterns popular on social media), rotation/momentum (hold whatever has risen most), calendar, and event.\nThis week’s monthly round (holdout on Canadian-listed ETFs)\nSwipe the table sideways for more columns →\n\n\nID\nStrategy\nFamily\nVerdict\nKilled by\n\n\n\n\nC1\nTurn-of-the-month: buy XSP.TO at the month’s last close, sell 3 days later\nCalendar\nFAIL\nAlpha t −1.30; Sharpe −0.01 vs SPY 0.77; breakeven cost 0.20%; 26.3% of placebos beat it; deflated Sharpe 0.047\n\n\nC2\nHold the top 3 of 7 TSX sector ETFs by 12-month momentum\nRotation\nFAIL\nSample size only: 85 round trips vs 100 required\n\n\nC3\nHold the best of 5 region/bond ETFs, or cash\nRotation\nFAIL\nAlpha t −1.36; Sharpe 0.47 vs SPY 0.96; 36 round trips; 65.6% of placebos beat it; deflated Sharpe 0.469\n\n\nR1\nReplication of C2 on 9 US sector ETFs, 2000–2026 (not a new strategy)\nRotation\nFAIL\nAlpha t 1.40 vs 1.96; 2.62 halt trips per 10 years vs 2; deflated Sharpe 0.931 vs 0.95\n\n\n\nThis week’s daily-swing tournament (practice round up to 2012; final from 2013)\nTo reach the final, a rule needed at least 100 practice trades, a positive net mean per trade with t ≥ 2.0, and a placebo percentile of at least 95. Every rule had at least 100 trades. The table shows the practice-round t-statistic and placebo percentile, net of 0.20% per round trip.\nRSI(2) is a 0–100 score of how stretched the last two days' moves are; below 10 means very oversold. IBS (internal bar strength) shows where the close sat within the day’s range. A fair value gap is a three-bar pattern in which the first bar’s high and the third bar’s low do not overlap, leaving a \"gap\" that traders expect price to revisit.\nSwipe the table sideways for more columns →\n\n\nID\nStrategy\nFamily\nPractice t\nPlacebo pct\nVerdict\nKilled by\n\n\n\n\nC22\nConnors R3 (RSI(2) falls 3 days in a row, ends below 10, above 200-day average)\nMean reversion\n+2.28\n100.0\nFAIL in final\nSee Section 5\n\n\nC21\nCumulative RSI(2)\nMean reversion\n+1.78\n100.0\nFAIL\nt below 2.0\n\n\nC02\nRSI(2) < 5\nMean reversion\n+1.74\n100.0\nFAIL\nt below 2.0\n\n\nC23\nConnors %b(5,1): close near the bottom of a 5-day Bollinger band 3 days running\nMean reversion\n+1.46\n100.0\nFAIL\nt below 2.0\n\n\nC17\nPower-of-three, weekly\nICT-style\n+1.44\n100.0\nFAIL\nt below 2.0\n\n\nC03\nDouble 7s: close at a 7-day low, above 200-day average\nMean reversion\n+1.29\n100.0\nFAIL\nt below 2.0\n\n\nC04\n3 down closes\nMean reversion\n+1.24\n100.0\nFAIL\nt below 2.0\n\n\nC01\nConnors RSI(2) < 10\nMean reversion\n+1.24\n100.0\nFAIL\nt below 2.0\n\n\nC10\n10-day average crosses above 50-day average\nTrend\n+1.04\n84.1\nFAIL\nt below 2.0; placebo\n\n\nC19\nWeekly sector loser reversal\nMean reversion\n+0.68\n92.1\nFAIL\nt below 2.0; placebo\n\n\nC06\nClose below lower Bollinger band (20-day average minus 2 standard deviations)\nMean reversion\n+0.48\n77.2\nFAIL\nt below 2.0; placebo\n\n\nC20\nWeekly time-series momentum: hold while price is above its level 20 days ago\nTrend\n+0.09\n11.7\nFAIL\nt below 2.0; placebo\n\n\nC05\nIBS < 0.2\nMean reversion\n−0.45\n99.7\nFAIL\nNet mean negative\n\n\nC07\nPullback to the 20-day exponential moving average in an uptrend\nTrend\n−0.65\n26.4\nFAIL\nNet mean negative; placebo\n\n\nC08\nDonchian breakout: close above the prior 20-day high\nBreakout\n−0.79\n0.1\nFAIL\nNet mean negative; placebo\n\n\nC18\nWeekly top sector by relative strength\nRotation\n−1.09\n14.9\nFAIL\nNet mean negative; placebo\n\n\nC12\nNR7 (narrowest range of 7) breakout\nBreakout\n−1.12\n0.0\nFAIL\nNet mean negative; placebo\n\n\nC13\nGap-down reversal\nMean reversion\n−1.20\n90.0\nFAIL\nNet mean negative; placebo\n\n\nC11\nInside-bar breakout\nBreakout\n−1.25\n0.0\nFAIL\nNet mean negative; placebo\n\n\nC15\nInverse fair value gap\nICT-style\n−1.54\n0.0\nFAIL\nNet mean negative; placebo\n\n\nC14\nBullish fair value gap retest (daily)\nICT-style\n−1.59\n34.8\nFAIL\nNet mean negative; placebo\n\n\nC09\n52-week-high breakout, 10-day hold\nBreakout\n−1.74\n0.1\nFAIL\nNet mean negative; placebo\n\n\nC16\nTurtle soup (liquidity sweep of a 20-day low)\nICT-style\n−2.37\n0.0\nFAIL\nNet mean negative, significantly\n\n\n\nEarlier in the project (different protocols, listed for completeness)\nSwipe the table sideways for more columns →\n\n\nStrategy\nFamily\nVerdict\nWhat killed it\n\n\n\n\nBull flag\nTrend/breakout\nNo edge\n87% of its profit was the market rising while trades were held\n\n\nMomentum decile\nMomentum\nNo edge\nt = 0.542\n\n\nReversal after a ≥3% one-day drop (20 TSX large caps)\nMean reversion\nFAIL\nt between −0.22 and +0.41 across 1-, 3- and 5-day holds\n\n\nInsider cluster buying\nEvent\nDo not build\nTradable names, 2017–2026: −0.30% over 21 days vs SPY, t −1.36\n\n\nVolatility-scaled momentum, 5 stocks (\"Part B\")\nMomentum\nFAIL\nNo version passed all four tests. Plain and trend-filtered versions tripped a 10% halt 11 and 9 times; the scaled version had a Sharpe of 0.66 vs SPY’s 1.06\n\n\nShort-term momentum (STMOM)\nMomentum\nNot significant\n+0.395% a month net over its benchmark, t 1.64 over 254 months\n\n\n\nScore: 0 of 26 this week; 0 of 32 across the project.\n5. The near-misses, honestly\nC2: passed every economic test, failed on trade count, then failed to replicate\nC2 held the three Canadian sector ETFs with the best 12-month returns, skipping the latest month, and rebalanced monthly. Over its holdout (164 months, 2013-02 to 2026-09):\n\nalpha t of 2.56 against a bar of 2.394, with a market beta of 0.53 (beta is how much a strategy moves with the market; 1.0 moves one-for-one);\nnet Sharpe of 1.23 a year, against SPY’s 1.04 and 0.99 for holding all seven ETFs equally;\nbreakeven cost of 7.3% per round trip, far above the 0.50% bar;\nonly 0.1% of 1,000 placebos beat it;\ndeflated Sharpe of 0.991 with N = 12;\nin a simulated $750 account under the project’s caps, $750 grew to $1,834 over 13.7 years, with 1 halt trip.\n\nIt produced 85 completed round trips. The bar was 100. The verdict is FAIL, as written in advance. We did not relax the minimum after seeing the result. The minimum exists because a rule with too few trades can look excellent by luck, and loosening it after the fact is exactly the habit this study is about.\nThe honest next step was a new trial: the same rule, word for word, on the nine original US sector funds, 2000-01 to 2026-09 (321 months). This replication, R1, was sealed before any return on that data was computed. It failed:\n\nalpha t of 1.40 against a bar of 1.96;\n7 halt trips in 26.7 years (2.62 per 10 years, against a limit of 2);\ndeflated Sharpe of 0.931, below 0.95.\n\nIts Sharpe of 0.65 a year essentially tied simply holding all nine sectors (also 0.65). The likeliest reading is that C2's Canadian result belonged to that period and that market. A strong result on one dataset is not the same as a result that survives replication.\nC22, Connors R3: the practice-round winner that faded\nThe rule: price is above its 200-day average, RSI(2) has fallen three days in a row from below 60, and today’s RSI(2) is under 10. Buy at the next open. Sell at the next open after RSI(2) rises above 70, or earlier if a volatility-based stop or the 15-day time limit hits.\nSwipe the table sideways for more columns →\n\n\nRow\nPractice (to 2012)\nFinal (2013 to Sep 2026)\n\n\n\n\nTrades\n1,323\n1,544\n\n\nNet mean per trade (after 0.20%)\n+0.285%\n+0.051%\n\n\nt-statistic\n2.28\n0.49 (bar 1.96)\n\n\nWin rate\n68.0%\n63.2%\n\n\nBreakeven round-trip cost\n0.485%\n0.251% (bar 0.50%)\n\n\nPlacebo percentile\n100.0\n90.9 (bar 95)\n\n\nDeflated Sharpe (N = 36)\n0.310\n0.0005 (bar 0.95)\n\n\n\nIt passed only the trade-count test in the final. Two warnings were on record before the final was run. C22 was the best of seven closely related dip-buy rules, and picking the best of a related family is exactly the selection effect a final round exists to test. And its practice breakeven of 0.485% was already below the 0.50% bar.\nWin rate deserves a word. A 63.2% win rate sounds good. But at a net +0.051% per trade it is close to break-even, because the losses are larger than the wins. In the final, 426 of 1,544 trades (28%) ended at the stop.\nThe $200 account. The pre-registration simulated a $200 account taking every signal with full equity, one position at a time, after costs:\n\nit started at $200.00 on 24 January 2013 and ended at $216.18 on 23 September 2026, after 392 trades;\nits lowest point was $105.99 on 19 March 2020, a maximum drawdown of 53.2%;\nthe 10% halt tripped 12 times in 13.74 years (8.73 per 10 years, against a limit of 2).\n\nRun on the practice data, the same account would already have tripped the halt 10 times in about 19 years.\n6. What could not be tested, and why\nWe declared these untestable in the sealed pre-registration, before any data was downloaded:\n\nOrder flow (footprint charts, cumulative delta, absorption, bid/ask imbalance). These need tick-level trade and quote data showing which side was aggressive. Free daily bars have none of that.\nGEX (dealer gamma exposure). This needs a daily history of options open interest by strike and expiry. Free sources give only today’s options chain, not its history.\nIntraday ICT (kill zones, silver bullet, session sweeps, intraday fair value gaps and order blocks, OTE entries, intraday power-of-three, SMT divergence). These need years of 1- to 15-minute bars. The free source serves about 7 days of 1-minute bars, about 60 days of 5- to 30-minute bars and about 730 days of hourly bars. That is far short of the 100-plus trades across several market regimes this test requires.\nOrder blocks, premium/discount (OTE Fibonacci) and market-structure shifts on any timeframe. Their definitions are discretionary: which candle, which swing. Any codified version would be a new rule, not the source’s. The codifiable parts were tested on daily bars: fair value gaps (C14, C15), the liquidity sweep (C16) and weekly power-of-three (C17). All four failed.\nShort selling versions of everything were excluded, because the account the tests were built for can only buy.\n\n\"Not tested\" does not mean \"works\". It means this study says nothing about them either way.\n7. What this means for a small-account trader\nThese are facts from the runs above, not advice.\n\nCosts are the first filter. At a 0.20% round trip, random entries held 2 to 4 days lost roughly the cost. Most breakout and pattern rules did worse than that. C22's final-round profit of +0.051% per trade became −0.249% at a 0.50% round-trip cost.\nHigh win rates hid thin edges. The seven RSI(2) dip-buy rules won 62–68% of practice trades. Only one reached the t-statistic bar, and it faded in the final.\nPopular named patterns did not show an edge on daily ETF data. Both fair-value-gap rules, turtle soup, inside bars, NR7, Donchian and 52-week-high breakouts all had negative net means per trade in the practice data.\nA small account feels drawdowns in full. The one rule that reached the final would have taken a $200 account down to $105.99 at its worst, and it tripped a 10% halt 12 times in under 14 years.\nSlow rules struggle to prove themselves. A monthly rotation made 85 completed trades in 13.7 years. That was too few for our pre-set minimum, even though it passed every economic test.\nOne good backtest is not evidence of a durable edge. C2 looked strong on Canadian data and did not replicate on US data. C22 looked best in its practice round and did not hold up in its final.\n\n8. Limitations\n\nSurvivorship. Individual stocks were skipped on purpose, and that was declared before any data was touched. The free daily price source lacks history for most delisted companies. Those are disproportionately companies whose dips kept falling, so a stock universe would have flattered dip-buying by an amount we could not measure. ETFs largely avoid this problem, but that means the results apply to liquid ETFs, not to stock picking. At least five of the six earlier project tests used individual stocks and carry this bias.\nThe 2026 data snapshot. ETF prices came from downloads of free, vendor-adjusted daily data taken on 16 October 2026, each fingerprinted. The vendor adjusts history for splits and dividends, and those adjustments can change between downloads. A rerun on a later download may differ in small ways. The fingerprints let anyone tell whether they are using the same snapshot.\n\nOur own choices. Where a rule could be read two ways, we logged the reading we chose before running it. The monthly round’s ambiguity log has 20 entries, A1–A20. Three examples:\n\nthe random-walk test drifts slightly upward, so a buy-only rule can pass it more easily (A5);\nthe shift test was ruled uninformative for the monthly-data strategies (A15);\nthe trial-variance rule in the deflated Sharpe was set to the strictest of three readings (A19).\n\nThe tournament logged its own readings, for example how to treat a repeated 20-day low in turtle soup. Where a rule allowed two readings, the pre-registration counted the worse result. The tested rules also differ from their published originals. Entries and exits happen at the next open, not the close, and every daily rule carries a volatility stop and a 15-day time limit. Published results are only a rough guide to ours.\n\n\nThis is not proof that no strategy works. It shows that these 26 rules, as written, on this data, with these costs, did not pass these tests. A rule we did not test, a different market, or data we could not get (Section 6) could give a different answer. A true but small edge could also fail tests this strict. Strict tests trade some missed real edges for far fewer false ones.\n\n\n9. Reproduce it\nEvery file below can be checked with sha256sum. Code to be published with this study.\nMonthly round (C1–C3, R1)\n\n\n\nFile\nSHA-256\n\n\n\n\nprereg/C1.md (PREREG-C1)\na5047cac4772475843177b6933825aeb17b0492bf242507240dc45c96e9f544a\n\n\nprereg/C2.md (PREREG-C2)\ne9f0e9dd7ecc56917cf3e2ddddb1531b60cd92e5d941678193f748239601e81d\n\n\nprereg/C3.md (PREREG-C3)\n5c98b5783515207e29c3e7b726aec56bd3d99ba6964bb1c3214a5d71a859102c\n\n\nprereg/R1.md (PREREG-R1)\n89ea575b2aabc2e47e7bf5769655b760bb129f9d4c54df615435aaf941745f82\n\n\nADDENDUM-C1-2026-10-16.md\nc7a9af1c7f35eb6d277a39962db9c161b4c0f3bd76e3a7e6e0462558eb892b60\n\n\nADDENDUM-K7-2026-10-16.md\ncbe29d1771c810ad08ebe721a8dea171bd1ae1c3efdbb032af56e36af7e15e9b\n\n\nADDENDUM-GATE-2026-10-16.md\naf6cc83e127dda1ddf47197b64e0d926c221d9a2cbaa5aa091994b829296d740\n\n\ndata/DATA_SHA256.txt (23 raw data snapshots)\n11e4d11a330ecf37873eac2d67f899ccd0d2e52a54ebdc05b09f6a67e539d4f0\n\n\ndata/r1/DATA_SHA256.txt (R1 data)\n4d03a57b7b2f04f6edd52fc6b1018f5153f9acf3876068328382074cf1967884\n\n\nout/insample_results.json\nf65e225eb3bdb7264a7819b8f106e6641d8d104033e5a9f7c8428cef9356a166\n\n\nout/holdout_C1.json\n3bdc4afb97ef6be0f390900674a9b2d31e300404bec3584a95f8294cd462866e\n\n\nout/holdout_C2.json\n71ca35452c1e10e6931ba0ac0b636b8f933ad3ec832d3f22cdde784df7e2b99d\n\n\nout/holdout_C3.json\n314cdfae01da10f003580ecb889d5e54e46cd3b0b6abd45637458cc4b83ca7fc\n\n\nout/holdout_R1.json\n1be497497cfda3bd066f73d9c4129ac1d06e1f200661e79352cf92dc8aae0faa\n\n\nLEDGER.md, first 7,796 bytes (frozen part)\n3c692c7a6a474c8cc7fe1e954c27103a9b7eb7551174d80f48de8121663dd0a4\n\n\n\nAlso: SEAL.md, INSAMPLE-2026-10-16.md, AMBIGUITIES.md, ACCESS_LOG.md and RESULT-weekend-strategy-search-holdout-2026-10-16.md. Each holdout ran exactly once with python3 -I code/run_holdout.py <C>.\nDaily-swing tournament (C01–C23)\n\n\n\nFile\nSHA-256\n\n\n\n\nPREREG.md (17,232 bytes)\nafce5e06d6b6f8ce9d0ef8d1d3961a55d8cc65fc107b41c8ebf741df8bf74d3f\n\n\nDATA_SHA256.txt (22 ETF files, snapshot 2026-10-16T19:58:23Z)\n06660068df33105596b84eb65e7289b802bd225a93bb3c660342dbdd3f4349e0\n\n\nout/discovery.json\ncdd8a3653c5e7113f765d5d978c0f1458fc96119364a7553acd7ede55ebb8870\n\n\nout/confirmation_C22.json\n73c1be4b5a0fdcf82521e1542dd432d2514eaa1e01093a30195894abe9cd4c4e\n\n\n\nAlso: SEAL.md, DISCOVERY.md, CONFIRMATION.md, TOURNEY_LEDGER.md and ACCESS_LOG.md. The final ran once with python3 -I code/run_confirmation.py C22. A second invocation was refused.\n\n  \n  Again: this is a negative research result, not a strategy, a recommendation or a signal. Nothing here says what anyone should buy, sell or hold.\n  Versions\nDateWhat changed16 Oct 2026Both pre-registrations sealed with a hash before any result was computed (monthly round 17:55:14 UTC; daily tournament 19:57:57 UTC). Each holdout was run once. Published on this site the same day.17 Oct 2026Update line added at the top, linking to the combined strategy study. The study text did not change.\n  Text and charts: CC BY-NC 4.0. Study code: MIT. The numbers are facts: quote them freely, with a link. A figure may be described as “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a fixed-scope agreement” only when it comes from a signed engagement; no one may describe it as audited, certified or verified.\n  Cite this study\ndonttrade (2026). We tested 26 swing-trading strategies under pre-registered rules. None survived.. Published 16 Oct 2026. https://donttrade.ca/research/swing-trading-strategies/\n@misc{donttrade2026swing,\n  author = {donttrade},\n  title  = {We tested 26 swing-trading strategies under pre-registered rules. None survived.},\n  year   = {2026},\n  url    = {https://donttrade.ca/research/swing-trading-strategies/},\n  note   = {Code: https://github.com/donttrade/disposition-effect}\n}\n  \n  WHAT NEXT\n  \n    Get the next study by email\n    Email address\n    \n    Email me the next study\n  \n    Read another pre-registered negative result: volatility-scaled momentum →\n  \n\nWork at a prop firm or broker? For firms →\n\n\n",
+ "text_collapsed": "STUDY · PRE-REGISTERED · NEGATIVE RESULT · 16 OCT 2026 We tested 26 swing-trading strategies under pre-registered rules. None survived. This page reports a negative research result. It is not a strategy, a recommendation or a signal, and nothing on it says what anyone should hold. Three monthly rules on ETFs and 23 classic daily swing rules on 22 ETFs, each written down and sealed with a SHA-256 hash before any result was computed, then judged once on a locked holdout, net of costs. None passed. Across the project’s full ledger of 36 trials, 32 of them distinct strategies, nothing has passed. Pre-registered and sealed 16 Oct 2026 (monthly round 17:55:14 UTC; daily tournament 19:57:57 UTC) · Run and published 16 Oct 2026 · Code: to be published with this study; the SHA-256 of every file is under “Reproduce it” · Data: free vendor-adjusted daily ETF prices, snapshot 16 Oct 2026 Funding: none. No firm paid for, saw or approved this study. How donttrade is paid → Published whether or not the result was interesting. Every trial was written into an append-only ledger, and a trial that died still counts. Update, 17 Oct 2026: these results are now combined with a later round of investing, overnight and day-trading rules in the combined strategy study. Nothing below has changed. Contents1. The short version2. Why most backtests lie3. How we tested4. Results: every strategy5. The near-misses, honestly6. What could not be tested, and why7. What this means for a small-account trader8. Limitations9. Reproduce it The working title of this study was \"We tested 32 strategies\". When we counted the ledgers line by line, 26 is the number that fits the claim in the title. 32 is the number of distinct strategies across the whole project, including six tested earlier under different protocols. The section \"How we counted\" explains both numbers. 1. The short version 26 strategies were tested this week, every one under rules sealed before any result was computed. None passed. Three were monthly rules on ETFs (exchange-traded funds: single shares that each hold a whole basket of stocks or bonds) (turn-of-the-month, sector momentum, region momentum). Twenty-three were classic daily swing rules on 22 ETFs: RSI(2) dip-buys, breakouts, moving-average crosses, inside bars, fair value gaps, \"turtle soup\" and others. Across the project’s full ledger of 36 trials, 32 of them distinct strategies, nothing has passed. The two near-misses failed in instructive ways. Canadian sector momentum (C2) passed every economic test but produced 85 completed trades against a pre-set minimum of 100. The same rule on US sector funds then failed. The best daily rule in the practice round, Connors R3 (C22), made +0.285% per trade after costs. On the sealed later data it made +0.051%. A simulated $200 account following it fell 53.2% from its peak, bottoming in March 2020. Most popular daily setups lost money after a 0.20% round-trip cost even before the final test. Every breakout rule, the weekly trend and sector-strength rules, both fair-value-gap rules and the liquidity-sweep rule had a negative or near-zero net result per trade in the practice data. The seven closely related RSI(2) dip-buy rules were all positive but weak. Only one of them cleared the bar to reach the final round. 2. Why most backtests lie A backtest replays a trading rule on old prices to see what it would have earned. Backtests are easy to run and easy to fool yourself with, for two reasons. Overfitting. Every rule has choices in it: which indicator, which threshold, how many days to hold. If you try enough choices on the same data, some will fit the past by luck. They look brilliant on the data used to pick them and then do nothing on new data. The rule ends up describing the noise in that particular stretch of history, not a repeatable pattern. Multiple testing. Suppose you test 100 strategies that have no real edge at all. By chance alone, some of them will look good. In an idealised simulation recorded in this project (clean random noise, 200 trades per strategy), the best of 100 no-edge strategies reached a t-statistic of 2.56. A t-statistic measures how far a result sits from zero compared with how much it bounces around. Around 2 is the traditional \"probably not luck\" bar. So a test that cleared the usual bar would have been pure luck. The more strategies you try, the higher the bar a real winner has to clear. Most published or sold backtests report the winner and not the number of things tried to find it. You cannot judge the winner without that number. That is why this study counts every trial and publishes every loser. 3. How we tested Pre-registration, sealed with a hash Pre-registration means writing down every rule before looking at any result: the strategy, the data, the dates, the costs and the exact pass/fail tests. Ours were then hashed. A hash (here SHA-256) is a 64-character fingerprint of a file. Change one character and the fingerprint changes completely. The fingerprints were recorded at sealing time: The monthly round (C1–C3) was sealed at 17:55:14 UTC on 16 October 2026. It was sealed before any return, Sharpe, alpha or signal had been computed on any period. The daily-swing tournament (C01–C23) was sealed at 19:57:57 UTC the same day. No price data for it had been downloaded at that point. The fingerprints are listed in Section 9, so anyone can check that the rules we report are the rules we wrote. A one-touch holdout A holdout is a slice of data locked away while the rules are designed and checked. It is opened once, at the end, for the final verdict. Our holdouts were locked in code. The data loader refused any date in the holdout unless an unlock file held the exact fingerprint of the sealed pre-registration. Every read, allowed or refused, was written to an access log. After a run, the unlock was consumed and a second run was refused. If a bug had been found after a run, both outputs would have been published and the worse verdict would have stood. Monthly round: each strategy had an earlier \"in-sample\" period, ending where the original research paper’s data ended. It also had a later holdout on Canadian-listed ETFs. Only the holdout decided the verdict. Daily tournament: the practice round (\"discovery\") used every bar up to 31 December 2012. The final round (\"confirmation\") used 2013-01-01 to 2026-09-30. Kill criteria Each strategy had to pass every test. Failing any one killed it. The tests, in plain words: Alpha t-statistic. Alpha is return beyond what simple exposure to the stock market explains. A strategy that only rides the market up has no alpha. Monthly round: alpha against SPY (an S&P 500 fund) with a t-statistic of at least 2.394. Daily tournament: the net return per trade itself with a t of at least 1.96. The bars differ because of the Bonferroni rule, explained below. Sharpe ratio (monthly round only). The Sharpe ratio is average return divided by how much returns bounce around: return per unit of bumpiness. The strategy had to match or beat both SPY and simply holding its own ETFs over the same months. Breakeven cost. The round-trip cost at which the profit disappears had to be at least 0.50%. A round trip is one buy plus the matching sell. Drawdown halts. A drawdown is a fall from a running peak in account value. A halt \"trips\" whenever the simulated account falls 10% below its peak, and the peak resets at each trip. At most 2 trips per 10 years were allowed. Sample size. At least 100 completed round trips. The monthly round also needed at least 120 holdout months. Placebo. A placebo here is a fake strategy that trades at random times in the same instruments, with the same holding lengths and the same costs. We ran 1,000 of them. The real strategy had to beat nearly all of them. That meant the 98.333rd percentile in the monthly round and the 95th in the final of the daily tournament. Deflated Sharpe. The deflated Sharpe ratio (Bailey and López de Prado, 2014) asks how likely it is that a Sharpe ratio this high is real, given how many strategies were tried in total. It returns a probability between 0 and 1. We required at least 0.95. Bonferroni is the simplest correction for multiple testing. If you test k strategies at once, you divide the allowed error rate by k, which raises the t-statistic bar. With k = 3 the two-sided bar is 2.394. With k = 1 it is 1.96. Only one daily strategy reached the final, so its bar was 1.96. Costs Every result is net, meaning after costs. The base cost was 0.20% per round trip (0.10% on each side). We also published results at other cost levels. The monthly round used 0.057%, 0.10%, 0.50% and 1.00%; the daily tournament used 0.10% and 0.50%. The trial ledger Every trial was written into an append-only ledger, a log where rows can be added but never edited or deleted. A trial that died still counts. The ledger’s trial count, N, feeds the deflated Sharpe, so every extra attempt makes passing harder for all later ones. N was 12 for C1–C3, 13 for the replication R1, and 36 for the daily tournament. Integrity checks before the final Before the holdout was opened, the monthly strategies also had to show that the machinery worked: they reached a t of at least 2.0 on the in-sample data; they failed on random-walk fake prices (passing in no more than 10 of 100 fake panels); they detected a planted +1% signal (t of at least 2.0); their loader refused an unauthorised read of the holdout. The test suite passed 195 of 195 before the monthly holdout runs. In the daily tournament, the engine was cross-checked against a published figure. The basic RSI(2) rule on SPY produced 158 trades over 1994–2012, about 8 a year. That is in line with the roughly 7.9 a year published for that rule. How we counted The tournament ledger ends at N = 36 trials. That is more than the number of distinct strategies, for two reasons: Swipe the table sideways for more columns → Step Count Source Trials in the ledger 36 TOURNEY_LEDGER.md minus 3 \"shift variants\" (C1–C3 rerun one period late as an integrity check; counted as trials to be strict, but the same strategies) 33 LEDGER.md rows 7–9 minus R1 (C2's exact rule rerun on US sector funds; a replication, not a new strategy) 32 distinct strategies LEDGER.md row 12; PREREG-R1 minus the 6 tested earlier in the project, under protocols that differed from this week’s sealed process 26 tested this week under sealed pre-registration LEDGER.md decision D2 The six earlier strategies are a bull-flag pattern, a momentum-decile screen, a reversal after a 3% one-day drop, insider cluster buying, volatility-scaled momentum held as five stocks (\"Part B\"), and short-term momentum (STMOM). They were tested between late August and 10 October 2026. Three of them (the 3% drop, Part B and STMOM) had written pre-registrations. We did not find one for the other three in the project record, and none used this week’s fingerprint seal or locked holdout. So we do not claim \"32 under pre-registered rules\". Section 4 reports all 32. A December tax-loss test from the same period was judged invalid by the project, because the data held only two Decembers. It is not in the ledger and is not counted here. A note on the word \"swing\". The 23 tournament rules hold for a few days to about three weeks. C1 holds for four trading days. C2 and C3 rebalance monthly, which is the slow end of swing trading. 4. Results: every strategy Families: mean reversion (buy a dip and expect a bounce), trend/breakout (buy strength and expect more), ICT-style (price-structure patterns popular on social media), rotation/momentum (hold whatever has risen most), calendar, and event. This week’s monthly round (holdout on Canadian-listed ETFs) Swipe the table sideways for more columns → ID Strategy Family Verdict Killed by C1 Turn-of-the-month: buy XSP.TO at the month’s last close, sell 3 days later Calendar FAIL Alpha t −1.30; Sharpe −0.01 vs SPY 0.77; breakeven cost 0.20%; 26.3% of placebos beat it; deflated Sharpe 0.047 C2 Hold the top 3 of 7 TSX sector ETFs by 12-month momentum Rotation FAIL Sample size only: 85 round trips vs 100 required C3 Hold the best of 5 region/bond ETFs, or cash Rotation FAIL Alpha t −1.36; Sharpe 0.47 vs SPY 0.96; 36 round trips; 65.6% of placebos beat it; deflated Sharpe 0.469 R1 Replication of C2 on 9 US sector ETFs, 2000–2026 (not a new strategy) Rotation FAIL Alpha t 1.40 vs 1.96; 2.62 halt trips per 10 years vs 2; deflated Sharpe 0.931 vs 0.95 This week’s daily-swing tournament (practice round up to 2012; final from 2013) To reach the final, a rule needed at least 100 practice trades, a positive net mean per trade with t ≥ 2.0, and a placebo percentile of at least 95. Every rule had at least 100 trades. The table shows the practice-round t-statistic and placebo percentile, net of 0.20% per round trip. RSI(2) is a 0–100 score of how stretched the last two days' moves are; below 10 means very oversold. IBS (internal bar strength) shows where the close sat within the day’s range. A fair value gap is a three-bar pattern in which the first bar’s high and the third bar’s low do not overlap, leaving a \"gap\" that traders expect price to revisit. Swipe the table sideways for more columns → ID Strategy Family Practice t Placebo pct Verdict Killed by C22 Connors R3 (RSI(2) falls 3 days in a row, ends below 10, above 200-day average) Mean reversion +2.28 100.0 FAIL in final See Section 5 C21 Cumulative RSI(2) Mean reversion +1.78 100.0 FAIL t below 2.0 C02 RSI(2) < 5 Mean reversion +1.74 100.0 FAIL t below 2.0 C23 Connors %b(5,1): close near the bottom of a 5-day Bollinger band 3 days running Mean reversion +1.46 100.0 FAIL t below 2.0 C17 Power-of-three, weekly ICT-style +1.44 100.0 FAIL t below 2.0 C03 Double 7s: close at a 7-day low, above 200-day average Mean reversion +1.29 100.0 FAIL t below 2.0 C04 3 down closes Mean reversion +1.24 100.0 FAIL t below 2.0 C01 Connors RSI(2) < 10 Mean reversion +1.24 100.0 FAIL t below 2.0 C10 10-day average crosses above 50-day average Trend +1.04 84.1 FAIL t below 2.0; placebo C19 Weekly sector loser reversal Mean reversion +0.68 92.1 FAIL t below 2.0; placebo C06 Close below lower Bollinger band (20-day average minus 2 standard deviations) Mean reversion +0.48 77.2 FAIL t below 2.0; placebo C20 Weekly time-series momentum: hold while price is above its level 20 days ago Trend +0.09 11.7 FAIL t below 2.0; placebo C05 IBS < 0.2 Mean reversion −0.45 99.7 FAIL Net mean negative C07 Pullback to the 20-day exponential moving average in an uptrend Trend −0.65 26.4 FAIL Net mean negative; placebo C08 Donchian breakout: close above the prior 20-day high Breakout −0.79 0.1 FAIL Net mean negative; placebo C18 Weekly top sector by relative strength Rotation −1.09 14.9 FAIL Net mean negative; placebo C12 NR7 (narrowest range of 7) breakout Breakout −1.12 0.0 FAIL Net mean negative; placebo C13 Gap-down reversal Mean reversion −1.20 90.0 FAIL Net mean negative; placebo C11 Inside-bar breakout Breakout −1.25 0.0 FAIL Net mean negative; placebo C15 Inverse fair value gap ICT-style −1.54 0.0 FAIL Net mean negative; placebo C14 Bullish fair value gap retest (daily) ICT-style −1.59 34.8 FAIL Net mean negative; placebo C09 52-week-high breakout, 10-day hold Breakout −1.74 0.1 FAIL Net mean negative; placebo C16 Turtle soup (liquidity sweep of a 20-day low) ICT-style −2.37 0.0 FAIL Net mean negative, significantly Earlier in the project (different protocols, listed for completeness) Swipe the table sideways for more columns → Strategy Family Verdict What killed it Bull flag Trend/breakout No edge 87% of its profit was the market rising while trades were held Momentum decile Momentum No edge t = 0.542 Reversal after a ≥3% one-day drop (20 TSX large caps) Mean reversion FAIL t between −0.22 and +0.41 across 1-, 3- and 5-day holds Insider cluster buying Event Do not build Tradable names, 2017–2026: −0.30% over 21 days vs SPY, t −1.36 Volatility-scaled momentum, 5 stocks (\"Part B\") Momentum FAIL No version passed all four tests. Plain and trend-filtered versions tripped a 10% halt 11 and 9 times; the scaled version had a Sharpe of 0.66 vs SPY’s 1.06 Short-term momentum (STMOM) Momentum Not significant +0.395% a month net over its benchmark, t 1.64 over 254 months Score: 0 of 26 this week; 0 of 32 across the project. 5. The near-misses, honestly C2: passed every economic test, failed on trade count, then failed to replicate C2 held the three Canadian sector ETFs with the best 12-month returns, skipping the latest month, and rebalanced monthly. Over its holdout (164 months, 2013-02 to 2026-09): alpha t of 2.56 against a bar of 2.394, with a market beta of 0.53 (beta is how much a strategy moves with the market; 1.0 moves one-for-one); net Sharpe of 1.23 a year, against SPY’s 1.04 and 0.99 for holding all seven ETFs equally; breakeven cost of 7.3% per round trip, far above the 0.50% bar; only 0.1% of 1,000 placebos beat it; deflated Sharpe of 0.991 with N = 12; in a simulated $750 account under the project’s caps, $750 grew to $1,834 over 13.7 years, with 1 halt trip. It produced 85 completed round trips. The bar was 100. The verdict is FAIL, as written in advance. We did not relax the minimum after seeing the result. The minimum exists because a rule with too few trades can look excellent by luck, and loosening it after the fact is exactly the habit this study is about. The honest next step was a new trial: the same rule, word for word, on the nine original US sector funds, 2000-01 to 2026-09 (321 months). This replication, R1, was sealed before any return on that data was computed. It failed: alpha t of 1.40 against a bar of 1.96; 7 halt trips in 26.7 years (2.62 per 10 years, against a limit of 2); deflated Sharpe of 0.931, below 0.95. Its Sharpe of 0.65 a year essentially tied simply holding all nine sectors (also 0.65). The likeliest reading is that C2's Canadian result belonged to that period and that market. A strong result on one dataset is not the same as a result that survives replication. C22, Connors R3: the practice-round winner that faded The rule: price is above its 200-day average, RSI(2) has fallen three days in a row from below 60, and today’s RSI(2) is under 10. Buy at the next open. Sell at the next open after RSI(2) rises above 70, or earlier if a volatility-based stop or the 15-day time limit hits. Swipe the table sideways for more columns → Row Practice (to 2012) Final (2013 to Sep 2026) Trades 1,323 1,544 Net mean per trade (after 0.20%) +0.285% +0.051% t-statistic 2.28 0.49 (bar 1.96) Win rate 68.0% 63.2% Breakeven round-trip cost 0.485% 0.251% (bar 0.50%) Placebo percentile 100.0 90.9 (bar 95) Deflated Sharpe (N = 36) 0.310 0.0005 (bar 0.95) It passed only the trade-count test in the final. Two warnings were on record before the final was run. C22 was the best of seven closely related dip-buy rules, and picking the best of a related family is exactly the selection effect a final round exists to test. And its practice breakeven of 0.485% was already below the 0.50% bar. Win rate deserves a word. A 63.2% win rate sounds good. But at a net +0.051% per trade it is close to break-even, because the losses are larger than the wins. In the final, 426 of 1,544 trades (28%) ended at the stop. The $200 account. The pre-registration simulated a $200 account taking every signal with full equity, one position at a time, after costs: it started at $200.00 on 24 January 2013 and ended at $216.18 on 23 September 2026, after 392 trades; its lowest point was $105.99 on 19 March 2020, a maximum drawdown of 53.2%; the 10% halt tripped 12 times in 13.74 years (8.73 per 10 years, against a limit of 2). Run on the practice data, the same account would already have tripped the halt 10 times in about 19 years. 6. What could not be tested, and why We declared these untestable in the sealed pre-registration, before any data was downloaded: Order flow (footprint charts, cumulative delta, absorption, bid/ask imbalance). These need tick-level trade and quote data showing which side was aggressive. Free daily bars have none of that. GEX (dealer gamma exposure). This needs a daily history of options open interest by strike and expiry. Free sources give only today’s options chain, not its history. Intraday ICT (kill zones, silver bullet, session sweeps, intraday fair value gaps and order blocks, OTE entries, intraday power-of-three, SMT divergence). These need years of 1- to 15-minute bars. The free source serves about 7 days of 1-minute bars, about 60 days of 5- to 30-minute bars and about 730 days of hourly bars. That is far short of the 100-plus trades across several market regimes this test requires. Order blocks, premium/discount (OTE Fibonacci) and market-structure shifts on any timeframe. Their definitions are discretionary: which candle, which swing. Any codified version would be a new rule, not the source’s. The codifiable parts were tested on daily bars: fair value gaps (C14, C15), the liquidity sweep (C16) and weekly power-of-three (C17). All four failed. Short selling versions of everything were excluded, because the account the tests were built for can only buy. \"Not tested\" does not mean \"works\". It means this study says nothing about them either way. 7. What this means for a small-account trader These are facts from the runs above, not advice. Costs are the first filter. At a 0.20% round trip, random entries held 2 to 4 days lost roughly the cost. Most breakout and pattern rules did worse than that. C22's final-round profit of +0.051% per trade became −0.249% at a 0.50% round-trip cost. High win rates hid thin edges. The seven RSI(2) dip-buy rules won 62–68% of practice trades. Only one reached the t-statistic bar, and it faded in the final. Popular named patterns did not show an edge on daily ETF data. Both fair-value-gap rules, turtle soup, inside bars, NR7, Donchian and 52-week-high breakouts all had negative net means per trade in the practice data. A small account feels drawdowns in full. The one rule that reached the final would have taken a $200 account down to $105.99 at its worst, and it tripped a 10% halt 12 times in under 14 years. Slow rules struggle to prove themselves. A monthly rotation made 85 completed trades in 13.7 years. That was too few for our pre-set minimum, even though it passed every economic test. One good backtest is not evidence of a durable edge. C2 looked strong on Canadian data and did not replicate on US data. C22 looked best in its practice round and did not hold up in its final. 8. Limitations Survivorship. Individual stocks were skipped on purpose, and that was declared before any data was touched. The free daily price source lacks history for most delisted companies. Those are disproportionately companies whose dips kept falling, so a stock universe would have flattered dip-buying by an amount we could not measure. ETFs largely avoid this problem, but that means the results apply to liquid ETFs, not to stock picking. At least five of the six earlier project tests used individual stocks and carry this bias. The 2026 data snapshot. ETF prices came from downloads of free, vendor-adjusted daily data taken on 16 October 2026, each fingerprinted. The vendor adjusts history for splits and dividends, and those adjustments can change between downloads. A rerun on a later download may differ in small ways. The fingerprints let anyone tell whether they are using the same snapshot. Our own choices. Where a rule could be read two ways, we logged the reading we chose before running it. The monthly round’s ambiguity log has 20 entries, A1–A20. Three examples: the random-walk test drifts slightly upward, so a buy-only rule can pass it more easily (A5); the shift test was ruled uninformative for the monthly-data strategies (A15); the trial-variance rule in the deflated Sharpe was set to the strictest of three readings (A19). The tournament logged its own readings, for example how to treat a repeated 20-day low in turtle soup. Where a rule allowed two readings, the pre-registration counted the worse result. The tested rules also differ from their published originals. Entries and exits happen at the next open, not the close, and every daily rule carries a volatility stop and a 15-day time limit. Published results are only a rough guide to ours. This is not proof that no strategy works. It shows that these 26 rules, as written, on this data, with these costs, did not pass these tests. A rule we did not test, a different market, or data we could not get (Section 6) could give a different answer. A true but small edge could also fail tests this strict. Strict tests trade some missed real edges for far fewer false ones. 9. Reproduce it Every file below can be checked with sha256sum. Code to be published with this study. Monthly round (C1–C3, R1) File SHA-256 prereg/C1.md (PREREG-C1) a5047cac4772475843177b6933825aeb17b0492bf242507240dc45c96e9f544a prereg/C2.md (PREREG-C2) e9f0e9dd7ecc56917cf3e2ddddb1531b60cd92e5d941678193f748239601e81d prereg/C3.md (PREREG-C3) 5c98b5783515207e29c3e7b726aec56bd3d99ba6964bb1c3214a5d71a859102c prereg/R1.md (PREREG-R1) 89ea575b2aabc2e47e7bf5769655b760bb129f9d4c54df615435aaf941745f82 ADDENDUM-C1-2026-10-16.md c7a9af1c7f35eb6d277a39962db9c161b4c0f3bd76e3a7e6e0462558eb892b60 ADDENDUM-K7-2026-10-16.md cbe29d1771c810ad08ebe721a8dea171bd1ae1c3efdbb032af56e36af7e15e9b ADDENDUM-GATE-2026-10-16.md af6cc83e127dda1ddf47197b64e0d926c221d9a2cbaa5aa091994b829296d740 data/DATA_SHA256.txt (23 raw data snapshots) 11e4d11a330ecf37873eac2d67f899ccd0d2e52a54ebdc05b09f6a67e539d4f0 data/r1/DATA_SHA256.txt (R1 data) 4d03a57b7b2f04f6edd52fc6b1018f5153f9acf3876068328382074cf1967884 out/insample_results.json f65e225eb3bdb7264a7819b8f106e6641d8d104033e5a9f7c8428cef9356a166 out/holdout_C1.json 3bdc4afb97ef6be0f390900674a9b2d31e300404bec3584a95f8294cd462866e out/holdout_C2.json 71ca35452c1e10e6931ba0ac0b636b8f933ad3ec832d3f22cdde784df7e2b99d out/holdout_C3.json 314cdfae01da10f003580ecb889d5e54e46cd3b0b6abd45637458cc4b83ca7fc out/holdout_R1.json 1be497497cfda3bd066f73d9c4129ac1d06e1f200661e79352cf92dc8aae0faa LEDGER.md, first 7,796 bytes (frozen part) 3c692c7a6a474c8cc7fe1e954c27103a9b7eb7551174d80f48de8121663dd0a4 Also: SEAL.md, INSAMPLE-2026-10-16.md, AMBIGUITIES.md, ACCESS_LOG.md and RESULT-weekend-strategy-search-holdout-2026-10-16.md. Each holdout ran exactly once with python3 -I code/run_holdout.py <C>. Daily-swing tournament (C01–C23) File SHA-256 PREREG.md (17,232 bytes) afce5e06d6b6f8ce9d0ef8d1d3961a55d8cc65fc107b41c8ebf741df8bf74d3f DATA_SHA256.txt (22 ETF files, snapshot 2026-10-16T19:58:23Z) 06660068df33105596b84eb65e7289b802bd225a93bb3c660342dbdd3f4349e0 out/discovery.json cdd8a3653c5e7113f765d5d978c0f1458fc96119364a7553acd7ede55ebb8870 out/confirmation_C22.json 73c1be4b5a0fdcf82521e1542dd432d2514eaa1e01093a30195894abe9cd4c4e Also: SEAL.md, DISCOVERY.md, CONFIRMATION.md, TOURNEY_LEDGER.md and ACCESS_LOG.md. The final ran once with python3 -I code/run_confirmation.py C22. A second invocation was refused. Again: this is a negative research result, not a strategy, a recommendation or a signal. Nothing here says what anyone should buy, sell or hold. Versions DateWhat changed16 Oct 2026Both pre-registrations sealed with a hash before any result was computed (monthly round 17:55:14 UTC; daily tournament 19:57:57 UTC). Each holdout was run once. Published on this site the same day.17 Oct 2026Update line added at the top, linking to the combined strategy study. The study text did not change. Text and charts: CC BY-NC 4.0. Study code: MIT. The numbers are facts: quote them freely, with a link. A figure may be described as “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a fixed-scope agreement” only when it comes from a signed engagement; no one may describe it as audited, certified or verified. Cite this study donttrade (2026). We tested 26 swing-trading strategies under pre-registered rules. None survived.. Published 16 Oct 2026. https://donttrade.ca/research/swing-trading-strategies/ @misc{donttrade2026swing, author = {donttrade}, title = {We tested 26 swing-trading strategies under pre-registered rules. None survived.}, year = {2026}, url = {https://donttrade.ca/research/swing-trading-strategies/}, note = {Code: https://github.com/donttrade/disposition-effect} } WHAT NEXT Get the next study by email Email address Email me the next study Read another pre-registered negative result: volatility-scaled momentum → Work at a prop firm or broker? For firms →"
+}

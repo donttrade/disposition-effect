@@ -12,9 +12,13 @@ flag off (seller name/placeholders, trader Stripe links, Product JSON-LD, paid m
 /dev/ in the build; secret patterns; the footer business line on every page exactly
 once while a commerce flag is on (and its address the private.toml one), none while both are off.
 
-Scope: the pages that templates own (new design). Passthrough pages are lifted word
-for word in steps 28–29 and are linted from then on; until then the old pages are
-covered by the v1 site tests.
+Scope: every page the templates own (new design) gets the full rules. A page lifted word for
+word from the pre-v2 site (steps 28–29, build.LIFTED_PATHS) gets the full rules on everything
+outside its frozen body (head, meta, JSON-LD, header, footer), and on the frozen body
+(<!--frozen:start-->…<!--frozen:end-->) the passthrough rules plus checks/compare.py: the
+frozen text must equal the old page's word for word, so the exemption from the word list
+covers only text that was already published and may not change (V2 plan: no sentence changes
+to study bodies). Any other page still passed through from docs/ gets the passthrough rules.
 """
 import json
 import os
@@ -399,6 +403,36 @@ def business_line_problems(html, where, commerce, private_values=()):
     return []
 
 
+FROZEN_START, FROZEN_END = "<!--frozen:start-->", "<!--frozen:end-->"
+FROZEN_RE = re.compile(r"(?s)<!--frozen:start-->(.*?)<!--frozen:end-->")
+
+
+def split_frozen(html):
+    """(the page without its frozen body, the frozen body or None)."""
+    m = FROZEN_RE.search(html)
+    if not m:
+        return html, None
+    return html[:m.start()] + " " + html[m.end():], m.group(1)
+
+
+def lifted_problems(html, where, path, paid, analytics, amounts, priv, seller, pilot):
+    """A lifted page: full rules outside the frozen body; inside it, the passthrough rules and
+    word-for-word equality with the old page (compare.py baseline)."""
+    import compare
+    n = (html.count(FROZEN_START), html.count(FROZEN_END))
+    if n != (1, 1):
+        return [("frozen", where, f"a lifted page needs exactly one frozen body, found {n[0]} start / {n[1]} end markers")]
+    rest, body = split_frozen(html)
+    out = lint_html(rest, where, paid, analytics, amounts, priv, commerce=seller, pilot=pilot)
+    out += passthrough_rules(body, where, analytics, paid)
+    base = compare.baselines().get(path)
+    if base is None:
+        out.append(("frozen", where, "no checks/lifted-baseline entry for this lifted page"))
+    else:
+        out += [("frozen:" + what, where, detail) for what, detail in compare.diff_page(base, html)]
+    return out
+
+
 def passthrough_rules(html, where, analytics, paid=False):
     """D9: the rules that must hold on passthrough pages too (the full word list waits for
     steps 28–29, which lift the study pages word for word): upload/analytics claims, the old
@@ -516,13 +550,20 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None):
         WARNINGS.append(f"no private.toml at {private_toml_path()}: the footer line's address was NOT checked "
                         "against it (set DT_PRIVATE_TOML to the file the build used)")
     owned_rel = {"/" + os.path.relpath(build.out_file(out_dir, p), out_dir) for p in owned_paths(paid, pilot)}
+    lifted = set(build.LIFTED_PATHS)
     for path in owned_paths(paid, pilot):
         fp = build.out_file(out_dir, path)
         if not os.path.exists(fp):
             problems.append(("flags", path, "page missing: is the build made with these flags?"))
             continue
         with open(fp, encoding="utf-8") as f:
-            problems += lint_html(f.read(), path, paid, analytics, amounts, priv, commerce=seller, pilot=pilot)
+            html = f.read()
+        if path in lifted:
+            problems += lifted_problems(html, path, path, paid, analytics, amounts, priv, seller, pilot)
+            continue
+        if FROZEN_START in html or FROZEN_END in html:
+            problems.append(("frozen", path, "a frozen-body marker on a page that is not lifted (build.LIFTED_PATHS)"))
+        problems += lint_html(html, path, paid, analytics, amounts, priv, commerce=seller, pilot=pilot)
     # leaks and flag rules apply to EVERY file in the build, passthrough included
     for root, _, files in os.walk(out_dir):
         for name in files:

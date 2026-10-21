@@ -1,0 +1,53 @@
+
+
+<div class="wrap page-head"><div class="col">
+<h1>Prop-firm pass-rate calculator</h1>
+<p class="lede">For firm operators. Enter the counts for one cohort and get pass and payout rates that say what they measure. Free. It runs in your browser and nothing is sent anywhere.</p>
+
+<p>A cohort is all the evaluations that started in one fixed window, for example everything started in March. Use the same cohort for every number below.</p>
+
+<form class="calc" id="pr-form" novalidate>
+  <div class="calc-grid">
+    <div class="calc-field"><label for="pr-started">Evaluations started</label><input id="pr-started" type="text" inputmode="numeric" autocomplete="off" aria-describedby="pr-msg"><p class="hint">Accounts, not people</p></div>
+    <div class="calc-field"><label for="pr-open">Still open at the cut-off</label><input id="pr-open" type="text" inputmode="numeric" autocomplete="off" aria-describedby="pr-msg"><p class="hint">Neither passed nor failed yet</p></div>
+    <div class="calc-field"><label for="pr-passed">Passed all stages (funded)</label><input id="pr-passed" type="text" inputmode="numeric" autocomplete="off" aria-describedby="pr-msg"><p class="hint">Accounts</p></div>
+    <div class="calc-field"><label for="pr-paid">Funded with at least one payout</label><input id="pr-paid" type="text" inputmode="numeric" autocomplete="off" aria-describedby="pr-msg"><p class="hint">Accounts</p></div>
+    <div class="calc-field"><label for="pr-traders">Unique traders (optional)</label><input id="pr-traders" type="text" inputmode="numeric" autocomplete="off" aria-describedby="pr-msg"><p class="hint">People behind the started accounts</p></div>
+  </div>
+  <div class="btn-row">
+    <button type="button" class="btn" id="pr-example">Fill a made-up example</button>
+    <button type="button" class="btn-2" id="pr-clear">Clear</button>
+  </div>
+  <p class="fine">The example (1,000 started, 150 open, 170 passed, 40 paid, 800 traders) is made-up. It is not a real firm’s data.</p>
+  <p class="calc-msg" id="pr-msg" role="status" aria-live="polite"></p>
+
+  <div id="pr-results" hidden>
+    <h2>Result</h2>
+    <dl class="calc-out">
+      <div><dt>Pass rate among finished evaluations (passed ÷ (started − open))</dt><dd id="pr-rate">–</dd></div>
+      <div><dt>Range if every open one fails / passes</dt><dd id="pr-range">–</dd></div>
+      <div><dt>Payout rate per evaluation (paid ÷ started)</dt><dd id="pr-perEval">–</dd></div>
+      <div><dt>Payout rate per funded account (paid ÷ passed)</dt><dd id="pr-perFunded">–</dd></div>
+      <div id="pr-trader-wrap" hidden><dt>Accounts per trader</dt><dd id="pr-perTrader">–</dd></div>
+    </dl>
+    <ul class="calc-notes" id="pr-notes"></ul>
+  </div>
+</form>
+
+<div class="box">
+  <h2 class="ls-boxhead">Common mistakes</h2>
+  <ul>
+    <li>Mixing cohorts, such as dividing this month’s passes by this month’s starts. Those passes mostly came from earlier starts.</li>
+    <li>Dropping open accounts. They are neither passes nor failures yet, so show the range.</li>
+    <li>Counting resets and retries as new people. They are new accounts, but not new traders.</li>
+    <li>Quoting the payout rate per funded account as if it were per evaluation. The two use different denominators.</li>
+  </ul>
+</div>
+
+<div class="box"><h2 class="ls-boxhead">What this calculator can’t do</h2>
+<p>It checks the arithmetic. It cannot tell anyone your inputs are right: a rate a firm computes about itself is still the firm’s own claim.</p>
+<p>Our paid work measures something no pass rate shows: how your traders handle winning and losing trades, computed from your own records by someone outside the firm, with the method published.</p>
+<p><a href="/for-firms/">What firms get →</a></p></div>
+</div></div>
+
+

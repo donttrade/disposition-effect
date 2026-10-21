@@ -1,0 +1,8 @@
+{#- A page lifted word for word from the pre-v2 site (plan steps 28–29). The body between the
+    frozen markers is site/templates/lifted/<slug>.html, unchanged: checks/compare.py holds it to
+    the old page's text, ids, links and tables, and lint keeps its words to the passthrough rules.
+    Edit the body only with a dated correction, and update checks/lifted-baseline/ with it. -#}
+{% extends "base.html" %}
+{% block content %}
+<!--frozen:start-->{{ lifted_html }}<!--frozen:end-->
+{% endblock %}

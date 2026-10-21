@@ -2,7 +2,7 @@
   <a class="brand" href="/">{{ site.name }}</a>
   <nav class="site-nav" aria-label="Main"><ul>
   {%- for item in nav %}
-    <li><a href="{{ item.href }}"{% if page.path == item.href %} aria-current="page"{% endif %}>{{ item.label }}</a></li>
+    <li><a href="{{ item.href }}"{% if page.path == item.href %} aria-current="page"{% elif page.get("section") == item.href %} aria-current="true"{% endif %}>{{ item.label }}</a></li>
   {%- endfor %}
   </ul></nav>
   <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" hidden>Dark mode</button>

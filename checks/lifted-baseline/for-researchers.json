@@ -1,0 +1,30 @@
+{
+ "attrs": [],
+ "citation": [],
+ "fixes": [],
+ "ids": [],
+ "links": [
+  "a[href]=mailto:donttrade.research@gmail.com?subject=Press%3A%20%5Bpublication%5D",
+  "a[href]=/data/disposition-pgr-plr.csv",
+  "a[href]=/data/insider-interval.csv",
+  "a[href]=/code/",
+  "a[href]=/code/",
+  "a[href]=https://github.com/donttrade/disposition-effect",
+  "a[href]=/sample-memo/",
+  "a[href]=/glossary/",
+  "a[href]=/research/disposition-effect/",
+  "a[href]=/research/insider-buying-edge/",
+  "a[href]=/research/portfolio-driven-disposition-effect/",
+  "a[href]=/research/volatility-scaled-momentum/",
+  "a[href]=/research/swing-trading-strategies/",
+  "a[href]=/research/strategy-tests/",
+  "a[href]=/corrections/",
+  "a[href]=mailto:donttrade.research@gmail.com?subject=Press%3A%20%5Bpublication%5D"
+ ],
+ "path": "/for-researchers/",
+ "source": "docs/for-researchers/index.html",
+ "source_sha256": "28a1737a4e3c66440eca3dd79a6338a43f50cd24c5c9825547f9555274e9691b",
+ "tables": [],
+ "text": "\n\n\n  FOR RESEARCHERS AND PRESS\n  Free data, code and method.\n  Everything behind the public studies is free to use, with a link. No registration.\n  Email a research or press questionIf your email app doesn’t open, write to donttrade.research@gmail.com with the subject “Press: [publication]”.Copy address\n  Data\n  \n    Disposition-effect replication — summary figures (CSV)\n    Insider-buying study — interval (CSV)\n    The upstream sources, as listed on the Code page.\n  \n  Code and method\n  \n    Methods and code\n    The public repository\n    Sample memo and method\n    Glossary\n  \n  The studies\n  Disposition-effect replication (6 Oct 2026)Insider-buying study, a negative result (11 Oct 2026)Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)Volatility-scaled momentum, a pre-registered negative result (16 Oct 2026)Swing-trading strategies under sealed pre-registration, a negative result (16 Oct 2026)Fifty trading strategies across four styles, a combined negative result (17 Oct 2026)\n  Licences and citing\n  Write-ups and charts CC BY-NC 4.0; study code MIT; the partner script from v2: PolyForm Noncommercial 1.0.0, free for research; v1 stays MIT. Each study page has a “Cite this study” block.\n  Corrections\n  Found an error? Email with the subject “Correction”. Verified errors are corrected within 30 days and logged permanently. Corrections →\n  Press\n  Email with “Press” in the subject: donttrade.research@gmail.com. Reply within 1 business day; interviews by email only. We don’t comment on individual firms.\n  Email a research or press questionIf your email app doesn’t open, write to donttrade.research@gmail.com with the subject “Press: [publication]”.Copy address\n\n\n",
+ "text_collapsed": "FOR RESEARCHERS AND PRESS Free data, code and method. Everything behind the public studies is free to use, with a link. No registration. Email a research or press questionIf your email app doesn’t open, write to donttrade.research@gmail.com with the subject “Press: [publication]”.Copy address Data Disposition-effect replication — summary figures (CSV) Insider-buying study — interval (CSV) The upstream sources, as listed on the Code page. Code and method Methods and code The public repository Sample memo and method Glossary The studies Disposition-effect replication (6 Oct 2026)Insider-buying study, a negative result (11 Oct 2026)Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)Volatility-scaled momentum, a pre-registered negative result (16 Oct 2026)Swing-trading strategies under sealed pre-registration, a negative result (16 Oct 2026)Fifty trading strategies across four styles, a combined negative result (17 Oct 2026) Licences and citing Write-ups and charts CC BY-NC 4.0; study code MIT; the partner script from v2: PolyForm Noncommercial 1.0.0, free for research; v1 stays MIT. Each study page has a “Cite this study” block. Corrections Found an error? Email with the subject “Correction”. Verified errors are corrected within 30 days and logged permanently. Corrections → Press Email with “Press” in the subject: donttrade.research@gmail.com. Reply within 1 business day; interviews by email only. We don’t comment on individual firms. Email a research or press questionIf your email app doesn’t open, write to donttrade.research@gmail.com with the subject “Press: [publication]”.Copy address"
+}

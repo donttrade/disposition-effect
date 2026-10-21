@@ -82,15 +82,18 @@ def test_b1_lint_catches_the_word_tally(built_site, tmp_path):
     from test_legal import build
     r, out = build(tmp_path, "t")
     assert r.returncode == 0 and L.lint_build(str(out)) == []
-    page = out / "glossary" / "index.html"  # passthrough
-    page.write_text(page.read_text(encoding="utf-8").replace("</main>", "<p>Forms open on Tally.</p></main>"), encoding="utf-8")
+    page = out / "glossary" / "index.html"  # a lifted page: inside its frozen body
+    page.write_text(page.read_text(encoding="utf-8").replace("<!--frozen:end-->", "<p>Forms open on Tally.</p><!--frozen:end-->"),
+                    encoding="utf-8")
     tpl = out / "privacy" / "index.html"    # template page
     tpl.write_text(tpl.read_text(encoding="utf-8").replace("</main>", "<p>Our forms (tally) …</p></main>"), encoding="utf-8")
     hits = {where for rule, where, _ in L.lint_build(str(out)) if rule == "tally"}
-    assert hits == {"/glossary/index.html", "/privacy/"}
+    assert hits == {"/glossary/", "/privacy/"}
 
 
 def test_b1_passthrough_chrome_mismatch_fails_the_build(tmp_path, monkeypatch):
+    # since steps 28–29 no page passes through; un-own /about/ so the guard has a page to check
+    monkeypatch.setattr(B, "PAGES", [p for p in B.PAGES if p["path"] != "/about/"])
     monkeypatch.setattr(B, "PASSTHROUGH_CHROME", B.PASSTHROUGH_CHROME + [("no such footer text", "x", 1)])
     monkeypatch.setenv("DT_OUT", str(tmp_path / "o"))
     with pytest.raises(B.BuildError, match="passthrough chrome"):
@@ -491,8 +494,16 @@ def test_d3_no_trial_call_to_action_anywhere(built_site):
 
 
 def test_d3_pilot_labels_keep_urls_and_anchors(built_site):
+    # the 20 old pages: a lifted one (steps 28–29) keeps every href and id of its docs/ body in
+    # order (compare.py) and has the v2 header; one still passed through keeps every href and id
+    # of the docs/ page and gets the Pilot labels (tests/test_oldpages.py: none passes through)
+    import compare as C
     pt = B.passthrough_pages({os.path.relpath(B.out_file("/x", p["path"]), "/x") for p in B.PAGES if not p["requires_flag"]})
-    assert len(pt) == 20
+    assert len(pt) + len(B.LIFTED_PATHS) == 20
+    for path in B.LIFTED_PATHS:
+        built = (built_site["out"] / B.out_file("", path).lstrip("/")).read_text(encoding="utf-8")
+        assert C.diff_page(C.baselines()[path], built) == [], path
+        assert "Firms: start a Pilot" not in built and ">Firms: Pilot<" not in built, path
     attr = re.compile(r'\s(?:href|id)="([^"]*)"')
     for rel in pt:
         built = (built_site["out"] / rel).read_text(encoding="utf-8")
@@ -505,9 +516,9 @@ def test_d3_lint_catches_trial_cta_on_passthrough(tmp_path):
     from test_legal import build
     r, out = build(tmp_path, "t")
     page = out / "glossary" / "index.html"
-    page.write_text(page.read_text(encoding="utf-8").replace("</main>", "<p><a href='/start/'>Start a trial</a></p></main>"),
-                    encoding="utf-8")
-    assert any(rule == "banned:trial_cta" for rule, where, _ in L.lint_build(str(out)) if where == "/glossary/index.html")
+    page.write_text(page.read_text(encoding="utf-8").replace(
+        "<!--frozen:end-->", "<p><a href='/start/'>Start a trial</a></p><!--frozen:end-->"), encoding="utf-8")
+    assert any(rule == "banned:trial_cta" for rule, where, _ in L.lint_build(str(out)) if where == "/glossary/")
 
 
 # ------------------------------------------------------------------ D7: a 100k-row file never freezes the page

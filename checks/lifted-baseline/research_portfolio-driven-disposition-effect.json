@@ -1,0 +1,319 @@
+{
+ "attrs": [
+  "nav[aria-label]=Contents",
+  "div[aria-label]=Table 1",
+  "div[aria-label]=Table 2",
+  "div[aria-label]=Table 3",
+  "div[aria-label]=Table 4",
+  "div[aria-label]=Table 5",
+  "div[aria-label]=Table 6",
+  "div[aria-label]=Robustness update results",
+  "pre[aria-label]=Commands, block 1",
+  "div[aria-label]=Versions table",
+  "pre[aria-label]=BibTeX citation",
+  "section[aria-label]=What next",
+  "input[placeholder]=you@example.com"
+ ],
+ "citation": [
+  [
+   "citation_title",
+   "Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)"
+  ],
+  [
+   "citation_author",
+   "donttrade"
+  ],
+  [
+   "citation_publication_date",
+   "2026/10/16"
+  ],
+  [
+   "citation_pdf_url",
+   "https://donttrade.ca/research/portfolio-driven-disposition-effect/donttrade-portfolio-driven-disposition-effect.pdf"
+  ]
+ ],
+ "fixes": [],
+ "ids": [
+  "correction",
+  "correction-h",
+  "the-short-version",
+  "what-was-tested-and-why",
+  "the-data-and-the-period",
+  "method",
+  "results",
+  "the-pre-registered-test",
+  "every-other-specification-not-pre-registered",
+  "the-placebos",
+  "a-side-finding",
+  "what-this-does-not-show",
+  "robustness-update",
+  "reproduce-it",
+  "references",
+  "versions",
+  "em"
+ ],
+ "links": [
+  "a[href]=#robustness-update",
+  "a[href]=/corrections/",
+  "a[href]=https://github.com/donttrade/disposition-effect/tree/main/pdde",
+  "a[href]=/independence/",
+  "a[href]=#the-short-version",
+  "a[href]=#what-was-tested-and-why",
+  "a[href]=#the-data-and-the-period",
+  "a[href]=#method",
+  "a[href]=#results",
+  "a[href]=#what-this-does-not-show",
+  "a[href]=#robustness-update",
+  "a[href]=#reproduce-it",
+  "a[href]=#references",
+  "a[href]=#correction",
+  "a[href]=#robustness-update",
+  "a[href]=/research/disposition-effect/",
+  "a[href]=/research/disposition-effect/",
+  "a[href]=https://github.com/donttrade/disposition-effect/tree/main/pdde",
+  "a[href]=/corrections/",
+  "a[href]=https://creativecommons.org/licenses/by-nc/4.0/",
+  "form[action]=https://donttrade.substack.com/subscribe",
+  "a[href]=/research/disposition-effect/",
+  "a[href]=https://github.com/donttrade/disposition-effect/tree/main/pdde",
+  "a[href]=/for-firms/"
+ ],
+ "path": "/research/portfolio-driven-disposition-effect/",
+ "source": "docs/research/portfolio-driven-disposition-effect/index.html",
+ "source_sha256": "69681f25fd0e9dedbf26281306fdd7b7d28e4339b0873ee611f4576caf024edc",
+ "tables": [
+  [
+   [
+    "Outcome",
+    "Pre-registered verdict"
+   ],
+   [
+    "Interaction negative, significant with trader-clustered errors, and gap at least 2× larger when the portfolio is down",
+    "Replicated"
+   ],
+   [
+    "Negative and significant, gap ratio under 2×",
+    "Weak replication"
+   ],
+   [
+    "Not distinguishable from zero",
+    "Failure to replicate"
+   ],
+   [
+    "Positive and significant",
+    "Contradicted"
+   ]
+  ],
+  [
+   [
+    "Step",
+    "Rows",
+    "Share of panel"
+   ],
+   [
+    "Start",
+    "2,780,879",
+    "100.00%"
+   ],
+   [
+    "Single-position trader-days (no \"other\" holdings)",
+    "−325,039",
+    "11.69%"
+   ],
+   [
+    "Ties at exactly 0.50",
+    "−280,771",
+    "10.10%"
+   ],
+   [
+    "Analysis sample",
+    "2,175,069",
+    "78.22%"
+   ]
+  ],
+  [
+   [
+    "Term",
+    "Coefficient",
+    "SE",
+    "t",
+    "p"
+   ],
+   [
+    "gain",
+    "+0.048971",
+    "0.001772",
+    "+27.64",
+    "2.17e-155"
+   ],
+   [
+    "PortfolioGain",
+    "+0.024398",
+    "0.001474",
+    "+16.56",
+    "8.20e-60"
+   ],
+   [
+    "gain × PortfolioGain",
+    "−0.024977",
+    "0.001747",
+    "−14.30",
+    "2.23e-45"
+   ]
+  ],
+  [
+   [
+    "#",
+    "Specification",
+    "Interaction",
+    "t",
+    "Ratio",
+    "95% CI"
+   ],
+   [
+    "1",
+    "Pre-specified: trader FE",
+    "−0.024977",
+    "−14.30",
+    "2.041",
+    "[1.862, 2.220]"
+   ],
+   [
+    "2",
+    "+ 428 date fixed effects",
+    "−0.025084",
+    "−14.61",
+    "2.041",
+    "[1.866, 2.217]"
+   ],
+   [
+    "3",
+    "+ portfolio size",
+    "−0.021841",
+    "−13.11",
+    "1.862 †",
+    "[1.706, 2.018]"
+   ],
+   [
+    "4",
+    "+ size, holding period, activity, market",
+    "−0.018651",
+    "−12.37",
+    "1.856 †",
+    "[1.689, 2.023]"
+   ],
+   [
+    "5",
+    "ret portfolio index, no exclusions (N = 2,720,871)",
+    "−0.028726",
+    "−14.27",
+    "2.065",
+    "[1.876, 2.254]"
+   ],
+   [
+    "7",
+    "Trader-day fixed effects (strictest)",
+    "−0.023752",
+    "−9.63",
+    "3.013",
+    "[2.442, 3.584]"
+   ]
+  ],
+  [
+   [
+    "Row",
+    "Uncontrolled",
+    "With specification 4's controls"
+   ],
+   [
+    "Placebo interaction",
+    "−0.005434 (t −4.06)",
+    "−0.001012 (t −0.91)"
+   ],
+   [
+    "Real interaction",
+    "−0.024977 (t −14.30)",
+    "−0.018651 (t −12.37)"
+   ]
+  ],
+  [
+   [
+    "Design",
+    "Real",
+    "Placebo, three random seeds"
+   ],
+   [
+    "Trader FE",
+    "−0.024977",
+    "−0.003015 / −0.003168 / −0.003315 (12.1% / 12.7% / 13.3% of real)"
+   ],
+   [
+    "Trader-day FE",
+    "−0.023752, ratio 3.013",
+    "ratio 1.057 / 1.035 / 1.083"
+   ]
+  ],
+  [
+   [
+    "Measure",
+    "Result"
+   ],
+   [
+    "Published ratio (specification 1)",
+    "2.04 (95% CI 1.86–2.22)"
+   ],
+   [
+    "Same, plus a fixed effect for every holding day",
+    "2.09 (95% CI 1.90–2.28)"
+   ],
+   [
+    "Same, with the winner–loser gap allowed to differ by holding age",
+    "2.01 (95% CI 1.84–2.18)"
+   ],
+   [
+    "Each trader compared with themselves, same holding day (the pre-registered test)",
+    "1.03 (95% CI 0.95–1.13)"
+   ],
+   [
+    "That test, positions held ≤ 1 day",
+    "1.11 (95% CI 1.04–1.18)"
+   ],
+   [
+    "That test, positions held 2–5 / 6–20 / 21–60 / 61–250 days",
+    "1.13 / 0.93 / 0.52 / 0.22 (all intervals wide)"
+   ]
+  ],
+  [
+   [
+    "Date",
+    "What changed"
+   ],
+   [
+    "9 Oct 2026",
+    "Pre-registration written, before any portfolio-level variable was computed."
+   ],
+   [
+    "10 Oct 2026",
+    "Gate check passed (78.22% of rows survive the exclusions). ret recorded as unused, with the reason. Primary test run."
+   ],
+   [
+    "Before 16 Oct 2026",
+    "Corrections to earlier versions of the public script and README, stated in them: ret is a trader-day series, not a position-level price ratio, and an earlier claim that it was “immune by construction” to dependence on the focal position was wrong; the size-controlled ratio is now reported at sample means and at a range of points, not at a one-position portfolio the sample excludes; the 718,973 off-diagonal rows (33.06%) are the whole contrast that identifies the interaction, not rows “contributing nothing”. An earlier draft write-up, never published here, gave An et al.’s effect as “roughly 4–10×”; their comparable regression figure is 3.368."
+   ],
+   [
+    "Before 16 Oct 2026",
+    "Re-computed three separate times by the author, each time recomputing every figure from the raw data with separately written code. Every figure reproduced; the errors found were in interpretation and are corrected here."
+   ],
+   [
+    "16 Oct 2026",
+    "Published on this site. Re-run from a fresh download (sha256 matches the 10 Oct file): every figure matched the script’s printed output. The script’s download step now sends an explicit User-Agent, because Harvard Dataverse refused Python’s default client with HTTP 403; see Corrections. No figure changed. The pooled (4.420) and per-trader (0.857) gap ratios are taken from pdde/README.md; the public script does not print them."
+   ],
+   [
+    "17 Oct 2026",
+    "Correction. Its headline, “Retail traders’ preference for selling winners was about twice as strong on days their other holdings were mostly down”, did not survive a pre-registered robustness test that compares each trader with themselves at the same holding day (1.03, 95% CI 0.95–1.13). Added: a dated correction box at the top, a note under “The short version”, and the robustness update as a section after “What this does not show”. Changed: the title (now “Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)”), the lede, which no longer states 2.041 as the result, the page description, the social card, and the listings on Research, About, Code and the Atom feed. The study text below the correction is kept as published. See Corrections."
+   ]
+  ]
+ ],
+ "text": "\n\n\n  STUDY · PRE-REGISTERED REPLICATION · 16 OCT 2026 · CORRECTED 17 OCT 2026\n  Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)\n  \n  Correction, 17 Oct 2026\n  The headline of this study is not supported. It was first published as:\n  Corrected “Retail traders’ preference for selling winners was about twice as strong on days their other holdings were mostly down” (ratio 2.041, 95% CI [1.862, 2.220]).\n  A pre-registered robustness test that compares each trader with themselves at the same holding day gives a ratio of 1.03 (95% CI 0.95–1.13), not about 2. Only in positions held a day or less does a larger gap on down days remain (1.11, 95% CI 1.04–1.18). The specification this study used also reports an effect like the published one in synthetic panels that contain none. What drove the figure was a difference between traders, not a change within the same trader, which is what the hypothesis is about.\n  The stricter test leans against finding the effect, so 1.03 does not show the effect is zero; it shows the published size is not supported. The pre-registered verdict recorded at the time is kept below as the record of what was run.\n  Read the robustness update ↓ · Corrections log →\n\n  A pre-registered test of the portfolio-driven disposition effect (An et al., 2024) on the same public CC0 panel as the disposition-effect study. It passed its own replication bar by a margin inside the noise, and a later, stricter test showed the headline does not hold: see the correction above.\n  Pre-registered 9 Oct 2026 · Run 10 Oct 2026 · Re-run from the public script and published 16 Oct 2026 · Corrected 17 Oct 2026 · Script: pdde/ · Data: Jin, Li & Zhu (2021), CC0, Harvard Dataverse\n  Funding: none. No firm paid for, saw or approved this study. How donttrade is paid →\n  Published whether or not the result was interesting. The test, the data, the exclusion rules and the pass mark were written down on 9 October, before any portfolio-level variable had been computed. It measures a habit; it is not a trading rule or a signal.\n  ContentsThe short versionWhat was tested, and whyThe data and the periodMethodResultsWhat this does not showRobustness update, 17 Oct 2026: does the result survive holding age?Reproduce itReferences\n  \n  The short version\nCorrected 17 Oct 2026: the “2.041 times larger” figure in this section did not survive a stricter test. The text is kept as published; see the correction and the robustness update.\nThe disposition-effect study found that traders on a public CC0\npanel sold winning positions more readily than losing ones. A 2024 Journal of Finance paper by An,\nEngelberg, Henriksson, Wang and Williams argues that this habit depends on the whole portfolio:\nit is strong when the portfolio is down and weak when it is up. Averaging over both states, as the\nfirst study did, hides that.\nSo I wrote the test down, fixed a pass mark of 2× in advance, and then ran it on the same panel. On\nthe one pre-registered specification, the gap between selling winners and selling losers was\n2.041 times larger on trader-days when the trader’s other holdings were mostly at a loss than when\nthey were mostly at a gain. That clears the 2.00 bar, by 0.04, and the 95% interval\n[1.862, 2.220] contains 2.00, so the margin is inside the noise. The direction is not in doubt:\nthe interaction is negative in every specification run, including the strictest one, where the ratio\nis 3.013. Two placebo tests are the reason to think it is behaviour rather than an artefact of\nhow the variable is built.\nThis is a measurement of a published finding on one public dataset. It is not a trading rule and\nsays nothing about what anyone should buy or sell.\nWhat was tested, and why\nThe objection. The first study measured the disposition effect unconditionally. An et al. find\nthe effect is concentrated when the investor’s portfolio is at a loss. If that is right, an\nunconditional measurement averages across exactly the state that matters. This was the strongest\nobjection to the first study, the data was already public, and as far as I could find nobody had run\nthis test on this panel.\nThe hypothesis, fixed in advance. On the Xueqiu panel, the gap between the proportion of gains\nrealised and the proportion of losses realised is larger on trader-days when the trader’s other\nholdings are mostly at a loss. In regression terms, the coefficient on gain × PortfolioGain is\nnegative.\nThe pass mark, fixed in advance.\n\n\n\nOutcome\nPre-registered verdict\n\n\n\n\nInteraction negative, significant with trader-clustered errors, and gap at least 2× larger when the portfolio is down\nReplicated\n\n\nNegative and significant, gap ratio under 2×\nWeak replication\n\n\nNot distinguishable from zero\nFailure to replicate\n\n\nPositive and significant\nContradicted\n\n\n\nThe data and the period\n\nSource: Jin, Li & Zhu (2021), PLoS ONE 16(2), doi:10.1371/journal.pone.0246759. Replication\n  files doi:10.7910/DVN/NI6SBJ, CC0 1.0. Main panel sample2.Rdata, Dataverse file 4053809.\nWhat it is: public portfolios on Xueqiu.com, a Chinese social-trading platform, holding\n  Shanghai and Shenzhen A-shares.\nSize: 2,780,879 trader-stock-lot-days, 4,731 traders, 3,501 stocks, 428 trading dates.\nPeriod: 24 June 2016 to 27 March 2018.\nIntegrity check: the file downloaded on 16 October 2026 has sha256\n  0ebd88d9719cebbc56246cef5c14dcb5513b2d84d4a97d18ba0000dbadcbe8de, the same hash recorded when the\n  study was first run on 10 October.\n\nEach row carries two yes/no flags: was the position closed that day (sale), and was it in profit\nthat day (gain).\nMethod\nPortfolio state is a count, not a return. The panel has no position weights that could be used,\nso \"the rest of the portfolio is down\" is measured as: of the trader’s other positions held that\nday, what share are in profit. PortfolioGain = 1 if that share is above 0.5 and 0 if below.\nLeave-one-out. The focal position is excluded from its own portfolio measure. Without that, the\nconditioning variable would be built partly from the thing being conditioned on.\nExclusions, all fixed in advance.\nSwipe the table sideways for more columns →\n\n\nStep\nRows\nShare of panel\n\n\n\n\nStart\n2,780,879\n100.00%\n\n\nSingle-position trader-days (no \"other\" holdings)\n−325,039\n11.69%\n\n\nTies at exactly 0.50\n−280,771\n10.10%\n\n\nAnalysis sample\n2,175,069\n78.22%\n\n\n\nThe analysis sample covers 4,482 of the 4,731 traders.\nThe test. A linear probability model, sale ~ gain + PortfolioGain + gain × PortfolioGain, with\ntrader fixed effects and standard errors clustered by trader. The ratio reported is the implied gap\nwhen the portfolio is down divided by the gap when it is up.\nA column called ret exists in the file and was not used for the primary test: it disagrees with the\nstudy’s own gain flag on more than a third of rows, and no codebook settles what it measures. That\ndecision was recorded before any outcome was computed.\nResults\nThe pre-registered test\nSwipe the table sideways for more columns →\n\n\nTerm\nCoefficient\nSE\nt\np\n\n\n\n\ngain\n+0.048971\n0.001772\n+27.64\n2.17e-155\n\n\nPortfolioGain\n+0.024398\n0.001474\n+16.56\n8.20e-60\n\n\ngain × PortfolioGain\n−0.024977\n0.001747\n−14.30\n2.23e-45\n\n\n\nRatio: 2.041, 95% CI [1.862, 2.220]. N = 2,175,069 position-days, 4,482 trader clusters.\nApplied literally, the pre-registered rule returns replicated: negative, significant, and the\nratio is above 2.00. It is above 2.00 by 0.04, and the interval contains 2.00.\nEvery other specification (not pre-registered)\nSwipe the table sideways for more columns →\n\n\n#\nSpecification\nInteraction\nt\nRatio\n95% CI\n\n\n\n\n1\nPre-specified: trader FE\n−0.024977\n−14.30\n2.041\n[1.862, 2.220]\n\n\n2\n+ 428 date fixed effects\n−0.025084\n−14.61\n2.041\n[1.866, 2.217]\n\n\n3\n+ portfolio size\n−0.021841\n−13.11\n1.862 †\n[1.706, 2.018]\n\n\n4\n+ size, holding period, activity, market\n−0.018651\n−12.37\n1.856 †\n[1.689, 2.023]\n\n\n5\nret portfolio index, no exclusions (N = 2,720,871)\n−0.028726\n−14.27\n2.065\n[1.876, 2.254]\n\n\n7\nTrader-day fixed effects (strictest)\n−0.023752\n−9.63\n3.013\n[2.442, 3.584]\n\n\n\n† At sample means. Specifications 3 and 4 interact with continuous controls, so the ratio has no\nsingle value: in specification 3 it is 1.478 at two positions, 1.914 at five (the median) and 2.722\nat eight. Specification 6 is the placebo below.\nOnly specification 1 was pre-registered. Specification 7 was added because a third review pointed\nout it had never been run. It absorbs everything that is constant within a trader on a given day,\nincluding portfolio size, holding period and activity, and it gives the largest ratio of any\nspecification. An et al.'s own comparable regression figure is 3.368 (0.293% at a portfolio loss\nagainst 0.087% at a gain, their Table 2 Panel A); 3.013 sits about 1.2 standard errors below it.\nThe placebos\nParity placebo. The same leave-one-out share, built from a column that cannot matter: whether the\ntrader’s other stock codes end in an even digit.\nSwipe the table sideways for more columns →\n\n\nRow\nUncontrolled\nWith specification 4's controls\n\n\n\n\nPlacebo interaction\n−0.005434 (t −4.06)\n−0.001012 (t −0.91)\n\n\nReal interaction\n−0.024977 (t −14.30)\n−0.018651 (t −12.37)\n\n\n\nUncontrolled, the placebo is 21.8% of the headline. With controls it goes to nothing while the real\ninteraction holds.\nForeign-portfolio placebo. The other positions' gain counts are shuffled across trader-days\nwithin the same date, portfolio size and own-gain cell. That keeps everything mechanical about the\nvariable and removes only the fact that it is this trader’s book.\nSwipe the table sideways for more columns →\n\n\nDesign\nReal\nPlacebo, three random seeds\n\n\n\n\nTrader FE\n−0.024977\n−0.003015 / −0.003168 / −0.003315 (12.1% / 12.7% / 13.3% of real)\n\n\nTrader-day FE\n−0.023752, ratio 3.013\nratio 1.057 / 1.035 / 1.083\n\n\n\nWithout trader-day effects, about 12–13% of the uncontrolled headline is structural. Under\ntrader-day fixed effects the placebo ratio falls to roughly 1, while the real variable gives 3.013.\nA side finding\nPortfolioGain has a positive main effect of +0.024398 (t +16.56) in the pre-registered model:\na position was more likely to be closed on a day when the rest of the holdings were up, whether or\nnot the position itself was in profit. That is not the disposition effect, it was not what the test\nwas looking for, and under trader-day fixed effects it is absorbed (+0.000341, t +0.13).\nWhat this does not show\n\nThe conditioning variable is a count, not a value-weighted return. One holding up 1% and one\n   down 40% count as a 50/50 tie and are dropped. An et al. condition on the size of the gain or\n   loss. This is the central difference between the two studies, and it is not resolved.\nNeither conditioning variable is independent of the focal position. Leave-one-out reduces the\n   dependence but does not remove it. The ret index used in specification 5 is a portfolio index,\n   so it contains the focal position too: regressed on the position’s own gain flag it gives\n   +0.051066.\nThe pre-registration named a statistic it did not pin down. It required \"the PGR − PLR gap at\n   least 2× larger\" without saying which gap. Pooled, the ratio is 4.420. Averaged per trader, it is\n   0.857, which is the opposite direction. Both figures are stated in pdde/README.md; the public\n   script does not print them. The regression ratio used above is a third measure, and the choice of\n   it was made after seeing the numbers. The argument for it, that the pre-registered test is that\n   regression, is reasonable but post hoc.\nThe tie exclusion is not neutral. A tie needs an even number of other holdings split in half,\n   so it can only happen on days with an odd number of positions. All 280,771 excluded tie rows are\n   from such days.\nAt two positions the design is degenerate. In a mixed pair the winner is always labelled\n   \"portfolio down\" and the loser \"portfolio up\". That stratum is 20.6% of the analysis sample.\nOne placebo seed is not clean. Under trader-day fixed effects, seed 2 of the\n   foreign-portfolio placebo gives t = −2.22. Its ratio, 1.083, is still close to 1 against the real\n   3.013.\nLevels do not travel; only ratios do. Here the outcome is the daily chance of closing a held\n   position, so the coefficients are in a different unit from An et al.'s. Their interaction is\n   −0.206%; this one is −0.024977.\nChinese A-shares, one social-trading platform, June 2016 to March 2018. The traders chose to\n   run public portfolios on that platform, so the population is selected. Nothing here is a claim\n   about retail investors in general, or about any firm’s clients.\nIt measures a habit. It tests no remedy for it, and it is not a signal for anyone’s trades.\n\nRobustness update, 17 Oct 2026: does the result survive holding age?\nIn short: no. The “about twice as strong” figure does not hold up when each trader is compared with themselves\nat the same holding age. Holding age itself turned out not to be the reason; differences between traders were.\nWhy we checked. A robustness check of the disposition-effect study found that\nthe habit of selling winners is concentrated in positions held a day or less, and that mixing holding ages\ndistorts the figures. This study compares that habit between two kinds of day. On this panel, positions on days\nwhen the rest of the book was mostly down were younger (median 25 days held, against 30). So I wrote a new test and\na pass mark down, tried them on made-up data first, and sealed them before running them on this panel. The seal\nhash is recorded in SEAL-ROBUST-PDDE.md and will be published in the study repository’s commit history.\nThe made-up data came first, and it matters. In synthetic panels where the rest of the book has no influence on\nselling at all, only the habit of selling winners and the fact that old positions are sold less, the specification\nthis study used found the effect, in the published direction, in 25, 37 and 30 of 40 panels, depending on the\nsetup. In one setup its typical ratio was 1.72, not far from the 2.04 published here.\nWhat came out.\n\n\n\nMeasure\nResult\n\n\n\n\nPublished ratio (specification 1)\n2.04 (95% CI 1.86–2.22)\n\n\nSame, plus a fixed effect for every holding day\n2.09 (95% CI 1.90–2.28)\n\n\nSame, with the winner–loser gap allowed to differ by holding age\n2.01 (95% CI 1.84–2.18)\n\n\nEach trader compared with themselves, same holding day (the pre-registered test)\n1.03 (95% CI 0.95–1.13)\n\n\nThat test, positions held ≤ 1 day\n1.11 (95% CI 1.04–1.18)\n\n\nThat test, positions held 2–5 / 6–20 / 21–60 / 61–250 days\n1.13 / 0.93 / 0.52 / 0.22 (all intervals wide)\n\n\n\nThe pre-registered rule says the result fails: the ratio is not above 1 with any confidence, let alone near 2.\nWhat this changes. Holding the holding age fixed barely moves the figure (2.09, 2.01). What removes it is\nletting each trader have their own winner–loser gap: done that way, in a check I made after seeing the result, the\neffect is gone. Traders differ in how strongly they sell winners. If the traders with the strongest habit also spend\nmore days with their book down, a single pooled gap makes it look as if being down strengthens the habit. That is a\ndifference between people, not a change within the same person, and the study’s hypothesis is about the second.\nTwo caveats that limit this result. First, the stricter test leans against finding the effect: on the made-up\npanels with no effect, it came out below 1 more often than above. So 1.03 does not show the effect is zero; it\nshows the published size is not supported. (On made-up panels with a real effect it did find it, every time.)\nSecond, it can use only the trader-and-holding-day groups that contain a winner and a loser on both kinds of day,\nabout a quarter of the rows. Using each position’s gain or loss from the day before, instead of the same day, makes\nthe effect weaker in every version, not stronger.\nWhat still stands. The pre-registered verdict, replicated by 0.04, is recorded as it was. The data and every\nfigure above are published; the code for this stricter test is not public yet. Like the original, this shows a pattern, not why traders sell, and it is\nnot a signal for anyone’s trades.\nReproduce it\nFolder: pdde/ in\ndonttrade/disposition-effect.\npip install pyreadr pandas numpy scipy\npython reproduce_pdde.py\n\nRun it from inside pdde/. The script downloads the panel from Harvard Dataverse itself; since\n16 October 2026 its download step sends an explicit User-Agent (see Versions).\nOn 16 October 2026 the public script was re-run from a fresh download. Every figure in the tables\nabove matched its output to the printed precision.\nReferences\n\nAn, L., Engelberg, J., Henriksson, M., Wang, B. & Williams, J. (2024). \"The Portfolio-Driven\n  Disposition Effect.\" Journal of Finance 79(5). doi:10.1111/jofi.13378\nJin, X., Li, R. & Zhu, Y. (2021). \"Could social interaction reduce the disposition effect? Evidence\n  from retail investors in a directed social trading network.\" PLoS ONE 16(2): e0246759.\n  doi:10.1371/journal.pone.0246759. Data doi:10.7910/DVN/NI6SBJ, CC0 1.0.\nOdean, T. (1998). \"Are Investors Reluctant to Realize Their Losses?\" Journal of Finance 53(5),\n  1775–1798.\n\nMethods and negative results, yes. Live signals, never.\n\n  \n  Versions\nDateWhat changed9 Oct 2026Pre-registration written, before any portfolio-level variable was computed.10 Oct 2026Gate check passed (78.22% of rows survive the exclusions). ret recorded as unused, with the reason. Primary test run.Before 16 Oct 2026Corrections to earlier versions of the public script and README, stated in them: ret is a trader-day series, not a position-level price ratio, and an earlier claim that it was “immune by construction” to dependence on the focal position was wrong; the size-controlled ratio is now reported at sample means and at a range of points, not at a one-position portfolio the sample excludes; the 718,973 off-diagonal rows (33.06%) are the whole contrast that identifies the interaction, not rows “contributing nothing”. An earlier draft write-up, never published here, gave An et al.’s effect as “roughly 4–10×”; their comparable regression figure is 3.368.Before 16 Oct 2026Re-computed three separate times by the author, each time recomputing every figure from the raw data with separately written code. Every figure reproduced; the errors found were in interpretation and are corrected here.16 Oct 2026Published on this site. Re-run from a fresh download (sha256 matches the 10 Oct file): every figure matched the script’s printed output. The script’s download step now sends an explicit User-Agent, because Harvard Dataverse refused Python’s default client with HTTP 403; see Corrections. No figure changed. The pooled (4.420) and per-trader (0.857) gap ratios are taken from pdde/README.md; the public script does not print them.17 Oct 2026Correction. Its headline, “Retail traders’ preference for selling winners was about twice as strong on days their other holdings were mostly down”, did not survive a pre-registered robustness test that compares each trader with themselves at the same holding day (1.03, 95% CI 0.95–1.13). Added: a dated correction box at the top, a note under “The short version”, and the robustness update as a section after “What this does not show”. Changed: the title (now “Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)”), the lede, which no longer states 2.041 as the result, the page description, the social card, and the listings on Research, About, Code and the Atom feed. The study text below the correction is kept as published. See Corrections.\n  Text and charts: CC BY-NC 4.0. Study code: MIT. The numbers are facts: quote them freely, with a link. A figure may be described as “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a fixed-scope agreement” only when it comes from a signed engagement; no one may describe it as audited, certified or verified.\n  Cite this study\ndonttrade (2026). Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026). Published 16 Oct 2026. https://donttrade.ca/research/portfolio-driven-disposition-effect/\n@misc{donttrade2026pdde,\n  author = {donttrade},\n  title  = {Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)},\n  year   = {2026},\n  url    = {https://donttrade.ca/research/portfolio-driven-disposition-effect/},\n  note   = {Code: https://github.com/donttrade/disposition-effect}\n}\n  \n  WHAT NEXT\n  \n    Get the next study by email\n    Email address\n    \n    Email me the next study\n  \n    Read the disposition-effect study it builds on →\n    Re-run this one (script) →\n  \n\nWork at a prop firm or broker? For firms →\n\n\n",
+ "text_collapsed": "STUDY · PRE-REGISTERED REPLICATION · 16 OCT 2026 · CORRECTED 17 OCT 2026 Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026) Correction, 17 Oct 2026 The headline of this study is not supported. It was first published as: Corrected “Retail traders’ preference for selling winners was about twice as strong on days their other holdings were mostly down” (ratio 2.041, 95% CI [1.862, 2.220]). A pre-registered robustness test that compares each trader with themselves at the same holding day gives a ratio of 1.03 (95% CI 0.95–1.13), not about 2. Only in positions held a day or less does a larger gap on down days remain (1.11, 95% CI 1.04–1.18). The specification this study used also reports an effect like the published one in synthetic panels that contain none. What drove the figure was a difference between traders, not a change within the same trader, which is what the hypothesis is about. The stricter test leans against finding the effect, so 1.03 does not show the effect is zero; it shows the published size is not supported. The pre-registered verdict recorded at the time is kept below as the record of what was run. Read the robustness update ↓ · Corrections log → A pre-registered test of the portfolio-driven disposition effect (An et al., 2024) on the same public CC0 panel as the disposition-effect study. It passed its own replication bar by a margin inside the noise, and a later, stricter test showed the headline does not hold: see the correction above. Pre-registered 9 Oct 2026 · Run 10 Oct 2026 · Re-run from the public script and published 16 Oct 2026 · Corrected 17 Oct 2026 · Script: pdde/ · Data: Jin, Li & Zhu (2021), CC0, Harvard Dataverse Funding: none. No firm paid for, saw or approved this study. How donttrade is paid → Published whether or not the result was interesting. The test, the data, the exclusion rules and the pass mark were written down on 9 October, before any portfolio-level variable had been computed. It measures a habit; it is not a trading rule or a signal. ContentsThe short versionWhat was tested, and whyThe data and the periodMethodResultsWhat this does not showRobustness update, 17 Oct 2026: does the result survive holding age?Reproduce itReferences The short version Corrected 17 Oct 2026: the “2.041 times larger” figure in this section did not survive a stricter test. The text is kept as published; see the correction and the robustness update. The disposition-effect study found that traders on a public CC0 panel sold winning positions more readily than losing ones. A 2024 Journal of Finance paper by An, Engelberg, Henriksson, Wang and Williams argues that this habit depends on the whole portfolio: it is strong when the portfolio is down and weak when it is up. Averaging over both states, as the first study did, hides that. So I wrote the test down, fixed a pass mark of 2× in advance, and then ran it on the same panel. On the one pre-registered specification, the gap between selling winners and selling losers was 2.041 times larger on trader-days when the trader’s other holdings were mostly at a loss than when they were mostly at a gain. That clears the 2.00 bar, by 0.04, and the 95% interval [1.862, 2.220] contains 2.00, so the margin is inside the noise. The direction is not in doubt: the interaction is negative in every specification run, including the strictest one, where the ratio is 3.013. Two placebo tests are the reason to think it is behaviour rather than an artefact of how the variable is built. This is a measurement of a published finding on one public dataset. It is not a trading rule and says nothing about what anyone should buy or sell. What was tested, and why The objection. The first study measured the disposition effect unconditionally. An et al. find the effect is concentrated when the investor’s portfolio is at a loss. If that is right, an unconditional measurement averages across exactly the state that matters. This was the strongest objection to the first study, the data was already public, and as far as I could find nobody had run this test on this panel. The hypothesis, fixed in advance. On the Xueqiu panel, the gap between the proportion of gains realised and the proportion of losses realised is larger on trader-days when the trader’s other holdings are mostly at a loss. In regression terms, the coefficient on gain × PortfolioGain is negative. The pass mark, fixed in advance. Outcome Pre-registered verdict Interaction negative, significant with trader-clustered errors, and gap at least 2× larger when the portfolio is down Replicated Negative and significant, gap ratio under 2× Weak replication Not distinguishable from zero Failure to replicate Positive and significant Contradicted The data and the period Source: Jin, Li & Zhu (2021), PLoS ONE 16(2), doi:10.1371/journal.pone.0246759. Replication files doi:10.7910/DVN/NI6SBJ, CC0 1.0. Main panel sample2.Rdata, Dataverse file 4053809. What it is: public portfolios on Xueqiu.com, a Chinese social-trading platform, holding Shanghai and Shenzhen A-shares. Size: 2,780,879 trader-stock-lot-days, 4,731 traders, 3,501 stocks, 428 trading dates. Period: 24 June 2016 to 27 March 2018. Integrity check: the file downloaded on 16 October 2026 has sha256 0ebd88d9719cebbc56246cef5c14dcb5513b2d84d4a97d18ba0000dbadcbe8de, the same hash recorded when the study was first run on 10 October. Each row carries two yes/no flags: was the position closed that day (sale), and was it in profit that day (gain). Method Portfolio state is a count, not a return. The panel has no position weights that could be used, so \"the rest of the portfolio is down\" is measured as: of the trader’s other positions held that day, what share are in profit. PortfolioGain = 1 if that share is above 0.5 and 0 if below. Leave-one-out. The focal position is excluded from its own portfolio measure. Without that, the conditioning variable would be built partly from the thing being conditioned on. Exclusions, all fixed in advance. Swipe the table sideways for more columns → Step Rows Share of panel Start 2,780,879 100.00% Single-position trader-days (no \"other\" holdings) −325,039 11.69% Ties at exactly 0.50 −280,771 10.10% Analysis sample 2,175,069 78.22% The analysis sample covers 4,482 of the 4,731 traders. The test. A linear probability model, sale ~ gain + PortfolioGain + gain × PortfolioGain, with trader fixed effects and standard errors clustered by trader. The ratio reported is the implied gap when the portfolio is down divided by the gap when it is up. A column called ret exists in the file and was not used for the primary test: it disagrees with the study’s own gain flag on more than a third of rows, and no codebook settles what it measures. That decision was recorded before any outcome was computed. Results The pre-registered test Swipe the table sideways for more columns → Term Coefficient SE t p gain +0.048971 0.001772 +27.64 2.17e-155 PortfolioGain +0.024398 0.001474 +16.56 8.20e-60 gain × PortfolioGain −0.024977 0.001747 −14.30 2.23e-45 Ratio: 2.041, 95% CI [1.862, 2.220]. N = 2,175,069 position-days, 4,482 trader clusters. Applied literally, the pre-registered rule returns replicated: negative, significant, and the ratio is above 2.00. It is above 2.00 by 0.04, and the interval contains 2.00. Every other specification (not pre-registered) Swipe the table sideways for more columns → # Specification Interaction t Ratio 95% CI 1 Pre-specified: trader FE −0.024977 −14.30 2.041 [1.862, 2.220] 2 + 428 date fixed effects −0.025084 −14.61 2.041 [1.866, 2.217] 3 + portfolio size −0.021841 −13.11 1.862 † [1.706, 2.018] 4 + size, holding period, activity, market −0.018651 −12.37 1.856 † [1.689, 2.023] 5 ret portfolio index, no exclusions (N = 2,720,871) −0.028726 −14.27 2.065 [1.876, 2.254] 7 Trader-day fixed effects (strictest) −0.023752 −9.63 3.013 [2.442, 3.584] † At sample means. Specifications 3 and 4 interact with continuous controls, so the ratio has no single value: in specification 3 it is 1.478 at two positions, 1.914 at five (the median) and 2.722 at eight. Specification 6 is the placebo below. Only specification 1 was pre-registered. Specification 7 was added because a third review pointed out it had never been run. It absorbs everything that is constant within a trader on a given day, including portfolio size, holding period and activity, and it gives the largest ratio of any specification. An et al.'s own comparable regression figure is 3.368 (0.293% at a portfolio loss against 0.087% at a gain, their Table 2 Panel A); 3.013 sits about 1.2 standard errors below it. The placebos Parity placebo. The same leave-one-out share, built from a column that cannot matter: whether the trader’s other stock codes end in an even digit. Swipe the table sideways for more columns → Row Uncontrolled With specification 4's controls Placebo interaction −0.005434 (t −4.06) −0.001012 (t −0.91) Real interaction −0.024977 (t −14.30) −0.018651 (t −12.37) Uncontrolled, the placebo is 21.8% of the headline. With controls it goes to nothing while the real interaction holds. Foreign-portfolio placebo. The other positions' gain counts are shuffled across trader-days within the same date, portfolio size and own-gain cell. That keeps everything mechanical about the variable and removes only the fact that it is this trader’s book. Swipe the table sideways for more columns → Design Real Placebo, three random seeds Trader FE −0.024977 −0.003015 / −0.003168 / −0.003315 (12.1% / 12.7% / 13.3% of real) Trader-day FE −0.023752, ratio 3.013 ratio 1.057 / 1.035 / 1.083 Without trader-day effects, about 12–13% of the uncontrolled headline is structural. Under trader-day fixed effects the placebo ratio falls to roughly 1, while the real variable gives 3.013. A side finding PortfolioGain has a positive main effect of +0.024398 (t +16.56) in the pre-registered model: a position was more likely to be closed on a day when the rest of the holdings were up, whether or not the position itself was in profit. That is not the disposition effect, it was not what the test was looking for, and under trader-day fixed effects it is absorbed (+0.000341, t +0.13). What this does not show The conditioning variable is a count, not a value-weighted return. One holding up 1% and one down 40% count as a 50/50 tie and are dropped. An et al. condition on the size of the gain or loss. This is the central difference between the two studies, and it is not resolved. Neither conditioning variable is independent of the focal position. Leave-one-out reduces the dependence but does not remove it. The ret index used in specification 5 is a portfolio index, so it contains the focal position too: regressed on the position’s own gain flag it gives +0.051066. The pre-registration named a statistic it did not pin down. It required \"the PGR − PLR gap at least 2× larger\" without saying which gap. Pooled, the ratio is 4.420. Averaged per trader, it is 0.857, which is the opposite direction. Both figures are stated in pdde/README.md; the public script does not print them. The regression ratio used above is a third measure, and the choice of it was made after seeing the numbers. The argument for it, that the pre-registered test is that regression, is reasonable but post hoc. The tie exclusion is not neutral. A tie needs an even number of other holdings split in half, so it can only happen on days with an odd number of positions. All 280,771 excluded tie rows are from such days. At two positions the design is degenerate. In a mixed pair the winner is always labelled \"portfolio down\" and the loser \"portfolio up\". That stratum is 20.6% of the analysis sample. One placebo seed is not clean. Under trader-day fixed effects, seed 2 of the foreign-portfolio placebo gives t = −2.22. Its ratio, 1.083, is still close to 1 against the real 3.013. Levels do not travel; only ratios do. Here the outcome is the daily chance of closing a held position, so the coefficients are in a different unit from An et al.'s. Their interaction is −0.206%; this one is −0.024977. Chinese A-shares, one social-trading platform, June 2016 to March 2018. The traders chose to run public portfolios on that platform, so the population is selected. Nothing here is a claim about retail investors in general, or about any firm’s clients. It measures a habit. It tests no remedy for it, and it is not a signal for anyone’s trades. Robustness update, 17 Oct 2026: does the result survive holding age? In short: no. The “about twice as strong” figure does not hold up when each trader is compared with themselves at the same holding age. Holding age itself turned out not to be the reason; differences between traders were. Why we checked. A robustness check of the disposition-effect study found that the habit of selling winners is concentrated in positions held a day or less, and that mixing holding ages distorts the figures. This study compares that habit between two kinds of day. On this panel, positions on days when the rest of the book was mostly down were younger (median 25 days held, against 30). So I wrote a new test and a pass mark down, tried them on made-up data first, and sealed them before running them on this panel. The seal hash is recorded in SEAL-ROBUST-PDDE.md and will be published in the study repository’s commit history. The made-up data came first, and it matters. In synthetic panels where the rest of the book has no influence on selling at all, only the habit of selling winners and the fact that old positions are sold less, the specification this study used found the effect, in the published direction, in 25, 37 and 30 of 40 panels, depending on the setup. In one setup its typical ratio was 1.72, not far from the 2.04 published here. What came out. Measure Result Published ratio (specification 1) 2.04 (95% CI 1.86–2.22) Same, plus a fixed effect for every holding day 2.09 (95% CI 1.90–2.28) Same, with the winner–loser gap allowed to differ by holding age 2.01 (95% CI 1.84–2.18) Each trader compared with themselves, same holding day (the pre-registered test) 1.03 (95% CI 0.95–1.13) That test, positions held ≤ 1 day 1.11 (95% CI 1.04–1.18) That test, positions held 2–5 / 6–20 / 21–60 / 61–250 days 1.13 / 0.93 / 0.52 / 0.22 (all intervals wide) The pre-registered rule says the result fails: the ratio is not above 1 with any confidence, let alone near 2. What this changes. Holding the holding age fixed barely moves the figure (2.09, 2.01). What removes it is letting each trader have their own winner–loser gap: done that way, in a check I made after seeing the result, the effect is gone. Traders differ in how strongly they sell winners. If the traders with the strongest habit also spend more days with their book down, a single pooled gap makes it look as if being down strengthens the habit. That is a difference between people, not a change within the same person, and the study’s hypothesis is about the second. Two caveats that limit this result. First, the stricter test leans against finding the effect: on the made-up panels with no effect, it came out below 1 more often than above. So 1.03 does not show the effect is zero; it shows the published size is not supported. (On made-up panels with a real effect it did find it, every time.) Second, it can use only the trader-and-holding-day groups that contain a winner and a loser on both kinds of day, about a quarter of the rows. Using each position’s gain or loss from the day before, instead of the same day, makes the effect weaker in every version, not stronger. What still stands. The pre-registered verdict, replicated by 0.04, is recorded as it was. The data and every figure above are published; the code for this stricter test is not public yet. Like the original, this shows a pattern, not why traders sell, and it is not a signal for anyone’s trades. Reproduce it Folder: pdde/ in donttrade/disposition-effect. pip install pyreadr pandas numpy scipy python reproduce_pdde.py Run it from inside pdde/. The script downloads the panel from Harvard Dataverse itself; since 16 October 2026 its download step sends an explicit User-Agent (see Versions). On 16 October 2026 the public script was re-run from a fresh download. Every figure in the tables above matched its output to the printed precision. References An, L., Engelberg, J., Henriksson, M., Wang, B. & Williams, J. (2024). \"The Portfolio-Driven Disposition Effect.\" Journal of Finance 79(5). doi:10.1111/jofi.13378 Jin, X., Li, R. & Zhu, Y. (2021). \"Could social interaction reduce the disposition effect? Evidence from retail investors in a directed social trading network.\" PLoS ONE 16(2): e0246759. doi:10.1371/journal.pone.0246759. Data doi:10.7910/DVN/NI6SBJ, CC0 1.0. Odean, T. (1998). \"Are Investors Reluctant to Realize Their Losses?\" Journal of Finance 53(5), 1775–1798. Methods and negative results, yes. Live signals, never. Versions DateWhat changed9 Oct 2026Pre-registration written, before any portfolio-level variable was computed.10 Oct 2026Gate check passed (78.22% of rows survive the exclusions). ret recorded as unused, with the reason. Primary test run.Before 16 Oct 2026Corrections to earlier versions of the public script and README, stated in them: ret is a trader-day series, not a position-level price ratio, and an earlier claim that it was “immune by construction” to dependence on the focal position was wrong; the size-controlled ratio is now reported at sample means and at a range of points, not at a one-position portfolio the sample excludes; the 718,973 off-diagonal rows (33.06%) are the whole contrast that identifies the interaction, not rows “contributing nothing”. An earlier draft write-up, never published here, gave An et al.’s effect as “roughly 4–10×”; their comparable regression figure is 3.368.Before 16 Oct 2026Re-computed three separate times by the author, each time recomputing every figure from the raw data with separately written code. Every figure reproduced; the errors found were in interpretation and are corrected here.16 Oct 2026Published on this site. Re-run from a fresh download (sha256 matches the 10 Oct file): every figure matched the script’s printed output. The script’s download step now sends an explicit User-Agent, because Harvard Dataverse refused Python’s default client with HTTP 403; see Corrections. No figure changed. The pooled (4.420) and per-trader (0.857) gap ratios are taken from pdde/README.md; the public script does not print them.17 Oct 2026Correction. Its headline, “Retail traders’ preference for selling winners was about twice as strong on days their other holdings were mostly down”, did not survive a pre-registered robustness test that compares each trader with themselves at the same holding day (1.03, 95% CI 0.95–1.13). Added: a dated correction box at the top, a note under “The short version”, and the robustness update as a section after “What this does not show”. Changed: the title (now “Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)”), the lede, which no longer states 2.041 as the result, the page description, the social card, and the listings on Research, About, Code and the Atom feed. The study text below the correction is kept as published. See Corrections. Text and charts: CC BY-NC 4.0. Study code: MIT. The numbers are facts: quote them freely, with a link. A figure may be described as “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a fixed-scope agreement” only when it comes from a signed engagement; no one may describe it as audited, certified or verified. Cite this study donttrade (2026). Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026). Published 16 Oct 2026. https://donttrade.ca/research/portfolio-driven-disposition-effect/ @misc{donttrade2026pdde, author = {donttrade}, title = {Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)}, year = {2026}, url = {https://donttrade.ca/research/portfolio-driven-disposition-effect/}, note = {Code: https://github.com/donttrade/disposition-effect} } WHAT NEXT Get the next study by email Email address Email me the next study Read the disposition-effect study it builds on → Re-run this one (script) → Work at a prop firm or broker? For firms →"
+}
