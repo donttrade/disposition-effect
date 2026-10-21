@@ -1528,6 +1528,45 @@ def pgr_plr_counts(executions):
             "coverage_pct": (100 * marked / total) if total else None}
 
 
+# ----------------------------------------------------------------- StrippedRows (paid report)
+# The only trade data that leaves the browser. Mirrors site/static/js/paid/strip.js.
+
+import hashlib  # noqa: E402
+
+
+def week_anchor(min_open_ts):
+    day = min_open_ts // DAY_MS
+    weekday = (day + 3) % 7  # 1970-01-01 was a Thursday; Monday = 0
+    return (day - weekday) * DAY_MS
+
+
+def round3(x):
+    return round_half_away(x * 1000) / 1000
+
+
+def round2(x):
+    return round_half_away(x * 100) / 100
+
+
+def fingerprint(salt, t):
+    text = "|".join(str(v) for v in [salt, t["symbol"], t["open_ts"], t["close_ts"], t["dir"],
+                                      round_half_away(t["qty"] * 1e8), round_half_away(t["pnl"] * 100)])
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:32]
+
+
+def strip_rows(trades, salt, perm=None):
+    used = trades[-20000:] if len(trades) > 20000 else trades
+    anchor = week_anchor(min(t["open_ts"] for t in used))
+    symbols = sorted({t["symbol"] for t in used})
+    p = perm(len(symbols)) if perm else list(range(len(symbols)))
+    index = {s: p[i] for i, s in enumerate(symbols)}
+    med = {s: median([t["qty"] for t in used if t["symbol"] == s]) for s in symbols}
+    rows = [{"o": (t["open_ts"] - anchor) // 60000, "h": t["hold_s"], "d": 1 if t["dir"] == "long" else -1,
+             "q": round3(t["qty"] / med[t["symbol"]]), "p": round2(t["pnl"]), "s": index[t["symbol"]],
+             "f": fingerprint(salt, t)} for t in used]
+    return {"rows": rows, "limited": len(trades) > 20000, "anchor": anchor}
+
+
 # ----------------------------------------------------------------- CLI / expected files
 
 FIXTURE_DIRS = ["generic", "generic_roundtrip", "mt5", "mt4", "ibkr", "tradovate", "errors"]

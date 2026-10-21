@@ -13,6 +13,7 @@ import { runFile } from '/site/static/js/engine/index.js';
 import { freeStats } from '/site/static/js/engine/stats.js';
 import { noiseChecks } from '/site/static/js/engine/noise.js';
 import { pgrPlrCounts } from '/site/static/js/engine/pgr.js';
+import { stripRows } from '/site/static/js/paid/strip.js';
 function bytesOf(b64) {
   const bin = atob(b64);
   const out = new Uint8Array(bin.length);
@@ -32,6 +33,11 @@ window.runNoiseInWorker = (b64) => new Promise((resolve) => {
   w.onmessage = (ev) => { w.terminate(); resolve(JSON.stringify(ev.data.noise)); };
   w.postMessage({ trades: r.result.trades.map((t) => ({ pnl: t.pnl, hold_s: t.hold_s })) });
 });
+window.stripFixture = async (b64, salt) => {
+  const r = runFile(bytesOf(b64));
+  if (r.error) return 'null';
+  return JSON.stringify(await stripRows(r.result.trades, salt, (n) => Array.from({ length: n }, (_, i) => i)));
+};
 window.statsWithBalance = (b64, bal) => JSON.stringify(freeStats(runFile(bytesOf(b64)).result.trades, bal));
 window.runEngineTimed = (b64) => {
   const bytes = bytesOf(b64);

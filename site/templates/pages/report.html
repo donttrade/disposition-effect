@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="wrap" data-requires-flag="paid_report">
+  <h1>Your habit report</h1>
+  {% include "partials/disclaimer.html" %}
+  <div class="notice no-print">
+    <strong>What leaves your computer</strong>
+    <p>Your browser reads the file in this tab and removes names, account numbers and symbols. It sends only stripped trade numbers: when each trade opened (weekday and time, no date) and closed, its direction, its size relative to your usual size, and its result. They are not stored. The only thing kept is one scrambled check-code per trade, so your re-test can be matched to the same account.</p>
+  </div>
+  <section class="no-print" aria-labelledby="pick-h">
+    <h2 id="pick-h">Choose your trade file</h2>
+    <p id="rp-access" class="muted"></p>
+    <div class="field"><label for="rp-firm">Which firm do you trade with? (optional)</label>
+      <input id="rp-firm" type="text" maxlength="80" autocomplete="organization"></div>
+    <div class="field"><div class="check"><input id="rp-firm-consent" type="checkbox">
+      <label for="rp-firm-consent">Count my firm's name. Only a count per firm is kept, never linked to me.</label></div></div>
+    <div class="dropzone" id="rp-drop">
+      <p><strong>Drop your trade file here</strong>, or choose it:</p>
+      <label for="rp-file">Trade file (MT5/MT4 report, IBKR Flex, Tradovate Orders, or the CSV template)</label>
+      <input id="rp-file" type="file" accept=".csv,.htm,.html,.txt">
+    </div>
+    <p><button class="btn btn-secondary" id="rp-restore-file" type="button">Download restore file</button> <span id="rp-uses" role="status"></span></p>
+  </section>
+  <div id="rp-status" class="notice" role="status" hidden></div>
+  <div id="rp-out"></div>
+</div>
+{% endblock %}
