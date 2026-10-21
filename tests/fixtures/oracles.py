@@ -323,6 +323,99 @@ ORACLES["generic_roundtrip/tv2_dst_fall.csv"] = {
     # Same night, round-trip layout: close 01:10 < open 01:50, both in the fall-back night, so the
     # close is the repeated hour (02:10 in naive time): hold 1200 s, long, 4 points. Flagged.
     "trades": [dict(symbol="ES", dir="long", qty=1, pnl=4.0, hold_s=1200)],
-    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_DST": 1},
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_DST": 1, "W_CLOSE_BEFORE_OPEN": 1},  # F-N3: the shift is flagged
+    "skipped": {},
+}
+
+# Tester fix round 2, F-B1 (t_b1b.py): a carried-in position that is ADDED TO inside the file.
+# The real position is not flat from the start of the file until the last close of the carried
+# lot, so under the flat-to-flat rule every fill of it is left out (never a trade carrying the
+# older lot's FIFO P&L). One W_OPEN_AT_START per symbol and direction.
+ORACLES["ibkr/fb1_carried_add_two_closes.csv"] = {
+    # AAPL: carried long 100; BUY 100 O 09-10 (inv 100); SELL 100 C 09-11 (inv 0); SELL 100 C 09-20
+    #   closes 100 more than the file opened -> a pre-file lot, closed 09-20: AAPL 09-10..09-20 left out.
+    # MSFT: BUY 10 O @400 09-03 -> SELL 10 C @410 09-04: realized 100 net, fees 2, gross 102, 1 day.
+    "trades": [dict(symbol="MSFT", dir="long", qty=10, pnl=100.0, pnl_gross=102.0, fees=2.0, hold_s=86400)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_OPEN_AT_START": 1},
+    "skipped": {},
+}
+ORACLES["ibkr/fb1_partial_carried_inner_trade.csv"] = {
+    # AAPL: SELL 50 C 09-02 (excess 50) ... BUY 10 O / SELL 10 C ... SELL 50 C 09-25 (excess 50):
+    #   50 carried shares are open the whole time, so the 10-share trade inside is left out; ONE position.
+    "trades": [dict(symbol="MSFT", dir="long", qty=10, pnl=100.0, hold_s=86400)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_OPEN_AT_START": 1},
+    "skipped": {},
+}
+ORACLES["mt5/fb1_carried_add_two_outs.csv"] = {
+    # EURUSD: carried long 1 + buy in 1; sell out (matched); sell out 09-08 (excess) -> all left out.
+    # GBPUSD: buy in 1.3000 09:00 -> sell out 1.3010 10:00, profit 100, no costs, 3600 s.
+    "trades": [dict(symbol="GBPUSD", dir="long", qty=1, pnl=100.0, pnl_gross=100.0, fees=0.0, hold_s=3600)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_OPEN_AT_START": 1},
+    "skipped": {},
+}
+
+# Tester fix round 2, F-D2 (t_b1b.py): reversal codes, same-second fills and an MT5 hedge on a
+# carried position. Nothing is guessed: what the file cannot show is left out and flagged.
+ORACLES["ibkr/fd2_carried_reversal_co.csv"] = {
+    # AAPL SELL 200 "C;O" 09-02 with nothing opened in the file: it closes a pre-file long of
+    # unknown size, so the short it opens has unknown size too. BUY 100 C 09-03 closes that short.
+    # Both left out: W_OPEN_AT_START 1 (the long), W_AMBIGUOUS_FILLS 1 (AAPL). Only MSFT (+100, 1 day).
+    "trades": [dict(symbol="MSFT", dir="long", qty=10, pnl=100.0, hold_s=86400)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_OPEN_AT_START": 1, "W_AMBIGUOUS_FILLS": 1},
+    "skipped": {},
+}
+ORACLES["ibkr/fd2_same_second_carried_close.csv"] = {
+    # AAPL BUY 100 O and SELL 100 C in the same second 09-10, SELL 100 C 09-12. In file order the
+    # 09-12 sell closes a pre-file long (all AAPL left out); with the sell first, the 09-10 sell
+    # closes it and 09-10 -> 09-12 is a trade. The file cannot say which: no AAPL trade, and
+    # never the old 0-second +800 trade. W_OPEN_AT_START 1, W_AMBIGUOUS_FILLS 1. Only MSFT.
+    "trades": [dict(symbol="MSFT", dir="long", qty=10, pnl=100.0, hold_s=86400)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_OPEN_AT_START": 1, "W_AMBIGUOUS_FILLS": 1},
+    "skipped": {},
+}
+ORACLES["mt5/fd2_hedge_carried_short.csv"] = {
+    # buy in 1 @1.0900 09:00 (a new long while a pre-file short is open: a hedge), buy out 10:00
+    # closes the pre-file short (left out), sell out @1.0950 12:00 closes the long: profit 50,
+    # 10800 s. W_HEDGING 1 (the carried short was closed while the long was open).
+    "trades": [dict(symbol="EURUSD", dir="long", qty=1, pnl=50.0, hold_s=10800)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_HEDGING": 1, "W_OPEN_AT_START": 1},
+    "skipped": {},
+}
+# sell 2.00 "in/out" with nothing opened in the file closes a pre-file long of unknown size, so
+# the short it opens (closed by buy out 1.00) has unknown size: nothing is left to analyse. The
+# message names both causes (test_engine_golden checks the text).
+ERRORS["mt5/fd2_inout_reversal_on_carried.csv"] = ("E_NO_CLOSED_TRADES", None, None)
+
+# Tester fix round 2, F-B2: one stray quote mark in an all-quoted CSV is closed by the NEXT row's
+# opening quote, which merged that row into a note and silently lost 30 of 40 trades.
+ERRORS["errors/fb2_allquoted_one_stray.csv"] = ("E_BAD_QUOTE", 22, None)       # row 22's note never closes
+ERRORS["errors/fb2_two_stray_quotes_symbol.csv"] = ("E_BAD_QUOTE", 12, None)   # Symbol cell spans rows 12-13
+ERRORS["errors/fb2_stray_note_into_next_row.csv"] = ("E_BAD_QUOTE", 12, None)  # note closed by row 13's quote
+
+# Tester fix round 2, F-D7: "0.125" in a decimal-comma file was read as 125 (x1,000), silently.
+# A thousands group never starts with 0, so "0.125" is a decimal point: with "12,50" in the same
+# file that is two number formats -> E_BAD_NUMBER at the first comma cell after the dot evidence.
+ERRORS["errors/fd7_leading_zero_dot_in_comma_file.csv"] = ("E_BAD_NUMBER", 2, "price")
+
+# Tester fix round 2, F-D3: an unquoted comma in Account ("Doe, Jane", "Lee, Ann") shifts the
+# name's second half into Currency. That column is now read only if every non-empty cell is an
+# ISO 4217 code; otherwise it is ignored as a whole (W_CURRENCY_IGNORED, which repeats no cell),
+# so no name reaches the page or the paid request. 40 round trips: (101 - 100) x 1 - fees 0.5 x 2
+# = 0 points each, 60 s.
+for _rel in ("generic/fd3_name_shifted_into_currency.csv", "generic/fd3_three_letter_fragment.csv"):
+    ORACLES[_rel] = {
+        "trades": [dict(symbol="AAA", dir="long", qty=1, pnl=0.0, fees=1.0, hold_s=60, pnl_unit="points",
+                        currency=None)] * 40,
+        "warnings": {"W_CURRENCY_IGNORED": 0},
+        "skipped": {},
+    }
+
+# Tester fix round 2, F-N3 (t_misc2.py): a close 30 min before its open on the EU fall-back night
+# (2026-10-25) is read as the repeated hour (02:10 -> 03:10 naive: long, 1800 s, +1 point), but no
+# longer silently: W_CLOSE_BEFORE_OPEN says it was moved and that swapped columns or a zone without
+# daylight saving would make it wrong.
+ORACLES["generic_roundtrip/fn3_close_before_open_swapped.csv"] = {
+    "trades": [dict(symbol="AAA", dir="long", qty=1, pnl=1.0, hold_s=1800)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_DST": 1, "W_CLOSE_BEFORE_OPEN": 1},
     "skipped": {},
 }

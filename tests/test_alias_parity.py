@@ -41,3 +41,12 @@ def test_no_account_or_name_alias():
         for aliases in sig["fields"].values():
             for a in aliases:
                 assert a.split("#")[0] not in banned, a
+
+
+def test_iso_currencies_equal():
+    # F-D3: only these codes are ever read from a Currency column, shown, or sent.
+    got = js_value("m.ISO_CURRENCIES")
+    assert got == E.ISO_CURRENCIES
+    assert len(got) == len(set(got)) and all(len(c) == 3 and c.isupper() for c in got)
+    assert {"USD", "EUR", "CAD", "GBP", "JPY", "CHF"} <= set(got)
+    assert not {"XTS", "XXX", "ANN", "JANE"} & set(got)
