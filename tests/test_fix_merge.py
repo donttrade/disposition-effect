@@ -93,3 +93,50 @@ def test_b1_passthrough_chrome_mismatch_fails_the_build(tmp_path, monkeypatch):
     monkeypatch.setenv("DT_OUT", str(tmp_path / "o"))
     with pytest.raises(B.BuildError, match="passthrough chrome"):
         B.build()
+
+
+# ------------------------------------------------------------------ B2: placeholder detection, either commerce flag
+B2_PLACEHOLDERS = [
+    "[SELLER - lawyer to confirm]", "[Seller — lawyer to confirm]", "SELLER — lawyer to confirm",   # failmodes.sh
+    "TBD", "TODO", "XXX", "tbc", "xxxx", "Lorem ipsum", "example seller", "PLACEHOLDER", "{seller}", "<name>",
+    "Seller - see lawyer", "Name: John", "pending", "lawyer to confirm", "  ", "​", "---",
+]
+
+
+@pytest.mark.parametrize("value", B2_PLACEHOLDERS)
+def test_b2_placeholder_values_are_detected(value):
+    assert B.placeholder_reason(value) or not value.strip("​ ")
+
+
+@pytest.mark.parametrize("value", ["Fixture Seller Zqx Holdings", "PO Box 0000, Fixturetown ON A0A 0A0",
+                                   "Suite 4 (rear), 12 Fixture Road", "+1 555 0100"])
+def test_b2_real_looking_values_pass(value):
+    assert B.placeholder_reason(value) is None
+
+
+def _priv(tmp, **vals):
+    base = {"seller_legal_name": "Fixture Seller Zqx Holdings", "premises_address": "PO Box 0000, Fixturetown ON A0A 0A0",
+            "phone": "+1 555 0100", **vals}
+    p = tmp / "p.toml"
+    p.write_text("".join(f'{k} = "{v}"\n' for k, v in base.items()), encoding="utf-8")
+    return str(p)
+
+
+@pytest.mark.parametrize("flags", [dict(pilot_checkout=True), dict(paid_report=True, trader_first_home=True)],
+                         ids=["pilot_checkout", "paid_report"])
+@pytest.mark.parametrize("field,value", [("seller_legal_name", "[SELLER - lawyer to confirm]"),
+                                         ("seller_legal_name", "SELLER — lawyer to confirm"),
+                                         ("premises_address", "TBD"), ("phone", "XXX"), ("phone", "555")])
+def test_b2_commerce_build_fails_on_placeholder(tmp_path, flags, field, value):
+    # repro: failmodes.sh "pilot: …" lines — these built with rc=0 before the fix
+    from test_legal import build, toml_with
+    r, _ = build(tmp_path, "o", DT_SITE_TOML=toml_with(tmp_path, **flags), DT_PRIVATE_TOML=_priv(tmp_path, **{field: value}))
+    assert r.returncode == 1 and "BUILD FAILED" in r.stderr and field in r.stderr, r.stderr
+
+
+def test_b2_malformed_private_toml_is_a_build_failure_not_a_traceback(tmp_path):
+    from test_legal import build, toml_with
+    bad = tmp_path / "bad.toml"
+    bad.write_text('seller_legal_name = "unterminated\n', encoding="utf-8")
+    r, _ = build(tmp_path, "o", DT_SITE_TOML=toml_with(tmp_path, pilot_checkout=True), DT_PRIVATE_TOML=str(bad))
+    assert r.returncode == 1 and "BUILD FAILED" in r.stderr and "Traceback" not in r.stderr, r.stderr

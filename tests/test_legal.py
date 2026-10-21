@@ -25,7 +25,7 @@ import lint as L  # noqa: E402
 import build as B  # noqa: E402
 from a11y import axe_violations, horizontal_overflow  # noqa: E402
 
-FAKE = {"seller_legal_name": "Example Seller Fixture", "premises_address": "PO Box 0000, Exampletown ON A0A 0A0",
+FAKE = {"seller_legal_name": "Fixture Seller Zqx Holdings", "premises_address": "PO Box 0000, Fixturetown ON A0A 0A0",
         "phone": "+1 555 0100"}
 SITE_TOML = os.path.join(REPO, "site", "config", "site.toml")
 
