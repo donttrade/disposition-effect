@@ -1,0 +1,9 @@
+orderId,Account,Order ID,B/S,Contract,Product,Product Description,avgPrice,filledQty,Fill Time,Status,Date,Quantity,Type,Limit Price,Stop Price,Filled Qty,Avg Fill Price
+9001,CANARY-ZQ7X,9001, Buy,MNQZ6,MNQ,Micro E-mini Nasdaq-100,21010.25,2,09/15/2026 09:31:04, Filled,09/15/2026,2,Market,,,2,21010.25
+9002,CANARY-ZQ7X,9002, Sell,MNQZ6,MNQ,Micro E-mini Nasdaq-100,21030.00,1,09/15/2026 09:48:40, Filled,09/15/2026,1,Limit,21030.00,,1,21030.00
+9003,CANARY-ZQ7X,9003, Sell,MNQZ6,MNQ,Micro E-mini Nasdaq-100,20995.50,1,09/15/2026 10:12:09, Filled,09/15/2026,1,Stop,,20995.50,1,20995.50
+9004,CANARY-ZQ7X,9004, Sell,MESZ6,,Micro E-mini S&P 500,6620.25,1,09/15/2026 10:30:00, Filled,09/15/2026,1,Market,,,1,6620.25
+9005,CANARY-ZQ7X,9005, Buy,MESZ6,,Micro E-mini S&P 500,6610.00,1,09/15/2026 11:00:00, Filled,09/15/2026,1,Market,,,1,6610.00
+9006,CANARY-ZQ7X,9006, Buy,MNQZ6,MNQ,Micro E-mini Nasdaq-100,,0,, Canceled,09/15/2026,1,Limit,20900.00,,0,
+9007,CANARY-ZQ7X,9007, Buy,XYZZ6,,Unknown contract,100.00,1,09/15/2026 12:00:00, Filled,09/15/2026,1,Market,,,1,100.00
+9008,CANARY-ZQ7X,9008, Sell,XYZZ6,,Unknown contract,101.50,1,09/15/2026 12:30:00, Filled,09/15/2026,1,Market,,,1,101.50

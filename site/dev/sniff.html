@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'">
+<title>Format sniffer (dev)</title>
+<!-- Dev tool (built only with DT_DEV=1, never bundled). Shows how the engine reads a
+     trade file: the detected format, which columns are mapped through the whitelist,
+     which are ignored, and two rows with every non-whitelisted cell shown as [skipped].
+     Runs locally; connect-src 'none' means it cannot send anything. -->
+<style>
+  body { font: 16px/1.5 system-ui, sans-serif; margin: 24px; max-width: 1100px; color: #16181C; background: #fff; }
+  table { border-collapse: collapse; margin: 8px 0 24px; font-size: 14px; }
+  th, td { border: 1px solid #DADCE0; padding: 4px 8px; text-align: left; vertical-align: top; }
+  th { background: #F4F5F7; }
+  .skipped { color: #5B606A; font-style: italic; }
+  .err { color: #A3264F; font-weight: 600; }
+  code { font-family: ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<h1>Format sniffer</h1>
+<p>Dev only. Pick a trade file; it is read in this tab and never sent anywhere.</p>
+<label for="file">Trade file</label>
+<input id="file" type="file" multiple>
+<div id="out" aria-live="polite"></div>
+<script type="module" src="sniff.js"></script>
+</body>
+</html>
