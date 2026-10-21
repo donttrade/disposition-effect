@@ -154,6 +154,15 @@ ORACLES["mt5/deals.csv"] = {
     "skipped": {},
 }
 
+ORACLES["generic/no_losses.csv"] = {
+    # 35 SPY trades, each buy 10 then sell 0.50 higher: +5.00 each, 30 min hold, no fees.
+    "trades": [dict(symbol="SPY", pnl=5.0, hold_s=1800)] * 35,
+    "warnings": {},
+    "skipped": {},
+}
+# 90 generated trades (make_fixtures.many_trades): checked for structure, not per trade.
+ORACLES_COUNT_ONLY = {"generic/ninety_trades.csv": 90}
+
 ERRORS = {
     "errors/empty.csv": ("E_EMPTY", None, None),
     "errors/blank_lines.csv": ("E_EMPTY", None, None),

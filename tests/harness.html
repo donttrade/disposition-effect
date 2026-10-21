@@ -10,13 +10,27 @@
 <p id="status">loading</p>
 <script type="module">
 import { runFile } from '/site/static/js/engine/index.js';
+import { freeStats } from '/site/static/js/engine/stats.js';
+import { noiseChecks } from '/site/static/js/engine/noise.js';
 function bytesOf(b64) {
   const bin = atob(b64);
   const out = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return out;
 }
-window.runEngine = (b64) => JSON.stringify(runFile(bytesOf(b64)));
+// Same shape as engine_ref.run_fixture(): {result, stats, noise} or {error}.
+window.runEngine = (b64) => {
+  const r = runFile(bytesOf(b64));
+  if (r.error) return JSON.stringify(r);
+  return JSON.stringify({ result: r.result, stats: freeStats(r.result.trades), noise: noiseChecks(r.result.trades) });
+};
+window.runNoiseInWorker = (b64) => new Promise((resolve) => {
+  const r = runFile(bytesOf(b64));
+  const w = new Worker('/site/static/js/engine/noise-worker.js', { type: 'module' });
+  w.onmessage = (ev) => { w.terminate(); resolve(JSON.stringify(ev.data.noise)); };
+  w.postMessage({ trades: r.result.trades.map((t) => ({ pnl: t.pnl, hold_s: t.hold_s })) });
+});
+window.statsWithBalance = (b64, bal) => JSON.stringify(freeStats(runFile(bytesOf(b64)).result.trades, bal));
 window.runEngineTimed = (b64) => {
   const bytes = bytesOf(b64);
   const t0 = performance.now();

@@ -9,7 +9,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "reference"))
 sys.path.insert(0, os.path.join(HERE, "fixtures"))
 import engine_ref as E  # noqa: E402
-from oracles import ERRORS, ORACLES  # noqa: E402
+from oracles import ERRORS, ORACLES, ORACLES_COUNT_ONLY  # noqa: E402
 
 FIX = os.path.join(HERE, "fixtures")
 
@@ -34,6 +34,13 @@ def test_oracle(rel):
     assert got["skipped"] == want["skipped"], rel
 
 
+@pytest.mark.parametrize("rel", sorted(ORACLES_COUNT_ONLY))
+def test_count_only(rel):
+    got = E.parse_file(load(rel))
+    assert len(got["trades"]) == ORACLES_COUNT_ONLY[rel]
+    assert got["warnings"] == [] and got["skipped"] == {}
+
+
 @pytest.mark.parametrize("rel", sorted(ERRORS))
 def test_error_codes(rel):
     code, row, col = ERRORS[rel]
@@ -43,7 +50,7 @@ def test_error_codes(rel):
 
 
 def test_every_fixture_has_an_oracle():
-    covered = set(ORACLES) | set(ERRORS)
+    covered = set(ORACLES) | set(ERRORS) | set(ORACLES_COUNT_ONLY)
     assert set(E.fixture_paths(FIX)) == covered
 
 

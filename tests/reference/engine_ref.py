@@ -1218,6 +1218,245 @@ def parse_file(data):
     }
 
 
+# ----------------------------------------------------------------- FreeStats
+
+def median(xs):
+    if not xs:
+        return None
+    v = sorted(xs)
+    k = len(v) // 2
+    if len(v) % 2:
+        return v[k]
+    return (v[k - 1] + v[k]) / 2
+
+
+def _split(trades, d):
+    sub = [t for t in trades if t["dir"] == d]
+    w = l = 0
+    pnl = 0.0
+    for t in sub:
+        pnl += t["pnl"]
+        if t["pnl"] > 0:
+            w += 1
+        elif t["pnl"] < 0:
+            l += 1
+    return {"n": len(sub), "wins": w, "losses": l, "win_rate": (w / (w + l)) if (w + l) else None, "pnl": pnl}
+
+
+def free_stats(trades, starting_balance=None):
+    """FreeStats exactly as the DATA MODEL defines them, on trades in close-time order."""
+    n = len(trades)
+    wins = losses = scratch = 0
+    gp = gl = total = 0.0
+    largest_win = largest_loss = None
+    for t in trades:
+        p = t["pnl"]
+        total += p
+        if p > 0:
+            wins += 1
+            gp += p
+            if largest_win is None or p > largest_win:
+                largest_win = p
+        elif p < 0:
+            losses += 1
+            gl += p
+            if largest_loss is None or p < largest_loss:
+                largest_loss = p
+        else:
+            scratch += 1
+    # streaks: a scratch trade ends both kinds of streak; the first longest run is kept
+    best = {"w": [0, 0.0], "l": [0, 0.0]}
+    cw = [0, 0.0]
+    cl = [0, 0.0]
+    for t in trades:
+        p = t["pnl"]
+        if p > 0:
+            cw = [cw[0] + 1, cw[1] + p]
+            cl = [0, 0.0]
+            if cw[0] > best["w"][0]:
+                best["w"] = list(cw)
+        elif p < 0:
+            cl = [cl[0] + 1, cl[1] + p]
+            cw = [0, 0.0]
+            if cl[0] > best["l"][0]:
+                best["l"] = list(cl)
+        else:
+            cw = [0, 0.0]
+            cl = [0, 0.0]
+    eq = peak = maxdd = 0.0
+    maxdd_pct = None
+    use_pct = starting_balance is not None and starting_balance > 0
+    if use_pct:
+        maxdd_pct = 0.0
+    for t in trades:
+        eq += t["pnl"]
+        if eq > peak:
+            peak = eq
+        dd = peak - eq
+        if dd > maxdd:
+            maxdd = dd
+        if use_pct:
+            top = starting_balance + peak
+            pct = (top - (starting_balance + eq)) / top if top > 0 else 0.0
+            if pct > maxdd_pct:
+                maxdd_pct = pct
+    hw = median([t["hold_s"] for t in trades if t["pnl"] > 0])
+    hl = median([t["hold_s"] for t in trades if t["pnl"] < 0])
+    return {
+        "n": n, "wins": wins, "losses": losses, "scratch": scratch,
+        "win_rate": (wins / (wins + losses)) if (wins + losses) else None,
+        "gross_profit": gp, "gross_loss": gl,
+        "profit_factor": (gp / -gl) if losses else "no losing trades",
+        "net_pnl": total,
+        "expectancy": (total / n) if n else None,
+        "avg_win": (gp / wins) if wins else None,
+        "avg_loss": (gl / losses) if losses else None,
+        "largest_win": largest_win, "largest_loss": largest_loss,
+        "max_consec_wins": {"n": best["w"][0], "pnl": best["w"][1]},
+        "max_consec_losses": {"n": best["l"][0], "pnl": best["l"][1]},
+        "max_drawdown_abs": maxdd,
+        "max_drawdown_pct": maxdd_pct,
+        "long": _split(trades, "long"), "short": _split(trades, "short"),
+        "hold_median_win_s": hw, "hold_median_loss_s": hl,
+        "hold_ratio": (hl / hw) if (hw is not None and hl is not None and hw > 0) else None,
+    }
+
+
+# ----------------------------------------------------------------- noise checks
+
+N_PERM = 10000
+SEED_BASE = 20261022
+MIN_GROUP = 30
+NOISE_LIMIT = 20000
+M32 = 0xFFFFFFFF
+
+
+def _imul(a, b):
+    return (a * b) & M32
+
+
+def mulberry32(seed):
+    """Port of the common JS mulberry32; every step is reduced to 32 bits like Math.imul / |0."""
+    state = [seed & M32]
+
+    def rand():
+        state[0] = (state[0] + 0x6D2B79F5) & M32
+        a = state[0]
+        t = _imul(a ^ (a >> 15), 1 | a)
+        t = ((t + _imul(t ^ (t >> 7), 61 | t)) & M32) ^ t
+        return ((t ^ (t >> 14)) & M32) / 4294967296
+
+    return rand
+
+
+def shuffle(arr, rand):
+    """Fisher–Yates, in place, from the end."""
+    for i in range(len(arr) - 1, 0, -1):
+        j = int(rand() * (i + 1))
+        arr[i], arr[j] = arr[j], arr[i]
+
+
+def p_value(count):
+    return (1 + count) / (N_PERM + 1)
+
+
+def label_for(p, too_few):
+    if too_few:
+        return "not enough trades to tell"
+    return "distinguishable from noise" if p < 0.05 else "may be noise"
+
+
+def _longest_loss_run(xs):
+    best = cur = 0
+    for v in xs:
+        if v < 0:
+            cur += 1
+            if cur > best:
+                best = cur
+        else:
+            cur = 0
+    return best
+
+
+def check_expectancy(pnls, seed):
+    n = len(pnls)
+    if n < MIN_GROUP:
+        return {"stat": "expectancy", "method": "sign-flip permutation", "n_a": n, "n_b": None, "value": None,
+                "p": None, "label": label_for(None, True)}
+    s = 0.0
+    for v in pnls:
+        s += v
+    obs = s / n
+    rand = mulberry32(seed)
+    count = 0
+    for _ in range(N_PERM):
+        s = 0.0
+        for v in pnls:
+            if rand() < 0.5:
+                s += v
+            else:
+                s -= v
+        if abs(s / n) >= abs(obs):
+            count += 1
+    p = p_value(count)
+    return {"stat": "expectancy", "method": "sign-flip permutation", "n_a": n, "n_b": None, "value": obs, "p": p,
+            "label": label_for(p, False)}
+
+
+def check_hold_gap(trades, seed):
+    # group A = losing trades, group B = winning trades; scratch trades are left out
+    a = [t["hold_s"] for t in trades if t["pnl"] < 0]
+    b = [t["hold_s"] for t in trades if t["pnl"] > 0]
+    na, nb = len(a), len(b)
+    out = {"stat": "hold_gap_s", "method": "label permutation", "n_a": na, "n_b": nb, "value": None, "p": None}
+    if na < MIN_GROUP or nb < MIN_GROUP:
+        out["label"] = label_for(None, True)
+        return out
+    obs = median(a) - median(b)
+    pool = [t["hold_s"] for t in trades if t["pnl"] != 0]
+    rand = mulberry32(seed)
+    count = 0
+    for _ in range(N_PERM):
+        shuffle(pool, rand)
+        stat = median(pool[:na]) - median(pool[na:])
+        if abs(stat) >= abs(obs):
+            count += 1
+    p = p_value(count)
+    out.update(value=obs, p=p, label=label_for(p, False))
+    return out
+
+
+def check_streak(pnls, seed):
+    n = len(pnls)
+    out = {"stat": "longest_losing_streak", "method": "order shuffle", "n_a": n, "n_b": None, "value": None,
+           "p": None}
+    if n < MIN_GROUP:
+        out["label"] = label_for(None, True)
+        return out
+    obs = _longest_loss_run(pnls)
+    work = [(-1 if v < 0 else (1 if v > 0 else 0)) for v in pnls]
+    rand = mulberry32(seed)
+    count = 0
+    for _ in range(N_PERM):
+        shuffle(work, rand)
+        if _longest_loss_run(work) >= obs:
+            count += 1
+    p = p_value(count)
+    out.update(value=obs, p=p, label=label_for(p, False))
+    return out
+
+
+def noise_checks(trades):
+    used = trades[-NOISE_LIMIT:] if len(trades) > NOISE_LIMIT else trades
+    pnls = [t["pnl"] for t in used]
+    return {
+        "n_used": len(used),
+        "limited": len(trades) > NOISE_LIMIT,
+        "checks": [check_expectancy(pnls, SEED_BASE + 0), check_hold_gap(used, SEED_BASE + 1),
+                   check_streak(pnls, SEED_BASE + 2)],
+    }
+
+
 # ----------------------------------------------------------------- CLI / expected files
 
 FIXTURE_DIRS = ["generic", "generic_roundtrip", "mt5", "mt4", "ibkr", "tradovate", "errors"]
@@ -1226,9 +1465,10 @@ FIXTURE_DIRS = ["generic", "generic_roundtrip", "mt5", "mt4", "ibkr", "tradovate
 def run_fixture(data):
     """What the golden test compares: the ParseResult, or the error code/row/column."""
     try:
-        return {"result": parse_file(data)}
+        res = parse_file(data)
     except EngineError as e:
         return {"error": e.to_json()}
+    return {"result": res, "stats": free_stats(res["trades"]), "noise": noise_checks(res["trades"])}
 
 
 def fixture_paths(root):

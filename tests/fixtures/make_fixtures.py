@@ -179,6 +179,54 @@ def mt4_statement():
     return html_doc(b)
 
 
+def lcg(seed):
+    state = [seed]
+
+    def r():
+        state[0] = (state[0] * 1103515245 + 12345) % 2147483648
+        return state[0] / 2147483648
+
+    return r
+
+
+def many_trades(n, seed, p_win, losers_longer=True):
+    """n synthetic round trips, 4 per day, never overlapping on one symbol.
+    Losers are held longer than winners when losers_longer, so the hold-gap check has something to find."""
+    r = lcg(seed)
+    lines = ["Date,Time,Symbol,Side,Quantity,Price,Currency,Fees"]
+    for i in range(n):
+        day = 1 + i // 4
+        start = 9 * 60 + 30 + (i % 4) * 100
+        sym = ["SPY", "QQQ", "IWM"][i % 3]
+        win = r() < p_win
+        qty = 10 * (1 + int(r() * 5))
+        entry = round(100 + r() * 50, 2)
+        hold = (5 + int(r() * 30)) if win else ((20 if losers_longer else 5) + int(r() * (70 if losers_longer else 30)))
+        move = round(0.2 + r() * 1.5, 2)
+        long_ = r() < 0.7
+        if long_:
+            exit_ = round(entry + move, 2) if win else round(entry - move * 1.2, 2)
+        else:
+            exit_ = round(entry - move, 2) if win else round(entry + move * 1.2, 2)
+        o_side, c_side = ("Buy", "Sell") if long_ else ("Sell", "Buy")
+        end = start + hold
+        d = f"2026-09-{day:02d}" if day <= 30 else f"2026-10-{day - 30:02d}"
+        lines.append(f"{d},{start // 60:02d}:{start % 60:02d}:00,{sym},{o_side},{qty},{entry:.2f},USD,1.00")
+        lines.append(f"{d},{end // 60:02d}:{end % 60:02d}:00,{sym},{c_side},{qty},{exit_:.2f},USD,1.00")
+    return "\n".join(lines) + "\n"
+
+
+def all_wins(n):
+    lines = ["Date,Time,Symbol,Side,Quantity,Price,Currency,Fees"]
+    for i in range(n):
+        day = 1 + i // 4
+        start = 9 * 60 + 30 + (i % 4) * 100
+        d = f"2026-09-{day:02d}" if day <= 30 else f"2026-10-{day - 30:02d}"
+        lines.append(f"{d},{start // 60:02d}:{start % 60:02d}:00,SPY,Buy,10,{100 + i:.2f},USD,0")
+        lines.append(f"{d},{(start + 30) // 60:02d}:{(start + 30) % 60:02d}:00,SPY,Sell,10,{100.5 + i:.2f},USD,0")
+    return "\n".join(lines) + "\n"
+
+
 def main():
     w("mt5/deals_netting.htm", mt5_netting())
     w("mt5/positions_hedging.htm", mt5_positions())
@@ -268,6 +316,10 @@ def main():
       "2026-09-02,11:00:00,RY,Sell,10,171.00,CAD,0\n"
       "2026-09-03,10:00:00,QQQ,Buy,5,480.00,USD,0\n"
       "2026-09-03,11:00:00,QQQ,Sell,5,478.00,USD,0\n")
+
+    # >= 30 trades so the permutation checks run (not "not enough trades to tell").
+    w("generic/ninety_trades.csv", many_trades(90, 20261020, 0.5))
+    w("generic/no_losses.csv", all_wins(35))
 
     w("generic_roundtrip/tradezella.csv",
       "Open Time,Close Time,Symbol,Direction,Volume,Open Price,Close Price,Fees\n"
