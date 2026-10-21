@@ -297,7 +297,7 @@ FORM_JS = "/static/js/form-ref.js"
 PRODUCT_TEXT = "Five habits measured in your own trades, with historical dollar figures, plus one re-test."
 PAGES += [
     {"template": "pages/for-traders.html", "path": "/for-traders/", "requires_flag": None, "updated": "2026-10-21",
-     "crumb": "Individual traders", "og_image": "/assets/og/traders.png", "scripts": [FORM_JS],
+     "crumb": "Individual traders", "og_image": "/assets/og/traders.png", "scripts": [FORM_JS, MOTION_JS],
      "title": "Trader Habit Report: Waitlist and Founding Price",
      "description": "A habit report built from your own MT5, IBKR or Tradovate file, with a real-or-noise check "
                     "for each tested habit. Coming soon; join the waitlist.",
@@ -305,7 +305,7 @@ PAGES += [
                  "description": "A habit report built from your own MT5, IBKR or Tradovate file, with a "
                                 "real-or-noise check for each tested habit. Founding price, one free re-test."}},
     {"template": "pages/for-firms.html", "path": "/for-firms/", "requires_flag": None, "updated": "2026-10-21",
-     "crumb": "Prop firms & brokers", "og_image": "/assets/og/firms.png", "scripts": [FORM_JS],
+     "crumb": "Prop firms & brokers", "og_image": "/assets/og/firms.png", "scripts": [FORM_JS, MOTION_JS],
      "title": "Disposition-Effect Measurement for Prop Firms and Brokers",
      "description": "Fixed-price measurement of whether your traders sell winners more readily than losers: a "
                     "published script, run inside your own systems."},
@@ -322,7 +322,7 @@ PAGES += [
                  "description": "Request a Pilot measurement, apply to partner as a journal or platform, or get "
                                 "the trader habit report. A short form or an email; no calls."}},
     {"template": "pages/for-platforms.html", "path": "/for-platforms/", "requires_flag": None, "updated": "2026-10-21",
-     "crumb": "Journals & platforms", "og_image": "/assets/og/platforms.png", "scripts": [FORM_JS],
+     "crumb": "Journals & platforms", "og_image": "/assets/og/platforms.png", "scripts": [FORM_JS, MOTION_JS],
      "title": "Behavioural Measurement for Trading Journals and Platforms",
      "description": "Show users how readily they close winning versus losing trades, with a public script run in "
                     "your own product. Free licence for the first three partners."},
@@ -461,6 +461,26 @@ def sample_csv():
 # file (checks/make_hero_dashboard.py). The partial records the sample's SHA-256; a different sample
 # means the hero shows numbers the tool no longer prints, so the build stops until it is re-captured.
 HERO_DASH = os.path.join(SITE, "templates", "partials", "hero_dashboard.html")
+
+
+def hero_dashboard_body():
+    """The partial's HTML as it lands in a page (the Jinja header comment renders to nothing)."""
+    with open(HERO_DASH, encoding="utf-8") as f:
+        return f.read().split("#}", 1)[1].strip()
+
+
+def motion_problem(html, path):
+    """Motion plan build guard: motion.js only on MOTION_PAGES; motion markup only with motion.js;
+    data-count only inside the generated hero (count-up is for its 6 sample tiles, never a real figure)."""
+    has_js = f'<script src="{MOTION_JS}" defer></script>' in html
+    if has_js and path not in MOTION_PAGES:
+        return f"motion.js on {path}, which is not one of MOTION_PAGES"
+    for marker in ("data-reveal", "data-count", "hero-dash"):
+        if marker in html and not has_js:
+            return f"{path} holds {marker} but does not load motion.js"
+    if "data-count" in html.replace(hero_dashboard_body(), ""):
+        return f"{path}: data-count outside the generated hero dashboard"
+    return None
 
 
 def check_hero_dashboard():
@@ -1194,6 +1214,14 @@ def verify(out, flags, seller=None, base_url=None):
                     with open(fp, encoding="utf-8", errors="replace") as f:
                         if PAID_FLAG_MARKER in f.read():
                             die(f"paid-flagged markup in {os.path.relpath(fp, out)} while paid_report = false")
+    for root, _, files in os.walk(out):  # motion plan guard (MOTION_PAGES)
+        for name in sorted(files):
+            if name.endswith(".html"):
+                fp = os.path.join(root, name)
+                with open(fp, encoding="utf-8", errors="replace") as f:
+                    why = motion_problem(f.read(), "/" + os.path.relpath(fp, out).replace(os.sep, "/").replace("index.html", ""))
+                if why:
+                    die(why)
     # Decision 21 Oct: the footer business line, on every page exactly once under any commerce flag
     commerce = any(flags.get(f) for f in COMMERCE_FLAGS)
     for root, _, files in os.walk(out):

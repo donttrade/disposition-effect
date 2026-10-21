@@ -10,7 +10,7 @@
     </div></div>
   </section>
 
-  <section class="section" aria-labelledby="first-h">
+  <section class="section" aria-labelledby="first-h" data-reveal>
     <h2 id="first-h">For the first three partners</h2>
     <ul>
       <li>A free 12-month commercial licence to run the script in your product.</li>
@@ -22,14 +22,14 @@
     <p>After 12 months, continuing is optional; any fee is agreed in writing before renewal.</p>
   </section>
 
-  <section class="section" aria-labelledby="ask-h">
+  <section class="section" aria-labelledby="ask-h" data-reveal>
     <h2 id="ask-h">What we ask in return</h2>
     <p>Attribution (“Method: donttrade”, with a link) and the aggregate counts for the co-published study.</p>
     <h3>What the script needs</h3>
     <p>A five-column extract, one row per open position per day. The <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/EXPORT-GUIDE.md">export guide</a> defines it, and <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/make_fixture.py">make_fixture.py</a> writes a synthetic file to test with.</p>
   </section>
 
-  <section class="section" aria-labelledby="faq-h">
+  <section class="section" aria-labelledby="faq-h" data-reveal>
     <h2 id="faq-h">Questions</h2>
     <details><summary>Do you need access to our systems?</summary><p>No.</p></details>
     <details><summary>Are you a data processor for us?</summary><p>We receive no user records; only aggregate counts for the study you agree to.</p></details>
@@ -37,7 +37,7 @@
     <details><summary>Will you grade our users?</summary><p>No. It is a measurement. It is not a grade or a badge, and it is not advice.</p></details>
   </section>
 
-  <section class="section" aria-labelledby="apply">
+  <section class="section" aria-labelledby="apply" data-reveal>
     <h2 id="apply">Apply to partner</h2>
     {%- with fid = "fp", product = "platform", partner = true, heading_id = "apply" %}{% include "partials/form_firm.html" %}{% endwith %}
   </section>

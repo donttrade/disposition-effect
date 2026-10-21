@@ -624,6 +624,10 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, b
                     problems += not_on_sale_claims(js_strings(s), rel)
             if name.endswith(".html"):
                 problems += business_line_problems(s, rel, paid or pilot, addresses)
+                url = rel[:-len("index.html")] if rel.endswith("/index.html") else rel
+                why = build.motion_problem(s, url)  # motion plan: count-up only on the hero's sample tiles
+                if why:
+                    problems.append(("motion", rel, why))
             if not seller:
                 rest = strip_business_line(s) if (paid or pilot) and name.endswith(".html") else s
                 for v in priv:

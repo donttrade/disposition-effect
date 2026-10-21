@@ -27,7 +27,7 @@
     </div>
   </section>
 
-  <ul class="evidence" aria-label="What you can check before you pay">
+  <ul class="evidence" aria-label="What you can check before you pay" data-reveal>
     <li><a href="/research/">{{ evidence.studies }} published studies</a></li>
     <li><a href="/code/">Scripts public for {{ evidence.scripts_public }} of {{ evidence.studies }}</a></li>
     <li><a href="/corrections/">{{ evidence.corrections }} corrections, dated and logged</a></li>
@@ -35,7 +35,7 @@
   </ul>
 
   {#- 2. Who it's for. #}
-  <section class="section" aria-labelledby="who-h">
+  <section class="section" aria-labelledby="who-h" data-reveal>
     <h2 id="who-h">Who it is for</h2>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Who it is for">
     <table>
@@ -51,7 +51,7 @@
   </section>
 
   {#- 3. What it costs (existing id). Prices from prices.json. #}
-  <section class="section" aria-labelledby="what-it-costs">
+  <section class="section" aria-labelledby="what-it-costs" data-reveal>
     <h2 id="what-it-costs">What it costs</h2>
     <p><strong>Prices in USD, before any applicable sales tax.</strong> The standard engagement measures one thing today: the disposition effect, reported as PGR, PLR, their pooled ratio and a t statistic, with the counts behind them. If the figure you publish is a different one, write anyway; we’ll tell you plainly whether the published script can compute it.</p>
     {%- set what = {
@@ -79,7 +79,7 @@
   </section>
 
   {#- 4. Timeline (FIRM-INBOUND-KIT §2). #}
-  <section class="section" aria-labelledby="timeline-h">
+  <section class="section" aria-labelledby="timeline-h" data-reveal>
     <h2 id="timeline-h">From first email to memo</h2>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Timeline">
     <table>
@@ -98,7 +98,7 @@
   </section>
 
   {#- 5. Copy-leader (existing id). #}
-  <section class="section" aria-labelledby="copy-leader">
+  <section class="section" aria-labelledby="copy-leader" data-reveal>
     <h2 id="copy-leader">Copy-trading platforms: the copy-leader persistence test</h2>
     <p><strong>Sold to platforms only, never to followers.</strong> For copy-trading apps, social trading networks, crypto exchanges with copy features and vault front-ends.</p>
     <p>Does your leader ranking predict what followers actually earn after copying costs and delay? The test answers that out of sample: leaders are ranked on one period and judged on a later period the ranking never saw. It is adjusted for luck, so a ranking counts only if it does better than chance would.</p>
@@ -113,7 +113,7 @@
   </section>
 
   {#- 6. Claims test (existing id). #}
-  <section class="section" aria-labelledby="claims-test">
+  <section class="section" aria-labelledby="claims-test" data-reveal>
     <h2 id="claims-test">Firms that make behaviour claims: the claims substantiation test</h2>
     <p><strong>We report the result whether it supports the claim or not.</strong> For trading journals, education sellers, prop firms and brokers whose marketing says their product changes how traders behave, such as “our journal makes you more disciplined”.</p>
     <p>Before anyone sees data, the claim is written down as a test: which behaviour, which users, which periods, what comparison, and what result would support it. That test is sealed (fingerprinted with a SHA-256 hash) and then run once, as written.</p>
@@ -129,7 +129,7 @@
   </section>
 
   {#- 7. What stays on your systems, and what comes back. #}
-  <section class="section" aria-labelledby="export-h">
+  <section class="section" aria-labelledby="export-h" data-reveal>
     <h2 id="export-h">What stays on your systems</h2>
     <p>Your trade records and account identifiers. The script runs inside your systems on a five-column extract, one row per open position per day plus a row on the day it closes, with no names. From the <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/EXPORT-GUIDE.md">export guide</a>:</p>
     <pre tabindex="0" role="region" aria-label="Example extract: one position as three rows">account_id,date,position_id,closed,pnl
@@ -147,10 +147,10 @@ a7f3,2026-03-04,p91,1,240.00</pre>
   </section>
 
   {#- 8. What you receive. #}
-  <section class="section" aria-labelledby="receive-h">
+  <section class="section" aria-labelledby="receive-h" data-reveal>
     <h2 id="receive-h">What you receive</h2>
     <p>A one-page memo with these fields, every time:</p>
-    <dl class="split">
+    <dl class="split" data-reveal data-reveal-stagger>
       <div><dt>The figure</dt><dd>Pooled PGR, PLR and their ratio, with the counts behind them, and the same comparison holding position age fixed, with its 95% interval</dd></div>
       <div><dt>Precision</dt><dd>The t statistic and the counts behind it</dd></div>
       <div><dt>Denominator and period</dt><dd>Exactly who was counted, who was left out, and the dates the extract covers</dd></div>
@@ -162,7 +162,7 @@ a7f3,2026-03-04,p91,1,240.00</pre>
   </section>
 
   {#- 9. Agreement and independence. #}
-  <section class="section" aria-labelledby="agree-h">
+  <section class="section" aria-labelledby="agree-h" data-reveal>
     <h2 id="agree-h">The agreement, in brief</h2>
     <ul>
       <li><strong>Fixed scope and price,</strong> in writing before any data is seen.</li>
@@ -180,7 +180,7 @@ a7f3,2026-03-04,p91,1,240.00</pre>
   </section>
 
   {#- 10. FAQ (kept: questions firms ask first). #}
-  <section class="section" aria-labelledby="faq-h">
+  <section class="section" aria-labelledby="faq-h" data-reveal>
     <h2 id="faq-h">For your compliance team</h2>
     <details><summary>Who will we contract with?</summary><p>One person. {% include "partials/contracting_party.html" %} We provide whatever identity checks your due diligence needs. The pen name is how the research is published, not a contract term.</p></details>
     <details><summary>Does any account data leave our systems?</summary><p>No. Your staff run the script inside your systems; we receive only what it prints. We never need access to your systems.</p></details>
@@ -195,13 +195,13 @@ a7f3,2026-03-04,p91,1,240.00</pre>
   </section>
 
   {#- 11. Press and partners (FIRM-INBOUND-KIT §2). #}
-  <section class="section" aria-labelledby="press-h">
+  <section class="section" aria-labelledby="press-h" data-reveal>
     <h2 id="press-h">For press and partners</h2>
     <p>donttrade is independent research on how traders handle winning and losing positions. It publishes its studies, scripts and corrections, and measures firms’ own records on their systems under a fixed-scope agreement. Paying buys scope and privacy, never a result. When describing a result, please use the wording under “Use of the name” above. Method and code: <a href="/code/">/code/</a>; corrections: <a href="/corrections/">/corrections/</a>.</p>
   </section>
 
   {#- 12. Request (the form). #}
-  <section class="section" aria-labelledby="request">
+  <section class="section" aria-labelledby="request" data-reveal>
     <h2 id="request">Start a {{ pilot.name }}, or ask a question</h2>
     <p>Tell us which traders and which dates. You get a written scope and a fixed price back, free. Nothing is owed until you accept the scope.</p>
     {%- if flags.pilot_checkout %}

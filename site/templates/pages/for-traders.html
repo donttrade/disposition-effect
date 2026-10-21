@@ -20,7 +20,7 @@
     </div>
   </section>
 
-  <section class="section" aria-labelledby="measure-h">
+  <section class="section" aria-labelledby="measure-h" data-reveal>
     {%- if sale %}
     <h2 id="measure-h">What it measures</h2>
     <p>Five habits, each measured in your own closed trades.</p>
@@ -43,7 +43,7 @@
     <p>Each tested habit gets one of three results: “distinguishable from noise”, “not distinguishable from noise”, or “not enough trades to tell” when either of the two groups it compares has fewer than 30 trades. Each test compares trades from the same days with each other. Dollar figures are historical totals from your file, such as “trades matching this pattern totalled −$X”. They describe what happened; they do not show that a habit caused a result.</p>
   </section>
 
-  <section class="section" aria-labelledby="files-h">
+  <section class="section" aria-labelledby="files-h" data-reveal>
     <h2 id="files-h">Your file, and what is sent</h2>
     <ul>
       <li><strong>Files:</strong> the MetaTrader 5 or 4 history report, an Interactive Brokers Flex Query, a Tradovate orders export (all three in beta until a real export confirms the columns), or the donttrade CSV template.</li>
@@ -56,7 +56,7 @@
     </ul>
   </section>
 
-  <section class="section" aria-labelledby="founding">
+  <section class="section" aria-labelledby="founding" data-reveal>
     <h2 id="founding">The founding offer</h2>
     <p>{{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers of the habit report, one time, in US dollars. It includes one re-test of the same account. A yearly habit tracker comes later, at {{ t.price_usd|usd }} a year as its founding price; it is not sold until it exists.</p>
     {%- if sale %}
@@ -66,12 +66,12 @@
     {%- endif %}
   </section>
 
-  <section class="section" aria-labelledby="waitlist">
+  <section class="section" aria-labelledby="waitlist" data-reveal>
     <h2 id="waitlist">{{ offer.signup_heading() }}</h2>
     {{- offer.signup("waitlist") }}
   </section>
 
-  <section class="section" aria-labelledby="free-h">
+  <section class="section" aria-labelledby="free-h" data-reveal>
     <h2 id="free-h">Free now</h2>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Free tools">
     <table class="tool-list">
@@ -86,7 +86,7 @@
     <p><a href="/tools/">All free tools</a> · <a href="/research/">The research is free</a></p>
   </section>
 
-  <section class="section" aria-labelledby="faq-h">
+  <section class="section" aria-labelledby="faq-h" data-reveal>
     <h2 id="faq-h">Questions</h2>
     <details><summary>Is this investment advice?</summary><p>No. It {{ "describes" if sale else "will describe" }} your own past trades. It does not recommend any security, trade, size or exit, and past results do not predict future results.</p></details>
     {%- if sale %}

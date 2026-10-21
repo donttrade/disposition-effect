@@ -622,55 +622,42 @@ pre { font-family: var(--font-mono); font-size: var(--fs-0); background: var(--s
 .lifted .ls-mt24 { margin-top: 24px !important; }
 
 /* ------------------------------------------------------------------ motion (ARCHITECT-MOTION-PLAN 2026-10-21)
-   Every hidden or moving state below needs .dt-motion on <html> (theme.js adds it before first paint, only
-   when prefers-reduced-motion is no-preference) or a class that motion.js adds. No JS: nothing is hidden.
-   Only transform and opacity animate (plus the discrete visibility failsafe and the colour transitions). */
+   Hidden/moving states need .dt-motion (theme.js, pre-paint) or a motion.js class. */
 :root {
   --ease-out: cubic-bezier(0.25, 1, 0.5, 1);    /* easeOutQuart */
   --ease-inout: cubic-bezier(0.65, 0, 0.35, 1); /* easeInOutCubic */
-  --dur-hover: 160ms;
-  --dur-reveal: 500ms;
-  --dur-draw: 1000ms;
-  --rise: 16px;
+  --dur-hover: 160ms; --dur-reveal: 500ms; --dur-draw: 1000ms; --rise: 16px;
   --lift-shadow: 0 6px 16px -6px rgb(22 24 28 / 0.35);
 }
 @media (max-width: 600px) { :root { --rise: 12px; } }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --lift-shadow: 0 6px 16px -6px rgb(0 0 0 / 0.7); } }
 :root[data-theme="dark"] { --lift-shadow: 0 6px 16px -6px rgb(0 0 0 / 0.7); }
 
-/* M1 button lift: buttons only, no card lift (plan D4). The shadow sits on ::after and only its opacity
-   animates. The transition keeps the colour transitions of the base rule above (the shorthand replaces it). */
-.btn, .lifted .btn-2, .lifted .subscribe button, .lifted .next-block button { position: relative; }
-.btn::after, .lifted .btn-2::after, .lifted .subscribe button::after, .lifted .next-block button::after {
-  content: ""; position: absolute; inset: -2px; border-radius: inherit; box-shadow: var(--lift-shadow);
+/* M1 lift: buttons only (D4); keeps the base colour transitions */
+:is(.btn, .lifted .btn-2, .lifted .subscribe button, .lifted .next-block button) { position: relative; }
+:is(.btn, .lifted .btn-2, .lifted .subscribe button, .lifted .next-block button)::after { content: ""; position: absolute; inset: -2px; border-radius: inherit; box-shadow: var(--lift-shadow);
   opacity: 0; pointer-events: none; }
 @media (prefers-reduced-motion: no-preference) {
-  .btn, .lifted .btn-2, .lifted .subscribe button, .lifted .next-block button {
-    transition: color 150ms, background-color 150ms, border-color 150ms, transform var(--dur-hover) var(--ease-out); }
-  .btn::after, .lifted .btn-2::after, .lifted .subscribe button::after, .lifted .next-block button::after {
-    transition: opacity var(--dur-hover) var(--ease-out); }
-  .btn:focus-visible:not([disabled]):not([aria-disabled="true"]),
-  .lifted .btn-2:focus-visible:not([disabled]):not([aria-disabled="true"]),
-  .lifted .subscribe button:focus-visible:not([disabled]):not([aria-disabled="true"]),
-  .lifted .next-block button:focus-visible:not([disabled]):not([aria-disabled="true"]) { transform: translateY(-1px); }
-  .btn:active:not([disabled]):not([aria-disabled="true"]),
-  .lifted .btn-2:active:not([disabled]):not([aria-disabled="true"]),
-  .lifted .subscribe button:active:not([disabled]):not([aria-disabled="true"]),
-  .lifted .next-block button:active:not([disabled]):not([aria-disabled="true"]) { transform: translateY(0); transition-duration: 60ms; }
+  :is(.btn, .lifted .btn-2, .lifted .subscribe button, .lifted .next-block button) { transition: color 150ms, background-color 150ms, border-color 150ms, transform var(--dur-hover) var(--ease-out); }
+  :is(.btn, .lifted .btn-2, .lifted .subscribe button, .lifted .next-block button)::after { transition: opacity var(--dur-hover) var(--ease-out); }
+  :is(.btn, .lifted .btn-2, .lifted .subscribe button, .lifted .next-block button):focus-visible:not([disabled], [aria-disabled="true"]) { transform: translateY(-1px); }
+  :is(.btn, .lifted .btn-2, .lifted .subscribe button, .lifted .next-block button):active:not([disabled], [aria-disabled="true"]) { transform: translateY(0); transition-duration: 60ms; }
 }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .btn:hover:not([disabled]):not([aria-disabled="true"]),
-  .lifted .btn-2:hover:not([disabled]):not([aria-disabled="true"]),
-  .lifted .subscribe button:hover:not([disabled]):not([aria-disabled="true"]),
-  .lifted .next-block button:hover:not([disabled]):not([aria-disabled="true"]) { transform: translateY(-1px); }
-  .btn:hover:not([disabled]):not([aria-disabled="true"])::after,
-  .lifted .btn-2:hover:not([disabled]):not([aria-disabled="true"])::after,
-  .lifted .subscribe button:hover:not([disabled]):not([aria-disabled="true"])::after,
-  .lifted .next-block button:hover:not([disabled]):not([aria-disabled="true"])::after { opacity: 1; }
+  :is(.btn, .lifted .btn-2, .lifted .subscribe button, .lifted .next-block button):hover:not([disabled], [aria-disabled="true"]) { transform: translateY(-1px); }
+  :is(.btn, .lifted .btn-2, .lifted .subscribe button, .lifted .next-block button):hover:not([disabled], [aria-disabled="true"])::after { opacity: 1; }
 }
 
-/* M3 hero dashboard: a DOM capture of the real tool (partials/hero_dashboard.html, made by
-   checks/make_hero_dashboard.py), coloured by the same tokens as the page, so it follows the theme toggle. */
+/* M2 fade-up: .rv only below the fold at load (motion.js) */
+.dt-motion .rv { opacity: 0; transform: translateY(var(--rise)); }
+.dt-motion .rv.rv-in { opacity: 1; transform: none;
+  transition: opacity var(--dur-reveal) var(--ease-out), transform var(--dur-reveal) var(--ease-out); }
+.dt-motion .rv.rv-d1 { transition-delay: 60ms; }
+.dt-motion .rv.rv-d2 { transition-delay: 120ms; }
+.dt-motion .rv.rv-d3 { transition-delay: 180ms; }
+.dt-motion .rv:focus-within { opacity: 1; transform: none; }
+
+/* M3 hero: checks/make_hero_dashboard.py */
 .hero-dash { margin: 0; padding: var(--s2); border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); }
 .hero-dash .dash-h { margin: 0 0 var(--s1); font-weight: 600; }
 .hero-dash .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s1) var(--s2); margin: 0 0 var(--s2); }
@@ -678,10 +665,7 @@ pre { font-family: var(--font-mono); font-size: var(--fs-0); background: var(--s
 .hero-dash .plot { position: relative; margin: 0; }
 .hero-dash .plot svg { display: block; width: 100%; height: auto; }
 
-/* M4 chart draw-in: a veil in the page background slides off to the right (transform only), which
-   reads as the equity line drawing itself. left = L / W of the capture (92 / 496, printed by
-   checks/make_hero_dashboard.py); right must be 0 or the line's last point shows early. Its 32 px
-   soft edge starts outside the clip box. At rest (no .dt-motion) the veil sits off the chart. */
+/* M4 wipe: left = L/W = 92/496 (capture script); right must be 0 */
 .hero-dash .veil { position: absolute; top: 0; bottom: 0; left: 18.55%; right: 0; overflow: hidden; pointer-events: none; }
 .hero-dash .veil::before { content: ""; position: absolute; top: 0; bottom: 0; left: -32px; right: 0;
   background: linear-gradient(90deg, transparent, var(--bg) 32px); transform: translateX(100%); }
@@ -689,10 +673,7 @@ pre { font-family: var(--font-mono); font-size: var(--fs-0); background: var(--s
 .dt-motion .hero-dash.is-waiting .veil::before { animation-play-state: paused; }
 @keyframes dt-wipe { from { transform: translateX(0); } to { transform: translateX(100%); } }
 
-/* M5 count-up, the 6 hero tiles only (sample data). The DOM text is always the final value (crawlers,
-   copy, no JS). While counting, the dd is visibility:hidden (it keeps its width) and ::after paints
-   data-cu over it. Before motion.js runs the value is hidden only under .dt-motion, and at most until
-   1200 ms (the CSS failsafe). */
+/* M5 count-up: DOM text stays final; ::after paints data-cu; failsafe at 1200 ms */
 .hero-dash [data-count] { position: relative; }
 .dt-motion .hero-dash [data-count] { visibility: hidden; animation: dt-show 1ms linear 1200ms forwards; }
 .dt-motion .hero-dash [data-count].cu-on { animation: none; }
@@ -700,15 +681,9 @@ pre { font-family: var(--font-mono); font-size: var(--fs-0); background: var(--s
 .dt-motion .hero-dash [data-count].cu-done { visibility: visible; animation: none; }
 @keyframes dt-show { to { visibility: visible; } }
 
-/* motion resets: reduced motion and print */
-@media (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce), print {
+  .rv { opacity: 1 !important; transform: none !important; transition: none !important; }
   .hero-dash [data-count] { visibility: visible !important; animation: none !important; }
   .hero-dash [data-count]::after { content: none !important; }
   .hero-dash .veil { display: none; }
-}
-@media print {
-  .hero-dash [data-count] { visibility: visible !important; animation: none !important; }
-  .hero-dash [data-count]::after { content: none !important; }
-  .hero-dash .veil { display: none; }
-  .btn::after, .lifted .btn-2::after, .lifted .subscribe button::after, .lifted .next-block button::after { display: none; }
 }
