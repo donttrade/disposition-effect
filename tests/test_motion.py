@@ -171,7 +171,7 @@ SAMPLE_ANIMS = """() => document.getAnimations().map(a => {
   const t = a.effect.getComputedTiming();
   const props = a.transitionProperty ? [a.transitionProperty]
     : a.effect.getKeyframes().flatMap(k => Object.keys(k).filter(x => !['offset', 'computedOffset', 'easing', 'composite'].includes(x)));
-  return {props, end: t.delay + t.duration, iter: t.iterations, name: a.animationName || a.transitionProperty,
+  return {props, delay: t.delay, end: t.delay + t.duration, iter: t.iterations, name: a.animationName || a.transitionProperty,
           rv: !!(a.effect.target && a.effect.target.classList && a.effect.target.classList.contains('rv-in'))};
 })"""
 
@@ -195,10 +195,34 @@ def test_i7_i17_only_transform_and_opacity_and_every_motion_ends_in_time(browser
     for a in seen:
         assert set(a["props"]) <= {"opacity", "transform", "visibility"}, a
         assert a["iter"] == 1 and a["end"] <= 5000, a          # WCAG 2.2.2: nothing loops or lasts 5 s
-        if a["rv"]:
-            assert a["end"] <= 680, a                         # 500 ms + at most 180 ms stagger
+        if a["rv"]:   # the stagger is motion.js timers (60/120/180 ms); a transition-delay is not composited
+            assert a["delay"] == 0 and a["end"] <= 500, a
         if a["name"] == "dt-wipe":
             assert a["end"] <= 1150, a                        # 150 ms delay + 1000 ms
+
+
+# I19, the "non-composited animations" half (Tester D2): Lighthouse reads Chromium's "Animation" trace
+# events and lists every one with data.compositeFailed. Bit 8 = "Effect has unsupported timing parameters"
+# (a transition-delay, which the stagger used to be); 8224 = an unsupported property (visibility).
+def _composite_failures(browser, url, vp):
+    ctx = _ctx(browser, vp, init=False)
+    pg = ctx.new_page()
+    browser.start_tracing(page=pg, categories=["blink.animations", "devtools.timeline"])
+    pg.goto(url)
+    pg.wait_for_timeout(1500)
+    _scroll(pg, step=400, pause=60)
+    events = json.loads(browser.stop_tracing())["traceEvents"]
+    ctx.close()
+    anims = [e for e in events if e.get("name") == "Animation"]
+    return anims, [e["args"]["data"] for e in anims if (e.get("args", {}).get("data") or {}).get("compositeFailed")]
+
+
+@pytest.mark.parametrize("vp", [DESK, PHONE], ids=["1280", "375"])
+def test_i19_every_motion_animation_runs_on_the_compositor(browser, built_site, vp):
+    for path in MOTION:
+        anims, failed = _composite_failures(browser, built_site["url"] + path, vp)
+        assert anims, (path, "the trace recorded no animation at all: the check would prove nothing")
+        assert [f for f in failed if f["compositeFailed"] & 8] == [], (path, failed[:4])
 
 
 def test_i17_revealed_blocks_reach_full_opacity_within_680ms(browser, built_site):
