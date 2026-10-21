@@ -81,6 +81,13 @@ restore_email_allow = ["restore by email is not offered", "Restore-by-email is n
 not_on_sale = ["not on sale", "waitlist", "wait list", "wait-list", "nothing is charged now", "no launch date",
                "coming soon", "launch date", "liste d’attente", "liste d'attente", "pas en vente", "pas encore en vente",
                "bientôt disponible"]
+# Decision 21 Oct (Visa Core Rules 5.4.2.5: "A Merchant must not require a Cardholder to waive
+# the right to dispute a Transaction"): a waive-word within waive_dispute_window characters of a
+# dispute-word, in either order, fails on every page (EN and FR) and in every script's strings.
+# Regexes, case-insensitive, whole words.
+waive_dispute_waive = ['waiv\w*', 'forgo\w*', 'give up', 'gives up', 'agrees? not to', 'renon\w*']
+waive_dispute_target = ['disput\w*', 'charge[\s-]?backs?', 'chargebacks?', 'contest\w*', 'rétrofactur\w*', 'litiges?']
+waive_dispute_window = 80
 not_on_sale_allow = ["Founding price for the first 100 on the trader waitlist added.",
                      "its own research page reads “Coming Soon.”"]
 

@@ -30,6 +30,7 @@ from a11y import axe_violations, horizontal_overflow  # noqa: E402
 FAKE = {"seller_legal_name": "Zzqx Qqvendor Holdings", "premises_address": "PO Box 9917, Zzqxville ON K9Z 9Z9",
         "phone": "+1 555 555 0234"}
 SITE_TOML = os.path.join(REPO, "site", "config", "site.toml")
+TERMS_VERSION = __import__("tomllib").load(open(SITE_TOML, "rb"))["legal"]["terms_version"]  # bumped with every legal edit
 
 
 # Well-formed fake values for a paid build that needs no escape variable (Tester D10).
@@ -132,7 +133,7 @@ def test_flag_off_legal_pages(built_site):
         html = (built_site["out"] / path.strip("/") / "index.html").read_text(encoding="utf-8")
         for i in ids:
             assert f'id="{i}"' in html, (path, i)
-        assert "tally" not in html.lower() and "Version 2026-10-22" in html
+        assert "tally" not in html.lower() and f"Version {TERMS_VERSION}" in html
         assert not re.search(r"standard price|after launch|\$49|\$99|restore by email", html, re.I)
     privacy = (built_site["out"] / "privacy" / "index.html").read_text(encoding="utf-8")
     assert "Web3Forms" in privacy and "pen name" in privacy and "runs no analytics" in privacy
