@@ -2,10 +2,11 @@
 // freezes the page (Tester D7). The engine itself is unchanged: this worker calls the same
 // runFile() the page used to call, then (when asked) the same noiseChecks().
 //
-// Messages in:  {bytes: Uint8Array}  read the file
-//               {noise: true}       then run the noise checks on the trades just read (the page
-//                                   asks once it has drawn the result, so the two never compete
-//                                   for the CPU)
+// Messages in:  {id, bytes: Uint8Array}  read the file
+//               {id, noise: true}       then run the noise checks on the trades just read (the
+//                                       page asks once it has drawn the result, so the two never
+//                                       compete for the CPU)
+// Every message out carries the `id` of the request it answers (Tester R3).
 // Messages out: {stage: 'parsing'}                      the file is being read
 //               {needsPage: true}                       an HTML report: DOMParser exists only
 //                                                       on the page, so the page parses it
@@ -45,27 +46,29 @@ let lastTrades = null; // {pnl, hold_s} of the file just read, kept only for the
 
 self.onmessage = (ev) => {
   const msg = ev.data || {};
+  const id = msg.id;
+  const send = (m, transfer) => self.postMessage({ id, ...m }, transfer || []);
   if (msg.noise === true && !msg.bytes) {
-    if (!lastTrades) { self.postMessage({ crash: 'noise asked before a file was read' }); return; }
-    try { self.postMessage({ noise: noiseChecks(lastTrades) }); } catch (e) { self.postMessage({ crash: String(e && e.message ? e.message : e) }); }
+    if (!lastTrades) { send({ crash: 'noise asked before a file was read' }); return; }
+    try { send({ noise: noiseChecks(lastTrades) }); } catch (e) { send({ crash: String(e && e.message ? e.message : e) }); }
     return;
   }
-  if (!(msg.bytes instanceof Uint8Array)) { self.postMessage({ crash: 'bad message' }); return; }
+  if (!(msg.bytes instanceof Uint8Array)) { send({ crash: 'bad message' }); return; }
   try {
     if (typeof DOMParser === 'undefined' && isHtml(decodeBytes(msg.bytes))) {
-      self.postMessage({ needsPage: true });
+      send({ needsPage: true });
       return;
     }
-    self.postMessage({ stage: 'parsing' });
+    send({ stage: 'parsing' });
     const out = runFile(msg.bytes);
-    if (out.error) { self.postMessage({ error: out.error }); return; }
+    if (out.error) { send({ error: out.error }); return; }
     // Only two numbers per trade are kept for the checks: no symbol, no time, nothing else.
     lastTrades = out.result.trades.map((t) => ({ pnl: Number(t.pnl), hold_s: Number(t.hold_s) }));
     const s = slim(out.result);
-    self.postMessage({ result: s }, [...Object.values(s.cols).map((a) => a.buffer), s.dir.buffer]);
+    send({ result: s }, [...Object.values(s.cols).map((a) => a.buffer), s.dir.buffer]);
   } catch (e) {
     // decodeBytes can raise an EngineError (E_ENCODING) before runFile catches anything
-    if (e && e.name === 'EngineError') { self.postMessage({ error: e.toJSON() }); return; }
-    self.postMessage({ crash: String(e && e.message ? e.message : e) });
+    if (e && e.name === 'EngineError') { send({ error: e.toJSON() }); return; }
+    send({ crash: String(e && e.message ? e.message : e) });
   }
 };
