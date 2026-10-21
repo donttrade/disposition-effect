@@ -110,3 +110,13 @@ def test_strip_rows_match_reference(engine_page, rel):
     assert not diff, diff
     allowed = {"o", "h", "d", "q", "p", "s", "f"}
     assert all(set(r) == allowed for r in got["rows"])
+
+
+def test_no_closed_trades_message_names_the_cause(engine_page):
+    """Tester D8: the message used to say "every position is still open" whatever the cause."""
+    with open(os.path.join(FIX, "errors", "no_closed_skipped_sides.csv"), "rb") as f:
+        msg = run_js(engine_page, f.read())["error"]["message"]
+    assert "2 rows were skipped (bad side: 2)" in msg, msg
+    assert "still open" not in msg, msg
+    one = run_js(engine_page, b"Date,Time,Symbol,Side,Quantity,Price\n2026-01-05,09:30:00,AAA,Buy,1,100\n")
+    assert "1 position is still open at the end of the file" in one["error"]["message"], one

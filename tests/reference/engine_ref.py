@@ -869,7 +869,7 @@ def parse_mt(tables):
 
 def _side_letter(v):
     v = v.strip().upper()
-    if v.startswith("B"):
+    if v.startswith("B") or v in ("LONG", "COVER"):
         return "buy"
     if v.startswith("S"):
         return "sell"
@@ -949,8 +949,31 @@ def parse_generic_roundtrip(rows, hi, m):
     return {"executions": execs, "roundtrips": rts, "skipped": skipped, "extra": {}}
 
 
+_RE_CANCEL_SIDE = re.compile(r"\(CA\.?\)", re.ASCII)
+
+
+def _apply_cancels(execs, cancels, skipped):
+    """IBKR cancellation rows take back an earlier execution (same symbol, side, qty, price,
+    latest at or before the cancellation's time). Mirrors applyCancels() in ibkr.js."""
+    for c in cancels:
+        best = -1
+        for k, e in enumerate(execs):
+            if e is None or e["symbol"] != c["symbol"] or e["side"] != c["side"] or e["qty"] != c["qty"] \
+                    or e["price"] != c["price"] or e["ts"] > c["ts"]:
+                continue
+            if best == -1 or e["ts"] >= execs[best]["ts"]:
+                best = k
+        if best == -1:
+            _skip(skipped, "cancel_unmatched")
+            continue
+        execs[best] = None
+        _skip(skipped, "cancelled")
+        _skip(skipped, "cancelled")
+    return [e for e in execs if e is not None]
+
+
 def parse_ibkr(rows, hi, m):
-    execs, skipped = [], {}
+    execs, cancels, skipped = [], [], {}
     for r in rows[hi + 1:]:
         if _empty(r["cells"]):
             continue
@@ -959,6 +982,9 @@ def parse_ibkr(rows, hi, m):
         if level != "" and level != "EXECUTION":
             _skip(skipped, "not_execution")
             continue
+        side_text = cell(r, m, "side").upper()
+        code_toks = [x.strip() for x in cell(r, m, "code").upper().split(";")]
+        is_cancel = bool(_RE_CANCEL_SIDE.search(side_text)) or "CA" in code_toks
         side = _side_letter(cell(r, m, "side"))
         if side is None:
             _skip(skipped, "bad_side")
@@ -1001,10 +1027,11 @@ def parse_ibkr(rows, hi, m):
         fx = None
         if "fx" in m and cell(r, m, "fx") != "":
             fx = req_number(cell(r, m, "fx"), row, "fx")
-        execs.append({"row": row, "ts": ts, "symbol": symbol, "side": side, "qty": qty, "price": price,
-                      "fee": fee, "currency": cur, "oc": oc, "pos_id": None, "pnl_reported": realized,
-                      "multiplier": mult, "_unit": cur if cur else "points", "_fx": fx})
-    return {"executions": execs, "roundtrips": [], "skipped": skipped, "extra": {}}
+        e = {"row": row, "ts": ts, "symbol": symbol, "side": side, "qty": qty, "price": price,
+             "fee": fee, "currency": cur, "oc": oc, "pos_id": None, "pnl_reported": realized,
+             "multiplier": mult, "_unit": cur if cur else "points", "_fx": fx}
+        (cancels if is_cancel else execs).append(e)
+    return {"executions": _apply_cancels(execs, cancels, skipped), "roundtrips": [], "skipped": skipped, "extra": {}}
 
 
 # UNVERIFIED: point values per contract; check each against CME contract specs.
@@ -1022,13 +1049,23 @@ def product_root(contract, product):
     return mm.group(1) if mm else c
 
 
+_PARTIAL_STATUSES = ("canceled", "cancelled", "expired")
+
+
+def _filled_some(raw, row):
+    """A Canceled/Expired order that filled part of its size is a fill of that part (D8)."""
+    v = parse_number(raw, row, "qty")
+    return v is not None and v != 0
+
+
 def parse_tradovate(rows, hi, m):
     execs, skipped = [], {}
     for r in rows[hi + 1:]:
         if _empty(r["cells"]):
             continue
         row = r["row"]
-        if cell(r, m, "status").strip().lower() != "filled":
+        status = cell(r, m, "status").strip().lower()
+        if status != "filled" and not (status in _PARTIAL_STATUSES and _filled_some(cell(r, m, "qty"), row)):
             _skip(skipped, "not_filled")
             continue
         side = _side_letter(cell(r, m, "side"))

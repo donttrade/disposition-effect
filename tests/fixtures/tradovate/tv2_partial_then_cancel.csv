@@ -1,0 +1,4 @@
+Account,B/S,Contract,Product,avgPrice,filledQty,Fill Time,Status
+X, Buy,ESZ6,ES,5000,2,09/15/2026 09:31:04, Filled
+X, Sell,ESZ6,ES,5010,1,09/15/2026 09:40:00, Canceled
+X, Sell,ESZ6,ES,5004,1,09/15/2026 09:50:00, Filled
