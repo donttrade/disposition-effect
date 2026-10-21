@@ -608,3 +608,15 @@ def test_nit4_one_trade_one_day_reads_singular(browser, built_site, tmp_path):
     text = page.inner_text("#ps-file-status")
     ctx.close()
     assert "1 closed trade on 1 trading day." in text, text
+
+
+# ------------------------------------------------------------------ NIT 5: no losses → no "may be noise" streak label
+def test_nit5_no_losing_trades_streak_label(browser, built_site):
+    ctx = browser.new_context()
+    page = ctx.new_page()
+    page.goto(built_site["url"] + "/tools/trade-stats/")
+    page.set_input_files("#ts-file", os.path.join(REPO, "tests", "fixtures", "generic", "no_losses.csv"))
+    page.wait_for_selector("#ts-noise table", timeout=90000)
+    row = page.inner_text('[data-check="longest_losing_streak"]')
+    ctx.close()
+    assert "no losing trades" in row and "may be noise" not in row, row
