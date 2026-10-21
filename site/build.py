@@ -257,6 +257,38 @@ PAID_APP_PATHS = ["/welcome/", "/restore/", "/report/"]  # noindex, and disallow
 PAID_ONLY_PATHS = PAID_APP_PATHS + PAID_ONLY_PATHS_FR
 
 
+# The footer's privacy sentences. One wording for template pages (partials/footer.html) and
+# passthrough pages (PASSTHROUGH_CHROME), so the two can never disagree with /privacy/.
+def footer_privacy(flags):
+    if flags["analytics"]:
+        parts = ["This site sets no cookies. Visits are counted with Cloudflare Web Analytics, which sets no cookie."]
+    else:
+        parts = ["This site sets no cookies and runs no analytics."]
+    parts.append("It stores only your light/dark choice, in your own browser.")
+    parts.append("Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; "
+                 "their privacy policies apply.")
+    return " ".join(parts)
+
+
+# Site-wide chrome on every passthrough page (the old header and footer), fixed at build time
+# until steps 28–29 lift those pages. (old, new(flags), expected count per page; None = at
+# least once). A passthrough page whose chrome no longer matches fails the build loudly.
+OLD_FOOTER_PRIVACY = ("This site sets no cookies and runs no analytics; it stores only your light/dark choice, in your "
+                      "own browser. Forms open on Tally and subscribing opens Substack; their privacy policies apply.")
+PASSTHROUGH_CHROME = [
+    (OLD_FOOTER_PRIVACY, footer_privacy, 1),   # B1: the forms are Web3Forms, not Tally
+]
+
+
+def fix_passthrough_chrome(text, rel, flags):
+    for old, new, expected in PASSTHROUGH_CHROME:
+        n = text.count(old)
+        if (expected is None and n < 1) or (expected is not None and n != expected):
+            die(f"passthrough chrome: {rel} holds {old!r} {n} time(s), expected {expected or 'at least 1'}")
+        text = text.replace(old, new(flags) if callable(new) else new)
+    return text
+
+
 # Exact-text copy fixes applied to passthrough pages until steps 28–29 lift them into templates.
 # docs/ stays untouched; the build fails if a sentence is no longer there exactly once.
 PASSTHROUGH_FIXES = {
@@ -266,6 +298,18 @@ PASSTHROUGH_FIXES = {
          "Standard-library Python with no network calls: the script itself sends nothing anywhere."),
     ],
 }
+
+
+def passthrough_pages(owned):
+    """Relative paths of the docs/ HTML pages that no template owns (copied through)."""
+    pages = []
+    for root, dirs, files in os.walk(DOCS):
+        dirs.sort()
+        for name in sorted(files):
+            rel = os.path.relpath(os.path.join(root, name), DOCS)
+            if name.endswith(".html") and rel not in owned:
+                pages.append(rel)
+    return pages
 
 
 class BuildError(Exception):
@@ -567,18 +611,19 @@ def build():
 
     # 1. passthrough of every docs/ file a template does not own yet
     copy_tree_sorted(DOCS, out, skip=lambda rel: rel in owned)
-    for rel, fixes in sorted(PASSTHROUGH_FIXES.items()):
-        if rel in owned:
-            continue
+    for rel in passthrough_pages(owned):
         fp = os.path.join(out, rel)
         with open(fp, encoding="utf-8") as f:
             text = f.read()
-        for old, new in fixes:
+        text = fix_passthrough_chrome(text, rel, flags)
+        for old, new in PASSTHROUGH_FIXES.get(rel, []):
             if text.count(old) != 1:
                 die(f"passthrough fix: {rel} no longer holds this sentence exactly once: {old!r}")
             text = text.replace(old, new)
         with open(fp, "w", encoding="utf-8", newline="") as f:
             f.write(text)
+    for rel in sorted(set(PASSTHROUGH_FIXES) - set(passthrough_pages(owned)) - set(owned)):
+        die(f"passthrough fix: {rel} is not a page in docs/")
     # 2. static assets of the new design
     copy_tree_sorted(os.path.join(SITE, "static"), os.path.join(out, "static"),
                      skip=(None if flags["paid_report"] else (lambda rel: rel.startswith("js" + os.sep + "paid"))))
@@ -595,7 +640,7 @@ def build():
                 "legal": cfg["legal"], "forms": cfg["forms"], "analytics": cfg["analytics"],
                 "worker": cfg["worker"], "prices": prices, "products": products, "private": private,
                 "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": TOOLS,
-                "evidence": evidence()}
+                "evidence": evidence(), "footer_privacy": footer_privacy(flags)}
     built = []
     for rel, page in sorted(owned.items()):
         page = {"scripts": [], "modules": [], "og_image": "/assets/og/default.png", "lang": "en",

@@ -119,7 +119,10 @@ def test_home_is_new_template_and_others_pass_through(tmp_path):
     assert r.returncode == 0
     home = (out / "index.html").read_text()
     assert "/static/css/site.css" in home and "Measure the gap between your traders" in home
-    assert (out / "about" / "index.html").read_bytes() == open(os.path.join(REPO, "docs/about/index.html"), "rb").read()
+    # passthrough = the docs/ page byte for byte, except the site-wide chrome fixes (header/footer wording)
+    docs = open(os.path.join(REPO, "docs/about/index.html"), encoding="utf-8").read()
+    flags = {"paid_report": False, "analytics": False, "pilot_checkout": False, "trader_first_home": False}
+    assert (out / "about" / "index.html").read_text(encoding="utf-8") == B.fix_passthrough_chrome(docs, "about/index.html", flags)
 
 
 def test_harvest_check_passes_on_live_pricing():
