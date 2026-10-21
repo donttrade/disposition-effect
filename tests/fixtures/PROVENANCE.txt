@@ -1,0 +1,75 @@
+PROVENANCE OF THE ENGINE FIXTURES (checked 2026-10-20)
+
+Every fixture file is a synthetic re-creation written by make_fixtures.py. No
+third-party export, and no row from any real account, is committed. The files
+copy only the HEADER STRUCTURE (column names, order, date and number style,
+section titles) described by the public sources below. Account, owner-name,
+alias, comment and report-header fields hold the canary CANARY-ZQ7X.
+
+Result of the step-1 sample hunt (RISKIEST ASSUMPTION): no downloadable real
+export was found for any format in the time box. What was found is
+documentation and open-source importer code that names the columns. So every
+broker parser ships verified_format = false ("beta — format not yet
+confirmed") and emits W_UNVERIFIED_FORMAT. The generic template is ours and is
+verified. Cheapest fix: the owner exports one MT5 demo History report as HTML.
+
+Format: MetaTrader 5 report (HTML; Deals, Positions, Orders sections)
+  1. MetaTrader 5 Help, "Trading Report" (metatrader5.com/en/terminal/help/
+     trading_advanced/history_report). Read 2026-10-19 (saved copy). Gives the
+     blocks: Header (broker, account number, owner name, currency, date),
+     Orders, Deals, Positions, Working Orders, Summary, Details. NOTE: it says
+     the Positions block shows OPEN positions only. Whether a closed-positions
+     table exists in current builds is UNVERIFIED; the engine supports both.
+  2. MQL5 article 5436 (mql5.com/en/articles/5436): Deals column order
+     Time, Deal, Symbol, Type, Direction, Volume, Price, Order, Commission,
+     Fee, Swap, Profit, Balance, Comment. Licence: MQL5 site terms; facts only
+     used, nothing copied.
+  3. TradeNote (github.com/Eleven-Trading/TradeNote, src/utils/brokers.js,
+     GPL-3.0, read via cdn.jsdelivr.net 2026-10-20): its MT5 importer finds a
+     "Trade History Report" title and a "Deals" section, uses the same column
+     order (Commission at index 8, Fee 9, Swap 10, Profit 11), lowercase
+     "buy"/"sell" and "in"/"out", "yyyy.mm.dd HH:MM:SS" times, and skips rows
+     whose type is "balance". Facts only; no code copied.
+  Encoding UTF-16LE with BOM: UNVERIFIED (common report); fixture
+  mt5/deals_netting_utf16.htm tests it.
+
+Format: MetaTrader 4 statement (HTML, one row per round trip)
+  MetaTrader 4 Help, "Account History" (metatrader4.com/en/trading-platform/
+  help/overview/terminal/terminal_account_history): columns Order, Time, Type,
+  Size, Symbol, Price, S/L, T/P, Time, Price, Commission, Taxes, Swap, Profit.
+  Section titles "Closed Transactions:", "Open Trades:", "Working Orders:",
+  "Summary:" and the "Ticket"/"Item" spellings are UNVERIFIED (from memory of
+  the detailed statement); both spellings are accepted.
+
+Format: IBKR Flex Query, Trades (CSV)
+  1. IBKR Reporting Reference, Trades Flex fields (ibkrguides.com/
+     reportingreference/reportguide/tradesfq.htm) and codes (codes_flex.htm):
+     field display names; O = opening, C = closing, P = partial.
+  2. Tapeboard import manual (tapeboard.com/manual/import-ibkr-flex-csv):
+     expects Symbol, AssetClass, CurrencyPrimary, TradeDate, DateTime,
+     Quantity, Price, IBCommission, Buy/Sell.
+  3. TradeNote (as above, GPL-3.0): Trade Confirmation Flex with
+     ClientAccountID, AssetClass, Date/Time ("yyyyMMdd;HHmmss"),
+     CurrencyPrimary, Buy/Sell ("BUY"/"SELL"), Code (contains O or C),
+     Symbol, Quantity (signed), Price, Commission, Proceeds. Its README gives
+     the Flex settings: CSV, column headers yes, header/trailer records no,
+     date yyyyMMdd, time HHmmss, separator ";".
+  Fixtures: ibkr/activity_flex.csv (sources 1–2 spellings),
+  ibkr/trade_confirm_fx.csv (source 3 spellings + FXRateToBase,
+  FifoPnlRealized, LevelOfDetail). Realized P&L being net of commission is
+  UNVERIFIED.
+
+Format: Tradovate Orders report (CSV)
+  1. TradeZella integration page (tradezella.com/integrations/tradovate):
+     column list orderId, Account, Order ID, B/S, Contract, Product, Product
+     Description, avgPrice, filledQty, Fill Time, lastCommandId, Status, ...,
+     Filled Qty, Avg Fill Price.
+  2. TradeNote (as above, GPL-3.0): keeps Status "Filled" after trimming,
+     trims " Buy"/" Sell", reads Fill Time and a Date that may have a 2-digit
+     year. Month-first dates are UNVERIFIED. No commissions in this report.
+
+Format: generic template and round-trip layout
+  Ours (TRADER-REPORT-INPUT-FORMATS §2D), aligned with Tradervue's generic
+  format (tradervue.com/help/generic) and TradeZella's generic CSV help
+  article (round-trip columns Open Time, Close Time, Symbol, Direction,
+  Volume, Open Price, Close Price; UNVERIFIED as exact spellings).

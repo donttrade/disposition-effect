@@ -8,3 +8,10 @@ f4/
 *.prepatch
 volmom/cache/
 momentum/
+
+# v2 rebuild
+site/_site/
+site/config/private.toml
+worker/.dev.vars
+.pytest_cache/
+tests/fixtures/generated/
