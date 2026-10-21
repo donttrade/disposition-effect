@@ -3,7 +3,7 @@
   'use strict';
   var root = document.documentElement;
   if (!root.classList.contains('dt-motion')) return;
-  var raf = 0, nums = [], io = null, RV = ['rv', 'rv-in', 'rv-d1', 'rv-d2', 'rv-d3'];
+  var raf = 0, nums = [], io = null, RV = ['rv', 'rv-in'];
 
   function done(el) { el.removeAttribute('data-cu'); el.classList.remove('cu-on'); el.classList.add('cu-done'); }
   function stop() {
@@ -29,7 +29,7 @@
   function show(el) {
     if (el === dash) { el.classList.remove('is-waiting'); if (nums.length) count(); return; }
     var p = parts(el);
-    p.forEach(function (k) { k.classList.add('rv-in'); });
+    p.forEach(function (k, i) { setTimeout(function () { k.classList.add('rv-in'); }, i < 4 ? i * 60 : 0); });
     setTimeout(function () { p.forEach(un); }, 800);
   }
 
@@ -49,7 +49,7 @@
     if (dash && below(dash)) { dash.classList.add('is-waiting'); io.observe(dash); } else if (nums.length) count();
     if (fresh) {
       [].filter.call(document.querySelectorAll('[data-reveal]'), below).forEach(function (el) {
-        parts(el).forEach(function (k, i) { k.classList.add('rv'); if (i && i < 4) k.classList.add('rv-d' + i); });
+        parts(el).forEach(function (k) { k.classList.add('rv'); });
         io.observe(el);
       });
     }

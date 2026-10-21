@@ -648,13 +648,10 @@ pre { font-family: var(--font-mono); font-size: var(--fs-0); background: var(--s
   :is(.btn, .lifted .btn-2, .lifted .subscribe button, .lifted .next-block button):hover:not([disabled], [aria-disabled="true"])::after { opacity: 1; }
 }
 
-/* M2 fade-up: .rv only below the fold at load (motion.js) */
+/* M2 fade-up: .rv only below the fold at load; stagger = motion.js timers (a transition-delay is not composited) */
 .dt-motion .rv { opacity: 0; transform: translateY(var(--rise)); }
 .dt-motion .rv.rv-in { opacity: 1; transform: none;
   transition: opacity var(--dur-reveal) var(--ease-out), transform var(--dur-reveal) var(--ease-out); }
-.dt-motion .rv.rv-d1 { transition-delay: 60ms; }
-.dt-motion .rv.rv-d2 { transition-delay: 120ms; }
-.dt-motion .rv.rv-d3 { transition-delay: 180ms; }
 .dt-motion .rv:focus-within { opacity: 1; transform: none; }
 
 /* M3 hero: checks/make_hero_dashboard.py */
