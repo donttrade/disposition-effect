@@ -58,6 +58,9 @@ Format: IBKR Flex Query, Trades (CSV)
   ibkr/trade_confirm_fx.csv (source 3 spellings + FXRateToBase,
   FifoPnlRealized, LevelOfDetail). Realized P&L being net of commission is
   UNVERIFIED.
+  ibkr/cnh_offshore_yuan.csv (synthetic, sources 1–2 spellings): CurrencyPrimary
+  CNH, the offshore-yuan code IBKR writes for CNH-settled trades; CNH is not an
+  ISO 4217 code but is on the engine's currency list.
 
 Format: Tradovate Orders report (CSV)
   1. TradeZella integration page (tradezella.com/integrations/tradovate):

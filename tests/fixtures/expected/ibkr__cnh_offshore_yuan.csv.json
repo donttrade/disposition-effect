@@ -1,0 +1,196 @@
+{
+ "noise": {
+  "checks": [
+   {
+    "label": "not enough trades to tell",
+    "method": "bootstrap-t",
+    "n_a": 2,
+    "n_b": null,
+    "p": null,
+    "stat": "expectancy",
+    "value": null
+   },
+   {
+    "label": "not enough trades to tell",
+    "method": "label permutation",
+    "n_a": 1,
+    "n_b": 1,
+    "p": null,
+    "stat": "hold_gap_s",
+    "value": null
+   },
+   {
+    "label": "not enough trades to tell",
+    "method": "order shuffle",
+    "n_a": 2,
+    "n_b": null,
+    "p": null,
+    "stat": "longest_losing_streak",
+    "value": null
+   }
+  ],
+  "limited": false,
+  "n_used": 2
+ },
+ "pgr_plr": {
+  "coverage_pct": null,
+  "pg": 0,
+  "pl": 0,
+  "rg": 1,
+  "rl": 1
+ },
+ "result": {
+  "currency_groups": {
+   "CNH": 2
+  },
+  "executions": [
+   {
+    "currency": "CNH",
+    "fee": 5.0,
+    "multiplier": 1,
+    "oc": "open",
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 50.0,
+    "qty": 100.0,
+    "row": 2,
+    "side": "buy",
+    "symbol": "DEMOA",
+    "ts": 1788341400000
+   },
+   {
+    "currency": "CNH",
+    "fee": 5.0,
+    "multiplier": 1,
+    "oc": "close",
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 51.2,
+    "qty": 100.0,
+    "row": 3,
+    "side": "sell",
+    "symbol": "DEMOA",
+    "ts": 1788343200000
+   },
+   {
+    "currency": "CNH",
+    "fee": 5.0,
+    "multiplier": 1,
+    "oc": "open",
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 20.0,
+    "qty": 200.0,
+    "row": 4,
+    "side": "buy",
+    "symbol": "DEMOB",
+    "ts": 1788427800000
+   },
+   {
+    "currency": "CNH",
+    "fee": 5.0,
+    "multiplier": 1,
+    "oc": "close",
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 19.5,
+    "qty": 200.0,
+    "row": 5,
+    "side": "sell",
+    "symbol": "DEMOB",
+    "ts": 1788433200000
+   }
+  ],
+  "format": "ibkr_flex",
+  "skipped": {},
+  "trades": [
+   {
+    "close_ts": 1788343200000,
+    "currency": "CNH",
+    "dir": "long",
+    "entry_vwap": 50.0,
+    "exit_vwap": 51.2,
+    "fees": 10.0,
+    "fills_n": 2,
+    "hold_s": 1800,
+    "id": "t1",
+    "open_ts": 1788341400000,
+    "pnl": 110.00000000000028,
+    "pnl_gross": 120.00000000000028,
+    "pnl_source": "computed",
+    "pnl_unit": "CNH",
+    "qty": 100.0,
+    "symbol": "DEMOA"
+   },
+   {
+    "close_ts": 1788433200000,
+    "currency": "CNH",
+    "dir": "long",
+    "entry_vwap": 20.0,
+    "exit_vwap": 19.5,
+    "fees": 10.0,
+    "fills_n": 2,
+    "hold_s": 5400,
+    "id": "t2",
+    "open_ts": 1788427800000,
+    "pnl": -110.0,
+    "pnl_gross": -100.0,
+    "pnl_source": "computed",
+    "pnl_unit": "CNH",
+    "qty": 200.0,
+    "symbol": "DEMOB"
+   }
+  ],
+  "tz_label": "as exported",
+  "verified_format": false,
+  "warnings": [
+   {
+    "code": "W_UNVERIFIED_FORMAT",
+    "n": 0
+   }
+  ]
+ },
+ "stats": {
+  "avg_loss": -110.0,
+  "avg_win": 110.00000000000028,
+  "expectancy": 1.4210854715202004e-13,
+  "gross_loss": -110.0,
+  "gross_profit": 110.00000000000028,
+  "hold_median_loss_s": 5400,
+  "hold_median_win_s": 1800,
+  "hold_ratio": 3.0,
+  "largest_loss": -110.0,
+  "largest_win": 110.00000000000028,
+  "long": {
+   "losses": 1,
+   "n": 2,
+   "pnl": 2.8421709430404007e-13,
+   "win_rate": 0.5,
+   "wins": 1
+  },
+  "losses": 1,
+  "max_consec_losses": {
+   "n": 1,
+   "pnl": -110.0
+  },
+  "max_consec_wins": {
+   "n": 1,
+   "pnl": 110.00000000000028
+  },
+  "max_drawdown_abs": 110.0,
+  "max_drawdown_pct": null,
+  "n": 2,
+  "net_pnl": 2.8421709430404007e-13,
+  "profit_factor": 1.0000000000000027,
+  "scratch": 0,
+  "short": {
+   "losses": 0,
+   "n": 0,
+   "pnl": 0.0,
+   "win_rate": null,
+   "wins": 0
+  },
+  "win_rate": 0.5,
+  "wins": 1
+ }
+}

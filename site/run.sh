@@ -23,7 +23,8 @@ case "${1:-}" in
     ;;
   test-engine) python3 -m pytest -q tests/test_engine_ref.py tests/test_engine_golden.py tests/test_engine_stats.py tests/test_engine_limits.py tests/test_alias_parity.py tests/test_sniff.py ;;
   test-worker)
-    if [ -d "$REPO/../dt-private" ]; then (cd "$REPO/../dt-private" && node --test); else echo "dt-private not present: the paid-analysis server is kept out of this repo"; fi ;;
+    # DT_PUBLIC_REPO: the server's parity tests (ISO list, vendored noise.js) compare with THIS checkout
+    if [ -d "$REPO/../dt-private" ]; then (cd "$REPO/../dt-private" && DT_PUBLIC_REPO="$REPO" node --test); else echo "dt-private not present: the paid-analysis server is kept out of this repo"; fi ;;
   site-tests) python3 site/build.py && python3 checks/tests/run_site_tests.py "${2:-site/_site}" ;;
   bundle)
     if [ "${DT_BUNDLE:-}" != "yes" ]; then echo "bundle replaces docs/ — run with DT_BUNDLE=yes (step 30, after the owner's review)"; exit 1; fi

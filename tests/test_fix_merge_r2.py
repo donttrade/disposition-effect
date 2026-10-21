@@ -653,3 +653,35 @@ def test_nit13_paid_footer_mentions_the_kept_fingerprints(paid_site):
     privacy = L.visible_text((paid_site["out"] / "privacy" / "index.html").read_text(encoding="utf-8"))
     assert "scrambled fingerprints of the trades in your first report" in privacy   # what the footer now points at
     assert line in (paid_site["out"] / "about" / "index.html").read_text(encoding="utf-8")
+
+
+# ------------------------------------------------------------------ Extra: CNH (offshore yuan, written by IBKR)
+CNH_FIX = os.path.join(HERE, "fixtures", "ibkr", "cnh_offshore_yuan.csv")
+
+
+def test_cnh_is_on_the_reference_list_and_read_as_a_currency():
+    sys.path.insert(0, os.path.join(HERE, "reference"))
+    import engine_ref as E
+    assert "CNH" in E.ISO_CURRENCIES and "CNY" in E.ISO_CURRENCIES and E.ISO_CURRENCIES == sorted(E.ISO_CURRENCIES)
+    r = E.parse_file(open(CNH_FIX, "rb").read())
+    assert r["currency_groups"] == {"CNH": 2} and {t["pnl_unit"] for t in r["trades"]} == {"CNH"}
+    assert "W_CURRENCY_IGNORED" not in {w["code"] for w in r["warnings"]}   # before: the column was ignored, unit "points"
+
+
+def test_cnh_file_on_the_trade_stats_page(browser, built_site):
+    ctx = browser.new_context()
+    page = ctx.new_page()
+    page.goto(built_site["url"] + TS)
+    page.set_input_files("#ts-file", CNH_FIX)
+    page.wait_for_selector("#ts-out:not([hidden])", timeout=30000)
+    text = page.inner_text("#ts-out")
+    ctx.close()
+    assert "Amounts are in CNH." in text and "2 closed trades" in text and "price points" not in text
+
+
+def test_cnh_on_the_server_list_too():
+    src = open(os.path.join(REPO, "..", "dt-private", "src", "core", "currencies.mjs"), encoding="utf-8").read() \
+        if os.path.isdir(os.path.join(REPO, "..", "dt-private")) else None
+    if src is None:
+        pytest.skip("dt-private not present next to this checkout")
+    assert "'CLP', 'CNH', 'CNY'," in src
