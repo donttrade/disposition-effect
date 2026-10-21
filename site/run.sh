@@ -28,7 +28,7 @@ case "${1:-}" in
   site-tests) python3 site/build.py && python3 checks/tests/run_site_tests.py "${2:-site/_site}" ;;
   bundle)
     if [ "${DT_BUNDLE:-}" != "yes" ]; then echo "bundle replaces docs/ — run with DT_BUNDLE=yes (step 30, after the owner's review)"; exit 1; fi
-    python3 site/build.py
+    DT_REQUIRE_LAUNCH_DATE=1 python3 site/build.py   # [legal] launch_date must be set to the push day
     rm -rf docs && cp -R site/_site docs && rm -rf docs/dev && printf 'donttrade.ca\n' > docs/CNAME && touch docs/.nojekyll
     echo "docs/ replaced from site/_site" ;;
   *) sed -n '2,10p' "$0"; exit 1 ;;

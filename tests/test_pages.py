@@ -19,6 +19,7 @@ sys.path.insert(0, os.path.join(REPO, "checks"))
 sys.path.insert(0, os.path.join(REPO, "site"))
 from a11y import axe_violations, horizontal_overflow  # noqa: E402
 import build as B  # noqa: E402
+from test_legal import LAUNCH_HUMAN  # noqa: E402  (Manager C3: [legal] launch_date)
 
 PAGES = ["/", "/for-traders/", "/for-firms/", "/pricing/", "/start/", "/for-platforms/", "/start/thanks/",
          "/for-traders/thanks/", "/thanks/", "/privacy/", "/terms/"]
@@ -167,7 +168,7 @@ def test_wording_rules(built_site, path):
             assert V1_NEG.search(sent), sent
     # "Trial" only in the formerly line; no regular-price wording; no competitor price talk
     for m in re.finditer(r"\btrial\b", text, re.I):
-        assert "called “Trial” before 22 Oct 2026" in text[max(0, m.start() - 10):m.end() + 30], text[m.start() - 60:m.end() + 60]
+        assert f"called “Trial” before {LAUNCH_HUMAN}" in text[max(0, m.start() - 10):m.end() + 30], text[m.start() - 60:m.end() + 60]
     assert not re.search(r"standard (prices?|after launch)|regular price|\$49|\$99", text, re.I)
 
 
@@ -258,7 +259,7 @@ def test_form_ref_capture_and_fields(browser, built_site, path):
 def test_for_firms_pilot_rename_and_prices(built_site):
     html = html_of(built_site, "/for-firms/")
     text = visible(html)
-    assert "Pilot (called “Trial” before 22 Oct 2026)" in text
+    assert f"Pilot (called “Trial” before {LAUNCH_HUMAN})" in text
     assert text.count("Trial") == 1
     assert "Start a Pilot — $745 USD" in text
     assert "Card payments are accepted through a secure Stripe link, sent only after you accept the scope." in text

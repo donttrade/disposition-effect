@@ -30,7 +30,10 @@ from a11y import axe_violations, horizontal_overflow  # noqa: E402
 FAKE = {"seller_legal_name": "Zzqx Qqvendor Holdings", "premises_address": "PO Box 9917, Zzqxville ON K9Z 9Z9",
         "phone": "+1 555 555 0234"}
 SITE_TOML = os.path.join(REPO, "site", "config", "site.toml")
-TERMS_VERSION = __import__("tomllib").load(open(SITE_TOML, "rb"))["legal"]["terms_version"]  # bumped with every legal edit
+# [legal] launch_date (Manager C3): the terms version and every launch-dated statement; empty = the build date
+_LAUNCH = B.set_launch_date(dict(__import__("tomllib").load(open(SITE_TOML, "rb"))["legal"]), SITE_TOML)
+TERMS_VERSION = _LAUNCH.isoformat()
+LAUNCH_HUMAN = f"{_LAUNCH.day} {B.MONTHS[_LAUNCH.month - 1]} {_LAUNCH.year}"
 
 
 # Well-formed fake values for a paid build that needs no escape variable (Tester D10).
@@ -138,7 +141,7 @@ def test_flag_off_legal_pages(built_site):
     privacy = (built_site["out"] / "privacy" / "index.html").read_text(encoding="utf-8")
     assert "Web3Forms" in privacy and "pen name" in privacy and "runs no analytics" in privacy
     terms = (built_site["out"] / "terms" / "index.html").read_text(encoding="utf-8")
-    assert "waitlist only for now: nothing is sold" in terms and "Pilot (called “Trial” before 22 Oct 2026)" in terms
+    assert "waitlist only for now: nothing is sold" in terms and f"Pilot (called “Trial” before {LAUNCH_HUMAN})" in terms
 
 
 def test_no_tally_anywhere_in_the_build(built_site):

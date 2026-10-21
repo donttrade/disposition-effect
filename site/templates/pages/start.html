@@ -14,7 +14,7 @@
   <section class="section" aria-labelledby="firm">
     <h2 id="firm">Prop firms, brokers and copy-trading platforms</h2>
     <p>Start with a {{ pilot.name }}: one disposition figure, measured on your own records, {{ pilot.price_usd|usd }} USD. {{ pilot.credit_rule }} of delivery. Want a Snapshot, Memo or Outcomes pack, the <a href="/for-firms/#copy-leader">copy-leader test</a> or a <a href="/for-firms/#claims-test">claims test</a> instead? Use the same form and say so.</p>
-    <p class="small muted">{{ pilot.name }} (called “{{ pilot.former_name }}” before 22 Oct 2026). <a href="/pricing/#firms">Firm pricing</a> · <a href="/terms/#trial">{{ pilot.name }} terms</a></p>
+    <p class="small muted">{{ pilot.name }} (called “{{ pilot.former_name }}” before {{ legal.launch_human }}). <a href="/pricing/#firms">Firm pricing</a> · <a href="/terms/#trial">{{ pilot.name }} terms</a></p>
     {%- if flags.pilot_checkout %}
     {%- with heading_id = "firm" %}{% include "partials/pilot_block.html" %}{% endwith %}
     <details><summary id="sf-other-h">Asking about a Snapshot, Memo, Outcomes pack or another test?</summary>

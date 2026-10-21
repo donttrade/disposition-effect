@@ -12,7 +12,7 @@ promises = ["improve your returns", "become profitable", "win more", "edge guara
 cause = ["you lost $", "because of your"]
 # Orchestrator rule (21 Oct): never call donttrade's work, or a firm's figure, any of these.
 assurance = ["certified", "verified", "audited", "certification", "certify", "verification", "audit", "audits"]
-# Trial was renamed Pilot on 22 Oct 2026 (plan step 14); only the "formerly" line may name it.
+# Trial was renamed Pilot on launch day (plan step 14; [legal] launch_date); only the "formerly" line may name it.
 renamed = ["trial"]
 # Competition Act regular-price risk (DECISIONS ADDED 20 Oct): no "standard price after launch".
 # The old product name used as a call to action; checked on passthrough pages too, where
@@ -22,6 +22,8 @@ regular_price = ["standard price", "standard prices", "regular price", "after la
 ai_tells = ["unlock", "unlocks", "unlocked", "elevate", "supercharge", "#1", "trusted by"]
 
 [allow]
+# the one place the old product name may appear: "called “Trial” before <[legal] launch_date>" (Manager C3)
+patterns = ['called “Trial” before \d{1,2} (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4}']
 # Phrases in which a banned word is fine (negations and the required disclaimer).
 phrases = [
   "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.",
@@ -45,8 +47,6 @@ phrases = [
   "It is not an audit",
   "Not an audit and not an assurance engagement",
   "Isn’t this a kind of audit?",
-  # the one place the old product name may appear
-  "called “Trial” before 22 Oct 2026",
   # FAQ questions whose answer on the page starts with "No."
   "Is this investment advice?",
   "Is this advice?",

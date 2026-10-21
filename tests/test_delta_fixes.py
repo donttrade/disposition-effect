@@ -255,3 +255,63 @@ def test_d6_an_address_without_its_civic_or_box_number_is_refused_tester_repro(a
 ])
 def test_d6_civic_and_box_addresses_are_accepted(addr):
     assert B.seller_problem("premises_address", addr) is None, (addr, B.seller_problem("premises_address", addr))
+
+
+# ------------------------------------------------------------------ Manager C3: one launch_date, never in the future
+def _toml_launch(tmp, value, extra=""):
+    src = open(os.path.join(REPO, "site", "config", "site.toml"), encoding="utf-8").read()
+    src, n = re.subn(r'(?m)^launch_date = "[^"]*"', f'launch_date = "{value}"{extra}', src)
+    assert n == 1
+    p = tmp / f"launch-{value or 'empty'}.toml"
+    p.write_text(src, encoding="utf-8")
+    return str(p)
+
+
+LAUNCH_PAGES = ["/pricing/", "/for-firms/", "/start/", "/terms/"]
+
+
+def test_c3_launch_date_dates_every_launch_statement(tmp_path):
+    from test_legal import build
+    r, out = build(tmp_path, "set", DT_SITE_TOML=_toml_launch(tmp_path, "2026-10-20"))
+    assert r.returncode == 0, r.stderr
+    for path in LAUNCH_PAGES:
+        assert "called “Trial” before 20 Oct 2026" in _visible(out, path), path
+    assert "<td>20 Oct 2026</td>" in (out / "pricing" / "index.html").read_text(encoding="utf-8")
+    for path in ("/terms/", "/privacy/"):
+        assert "Version 2026-10-20." in _visible(out, path), path
+    for t in ("for-firms", "start", "pricing", "terms"):
+        src = open(os.path.join(REPO, "site", "templates", "pages", t + ".html"), encoding="utf-8").read()
+        assert "22 Oct 2026" not in src and "2026-10-2" not in src, t
+
+
+def test_c3_empty_launch_date_is_the_build_date(tmp_path):
+    import datetime as dt
+    from test_legal import build
+    r, out = build(tmp_path, "empty", DT_SITE_TOML=_toml_launch(tmp_path, ""))
+    assert r.returncode == 0, r.stderr
+    d = dt.date.today()
+    assert f"Version {d.isoformat()}." in _visible(out, "/terms/")
+    assert f"called “Trial” before {d.day} {B.MONTHS[d.month - 1]} {d.year}" in _visible(out, "/pricing/")
+
+
+@pytest.mark.parametrize("value,env,msg", [
+    ("2099-01-01", {}, "after the build date"),
+    ("2026-02-30", {}, "not a real date"),
+    ("23 Oct 2026", {}, "not YYYY-MM-DD"),
+    ("", {"DT_REQUIRE_LAUNCH_DATE": "1"}, "set it to the push day"),
+])
+def test_c3_a_future_bad_or_missing_launch_date_fails_the_build(tmp_path, value, env, msg):
+    from test_legal import build
+    r, _ = build(tmp_path, "bad", DT_SITE_TOML=_toml_launch(tmp_path, value), **env)
+    assert r.returncode == 1 and msg in r.stderr, r.stderr
+
+
+def test_c3_the_old_terms_version_key_is_refused(tmp_path):
+    from test_legal import build
+    r, _ = build(tmp_path, "old", DT_SITE_TOML=_toml_launch(tmp_path, "2026-10-20", '\nterms_version = "2026-10-23"'))
+    assert r.returncode == 1 and "terms_version is not a known key" in r.stderr, r.stderr
+
+
+def test_c3_bundle_requires_the_launch_date():
+    sh = open(os.path.join(REPO, "site", "run.sh"), encoding="utf-8").read()
+    assert "DT_REQUIRE_LAUNCH_DATE=1 python3 site/build.py" in sh[sh.index("bundle)"):]
