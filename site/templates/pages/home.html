@@ -13,7 +13,7 @@
         <h1 id="hero">See where your trades leave your plan.</h1>
         <p class="lede">A habit report built from your own trade history. It measures behaviour, like holding losing trades longer than winning ones, and tests whether each pattern is more than noise. It doesn’t tell you what to trade.</p>
         <p class="btn-row"><a class="btn" href="/pricing/#traders">Get the habit report — {{ r.price_usd|usd }}</a> <a class="btn btn-secondary" href="/tools/trade-stats/">Free trade stats</a></p>
-        <p class="small">{{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers. One time, in US dollars, with one free re-test 30 to 60 days later. A full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying.</p>
+        <p class="small">{{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers. One time, in US dollars, with one free re-test 30 to 60 days after your first report. A full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying.</p>
         <p class="small muted">Not investment advice. <a href="/pricing/#before-you-pay">Before you pay</a></p>
       </div>
       <figure class="span-5 hero-shot">
@@ -50,7 +50,7 @@
     <ol class="steps">
       <li><strong>Export your history.</strong> A MetaTrader 5 or 4 report, an IBKR Flex Query or a Tradovate orders export (all three in beta), or the donttrade CSV template.</li>
       <li><strong>Your browser reads it.</strong> It removes names, account numbers and symbols, and sends our server only stripped trade numbers, which are not stored.</li>
-      <li><strong>Read your report.</strong> Run the free re-test on the same account 30 to 60 days later.</li>
+      <li><strong>Read your report.</strong> Run the free re-test on the same account 30 to 60 days after your first report.</li>
     </ol>
     <p><a href="/privacy/#report">Exactly what is sent and kept</a></p>
   </section>
