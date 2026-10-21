@@ -35,6 +35,7 @@ def rules(html, paid=False, analytics=False, priv=()):
     ("<p>Standard prices after launch apply.</p>", "banned:regular_price"),
     ('<a href="https://tally.so/r/x">form</a>', "tally"),
     ("<p>Only $59 today.</p>", "price_literal"),
+    ("<p>Then $49 after the founding offer.</p>", "price_literal"),  # retired 20 Oct: allowed nowhere
     ("<p>key " + "sk_" + "live_abcdefgh1234</p>", "secret"),  # built at runtime so repo secret scans stay clean
     ('<div data-requires-flag="paid_report">x</div>', "flag:paid_markup"),
     ('<script type="application/ld+json">{"@type": "Product"}</script>', "flag:product_jsonld"),

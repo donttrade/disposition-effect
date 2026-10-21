@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.join(REPO, "site"))
 from a11y import axe_violations, horizontal_overflow  # noqa: E402
 import build as B  # noqa: E402
 
-PAGES = ["/", "/for-traders/", "/for-firms/"]
+PAGES = ["/", "/for-traders/", "/for-firms/", "/pricing/"]
 # Links to anchors that the NEXT step builds. Each step that builds one removes it here.
 FORWARD = set()
 
@@ -29,6 +29,8 @@ FORWARD = set()
 OLD_IDS = {
     "/for-traders/": ["founding"],
     "/for-firms/": ["what-it-costs", "copy-leader", "claims-test"],
+    "/pricing/": ["firms", "copy-leader", "claims-test", "platforms", "traders", "researchers", "payment",
+                  "refunds", "history", "questions"],
 }
 # v1 rule (checks/tests/test_site_content.py): an assurance word only in a sentence with a negation.
 V1_BANNED = re.compile(r"\b(certif(?:ied|ication|y)|verif(?:ied|ication|y)|audit(?:ed|s)?)\b(?!/)", re.I)
@@ -263,3 +265,17 @@ def test_for_traders_waitlist_and_privacy_wording(built_site):
     assert "beta" in text and "not uploaded" in text
     for bad in ("nothing leaves", "never leaves", "anonymous"):
         assert bad not in text.lower()
+
+
+# ------------------------------------------------------------------ step 15: pricing
+def test_pricing_prices_match_prices_json(built_site):
+    import json
+    prices = json.load(open(os.path.join(REPO, "site", "config", "prices.json")))
+    html = html_of(built_site, "/pricing/")
+    rows = re.findall(r'<tr><th scope="row">([^<]+)</th>.*?<td class="num">([^<]+)</td></tr>', html, re.S)
+    by_name = {p["name"]: B.usd(p["price_usd"]) for p in prices["products"] if p["audience"] == "firm"}
+    assert {n: v for n, v in rows if n in by_name} == by_name
+    text = visible(html)
+    assert "$1,500 for a Memo" in text  # 25% of the Memo price, computed from the rule
+    assert "$39 founding price for the first 100 buyers" in text
+    assert 'role="tablist"' not in html and "Before you pay" not in text

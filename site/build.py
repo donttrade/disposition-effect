@@ -84,6 +84,8 @@ PAGES += [
 # Audience pages (step 14). Titles ≤ 60 and descriptions ≤ 155 characters (SEO-PLAN §3.1).
 # Search terms behind these titles are from autocomplete only; volumes are UNVERIFIED.
 FORM_JS = "/static/js/form-ref.js"
+# The Product JSON-LD description (paid_report only): the same words as the pricing table row.
+PRODUCT_TEXT = "Five habits measured in your own trades, with historical dollar figures, plus one re-test."
 PAGES += [
     {"template": "pages/for-traders.html", "path": "/for-traders/", "requires_flag": None, "updated": "2026-10-21",
      "crumb": "Individual traders", "og_image": "/assets/og/traders.png", "scripts": [FORM_JS],
@@ -168,13 +170,14 @@ PAID_PAGES = [
      "description": "Your donttrade habit report, built from your own trade file."},
 ]
 PAGES += PAID_PAGES
-# Flag-on /pricing/: Traders | Firms tabs. Its firm and shared sections are lifted
-# word for word from today's live page (see lift_sections), so with the flag off the
-# old page passes through untouched.
-PAGES.append({"template": "pages/pricing_paid.html", "path": "/pricing/", "requires_flag": "paid_report",
-              "scripts": ["/static/js/tabs.js", "/static/js/print.js"], "title": "Pricing — donttrade",
-              "crumb": "Pricing", "updated": "2026-10-21",
-              "description": "Published prices in USD. Every price on this site comes from one list."})
+# /pricing/ (step 15): one template. Flag off: sections stacked, firms first. Flag on:
+# Traders | Firms tabs (tabs.js) and the printable "Before you pay" block (print.js).
+PAGES.append({"template": "pages/pricing.html", "path": "/pricing/", "requires_flag": None,
+              "scripts_if_paid": ["/static/js/tabs.js", "/static/js/print.js"], "product": PRODUCT_TEXT,
+              "crumb": "Pricing", "updated": "2026-10-21", "og_image": "/assets/og/pricing.png",
+              "title": "Pricing: Published Prices for Firms and Traders",
+              "description": "Published prices in USD for prop firms, brokers, trading platforms and traders, the "
+                             "same for everyone and fixed in writing before anyone sees data."})
 
 # Paths that may exist only when paid_report = true.
 PAID_ONLY_PATHS = ["/welcome/", "/restore/", "/report/"]
@@ -454,6 +457,8 @@ def build():
     for rel, page in sorted(owned.items()):
         page = {"scripts": [], "modules": [], "og_image": "/assets/og/default.png", "lang": "en",
                 "alternates": [], **page}
+        if flags["paid_report"]:
+            page["scripts"] = page["scripts"] + page.get("scripts_if_paid", [])
         extra = {"sample_csv": sample_csv()} if page.get("sample") else {}
         html = env.get_template(page["template"]).render(page=page, csp=csp_for(page, cfg), **base_ctx, **extra)
         if html.count(LD_MARKER) != 1:
