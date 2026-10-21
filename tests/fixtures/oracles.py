@@ -419,3 +419,16 @@ ORACLES["generic_roundtrip/fn3_close_before_open_swapped.csv"] = {
     "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_DST": 1, "W_CLOSE_BEFORE_OPEN": 1},
     "skipped": {},
 }
+
+# Coordinator item (round 2): IBKR writes CNH (offshore yuan, not an ISO 4217 code) for
+# CNH-settled trades. CNH is on the currency list, so the Currency column is read, not ignored.
+# DEMOA long 100: (51.20 - 50.00) x 100 = 120.00 - fees 10.00 = 110.00 ; 09:30 -> 10:00 = 1800 s
+# DEMOB long 200: (19.50 - 20.00) x 200 = -100.00 - fees 10.00 = -110.00 ; 09:30 -> 11:00 = 5400 s
+ORACLES["ibkr/cnh_offshore_yuan.csv"] = {
+    "trades": [dict(symbol="DEMOA", dir="long", qty=100, pnl=110.0, pnl_gross=120.0, fees=10.0, hold_s=1800,
+                    pnl_unit="CNH", currency="CNH"),
+               dict(symbol="DEMOB", dir="long", qty=200, pnl=-110.0, pnl_gross=-100.0, fees=10.0, hold_s=5400,
+                    pnl_unit="CNH", currency="CNH")],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0},
+    "skipped": {},
+}

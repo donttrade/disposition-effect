@@ -108,7 +108,8 @@ export const NUMERIC_FIELDS = {
   generic: ['qty', 'price', 'fees'],
 };
 
-// ISO 4217 currency codes (the active list, plus the metal and fund codes; not XTS or XXX).
+// ISO 4217 currency codes (the active list, plus the metal and fund codes; not XTS or XXX),
+// plus CNH: offshore yuan, not an ISO code but what IBKR writes for CNH-settled trades.
 // A Currency column is read only if every non-empty cell is one of these: anything else
 // (a name shifted in by an unquoted comma, a note, a fragment like "ANN") means the column
 // is not what its header says, so it is ignored as a whole, with a warning that never
@@ -116,7 +117,7 @@ export const NUMERIC_FIELDS = {
 export const ISO_CURRENCIES = Object.freeze([
   'AED', 'AFN', 'ALL', 'AMD', 'ANG', 'AOA', 'ARS', 'AUD', 'AWG', 'AZN', 'BAM', 'BBD', 'BDT', 'BGN', 'BHD',
   'BIF', 'BMD', 'BND', 'BOB', 'BOV', 'BRL', 'BSD', 'BTN', 'BWP', 'BYN', 'BZD', 'CAD', 'CDF', 'CHE', 'CHF',
-  'CHW', 'CLF', 'CLP', 'CNY', 'COP', 'COU', 'CRC', 'CUC', 'CUP', 'CVE', 'CZK', 'DJF', 'DKK', 'DOP', 'DZD',
+  'CHW', 'CLF', 'CLP', 'CNH', 'CNY', 'COP', 'COU', 'CRC', 'CUC', 'CUP', 'CVE', 'CZK', 'DJF', 'DKK', 'DOP', 'DZD',
   'EGP', 'ERN', 'ETB', 'EUR', 'FJD', 'FKP', 'GBP', 'GEL', 'GHS', 'GIP', 'GMD', 'GNF', 'GTQ', 'GYD', 'HKD',
   'HNL', 'HTG', 'HUF', 'IDR', 'ILS', 'INR', 'IQD', 'IRR', 'ISK', 'JMD', 'JOD', 'JPY', 'KES', 'KGS', 'KHR',
   'KMF', 'KPW', 'KRW', 'KWD', 'KYD', 'KZT', 'LAK', 'LBP', 'LKR', 'LRD', 'LSL', 'LYD', 'MAD', 'MDL', 'MGA',
