@@ -1,4 +1,37 @@
 {
+ "noise": {
+  "checks": [
+   {
+    "label": "not enough trades to tell",
+    "method": "sign-flip permutation",
+    "n_a": 3,
+    "n_b": null,
+    "p": null,
+    "stat": "expectancy",
+    "value": null
+   },
+   {
+    "label": "not enough trades to tell",
+    "method": "label permutation",
+    "n_a": 2,
+    "n_b": 1,
+    "p": null,
+    "stat": "hold_gap_s",
+    "value": null
+   },
+   {
+    "label": "not enough trades to tell",
+    "method": "order shuffle",
+    "n_a": 3,
+    "n_b": null,
+    "p": null,
+    "stat": "longest_losing_streak",
+    "value": null
+   }
+  ],
+  "limited": false,
+  "n_used": 3
+ },
  "result": {
   "currency_groups": {
    "account": 3
@@ -166,5 +199,48 @@
     "n": 1
    }
   ]
+ },
+ "stats": {
+  "avg_loss": -104.95,
+  "avg_win": 343.0,
+  "expectancy": 44.36666666666667,
+  "gross_loss": -209.9,
+  "gross_profit": 343.0,
+  "hold_median_loss_s": 172800.0,
+  "hold_median_win_s": 16200,
+  "hold_ratio": 10.666666666666666,
+  "largest_loss": -204.6,
+  "largest_win": 343.0,
+  "long": {
+   "losses": 1,
+   "n": 2,
+   "pnl": 337.7,
+   "win_rate": 0.5,
+   "wins": 1
+  },
+  "losses": 2,
+  "max_consec_losses": {
+   "n": 2,
+   "pnl": -209.9
+  },
+  "max_consec_wins": {
+   "n": 1,
+   "pnl": 343.0
+  },
+  "max_drawdown_abs": 209.9,
+  "max_drawdown_pct": null,
+  "n": 3,
+  "net_pnl": 133.1,
+  "profit_factor": 1.6341114816579323,
+  "scratch": 0,
+  "short": {
+   "losses": 1,
+   "n": 1,
+   "pnl": -204.6,
+   "win_rate": 0.0,
+   "wins": 0
+  },
+  "win_rate": 0.3333333333333333,
+  "wins": 1
  }
 }
