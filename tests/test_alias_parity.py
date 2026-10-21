@@ -22,6 +22,12 @@ def test_signatures_equal():
     assert js_value("m.SIGNATURES") == E.SIGNATURES
 
 
+def test_numeric_fields_equal():
+    assert js_value("m.NUMERIC_FIELDS") == E.NUMERIC_FIELDS
+    for name, fields in E.NUMERIC_FIELDS.items():
+        assert set(fields) <= set(E.SIGNATURES[name]["fields"]), name
+
+
 def test_orders_and_titles_equal():
     got = js_value("[m.CSV_ORDER, m.HTML_ORDER, m.HEADER_TITLES, m.SECTION_TITLES, m.SEARCH_ROWS]")
     assert got == [E.CSV_ORDER, E.HTML_ORDER, E.HEADER_TITLES, E.SECTION_TITLES, E.SEARCH_ROWS]
