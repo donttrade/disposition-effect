@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block content %}
+{%- import "partials/trader_offer.html" as offer with context %}
+<div class="wrap">
+  <div class="grid">
+    <div class="span-8">
+      <p class="crumb small"><a href="/tools/">Free tools</a></p>
+      <h1>Your trades by hour and weekday</h1>
+      <p class="lede">Drop a trade file and see your results laid out by the hour and the day of the week each trade opened: the number of trades, the total and average result, and the win rate in each cell, with a shift for the time zone your file uses.</p>
+      <p>Most heatmaps stop there, and that is where they can mislead. A grid of 24 hours by 5 weekdays is 120 comparisons at once, so a few cells will look unusually good or bad by chance alone. This page says so next to the grid, shows how many cells hold fewer than 30 trades, and does not test, rank or name any cell as a pattern. It reads MT5 and MT4 HTML reports, IBKR Flex Query trade files and Tradovate order exports (all three in beta), and a plain CSV template. {% if flags.analytics %}Your file’s contents are never sent. The only request this page makes is an anonymous page-view count.{% else %}Everything runs in this browser tab, and the page’s security policy blocks every outgoing network request, so your file is not uploaded anywhere.{% endif %} The map describes your own past trades. It does not tell anyone when to trade.</p>
+    </div>
+  </div>
+  {% include "partials/disclaimer.html" %}
+
+  <section class="tool" aria-labelledby="hm-tool-h">
+    <h2 id="hm-tool-h">Your file</h2>
+    <p id="hm-js-needed" class="notice notice-caution">This tool runs in your browser and needs JavaScript turned on.</p>
+    <div id="hm-controls" hidden>
+      <div class="dropzone" id="hm-drop">
+        <p><strong>Drop a trade file here</strong>, or choose one from your computer.</p>
+        <p class="small muted">MT5 or MT4 report (.htm, .html), IBKR Flex Query (.csv), Tradovate Orders (.csv), or the CSV template. Up to 50 MB and 200,000 rows.</p>
+        <div class="file-pick">
+          <label for="hm-file">Your trade file</label>
+          <input id="hm-file" type="file" accept=".csv,.htm,.html,.txt">
+        </div>
+        <p class="btn-row"><span class="muted">No file to hand?</span> <button class="btn btn-secondary" id="hm-sample-btn" type="button">Try a sample file</button></p>
+        <p class="small muted">The sample is synthetic: 160 made-up trades on three fictional symbols, not a real trader. The <a href="/tools/trade-stats/#template">CSV template</a> is described on the trade-stats page.</p>
+      </div>
+      <div class="field-grid">
+        <div class="field">
+          <label for="hm-shift">Time shift</label>
+          <span class="hint" id="hm-shift-hint">Times are read as written in the file. MT5 and MT4 reports use the broker’s server time; choose a shift to see the hours in another zone.</span>
+          <select id="hm-shift" aria-describedby="hm-shift-hint">
+            {%- for h in range(-12, 15) %}
+            <option value="{{ h }}"{% if h == 0 %} selected{% endif %}>{% if h == 0 %}None (as in the file){% elif h > 0 %}+{{ h }} hours{% else %}−{{ -h }} hours{% endif %}</option>
+            {%- endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label for="hm-block">Hours per column</label>
+          <span class="hint" id="hm-block-hint">Wider blocks put more trades in each cell.</span>
+          <select id="hm-block" aria-describedby="hm-block-hint">
+            <option value="1" selected>1 hour</option>
+            <option value="2">2 hours</option>
+            <option value="3">3 hours</option>
+            <option value="4">4 hours</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <p id="hm-status" class="muted" role="status" hidden></p>
+    <p id="hm-progress" class="progress-line small muted" hidden><progress aria-label="Reading your file"></progress> <span data-elapsed aria-hidden="true"></span></p>
+    <div id="hm-error" class="notice notice-error" role="alert" tabindex="-1" hidden></div>
+  </section>
+
+  <div id="hm-out" class="tool-out" hidden></div>
+
+  <aside id="hm-teaser" class="notice notice-gap teaser" aria-labelledby="hm-teaser-h" {{ offer.on_sale_attr() }}>
+    <strong id="hm-teaser-h">{{ offer.teaser_heading() }}</strong>
+    <p id="hm-teaser-text">{{ offer.lead() }} looks at what you do after a loss rather than at the clock.</p>
+    {{- offer.teaser() }}
+  </aside>
+
+  <section class="section" aria-labelledby="count-h">
+    <h2 id="count-h">How the numbers are counted</h2>
+    <ul>
+      <li>Each closed trade goes in the cell of the weekday and hour it opened, after the time shift you choose. A trade runs from flat to flat on each symbol, as on the trade-stats page, and its result is net of fees when the file has them.</li>
+      <li>The open time is the close time minus the time the trade was held, in whole seconds, which is exact for every supported file format.</li>
+      <li>Win rate leaves out break-even trades. Saturday and Sunday appear only when the file has trades on them.</li>
+      <li>Nothing is tested. With many cells, some look unusual by chance alone, and a cell with few trades can swing a long way on one result.</li>
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="faq-h">
+    <h2 id="faq-h">Questions</h2>
+    <details><summary>Why do some cells hold so few trades?</summary><p>Trades spread over up to 168 weekday and hour cells, and many hours simply have few. Choose two-, three- or four-hour blocks to put more trades in each cell.</p></details>
+    <details><summary>Why does the page not mark the best and worst hours?</summary><p>When you compare many cells at once, some will look unusual by luck alone. The top or bottom cell of a large grid is often one of those lucky cells, so this page describes every cell and picks none of them out.</p></details>
+    <details><summary>Which time zone are my trades in?</summary><p>MT5 and MT4 reports use the broker’s server time, which is often two or three hours ahead of UTC and can shift with daylight saving. The page reads times exactly as written in the file; the shift moves them by whole hours, and the page shows the first and last open times so you can check them against what you remember.</p></details>
+    <details><summary>Does this tell me the best time to trade?</summary><p>No. It describes when your own past trades did better or worse. A cell that looks good or bad is a description of your history, not a forecast, and this page does not recommend when to trade.</p></details>
+    <details><summary>Is my file uploaded?</summary><p>{% if flags.analytics %}No. The analysis runs in your browser tab, and your file’s contents are never sent. The only request this page makes is an anonymous page-view count.{% else %}No. The analysis runs in your browser tab, and the page’s security policy blocks it from making network requests. You can watch your browser’s Network tab stay empty while it works.{% endif %}</p></details>
+    <details><summary>Is this investment advice?</summary><p>No. It measures your own past trades and does not recommend any security, trade, size or exit. Past results do not predict future results.</p></details>
+  </section>
+
+  <section class="section" aria-labelledby="more-h">
+    <h2 id="more-h">Related</h2>
+    <ul>
+      <li><a href="/tools/trade-stats/">Trade stats</a>: profit factor, win rate and streaks from your own trade file.</li>
+      <li><a href="/tools/drawdown-calculator/">Drawdown and recovery calculator</a>: your own drawdowns and how long they lasted.</li>
+      <li><a href="/tools/prop-challenge-simulator/">Prop-firm challenge simulator</a>: replay a challenge from your own trading days.</li>
+      <li><a href="/for-traders/">The habit report for traders</a> ({{ offer.short_state() }}).</li>
+    </ul>
+  </section>
+  <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR and Tradovate are trademarks of their owners. donttrade is not affiliated with any of them.</p>
+</div>
+<script type="text/csv" id="hm-sample">
+{{ sample_csv|safe }}</script>
+{% endblock %}
