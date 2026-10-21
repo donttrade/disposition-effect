@@ -187,3 +187,31 @@ ERRORS = {
     "errors/html_no_table.htm": ("E_UNKNOWN_FORMAT", None, None),
     "errors/mt5_header_only.htm": ("E_HEADER_ONLY", None, None),
 }
+
+# Tester v2 B1: a file that starts while a position is already open.
+ORACLES["ibkr/tv2_carried_in.csv"] = {
+    # 09-02 SELL 100 C closes a long bought before the file starts: left out (W_OPEN_AT_START 1),
+    # never turned into a short. The real trade: BUY 100 O @200 09-10 10:00 -> SELL 100 C @205 09-11 10:00.
+    # realized 0 + 500 = 500 net (reported) ; fees 1 + 1 = 2 ; gross 502 ; hold 86400 s
+    "trades": [dict(symbol="AAPL", dir="long", qty=100, pnl=500.0, pnl_gross=502.0, fees=2.0, hold_s=86400,
+                    fills_n=2, pnl_source="reported")],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_OPEN_AT_START": 1},
+    "skipped": {},
+}
+ORACLES["mt5/tv2_carried_in_deals.csv"] = {
+    # 09-01 "sell out" closes a pre-file buy: left out, so no fake short and no false W_HEDGING.
+    # buy in 1.00 @1.0900 09-05 09:00 -> sell out @1.0950 12:00, profit 50 ; no costs ; hold 10800 s
+    "trades": [dict(symbol="EURUSD", dir="long", qty=1, pnl=50.0, pnl_gross=50.0, fees=0.0, hold_s=10800,
+                    fills_n=2)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_OPEN_AT_START": 1},
+    "skipped": {},
+}
+ORACLES["ibkr/carried_in_add.csv"] = {
+    # AAPL: BUY 100 O, then SELL 200 C. 200 > the 100 opened in the file, so the position was
+    #   already long before the file; it was never flat, so the whole AAPL trade is left out (1).
+    # TSLA: two closes of one carried position -> counted once (1). Total W_OPEN_AT_START 2.
+    # MSFT: BUY 10 O @400 -> SELL 10 C @398, realized -22 net ; fees 2 ; gross -20 ; 3600 s
+    "trades": [dict(symbol="MSFT", dir="long", qty=10, pnl=-22.0, pnl_gross=-20.0, fees=2.0, hold_s=3600)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_OPEN_AT_START": 2},
+    "skipped": {},
+}

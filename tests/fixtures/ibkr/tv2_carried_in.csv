@@ -1,0 +1,4 @@
+CurrencyPrimary,AssetClass,Symbol,DateTime,Quantity,TradePrice,Buy/Sell,Open/CloseIndicator,Notes/Codes,IBCommission,FifoPnlRealized,LevelOfDetail
+USD,STK,AAPL,20260902;100000,-100,210,SELL,C,C,-1,500,EXECUTION
+USD,STK,AAPL,20260910;100000,100,200,BUY,O,O,-1,0,EXECUTION
+USD,STK,AAPL,20260911;100000,-100,205,SELL,C,C,-1,500,EXECUTION
