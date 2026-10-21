@@ -25,6 +25,9 @@ phrases = [
   "does not recommend",
   "never recommends",
   "no signals",
+  "no legal advice",
+  "not legal advice",
+  "legal advisers",
 ]
 
 [claims]

@@ -16,6 +16,9 @@ trader_first_home = false  # must equal paid_report (the build fails otherwise)
 [analytics]
 cf_beacon_token = ""       # required when analytics = true
 
+[stripe]
+mode = "test"              # which prices.json link the paid build renders: "test" or "live"
+
 [forms]
 endpoint = "https://api.web3forms.com/submit"
 firm_key = "f8fdba04-71bb-4856-b700-01ac6796c252"     # Web3Forms access keys are public by design
