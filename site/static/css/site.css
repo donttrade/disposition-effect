@@ -684,3 +684,23 @@ pre { font-family: var(--font-mono); font-size: var(--fs-0); background: var(--s
   .hero-dash .veil { display: none; }
 }
 @media print { .hero-dash { break-inside: avoid; } } /* the box stays on one page */
+
+/* ------------------------------------------------------------------ trading heatmap (tools batch 2) */
+/* Cell text stays var(--text) on a light tint of gain or loss (never coloured text on colour), and every
+   cell prints its signed total and its trade count, so the shading is never the only signal. */
+.heatmap td.heat { min-width: 6.5rem; font-family: var(--font-mono); font-size: var(--fs-0); font-variant-numeric: tabular-nums; color: var(--text); }
+.heatmap td.heat span { display: block; white-space: nowrap; }
+.heatmap td.heat .heat-n { color: var(--text); font-family: var(--font-sans); }
+.heatmap td.heat-empty { color: var(--muted); text-align: center; }
+.heatmap tbody th[scope="row"] { min-width: 7.5rem; white-space: nowrap; font-family: var(--font-mono); font-size: var(--fs-0); }
+.heat-g1 { background: color-mix(in srgb, var(--gain) 12%, var(--bg)); }
+.heat-g2 { background: color-mix(in srgb, var(--gain) 22%, var(--bg)); }
+.heat-g3 { background: color-mix(in srgb, var(--gain) 32%, var(--bg)); }
+.heat-g4 { background: color-mix(in srgb, var(--gain) 42%, var(--bg)); }
+.heat-l1 { background: color-mix(in srgb, var(--loss) 12%, var(--bg)); }
+.heat-l2 { background: color-mix(in srgb, var(--loss) 22%, var(--bg)); }
+.heat-l3 { background: color-mix(in srgb, var(--loss) 32%, var(--bg)); }
+.heat-l4 { background: color-mix(in srgb, var(--loss) 42%, var(--bg)); }
+.tool-out .table-wrap:has(> .heatmap) { max-width: 100%; }
+.table-wrap.table-narrow { max-width: 32rem; }
+.tool-out .table-wrap.table-wide { max-width: none; } /* the drawdown list: 10 columns */
