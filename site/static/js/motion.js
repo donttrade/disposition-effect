@@ -1,16 +1,17 @@
-// motion.js: fade-up, hero wipe, count-up. Enhancement only; any error drops .dt-motion.
+// motion.js: fade-up, hero wipe, count-up; any error drops .dt-motion
 (function () {
   'use strict';
   var root = document.documentElement;
   if (!root.classList.contains('dt-motion')) return;
-  var raf = 0, nums = [], io = null, vh = innerHeight;
+  var raf = 0, nums = [], io = null, RV = ['rv', 'rv-in', 'rv-d1', 'rv-d2', 'rv-d3'];
 
   function done(el) { el.removeAttribute('data-cu'); el.classList.remove('cu-on'); el.classList.add('cu-done'); }
   function stop() {
     root.classList.remove('dt-motion');
-    if (raf) cancelAnimationFrame(raf);
+    cancelAnimationFrame(raf);
     if (io) io.disconnect();
     nums.forEach(function (n) { done(n.el); });
+    [].forEach.call(document.querySelectorAll('.rv'), un);
   }
   function txt(n, v) { return n.pre + v.toFixed(n.dec) + n.post; }
   function count() {
@@ -22,13 +23,14 @@
       raf = p < 1 ? requestAnimationFrame(frame) : 0;
     });
   }
-  function below(el) { return el.getBoundingClientRect().top > vh * 0.9; }
+  function un(k) { k.classList.remove.apply(k.classList, RV); }
+  function below(el) { return el.getBoundingClientRect().top > innerHeight * 0.9; }
   function parts(el) { return el.hasAttribute('data-reveal-stagger') ? [].slice.call(el.children) : [el]; }
   function show(el) {
-    if (el.classList.contains('hero-dash')) { el.classList.remove('is-waiting'); if (nums.length) count(); return; }
+    if (el === dash) { el.classList.remove('is-waiting'); if (nums.length) count(); return; }
     var p = parts(el);
     p.forEach(function (k) { k.classList.add('rv-in'); });
-    setTimeout(function () { p.forEach(function (k) { k.classList.remove('rv', 'rv-in', 'rv-d1', 'rv-d2', 'rv-d3'); }); }, 800);
+    setTimeout(function () { p.forEach(un); }, 800);
   }
 
   try {
