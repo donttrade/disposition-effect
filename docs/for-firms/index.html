@@ -3,447 +3,185 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Prop firms &amp; brokers — donttrade</title>
-<meta name="description" content="Fixed-price measurement of the plan gap for prop firms and brokers: a published script, run inside your own systems, at published prices.">
+<meta http-equiv="Content-Security-Policy" content="default-src &#39;self&#39;; script-src &#39;self&#39;; style-src &#39;self&#39;; img-src &#39;self&#39; data:; font-src &#39;self&#39;; connect-src &#39;none&#39;; worker-src &#39;self&#39;; form-action &#39;self&#39; https://api.web3forms.com; base-uri &#39;none&#39;; object-src &#39;none&#39;">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16181C" media="(prefers-color-scheme: dark)">
+<title>Disposition-Effect Measurement for Prop Firms and Brokers</title>
+<meta name="description" content="Fixed-price measurement of whether your traders sell winners more readily than losers: a published script, run inside your own systems.">
 <link rel="canonical" href="https://donttrade.ca/for-firms/">
-<link rel="preload" href="/assets/fonts/dt-serif.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
-<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<meta property="og:title" content="Prop firms &amp; brokers — donttrade">
-<meta property="og:description" content="Fixed-price measurement of the plan gap for prop firms and brokers: a published script, run inside your own systems, at published prices.">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="donttrade">
+<meta property="og:title" content="Disposition-Effect Measurement for Prop Firms and Brokers">
+<meta property="og:description" content="Fixed-price measurement of whether your traders sell winners more readily than losers: a published script, run inside your own systems.">
 <meta property="og:url" content="https://donttrade.ca/for-firms/">
 <meta property="og:image" content="https://donttrade.ca/assets/og/firms.png">
-<meta property="og:image:alt" content="Prop firms &amp; brokers — donttrade">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Disposition-Effect Measurement for Prop Firms and Brokers">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#FBF8F3" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#16181C" media="(prefers-color-scheme: dark)">
-<link rel="alternate" type="application/rss+xml" title="donttrade" href="https://donttrade.substack.com/feed">
-<link rel="alternate" type="application/atom+xml" title="donttrade: studies and corrections" href="/feed.xml">
-<style>
-@font-face{font-family:"DT Serif";src:url(/assets/fonts/dt-serif.woff2) format("woff2");font-weight:400 600;font-style:normal;font-display:swap}
-@font-face{font-family:"DT Serif Fallback";src:local("Georgia"),local("Times New Roman");size-adjust:104%;ascent-override:92%;descent-override:30%}
-:root{
-  --bg:#FBF8F3;--surface:#F3EEE6;--text:#1C1A17;--text-2:#4F4A43;--text-muted:#6B655C;
-  --link:#0A5280;--accent:#9A3B1C;--on-accent:#FFFFFF;--border-ui:#8A8275;--border-hairline:#C9C1B4;--grid:#E4DED4;
-  --chart-1:#1F5F8B;--chart-2:#B5471C;--chart-3:#2E6B3D;--chart-4:#6A4C93;--chart-5:#8A6D00;--chart-6:#5A5A5A;
-  --scroll-shadow:rgba(28,26,23,.28);
-  --measure:65ch;
-  --fs-body:clamp(1rem,0.95rem + 0.3vw,1.125rem);--lh-body:1.55;
-  --font-body:"DT Serif","DT Serif Fallback",Georgia,"Times New Roman",serif;
-  --font-ui:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
-  color-scheme:light;
-}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#16181C;--surface:#1F2227;--text:#E9E6E0;--text-2:#BAB5AC;--text-muted:#9A958B;
-  --link:#7DB9E6;--accent:#E88A5E;--on-accent:#16181C;--border-ui:#6E7480;--border-hairline:#3A3E45;--grid:#2C3036;
-  --chart-1:#6FAEDC;--chart-2:#F0925F;--chart-3:#7CC28C;--chart-4:#B79BE0;--chart-5:#E3C04C;--chart-6:#A7A7A7;
-  --scroll-shadow:rgba(233,230,224,.30);
-  color-scheme:dark;}}
-:root[data-theme="dark"]{
-  --bg:#16181C;--surface:#1F2227;--text:#E9E6E0;--text-2:#BAB5AC;--text-muted:#9A958B;
-  --link:#7DB9E6;--accent:#E88A5E;--on-accent:#16181C;--border-ui:#6E7480;--border-hairline:#3A3E45;--grid:#2C3036;
-  --chart-1:#6FAEDC;--chart-2:#F0925F;--chart-3:#7CC28C;--chart-4:#B79BE0;--chart-5:#E3C04C;--chart-6:#A7A7A7;
-  --scroll-shadow:rgba(233,230,224,.30);
-  color-scheme:dark;}
-*{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--text);font:var(--fs-body)/var(--lh-body) var(--font-body);font-feature-settings:"kern","liga";text-rendering:optimizeLegibility}
-a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:3px}
-a:hover{text-decoration-thickness:2px}
-.wrap{max-width:1200px;margin:0 auto;padding-inline:16px}
-@media (min-width:768px){.wrap{padding-inline:32px}}
-.col{max-width:calc(var(--measure) + 8ch)}
-main{padding-block:0 72px}
-.page-head{padding-block:48px 8px}
-h1{font-size:clamp(2.125rem,1.5rem + 3vw,4rem);font-weight:600;line-height:1.08;letter-spacing:-0.02em;margin:0 0 18px;text-wrap:balance;max-width:22ch}
-h1.long{max-width:28ch;font-size:clamp(1.875rem,1.35rem + 2.4vw,3.25rem)}
-h2{font-size:clamp(1.5rem,1.2rem + 1vw,2rem);font-weight:600;line-height:1.18;letter-spacing:-0.01em;margin:clamp(48px,6vw,88px) 0 14px;padding-top:24px;border-top:1px solid var(--border-hairline);text-wrap:balance;max-width:30ch}
-h3{font-size:1.25rem;font-weight:600;line-height:1.25;margin:32px 0 8px;max-width:40ch}
-p,ul,ol,blockquote,dl{max-width:var(--measure);margin:0 0 1em}
-p,li,dd,td,figcaption{overflow-wrap:break-word}
-.post p{overflow-wrap:anywhere}
-.vh{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
-ul,ol{padding-left:1.35em}
-li{margin-bottom:.4em}
-blockquote{border-left:3px solid var(--border-hairline);margin-left:0;padding-left:16px;color:var(--text-2)}
-hr{border:0;border-top:1px solid var(--border-hairline);margin:36px 0}
-code{font-family:var(--font-mono);font-size:max(.84em,14px);background:var(--surface);padding:1px 5px;border-radius:3px}
-pre{background:var(--surface);border:1px solid var(--border-hairline);border-radius:4px;padding:14px 16px;overflow-x:auto;max-width:min(90ch,100%);font-size:.875rem;line-height:1.5}
-pre code{background:none;padding:0;font-size:inherit}
-strong{font-weight:600}
-.lede{font-size:clamp(1.125rem,1rem + .5vw,1.375rem);line-height:1.45;color:var(--text-2);max-width:46ch;margin:0 0 22px}
-.mono,.kicker,.meta,.prov{font-family:var(--font-mono);font-size:.875rem;letter-spacing:.02em;color:var(--text-muted)}
-.kicker{margin:0 0 10px;letter-spacing:.06em}
-.meta{margin:0 0 22px;line-height:1.6;max-width:none}
-.meta a,.prov a{color:var(--text-muted)}
-.prov{margin:10px 0 0;line-height:1.55}
-.hero-band{background:var(--surface) radial-gradient(var(--grid) 1px,transparent 1px) 0 0/22px 22px;border-bottom:1px solid var(--border-hairline);padding-block:clamp(40px,6vw,88px)}
-@media print{.hero-band{background:none}}
-.hero{display:grid;grid-template-columns:minmax(0,1fr);gap:36px;align-items:center}
-.hero>*{min-width:0}
-@media (min-width:960px){.hero{grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:56px}}
-.hero h1{margin-bottom:20px}
-.panel{background:var(--bg);border:1px solid var(--border-hairline);border-radius:6px;padding:22px 22px 18px}
-.hero-num{font-family:var(--font-body);font-size:clamp(3.5rem,2rem + 5vw,6rem);font-weight:600;letter-spacing:-0.03em;line-height:1;margin:0 0 10px;color:var(--text)}
-.hero-num .unit{font-size:.55em;letter-spacing:-0.01em}
-.finding{font-size:clamp(1.375rem,1.15rem + 1vw,1.875rem);line-height:1.22;font-weight:600;letter-spacing:-0.01em;margin:0 0 10px;max-width:32ch;text-wrap:balance}
-.receipts{font-family:var(--font-ui);font-variant-numeric:tabular-nums;font-size:clamp(.9375rem,.9rem + .2vw,1rem);color:var(--text-2);display:flex;flex-wrap:wrap;gap:6px 0;margin:0 0 26px;padding:0;list-style:none;max-width:none}
-.receipts li{margin:0}
-.receipts li:not(:last-child)::after{content:"·";margin:0 12px;color:var(--border-ui)}
-.receipts a{color:var(--text-2);display:inline-block;padding-block:11px}
-.inline-sub{margin:4px 0 0;max-width:560px}
-.inline-sub .lead{font-family:var(--font-ui);font-size:.9375rem;color:var(--text-2);margin:0 0 10px}
-.inline-sub form,.subscribe form{display:flex;gap:8px;flex-wrap:wrap}
-input[type=email]{flex:1 1 220px;min-width:0;font:inherit;font-family:var(--font-ui);font-size:max(16px,1rem);padding:11px 12px;border:1px solid var(--border-ui);border-radius:4px;background:var(--bg);color:var(--text)}
-input[type=email]:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--link);outline-offset:2px}
-.btn,.subscribe button,.inline-sub button,.next-block button{display:inline-block;font:inherit;font-family:var(--font-ui);font-size:1rem;font-weight:600;padding:12px 18px;border:0;border-radius:4px;background:var(--accent);color:var(--on-accent);cursor:pointer;text-decoration:none;line-height:1.3}
-.btn:hover,.subscribe button:hover,.inline-sub button:hover,.next-block button:hover{text-decoration:underline;text-underline-offset:3px}
-.fine{font-family:var(--font-ui);font-size:.875rem;color:var(--text-muted);margin:10px 0 0}
-.fine a{color:var(--text-muted)}
-.subscribe{border-top:1px solid var(--border-hairline);border-bottom:1px solid var(--border-hairline);padding:22px 0;margin:36px 0;max-width:var(--measure)}
-.subscribe p.lead{margin:0 0 12px;font-family:var(--font-ui);font-size:1rem;color:var(--text)}
-.study-list{list-style:none;padding:0;margin:0;max-width:880px}
-.study-list li{border-top:1px solid var(--border-hairline);padding:26px 0;margin:0}
-.study-list li:last-child{border-bottom:1px solid var(--border-hairline)}
-.study-list .t{font-size:clamp(1.25rem,1.1rem + .6vw,1.5rem);font-weight:600;line-height:1.25;margin:0 0 8px;letter-spacing:-0.01em;max-width:none}
-.study-list .t a{color:var(--text);text-decoration:none}
-.study-list .t a:hover{text-decoration:underline}
-.study-list .d{color:var(--text-2);margin:0 0 10px}
-.tag{display:inline-block;font-family:var(--font-mono);font-size:.875rem;letter-spacing:.04em;color:var(--text-muted);border:1px solid var(--border-hairline);border-radius:3px;padding:1px 7px;margin:0 6px 0 0;vertical-align:middle}
-.links{font-family:var(--font-ui);font-size:.9375rem;display:flex;gap:0 22px;flex-wrap:wrap;margin:4px 0 0;max-width:none}
-.links a{display:inline-block;padding-block:11px}
-.also{padding-block:44px 0}
-.also .item{border-top:1px solid var(--border-hairline);padding-top:22px;max-width:760px}
-figure{margin:28px 0;max-width:min(92ch,100%)}
-figure svg,.panel svg{width:100%;height:auto;display:block}
-svg.chart-m{display:none}
-@media (max-width:820px){svg.chart-d{display:none} svg.chart-m{display:block;max-width:440px}}
-figcaption{font-family:var(--font-ui);font-size:.875rem;color:var(--text-muted);margin-top:10px;max-width:var(--measure)}
-.chart-title{font-family:var(--font-ui);font-size:.9375rem;font-weight:600;margin:0 0 6px;max-width:none;color:var(--text)}
-.standing{border:1px solid var(--border-ui);border-left:3px solid var(--accent);border-radius:4px;padding:12px 16px;margin:0 0 24px;max-width:var(--measure);font-family:var(--font-ui);font-size:.9375rem;color:var(--text-2)}
-.funding{font-family:var(--font-ui);font-size:.9375rem;color:var(--text-2);margin:0 0 14px}
-table{border-collapse:collapse;width:100%;font-size:.9375rem;font-family:var(--font-ui);font-variant-numeric:tabular-nums}
-th,td{text-align:left;vertical-align:top;padding:12px 12px;border-bottom:1px solid var(--border-hairline)}
-th{font-weight:600;color:var(--text-2);font-size:.875rem;letter-spacing:.03em;border-bottom:1px solid var(--border-ui)}
-td.price{white-space:nowrap;font-weight:700;font-size:1.0625rem;color:var(--text)}
-td .label{display:inline-block;font-family:var(--font-mono);font-size:.875rem;color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:0 6px;margin-top:6px}
-.table-scroll{overflow-x:auto;max-width:100%;margin:0 0 1em;-webkit-overflow-scrolling:touch;
- background:linear-gradient(to right,var(--bg) 30%,transparent) left center/40px 100% no-repeat local,
-  linear-gradient(to left,var(--bg) 30%,transparent) right center/40px 100% no-repeat local,
-  radial-gradient(farthest-side at 0 50%,var(--scroll-shadow),transparent) left center/16px 100% no-repeat scroll,
-  radial-gradient(farthest-side at 100% 50%,var(--scroll-shadow),transparent) right center/16px 100% no-repeat scroll;
- background-color:var(--bg)}
-.scroll-hint{display:none;font-family:var(--font-ui);font-size:.875rem;color:var(--text-2);margin:0 0 6px;max-width:none}
-@media (max-width:820px){
- .scroll-hint{display:block}
- .scroll-hint.fits{display:none}
- .table-scroll.sticky1 tr>:first-child{position:sticky;left:0;z-index:1;background:var(--bg);min-width:8.5rem;box-shadow:inset -1px 0 var(--border-hairline)}
-}
-.price-table{min-width:900px}
-@media (max-width:800px){
- .price-table{min-width:0}
- .price-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
- .price-table,.price-table tbody{display:block}
- .price-table tr{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 16px;border:1px solid var(--border-hairline);border-radius:6px;padding:14px 16px;margin:0 0 14px}
- .price-table td{display:block;border:0;padding:0;width:100%}
- .price-table td.eng{width:auto;flex:1 1 14ch;order:0;font-size:1.0625rem}
- .price-table td.price{width:auto;order:1}
- .price-table td.det{order:2;margin-top:10px}
- .price-table td.det::before{content:attr(data-label);display:block;font-size:.875rem;letter-spacing:.03em;color:var(--text-muted);font-weight:600;margin-bottom:2px}
-}
-.terms{font-family:var(--font-ui);font-size:.9375rem;color:var(--text-2);margin:14px 0 6px;max-width:none}
-.veto{font-size:1.0625rem;color:var(--text);margin:16px 0 8px}
-.cta-row{display:flex;gap:10px 16px;align-items:center;flex-wrap:wrap;margin:26px 0 6px}
-.cta-row .note{font-family:var(--font-ui);font-size:.875rem;color:var(--text-muted);max-width:44ch}
-.router{font-family:var(--font-ui);font-size:.875rem;color:var(--text-muted);margin:0}
-.router a{color:var(--text-muted)}
-.pipeline{list-style:none;padding:0;margin:0;display:grid;gap:12px;counter-reset:step;max-width:none}
-.pipeline li{position:relative;margin:0;background:var(--bg);border:1px solid var(--border-ui);border-radius:6px;padding:14px 16px 14px 48px;font-family:var(--font-ui);font-size:.9375rem;line-height:1.4;color:var(--text-2)}
-.pipeline li strong{display:block;color:var(--text);font-size:1rem;margin-bottom:2px}
-.pipeline li::before{counter-increment:step;content:counter(step);position:absolute;left:14px;top:14px;width:22px;height:22px;border-radius:50%;border:1px solid var(--border-ui);font-family:var(--font-mono);font-size:.875rem;line-height:20px;text-align:center;color:var(--text-2)}
-.pipeline li:last-child{border:1.5px solid var(--accent)}
-.pipeline li:not(:last-child)::after{content:"";position:absolute;left:24px;bottom:-13px;width:1px;height:12px;background:var(--border-ui)}
-.steps{counter-reset:s;list-style:none;padding:0}
-.steps li{position:relative;padding-left:44px;margin-bottom:16px}
-.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:var(--surface);border:1px solid var(--border-hairline);font-family:var(--font-mono);font-size:.875rem;line-height:26px;text-align:center;color:var(--text-2)}
-dl.skeleton{display:grid;grid-template-columns:max-content 1fr;gap:8px 20px;font-family:var(--font-ui);font-size:.9375rem;max-width:720px}
-dl.skeleton dt{color:var(--text);font-weight:600}
-dl.skeleton dd{margin:0;color:var(--text-2)}
-@media (max-width:560px){dl.skeleton{grid-template-columns:1fr} dl.skeleton dd{margin-bottom:8px}}
-.memo dl{display:grid;grid-template-columns:minmax(150px,max-content) 1fr;gap:12px 24px;max-width:860px}
-.memo dt{font-family:var(--font-ui);font-weight:600;font-size:.9375rem;color:var(--text)}
-.memo dd{margin:0}
-@media (max-width:560px){.memo dl{grid-template-columns:1fr} .memo dd{margin-bottom:12px}}
-.risk{list-style:none;padding:0}
-.risk li{padding:10px 0 10px 16px;border-left:2px solid var(--border-hairline);margin:0 0 6px}
-details{border-top:1px solid var(--border-hairline);padding:4px 0;max-width:var(--measure)}
-details:last-of-type{border-bottom:1px solid var(--border-hairline)}
-summary{cursor:pointer;font-family:var(--font-ui);font-weight:600;font-size:1rem;color:var(--text);padding-block:10px}
-details p{margin:4px 0 10px;color:var(--text-2)}
-.faq-intro{margin-bottom:12px}
-.toc{font-family:var(--font-ui);font-size:.9375rem;background:var(--surface);border:1px solid var(--border-hairline);border-radius:6px;padding:14px 18px;margin:0 0 28px;max-width:var(--measure)}
-.toc ol{margin:6px 0 0;padding-left:1.3em}
-.toc li{margin:0 0 4px}
-.versions td,.versions th{font-size:.875rem}
-.cite pre{white-space:pre-wrap}
-.client-out{font-size:.875rem}
-.box{border:1px solid var(--border-ui);border-radius:6px;padding:16px 18px 6px;margin:0 0 24px;max-width:var(--measure)}
-.box h3{margin-top:0}
-.banner{border:1px solid var(--accent);border-left:4px solid var(--accent);border-radius:4px;padding:12px 16px;margin:0 0 24px;max-width:var(--measure);font-family:var(--font-ui);font-size:.9375rem;color:var(--text)}
-.hero-links{font-family:var(--font-ui);font-size:.9375rem;margin:0 0 18px}
-.hero-links a{display:inline-block;padding-block:11px}
-.next-block{border-top:1px solid var(--border-hairline);margin-top:48px;padding-top:8px;max-width:var(--measure)}
-.next-block ol{list-style:none;padding:0}
-.next-block form{display:flex;gap:8px;flex-wrap:wrap}
-.next-block li{padding:14px 0;border-bottom:1px solid var(--border-hairline);margin:0}
-.next-block li>a{display:inline-block;padding-block:10px}
-.correction{border:2px solid var(--accent);border-radius:6px;background:var(--surface);padding:14px 18px 4px;margin:0 0 24px;max-width:var(--measure);font-family:var(--font-ui);font-size:1rem;color:var(--text)}
-.correction p{margin:0 0 10px}
-.correction .corr-h{font-size:1.0625rem}
-.correction .corr-old{color:var(--text-2);border-left:3px solid var(--border-ui);padding-left:12px}
-.corr-tag{display:inline-block;font-family:var(--font-mono);font-size:.875rem;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);border-radius:3px;padding:0 6px;margin-right:6px}
-.correction .corr-links a{display:inline-block;padding-block:11px}
-.update{border-left:3px solid var(--chart-1);background:var(--surface);padding:12px 16px;border-radius:0 4px 4px 0;font-family:var(--font-ui);font-size:.9375rem;color:var(--text-2)}
-.code-shot{background:var(--surface);border:1px solid var(--border-hairline);border-radius:6px;padding:16px 18px;font-family:var(--font-mono);font-size:.875rem;line-height:1.6;overflow-x:auto;max-width:min(90ch,100%);color:var(--text-2);margin:0 0 1em;white-space:pre}
-.track{list-style:none;padding:0}
-.track li{display:grid;grid-template-columns:7.5rem 1fr;gap:12px;padding:10px 0;border-top:1px solid var(--border-hairline);margin:0}
-.track .when{font-family:var(--font-mono);font-size:.875rem;color:var(--text-muted);padding-top:3px}
-@media (max-width:480px){.track li{grid-template-columns:1fr;gap:2px}}
-.gloss dt{font-weight:600;font-size:1.125rem;margin-top:24px}
-.gloss dd{margin:6px 0 0}
-.gloss dd .src{font-family:var(--font-ui);font-size:.875rem;color:var(--text-muted)}
-dfn{font-style:normal}
-.skip{position:absolute;left:-9999px}
-.skip:focus{left:16px;top:8px;background:var(--surface);padding:6px 10px;z-index:9}
-.post :is(h2,h3){max-width:36ch}
-.post h2{font-size:clamp(1.375rem,1.15rem + .8vw,1.75rem)}
-.post p,.post ul,.post ol{max-width:var(--measure)}
-@media (prefers-reduced-motion:no-preference){a,.btn,nav.main a{transition:color .12s ease,box-shadow .12s ease}}
-header.site{border-bottom:1px solid var(--border-hairline);background:var(--bg)}
-header.site .hdr{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px}
-.wordmark{color:var(--text);display:inline-flex;align-items:center;line-height:0;min-height:44px}
-.wordmark svg{height:24px;width:auto;display:block}
-nav.main{display:flex;gap:0 16px;flex-wrap:nowrap;white-space:nowrap;font-family:var(--font-ui);font-size:.9375rem;align-items:center}
-nav.main a{color:var(--text-2);text-decoration:none;display:inline-flex;align-items:center;min-height:44px}
-nav.main a[aria-current="page"],.menu-panel a[aria-current="page"]{color:var(--text);box-shadow:inset 0 -2px var(--accent)}
-nav.main a:hover{color:var(--text)}
-.theme{background:none;border:1px solid var(--border-ui);color:var(--text-2);border-radius:4px;padding:0 12px;min-height:44px;font:inherit;font-family:var(--font-ui);font-size:.875rem;cursor:pointer}
-.theme[aria-pressed="true"]{background:var(--surface);color:var(--text)}
-header.site details{border:0;padding:0;max-width:none}
-header.site summary{list-style:none;min-height:44px;display:inline-flex;align-items:center;cursor:pointer;color:var(--text-2);font-weight:400;font-size:.9375rem;font-family:var(--font-ui);padding:0}
-header.site summary::-webkit-details-marker{display:none}
-header.site summary::after{content:"▾";margin-left:6px}
-header.site summary.is-current{color:var(--text);box-shadow:inset 0 -2px var(--accent)}
-.dd{position:relative}
-.dd ul{position:absolute;right:0;top:100%;z-index:10;min-width:300px;list-style:none;margin:4px 0 0;padding:6px;background:var(--bg);border:1px solid var(--border-ui);border-radius:6px;white-space:normal}
-.dd li{margin:0}
-.dd a{white-space:nowrap}
-.dd a,.menu a{display:flex;align-items:center;min-height:44px;padding:0 10px}
-nav.main a.btn,header.site a.btn{color:var(--on-accent);min-height:44px;display:inline-flex;align-items:center;padding:0 16px;box-shadow:none}
-nav.main a.btn-2,header.site a.btn-2{color:var(--text);min-height:44px;display:inline-flex;align-items:center;padding:0 16px;box-shadow:none;font-size:.9375rem}
-.mob{display:flex;align-items:center;gap:10px}
-.menu{position:static}
-.menu-panel{overscroll-behavior:contain;position:absolute;left:16px;right:16px;top:100%;z-index:10;margin-top:4px;padding:8px;background:linear-gradient(var(--bg) 30%,transparent) center top/100% 40px no-repeat local,linear-gradient(transparent,var(--bg) 70%) center bottom/100% 40px no-repeat local,radial-gradient(farthest-side at 50% 0,var(--scroll-shadow),transparent) center top/100% 18px no-repeat scroll,radial-gradient(farthest-side at 50% 100%,var(--scroll-shadow),transparent) center bottom/100% 18px no-repeat scroll;background-color:var(--bg);border:1px solid var(--border-ui);border-radius:6px;max-height:70vh;max-height:70dvh;overflow:auto;font-family:var(--font-ui);font-size:1rem;display:flex;flex-direction:column}
-.menu-panel a{color:var(--text-2);text-decoration:none}
-.menu-panel .menu-lbl{margin:8px 10px 0;font-size:.875rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted)}
-.menu-panel .theme{margin:8px 10px 4px;align-self:flex-start}
-header.site .menu-panel a.menu-cta{display:none;justify-content:center;margin:0 0 6px}
-@media (max-width:419px){header.site a.nav-cta-hdr{padding:0 10px;font-size:.875rem} header.site .menu-panel a.menu-cta{display:flex} header.site .hdr{gap:8px} .mob{gap:8px}}
-@media (max-width:339px){header.site a.nav-cta-hdr{display:none}}
-@media (max-width:999px){header.site nav.main.nav-desk{display:none}}
-@media (min-width:1000px){header.site .mob{display:none}}
-.btn{min-height:44px;display:inline-flex;align-items:center}
-.btn-2{display:inline-flex;align-items:center;min-height:44px;font-family:var(--font-ui);font-size:1rem;font-weight:600;padding:12px 18px;line-height:1.3;border:1px solid var(--accent);border-radius:4px;background:transparent;color:var(--text);text-decoration:none}
-.btn-2:hover{text-decoration:underline;text-underline-offset:3px}
-.soon{white-space:nowrap;font-family:var(--font-mono);font-size:.875rem;color:var(--text-muted);border:1px solid var(--border-hairline);border-radius:3px;padding:0 5px;margin-left:6px}
-input,select,textarea{font-size:max(16px,1rem)}
-.copy[hidden]{display:none}
-.copy-msg{font-family:var(--font-ui);font-size:.875rem;color:var(--text-2);margin:6px 0 0}
-.copy{display:block;margin:6px 0 0;font:inherit;font-family:var(--font-ui);font-size:.875rem;min-height:44px;padding:0 12px;border:1px solid var(--border-ui);border-radius:4px;background:var(--bg);color:var(--text);cursor:pointer;vertical-align:middle}
-.addr{font-family:var(--font-mono);font-size:max(.875em,14px);overflow-wrap:anywhere}
-.cta-block{margin:18px 0 8px}
-.cta-block .fine{max-width:60ch}
-.btn-row{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 14px}
-.cards{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin:0 0 8px;list-style:none;padding:0;max-width:none}
-@media (min-width:720px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.card{border:1px solid var(--border-ui);border-radius:6px;padding:18px 18px 14px;margin:0;background:var(--bg)}
-.card h3{margin:0 0 8px}
-.card .anchor{font-family:var(--font-ui);font-size:.9375rem;font-weight:600;color:var(--text);margin:0 0 10px}
-.card p{margin:0 0 10px}
-.card .go{display:inline-flex;align-items:center;min-height:44px;font-family:var(--font-ui)}
-.start-card{scroll-margin-top:16px}
-@media (min-width:801px){.price-table.compact{min-width:700px}}
-.risk-line{font-family:var(--font-ui);font-size:.9375rem;color:var(--text);margin:0 0 8px;max-width:52ch}
-.sample pre{font-size:.875rem;margin:0 0 8px;max-width:100%}
-.sample-lbl{font-family:var(--font-ui);font-size:.875rem;color:var(--text-2);margin:0 0 10px}
-.card h3 a{color:var(--text)}
-footer.site{border-top:1px solid var(--border-hairline);padding-block:32px 48px;font-family:var(--font-ui);font-size:.875rem;color:var(--text-muted)}
-footer.site .fcols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px;margin:0 0 20px}
-@media (min-width:860px){footer.site .fcols{grid-template-columns:repeat(4,minmax(0,1fr))}}
-footer.site nav{display:flex;flex-direction:column}
-footer.site nav .fh{margin:0 0 2px;font-weight:600;color:var(--text);font-size:.875rem}
-footer.site nav a{display:flex;align-items:center;min-height:44px}
-footer.site a{color:var(--text-2)}
-footer.site p{margin:0 0 8px;max-width:none}
-footer.site .whopays,footer.site .contact{color:var(--text-2);font-size:.9375rem}
-footer .wordmark svg{height:20px}
-@media (pointer:coarse),(max-width:1000px){
- footer.site p a,footer.site .contact a,footer.site .whopays a{display:inline-flex;align-items:center;min-height:44px}
- main p a:not(.btn):not(.btn-2),main td a,main dd a,main span>a,figcaption a,.banner a,.standing a,.update a,.meta a,.prov a,.fine a,.router a{padding-block:14px}
- main li>a{display:inline-block;padding-block:10px;min-height:44px}
- main h2>a{display:inline-flex;align-items:center;min-height:44px}
- td code{overflow-wrap:anywhere;word-break:break-all}
- .card h3 a{display:inline-flex;align-items:center;min-height:44px}
- .card .anchor a{display:inline-flex;align-items:center;min-height:44px}
-}
-.fig-open{font-family:var(--font-ui);font-size:.9375rem;margin:8px 0 0;max-width:none}
-.fig-open a{display:inline-flex;align-items:center;min-height:44px}
-.study-firms{font-family:var(--font-ui);font-size:.9375rem;color:var(--text-2);margin:18px 0 0}
-.study-firms a{display:inline-flex;align-items:center;min-height:44px}
-.hero-band .kicker,.hero-band .fine,.hero-band .fine a{color:var(--text-2)}
-</style>
-<script>(function(){var k='donttrade-theme',d=document.documentElement,C={dark:'#16181C',light:'#FBF8F3'};
-function meta(t){var m=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<m.length;i++){m[i].setAttribute('content',C[t]);}}
-try{var t=localStorage.getItem(k);if(t==='dark'||t==='light'){d.setAttribute('data-theme',t);meta(t);}}catch(e){}
-document.addEventListener('DOMContentLoaded',function(){var bs=document.querySelectorAll('[data-theme-toggle]'),i;
-function cur(){var a=d.getAttribute('data-theme');if(a)return a;return (window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';}
-function sync(){for(var j=0;j<bs.length;j++){bs[j].setAttribute('aria-pressed',cur()==='dark'?'true':'false');}}
-for(i=0;i<bs.length;i++){bs[i].addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';d.setAttribute('data-theme',n);try{localStorage.setItem(k,n);}catch(e){}meta(n);sync();});bs[i].hidden=false;}sync();
-var ds=document.querySelectorAll('header.site details');
-for(i=0;i<ds.length;i++){ds[i].addEventListener('toggle',function(){if(!this.open)return;for(var j=0;j<ds.length;j++){if(ds[j]!==this)ds[j].open=false;}});}
-function outside(e){for(var j=0;j<ds.length;j++){if(ds[j].open&&!ds[j].contains(e.target))ds[j].open=false;}}
-document.addEventListener('pointerdown',outside);document.addEventListener('click',outside);
-document.addEventListener('keydown',function(e){if(e.key!=='Escape')return;for(var j=0;j<ds.length;j++){if(ds[j].open){ds[j].open=false;ds[j].querySelector('summary').focus();}}});
-var hs=document.querySelectorAll('.scroll-hint');function fit(){for(var j=0;j<hs.length;j++){var t=hs[j].nextElementSibling;if(t){if(t.scrollWidth<=t.clientWidth+1){hs[j].classList.add('fits');}else{hs[j].classList.remove('fits');}}}}fit();window.addEventListener('resize',fit);window.addEventListener('load',fit);
-var cs=document.querySelectorAll('button.copy[data-copy]');for(i=0;i<cs.length;i++){(function(c){c.hidden=false;function fail(){var blk=c.parentNode,a=blk.querySelector('.addr'),m=blk.querySelector('.copy-msg');if(a&&window.getSelection){var r=document.createRange();r.selectNodeContents(a);var sel=window.getSelection();sel.removeAllRanges();sel.addRange(r);}if(!m){m=document.createElement('p');m.className='copy-msg';m.setAttribute('role','status');blk.appendChild(m);}m.textContent='Copy failed — select the address above and copy it.';}c.addEventListener('click',function(){if(!navigator.clipboard||!navigator.clipboard.writeText){fail();return;}navigator.clipboard.writeText(c.getAttribute('data-copy')).then(function(){var o=c.textContent;c.textContent='Copied';setTimeout(function(){c.textContent=o;},2000);},fail);});})(cs[i]);}
-});})();</script>
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/static/css/site.css">
+<script src="/static/js/theme.js"></script>
+<script src="/static/js/nav.js" defer></script>
+<script src="/static/js/form-ref.js" defer></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "name": "Prop firms & brokers", "position": 2}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "One person. The legal contracting party is named in writing, in the engagement agreement, before anything is paid. We provide whatever identity checks your due diligence needs. The pen name is how the research is published, not a contract term."}, "name": "Who will we contract with?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. Your staff run the script inside your systems; we receive only what it prints. We never need access to your systems."}, "name": "Does any account data leave our systems?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Then that is the number. You can keep it private, and we publish nothing from the engagement. The fee is unchanged."}, "name": "What if the number is bad for us?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. You review anything describing your data first and may decline publication outright. We may say only that an engagement took place, without naming you or the figure."}, "name": "Can you publish without our consent?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. It is a measurement with its limits stated. Please don’t describe it as audited, certified or verified."}, "name": "Isn’t this a kind of audit?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No cancellation fees. The Pilot is refundable in full until your staff first run the script on your records, and after that through the reproduction refund. Snapshot, Memo and Outcomes pack are paid 50% on acceptance and 50% within 7 days of delivery; if either side stops, completed work is billed pro rata."}, "name": "What if we stop halfway?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Invoiced in USD; bank transfer, or in Canada the CAD equivalent by Interac e-Transfer. Card payments are accepted through a secure Stripe link, sent only after you accept the scope."}, "name": "How do we pay?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "We work by email only, so every answer is in writing and can go straight to your compliance file."}, "name": "Can we talk on a call?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "There are no paying clients yet. A firm that chooses to publish its result will be listed, with its consent."}, "name": "Why is there no client list?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The licence lets any organisation run it on synthetic or test data for 32 days, and the folder includes a generator that writes a test file. partner/ on GitHub"}, "name": "Can we test it first?"}]}]}</script>
 </head>
 <body>
-<a class="skip" href="#main">Skip to content</a>
-<header class="site"><div class="wrap hdr">
-  <a class="wordmark" href="/" aria-label="donttrade, home"><svg class="wm" height="26" xmlns="http://www.w3.org/2000/svg" viewBox="0 -744 4362 768" role="img" aria-label="donttrade"><g fill="currentColor" transform="scale(1 -1)"><path transform="translate(0.0 0)" d="M239 -14Q180 -14 134.5 16.0Q89 46 63.0 102.0Q37 158 37 235Q37 314 67.0 372.0Q97 430 146.0 461.5Q195 493 254 493Q284 493 309.0 484.5Q334 476 356.5 457.5Q379 439 400 409H420L410 351Q373 390 345.5 406.5Q318 423 288 423Q254 423 226.0 403.0Q198 383 181.0 342.0Q164 301 164 237Q164 177 180.0 137.0Q196 97 223.5 77.0Q251 57 287 57Q324 57 352.5 78.0Q381 99 410 140L420 82H401Q381 50 357.0 28.5Q333 7 304.0 -3.5Q275 -14 239 -14ZM387 -11 376 85V87V397L380 409V640L302 650V689L484 734L499 725L495 583V52L561 41V0Z"/><path transform="translate(565.0 0)" d="M278 -14Q211 -14 156.0 16.0Q101 46 69.0 103.0Q37 160 37 239Q37 319 70.5 376.0Q104 433 159.0 463.0Q214 493 278 493Q342 493 397.0 463.0Q452 433 485.5 376.5Q519 320 519 239Q519 159 486.5 102.0Q454 45 399.5 15.5Q345 -14 278 -14ZM278 34Q314 34 338.5 56.5Q363 79 376.5 124.0Q390 169 390 238Q390 308 376.5 353.5Q363 399 338.5 421.5Q314 444 278 444Q242 444 217.0 421.5Q192 399 179.5 353.5Q167 308 167 238Q167 169 179.5 124.0Q192 79 217.0 56.5Q242 34 278 34Z"/><path transform="translate(1107.0 0)" d="M34 0V41L136 61H184L281 41V0ZM98 0Q99 23 99.5 60.5Q100 98 100.5 138.5Q101 179 101 210V263Q101 291 100.5 310.0Q100 329 99.5 346.0Q99 363 98 383L27 392V429L194 493L210 483L220 369V367V210Q220 179 220.5 138.5Q221 98 221.5 60.5Q222 23 223 0ZM338 0V41L438 61H486L585 41V0ZM400 0Q401 23 401.5 60.0Q402 97 402.5 137.5Q403 178 403 210V304Q403 364 386.5 386.5Q370 409 333 409Q312 409 290.0 401.5Q268 394 245.0 378.5Q222 363 197 338L189 390H203Q230 424 260.0 446.5Q290 469 322.5 481.0Q355 493 387 493Q452 493 487.0 450.0Q522 407 522 314V210Q522 178 522.5 137.5Q523 97 523.5 60.0Q524 23 525 0Z"/><path transform="translate(1703.0 0)" d="M144 419V479H326V419ZM211 -14Q152 -14 117.5 16.0Q83 46 83 112Q83 134 83.5 154.5Q84 175 84 204V419H10V470L131 485L83 449L129 617H209L204 459V439V123Q204 86 218.5 69.0Q233 52 257 52Q273 52 287.0 58.5Q301 65 318 77L342 52Q329 31 310.0 16.0Q291 1 266.5 -6.5Q242 -14 211 -14Z"/><path transform="translate(2029.0 0)" d="M144 419V479H326V419ZM211 -14Q152 -14 117.5 16.0Q83 46 83 112Q83 134 83.5 154.5Q84 175 84 204V419H10V470L131 485L83 449L129 617H209L204 459V439V123Q204 86 218.5 69.0Q233 52 257 52Q273 52 287.0 58.5Q301 65 318 77L342 52Q329 31 310.0 16.0Q291 1 266.5 -6.5Q242 -14 211 -14Z"/><path transform="translate(2355.0 0)" d="M35 0V41L138 61H200L303 41V0ZM98 0Q99 23 99.5 60.5Q100 98 100.5 138.5Q101 179 101 210V263Q101 291 100.5 310.5Q100 330 99.5 346.5Q99 363 98 383L27 392V429L194 493L210 483L220 359V357V210Q220 179 220.5 138.5Q221 98 221.5 60.5Q222 23 223 0ZM219 276 195 345H213Q228 393 251.5 426.0Q275 459 303.5 476.0Q332 493 360 493Q387 493 409.0 479.0Q431 465 438 439Q438 402 421.0 382.0Q404 362 374 362Q354 362 337.5 370.5Q321 379 305 397L277 427L322 425Q285 403 259.0 365.5Q233 328 219 276Z"/><path transform="translate(2783.0 0)" d="M171 -14Q115 -14 76.5 18.5Q38 51 38 112Q38 145 52.5 172.5Q67 200 105.5 224.0Q144 248 217 268Q244 276 270.0 283.5Q296 291 322.0 298.0Q348 305 374 312V274Q341 264 309.0 253.5Q277 243 247 234Q209 222 189.0 205.0Q169 188 162.0 169.0Q155 150 155 130Q155 93 175.5 76.0Q196 59 226 59Q242 59 257.0 64.0Q272 69 293.0 83.0Q314 97 348 122L360 71H325Q297 43 275.0 24.0Q253 5 229.0 -4.5Q205 -14 171 -14ZM415 -12Q369 -12 342.5 14.5Q316 41 313 86V91V326Q313 373 304.5 398.5Q296 424 277.0 434.0Q258 444 225 444Q207 444 185.5 441.0Q164 438 133 428L188 463L171 386Q167 350 150.0 333.0Q133 316 109 316Q86 316 71.5 328.0Q57 340 53 362Q62 421 117.5 457.0Q173 493 264 493Q322 493 358.5 474.5Q395 456 412.5 416.5Q430 377 430 312V94Q430 70 438.0 59.5Q446 49 460 49Q471 49 479.0 54.5Q487 60 495 71L518 51Q500 16 475.0 2.0Q450 -12 415 -12Z"/><path transform="translate(3287.0 0)" d="M239 -14Q180 -14 134.5 16.0Q89 46 63.0 102.0Q37 158 37 235Q37 314 67.0 372.0Q97 430 146.0 461.5Q195 493 254 493Q284 493 309.0 484.5Q334 476 356.5 457.5Q379 439 400 409H420L410 351Q373 390 345.5 406.5Q318 423 288 423Q254 423 226.0 403.0Q198 383 181.0 342.0Q164 301 164 237Q164 177 180.0 137.0Q196 97 223.5 77.0Q251 57 287 57Q324 57 352.5 78.0Q381 99 410 140L420 82H401Q381 50 357.0 28.5Q333 7 304.0 -3.5Q275 -14 239 -14ZM387 -11 376 85V87V397L380 409V640L302 650V689L484 734L499 725L495 583V52L561 41V0Z"/><path transform="translate(3852.0 0)" d="M281 -14Q208 -14 153.0 15.0Q98 44 67.5 99.5Q37 155 37 234Q37 314 69.0 372.0Q101 430 155.5 461.5Q210 493 276 493Q336 493 380.5 468.0Q425 443 450.5 398.0Q476 353 476 292Q476 275 474.5 261.5Q473 248 470 237H90V284H298Q338 284 350.0 299.0Q362 314 362 341Q362 376 351.0 399.0Q340 422 320.5 433.0Q301 444 276 444Q248 444 221.5 425.5Q195 407 178.5 365.0Q162 323 162 250Q162 189 182.0 147.5Q202 106 237.5 85.5Q273 65 319 65Q362 65 394.5 79.5Q427 94 454 124L481 102Q460 66 433.0 40.0Q406 14 369.0 0.0Q332 -14 281 -14Z"/></g></svg></a>
-  <nav class="main nav-desk" aria-label="Site">
-    <details class="dd"><summary class="is-current">Who it’s for</summary><ul><li><a href="/for-firms/" aria-current="page">Prop firms &amp; brokers</a></li><li><a href="/for-platforms/">Journals &amp; platforms</a></li><li><a href="/for-firms/#copy-leader">Copy-trading platforms</a></li><li><a href="/for-firms/#claims-test">Firms making behaviour claims</a></li><li><a href="/for-traders/">Individual traders <span class="soon">coming soon</span></a></li><li><a href="/for-researchers/">Researchers &amp; press</a></li></ul></details>
-    <a href="/pricing/">Pricing</a><a href="/research/">Research</a><a href="/sample-memo/">Sample &amp; method</a><a href="/about/">About</a>
-    <a class="btn-2 nav-cta" href="/start/#firm">Firms: start a trial</a>
-    <button class="theme" data-theme-toggle type="button" aria-pressed="false" hidden>Dark mode</button>
-  </nav>
-  <div class="mob">
-    <a class="btn-2 nav-cta nav-cta-hdr" href="/start/#firm">Firms: trial</a>
-    <details class="menu"><summary>Menu</summary>
-      <nav class="menu-panel" aria-label="Site menu">
-        <a class="btn menu-cta" href="/start/#firm">Firms: start a trial</a>
-        <p class="menu-lbl">Who it’s for</p>
-        <a href="/for-firms/" aria-current="page">Prop firms &amp; brokers</a><a href="/for-platforms/">Journals &amp; platforms</a><a href="/for-firms/#copy-leader">Copy-trading platforms</a><a href="/for-firms/#claims-test">Firms making behaviour claims</a><a href="/for-traders/">Individual traders <span class="soon">coming soon</span></a><a href="/for-researchers/">Researchers &amp; press</a>
-        <a href="/pricing/">Pricing</a><a href="/research/">Research</a><a href="/sample-memo/">Sample &amp; method</a><a href="/about/">About</a>
-        <button class="theme" data-theme-toggle type="button" aria-pressed="false" hidden>Dark mode</button>
-      </nav>
-    </details>
-  </div>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header"><div class="wrap">
+  <a class="brand" href="/">donttrade</a>
+  <nav class="site-nav" aria-label="Main"><ul class="nav-row">
+    <li><a href="/for-firms/" aria-current="page">For firms</a></li>
+    <li><a href="/for-traders/">For traders</a></li>
+    <li><a href="/tools/">Free tools</a></li>
+    <li><a href="/pricing/">Pricing</a></li>
+    <li><a href="/research/">Research</a></li>
+    <li><a href="/about/">About</a></li>
+  </ul>
+  <details class="nav-menu" data-nav-menu>
+    <summary><svg class="i-menu" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg><svg class="i-close" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>Menu</summary>
+    <ul class="nav-panel">
+    <li><a href="/for-firms/" aria-current="page">For firms</a></li>
+    <li><a href="/for-traders/">For traders</a></li>
+    <li><a href="/tools/">Free tools</a></li>
+    <li><a href="/pricing/">Pricing</a></li>
+    <li><a href="/research/">Research</a></li>
+    <li><a href="/about/">About</a></li>
+    </ul>
+  </details></nav>
+  <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" hidden><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg><span class="tt-label">Dark mode</span></button>
 </div></header>
+
 <main id="main">
 
-<section class="hero-band"><div class="wrap hero">
-  <div>
-    <p class="kicker">FOR PROP FIRMS AND BROKERS</p>
-    <h1>Find out whether your traders sell winners more readily than losers — measured privately on your own records.</h1>
-    <p class="lede">We measure the plan gap: the difference between how your traders plan to handle wins and losses and how they actually trade. For prop firms and brokers, one measure is available today: the disposition effect, which is whether your traders close winning positions more readily than losing ones. Tell us the population and the period. Your staff run a published script inside your systems. You get back PGR, PLR, their pooled ratio and a t statistic, the counts and period behind them, and a one-page memo. The price is fixed before anyone sees data.</p>
-    <p>The script is free to read, and free to try on test data. The trial adds what makes the number usable: a licence to run it on your own records, a fixed, versioned method, a one-page write-up by donttrade saying how sure the result is, and a full refund if your own re-run of the same script version on the same export doesn’t reproduce it. It stays private unless you choose to publish.</p>
-    <div class="cta-block"><a class="btn" data-cta="firm" href="https://tally.so/r/VpE8Zj?audience=firm">Start the trial — $745 USD</a><p class="fine">Prefer email? <span class="addr">donttrade.research@gmail.com</span></p></div>
-    <p class="hero-links"><a href="#what-it-costs">See what it costs ↓</a></p>
-    <p class="router">Here as a trader? See <a href="/for-traders/">Individual traders</a> (coming soon) or the free <a href="/research/">Research</a>. We can’t help with disputes about a firm.</p>
-  </div>
-  <div>
-    <ol class="pipeline" aria-label="How the measurement runs">
-      <li><strong>Your records</strong>stay on your systems</li>
-      <li><strong>Published script</strong>run by your staff</li>
-      <li><strong>Aggregate counts</strong>the only thing that leaves</li>
-      <li><strong>Number · t statistic · period · memo</strong>returned to you</li>
-    </ol>
-    <p class="prov">partner_disposition.py · public · from v2 free for non-commercial use; engagements and platform partners include a commercial licence · <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/partner_disposition.py">read the code →</a></p>
-  </div>
-</div></section>
-
 <div class="wrap">
-  <ul class="receipts" style="margin-top:28px" aria-label="Checkable facts">
-    <li>Listed on Quantocracy’s daily wrap, 12 Oct 2026 (<a href="https://quantocracy.com/">quantocracy.com</a>)</li>
+  <section class="hero" aria-labelledby="ff-h">
+    <div class="grid">
+      <div class="span-7">
+        <h1 id="ff-h">Find out whether your traders sell winners more readily than losers — measured privately on your own records.</h1>
+        <p class="lede">We measure the plan gap: the difference between how your traders plan to handle wins and losses and how they actually trade. One measure is available today: the disposition effect, which is whether your traders close winning positions more readily than losing ones.</p>
+        <p>Tell us the population and the period. Your staff run a published script inside your systems. You get back PGR, PLR, their pooled ratio and a t statistic, the counts and period behind them, and a one-page memo. The price is fixed before anyone sees data.</p>
+        <p class="btn-row"><a class="btn" href="#request">Start a Pilot — $745 USD</a> <a class="btn btn-secondary" href="/sample-memo/">See a sample memo</a></p>
+        <p class="small muted">Pilot (called “Trial” before 21 Oct 2026). Email only, no calls. <a href="#what-it-costs">See what it costs</a></p>
+        <p class="small">Here as a trader? See <a href="/for-traders/">Individual traders</a> or the free <a href="/tools/">tools</a>. We can’t help with disputes about a firm.</p>
+      </div>
+      <div class="span-5">
+        <ol class="pipeline" aria-label="How the measurement runs">
+          <li><strong>Your records</strong> stay on your systems</li>
+          <li><strong>Published script</strong> run by your staff</li>
+          <li><strong>Aggregate counts</strong> are all that comes back to us</li>
+          <li><strong>Number, t statistic, period and memo</strong> returned to you</li>
+        </ol>
+        <p class="small muted">partner_disposition.py is public: free for non-commercial use from v2; engagements include a commercial licence. <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/partner_disposition.py">Read the code</a></p>
+      </div>
+    </div>
+  </section>
+
+  <ul class="evidence" aria-label="What you can check before you pay">
     <li><a href="/research/">6 published studies</a></li>
-    <li><a href="/code/">scripts public for 4 of 6 · gaps disclosed in each study</a></li>
-    <li><a href="/corrections/">6 corrections logged</a></li>
+    <li><a href="/code/">Scripts public for 4 of 6</a></li>
+    <li><a href="/corrections/">6 corrections, dated and logged</a></li>
+    <li><a href="/independence/">No firm can pay to change a number</a></li>
   </ul>
-
-  <h2 id="what-it-costs" style="margin-top:28px">What it costs</h2>
-  <p class="terms"><strong>Launch pricing, valid for engagements signed before 31 March 2027. Prices in USD.</strong></p>
-  <p class="standing">The standard engagement measures one thing today: the disposition effect (selling winners more readily than losers), the first part of the plan gap we can measure, reported as PGR, PLR, their pooled ratio and a t statistic, with the counts behind them. No other standard measure is offered yet. If the figure you publish is a different one, write anyway; we’ll tell you plainly whether the published script can compute it. Run a copy-trading platform? See the <a href="#copy-leader">copy-leader persistence test</a> below. Does your marketing say your product changes how traders behave? See the <a href="#claims-test">claims substantiation test</a>.</p>
-  <div class="table-scroll" tabindex="0" role="region" aria-label="Prices and scope of each engagement"><table class="price-table" role="table">
-    <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">Engagement</th><th role="columnheader" scope="col">Best for</th><th role="columnheader" scope="col">What your staff run it on</th><th role="columnheader" scope="col">What you get back</th><th role="columnheader" scope="col">Delivery time</th><th role="columnheader" scope="col">Payment</th><th role="columnheader" scope="col">Price (USD)</th></tr></thead>
-    <tbody role="rowgroup">
-      <tr role="row"><td role="cell" class="eng" data-label="Engagement"><strong>Trial</strong><br><span class="label">Your first Snapshot · one per firm</span></td><td role="cell" class="det" data-label="Best for">A firm that wants to see the method work on its own records before committing</td><td role="cell" class="det" data-label="What your staff run it on">The records behind one disposition figure your firm already publishes or wants to publish, measured with the public script on your own records (they stay on your systems)</td><td role="cell" class="det" data-label="What you get back">The figure, its denominator and period, the t statistic, the script version, and a one-page memo. Before starting, we agree with you in writing what result would make a Memo worth doing. If your extract can’t be made to run with the script, even with our help by email, the trial fee is refunded in full; so it is if your own re-run of the same script version on the same export (same file hash) does not reproduce the figure. Credited in full toward a Memo signed within 60 days of trial delivery</td><td role="cell" class="det" data-label="Delivery time">5 business days</td><td role="cell" class="det" data-label="Payment">100% on acceptance</td><td role="cell" class="price" data-label="Price (USD)">$745</td></tr><tr role="row"><td role="cell" class="eng" data-label="Engagement"><strong>Snapshot</strong></td><td role="cell" class="det" data-label="Best for">A firm that wants one disposition figure, for one population, computed by someone else</td><td role="cell" class="det" data-label="What your staff run it on">The five-column extract for the population and period you name</td><td role="cell" class="det" data-label="What you get back">Pooled PGR, PLR, their ratio and a t statistic, the counts and period behind them, the script version, and the full one-page memo for your use</td><td role="cell" class="det" data-label="Delivery time">10 business days</td><td role="cell" class="det" data-label="Payment">50% on acceptance; 50% within 7 days of delivery</td><td role="cell" class="price" data-label="Price (USD)">$2,500</td></tr><tr role="row"><td role="cell" class="eng" data-label="Engagement"><strong>Memo</strong><br><span class="label">Standard engagement</span></td><td role="cell" class="det" data-label="Best for">A firm that wants its traders’ ratio set beside the public panel’s</td><td role="cell" class="det" data-label="What your staff run it on">The five-column extract, for the population and period you name</td><td role="cell" class="det" data-label="What you get back">Everything in a Snapshot, plus your pooled ratio set beside the public study’s pooled ratio. Don’t compare levels: the public panel is Chinese A-share social-trading portfolios from 2016–18, and your script counts only days with a sale, while the public study counts every day a position was held. Only the ratios are roughly comparable, and neither says what yours should be. A private report; an optional co-published study</td><td role="cell" class="det" data-label="Delivery time">15 business days</td><td role="cell" class="det" data-label="Payment">50% on acceptance; 50% within 7 days of delivery</td><td role="cell" class="price" data-label="Price (USD)">$6,000</td></tr><tr role="row"><td role="cell" class="eng" data-label="Engagement"><strong>Outcomes pack</strong></td><td role="cell" class="det" data-label="Best for">A firm that wants its whole book measured, and split</td><td role="cell" class="det" data-label="What your staff run it on">An extract across your whole book, plus extracts you split by a field you hold, such as account size or instrument (the splits are agreed in the scope)</td><td role="cell" class="det" data-label="What you get back">Everything in Memo, for your whole book and for each split extract, run by the same script; a private report; an optional co-published study</td><td role="cell" class="det" data-label="Delivery time">20 business days</td><td role="cell" class="det" data-label="Payment">50% on acceptance; 50% within 7 days of delivery</td><td role="cell" class="price" data-label="Price (USD)">$12,000</td></tr>
-    </tbody>
-  </table></div>
-  <p class="terms"><strong>Optional quarterly re-check:</strong> the same measurement on a fresh extract, at 25% of the tier price, payable in advance, delivered in 5 business days.</p>
-  <p class="terms">Prices in US dollars (USD), before any applicable sales tax. Every engagement is invoiced in USD; pay by bank transfer, or, in Canada, the CAD equivalent by Interac e-Transfer. Card payments are accepted through a secure Stripe link, sent only after you accept the scope. One-off engagement, fixed scope, no subscription. Invoices read “Payable on acceptance — thank you.” and “Balance due within 7 days of delivery — thank you.”</p>
-  <p class="terms">Delivery times are in business days. The clock starts when payment is received and the script’s output comes back without validation errors, and it pauses while a clarifying question is open.</p>
-  <p class="veto"><strong>If you don’t like the number, no one else sees it.</strong> You can decline publication outright, and we publish nothing from the engagement. The fee is the same either way.</p>
-  <p style="color:var(--text-2)">The method is the same for every firm and for the free research. Paying buys scope and privacy, never a result. <a href="/independence/">Independence policy →</a></p>
-  <div class="cta-row"><div class="cta-block"><a class="btn" data-cta="firm" href="https://tally.so/r/VpE8Zj?audience=firm">Start the trial — $745 USD</a><p class="fine">Prefer email? <span class="addr">donttrade.research@gmail.com</span></p></div><span class="note">You get a written scope and a fixed price back, free. Nothing is owed until you accept the scope.</span></div>
-
-  <h2 id="copy-leader">Copy-trading platforms: the copy-leader persistence test</h2>
-  <p class="standing"><strong>Sold to platforms only, never to followers.</strong> For copy-trading apps, social trading networks, crypto exchanges with copy features and vault front-ends.</p>
-  <p>Does your leader ranking predict what followers actually earn after copying costs and delay? The test answers that out of sample: leaders are ranked on one period and judged on a later period the ranking never saw. It is adjusted for luck, so a ranking counts only if it does better than chance would.</p>
-  <ul>
-    <li><strong>A sealed method.</strong> The ranking rule, the periods, the cost and delay assumptions and the pass mark are fixed in writing before anyone sees data, and they don’t change afterwards.</li>
-    <li><strong>Run on your systems.</strong> Your engineers run a script we send with the scope, and can read every line of it first. Only aggregate results come back. We hold no data: no follower, leader or account record leaves your systems.</li>
-    <li><strong>About your ranking, not about people.</strong> The result names no leader and scores no one.</li>
-    <li><strong>Not advice.</strong> It is not a recommendation of any trader or leader, to you or to your followers, and no guarantee of future results. It is not an audit or a certification: please don’t call any leader or ranking audited, certified or verified.</li>
-    <li><strong>Optional re-check.</strong> The same test on a fresh period, on the quarterly re-check terms above.</li>
-  </ul>
-  <h3>Which engagement</h3>
-  <ul><li><strong>Trial, $745 USD:</strong> your first test at the introductory price, one per platform: one ranking rule and one period. The trial terms apply, with that test in place of the disposition figure.</li><li><strong>Snapshot, $2,500 USD:</strong> one ranking rule and one period.</li><li><strong>Memo, $6,000 USD:</strong> the full test: every ranking rule and period agreed in the scope, written up with its limits stated.</li><li><strong>Outcomes pack, $12,000 USD:</strong> the full test, plus a re-check of the same rules on a later period.</li></ul>
-  <p>Payment, delivery times and refunds are those of the engagement. By email only, no calls.</p>
-  <div class="cta-block"><a class="btn" data-cta="firm" href="https://tally.so/r/VpE8Zj?audience=firm">Ask about the copy-leader test</a><p class="fine">Prefer email? <span class="addr">donttrade.research@gmail.com</span></p></div>
-
-
-  <h2 id="claims-test">Firms that make behaviour claims: the claims substantiation test</h2>
-  <p class="standing"><strong>We report the result whether it supports the claim or not.</strong> For trading journals, education sellers, prop firms and brokers whose marketing says their product changes how traders behave, such as “our journal makes you more disciplined”.</p>
-  <p>Does your marketing say your product changes how traders behave? The claims test puts one measured number behind that claim, from your own records, and states its limits. It stays private unless you publish.</p>
-  <p>Does the claim hold on your own users’ records? Before anyone sees data, the claim is written down as a test: which behaviour, which users, which periods, what comparison, and what result would support it. That test is sealed (fingerprinted with a SHA-256 hash) and then run once, as written.</p>
-  <ul>
-    <li><strong>Pre-registered and sealed.</strong> The measure, the comparison and the pass mark are fixed in writing before anyone sees data, and they don’t change afterwards.</li>
-    <li><strong>Run on your systems.</strong> Your engineers run a script we send with the scope, and can read every line of it first. Only aggregate results come back; no user record leaves your systems.</li>
-    <li><strong>Either answer is a finished result.</strong> We report the result whether it supports the claim or not. The fee is the same either way, and you decide whether anything is published.</li>
-    <li><strong>Limits stated.</strong> We tell you in the scope, before you pay, whether your records can test the claim at all, and what the design can and cannot show. A before-and-after comparison, for example, cannot by itself show that your product caused a change.</li>
-    <li><strong>Not a certification, a verification or an audit.</strong> It is a test, with its result and its limits. Please don’t call the claim or the product certified, verified or audited.</li>
-  </ul>
-  <p><strong>The law, in neutral terms (not legal advice).</strong> In Canada, the Competition Act treats as reviewable conduct a representation to the public, made to promote a product or a business interest, in the form of “a statement, warranty or guarantee of the performance, efficacy or length of life of a product that is not based on an adequate and proper test thereof, the proof of which lies on the person making the representation” (<a href="https://laws-lois.justice.gc.ca/eng/acts/C-34/section-74.01.html">s. 74.01(1)(b)</a>). Whether a particular test is adequate and proper for a particular claim is for you and your legal advisers to judge. We give no legal advice, and we don’t say that our test meets that standard.</p>
-  <h3>Which engagement</h3>
-  <ul><li><strong>Trial, $745 USD:</strong> your first test at the introductory price, one per firm: one claim, one measure and one comparison. The trial terms apply, with that test in place of the disposition figure.</li><li><strong>Snapshot, $2,500 USD:</strong> one claim, one measure and one comparison.</li><li><strong>Memo, $6,000 USD:</strong> the full test: every measure and comparison agreed in the scope, written up with its result and its limits.</li><li><strong>Outcomes pack, $12,000 USD:</strong> the full test, plus the same sealed test run again on a later period.</li></ul>
-  <p>Payment, delivery times and refunds are those of the engagement. By email only, no calls.</p>
-  <div class="cta-block"><a class="btn" data-cta="firm" href="https://tally.so/r/VpE8Zj?audience=firm">Ask about a claims test</a><p class="fine">Prefer email? <span class="addr">donttrade.research@gmail.com</span></p></div>
-
-  <h2>What your staff export</h2>
-  <p>Five columns, one row per open position per day, plus a row on the day it closes. One position, as rows, from the <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/EXPORT-GUIDE.md">export guide</a>:</p>
-  <pre tabindex="0" role="region" aria-label="Example extract: one position as three rows">account_id,date,position_id,closed,pnl
+  <section class="section" aria-labelledby="who-h">
+    <h2 id="who-h">Who it is for</h2>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Who it is for">
+    <table>
+      <thead><tr><th scope="col">You are</th><th scope="col">The question it answers</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">A prop firm or broker</th><td>Do our traders close winning positions more readily than losing ones?</td></tr>
+        <tr><th scope="row">A trading journal or platform</th><td>Can we show users this measure inside our product? <a href="/for-platforms/">Journals &amp; platforms</a></td></tr>
+        <tr><th scope="row">A copy-trading platform</th><td>Does our leader ranking predict what followers earn? <a href="#copy-leader">Copy-leader test</a></td></tr>
+        <tr><th scope="row">A firm making behaviour claims</th><td>Does our claim hold on our own users’ records? <a href="#claims-test">Claims test</a></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="what-it-costs">
+    <h2 id="what-it-costs">What it costs</h2>
+    <p><strong>Prices in USD, before any applicable sales tax.</strong> The standard engagement measures one thing today: the disposition effect, reported as PGR, PLR, their pooled ratio and a t statistic, with the counts behind them. If the figure you publish is a different one, write anyway; we’ll tell you plainly whether the published script can compute it.</p>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Prices and scope of each engagement">
+    <table class="price-table">
+      <thead><tr><th scope="col">Engagement</th><th scope="col">What you get</th><th scope="col">Delivery</th><th scope="col">Payment</th><th scope="col" class="num">Price (USD)</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Pilot</th>
+          <td>Your first Snapshot at an introductory price, one per firm: the records behind one disposition figure, measured with the public script on your own records. The figure, its denominator and period, the t statistic, the script version and a one-page memo. Credited in full toward a Memo signed within 60 days of delivery.</td><td>5 business days</td><td>100% on acceptance</td><td class="num">$745</td></tr>
+        <tr><th scope="row">Snapshot</th>
+          <td>One disposition figure for one population and period you name: pooled PGR, PLR, their ratio and a t statistic, the counts and period behind them, the script version and the one-page memo.</td><td>10 business days</td><td>50% on acceptance; 50% within 7 days of delivery</td><td class="num">$2,500</td></tr>
+        <tr><th scope="row">Memo</th>
+          <td>Everything in a Snapshot, plus your pooled ratio set beside the public study’s pooled ratio, with the differences explained in writing. Only the ratios are roughly comparable, and neither sets a target for yours. A private report; an optional co-published study.</td><td>15 business days</td><td>50% on acceptance; 50% within 7 days of delivery</td><td class="num">$6,000</td></tr>
+        <tr><th scope="row">Outcomes pack</th>
+          <td>Everything in a Memo, for your whole book and for each split you agree in the scope (for example by account size or instrument), run by the same script.</td><td>20 business days</td><td>50% on acceptance; 50% within 7 days of delivery</td><td class="num">$12,000</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>The Pilot fee is refunded in full if your extract can’t be made to run with the script, even with our help by email, or if your own re-run of the same script version on the same export (same file hash) does not reproduce the figure. Before starting, we agree with you in writing what result would make a Memo worth doing.</p>
+    <p><strong>Optional quarterly re-check:</strong> the same measurement on a fresh extract, at 25% of the tier price, payable in advance, delivered in 5 business days.</p>
+    <p>Every engagement is invoiced in USD; pay by bank transfer, or, in Canada, the CAD equivalent by Interac e-Transfer. Card payments are accepted through a secure Stripe link, sent only after you accept the scope. One-off engagement, fixed scope, no subscription.</p>
+    <p>Delivery times are in business days. The clock starts when payment is received and the script’s output comes back without validation errors, and it pauses while a clarifying question is open.</p>
+    <p><strong>If you don’t like the number, no one else sees it.</strong> You can decline publication outright, and we publish nothing from the engagement. The fee is the same either way. The method is the same for every firm and for the free research. Paying buys scope and privacy, never a result. <a href="/independence/">Independence policy</a></p>
+  </section>
+  <section class="section" aria-labelledby="timeline-h">
+    <h2 id="timeline-h">From first email to memo</h2>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Timeline">
+    <table>
+      <thead><tr><th scope="col">Step</th><th scope="col">Who</th><th scope="col">When</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Email or form: which traders, which dates</th><td>You</td><td>Day 0</td></tr>
+        <tr><th scope="row">Reply</th><td>donttrade</td><td>Within 1 business day</td></tr>
+        <tr><th scope="row">Written scope and fixed price, free (nothing owed until you accept)</th><td>donttrade</td><td>After your reply</td></tr>
+        <tr><th scope="row">Accept, sign the agreement, pay</th><td>You</td><td>When ready</td></tr>
+        <tr><th scope="row">Your staff run the script and send back what it prints</th><td>Your staff</td><td>Your pace</td></tr>
+        <tr><th scope="row">Memo delivered</th><td>donttrade</td><td>Within the tier’s business days of payment and a clean run</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>The legal contracting party is named in writing, in the engagement agreement, before anything is paid. An NDA or DPA is signed on request. A “no measurable effect” answer is a finished job and is invoiced as one.</p>
+  </section>
+  <section class="section" aria-labelledby="copy-leader">
+    <h2 id="copy-leader">Copy-trading platforms: the copy-leader persistence test</h2>
+    <p><strong>Sold to platforms only, never to followers.</strong> For copy-trading apps, social trading networks, crypto exchanges with copy features and vault front-ends.</p>
+    <p>Does your leader ranking predict what followers actually earn after copying costs and delay? The test answers that out of sample: leaders are ranked on one period and judged on a later period the ranking never saw. It is adjusted for luck, so a ranking counts only if it does better than chance would.</p>
+    <ul>
+      <li><strong>A sealed method.</strong> The ranking rule, the periods, the cost and delay assumptions and the pass mark are fixed in writing before anyone sees data, and they don’t change afterwards.</li>
+      <li><strong>Run on your systems.</strong> Your engineers run a script we send with the scope, and can read every line of it first. Only aggregate results come back. We hold no follower, leader or account record.</li>
+      <li><strong>About your ranking, not about people.</strong> The result names no leader and scores no one.</li>
+      <li><strong>Not advice.</strong> It does not recommend any trader or leader, to you or to your followers, and makes no promise about future results. It is not an audit: please don’t call any leader or ranking audited, certified or verified.</li>
+    </ul>
+    <p>Which engagement: the Pilot ($745 USD) covers one ranking rule and one period, one per platform; a Snapshot ($2,500) the same; a Memo ($6,000) every rule and period agreed in the scope; an Outcomes pack ($12,000) adds a re-check on a later period. Payment, delivery and refunds are those of the engagement.</p>
+    <p><a class="btn btn-secondary" href="?product=copy-leader#request">Ask about the copy-leader test</a></p>
+  </section>
+  <section class="section" aria-labelledby="claims-test">
+    <h2 id="claims-test">Firms that make behaviour claims: the claims substantiation test</h2>
+    <p><strong>We report the result whether it supports the claim or not.</strong> For trading journals, education sellers, prop firms and brokers whose marketing says their product changes how traders behave, such as “our journal makes you more disciplined”.</p>
+    <p>Before anyone sees data, the claim is written down as a test: which behaviour, which users, which periods, what comparison, and what result would support it. That test is sealed (fingerprinted with a SHA-256 hash) and then run once, as written.</p>
+    <ul>
+      <li><strong>Run on your systems.</strong> Your engineers run a script we send with the scope; only aggregate results come back.</li>
+      <li><strong>Either answer is a finished result.</strong> The fee is the same either way, and you decide whether anything is published.</li>
+      <li><strong>Limits stated.</strong> We tell you in the scope, before you pay, whether your records can test the claim at all. A before-and-after comparison, for example, cannot by itself show that your product caused a change.</li>
+      <li><strong>A test, with its result and its limits.</strong> It is not an audit. Please don’t call the claim or the product certified, verified or audited.</li>
+    </ul>
+    <p><strong>The law, in neutral terms (not legal advice).</strong> In Canada, the Competition Act treats as reviewable conduct a representation to the public, made to promote a product or a business interest, in the form of “a statement, warranty or guarantee of the performance, efficacy or length of life of a product that is not based on an adequate and proper test thereof, the proof of which lies on the person making the representation” (<a href="https://laws-lois.justice.gc.ca/eng/acts/C-34/section-74.01.html">s. 74.01(1)(b)</a>). Whether a particular test is adequate and proper for a particular claim is for you and your legal advisers to judge. We give no legal advice, and we don’t say that our test meets that standard.</p>
+    <p>Which engagement: the Pilot ($745 USD) covers one claim, one measure and one comparison, one per firm; a Snapshot ($2,500) the same; a Memo ($6,000) every measure and comparison agreed in the scope; an Outcomes pack ($12,000) runs the same sealed test again on a later period.</p>
+    <p><a class="btn btn-secondary" href="?product=claims-test#request">Ask about a claims test</a></p>
+  </section>
+  <section class="section" aria-labelledby="export-h">
+    <h2 id="export-h">What stays on your systems</h2>
+    <p>Your trade records and account identifiers. The script runs inside your systems on a five-column extract, one row per open position per day plus a row on the day it closes, with no names. From the <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/EXPORT-GUIDE.md">export guide</a>:</p>
+    <pre tabindex="0" role="region" aria-label="Example extract: one position as three rows">account_id,date,position_id,closed,pnl
 a7f3,2026-03-02,p91,0,110.50
 a7f3,2026-03-03,p91,0,-40.25
 a7f3,2026-03-04,p91,1,240.00</pre>
-  <p>The first two rows are the unrealised mark at each end of day; the last is the realisation. A list of closed trades alone is refused by the script, by design: it needs the positions you held and did not close. To see the shape first, run it on the synthetic file that <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/make_fixture.py">make_fixture.py</a> writes.</p>
-
-  <h2>What happens after you get in touch</h2>
-  <ol class="steps">
-    <li><strong>You fill in the short form or email</strong> the population and period you want measured. We reply within 1 business day.</li>
-    <li><strong>Scope sheet.</strong> We send a written scope and a fixed price. The legal contracting party is named in the engagement agreement, before anything is paid; an NDA or DPA is signed on request.</li>
-    <li><strong>Accept.</strong> You accept the scope and pay the first invoice: 50% on acceptance, or the full fee for the trial. Payable on acceptance — thank you.</li>
-    <li><strong>Your staff run the script</strong> inside your systems and send back what it prints. Nothing else. The delivery clock starts once payment is received and that output comes back without validation errors; it pauses while a clarifying question is open.</li>
-    <li><strong>Delivery.</strong> We return the memo within the tier’s business days. For the Memo, Outcomes pack and Snapshot, the balance is due within 7 days of delivery — thank you. A “no measurable effect” answer is a finished job and is invoiced as one. You decide whether anything is published.</li>
-  </ol>
-
-  <div class="box">
-    <h3>Everything that comes back to us</h3>
-    <p>This is the client script’s complete output, generated when this page was built by running the published <code>partner_disposition.py</code> on the synthetic test file from <code>make_fixture.py</code>. <strong>Synthetic test file, not real traders.</strong></p>
-    <pre tabindex="0" role="region" aria-label="Client script output on the synthetic test file" class="client-out">$ python3 make_fixture.py --out fixture.csv --seed 7
+    <p>The first two rows are the unrealised mark at each end of day; the last is the realisation. A list of closed trades alone is refused by the script, by design. To see the shape first, run it on the synthetic file that <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/make_fixture.py">make_fixture.py</a> writes.</p>
+    <details>
+      <summary>Everything that comes back to us (the script’s complete output on a synthetic file)</summary>
+      <p><strong>Synthetic test file, not real traders.</strong> This is the client script’s complete output from the published <code>partner_disposition.py</code> on the test file from <code>make_fixture.py</code>.</p>
+      <pre tabindex="0" role="region" aria-label="Client script output on the synthetic test file" class="client-out">$ python3 make_fixture.py --out fixture.csv --seed 7
 $ python3 partner_disposition.py fixture.csv --pnl-basis price
 pnl basis:            price (funding excluded)
 accounts:             30
@@ -527,103 +265,107 @@ HOW TO READ THE AGE-CONTROLLED FIGURES
   by account and date (fixed effects). The t statistic at the top treats
   every row as independent and is not.
 - NOT MEASURED means the data cannot support the figure, never zero.</pre>
-    <p>That block is the whole of it. No account IDs, position IDs, dates or individual P&amp;L values are printed. The script is one Python file using only the standard library; it makes no network calls, and your staff can read all of it before running it.</p>
-    <p>Retention: we keep the returned aggregates for the life of the engagement record and never the extract — no extract ever leaves your systems.</p>
-  </div>
 
-  <h2>What you receive</h2>
-  <p>A one-page memo with these fields, every time:</p>
-  <dl class="skeleton">
-    <dt>The question</dt><dd>The population and period you asked us to measure, in one sentence</dd>
-    <dt>The figure</dt><dd>Pooled PGR, PLR and their ratio, with the counts behind them</dd>
-    <dt>The figure, holding age fixed</dt><dd>The same comparison made only between positions of the same holding age, with its 95% interval; beside it the pooled ratio on the same rows, and a fixed-effects ratio that compares each account with itself</dd>
-    <dt>Precision</dt><dd>The t statistic and the counts behind it</dd>
-    <dt>Denominator</dt><dd>Exactly who was counted, and who was left out</dd>
-    <dt>Period</dt><dd>The dates the extract covers</dd>
-    <dt>Accounts and observations</dt><dd>How many of each were counted</dd>
-    <dt>Script version</dt><dd>The exact code that produced the figure</dd>
-    <dt>What this does not show</dt><dd>The limits, stated before anyone asks</dd>
-    <dt>Who may rely on it</dt><dd>You only</dd>
-  </dl>
-  <p><a href="/sample-memo/">See a specimen memo, and the client script’s output on a synthetic file →</a></p>
+      <p>That block is the whole of it. No account IDs, position IDs, dates or individual P&amp;L values are printed. The script is one Python file using only the standard library; it makes no network calls.</p>
+    </details>
+    <p>Retention: we keep the returned aggregates for the life of the engagement record, and never receive the extract.</p>
+  </section>
+  <section class="section" aria-labelledby="receive-h">
+    <h2 id="receive-h">What you receive</h2>
+    <p>A one-page memo with these fields, every time:</p>
+    <dl class="split">
+      <div><dt>The figure</dt><dd>Pooled PGR, PLR and their ratio, with the counts behind them, and the same comparison holding position age fixed, with its 95% interval</dd></div>
+      <div><dt>Precision</dt><dd>The t statistic and the counts behind it</dd></div>
+      <div><dt>Denominator and period</dt><dd>Exactly who was counted, who was left out, and the dates the extract covers</dd></div>
+      <div><dt>Script version</dt><dd>The exact code that produced the figure</dd></div>
+      <div><dt>What this does not show</dt><dd>The limits, stated before anyone asks</dd></div>
+      <div><dt>Who may rely on it</dt><dd>You only</dd></div>
+    </dl>
+    <p><a href="/sample-memo/">See a specimen memo</a></p>
+  </section>
+  <section class="section" aria-labelledby="agree-h">
+    <h2 id="agree-h">The agreement, in brief</h2>
+    <ul>
+      <li><strong>Fixed scope and price,</strong> in writing before any data is seen.</li>
+      <li><strong>Publication only with your consent.</strong> You review anything describing your data first and may decline outright.</li>
+      <li><strong>Use of the name.</strong> You may say a figure was “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a fixed-scope agreement”, and nothing stronger: never audited, certified or verified.</li>
+      <li><strong>Liability</strong> is capped at the fees paid. Either side can stop in writing; no cancellation fees. <a href="/terms/#trial">Pilot terms</a></li>
+    </ul>
+    <h3>What the money does not buy</h3>
+    <ul>
+      <li><strong>No signals, no picks, no predictions.</strong> Nothing here tells anyone what to buy.</li>
+      <li><strong>No flattering version.</strong> If the number comes out against your marketing, that is the number.</li>
+      <li><strong>Not an audit and not an assurance engagement.</strong> No regulatory status, no badge or seal.</li>
+    </ul>
+    <p>Industry codes for prop firms now ask for rules that are objective and can be checked from outside (<a href="https://financialcommission.org/prop-firm-certification/code-of-conduct/">an example code of conduct</a>). Some firms already pay for outside reviews of their operations, such as payout times; those reviews cover operations, not how traders behaved. A figure computed with a published method can be re-run by anyone who reads it. Publishing a pass rate? <a href="/tools/pass-rate-calculator/">Check the arithmetic with the free pass-rate calculator</a>.</p>
+  </section>
+  <section class="section" aria-labelledby="faq-h">
+    <h2 id="faq-h">For your compliance team</h2>
+    <details><summary>Who will we contract with?</summary><p>One person. The legal contracting party is named in writing, in the engagement agreement, before anything is paid. We provide whatever identity checks your due diligence needs. The pen name is how the research is published, not a contract term.</p></details>
+    <details><summary>Does any account data leave our systems?</summary><p>No. Your staff run the script inside your systems; we receive only what it prints. We never need access to your systems.</p></details>
+    <details><summary>What if the number is bad for us?</summary><p>Then that is the number. You can keep it private, and we publish nothing from the engagement. The fee is unchanged.</p></details>
+    <details><summary>Can you publish without our consent?</summary><p>No. You review anything describing your data first and may decline publication outright. We may say only that an engagement took place, without naming you or the figure.</p></details>
+    <details><summary>Isn’t this a kind of audit?</summary><p>No. It is a measurement with its limits stated. Please don’t describe it as audited, certified or verified.</p></details>
+    <details><summary>What if we stop halfway?</summary><p>No cancellation fees. The Pilot is refundable in full until your staff first run the script on your records, and after that through the reproduction refund. Snapshot, Memo and Outcomes pack are paid 50% on acceptance and 50% within 7 days of delivery; if either side stops, completed work is billed pro rata.</p></details>
+    <details><summary>How do we pay?</summary><p>Invoiced in USD; bank transfer, or in Canada the CAD equivalent by Interac e-Transfer. Card payments are accepted through a secure Stripe link, sent only after you accept the scope.</p></details>
+    <details><summary>Can we talk on a call?</summary><p>We work by email only, so every answer is in writing and can go straight to your compliance file.</p></details>
+    <details><summary>Why is there no client list?</summary><p>There are no paying clients yet. A firm that chooses to publish its result will be listed, with its consent.</p></details>
+    <details><summary>Can we test it first?</summary><p>Yes. The licence lets any organisation run it on synthetic or test data for 32 days, and the folder includes a generator that writes a test file. <a href="https://github.com/donttrade/disposition-effect/tree/main/partner">partner/ on GitHub</a></p></details>
+  </section>
+  <section class="section" aria-labelledby="press-h">
+    <h2 id="press-h">For press and partners</h2>
+    <p>donttrade is independent research on how traders handle winning and losing positions. It publishes its studies, scripts and corrections, and measures firms’ own records on their systems under a fixed-scope agreement. Paying buys scope and privacy, never a result. When describing a result, please use the wording under “Use of the name” above. Method and code: <a href="/code/">/code/</a>; corrections: <a href="/corrections/">/corrections/</a>.</p>
+  </section>
+  <section class="section" aria-labelledby="request">
+    <h2 id="request">Start a Pilot, or ask a question</h2>
+    <p>Tell us which traders and which dates. You get a written scope and a fixed price back, free. Nothing is owed until you accept the scope.</p>
+<form class="request-form" id="ff" method="POST" action="https://api.web3forms.com/submit" aria-labelledby="request">
+  <input type="hidden" name="access_key" value="f8fdba04-71bb-4856-b700-01ac6796c252">
+  <input type="hidden" name="subject" value="donttrade: firm request">
+  <input type="hidden" name="from_name" value="donttrade site">
+  <input type="hidden" name="redirect" value="https://donttrade.ca/start/thanks/">
+  <input type="hidden" name="product" value="pilot" data-from-query="product">
+  <input type="hidden" name="page" value="/for-firms/">
+  <input type="hidden" name="ref" value="" data-from-query="ref">
+  <input type="checkbox" name="botcheck" class="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" hidden>
+  <div class="field"><label for="ff-email">Work email <span class="req">(required)</span></label>
+    <input id="ff-email" name="email" type="email" autocomplete="email" required></div>
+  <div class="field"><label for="ff-firm">Firm <span class="req">(required)</span></label>
+    <input id="ff-firm" name="firm" type="text" autocomplete="organization" required></div>
+  <div class="field"><label for="ff-role">Your role <span class="opt">(optional)</span></label>
+    <input id="ff-role" name="role" type="text" autocomplete="organization-title" placeholder="e.g. Head of Risk"></div>
+  <div class="field"><label for="ff-what">What do you want measured? <span class="opt">(optional)</span></label>
+    <textarea id="ff-what" name="message" rows="3" placeholder="e.g. whether funded traders close winning positions sooner than losing ones"></textarea></div>
+  <p><button class="btn" type="submit">Send the request</button></p>
+  <p class="small muted">We use these details only to reply. We reply within 1 business day (Eastern Time, Monday to Friday). <a href="/privacy/">Privacy notice</a></p>
+</form>
+<p class="mailto-line">Prefer email? Write to <a href="mailto:donttrade.research@gmail.com?subject=Pilot%20request%20%E2%80%94%20%5Byour%20firm%5D">donttrade.research@gmail.com</a>.</p>
 
-  <h2>The agreement, in brief</h2>
-  <ul>
-    <li><strong>Fixed scope and price,</strong> in writing before any data is seen.</li>
-    <li><strong>Your records never leave your systems.</strong> Only what the script prints comes back.</li>
-    <li><strong>Publication only with your consent.</strong> You review anything describing your data first and may decline outright.</li>
-    <li><strong>Use of the name.</strong> You may say a figure was “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a fixed-scope agreement”, and nothing stronger: never audited, certified or verified. We name you only with your consent.</li>
-    <li><strong>Licence for the engagement.</strong> The commercial licence to run the script on your records comes with the engagement.</li>
-  </ul>
+  </section>
+  <p class="disclaimer">donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.</p>
 
-  <h2>How this compares</h2>
-  <p class="scroll-hint" aria-hidden="true">Swipe the table sideways for more columns →</p><div class="table-scroll sticky1" tabindex="0" role="region" aria-label="Comparison of options"><table style="min-width:720px">
-    <thead><tr><th scope="col"><span class="vh">Question</span></th><th scope="col">donttrade measurement</th><th scope="col">A figure you compute yourself</th><th scope="col">A third-party assurance review</th><th scope="col">Doing nothing</th></tr></thead>
-    <tbody>
-      <tr><th scope="row">Who computes it</th><td>Your staff run our published script; we write it up</td><td>You</td><td>The review provider</td><td>—</td></tr>
-      <tr><th scope="row">Can a trader or journalist re-run the method?</th><td>Yes; the script is public</td><td>Only if you publish your method</td><td>Usually not published</td><td>—</td></tr>
-      <tr><th scope="row">What it covers</th><td>Trader behaviour</td><td>Whatever you choose</td><td>Set by that engagement (e.g. payout processing times)</td><td>—</td></tr>
-      <tr><th scope="row">Does account-level data leave your systems?</th><td>No; aggregate counts only</td><td>No</td><td>Set by that engagement</td><td>No</td></tr>
-      <tr><th scope="row">Price known before you ask?</th><td>Yes</td><td>—</td><td>Usually not published</td><td>—</td></tr>
-      <tr><th scope="row">Can you keep an unflattering result private?</th><td>Yes</td><td>Yes</td><td>Set by that engagement</td><td>—</td></tr>
-    </tbody>
-  </table></div>
-
-  <h2>Why a re-run number is harder to wave away</h2>
-  <p>The Financial Commission’s prop-firm code took effect in July 2026. It asks for drawdown rules that are objective and verifiable, and certification runs on attestations: firms sign one to join and file quarterly attestations that the Commission can review. (<a href="https://financialcommission.org/prop-firm-certification/code-of-conduct/">Code of Conduct</a>; <a href="https://financefeeds.com/financial-commission-launches-prop-firm-certification-as-industry-seeks-rules-on-payouts-and-trader-abuse/">FinanceFeeds</a>)</p>
-  <p>Firms already pay for outside checks. Hola Prime commissioned Deloitte for an independent review of payout processing and published the result. That review covered operations, in a window the firm chose. It did not measure how traders behaved. (<a href="https://www.fxstreet.com/press-releases/hola-prime-completes-independent-deloitte-review-reinforcing-transparency-202604291417">release</a>)</p>
-  <p>A figure someone else computed, with the method published, can be checked by anyone who reads it.</p>
-  <p>Publishing a pass rate? <a href="/tools/pass-rate-calculator/">Check the arithmetic with the free pass-rate calculator →</a></p>
-
-  <h2>What you risk, and what you don’t</h2>
-  <ul class="risk">
-    <li>The price is fixed in writing before any data is seen.</li>
-    <li>We will not change a figure, narrow a period or change a denominator.</li>
-    <li>You can decline publication; the fee is the same.</li>
-    <li>Our liability is capped at the fees paid.</li>
-    <li>The engagement agreement (scope, data terms, licence) is sent with the scope, before you pay. A blank template is available on request.</li>
-    <li>Either side can stop in writing. No cancellation fees. The trial is refundable in full until your staff first run the script on your records (data kick-off), and after that through the reproduction refund. Memo, Outcomes pack and Snapshot are paid 50% on acceptance and 50% within 7 days of delivery; if either side stops, completed work is billed pro rata.</li>
-    <li><strong>Before you sign anything, run the public script on a test file</strong> (the licence allows 32 days of evaluation on test data). If it doesn’t run, you’ve lost nothing.</li>
-  </ul>
-
-  <h2>What the money does not buy</h2>
-  <ul>
-    <li><strong>No signals, no picks, no predictions.</strong> Nothing here tells anyone what to buy.</li>
-    <li><strong>No edge claims.</strong> A measurement of how your traders behave is not a forecast of how they will behave next quarter, and it will not be written as one.</li>
-    <li><strong>No flattering version.</strong> If the number comes out against your marketing, that is the number. You can decline to publish it; we will not publish a more comfortable version instead.</li>
-    <li><strong>Not an audit, not an assurance engagement, not a certification,</strong> and no regulatory status or endorsement of your solvency or performance. We issue no badge or seal. This is a one-off research service: it performs no operational function for you and needs no access to your systems.</li>
-  </ul>
-
-  <h2>For your compliance team</h2>
-  <p class="faq-intro">Frank answers to the questions due diligence asks first.</p>
-  <details><summary>Who will we contract with?</summary><p>One person. The legal contracting party is named in the engagement agreement, before anything is paid, with whatever identity checks your due diligence needs. The pseudonym is how the research is published, not a contract term.</p></details>
-  <details><summary>Does any account data leave our systems?</summary><p>No. Your staff run the script inside your systems; we receive only what it prints, shown above under “Everything that comes back to us”. We never need access to your systems.</p></details>
-  <details><summary>What if the number is bad for us?</summary><p>Then that is the number. You can keep it private, and we publish nothing from the engagement. The fee is unchanged.</p></details>
-  <details><summary>Can you publish without our consent?</summary><p>No. You review anything describing your data first and may decline publication outright. We may say only that an engagement took place, without naming you or the figure.</p></details>
-  <details><summary>Is this an audit or a certification?</summary><p>No. Please don’t describe it as audited, certified or verified.</p></details>
-  <details><summary>Do advertising rules apply to claims about trader behaviour?</summary><p>Generally, yes. In Canada, a performance claim must be based on an adequate and proper test done before the claim is made; in the US, advertisers need a reasonable basis before publishing. Whether one claims test is enough support for your claim is a question for your own counsel. Not legal advice.</p></details>
-  <details><summary>What if we stop halfway?</summary><p>No cancellation fees. The trial is refundable in full until your staff first run the script on your records (data kick-off), and after that through the reproduction refund. Memo, Outcomes pack and Snapshot are paid 50% on acceptance and 50% within 7 days of delivery; if either side stops, completed work is billed pro rata.</p></details>
-  <details><summary>Who pays you? Can anyone pay to change a number?</summary><p>Firms pay for measurements of their own data; readers pay nothing. No one can pay to change a number, in a report or in the free research. <a href="/independence/">Independence policy →</a></p></details>
-  <details><summary>How do we pay?</summary><p>Prices in US dollars (USD), before any applicable sales tax. Every engagement is invoiced in USD; pay by bank transfer, or, in Canada, the CAD equivalent by Interac e-Transfer. Card payments are accepted through a secure Stripe link, sent only after you accept the scope. One-off engagement, fixed scope, no subscription.</p></details>
-  <details><summary>Can we talk on a call?</summary><p>We work by email only, so every answer is in writing and can go straight to your compliance file. Ask anything at <span class="addr">donttrade.research@gmail.com</span>.</p></details>
-  <details><summary>Why is there no client list?</summary><p>There are no paying clients yet. Every headline figure on this site comes from public data; the scripts behind 4 of the 6 studies are public; the other 2 are listed, with their gaps, on each study. A firm that elects to publish its result will be listed, with its consent.</p></details>
-  <details><summary>Can we test it first?</summary><p>Yes. The licence lets any organisation run it on synthetic or test data for 32 days, and the folder includes a generator that writes a test file. <a href="https://github.com/donttrade/disposition-effect/tree/main/partner">partner/ →</a></p></details>
-  <details><summary>Can we just run the public script on our own records?</summary><p>Not for your business, from v2. Version 1 of the measurement script (commit 2ff165c) stays under the MIT licence. From v2 it is under PolyForm Noncommercial 1.0.0: free for traders, researchers and non-commercial use, with a 32-day evaluation on test data for any organisation; the terms are in partner/LICENSING.md, published with v2. A firm running v2 or later on client records, or quoting what it prints, needs a commercial licence, which comes with every engagement. What you are buying is also the part you can’t do yourself: a figure computed under an independent agreement, with its ratio set beside the public panel’s pooled ratio, and the difference in how the two count days stated.</p></details>
-
-  <div class="cta-row"><div class="cta-block"><a class="btn" data-cta="firm" href="https://tally.so/r/VpE8Zj?audience=firm">Start the trial — $745 USD</a><p class="fine">Prefer email? <span class="addr">donttrade.research@gmail.com</span></p></div><span class="note">You get a written scope and a fixed price back, free. Nothing is owed until you accept the scope.</span></div>
-  <p><a href="/independence/">Independence policy: who pays, and what the money does not buy →</a></p>
 </div>
 
 </main>
-<footer class="site"><div class="wrap">
-  <div class="fcols"><nav aria-label="Who it’s for"><p class="fh">Who it’s for</p><a href="/for-firms/">Prop firms &amp; brokers</a><a href="/for-platforms/">Journals &amp; platforms</a><a href="/for-firms/#copy-leader">Copy-trading platforms</a><a href="/for-firms/#claims-test">Firms making behaviour claims</a><a href="/for-traders/">Individual traders</a><a href="/for-researchers/">Researchers &amp; press</a></nav><nav aria-label="Buying"><p class="fh">Buying</p><a href="/pricing/">Pricing</a><a href="/start/">Start a trial</a><a href="/terms/">Terms</a><a href="/terms/#cancellation">Cancellations &amp; refunds</a></nav><nav aria-label="Research"><p class="fh">Research</p><a href="/research/">Research</a><a href="/plan-gap/">The plan gap</a><a href="/sample-memo/">Sample &amp; method</a><a href="/code/">Code</a><a href="/glossary/">Glossary</a><a href="/corrections/">Corrections</a><a href="/feed.xml">Atom feed</a></nav><nav aria-label="Trust"><p class="fh">Trust</p><a href="/tools/">Free tools</a><a href="/independence/">Independence</a><a href="/about/">About</a><a href="/privacy/">Privacy</a></nav></div>
-  <p class="contact">Email <a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a>. We reply within 1 business day (Eastern Time, Monday to Friday). We work by email only, with no calls, so everything is in writing.</p>
-  <p class="whopays"><strong>Firms pay for fixed-scope measurements of their own data. Readers pay nothing. No firm can pay to change a number.</strong> <a href="/independence/">Independence policy →</a></p>
-  <p>Nothing here is investment advice or tailored to anyone’s circumstances, and nothing here forecasts anything.</p>
-  <p>This site sets no cookies and runs no analytics; it stores only your light/dark choice, in your own browser. Forms open on Tally and subscribing opens Substack; their privacy policies apply. <a href="/privacy/">Privacy →</a></p>
-  <p>Published only at <a href="https://donttrade.substack.com">donttrade.substack.com</a>, this site and <a href="https://github.com/donttrade">github.com/donttrade</a>. Any other channel or handle is not us.</p>
-  <p>&copy; 2026 donttrade. Text and charts <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>; numbers are facts, quote them with a link.</p>
-  <p><a class="wordmark" href="/" aria-label="donttrade, home"><svg class="wm" height="26" xmlns="http://www.w3.org/2000/svg" viewBox="0 -744 4362 768" role="img" aria-label="donttrade"><g fill="currentColor" transform="scale(1 -1)"><path transform="translate(0.0 0)" d="M239 -14Q180 -14 134.5 16.0Q89 46 63.0 102.0Q37 158 37 235Q37 314 67.0 372.0Q97 430 146.0 461.5Q195 493 254 493Q284 493 309.0 484.5Q334 476 356.5 457.5Q379 439 400 409H420L410 351Q373 390 345.5 406.5Q318 423 288 423Q254 423 226.0 403.0Q198 383 181.0 342.0Q164 301 164 237Q164 177 180.0 137.0Q196 97 223.5 77.0Q251 57 287 57Q324 57 352.5 78.0Q381 99 410 140L420 82H401Q381 50 357.0 28.5Q333 7 304.0 -3.5Q275 -14 239 -14ZM387 -11 376 85V87V397L380 409V640L302 650V689L484 734L499 725L495 583V52L561 41V0Z"/><path transform="translate(565.0 0)" d="M278 -14Q211 -14 156.0 16.0Q101 46 69.0 103.0Q37 160 37 239Q37 319 70.5 376.0Q104 433 159.0 463.0Q214 493 278 493Q342 493 397.0 463.0Q452 433 485.5 376.5Q519 320 519 239Q519 159 486.5 102.0Q454 45 399.5 15.5Q345 -14 278 -14ZM278 34Q314 34 338.5 56.5Q363 79 376.5 124.0Q390 169 390 238Q390 308 376.5 353.5Q363 399 338.5 421.5Q314 444 278 444Q242 444 217.0 421.5Q192 399 179.5 353.5Q167 308 167 238Q167 169 179.5 124.0Q192 79 217.0 56.5Q242 34 278 34Z"/><path transform="translate(1107.0 0)" d="M34 0V41L136 61H184L281 41V0ZM98 0Q99 23 99.5 60.5Q100 98 100.5 138.5Q101 179 101 210V263Q101 291 100.5 310.0Q100 329 99.5 346.0Q99 363 98 383L27 392V429L194 493L210 483L220 369V367V210Q220 179 220.5 138.5Q221 98 221.5 60.5Q222 23 223 0ZM338 0V41L438 61H486L585 41V0ZM400 0Q401 23 401.5 60.0Q402 97 402.5 137.5Q403 178 403 210V304Q403 364 386.5 386.5Q370 409 333 409Q312 409 290.0 401.5Q268 394 245.0 378.5Q222 363 197 338L189 390H203Q230 424 260.0 446.5Q290 469 322.5 481.0Q355 493 387 493Q452 493 487.0 450.0Q522 407 522 314V210Q522 178 522.5 137.5Q523 97 523.5 60.0Q524 23 525 0Z"/><path transform="translate(1703.0 0)" d="M144 419V479H326V419ZM211 -14Q152 -14 117.5 16.0Q83 46 83 112Q83 134 83.5 154.5Q84 175 84 204V419H10V470L131 485L83 449L129 617H209L204 459V439V123Q204 86 218.5 69.0Q233 52 257 52Q273 52 287.0 58.5Q301 65 318 77L342 52Q329 31 310.0 16.0Q291 1 266.5 -6.5Q242 -14 211 -14Z"/><path transform="translate(2029.0 0)" d="M144 419V479H326V419ZM211 -14Q152 -14 117.5 16.0Q83 46 83 112Q83 134 83.5 154.5Q84 175 84 204V419H10V470L131 485L83 449L129 617H209L204 459V439V123Q204 86 218.5 69.0Q233 52 257 52Q273 52 287.0 58.5Q301 65 318 77L342 52Q329 31 310.0 16.0Q291 1 266.5 -6.5Q242 -14 211 -14Z"/><path transform="translate(2355.0 0)" d="M35 0V41L138 61H200L303 41V0ZM98 0Q99 23 99.5 60.5Q100 98 100.5 138.5Q101 179 101 210V263Q101 291 100.5 310.5Q100 330 99.5 346.5Q99 363 98 383L27 392V429L194 493L210 483L220 359V357V210Q220 179 220.5 138.5Q221 98 221.5 60.5Q222 23 223 0ZM219 276 195 345H213Q228 393 251.5 426.0Q275 459 303.5 476.0Q332 493 360 493Q387 493 409.0 479.0Q431 465 438 439Q438 402 421.0 382.0Q404 362 374 362Q354 362 337.5 370.5Q321 379 305 397L277 427L322 425Q285 403 259.0 365.5Q233 328 219 276Z"/><path transform="translate(2783.0 0)" d="M171 -14Q115 -14 76.5 18.5Q38 51 38 112Q38 145 52.5 172.5Q67 200 105.5 224.0Q144 248 217 268Q244 276 270.0 283.5Q296 291 322.0 298.0Q348 305 374 312V274Q341 264 309.0 253.5Q277 243 247 234Q209 222 189.0 205.0Q169 188 162.0 169.0Q155 150 155 130Q155 93 175.5 76.0Q196 59 226 59Q242 59 257.0 64.0Q272 69 293.0 83.0Q314 97 348 122L360 71H325Q297 43 275.0 24.0Q253 5 229.0 -4.5Q205 -14 171 -14ZM415 -12Q369 -12 342.5 14.5Q316 41 313 86V91V326Q313 373 304.5 398.5Q296 424 277.0 434.0Q258 444 225 444Q207 444 185.5 441.0Q164 438 133 428L188 463L171 386Q167 350 150.0 333.0Q133 316 109 316Q86 316 71.5 328.0Q57 340 53 362Q62 421 117.5 457.0Q173 493 264 493Q322 493 358.5 474.5Q395 456 412.5 416.5Q430 377 430 312V94Q430 70 438.0 59.5Q446 49 460 49Q471 49 479.0 54.5Q487 60 495 71L518 51Q500 16 475.0 2.0Q450 -12 415 -12Z"/><path transform="translate(3287.0 0)" d="M239 -14Q180 -14 134.5 16.0Q89 46 63.0 102.0Q37 158 37 235Q37 314 67.0 372.0Q97 430 146.0 461.5Q195 493 254 493Q284 493 309.0 484.5Q334 476 356.5 457.5Q379 439 400 409H420L410 351Q373 390 345.5 406.5Q318 423 288 423Q254 423 226.0 403.0Q198 383 181.0 342.0Q164 301 164 237Q164 177 180.0 137.0Q196 97 223.5 77.0Q251 57 287 57Q324 57 352.5 78.0Q381 99 410 140L420 82H401Q381 50 357.0 28.5Q333 7 304.0 -3.5Q275 -14 239 -14ZM387 -11 376 85V87V397L380 409V640L302 650V689L484 734L499 725L495 583V52L561 41V0Z"/><path transform="translate(3852.0 0)" d="M281 -14Q208 -14 153.0 15.0Q98 44 67.5 99.5Q37 155 37 234Q37 314 69.0 372.0Q101 430 155.5 461.5Q210 493 276 493Q336 493 380.5 468.0Q425 443 450.5 398.0Q476 353 476 292Q476 275 474.5 261.5Q473 248 470 237H90V284H298Q338 284 350.0 299.0Q362 314 362 341Q362 376 351.0 399.0Q340 422 320.5 433.0Q301 444 276 444Q248 444 221.5 425.5Q195 407 178.5 365.0Q162 323 162 250Q162 189 182.0 147.5Q202 106 237.5 85.5Q273 65 319 65Q362 65 394.5 79.5Q427 94 454 124L481 102Q460 66 433.0 40.0Q406 14 369.0 0.0Q332 -14 281 -14Z"/></g></svg></a></p>
+<footer class="site-footer"><div class="wrap">
+  <div class="cols">
+    <nav aria-label="Traders"><h2>Traders</h2><ul><li><a href="/tools/">Free tools</a></li><li><a href="/tools/trade-stats/">Trade stats</a></li><li><a href="/for-traders/">Individual traders</a></li>
+    </ul></nav>
+    <nav aria-label="Firms"><h2>Firms</h2><ul><li><a href="/for-firms/">Prop firms &amp; brokers</a></li><li><a href="/for-platforms/">Journals &amp; platforms</a></li><li><a href="/for-firms/#copy-leader">Copy-trading platforms</a></li><li><a href="/for-firms/#claims-test">Firms making behaviour claims</a></li><li><a href="/pricing/">Pricing</a></li><li><a href="/start/#firm">Start a Pilot</a></li>
+    </ul></nav>
+    <nav aria-label="Research"><h2>Research</h2><ul><li><a href="/research/">Research</a></li><li><a href="/plan-gap/">The plan gap</a></li><li><a href="/sample-memo/">Sample &amp; method</a></li><li><a href="/code/">Code</a></li><li><a href="/glossary/">Glossary</a></li><li><a href="/corrections/">Corrections</a></li><li><a href="/feed.xml">Atom feed</a></li>
+    </ul></nav>
+    <nav aria-label="Trust"><h2>Trust</h2><ul><li><a href="/independence/">Independence</a></li><li><a href="/about/">About</a></li><li><a href="/for-researchers/">Researchers &amp; press</a></li>
+    </ul></nav>
+    <nav aria-label="Legal"><h2>Legal</h2><ul><li><a href="/terms/">Terms</a></li><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/#cancellation">Cancellations &amp; refunds</a></li>
+    </ul></nav>
+  </div>
+  <p class="legal">Email <a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a>. We reply within 1 business day (Eastern Time, Monday to Friday).</p>
+  <p class="legal"><strong>Firms pay for fixed-scope measurements of their own data. Readers pay nothing. No firm can pay to change a number.</strong> <a href="/independence/">Independence policy</a></p>
+  <p class="legal">donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.</p>
+  <p class="legal">This site sets no cookies and runs no analytics. It stores only your light/dark choice, in your own browser. Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; their privacy policies apply. <a href="/privacy/">Privacy</a></p>
+  <p class="legal">&copy; 2026 donttrade. Text and charts <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>; numbers are facts, quote them with a link.</p>
 </div></footer>
+
 </body>
 </html>

@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src &#39;self&#39;; script-src &#39;self&#39;; style-src &#39;self&#39;; img-src &#39;self&#39; data:; font-src &#39;self&#39;; connect-src &#39;none&#39;; worker-src &#39;self&#39;; form-action &#39;self&#39; https://api.web3forms.com; base-uri &#39;none&#39;; object-src &#39;none&#39;">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16181C" media="(prefers-color-scheme: dark)">
+<title>Lot Size Calculator: Forex, Gold, Indices and Futures</title>
+<meta name="description" content="Work out position size in lots from your balance, risk amount and stop distance. Shows the formula with your numbers and the loss after rounding.">
+<link rel="canonical" href="https://donttrade.ca/tools/lot-size-calculator/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="donttrade">
+<meta property="og:title" content="Lot Size Calculator: Forex, Gold, Indices and Futures">
+<meta property="og:description" content="Work out position size in lots from your balance, risk amount and stop distance. Shows the formula with your numbers and the loss after rounding.">
+<meta property="og:url" content="https://donttrade.ca/tools/lot-size-calculator/">
+<meta property="og:image" content="https://donttrade.ca/assets/og/default.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Lot Size Calculator: Forex, Gold, Indices and Futures">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/static/css/site.css">
+<script src="/static/js/theme.js"></script>
+<script src="/static/js/nav.js" defer></script>
+<script src="/static/js/tools/lot-size.js" type="module"></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "item": "https://donttrade.ca/tools/", "name": "Free tools", "position": 2}, {"@type": "ListItem", "name": "Lot size calculator", "position": 3}]}, {"@id": "https://donttrade.ca/tools/lot-size-calculator/#app", "@type": "WebApplication", "applicationCategory": "FinanceApplication", "browserRequirements": "Requires JavaScript", "description": "Work out position size in lots from your balance, risk amount and stop distance. Shows the formula with your numbers and the loss after rounding.", "isAccessibleForFree": true, "name": "Lot size calculator", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "operatingSystem": "Any (runs in a web browser)", "publisher": {"@id": "https://donttrade.ca/#org"}, "url": "https://donttrade.ca/tools/lot-size-calculator/"}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Lot size equals the amount you are prepared to lose divided by the stop distance times the value of one point for one lot. For example, a risk amount of 200 with a 40-point stop and 1 per point per lot gives 5 lots. The page shows this formula filled in with your inputs."}, "name": "How is lot size calculated?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Your platform’s contract specification lists the contract size and tick value for each symbol. In MT5, right-click the symbol in Market Watch and open Specification. The value per point can differ between brokers for the same symbol name, so use your own broker’s figure."}, "name": "Where do I find the value per point for gold or an index?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "The calculator does not suggest one. How much you risk is your decision, and this page does not recommend any size. It only converts the amount you choose into lots."}, "name": "What risk percentage do other traders use?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Brokers trade in fixed lot steps, often 0.01 lots. If the exact size falls between steps, the page rounds down and shows the loss at the rounded size. If even one step is larger than your risk amount, the page says so instead of rounding up quietly."}, "name": "Why is the loss at the rounded size lower than what I entered?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. It sizes from the stop distance you enter. If you want costs included, add the spread to your stop distance; commission and slippage are not modelled."}, "name": "Does it include spread, commission or slippage?"}]}]}</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header"><div class="wrap">
+  <a class="brand" href="/">donttrade</a>
+  <nav class="site-nav" aria-label="Main"><ul class="nav-row">
+    <li><a href="/for-firms/">For firms</a></li>
+    <li><a href="/for-traders/">For traders</a></li>
+    <li><a href="/tools/">Free tools</a></li>
+    <li><a href="/pricing/">Pricing</a></li>
+    <li><a href="/research/">Research</a></li>
+    <li><a href="/about/">About</a></li>
+  </ul>
+  <details class="nav-menu" data-nav-menu>
+    <summary><svg class="i-menu" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg><svg class="i-close" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>Menu</summary>
+    <ul class="nav-panel">
+    <li><a href="/for-firms/">For firms</a></li>
+    <li><a href="/for-traders/">For traders</a></li>
+    <li><a href="/tools/">Free tools</a></li>
+    <li><a href="/pricing/">Pricing</a></li>
+    <li><a href="/research/">Research</a></li>
+    <li><a href="/about/">About</a></li>
+    </ul>
+  </details></nav>
+  <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" hidden><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg><span class="tt-label">Dark mode</span></button>
+</div></header>
+
+<main id="main">
+
+<div class="wrap">
+  <div class="grid">
+    <div class="span-8">
+      <p class="crumb small"><a href="/tools/">Free tools</a></p>
+      <h1>Lot size calculator</h1>
+      <p class="lede">Enter your account balance, the amount you would lose if the stop is hit (as a percentage or as an amount), your stop distance, and the value of one point for one lot on your instrument.</p>
+      <p>The calculator returns the position size in lots, shows the loss at the stop after rounding down to your broker’s lot step, and prints the formula with your own numbers in it so you can redo it by hand. It works for forex pairs, gold, indices and futures, as long as you know the point value your broker uses; the section below shows where to find it. The inputs start blank on purpose. We do not suggest a risk percentage, because that choice is yours. Entries that could be read two ways, such as “1,500” in a field that also accepts decimals, are refused instead of guessed. It runs entirely in your browser and nothing you type is sent anywhere.</p>
+    </div>
+  </div>
+  <p class="disclaimer">donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.</p>
+
+
+  <section class="tool" aria-labelledby="ls-tool-h">
+    <h2 id="ls-tool-h">Your numbers</h2>
+    <p id="ls-js-needed" class="notice notice-caution">This calculator runs in your browser and needs JavaScript turned on.</p>
+    <form id="ls-form" novalidate hidden>
+      <fieldset>
+        <legend>How you state the risk</legend>
+        <div class="check"><input type="radio" id="ls-mode-amount" name="ls-mode" value="amount" checked><label for="ls-mode-amount">As an amount of money</label></div>
+        <div class="check"><input type="radio" id="ls-mode-pct" name="ls-mode" value="pct"><label for="ls-mode-pct">As a % of the account balance</label></div>
+      </fieldset>
+      <div class="field-grid">
+        
+      <div class="field">
+        <label for="ls-balance" id="ls-balance-label">Account balance</label> <span id="ls-balance-opt" class="muted">(optional)</span>
+        <span class="hint" id="ls-balance-hint">In your account currency, for example 25000.</span>
+        <input id="ls-balance" type="text" inputmode="decimal" autocomplete="off" aria-describedby="ls-balance-hint ls-balance-err">
+        <p class="error" id="ls-balance-err" hidden></p>
+      </div>
+        
+      <div class="field">
+        <label for="ls-risk" id="ls-risk-label">Risk, as an amount</label>
+        <span class="hint" id="ls-risk-hint">What you would lose if the stop is hit, in your account currency. There is no default: the number is yours.</span>
+        <input id="ls-risk" type="text" inputmode="decimal" autocomplete="off" aria-describedby="ls-risk-hint ls-risk-err">
+        <p class="error" id="ls-risk-err" hidden></p>
+      </div>
+        
+      <div class="field">
+        <label for="ls-stop" id="ls-stop-label">Stop distance (points)</label>
+        <span class="hint" id="ls-stop-hint">From entry to stop, in the same points as the value below.</span>
+        <input id="ls-stop" type="text" inputmode="decimal" autocomplete="off" aria-describedby="ls-stop-hint ls-stop-err">
+        <p class="error" id="ls-stop-err" hidden></p>
+      </div>
+        
+      <div class="field">
+        <label for="ls-vpp" id="ls-vpp-label">Value per point for one lot</label>
+        <span class="hint" id="ls-vpp-hint">From your broker’s contract specification. See “Where to find the value per point” below.</span>
+        <input id="ls-vpp" type="text" inputmode="decimal" autocomplete="off" aria-describedby="ls-vpp-hint ls-vpp-err">
+        <p class="error" id="ls-vpp-err" hidden></p>
+      </div>
+        
+      <div class="field">
+        <label for="ls-step" id="ls-step-label">Lot step (optional)</label>
+        <span class="hint" id="ls-step-hint">Your broker’s smallest size change, for example 0.01. Leave blank for no rounding.</span>
+        <input id="ls-step" type="text" inputmode="decimal" autocomplete="off" aria-describedby="ls-step-hint ls-step-err">
+        <p class="error" id="ls-step-err" hidden></p>
+      </div>
+      </div>
+      <div id="ls-errors" class="notice notice-error" role="alert" tabindex="-1" hidden></div>
+      <p><button class="btn" type="submit">Calculate</button></p>
+    </form>
+  </section>
+
+  <div id="ls-out" class="tool-out" hidden></div>
+
+  <aside class="notice notice-gap teaser" aria-labelledby="ls-teaser-h" data-on-sale="false">
+    <strong id="ls-teaser-h">What the habit report will add</strong>
+    <p>Sizing on paper is one thing. We’re building a habit report that checks, from your own trade file, whether your size changes after a loss, and what that cost.</p>
+    <p><a class="btn" href="/for-traders/#waitlist">Join the waitlist — $39 founding price</a></p>
+    <p class="small">Not on sale yet: nothing is charged now. The free tools stay free.</p>
+  </aside>
+
+  <section class="section" aria-labelledby="vpp-h">
+    <h2 id="vpp-h">Where to find the value per point</h2>
+    <p>Your platform’s contract specification lists the contract size and tick value for each symbol. In MT5, right-click the symbol in Market Watch and open Specification. The value per point can differ between brokers for the same symbol name, so use your own broker’s figure, and measure the stop distance in the same points.</p>
+    <ul>
+      <li><strong>Forex:</strong> the value of one pip (or one point, if your platform quotes five decimals) for one standard lot, in your account currency.</li>
+      <li><strong>Gold and indices (CFDs):</strong> the contract size times the price step, as listed in the specification.</li>
+      <li><strong>Futures:</strong> the exchange’s multiplier per point for one contract; here a “lot” is one contract.</li>
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="faq-h">
+    <h2 id="faq-h">Questions</h2>
+    <details><summary>How is lot size calculated?</summary><p>Lot size equals the amount you are prepared to lose divided by the stop distance times the value of one point for one lot. For example, a risk amount of 200 with a 40-point stop and 1 per point per lot gives 5 lots. The page shows this formula filled in with your inputs.</p></details>
+    <details><summary>Where do I find the value per point for gold or an index?</summary><p>Your platform’s contract specification lists the contract size and tick value for each symbol. In MT5, right-click the symbol in Market Watch and open Specification. The value per point can differ between brokers for the same symbol name, so use your own broker’s figure.</p></details>
+    <details><summary>What risk percentage do other traders use?</summary><p>The calculator does not suggest one. How much you risk is your decision, and this page does not recommend any size. It only converts the amount you choose into lots.</p></details>
+    <details><summary>Why is the loss at the rounded size lower than what I entered?</summary><p>Brokers trade in fixed lot steps, often 0.01 lots. If the exact size falls between steps, the page rounds down and shows the loss at the rounded size. If even one step is larger than your risk amount, the page says so instead of rounding up quietly.</p></details>
+    <details><summary>Does it include spread, commission or slippage?</summary><p>No. It sizes from the stop distance you enter. If you want costs included, add the spread to your stop distance; commission and slippage are not modelled.</p></details>
+  </section>
+
+  <section class="section" aria-labelledby="more-h">
+    <h2 id="more-h">Related</h2>
+    <ul>
+      <li><a href="/tools/trade-stats/">Trade stats</a>: what your own trade file shows.</li>
+      <li><a href="/tools/prop-challenge-simulator/">Prop-firm challenge simulator</a>: replay a challenge from your own trading days.</li>
+    </ul>
+  </section>
+  <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. donttrade is not affiliated with it.</p>
+</div>
+
+</main>
+<footer class="site-footer"><div class="wrap">
+  <div class="cols">
+    <nav aria-label="Traders"><h2>Traders</h2><ul><li><a href="/tools/">Free tools</a></li><li><a href="/tools/trade-stats/">Trade stats</a></li><li><a href="/for-traders/">Individual traders</a></li>
+    </ul></nav>
+    <nav aria-label="Firms"><h2>Firms</h2><ul><li><a href="/for-firms/">Prop firms &amp; brokers</a></li><li><a href="/for-platforms/">Journals &amp; platforms</a></li><li><a href="/for-firms/#copy-leader">Copy-trading platforms</a></li><li><a href="/for-firms/#claims-test">Firms making behaviour claims</a></li><li><a href="/pricing/">Pricing</a></li><li><a href="/start/#firm">Start a Pilot</a></li>
+    </ul></nav>
+    <nav aria-label="Research"><h2>Research</h2><ul><li><a href="/research/">Research</a></li><li><a href="/plan-gap/">The plan gap</a></li><li><a href="/sample-memo/">Sample &amp; method</a></li><li><a href="/code/">Code</a></li><li><a href="/glossary/">Glossary</a></li><li><a href="/corrections/">Corrections</a></li><li><a href="/feed.xml">Atom feed</a></li>
+    </ul></nav>
+    <nav aria-label="Trust"><h2>Trust</h2><ul><li><a href="/independence/">Independence</a></li><li><a href="/about/">About</a></li><li><a href="/for-researchers/">Researchers &amp; press</a></li>
+    </ul></nav>
+    <nav aria-label="Legal"><h2>Legal</h2><ul><li><a href="/terms/">Terms</a></li><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/#cancellation">Cancellations &amp; refunds</a></li>
+    </ul></nav>
+  </div>
+  <p class="legal">Email <a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a>. We reply within 1 business day (Eastern Time, Monday to Friday).</p>
+  <p class="legal"><strong>Firms pay for fixed-scope measurements of their own data. Readers pay nothing. No firm can pay to change a number.</strong> <a href="/independence/">Independence policy</a></p>
+  <p class="legal">donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.</p>
+  <p class="legal">This site sets no cookies and runs no analytics. It stores only your light/dark choice, in your own browser. Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; their privacy policies apply. <a href="/privacy/">Privacy</a></p>
+  <p class="legal">&copy; 2026 donttrade. Text and charts <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>; numbers are facts, quote them with a link.</p>
+</div></footer>
+
+</body>
+</html>

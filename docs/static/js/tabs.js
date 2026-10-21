@@ -1,0 +1,51 @@
+// tabs.js — WAI-ARIA tablist: click or arrow keys switch panels, Home/End jump.
+// The URL hash picks the starting tab (#firms opens Firms). Without JS every panel
+// is shown stacked, because the build renders them unhidden and this script hides them.
+(function () {
+  'use strict';
+  function init(list) {
+    var tabs = Array.prototype.slice.call(list.querySelectorAll('[role="tab"]'));
+    function panelOf(t) { return document.getElementById(t.getAttribute('aria-controls')); }
+    function select(t, focus) {
+      tabs.forEach(function (x) {
+        var on = x === t;
+        x.setAttribute('aria-selected', on ? 'true' : 'false');
+        x.tabIndex = on ? 0 : -1;
+        var p = panelOf(x);
+        if (p) p.hidden = !on;
+      });
+      if (focus) t.focus();
+    }
+    tabs.forEach(function (t, i) {
+      t.addEventListener('click', function () { select(t, false); });
+      t.addEventListener('keydown', function (e) {
+        var k = e.key, n = null;
+        if (k === 'ArrowRight') n = tabs[(i + 1) % tabs.length];
+        else if (k === 'ArrowLeft') n = tabs[(i - 1 + tabs.length) % tabs.length];
+        else if (k === 'Home') n = tabs[0];
+        else if (k === 'End') n = tabs[tabs.length - 1];
+        if (n) { e.preventDefault(); select(n, true); }
+      });
+    });
+    // The tab for the current hash: a tab's own data-hash, or the panel holding that id
+    // (e.g. /pricing/#copy-leader opens Firms). No match: keep `fallback`.
+    function fromHash(fallback) {
+      var start = fallback;
+      var hash = window.location.hash.slice(1);
+      tabs.forEach(function (t) { if (hash && t.getAttribute('data-hash') === hash) start = t; });
+      var target = hash ? document.getElementById(hash) : null;
+      if (target) tabs.forEach(function (t) { var p = panelOf(t); if (p && p.contains(target)) start = t; });
+      select(start, false);
+      if (target && start.getAttribute('data-hash') !== hash) target.scrollIntoView();
+    }
+    fromHash(tabs[0]);
+    // NIT 7: a same-page link, or back/forward, changes only the hash: switch the tab then too.
+    window.addEventListener('hashchange', function () {
+      // no hash (back to the bare page): the first tab, as on load; an unknown hash: no change
+      var current = tabs.filter(function (t) { return t.getAttribute('aria-selected') === 'true'; })[0] || tabs[0];
+      fromHash(window.location.hash.length > 1 ? current : tabs[0]);
+    });
+  }
+  function run() { Array.prototype.forEach.call(document.querySelectorAll('[role="tablist"]'), init); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
+})();
