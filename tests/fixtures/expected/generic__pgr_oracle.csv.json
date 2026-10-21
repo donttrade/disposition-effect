@@ -1,0 +1,297 @@
+{
+ "noise": {
+  "checks": [
+   {
+    "label": "not enough trades to tell",
+    "method": "sign-flip permutation",
+    "n_a": 4,
+    "n_b": null,
+    "p": null,
+    "stat": "expectancy",
+    "value": null
+   },
+   {
+    "label": "not enough trades to tell",
+    "method": "label permutation",
+    "n_a": 2,
+    "n_b": 2,
+    "p": null,
+    "stat": "hold_gap_s",
+    "value": null
+   },
+   {
+    "label": "not enough trades to tell",
+    "method": "order shuffle",
+    "n_a": 4,
+    "n_b": null,
+    "p": null,
+    "stat": "longest_losing_streak",
+    "value": null
+   }
+  ],
+  "limited": false,
+  "n_used": 4
+ },
+ "pgr_plr": {
+  "coverage_pct": 50.0,
+  "pg": 0,
+  "pl": 1,
+  "rg": 2,
+  "rl": 2
+ },
+ "result": {
+  "currency_groups": {
+   "USD": 4
+  },
+  "executions": [
+   {
+    "currency": "USD",
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 100.0,
+    "qty": 10.0,
+    "row": 2,
+    "side": "buy",
+    "symbol": "AAA",
+    "ts": 1788256800000
+   },
+   {
+    "currency": "USD",
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 50.0,
+    "qty": 10.0,
+    "row": 3,
+    "side": "buy",
+    "symbol": "BBB",
+    "ts": 1788257100000
+   },
+   {
+    "currency": "USD",
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 20.0,
+    "qty": 10.0,
+    "row": 4,
+    "side": "buy",
+    "symbol": "CCC",
+    "ts": 1788257400000
+   },
+   {
+    "currency": "USD",
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 105.0,
+    "qty": 10.0,
+    "row": 5,
+    "side": "sell",
+    "symbol": "AAA",
+    "ts": 1788343200000
+   },
+   {
+    "currency": "USD",
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 48.0,
+    "qty": 5.0,
+    "row": 6,
+    "side": "buy",
+    "symbol": "BBB",
+    "ts": 1788345000000
+   },
+   {
+    "currency": "USD",
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 47.0,
+    "qty": 15.0,
+    "row": 7,
+    "side": "sell",
+    "symbol": "BBB",
+    "ts": 1788433200000
+   },
+   {
+    "currency": "USD",
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 30.0,
+    "qty": 10.0,
+    "row": 8,
+    "side": "sell",
+    "symbol": "DDD",
+    "ts": 1788433500000
+   },
+   {
+    "currency": "USD",
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 19.0,
+    "qty": 10.0,
+    "row": 9,
+    "side": "sell",
+    "symbol": "CCC",
+    "ts": 1788512400000
+   },
+   {
+    "currency": "USD",
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 29.0,
+    "qty": 10.0,
+    "row": 10,
+    "side": "buy",
+    "symbol": "DDD",
+    "ts": 1788514200000
+   }
+  ],
+  "format": "generic",
+  "skipped": {},
+  "trades": [
+   {
+    "close_ts": 1788343200000,
+    "currency": "USD",
+    "dir": "long",
+    "entry_vwap": 100.0,
+    "exit_vwap": 105.0,
+    "fees": 0.0,
+    "fills_n": 2,
+    "hold_s": 86400,
+    "id": "t1",
+    "open_ts": 1788256800000,
+    "pnl": 50.0,
+    "pnl_gross": 50.0,
+    "pnl_source": "computed",
+    "pnl_unit": "USD",
+    "qty": 10.0,
+    "symbol": "AAA"
+   },
+   {
+    "close_ts": 1788433200000,
+    "currency": "USD",
+    "dir": "long",
+    "entry_vwap": 49.333333333333336,
+    "exit_vwap": 47.0,
+    "fees": 0.0,
+    "fills_n": 3,
+    "hold_s": 176100,
+    "id": "t2",
+    "open_ts": 1788257100000,
+    "pnl": -35.000000000000036,
+    "pnl_gross": -35.000000000000036,
+    "pnl_source": "computed",
+    "pnl_unit": "USD",
+    "qty": 15.0,
+    "symbol": "BBB"
+   },
+   {
+    "close_ts": 1788512400000,
+    "currency": "USD",
+    "dir": "long",
+    "entry_vwap": 20.0,
+    "exit_vwap": 19.0,
+    "fees": 0.0,
+    "fills_n": 2,
+    "hold_s": 255000,
+    "id": "t3",
+    "open_ts": 1788257400000,
+    "pnl": -10.0,
+    "pnl_gross": -10.0,
+    "pnl_source": "computed",
+    "pnl_unit": "USD",
+    "qty": 10.0,
+    "symbol": "CCC"
+   },
+   {
+    "close_ts": 1788514200000,
+    "currency": "USD",
+    "dir": "short",
+    "entry_vwap": 30.0,
+    "exit_vwap": 29.0,
+    "fees": 0.0,
+    "fills_n": 2,
+    "hold_s": 80700,
+    "id": "t4",
+    "open_ts": 1788433500000,
+    "pnl": 10.0,
+    "pnl_gross": 10.0,
+    "pnl_source": "computed",
+    "pnl_unit": "USD",
+    "qty": 10.0,
+    "symbol": "DDD"
+   }
+  ],
+  "tz_label": "as in the file",
+  "verified_format": true,
+  "warnings": []
+ },
+ "stats": {
+  "avg_loss": -22.500000000000018,
+  "avg_win": 30.0,
+  "expectancy": 3.749999999999991,
+  "gross_loss": -45.000000000000036,
+  "gross_profit": 60.0,
+  "hold_median_loss_s": 215550.0,
+  "hold_median_win_s": 83550.0,
+  "hold_ratio": 2.5798922800718134,
+  "largest_loss": -35.000000000000036,
+  "largest_win": 50.0,
+  "long": {
+   "losses": 2,
+   "n": 3,
+   "pnl": 4.9999999999999645,
+   "win_rate": 0.3333333333333333,
+   "wins": 1
+  },
+  "losses": 2,
+  "max_consec_losses": {
+   "n": 2,
+   "pnl": -45.000000000000036
+  },
+  "max_consec_wins": {
+   "n": 1,
+   "pnl": 50.0
+  },
+  "max_drawdown_abs": 45.000000000000036,
+  "max_drawdown_pct": null,
+  "n": 4,
+  "net_pnl": 14.999999999999964,
+  "profit_factor": 1.3333333333333324,
+  "scratch": 0,
+  "short": {
+   "losses": 0,
+   "n": 1,
+   "pnl": 10.0,
+   "win_rate": 1.0,
+   "wins": 1
+  },
+  "win_rate": 0.5,
+  "wins": 2
+ }
+}

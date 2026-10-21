@@ -32,6 +32,13 @@
   "limited": false,
   "n_used": 90
  },
+ "pgr_plr": {
+  "coverage_pct": null,
+  "pg": 0,
+  "pl": 0,
+  "rg": 42,
+  "rl": 48
+ },
  "result": {
   "currency_groups": {
    "USD": 90

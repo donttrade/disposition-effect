@@ -1457,6 +1457,77 @@ def noise_checks(trades):
     }
 
 
+# ----------------------------------------------------------------- PGR / PLR (partial coverage)
+# Browser-side counts for the paid report (step 18). Odean (1998) needs a price for
+# every open position on every sell day; trade files have none, so a position is
+# marked only when its symbol traded that same day (last execution price that day).
+# Unmarked open position-days lower coverage_pct, which the report shows.
+
+DAY_MS = 86400000
+
+
+def pgr_plr_counts(executions):
+    order = sorted(range(len(executions)), key=lambda k: (executions[k]["ts"], executions[k]["row"], k))
+    pos = {}  # symbol -> [units (signed int), avg entry price]
+    rg = rl = pg = pl = 0
+    marked = total = 0
+    i = 0
+    while i < len(order):
+        day = executions[order[i]]["ts"] // DAY_MS
+        j = i
+        while j < len(order) and executions[order[j]]["ts"] // DAY_MS == day:
+            j += 1
+        todays = [executions[order[k]] for k in range(i, j)]
+        mark = {}
+        for e in todays:
+            mark[e["symbol"]] = e["price"]  # last price of the day per symbol
+        sold = set()
+        for e in todays:
+            sym = e["symbol"]
+            s = 1 if e["side"] == "buy" else -1
+            q = round_half_away(e["qty"] * UNIT)
+            if q == 0:
+                continue
+            units, avg = pos.get(sym, (0, 0.0))
+            if units == 0 or (units > 0) == (s > 0):
+                new_units = units + s * q
+                avg = (avg * abs(units) + e["price"] * q) / abs(new_units)
+                pos[sym] = (new_units, avg)
+                continue
+            # a realising fill: gain or loss against the average entry
+            diff = (e["price"] - avg) * (1 if units > 0 else -1)
+            if diff > 0:
+                rg += 1
+            elif diff < 0:
+                rl += 1
+            sold.add(sym)
+            close = min(q, abs(units))
+            rem = q - close
+            units = units + s * close
+            if units == 0 and rem:
+                pos[sym] = (s * rem, e["price"])
+            elif units == 0:
+                pos[sym] = (0, 0.0)
+            else:
+                pos[sym] = (units, avg)
+        if sold:
+            for sym in sorted(pos):
+                units, avg = pos[sym]
+                if units == 0 or sym in sold:
+                    continue
+                total += 1
+                if sym in mark:
+                    marked += 1
+                    diff = (mark[sym] - avg) * (1 if units > 0 else -1)
+                    if diff > 0:
+                        pg += 1
+                    elif diff < 0:
+                        pl += 1
+        i = j
+    return {"rg": rg, "pg": pg, "rl": rl, "pl": pl,
+            "coverage_pct": (100 * marked / total) if total else None}
+
+
 # ----------------------------------------------------------------- CLI / expected files
 
 FIXTURE_DIRS = ["generic", "generic_roundtrip", "mt5", "mt4", "ibkr", "tradovate", "errors"]
@@ -1468,7 +1539,8 @@ def run_fixture(data):
         res = parse_file(data)
     except EngineError as e:
         return {"error": e.to_json()}
-    return {"result": res, "stats": free_stats(res["trades"]), "noise": noise_checks(res["trades"])}
+    return {"result": res, "stats": free_stats(res["trades"]), "noise": noise_checks(res["trades"]),
+            "pgr_plr": pgr_plr_counts(res["executions"])}
 
 
 def fixture_paths(root):

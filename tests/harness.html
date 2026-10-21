@@ -12,6 +12,7 @@
 import { runFile } from '/site/static/js/engine/index.js';
 import { freeStats } from '/site/static/js/engine/stats.js';
 import { noiseChecks } from '/site/static/js/engine/noise.js';
+import { pgrPlrCounts } from '/site/static/js/engine/pgr.js';
 function bytesOf(b64) {
   const bin = atob(b64);
   const out = new Uint8Array(bin.length);
@@ -22,7 +23,8 @@ function bytesOf(b64) {
 window.runEngine = (b64) => {
   const r = runFile(bytesOf(b64));
   if (r.error) return JSON.stringify(r);
-  return JSON.stringify({ result: r.result, stats: freeStats(r.result.trades), noise: noiseChecks(r.result.trades) });
+  return JSON.stringify({ result: r.result, stats: freeStats(r.result.trades), noise: noiseChecks(r.result.trades),
+    pgr_plr: pgrPlrCounts(r.result.executions) });
 };
 window.runNoiseInWorker = (b64) => new Promise((resolve) => {
   const r = runFile(bytesOf(b64));
