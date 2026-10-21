@@ -69,7 +69,11 @@ no_analytics = ["no analytics", "runs no analytics"]
 restore_email = ['restore[\s-]+(?:access[\s-]+|your[\s-]+\w+[\s-]+)?(?:by|via|through|over)[\s-]+e-?mail',
                  'restore\b[^.<]{0,60}\baddress you paid with',
                  'e-?mail(?:ed)?[^.<]{0,30}\brestore[\s-]+link',
-                 'restore[^.<]{0,40}\b(?:enter|type)[^.<]{0,20}\be-?mail']
+                 'restore[^.<]{0,40}\b(?:enter|type)[^.<]{0,20}\be-?mail',
+                 # NIT 1 rewordings: "get your access back by email", "recover … via e-mail",
+                 # "restore using your email address", "restore it by emailing us", "we can email you a new link"
+                 '(?:restore|recover|regain|re-?open|get[\s-]+(?:your[\s-]+)?(?:access|it|key|report|purchase)[\s-]+back)\b[^.<]{0,40}?\b(?:by|via|through|over|using|with)[\s-]+(?:your[\s-]+|an[\s-]+|a[\s-]+)?e-?mail',
+                 'e-?mail(?:s|ed)?[\s-]+you[\s-]+(?:a[\s-]+)?(?:new|fresh|restore|access|another|recovery)[\s-]+(?:link|key|code)']
 restore_email_allow = ["restore by email is not offered", "Restore-by-email is not in v1"]
 # R5: false once the habit report is sold. Checked on every page of a paid_report build (EN and
 # FR, visible text, meta/og descriptions, JSON-LD, alt/title/aria-label). The allow list holds

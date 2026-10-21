@@ -426,3 +426,84 @@ def test_r6_no_terms_copy_email_is_promised_for_the_39_report(paid_site):
     for rel in ("pricing", "terms", "welcome", "fr/avant-de-payer", "fr/conditions", "fr/confidentialite"):
         t = _text(paid_site["out"], rel)
         assert not re.search(PROMISES[0][0] + "|" + PROMISES[0][1] + "|Votre copie", t, re.I), rel
+
+
+# ------------------------------------------------------------------ NIT 1: the wording checker reads what a person reads
+# lint_evasion.py: every variant renders (in a browser) as the banned text
+EVADE_TALLY = ["Forms open on Tally.", "TALLY forms", "T&#97;lly forms", "&#x54;ally forms", "Ta&#108;&#108;y",
+               "Ta<span>lly</span> forms", "Tal<b></b>ly forms", "Tal<wbr>ly forms", "Tal­ly forms", "Tal&shy;ly forms",
+               "Ta​lly forms", "Tаlly forms", "Tal<!-- -->ly forms", '<a href="https://tally.so/r/x">form</a>',
+               '<a href="https://t&#97;lly.so/r/x">form</a>', '<a href="https://%74ally.so/r/x">form</a>', "ＴＡＬＬＹ forms"]
+EVADE_RESTORE = ["You can restore by email.", "RESTORE BY EMAIL any time.", "Restore by e&#109;ail any time.",
+                 "Restore by <b>email</b> any time.", "Restore by e<span>mail</span> any time.", "Restore by e<wbr>mail.",
+                 "Restore by e­mail.", "Restore by e​mail.", "Restore by email.", "Restore&nbsp;by&nbsp;email.",
+                 "Get your access back by email.", "Lost it? We can email you a new link.", "Recover the report via e-mail.",
+                 "Restore using your email address.", "Restore it by emailing us.",
+                 "Restore by email is not offered. Restore by email here instead."]
+EVADE_ADVICE = ["This is advice.", "We RECOMMEND it.", "We rec&#111;mmend it.", "We re<b>commend</b> it.",
+                "We recom<span>mend</span> it.", "We recom­mend it.", "We recom&shy;mend it.", "We recom​mend it.",
+                "We recоmmend it.", "<a href='/' aria-label='our advice'>x</a>", "<a href=/ title=advice>x</a>",
+                "This is not advice: you should buy now.", "Results are certified.", "Results are ver&#105;fied.",
+                "You sho<i>uld</i> sell.", "We ｒｅｃｏｍｍｅｎｄ it."]
+EVADE_HEAD = ['<meta name="description" content="We recommend you should buy this.">',
+              '<meta property="og:description" content="We recommend you should buy this.">',
+              '<meta name="twitter:description" content="We rec&#111;mmend it.">',
+              '<meta content="We recommend it." name="description">',
+              '<script type="application/ld+json">{"@type":"WebPage","description":"We recommend you should buy this."}</script>',
+              '<script type="application/ld+json">{"@graph":[{"@type":"FAQPage","mainEntity":[{"acceptedAnswer":{"text":"We recommend it."}}]}]}</script>']
+
+
+def _plant(html, snippet, head=False):
+    if head:
+        return html.replace("</head>", snippet + "</head>", 1)
+    i = html.find("</main>")
+    return html[:i] + "<p>" + snippet + "</p>" + html[i:]
+
+
+@pytest.fixture(scope="module")
+def pages(built_site, paid_site):
+    rd = lambda out, rel: open(os.path.join(out, rel), encoding="utf-8").read()  # noqa: E731
+    return {"owned": rd(built_site["out"], "for-traders/index.html"), "pass": rd(built_site["out"], "about/index.html"),
+            "welcome": rd(paid_site["out"], "welcome/index.html")}
+
+
+def _owned(html, paid=False):
+    return L.lint_html(html, "/x/", paid, False, L.allowed_amounts(), [])
+
+
+@pytest.mark.parametrize("snippet", EVADE_TALLY)
+@pytest.mark.parametrize("kind", ["owned", "pass"])
+def test_nit1_tally_evasions_are_caught(pages, kind, snippet):
+    html = _plant(pages[kind], snippet)
+    found = _owned(html) if kind == "owned" else L.passthrough_rules(html, "/about/index.html", False)
+    assert any(r == "tally" for r, _, _ in found), snippet
+
+
+@pytest.mark.parametrize("snippet", EVADE_RESTORE)
+@pytest.mark.parametrize("kind", ["welcome", "pass"])
+def test_nit1_restore_by_email_evasions_are_caught(pages, kind, snippet):
+    html = _plant(pages[kind], snippet)
+    found = _owned(html, paid=True) if kind == "welcome" else L.passthrough_rules(html, "/about/index.html", False, True)
+    assert any(r == "claim:restore_email" for r, _, _ in found), snippet
+
+
+@pytest.mark.parametrize("snippet", EVADE_ADVICE)
+def test_nit1_adviser_word_evasions_are_caught(pages, snippet):
+    assert any(r.startswith("banned:") for r, _, _ in _owned(_plant(pages["owned"], snippet))), snippet
+
+
+@pytest.mark.parametrize("snippet", EVADE_HEAD)
+def test_nit1_meta_og_and_jsonld_text_is_linted(pages, snippet):
+    assert any(r.startswith("banned:") for r, _, _ in _owned(_plant(pages["owned"], snippet, head=True))), snippet
+
+
+@pytest.mark.parametrize("expr", ["'Restore by email any time'", "'Restore by ' + 'email'", "'Restore by \\u0065mail'",
+                                  "`Restore by ${'email'}`", "'Restore by \\x65mail'", "'Restore by \\u{65}mail'",
+                                  "['Restore','by','email'].join(' ')", "`Get your access back by ${x} email`"])
+def test_nit1_js_string_evasions_are_caught(expr):
+    assert L.restore_email_claims(L.js_strings(f"const _planted = {expr};"), "welcome.js"), expr
+
+
+def test_nit1_clean_builds_still_pass(built_site, paid_site):
+    assert L.lint_build(str(built_site["out"])) == []
+    assert L.lint_build(str(paid_site["out"]), paid=True) == []
