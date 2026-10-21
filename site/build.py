@@ -334,6 +334,10 @@ OLD_FOOTER_PRIVACY = ("This site sets no cookies and runs no analytics; it store
                       "own browser. Forms open on Tally and subscribing opens Substack; their privacy policies apply.")
 PASSTHROUGH_CHROME = [
     (OLD_FOOTER_PRIVACY, footer_privacy, 1),   # B1: the forms are Web3Forms, not Tally
+    # D3: Trial was renamed Pilot (22 Oct 2026). Labels only; every href and anchor is unchanged.
+    ("Firms: start a trial</a>", "Firms: start a Pilot</a>", 2),        # desktop nav + mobile menu
+    (">Firms: trial</a>", ">Firms: Pilot</a>", 1),                       # mobile header button
+    ('<a href="/start/">Start a trial</a>', '<a href="/start/">Start a Pilot</a>', None),  # footer (+ 404 body)
 ]
 
 
@@ -349,6 +353,11 @@ def fix_passthrough_chrome(text, rel, flags):
 # Exact-text copy fixes applied to passthrough pages until steps 28–29 lift them into templates.
 # docs/ stays untouched; the build fails if a sentence is no longer there exactly once.
 PASSTHROUGH_FIXES = {
+    # D3: the sentence describes the header label, which is now "Start a Pilot"
+    os.path.join("independence", "index.html"): [
+        ("The site header and footer link to Pricing and Start a trial on every page,",
+         "The site header and footer link to Pricing and Start a Pilot on every page,"),
+    ],
     # D9: "nothing leaves" is banned site-wide (it is false next to the paid pipeline).
     os.path.join("code", "index.html"): [
         ("Standard-library Python, no network calls; nothing leaves the machine it runs on.",

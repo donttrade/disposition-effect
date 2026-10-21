@@ -473,3 +473,32 @@ def test_d6_one_sided_pair_fails_the_build_check(paid_site, tmp_path):
     p.write_text(re.sub(r'<link rel="alternate"[^>]*>\n?', "", p.read_text(encoding="utf-8")), encoding="utf-8")
     with pytest.raises(B.BuildError, match="hreflang"):
         B.check_language_pairs(str(out), "https://donttrade.ca")
+
+
+# ------------------------------------------------------------------ D3: Trial → Pilot labels on the passthrough pages
+def test_d3_no_trial_call_to_action_anywhere(built_site):
+    # repro: words.py — 98 "trial" hits on the 20 passthrough pages, "Firms: start a trial" in the header
+    for p in built_site["out"].rglob("*.html"):
+        t = L.visible_text(p.read_text(encoding="utf-8")).lower()
+        for w in ("start a trial", "firms: trial", "start a trial on every page"):
+            assert w not in t, (p, w)
+
+
+def test_d3_pilot_labels_keep_urls_and_anchors(built_site):
+    pt = B.passthrough_pages({os.path.relpath(B.out_file("/x", p["path"]), "/x") for p in B.PAGES if not p["requires_flag"]})
+    assert len(pt) == 20
+    attr = re.compile(r'\s(?:href|id)="([^"]*)"')
+    for rel in pt:
+        built = (built_site["out"] / rel).read_text(encoding="utf-8")
+        docs = open(os.path.join(REPO, "docs", rel), encoding="utf-8").read()
+        assert attr.findall(built) == attr.findall(docs), rel  # every href and id, in order, unchanged
+        assert built.count("Firms: start a Pilot") == 2 and built.count(">Firms: Pilot<") == 1, rel
+
+
+def test_d3_lint_catches_trial_cta_on_passthrough(tmp_path):
+    from test_legal import build
+    r, out = build(tmp_path, "t")
+    page = out / "glossary" / "index.html"
+    page.write_text(page.read_text(encoding="utf-8").replace("</main>", "<p><a href='/start/'>Start a trial</a></p></main>"),
+                    encoding="utf-8")
+    assert any(rule == "banned:trial_cta" for rule, where, _ in L.lint_build(str(out)) if where == "/glossary/index.html")

@@ -15,6 +15,9 @@ assurance = ["certified", "verified", "audited", "certification", "certify", "ve
 # Trial was renamed Pilot on 22 Oct 2026 (plan step 14); only the "formerly" line may name it.
 renamed = ["trial"]
 # Competition Act regular-price risk (DECISIONS ADDED 20 Oct): no "standard price after launch".
+# The old product name used as a call to action; checked on passthrough pages too, where
+# "trial" also means a statistical trial (the research ledgers), so only these forms are banned.
+trial_cta = ["start a trial", "firms: trial", "request a trial", "book a trial", "free trial"]
 regular_price = ["standard price", "standard prices", "regular price", "after launch:"]
 ai_tells = ["unlock", "unlocks", "unlocked", "elevate", "supercharge", "#1", "trusted by"]
 
