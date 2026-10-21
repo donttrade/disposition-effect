@@ -39,6 +39,26 @@ def _phrase_re(p):
 WORDS = [(cat, w, _phrase_re(w)) for cat, ws in RULES["words"].items() for w in ws]
 ALLOW = [_phrase_re(p) for p in RULES["allow"]["phrases"]]
 SECRETS = [re.compile(p) for p in RULES["secrets"]["patterns"]]
+RESTORE_EMAIL = [re.compile(p, re.IGNORECASE) for p in RULES["claims"]["restore_email"]]
+RESTORE_EMAIL_ALLOW = [re.compile(re.escape(p), re.IGNORECASE) for p in RULES["claims"]["restore_email_allow"]]
+
+
+def restore_email_claims(text, where):
+    """Restore-by-email is not in v1 (decision 20 Oct): any wording that offers it fails,
+    on every page and in the paid scripts' messages. The listed negations are allowed."""
+    for a in RESTORE_EMAIL_ALLOW:
+        text = a.sub(lambda m: " " * len(m.group(0)), text)
+    return [("claim:restore_email", where, m.group(0)) for rx in RESTORE_EMAIL for m in rx.finditer(text)]
+
+
+def js_strings(code):
+    """The string literals of a script (comments dropped): the text a script can put on a page."""
+    out = []
+    for m in re.finditer(r"//[^\n]*|/\*.*?\*/|'(?:[^'\\\n]|\\.)*'|\"(?:[^\"\\\n]|\\.)*\"|`(?:[^`\\]|\\.)*`", code, re.S):
+        tok = m.group(0)
+        if tok[0] in "'\"`":
+            out.append(tok[1:-1])
+    return "\n".join(out)
 
 
 def visible_text(html):
@@ -90,6 +110,7 @@ def lint_text(text, where="text", paid=False, analytics=False, english=True):
         for c in RULES["claims"]["no_analytics"]:
             if _phrase_re(c).search(text):
                 out.append(("claim:no_analytics", where, c))
+    out += restore_email_claims(text, where)
     return out
 
 
@@ -144,6 +165,7 @@ def passthrough_rules(html, where, analytics):
         for c in RULES["claims"]["no_analytics"]:
             if _phrase_re(c).search(text):
                 out.append(("claim:no_analytics", where, c))
+    out += restore_email_claims(text, where)
     for w in RULES["words"]["regular_price"]:
         if _phrase_re(w).search(text):
             out.append(("banned:regular_price", where, w))
@@ -210,6 +232,8 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False):
                     problems.append(("secret", rel, rx.pattern))
             if name.endswith(".html") and rel not in owned_rel:
                 problems += passthrough_rules(s, rel, analytics)
+            if name.endswith(".js"):
+                problems += restore_email_claims(js_strings(s), rel)
             if not (paid or pilot):
                 for v in priv:
                     if v and v in s:

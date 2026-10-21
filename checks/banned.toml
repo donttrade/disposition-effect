@@ -61,6 +61,13 @@ banned = ["conseil*", "recommand*", "devriez", "devez", "il faut", "corriger", "
 # Phrases that become false once a paid flow exists (CONCERN 6).
 no_upload = ["nothing leaves", "nothing is uploaded", "never leaves your browser"]
 no_analytics = ["no analytics", "runs no analytics"]
+# Restore-by-email is not in v1 (DECISIONS ADDED 20 Oct): only the restore link/file exists.
+# Regexes (case-insensitive), checked on page text and on the paid scripts' strings.
+restore_email = ['restore[\s-]+(?:access[\s-]+|your[\s-]+\w+[\s-]+)?(?:by|via|through|over)[\s-]+e-?mail',
+                 'restore\b[^.<]{0,60}\baddress you paid with',
+                 'e-?mail(?:ed)?[^.<]{0,30}\brestore[\s-]+link',
+                 'restore[^.<]{0,40}\b(?:enter|type)[^.<]{0,20}\be-?mail']
+restore_email_allow = ["restore by email is not offered", "Restore-by-email is not in v1"]
 
 [secrets]
 patterns = ['sk_live_[0-9A-Za-z]{8,}', 'sk_test_[0-9A-Za-z]{8,}', 'rk_live_[0-9A-Za-z]{8,}', 'rk_test_[0-9A-Za-z]{8,}', 'whsec_[0-9A-Za-z]{8,}', '-----BEGIN [A-Z ]*PRIVATE KEY-----']
