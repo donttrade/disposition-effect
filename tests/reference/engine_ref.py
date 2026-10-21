@@ -376,19 +376,19 @@ def parse_number(raw, row=None, column=None):
     if commas > 0:
         if dots == 0 and commas == 1 and _RE_SINGLE_COMMA.match(s):
             if re.search(r",\d{3}$", s, re.ASCII):
-                fail("E_BAD_NUMBER", s, row, column)
+                fail("E_BAD_NUMBER", "comma then 3 digits", row, column)
             s = s.replace(",", ".")
         elif _RE_THOUSANDS_COMMA.match(s):
             s = s.replace(",", "")
         elif _RE_EURO.match(s):
             s = s.replace(".", "").replace(",", ".")
         else:
-            fail("E_BAD_NUMBER", s, row, column)
+            fail("E_BAD_NUMBER", "not a plain number", row, column)
     if not _RE_PLAIN.match(s):
-        fail("E_BAD_NUMBER", s, row, column)
+        fail("E_BAD_NUMBER", "not a plain number", row, column)
     v = float(s)
     if not math.isfinite(v):
-        fail("E_BAD_NUMBER", s, row, column)
+        fail("E_BAD_NUMBER", "not a plain number", row, column)
     return v
 
 
@@ -542,8 +542,8 @@ def parse_date(raw, kind, row, column):
                           int(g[4]) if g[4] is not None else 0,
                           int(g[5]) if g[5] is not None else 0, row, column)
     if "/" in s:
-        fail("E_AMBIGUOUS_DATE", s, row, column)
-    fail("E_BAD_DATE", s, row, column)
+        fail("E_AMBIGUOUS_DATE", "slash date", row, column)
+    fail("E_BAD_DATE", "not a date", row, column)
 
 
 # ----------------------------------------------------------------- whitelist / detection
@@ -890,7 +890,7 @@ def parse_generic(rows, hi, m):
             if d == "":
                 fail("E_BAD_DATE", "empty", row, "date")
             if "/" in d:
-                fail("E_AMBIGUOUS_DATE", d, row, "date")
+                fail("E_AMBIGUOUS_DATE", "slash date", row, "date")
             ts = parse_date((d + " " + t) if t != "" else d, "generic", row, "date")
         symbol = cell(r, m, "symbol")
         side = _side_letter(cell(r, m, "side"))

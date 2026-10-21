@@ -250,3 +250,7 @@ ORACLES["mt5/deals_netting_40.htm"] = {
     "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_SKIPPED_ROWS": 1},
     "skipped": {"balance": 1},
 }
+
+# Tester v2 D5: an unquoted comma in Account shifts "CANARY-T3" into the Date column. The
+# error names row 2, column date, and its message never repeats the cell (golden test checks).
+ERRORS["errors/tv2_unquoted_comma_account.csv"] = ("E_BAD_DATE", 2, "date")

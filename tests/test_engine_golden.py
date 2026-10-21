@@ -87,10 +87,12 @@ def test_js_matches_reference(engine_page, rel):
     with open(os.path.join(EXP, rel.replace("/", "__") + ".json"), encoding="utf-8") as f:
         want = json.load(f)
     assert want == E.run_fixture(data), "expected/*.json is stale: rerun engine_ref.py --expected"
-    got = comparable(run_js(engine_page, data))
+    raw = run_js(engine_page, data)
+    got = comparable(raw)
     diff = same(got, comparable(want))
     assert not diff, f"{rel}: {diff}"
-    assert "CANARY" not in json.dumps(got), rel
+    # with the human messages: an error or warning text never repeats account/name cells (D5)
+    assert "CANARY" not in json.dumps(raw), rel
 
 
 @pytest.mark.parametrize("rel", E.fixture_paths(FIX))
