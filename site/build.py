@@ -134,20 +134,46 @@ def name_problem(v):
     return _token_problem(words)
 
 
+# Decision 21 Oct: a Canada Post box ("PO Box 1234 STN Main", "PO Box 1234, STN Main", FR "CP 1234
+# Succ. Centre-ville") or a mailbox-store street address ("123 Street Rd #456") is the business
+# mailing address. Tester delta D6: a street address needs its CIVIC number, at the start of a
+# part of the street (a unit alone, "Street Rd #456", is not an address); a unit may come before it
+# as its own part ("Suite 4, 12 Road") or joined to it ("456-123 Road", "#456-123 Road").
+BOX_WORD = r"(?:P\.?\s?O\.?\s?Box|Box|C\.?\s?P\.?|Case\s+postale)"
+BOX_START = re.compile(BOX_WORD + r"(?=[\s#\d]|$)\s*#?\s*(?P<n>[^\s,]*)", re.IGNORECASE)
+BOX_ANYWHERE = re.compile(r"(?<![\w.])(?:P\.?\s?O\.?\s?Box|C\.?\s?P\.|Case\s+postale)(?![\w])", re.IGNORECASE)
+CIVIC_START = re.compile(r"#?(?:\d{1,6}[A-Za-z]?-)?(?P<n>\d{1,6})[A-Za-z]?(?:\s+1/2)?\s+(?=\S*[^\W\d_]|$)")
+
+
+def street_problem(street):
+    parts = [p.strip() for p in street.split(",") if p.strip()]
+    if len(BOX_ANYWHERE.findall(street)) > 1:
+        return "the address names more than one PO Box"
+    for p in parts:
+        b = BOX_START.match(p)
+        if b:
+            n = b.group("n")
+            if not re.fullmatch(r"\d{1,6}", n) or int(n) == 0:
+                return "the PO Box needs its number (1 to 6 digits, not 0), right after 'PO Box'"
+            return None
+    for i, p in enumerate(parts):
+        c = CIVIC_START.match(p + " ")
+        if c and int(c.group("n")) > 0 and (c.end() < len(p) + 1 or (i + 1 < len(parts) and re.match(r"[^\W\d_]", parts[i + 1]))):
+            return None   # "123 Street Rd", or FR "123, rue Principale"
+    return ("the street address needs its civic (street) number at the start, e.g. '123 Street Rd #456': "
+            "a unit, suite or mailbox number alone is not enough")
+
+
 def address_problem(v):
-    if not re.fullmatch(r"[^\W_]+(?:[ ,.'’#/-]+[^\W_]*)*\.?", v):
+    if not re.fullmatch(r"#?[^\W_]+(?:[ ,.'’#/-]+[^\W_]*)*\.?", v):   # may start "#456-123 …" (N5)
         return "an address may hold only letters, digits, spaces and , . - ' # /"
     m = ADDRESS.fullmatch(v)
     if not m:
         return "write it as: street number and street (or PO Box N), city, province code, postal code — e.g. 'PO Box 12, Town ON K1A 0B1'"
     street, city, prov, postal = m.group("street", "city", "prov", "postal")
-    # Decision 21 Oct: a Canada Post box ("PO Box 1234 STN Main", "PO Box 1234, STN Main") or a
-    # mailbox-store street address ("123 Street Rd #456") is the business mailing address.
-    box = re.search(r"\b(?:P\.?\s?O\.?\s+)?Box\b\s*#?\s*([^\s,]*)", street, re.IGNORECASE)
-    civic = re.search(r"\b\d+[A-Za-z]?\b", street)
-    number = box.group(1) if box else (civic.group(0) if civic else "")
-    if not re.fullmatch(r"\d+[A-Za-z]?", number) or int(re.match(r"\d+", number).group(0)) == 0:
-        return "the street address needs a street number, or the PO Box its number"
+    why = street_problem(street)
+    if why:
+        return why
     city_words = city.split(" ")
     if not all(NAME_WORD.fullmatch(w) for w in city_words) or not any(len(w.rstrip(".")) >= 2 for w in city_words):
         return f"{city!r} is not a city name"

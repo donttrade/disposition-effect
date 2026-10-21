@@ -221,3 +221,37 @@ def test_d5_no_false_positive_on_compliant_wording(ok):
 
 def test_d5_sentences_split_on_punctuation_lines_and_bullets():
     assert L.sentences("A dispute. We waive it.\nNext; one · two") == ["A dispute.", "We waive it.", "Next;", "one", "two"]
+
+
+# ------------------------------------------------------------------ D6 + N5: the address needs a civic or box number
+@pytest.mark.parametrize("addr", [
+    "Zzqx Street Rd #456, Zzqxville ON K9Z 9Z9",          # the Tester's two (D6): a unit, no civic number
+    "Zzqx Street Rd Suite 456, Zzqxville ON K9Z 9Z9",
+    "Zzqx Street Rd Unit 456, Zzqxville ON K9Z 9Z9",
+    "Zzqx Street Rd PMB 456, Zzqxville ON K9Z 9Z9",
+    "Suite 4, Qqvendor Road, Zzqxville ON K9Z 9Z9",
+    "0 Qqvendor Road, Zzqxville ON K9Z 9Z9",
+    "PO Box 12345678901234567890, Zzqxville ON K9Z 9Z9",  # N5: an absurd box number
+    "PO Box 4417 PO Box 9999, Zzqxville ON K9Z 9Z9",      # N5: two boxes
+    "PO Box STN Main 4417, Zzqxville ON K9Z 9Z9",
+])
+def test_d6_an_address_without_its_civic_or_box_number_is_refused_tester_repro(addr):
+    assert B.seller_problem("premises_address", addr), addr
+
+
+@pytest.mark.parametrize("addr", [
+    "123 Street Rd #456, Zzqxville ON K9Z 9Z9",            # the mailbox-store format of the ruling
+    "123 Zzqx Street Rd Suite 456, Zzqxville ON K9Z 9Z9",
+    "Suite 4, 12 Qqvendor Road, Zzqxville ON K9Z 9Z9",     # unit first, as its own part
+    "456-123 Zzqx Street Rd, Zzqxville ON K9Z 9Z9",        # Canada Post unit-civic
+    "#456-123 Zzqx Street Rd, Zzqxville ON K9Z 9Z9",       # N5: was refused for the leading #
+    "1 Box Rd, Zzqxville ON K9Z 9Z9",                      # N5: was read as a PO box
+    "123, rue Zzqx, Zzqxville QC H9Z 9Z9",                 # FR: civic number, comma, street
+    "PO Box 4417 STN Main, Zzqxville ON K9Z 9Z9",
+    "CP 4417 Succ. Centre-ville, Zzqxville QC H9Z 9Z9",
+    "C.P. 4417, Zzqxville QC H9Z 9Z9",
+    "Case postale 4417, Zzqxville QC H9Z 9Z9",
+    "P.O.Box 4417, Zzqxville ON K9Z 9Z9",
+])
+def test_d6_civic_and_box_addresses_are_accepted(addr):
+    assert B.seller_problem("premises_address", addr) is None, (addr, B.seller_problem("premises_address", addr))
