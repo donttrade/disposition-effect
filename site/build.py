@@ -364,6 +364,26 @@ def die(msg):
     raise BuildError(msg)
 
 
+FLAGS = ("paid_report", "analytics", "trader_first_home", "pilot_checkout")
+OPTIONAL_FLAGS = {"pilot_checkout": False}  # older site.toml files may lack the line
+
+
+def check_flags(flags, toml_path):
+    """D9: every flag is a real TOML boolean. A quoted "false" is a non-empty string, which
+    Python reads as true, so it would switch the feature ON: fail instead. Unknown keys (a typo
+    such as paid_reprot) fail too, so a flag can't be silently ignored."""
+    for k, v in OPTIONAL_FLAGS.items():
+        flags.setdefault(k, v)
+    for k in sorted(flags):
+        if k not in FLAGS:
+            die(f"[flags] {k} is not a known flag ({', '.join(FLAGS)}) in {toml_path}")
+    for k in FLAGS:
+        if k not in flags:
+            die(f"[flags] {k} is missing from {toml_path}")
+        if type(flags[k]) is not bool:
+            die(f"[flags] {k} = {flags[k]!r} must be true or false without quotes (a TOML boolean) in {toml_path}")
+
+
 def read_toml(path, label):
     """tomllib.load, but a syntax error is a BUILD FAILED line, not a traceback (Tester NIT 1)."""
     try:
@@ -396,12 +416,12 @@ def load_config():
     with open(os.path.join(SITE, "config", "prices.json"), encoding="utf-8") as f:
         prices = json.load(f)
     flags = cfg["flags"]
+    check_flags(flags, toml_path)
     if flags["trader_first_home"] != flags["paid_report"]:
         die(f"flag mismatch: trader_first_home={flags['trader_first_home']} must equal "
             f"paid_report={flags['paid_report']} ({toml_path})")
     if flags["analytics"] and not cfg["analytics"]["cf_beacon_token"]:
         die("analytics = true but [analytics] cf_beacon_token is empty")
-    flags.setdefault("pilot_checkout", False)
     private = {}
     on = [f for f in COMMERCE_FLAGS if flags[f]]
     if on:
