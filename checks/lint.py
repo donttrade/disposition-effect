@@ -43,6 +43,15 @@ RESTORE_EMAIL = [re.compile(p, re.IGNORECASE) for p in RULES["claims"]["restore_
 RESTORE_EMAIL_ALLOW = [re.compile(re.escape(p), re.IGNORECASE) for p in RULES["claims"]["restore_email_allow"]]
 
 
+TALLY = re.compile(r"(?<![A-Za-z0-9])tally(?![A-Za-z0-9])", re.IGNORECASE)
+
+
+def tally_mentions(html, where):
+    """B1: Tally is no longer used (the forms are Web3Forms), so the word may not appear anywhere
+    in a page, visible or not, including tally.so links."""
+    return [("tally", where, html[max(0, m.start() - 30):m.end() + 30].replace("\n", " ")) for m in TALLY.finditer(html)]
+
+
 def restore_email_claims(text, where):
     """Restore-by-email is not in v1 (decision 20 Oct): any wording that offers it fails,
     on every page and in the paid scripts' messages. The listed negations are allowed."""
@@ -119,8 +128,7 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
     commerce = (paid or pilot) if commerce is None else commerce
     french = bool(re.search(r'<html lang="fr', html))
     out = lint_text(visible_text(html), where, paid, analytics, english=not french)
-    if "tally.so" in html:
-        out.append(("tally", where, "tally.so"))
+    out += tally_mentions(html, where)
     from harvest_prices import amounts_in
     for a in amounts_in(html):
         if a not in allowed_amounts and a != 0:  # "$0" (free) is not a price
@@ -175,8 +183,7 @@ def passthrough_rules(html, where, analytics):
     for a in amounts_in(html):
         if a in retired:
             out.append(("price_literal", where, f"${a:g} is a retired price"))
-    if "tally.so" in html:
-        out.append(("tally", where, "tally.so"))
+    out += tally_mentions(html, where)
     return out
 
 
