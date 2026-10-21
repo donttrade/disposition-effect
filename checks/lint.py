@@ -45,19 +45,41 @@ RESTORE_EMAIL = [re.compile(p, re.IGNORECASE) for p in RULES["claims"]["restore_
 RESTORE_EMAIL_ALLOW = [re.compile(re.escape(p), re.IGNORECASE) for p in RULES["claims"]["restore_email_allow"]]
 
 
-WAIVE = re.compile(r"(?<![\w])(?:" + "|".join(RULES["claims"]["waive_dispute_waive"]) + r")(?![\w])", re.IGNORECASE)
-DISPUTE = re.compile(r"(?<![\w])(?:" + "|".join(RULES["claims"]["waive_dispute_target"]) + r")(?![\w])", re.IGNORECASE)
-WAIVE_WINDOW = RULES["claims"]["waive_dispute_window"]
+_W = RULES["claims"]
+WAIVE = re.compile(r"(?<![\w])(?:" + "|".join(_W["waive_dispute_waive"]) + r")(?![\w])", re.IGNORECASE)
+DISPUTE = re.compile(r"(?<![\w])(?:" + "|".join(_W["waive_dispute_target"]) + r")(?![\w])", re.IGNORECASE)
+REASSURE = re.compile(r"(?:" + "|".join(_W["waive_dispute_reassure"]) + r")$", re.IGNORECASE)
+_FILL_WORDS = [f for f in _W["waive_dispute_filler"] if not f.endswith("['’]")]
+_FILL_ELIDED = [f for f in _W["waive_dispute_filler"] if f.endswith("['’]")]   # d' l' : no space after
+_FILL = r"(?:(?:" + "|".join(_FILL_WORDS) + r")\s+|(?:" + "|".join(_FILL_ELIDED) + r")\s*)"
+_NEG = "|".join((r"(?<![\w])" if re.fullmatch(r"\w+", n) else "") + n for n in _W["waive_dispute_negation"])  # n't: no boundary before
+NEGATED_DISPUTE = re.compile(r"(?:" + _NEG + r")(?![\w])\s*" + _FILL + r"{0,3}?"
+                             r"(?:" + "|".join(_W["waive_dispute_target"]) + r")(?![\w])", re.IGNORECASE)
+FIXED_REFUSAL = re.compile(r"(?<![\w])(?:" + "|".join(_W["waive_dispute_fixed"]) + r")(?![\w])", re.IGNORECASE)
+SENTENCE_END = re.compile(r"(?<=[.!?;:])\s+|\n+|\s+[•·]\s+")
+
+
+def sentences(text):
+    return [x for x in SENTENCE_END.split(text) if x.strip()]
 
 
 def waive_dispute_claims(text, where):
     """Decision 21 Oct: no wording that asks a client to waive (give up, agree not to use) a
-    dispute or chargeback right: a waive-word within WAIVE_WINDOW characters of a dispute-word."""
+    dispute or chargeback right. Checked one sentence at a time (Tester delta D5), with the three
+    rules in banned.toml: a waive-word and a dispute-word in one sentence (not after a reassurance
+    such as "we never ask you to"), a negated dispute verb, or a fixed refusal."""
     out = []
-    for m in WAIVE.finditer(text):
-        near = text[max(0, m.start() - WAIVE_WINDOW):m.end() + WAIVE_WINDOW]
-        if DISPUTE.search(near):
-            out.append(("claim:waive_dispute", where, " ".join(near.split())))
+    for sent in sentences(text):
+        flat = " ".join(sent.split())
+        hit = None
+        if DISPUTE.search(flat):
+            for m in WAIVE.finditer(flat):
+                if not REASSURE.search(flat[:m.start()]):
+                    hit = m
+                    break
+        hit = hit or NEGATED_DISPUTE.search(flat) or FIXED_REFUSAL.search(flat)
+        if hit:
+            out.append(("claim:waive_dispute", where, flat[:300]))
     return out
 
 

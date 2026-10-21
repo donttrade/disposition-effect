@@ -82,12 +82,28 @@ not_on_sale = ["not on sale", "waitlist", "wait list", "wait-list", "nothing is 
                "coming soon", "launch date", "liste d’attente", "liste d'attente", "pas en vente", "pas encore en vente",
                "bientôt disponible"]
 # Decision 21 Oct (Visa Core Rules 5.4.2.5: "A Merchant must not require a Cardholder to waive
-# the right to dispute a Transaction"): a waive-word within waive_dispute_window characters of a
-# dispute-word, in either order, fails on every page (EN and FR) and in every script's strings.
+# the right to dispute a Transaction"), checked on every page (EN and FR) and in every script's
+# strings, ONE SENTENCE AT A TIME (Tester delta D5: an 80-character window was evaded by padding):
+#   1. a waive-word and a dispute-word in the same sentence, in either order, unless the waive-word
+#      follows a reassurance ("we never ask you to waive …");
+#   2. a negation, then up to 3 filler words, then a dispute-word ("will not dispute", "may not
+#      initiate a chargeback", "cannot be disputed", "ne pas contester", "ne pourrez pas contester");
+#   3. a fixed refusal ("No chargebacks", "non-disputable", "Aucune contestation").
 # Regexes, case-insensitive, whole words.
-waive_dispute_waive = ['waiv\w*', 'forgo\w*', 'give up', 'gives up', 'agrees? not to', 'renon\w*']
-waive_dispute_target = ['disput\w*', 'charge[\s-]?backs?', 'chargebacks?', 'contest\w*', 'rétrofactur\w*', 'litiges?']
-waive_dispute_window = 80
+waive_dispute_waive = ['waiv\w*', 'forgo\w*', 'forego\w*', 'give up', 'gives up', 'giving up', 'gave up', 'agrees? not to',
+                       'relinquish\w*', 'forfeit\w*', 'surrender\w*', 'abandon\w*', 'renounc\w*', 'renonc\w*']
+waive_dispute_target = ['disput\w*', 'charge[\s-]?backs?', 'chargebacks?', 'contest\w*', 'rétrofactur\w*', 'retrofactur\w*', 'litiges?']
+# rule 1's exception: these right before the waive-word make the sentence a reassurance
+waive_dispute_reassure = ["(?:never|not|n['’]t|no one will)\\s+(?:ask|require|expect|make|want|need)\\w*\\s+(?:you|anyone|clients?|buyers?|customers?)\\s+to\\s+",
+                          "(?:do not|don['’]t|never)\\s+(?:have|need)\\s+to\\s+"]
+waive_dispute_negation = ["not", "n['’]t", "never", "cannot", "(?:ne|n['’])\\s*(?:\\w+\\s+){0,2}?(?:pas|jamais|point|plus)"]
+waive_dispute_filler = ["be", "been", "being", "a", "an", "any", "the", "this", "that", "your", "its", "their", "to", "ever", "later",
+                        "open", "opening", "initiate", "initiating", "file", "filing", "raise", "raising", "request", "requesting",
+                        "make", "making", "start", "starting", "seek", "seeking", "pursue", "pursuing", "lodge", "submit", "issue",
+                        "de", "d['’]", "la", "le", "les", "l['’]", "un", "une", "des", "demander", "faire", "ouvrir", "engager",
+                        "déposer", "deposer", "initier", "à", "ce", "cette"]
+waive_dispute_fixed = ["no\\s+(?:chargebacks?|charge[\\s-]backs?|disputes?)", "non-?disput\\w*", "not\\s+disputable",
+                       "aucune?\\s+(?:contestations?|rétrofacturations?|litiges?)"]
 not_on_sale_allow = ["Founding price for the first 100 on the trader waitlist added.",
                      "its own research page reads “Coming Soon.”"]
 
