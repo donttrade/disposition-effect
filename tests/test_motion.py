@@ -133,6 +133,9 @@ def test_i4_hero_text_is_always_the_final_value(browser, built_site):
     assert len(m["dd"]) >= 30 and all(s == FINAL for s in m["dd"]), m["dd"][:3]
     assert m["cuSeen"], "the count-up ran (in data-cu only)"
     assert set(m["cuValues"]) - set(FINAL), "intermediate values appeared, in data-cu"
+    # Tester N4: a signed zero ("−$0.00", "+$0.00") is never drawn; the sign comes with the first non-zero digit
+    assert [v for v in m["cuValues"] if v and v[0] in "+−-" and not re.search(r"[1-9]", v)] == [], m["cuValues"][:12]
+    assert "$0.00" in m["cuValues"] and any(v.startswith("−$") for v in m["cuValues"])
     assert pg.evaluate("document.querySelectorAll('[data-cu], .cu-on').length") == 0
     assert pg.evaluate("document.querySelectorAll('.hero-dash .cu-done').length") == 6
     ctx.close()
