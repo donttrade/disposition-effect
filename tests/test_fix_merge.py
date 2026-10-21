@@ -355,3 +355,58 @@ def test_d2_planted_seller_block_in_pilot_only_build_fails_verify(tmp_path):
     (out / "about" / "index.html").write_text("<dl><dt data-seller-block>Seller</dt></dl>")
     with pytest.raises(B.BuildError, match="seller disclosure"):
         B.verify(str(out), {"paid_report": False, "pilot_checkout": True, "analytics": False}, seller=False)
+
+
+# ------------------------------------------------------------------ D5: the trader-first home (paid_report) is complete
+FINDING_RE = re.compile(r"76\.1|4,659|more readily than|1\.61|1\.78|none survived|None passed|0 of 32", re.I)  # adjacency.py
+
+
+@pytest.fixture(scope="module")
+def paid_site(tmp_path_factory):
+    import functools
+    import http.server
+    import threading
+    from conftest import _Quiet
+    from test_legal import build, paid_env
+    tmp = tmp_path_factory.mktemp("merge-paid")
+    r, out = build(tmp, "on", **paid_env(tmp))
+    assert r.returncode == 0, r.stderr
+    srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(_Quiet, directory=str(out)))
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    yield {"out": out, "url": f"http://127.0.0.1:{srv.server_address[1]}"}
+    srv.shutdown()
+
+
+def test_d5_paid_home_has_the_founding_offer(paid_site):
+    text = L.visible_text((paid_site["out"] / "index.html").read_text(encoding="utf-8"))
+    assert "See where your trades leave your plan." in text
+    assert "$39 founding price for the first 100 buyers." in text
+    assert "One time, in US dollars, with one free re-test 30 to 60 days later." in text
+    assert "Get the habit report — $39" in text and "What the report measures" in text and "How it works" in text
+    assert not FINDING_RE.search(text)  # no study finding anywhere on the page, so none next to an offer
+
+
+def test_d5_paid_home_prices_come_from_prices_json(tmp_path):
+    import json
+    from test_legal import build, paid_env
+    env = paid_env(tmp_path)
+    d = json.load(open(env["DT_PRICES_JSON"], encoding="utf-8"))
+    next(p for p in d["products"] if p["id"] == "report39")["price_usd"] = 41
+    d["rules"]["founding_limit"], d["rules"]["trader_refund_days"] = 77, 21
+    open(env["DT_PRICES_JSON"], "w", encoding="utf-8").write(json.dumps(d))
+    r, out = build(tmp_path, "o", **env)
+    assert r.returncode == 0, r.stderr
+    text = L.visible_text((out / "index.html").read_text(encoding="utf-8"))
+    assert "$41 founding price for the first 77 buyers." in text and "within 21 days of buying" in text
+    assert "$39" not in text
+
+
+@pytest.mark.parametrize("width", [375, 1280])
+@pytest.mark.parametrize("color", ["light", "dark"])
+def test_d5_paid_home_axe_and_overflow(browser, paid_site, width, color):
+    from a11y import axe_violations, horizontal_overflow
+    ctx = browser.new_context(viewport={"width": width, "height": 900}, color_scheme=color, bypass_csp=True)  # axe is injected
+    page = ctx.new_page()
+    page.goto(paid_site["url"] + "/")
+    assert horizontal_overflow(page) == [] and axe_violations(page) == []
+    ctx.close()
