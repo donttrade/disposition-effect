@@ -1,0 +1,67 @@
+# site.toml — the one settings file for the v2 build (committed).
+# Secrets never go here. The seller's legal name, address and phone live only in
+# the gitignored private.toml, and are read only when paid_report = true.
+
+[site]
+name = "donttrade"
+base_url = "https://donttrade.ca"
+contact_email = "donttrade.research@gmail.com"
+reply_promise = "We reply within 1 business day (Eastern Time, Monday to Friday)."
+
+[flags]
+paid_report = false        # the $39 report, its pages and the trader Stripe links
+analytics = false          # Cloudflare Web Analytics beacon
+trader_first_home = false  # must equal paid_report (the build fails otherwise)
+
+[analytics]
+cf_beacon_token = ""       # required when analytics = true
+
+[forms]
+endpoint = "https://api.web3forms.com/submit"
+firm_key = "f8fdba04-71bb-4856-b700-01ac6796c252"     # Web3Forms access keys are public by design
+trader_key = "54d01baf-5e02-4d93-988c-16cf5487732d"
+redirect_firm = "https://donttrade.ca/start/thanks/"
+redirect_trader = "https://donttrade.ca/for-traders/thanks/"
+
+[worker]
+api_base = "http://127.0.0.1:8787"  # local dev server only; no production value yet
+
+[legal]
+# Verbatim from NON-ADVISER-DESIGN-AND-AUTORENEW A3 (the only approved wording).
+disclaimer_short = "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results."
+disclaimer_long = "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results."
+
+[[nav]]
+label = "For firms"
+href = "/for-firms/"
+[[nav]]
+label = "For traders"
+href = "/for-traders/"
+[[nav]]
+label = "Free tools"
+href = "/tools/"
+[[nav]]
+label = "Pricing"
+href = "/pricing/"
+[[nav]]
+label = "Research"
+href = "/research/"
+[[nav]]
+label = "About"
+href = "/about/"
+
+[[footer]]
+heading = "Traders"
+links = [["Free tools", "/tools/"], ["Trade stats", "/tools/trade-stats/"], ["Individual traders", "/for-traders/"]]
+[[footer]]
+heading = "Firms"
+links = [["Prop firms & brokers", "/for-firms/"], ["Journals & platforms", "/for-platforms/"], ["Copy-trading platforms", "/for-firms/#copy-leader"], ["Firms making behaviour claims", "/for-firms/#claims-test"], ["Pricing", "/pricing/"], ["Start a Pilot", "/start/#firm"]]
+[[footer]]
+heading = "Research"
+links = [["Research", "/research/"], ["The plan gap", "/plan-gap/"], ["Sample & method", "/sample-memo/"], ["Code", "/code/"], ["Glossary", "/glossary/"], ["Corrections", "/corrections/"], ["Atom feed", "/feed.xml"]]
+[[footer]]
+heading = "Trust"
+links = [["Independence", "/independence/"], ["About", "/about/"], ["Researchers & press", "/for-researchers/"]]
+[[footer]]
+heading = "Legal"
+links = [["Terms", "/terms/"], ["Privacy", "/privacy/"], ["Cancellations & refunds", "/terms/#cancellation"]]
