@@ -178,7 +178,7 @@ heading = "Traders"
 links = [["Free tools", "/tools/"], ["Trade stats", "/tools/trade-stats/"], ["Individual traders", "/for-traders/"]]
 [[footer]]
 heading = "Firms"
-links = [["Prop firms & brokers", "/for-firms/"], ["Journals & platforms", "/for-platforms/"], ["Copy-trading platforms", "/for-firms/#copy-leader"], ["Firms making behaviour claims", "/for-firms/#claims-test"], ["Pricing", "/pricing/"], ["Start a Pilot", "/start/#firm"]]
+links = [["Prop firms & brokers", "/for-firms/"], ["Journals & platforms", "/for-platforms/"], ["Copy-trading platforms", "/for-firms/#copy-leader"], ["Firms making behaviour claims", "/for-firms/#claims-test"], ["Pricing", "/pricing/"], ["Start a Pilot", "/start/?product=pilot#pilot"]]
 [[footer]]
 heading = "Research"
 links = [["Research", "/research/"], ["The plan gap", "/plan-gap/"], ["Sample & method", "/sample-memo/"], ["Code", "/code/"], ["Glossary", "/glossary/"], ["Corrections", "/corrections/"], ["Atom feed", "/feed.xml"]]

@@ -585,10 +585,12 @@ def pilot_site(tmp_path_factory):
     srv.shutdown()
 
 
-@pytest.mark.parametrize("path,form,expect", [("/start/?product=pilot#firm", "#sf", "enquiry"),   # the home "Start a Pilot" link
+# v3: /start/ has no enquiry form any more; each product section has a fixed product (C3), so a URL saying
+# "pilot" cannot turn a Snapshot, Memo or Outcomes request into a Pilot request either
+@pytest.mark.parametrize("path,form,expect", [("/start/?product=pilot#memo", "#sf-memo", "memo"),
                                               ("/for-firms/?product=pilot", "#ff", "enquiry"),
-                                              ("/start/?product=PILOT", "#sf", "enquiry"),
-                                              ("/start/?product=memo", "#sf", "memo")])
+                                              ("/start/?product=PILOT#snapshot", "#sf-snapshot", "snapshot"),
+                                              ("/start/?product=memo#outcomes", "#sf-outcomes", "outcomes")])
 def test_nit9_enquiry_form_refuses_pilot_from_the_url(browser, pilot_site, path, form, expect):
     from urllib.parse import parse_qs
     ctx = browser.new_context()
@@ -609,7 +611,7 @@ def test_nit9_enquiry_form_refuses_pilot_from_the_url(browser, pilot_site, path,
 
 def test_nit9_flag_off_firm_form_still_takes_pilot(browser, built_site):
     from test_fix_merge import _post
-    assert _post(browser, built_site["url"] + "/start/?product=pilot#firm", "#sf")["product"] == "pilot"
+    assert _post(browser, built_site["url"] + "/start/?product=pilot#pilot", "#sf-pilot")["product"] == "pilot"
 
 
 # ------------------------------------------------------------------ NIT 2, 16: lint reads the same config as the build

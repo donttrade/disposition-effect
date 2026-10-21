@@ -248,6 +248,11 @@ def check_private(private, on):
 # only; verify() refuses it anywhere else, and refuses motion markup on a page without it.
 MOTION_JS = "/static/js/motion.js"
 MOTION_PAGES = {"/", "/for-firms/", "/for-traders/", "/for-platforms/"}
+# ARCHITECT-V3 B6, C8: the cross-document view transition (vt.css) on the motion pages and /start/ only;
+# verify() refuses vt.css on any other page and @view-transition in any other stylesheet.
+VT_CSS = "/static/css/vt.css"
+VT_PAGES = MOTION_PAGES | {"/start/"}
+START_JS = "/static/js/start-chooser.js"
 
 # Pages owned by templates. path → template, metadata, and the flag that must be on.
 PAGES = [
@@ -314,7 +319,7 @@ PAGES += [
 # Forms and the pages around them (step 16). Thank-you pages are noindex and stay out of the sitemap.
 PAGES += [
     {"template": "pages/start.html", "path": "/start/", "requires_flag": None, "updated": "2026-10-21",
-     "crumb": "Start here", "og_image": "/assets/og/start.png", "scripts": [FORM_JS],
+     "crumb": "Start here", "og_image": "/assets/og/start.png", "scripts": [FORM_JS, START_JS],
      "title": "Start a Pilot, Apply to Partner or Join the Waitlist",
      "description": "Request a Pilot measurement, apply to partner as a journal or platform, or join the trader "
                     "waitlist. A short form or an email; no calls.",
@@ -445,6 +450,49 @@ def evidence():
             "finding": {"pct": "76.1%", "rest": sentence[len("76.1% "):], "url": "/research/disposition-effect/"}}
 
 
+def human_date(iso):
+    """2026-10-17 → 17 Oct 2026."""
+    y, m, d = (int(x) for x in iso.split("-"))
+    return f"{d} {MONTHS[m - 1]} {y}"
+
+
+def latest():
+    """ARCHITECT-V3 §c.3 section 8, H7: the home "Latest" band, every date read from its source at build
+    time: the newest study (its Article datePublished in the lifted page data), the newest row of the
+    /corrections/ table, and the commit the site was built from (omitted when git is unavailable).
+    The commit date, not the build date, so two builds of one commit stay byte-identical."""
+    import subprocess
+    studies = []
+    for name in sorted(os.listdir(LIFTED_DIR)):
+        if name.startswith("research_") and name.endswith(".json"):
+            with open(os.path.join(LIFTED_DIR, name), encoding="utf-8") as f:
+                m = json.load(f)
+            if m.get("article", {}).get("datePublished"):
+                studies.append((m["article"]["datePublished"], m["article"].get("headline") or m["crumb"], m["path"]))
+    if not studies:
+        die("latest: no study with a datePublished in site/templates/lifted/research_*.json")
+    s_date, s_title, s_url = max(studies)
+    t = re.search(r"(?s)<table.*?<tbody>(.*?)</tbody>", lifted_fragment("corrections"))
+    rows = [re.match(r"(?s)\s*<td>(\d{1,2} [A-Z][a-z]{2} \d{4})</td>", r) for r in re.findall(r"(?s)<tr\b[^>]*>(.*?)</tr>", t.group(1))]
+    if not rows or not all(rows):
+        die("latest: a /corrections/ row does not start with a 'D Mon YYYY' date cell")
+    def key(h):
+        d, mon, y = h.split(" ")
+        return (int(y), MONTHS.index(mon), int(d))
+    c_date = max((r.group(1) for r in rows), key=key)
+    commit = None
+    try:
+        r = subprocess.run(["git", "-C", REPO, "log", "-1", "--format=%H %cs"], capture_output=True, text=True, timeout=10)
+        if r.returncode == 0 and re.fullmatch(r"[0-9a-f]{40} \d{4}-\d{2}-\d{2}", r.stdout.strip()):
+            sha, day = r.stdout.split()
+            commit = {"sha": sha, "short": sha[:7], "date": human_date(day),
+                      "url": "https://github.com/donttrade/disposition-effect/commit/" + sha}
+    except (OSError, subprocess.SubprocessError):
+        commit = None
+    return {"study": {"date": human_date(s_date), "title": s_title, "url": s_url},
+            "correction": {"date": c_date, "url": "/corrections/"}, "commit": commit}
+
+
 def sample_csv():
     """The synthetic demo file, inlined into the page inside <script type="text/csv">.
 
@@ -480,6 +528,26 @@ def motion_problem(html, path):
             return f"{path} holds {marker} but does not load motion.js"
     if "data-count" in html.replace(hero_dashboard_body(), ""):
         return f"{path}: data-count outside the generated hero dashboard"
+    return None
+
+
+def vt_problem(html, path):
+    """C8: vt.css only on VT_PAGES; the view-transition name only where vt.css is loaded."""
+    has = re.search(f'<link rel="stylesheet" href="{re.escape(VT_CSS)}(?:\\?v=[0-9a-f]{{8}})?">', html) is not None
+    if has and path not in VT_PAGES:
+        return f"vt.css on {path}, which is not one of VT_PAGES"
+    if "vt-start" in html and not has:
+        return f"{path} names a view transition (vt-start) without vt.css"
+    return None
+
+
+def vt_css_problem(out):
+    for root, _, files in os.walk(os.path.join(out, "static")):
+        for name in sorted(files):
+            if name.endswith(".css") and name != "vt.css":
+                with open(os.path.join(root, name), encoding="utf-8") as f:
+                    if "@view-transition" in f.read():
+                        return f"@view-transition in {name}: only vt.css may opt pages in (C8)"
     return None
 
 
@@ -1370,10 +1438,13 @@ def verify(out, flags, seller=None, base_url=None):
                 fp = os.path.join(root, name)
                 with open(fp, encoding="utf-8", errors="replace") as f:
                     text = f.read()
-                why = (motion_problem(text, "/" + os.path.relpath(fp, out).replace(os.sep, "/").replace("index.html", ""))
-                       or unversioned_problem(text))
+                url = "/" + os.path.relpath(fp, out).replace(os.sep, "/").replace("index.html", "")
+                why = motion_problem(text, url) or vt_problem(text, url) or unversioned_problem(text)
                 if why:
                     die(why)
+    why = vt_css_problem(out)
+    if why:
+        die(why)
     # Decision 21 Oct: the footer business line, on every page exactly once under any commerce flag
     commerce = any(flags.get(f) for f in COMMERCE_FLAGS)
     for root, _, files in os.walk(out):
@@ -1447,11 +1518,11 @@ def build():
     products = {p["id"]: p for p in prices["products"]}
     nav = nav_for(cfg["nav"], flags)
     base_ctx = {"site": cfg["site"], "flags": flags, "nav": nav, "nav_current": lambda pg: nav_current(nav, pg),
-                "footer": cfg["footer"],
+                "footer": cfg["footer"], "vt_pages": VT_PAGES,
                 "legal": cfg["legal"], "forms": cfg["forms"], "analytics": cfg["analytics"],
                 "worker": cfg["worker"], "prices": prices, "products": products, "private": private,
                 "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": tools_for(flags),
-                "evidence": evidence(), "footer_privacy": footer_privacy(flags), "show_seller": show_seller(cfg),
+                "evidence": evidence(), "latest": latest(), "footer_privacy": footer_privacy(flags), "show_seller": show_seller(cfg),
                 "business_id_line": Markup(business_id_line(cfg, private, "legal"))}
     built = []
     for rel, page in sorted(owned.items()):
