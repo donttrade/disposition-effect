@@ -83,11 +83,13 @@ function twoBarChart(h, unit) {
   if (h.measure_a === null || h.measure_b === null || h.id === 'oversized_loss') return null;
   const isMoney = h.id === 'revenge' || h.id === 'tilt';
   const fmt = (v) => (h.id === 'hold_gap' ? duration(v) : isMoney ? money(v, unit) : num(v));
-  const labels = { hold_gap: ['Losing trades', 'Winning trades'], revenge: ['Within 15 min of a loss', 'Other trades'],
+  const labels = { hold_gap: ['Losing trades', 'Winning trades'], revenge: ['Soon after a loss', 'Other trades'],
     size_up: ['After a loss', 'After a win'], tilt: ['After 2+ losses', 'Other trades'] }[h.id];
   const vals = [h.measure_a, h.measure_b];
   const maxAbs = Math.max(Math.abs(vals[0]), Math.abs(vals[1])) || 1;
-  const W = 320, rowH = 34, x0 = 150, span = W - x0 - 10;
+  // viewBox close to the rendered width (CSS caps .chart-bars at 420 px), so the
+  // 12 px labels render at about 12–13 px on a phone and on a desktop.
+  const W = 400, rowH = 34, x0 = 130, span = W - x0 - 10;
   const ns = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(ns, 'svg');
   svg.setAttribute('viewBox', `0 0 ${W} ${rowH * 2 + 10}`);
@@ -99,7 +101,7 @@ function twoBarChart(h, unit) {
   vals.forEach((v, i) => {
     const y = 6 + i * rowH;
     const t = document.createElementNS(ns, 'text');
-    t.setAttribute('x', '0'); t.setAttribute('y', String(y + 15)); t.setAttribute('class', 'axis'); t.textContent = labels[i];
+    t.setAttribute('x', '0'); t.setAttribute('y', String(y + 15)); t.setAttribute('class', 'bar-label'); t.textContent = labels[i];
     const r = document.createElementNS(ns, 'rect');
     const w = Math.abs(v) * scale;
     r.setAttribute('x', String(v < 0 ? zero - w : zero)); r.setAttribute('y', String(y + 2));
@@ -117,7 +119,7 @@ function twoBarChart(h, unit) {
     el('tbody', {},
       el('tr', {}, el('th', { scope: 'row', text: labels[0] }), el('td', { class: 'num', text: String(h.n_a) }), el('td', { class: 'num', text: fmt(vals[0]) })),
       el('tr', {}, el('th', { scope: 'row', text: labels[1] }), el('td', { class: 'num', text: String(h.n_b) }), el('td', { class: 'num', text: fmt(vals[1]) }))));
-  return el('figure', { class: 'chart' }, svg,
+  return el('figure', { class: 'chart chart-bars' }, svg,
     el('figcaption', { text: `n = ${h.n_a} and ${h.n_b} trades · from your file · historical` }),
     el('details', {}, el('summary', { text: 'Show as a table' }), el('div', { class: 'table-wrap', tabindex: '0', role: 'region', 'aria-label': h.name + ' table' }, table)));
 }

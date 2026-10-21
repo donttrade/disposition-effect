@@ -50,7 +50,7 @@ PAGES = [
 PAID_PAGES = [
     {"template": "pages/welcome.html", "path": "/welcome/", "requires_flag": "paid_report", "connect_worker": True,
      "modules": ["/static/js/paid/welcome.js"], "title": "Thank you — donttrade",
-     "description": "Your donttrade habit report is unlocked."},
+     "description": "Your donttrade habit report is ready."},
     {"template": "pages/restore.html", "path": "/restore/", "requires_flag": "paid_report", "connect_worker": True,
      "modules": ["/static/js/paid/restore.js"], "title": "Restore access — donttrade",
      "description": "Reopen your donttrade habit report on this browser."},

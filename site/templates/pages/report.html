@@ -2,7 +2,7 @@
 {% block content %}
 <div class="wrap" data-requires-flag="paid_report">
   <h1>Your habit report</h1>
-  {% include "partials/disclaimer.html" %}
+  <div class="no-print">{% include "partials/disclaimer.html" %}</div>
   <div class="notice no-print">
     <strong>What leaves your computer</strong>
     <p>Your browser reads the file in this tab and removes names, account numbers and symbols. It sends only stripped trade numbers: when each trade opened (weekday and time, no date) and closed, its direction, its size relative to your usual size, and its result. They are not stored. The only thing kept is one scrambled check-code per trade, so your re-test can be matched to the same account.</p>
