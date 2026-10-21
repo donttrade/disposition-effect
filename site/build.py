@@ -785,13 +785,81 @@ def die(msg):
     raise BuildError(msg)
 
 
-FLAGS = ("paid_report", "analytics", "trader_first_home", "pilot_checkout", "free_badges")
-OPTIONAL_FLAGS = {"pilot_checkout": False, "free_badges": False}  # older site.toml files may lack the line
+FLAGS = ("paid_report", "analytics", "trader_first_home", "pilot_checkout", "free_badges", "journal")
+OPTIONAL_FLAGS = {"pilot_checkout": False, "free_badges": False, "journal": False}  # older site.toml files may lack the line
 # Free-launch condition C1 (21 Oct 2026): free_badges turns on the free tools' "real or noise"
 # badges and their footnote, which the Architect is redesigning. Off (the committed default): the
 # free tools show only the descriptive numbers, static/js/tools/trade-stats-badges.js is left out
 # of the build, and every page's copy drops the check (BADGE_COPY, the if_badges overrides).
 BADGES_JS = os.path.join("js", "tools", "trade-stats-badges.js")
+
+
+# ------------------------------------------------------------------ nav (ARCHITECT-V3 §c.2, D1-D3)
+# site.toml [[nav]]: a group with [[nav.items]] is a drop-down, one without is a plain link. The nav never
+# shows a price, a % or a study number (D3): every label and description is refused here if it holds a
+# digit, "$", "%" or a banned.toml word, so the header can never sit a finding next to an offer.
+BANNED_TOML = os.path.join(REPO, "checks", "banned.toml")
+NAV_TEXT_BAD = re.compile(r"[0-9$%]")
+NAV_ICONS = ("journal", "stats", "flag", "scale", "hourglass", "list", "split", "doc", "code", "check", "bookmark",
+             "building", "swap", "windows", "percent", "shield")
+
+
+def banned_words():
+    with open(BANNED_TOML, "rb") as f:
+        words = tomllib.load(f)["words"]
+    return [w for ws in words.values() for w in ws]
+
+
+def nav_problem(nav):
+    """Why the [[nav]] data breaks the nav rules, or None."""
+    if not isinstance(nav, list) or not nav:
+        return "[[nav]] is empty"
+    banned = [(w, re.compile(r"(?<![\w#])" + re.escape(w) + r"(?!\w)", re.IGNORECASE)) for w in banned_words()]
+    for g in nav:
+        texts = [g.get("label", "")]
+        for it in g.get("items", []) + g.get("foot", []):
+            for k in ("label", "href"):
+                if not isinstance(it.get(k), str) or not it[k]:
+                    return f"nav item {it!r} has no {k}"
+            texts += [it["label"], it.get("desc", ""), it.get("label_if_paid", "")]
+            if it.get("requires_flag") and it["requires_flag"] not in FLAGS:
+                return f"nav item {it['label']!r}: requires_flag {it['requires_flag']!r} is not a flag"
+            if "items" in g and it in g["items"] and it.get("icon") not in NAV_ICONS:
+                return f"nav item {it['label']!r}: icon {it.get('icon')!r} is not in partials/icons.html"
+        for t in texts:
+            if NAV_TEXT_BAD.search(t):
+                return f"nav text {t!r} holds a digit, '$' or '%' (the nav never shows a price, % or number)"
+            for w, rx in banned:
+                if rx.search(t):
+                    return f"nav text {t!r} holds the banned word {w!r} (checks/banned.toml)"
+    return None
+
+
+def nav_for(nav, flags):
+    """[[nav]] as this build renders it: items behind an off flag dropped, label_if_paid applied."""
+    def keep(it):
+        return not it.get("requires_flag") or flags[it["requires_flag"]]
+
+    def label(it):
+        return {**it, "label": it.get("label_if_paid", it["label"]) if flags["paid_report"] else it["label"]}
+    return [{**g, "items": [label(i) for i in g.get("items", []) if keep(i)],
+             "foot": [label(i) for i in g.get("foot", []) if keep(i)]} for g in nav]
+
+
+def nav_current(nav, page):
+    """The label of the nav group the page belongs to: the group listing the page itself, else the
+    group whose section is the page's (lifted pages' "section"), else the group whose href starts the path."""
+    path = page["path"]
+    for g in nav:
+        if any(i["href"] == path for i in g["items"] + g["foot"]) or g["href"] == path:
+            return g["label"]
+    for g in nav:
+        if page.get("section") and g["href"] == page.get("section"):
+            return g["label"]
+    for g in nav:
+        if g["href"] != "/" and path.startswith(g["href"]):
+            return g["label"]
+    return None
 
 
 def show_seller(cfg):
@@ -845,6 +913,9 @@ def check_schema(cfg, toml_path):
     for table in ("nav", "footer"):
         if not isinstance(cfg.get(table), list):
             die(f"site.toml has no [[{table}]] entries ({toml_path})")
+    why = nav_problem(cfg["nav"])
+    if why:
+        die(f"{why} ({toml_path})")
 
 
 def read_toml(path, label):
@@ -1374,7 +1445,9 @@ def build():
     env.filters["usd"] = usd
     env.filters["usd_fr"] = usd_fr
     products = {p["id"]: p for p in prices["products"]}
-    base_ctx = {"site": cfg["site"], "flags": flags, "nav": cfg["nav"], "footer": cfg["footer"],
+    nav = nav_for(cfg["nav"], flags)
+    base_ctx = {"site": cfg["site"], "flags": flags, "nav": nav, "nav_current": lambda pg: nav_current(nav, pg),
+                "footer": cfg["footer"],
                 "legal": cfg["legal"], "forms": cfg["forms"], "analytics": cfg["analytics"],
                 "worker": cfg["worker"], "prices": prices, "products": products, "private": private,
                 "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": tools_for(flags),

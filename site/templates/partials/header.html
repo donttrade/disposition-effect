@@ -1,24 +1,62 @@
-{#- The shared header (Manager V3, 21 Oct 2026). From 900 px: brand, the nav row, the theme toggle,
-    on one 64 px line. Below 900 px: brand, a "Menu" disclosure and the theme toggle as an icon
-    button, still 64 px; the menu opens a list over the page. The menu is a <details>, so it works
-    without JavaScript; nav.js only adds Escape and click-outside closing. Both lists sit in the one
-    "Main" nav landmark and CSS shows one of them, so a screen reader meets one list at a time.
-    No button or offer in the header (independence: no finding next to an offer). -#}
-{%- macro nav_items() %}
-  {%- for item in nav %}
-    <li><a href="{{ item.href }}"{% if page.path == item.href %} aria-current="page"{% elif page.get("section") == item.href %} aria-current="true"{% endif %}>{{ item.label }}</a></li>
-  {%- endfor %}
+{#- The shared header (Manager V3; ARCHITECT-V3 §c.2, 21 Oct 2026). From 900 px: brand, the nav row
+    (Free tools ▾ · Research ▾ · For firms ▾ · Pricing · About), the theme toggle, on one 64 px line.
+    Each ▾ is a <details name="nav"> disclosure (APG disclosure navigation, no ARIA menu role): it opens
+    without JavaScript, and name="nav" keeps one open at a time. nav.js adds Escape, focus-out,
+    click-outside and hover intent. Below 900 px: brand, a "Menu" <details> holding the same groups as
+    an accordion (<details name="m">), Pricing and About, and the theme toggle as an icon button.
+    Both lists come from the same [[nav]] data and sit in the one "Main" nav landmark; CSS shows one.
+    The nav shows no price, % or study number (build.nav_problem); its one offer is the plain text
+    link "Start a Pilot" at the foot of the For firms panel (owner decision Q3), never a button. -#}
+{%- import "partials/icons.html" as ic %}
+{%- set cur = nav_current(page) %}
+{%- macro item_link(it) %}<a class="nav-item" href="{{ it.href }}"{% if page.path == it.href %} aria-current="page"{% endif %}>{{ ic.icon(it.icon) }}<span class="ni-text"><span class="ni-t">{{ it.label }}</span>{% if it.desc %} <span class="ni-d">{{ it.desc }}</span>{% endif %}</span></a>{% endmacro %}
+{%- macro group_body(g) %}
+      <ul class="nav-items">
+      {%- for it in g["items"] %}
+        <li>{{ item_link(it) }}</li>
+      {%- endfor %}
+      </ul>
+      {%- if g["foot"] %}
+      <ul class="nav-foot">
+      {%- for it in g["foot"] %}
+        <li><a href="{{ it.href }}"{% if page.path == it.href %} aria-current="page"{% endif %}>{{ it.label }}</a></li>
+      {%- endfor %}
+      </ul>
+      {%- endif %}
 {%- endmacro %}
+{%- macro summary_text(g) %}{{ g.label }}{% if cur == g.label %}<span class="visually-hidden">, current section</span>{% endif %}{{ ic.icon("chevron", "chev") }}{% endmacro %}
+{%- macro plain_link(g) %}<a href="{{ g.href }}"{% if page.path == g.href %} aria-current="page"{% elif cur == g.label %} aria-current="true"{% endif %}>{{ g.label }}</a>{% endmacro %}
 <header class="site-header"><div class="wrap">
   <a class="brand" href="/">{{ site.name }}</a>
   <nav class="site-nav" aria-label="Main"><ul class="nav-row">
-  {{- nav_items() }}
+  {%- for g in nav %}
+    {%- if g["items"] %}
+    <li class="nav-dd-li"><details name="nav" class="nav-dd" data-nav-dd>
+      <summary{% if cur == g.label %} class="is-current"{% endif %}>{{ summary_text(g) }}</summary>
+      <div class="nav-pop{% if g.get("columns") == 2 %} nav-pop-2{% endif %}{% if loop.index0 >= 2 %} nav-pop-end{% endif %}">
+      {{- group_body(g) }}
+      </div>
+    </details></li>
+    {%- else %}
+    <li>{{ plain_link(g) }}</li>
+    {%- endif %}
+  {%- endfor %}
   </ul>
   <details class="nav-menu" data-nav-menu>
     <summary><svg class="i-menu" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg><svg class="i-close" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>Menu</summary>
-    <ul class="nav-panel">
-    {{- nav_items() }}
-    </ul>
+    <div class="nav-panel">
+    {%- for g in nav if g["items"] %}
+      <details name="m" class="nav-acc">
+        <summary{% if cur == g.label %} class="is-current"{% endif %}>{{ summary_text(g) }}</summary>
+        {{- group_body(g) }}
+      </details>
+    {%- endfor %}
+      <ul class="nav-links">
+      {%- for g in nav if not g["items"] %}
+        <li>{{ plain_link(g) }}</li>
+      {%- endfor %}
+      </ul>
+    </div>
   </details></nav>
   <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" hidden><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg><span class="tt-label">Dark mode</span></button>
 </div></header>
