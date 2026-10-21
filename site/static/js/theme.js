@@ -8,8 +8,13 @@
   var root = document.documentElement;
   var COLORS = { dark: '#16181C', light: '#FFFFFF' };
   try { // motion: decided before first paint (this file blocks in <head>); motion.js and site.css read it
-    if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches && 'IntersectionObserver' in window)
+    if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches && 'IntersectionObserver' in window) {
       root.classList.add('dt-motion');
+      // failsafe for the hero numbers (site.css hides them under .dt-motion:not(.dt-fs)): shown 800 ms after
+      // navigation start unless motion.js has claimed them for the count by then. A class, not a CSS
+      // animation, so nothing runs off the compositor (Lighthouse "non-composited animations").
+      setTimeout(function () { root.classList.add('dt-fs'); }, 800 - performance.now());
+    }
   } catch (e) { /* no motion */ }
 
   function setMeta(t) {

@@ -193,7 +193,7 @@ def test_i7_i17_only_transform_and_opacity_and_every_motion_ends_in_time(browser
     ctx.close()
     assert any(a["name"] == "dt-wipe" for a in seen) and any(a["rv"] for a in seen)
     for a in seen:
-        assert set(a["props"]) <= {"opacity", "transform", "visibility"}, a
+        assert set(a["props"]) <= {"opacity", "transform"}, a   # the visibility failsafe is a class now (D2)
         assert a["iter"] == 1 and a["end"] <= 5000, a          # WCAG 2.2.2: nothing loops or lasts 5 s
         if a["rv"]:   # the stagger is motion.js timers (60/120/180 ms); a transition-delay is not composited
             assert a["delay"] == 0 and a["end"] <= 500, a
@@ -222,7 +222,7 @@ def test_i19_every_motion_animation_runs_on_the_compositor(browser, built_site, 
     for path in MOTION:
         anims, failed = _composite_failures(browser, built_site["url"] + path, vp)
         assert anims, (path, "the trace recorded no animation at all: the check would prove nothing")
-        assert [f for f in failed if f["compositeFailed"] & 8] == [], (path, failed[:4])
+        assert failed == [], (path, failed[:4])
 
 
 def test_i17_revealed_blocks_reach_full_opacity_within_680ms(browser, built_site):
@@ -355,12 +355,24 @@ def test_i12_tabbing_into_an_unrevealed_section_shows_it_at_once(browser, built_
 
 
 # ------------------------------------------------------------------ I13: failure modes
-def test_i13_motion_js_blocked_hides_nothing_but_the_numbers_until_1300ms(browser, built_site):
-    ctx = _ctx(browser)
+# Tester N2: measured from navigation start (performance.now() in the page), not from Playwright's
+# "commit". The failsafe is theme.js's .dt-fs class at 800 ms; the budget is 1,000 ms.
+SHOWN_AT = """window.__shown = null; (function poll() { const d = document.querySelectorAll('.hero-dash [data-count]');
+  if (d.length && [...d].every(e => getComputedStyle(e).visibility === 'visible')) { __shown = performance.now(); return; }
+  requestAnimationFrame(poll); })();"""
+
+
+@pytest.mark.parametrize("vp", [DESK, PHONE], ids=["1280", "375"])
+def test_i13_motion_js_blocked_hides_nothing_but_the_numbers_until_1000ms(browser, built_site, vp):
+    ctx = _ctx(browser, vp)
     ctx.route("**/motion.js", lambda r: r.abort())
+    ctx.add_init_script(SHOWN_AT)
     pg = ctx.new_page()
     pg.goto(built_site["url"] + "/", wait_until="commit")
-    pg.wait_for_timeout(1300)
+    pg.wait_for_timeout(2000)
+    shown = pg.evaluate("__shown")
+    assert shown is not None and shown <= 1000, shown
+    assert pg.evaluate("document.documentElement.classList.contains('dt-motion')"), "motion was on: the failsafe did it"
     assert pg.evaluate(HIDDEN) == 0
     _scroll(pg, step=600, pause=30)
     assert pg.evaluate(HIDDEN) == 0 and not pg.evaluate("__m").get("rvSeen")

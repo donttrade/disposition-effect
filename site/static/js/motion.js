@@ -35,7 +35,7 @@
 
   try {
     var nav = (performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || {};
-    var fresh = (nav.type || 'navigate') === 'navigate' && !location.hash, early = fresh && performance.now() < 1000;
+    var fresh = (nav.type || 'navigate') === 'navigate' && !location.hash, early = fresh && !root.classList.contains('dt-fs');
     var dash = document.querySelector('.hero-dash');
     io = new IntersectionObserver(function (es) {
       es.forEach(function (e) { if (e.isIntersecting) { io.unobserve(e.target); show(e.target); } });
