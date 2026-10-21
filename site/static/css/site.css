@@ -362,3 +362,8 @@ pre { font-family: var(--font-mono); font-size: var(--fs-0); background: var(--s
 .jump li a { display: inline-flex; align-items: center; min-height: var(--target); }
 .prose { max-width: 46rem; }
 .prose .byp { margin-bottom: var(--s3); }
+
+/* Reading a trade file (read-file.js): an indeterminate bar and the seconds elapsed. */
+.progress-line { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+.progress-line[hidden] { display: none; }
+.progress-line progress { width: min(240px, 60%); height: 8px; accent-color: var(--plan); }

@@ -1,11 +1,12 @@
 // prop-sim.js — /tools/prop-challenge-simulator/.
 //
-// File mode: the trade file is parsed in this tab by the same engine as the dashboard,
+// File mode: the trade file is parsed in this tab (in a Web Worker, read-file.js, so a large
+// file never freezes the page) by the same engine as the dashboard,
 // reduced to one list of realised results per trading day, and only those numbers go to
 // the worker. Manual mode: four summary numbers. Either way the page's CSP is
 // connect-src 'none', nothing is stored, nothing is logged.
 
-import { runFile } from '../engine/index.js';
+import { readTradeFile, startProgress } from './read-file.js';
 import { LIMITS, MESSAGES } from '../engine/errors.js';
 import { RUNS, DEFAULT_SEED, tradingDays } from './prop-sim-core.js';
 import { money, unitNote, pct, intText, el, DASH } from './format.js';
@@ -15,6 +16,9 @@ const $ = (id) => document.getElementById(id);
 const MIN_STREAK_BUSTS = 30; // fewer busts than this: too few to describe what led up to them
 let loaded = null;           // {days, unit, n, label} — the file's trading days, in memory only
 let worker = null;
+let reading = null;          // the file being read: {cancel()}
+let readSeq = 0;             // which read is the latest; an older result is dropped
+let stopProgress = () => {};
 
 function mode() { return document.querySelector('input[name="ps-mode"]:checked').value; }
 
@@ -34,13 +38,23 @@ function setFileStatus(text, isError) {
 
 async function fromFile(file) {
   loaded = null;
+  if (reading) { reading.cancel(); reading = null; stopProgress(); }
   if (!file) return;
   if (file.size > LIMITS.MAX_BYTES) { setFileStatus(MESSAGES.E_TOO_LARGE, true); return; }
   load(new Uint8Array(await file.arrayBuffer()), 'your file');
 }
 
-function load(bytes, label) {
-  const out = runFile(bytes);
+async function load(bytes, label) {
+  loaded = null;
+  if (reading) reading.cancel();
+  stopProgress();
+  stopProgress = startProgress($('ps-progress'));
+  const mine = ++readSeq;
+  const job = readTradeFile(bytes, { onStage: (t) => setFileStatus(t, false) });
+  reading = job;
+  let out;
+  try { out = await job.done; } finally { if (mine === readSeq) { reading = null; stopProgress(); } }
+  if (mine !== readSeq) return; // a newer file replaced this one
   if (out.error) { setFileStatus(`${out.error.message} (error code ${out.error.code})`, true); return; }
   const r = out.result;
   loaded = { days: tradingDays(r.trades), unit: r.trades[0].pnl_unit, n: r.trades.length, label,
@@ -91,7 +105,8 @@ function read() {
   const seed = get('ps-seed', (v, l) => parseWhole(v, l, 0, 4294967295));
   const p = { rules, seed, runs: RUNS, mode: mode() };
   if (p.mode === 'file') {
-    if (!loaded) problems.push({ id: 'ps-file', message: 'Choose a trade file, or try the sample file, or switch to manual numbers.' });
+    if (reading) problems.push({ id: 'ps-file', message: 'Your file is still being read. Run again when it says how many trades it found.' });
+    else if (!loaded) problems.push({ id: 'ps-file', message: 'Choose a trade file, or try the sample file, or switch to manual numbers.' });
     else p.days = loaded.days;
   } else {
     const wr = get('ps-wr', parseStrict);
