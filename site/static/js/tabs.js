@@ -27,14 +27,24 @@
         if (n) { e.preventDefault(); select(n, true); }
       });
     });
-    var start = tabs[0];
-    var hash = window.location.hash.slice(1);
-    tabs.forEach(function (t) { if (hash && t.getAttribute('data-hash') === hash) start = t; });
-    // A link to any id inside a panel (e.g. /pricing/#copy-leader) opens that panel.
-    var target = hash ? document.getElementById(hash) : null;
-    if (target) tabs.forEach(function (t) { var p = panelOf(t); if (p && p.contains(target)) start = t; });
-    select(start, false);
-    if (target && start.getAttribute('data-hash') !== hash) target.scrollIntoView();
+    // The tab for the current hash: a tab's own data-hash, or the panel holding that id
+    // (e.g. /pricing/#copy-leader opens Firms). No match: keep `fallback`.
+    function fromHash(fallback) {
+      var start = fallback;
+      var hash = window.location.hash.slice(1);
+      tabs.forEach(function (t) { if (hash && t.getAttribute('data-hash') === hash) start = t; });
+      var target = hash ? document.getElementById(hash) : null;
+      if (target) tabs.forEach(function (t) { var p = panelOf(t); if (p && p.contains(target)) start = t; });
+      select(start, false);
+      if (target && start.getAttribute('data-hash') !== hash) target.scrollIntoView();
+    }
+    fromHash(tabs[0]);
+    // NIT 7: a same-page link, or back/forward, changes only the hash: switch the tab then too.
+    window.addEventListener('hashchange', function () {
+      // no hash (back to the bare page): the first tab, as on load; an unknown hash: no change
+      var current = tabs.filter(function (t) { return t.getAttribute('aria-selected') === 'true'; })[0] || tabs[0];
+      fromHash(window.location.hash.length > 1 ? current : tabs[0]);
+    });
   }
   function run() { Array.prototype.forEach.call(document.querySelectorAll('[role="tablist"]'), init); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();

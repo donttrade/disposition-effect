@@ -645,3 +645,21 @@ def test_nit6_tiny_risk_is_not_rounded_to_zero(browser, built_site):
     # risk .5 on a 25,000 balance showed "0.00%"
     r = _lots(browser, built_site, {"#ls-risk": "0.5", "#ls-balance": "25000", "#ls-stop": "40", "#ls-vpp": "1"})
     assert r["pct"] == "under 0.01%", r
+
+
+# ------------------------------------------------------------------ NIT 7: pricing tabs follow same-page hash changes
+def test_nit7_hashchange_switches_the_pricing_tab(browser, paid_site):
+    ctx = browser.new_context()
+    page = ctx.new_page()
+    page.goto(paid_site["url"] + "/pricing/")
+    assert page.get_attribute("#tab-traders", "aria-selected") == "true"
+    page.evaluate("location.hash = 'firms'")
+    page.wait_for_function("() => document.getElementById('tab-firms').getAttribute('aria-selected') === 'true'")
+    page.evaluate("location.hash = 'copy-leader'")  # an id inside the Firms panel keeps Firms
+    assert page.get_attribute("#tab-firms", "aria-selected") == "true"
+    page.go_back()
+    page.go_back()
+    page.wait_for_function("() => document.getElementById('tab-traders').getAttribute('aria-selected') === 'true'")
+    page.evaluate("location.hash = 'traders'")
+    assert page.is_visible("#before-you-pay")
+    ctx.close()
