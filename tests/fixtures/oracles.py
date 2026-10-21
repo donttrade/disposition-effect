@@ -215,3 +215,20 @@ ORACLES["ibkr/carried_in_add.csv"] = {
     "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_OPEN_AT_START": 2},
     "skipped": {},
 }
+
+# Tester v2 B2: dot thousands in a decimal-comma file.
+ORACLES["generic/tv2_eu_dot_thousands_qty.csv"] = {
+    # "12,50" and "13,50" prove the file uses decimal commas, so "1.500" = 1,500 (not 1.5).
+    # (13.50 - 12.50) * 1500 = 1500 points ; 1 h
+    "trades": [dict(symbol="AAA", dir="long", qty=1500, pnl=1500.0, hold_s=3600)],
+    "warnings": {},
+    "skipped": {},
+}
+ORACLES["generic/tv2_eu_dot_thousands_price.csv"] = {
+    # "18.300,5" proves decimal commas: entry "18.250" = 18,250 ; exit 18,300.5 ; pnl 50.5
+    "trades": [dict(symbol="GER40", dir="long", qty=1, entry_vwap=18250.0, exit_vwap=18300.5, pnl=50.5)],
+    "warnings": {},
+    "skipped": {},
+}
+ERRORS["errors/mixed_decimal_styles.csv"] = ("E_BAD_NUMBER", 3, "price")   # "12,50" then "13.5"
+ERRORS["errors/dot3_no_evidence.csv"] = ("E_BAD_NUMBER", 2, "qty")       # ';' file, "1.500" and integers only

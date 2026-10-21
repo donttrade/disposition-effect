@@ -185,6 +185,80 @@ export function parseNumber(raw, row, column) {
   return v;
 }
 
+// ---------------------------------------------------------------- the file's decimal separator
+// parseNumber reads one cell at a time, so "1.500" alone could be 1.5 or 1,500.
+// resolveNumberStyle decides once per file, from every number cell:
+//   comma evidence: "12,50", "1.234,5", "1.234.567"   dot evidence: "12.5", "1,234.5", "1234.567"
+//   "1.500" / "18.250" (one dot, then exactly 3 digits, at most 3 before it) is evidence of neither.
+// Both kinds in one file → E_BAD_NUMBER (never guess). Comma evidence → the dots in
+// "1.500"-style cells are thousands separators, so they are removed here. Dot evidence
+// → those cells are decimals. Neither → the fallback: 'dot' (comma-separated CSV and
+// MetaTrader HTML), or null (';' or tab CSV, where "1.500" is a real ambiguity) →
+// E_BAD_NUMBER. "1,234" is left to parseNumber, which always refuses it (plan rule).
+
+const SH_INT = /^[+-]?\d+$/;
+const SH_ONE_COMMA = /^[+-]?\d+,(\d+)$/;
+const SH_EURO = /^[+-]?\d{1,3}(\.\d{3})+,\d+$/;
+const SH_US = /^[+-]?\d{1,3}(,\d{3})+(\.\d+)?$/;
+const SH_DOT3 = /^[+-]?\d{1,3}\.\d{3}$/;
+const SH_ONE_DOT = /^[+-]?(\d+\.?\d*|\.\d+)$/;
+const SH_DOTS_THOUSANDS = /^[+-]?\d{1,3}(\.\d{3}){2,}$/;
+
+export function numberShape(raw) {
+  const s = String(raw).replace(RE_STRIP, '').replace(/−/g, '-');
+  if (s === '' || SH_INT.test(s)) return 'neutral';
+  const c = SH_ONE_COMMA.exec(s);
+  if (c) return c[1].length === 3 ? 'neutral' : 'comma';
+  if (SH_EURO.test(s) || SH_DOTS_THOUSANDS.test(s)) return 'comma';
+  if (SH_US.test(s)) return 'dot';
+  if (SH_DOT3.test(s)) return 'dot3';
+  if (SH_ONE_DOT.test(s)) return 'dot';
+  return 'other'; // parseNumber reports it
+}
+
+// groups: [{rows: [{row, cells}], map, fields}] — every number cell of the file.
+// Returns 'dot' | 'comma'; rewrites "1.500"-style cells in place when 'comma'.
+export function resolveNumberStyle(groups, fallback) {
+  let firstComma = null;
+  let firstDot = null;
+  let firstDot3 = null;
+  for (const g of groups) {
+    for (const r of g.rows) {
+      for (const f of g.fields) {
+        const i = g.map[f];
+        if (i === undefined || i >= r.cells.length) continue;
+        const shape = numberShape(r.cells[i]);
+        const at = { row: r.row, column: f };
+        if (shape === 'comma') {
+          if (firstDot) fail('E_BAD_NUMBER', `This file mixes decimal commas and decimal points (a decimal point is in row ${firstDot.row}). Export it again with one number format.`, at.row, at.column);
+          if (!firstComma) firstComma = at;
+        } else if (shape === 'dot') {
+          if (firstComma) fail('E_BAD_NUMBER', `This file mixes decimal commas and decimal points (a decimal comma is in row ${firstComma.row}). Export it again with one number format.`, at.row, at.column);
+          if (!firstDot) firstDot = at;
+        } else if (shape === 'dot3' && !firstDot3) firstDot3 = at;
+      }
+    }
+  }
+  const style = firstComma ? 'comma' : firstDot ? 'dot' : fallback;
+  if (style === null) {
+    if (firstDot3) fail('E_BAD_NUMBER', 'a number like 1.500 could mean 1.5 or 1,500, and no other number in the file shows which. Export it again without thousands separators.', firstDot3.row, firstDot3.column);
+    return 'dot';
+  }
+  if (style === 'comma') {
+    for (const g of groups) {
+      for (const r of g.rows) {
+        for (const f of g.fields) {
+          const i = g.map[f];
+          if (i === undefined || i >= r.cells.length) continue;
+          const bare = r.cells[i].replace(RE_STRIP, '').replace(/−/g, '-');
+          if (SH_DOT3.test(bare) || SH_DOTS_THOUSANDS.test(bare)) r.cells[i] = bare.replace(/\./g, '');
+        }
+      }
+    }
+  }
+  return style;
+}
+
 // ---------------------------------------------------------------- dates
 // Every reader returns milliseconds since 1970 for the wall-clock time read as UTC,
 // or null when the text does not match that reader's pattern at all.

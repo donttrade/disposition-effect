@@ -96,6 +96,18 @@ export const SIGNATURES = {
 };
 
 // Order matters: the first signature that fully matches wins.
+// The whitelisted columns that hold numbers, per signature. The file's decimal
+// separator is decided from these cells only (csv.js resolveNumberStyle).
+export const NUMERIC_FIELDS = {
+  mt5_deals: ['volume', 'price', 'commission', 'fee', 'swap', 'profit'],
+  mt5_positions: ['volume', 'open_price', 'close_price', 'commission', 'fee', 'swap', 'profit'],
+  mt4: ['size', 'open_price', 'close_price', 'commission', 'taxes', 'swap', 'profit'],
+  ibkr_flex: ['quantity', 'price', 'commission', 'realized', 'multiplier', 'fx'],
+  tradovate_orders: ['qty', 'price'],
+  generic_roundtrip: ['qty', 'open_price', 'close_price', 'fees'],
+  generic: ['qty', 'price', 'fees'],
+};
+
 export const CSV_ORDER = ['mt5_deals', 'ibkr_flex', 'tradovate_orders', 'generic_roundtrip', 'generic'];
 export const HTML_ORDER = ['mt5_deals', 'mt5_positions', 'mt4'];
 

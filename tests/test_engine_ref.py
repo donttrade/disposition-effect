@@ -80,6 +80,24 @@ def test_number_rules():
         assert ei.value.code == "E_BAD_NUMBER", bad
 
 
+def test_number_style_is_decided_per_file():
+    # B2: a cell alone cannot say whether "1.500" is 1.5 or 1,500; the rest of the file can.
+    def one(qty, price, sep=";"):
+        h = sep.join(["Date", "Time", "Symbol", "Side", "Quantity", "Price"])
+        rows = [sep.join(["2026-01-05", "09:30:00", "AAA", "Buy", qty, price]),
+                sep.join(["2026-01-05", "10:30:00", "AAA", "Sell", qty, price])]
+        return E.parse_file(("\n".join([h] + rows) + "\n").encode())["trades"][0]["qty"]
+    assert one("1.500", "12,50") == 1500          # decimal commas elsewhere: dot = thousands
+    assert one("1.500", "12.5") == 1.5            # decimal points elsewhere: dot = decimal
+    assert one("1.500", "12", sep=",") == 1.5     # comma-separated CSV: US style by default
+    assert one("1.234.567", "12,5") == 1234567
+    assert one("1.234,567", "12,5") == 1234.567   # full European form keeps its decimals
+    for qty, price in [("1.500", "12"), ("12,5", "1,234.5")]:
+        with pytest.raises(E.EngineError) as ei:
+            one(qty, price)
+        assert ei.value.code == "E_BAD_NUMBER"
+
+
 def test_dates_are_naive_utc():
     assert E.parse_date("2026.09.01 09:15:02", "mt", 1, "t") == 1788254102000
     assert E.parse_date("20260902;093512", "ibkr", 1, "t") == E.parse_date("2026-09-02 09:35:12", "ibkr", 1, "t")

@@ -379,6 +379,77 @@ def opt_number(raw, row, column, default=0.0):
     return default if v is None else v
 
 
+# ----------------------------------------------------------------- the file's decimal separator
+# Mirrors resolveNumberStyle() in csv.js: decided once per file from every number cell.
+# Comma evidence and dot evidence in one file -> E_BAD_NUMBER; comma evidence -> the dots
+# in "1.500"-style cells are thousands separators; neither -> the fallback ("dot", or None
+# for ';'/tab CSV, where a "1.500"-style cell is E_BAD_NUMBER).
+
+_SH_INT = re.compile(r"^[+-]?\d+$", re.ASCII)
+_SH_ONE_COMMA = re.compile(r"^[+-]?\d+,(\d+)$", re.ASCII)
+_SH_EURO = re.compile(r"^[+-]?\d{1,3}(\.\d{3})+,\d+$", re.ASCII)
+_SH_US = re.compile(r"^[+-]?\d{1,3}(,\d{3})+(\.\d+)?$", re.ASCII)
+_SH_DOT3 = re.compile(r"^[+-]?\d{1,3}\.\d{3}$", re.ASCII)
+_SH_ONE_DOT = re.compile(r"^[+-]?(\d+\.?\d*|\.\d+)$", re.ASCII)
+_SH_DOTS_THOUSANDS = re.compile(r"^[+-]?\d{1,3}(\.\d{3}){2,}$", re.ASCII)
+
+
+def number_shape(raw):
+    s = _RE_STRIP.sub("", str(raw)).replace("\u2212", "-")
+    if s == "" or _SH_INT.match(s):
+        return "neutral"
+    c = _SH_ONE_COMMA.match(s)
+    if c:
+        return "neutral" if len(c.group(1)) == 3 else "comma"
+    if _SH_EURO.match(s) or _SH_DOTS_THOUSANDS.match(s):
+        return "comma"
+    if _SH_US.match(s):
+        return "dot"
+    if _SH_DOT3.match(s):
+        return "dot3"
+    if _SH_ONE_DOT.match(s):
+        return "dot"
+    return "other"
+
+
+def resolve_number_style(groups, fallback):
+    first_comma = first_dot = first_dot3 = None
+    for g in groups:
+        for r in g["rows"]:
+            for f in g["fields"]:
+                i = g["map"].get(f)
+                if i is None or i >= len(r["cells"]):
+                    continue
+                shape = number_shape(r["cells"][i])
+                at = (r["row"], f)
+                if shape == "comma":
+                    if first_dot:
+                        fail("E_BAD_NUMBER", "mixed decimal comma and point", at[0], at[1])
+                    first_comma = first_comma or at
+                elif shape == "dot":
+                    if first_comma:
+                        fail("E_BAD_NUMBER", "mixed decimal comma and point", at[0], at[1])
+                    first_dot = first_dot or at
+                elif shape == "dot3" and not first_dot3:
+                    first_dot3 = at
+    style = "comma" if first_comma else ("dot" if first_dot else fallback)
+    if style is None:
+        if first_dot3:
+            fail("E_BAD_NUMBER", "1.500 could be 1.5 or 1500", first_dot3[0], first_dot3[1])
+        return "dot"
+    if style == "comma":
+        for g in groups:
+            for r in g["rows"]:
+                for f in g["fields"]:
+                    i = g["map"].get(f)
+                    if i is None or i >= len(r["cells"]):
+                        continue
+                    bare = _RE_STRIP.sub("", r["cells"][i]).replace("\u2212", "-")
+                    if _SH_DOT3.match(bare) or _SH_DOTS_THOUSANDS.match(bare):
+                        r["cells"][i] = bare.replace(".", "")
+    return style
+
+
 # ----------------------------------------------------------------- dates
 
 def _days_in_month(y, m):
@@ -524,6 +595,17 @@ SIGNATURES = {
         },
         "required": [["date", "datetime"], ["time", "datetime"], ["symbol"], ["side"], ["qty"], ["price"]],
     },
+}
+
+# Must equal NUMERIC_FIELDS in detect.js: the whitelisted columns that hold numbers.
+NUMERIC_FIELDS = {
+    "mt5_deals": ["volume", "price", "commission", "fee", "swap", "profit"],
+    "mt5_positions": ["volume", "open_price", "close_price", "commission", "fee", "swap", "profit"],
+    "mt4": ["size", "open_price", "close_price", "commission", "taxes", "swap", "profit"],
+    "ibkr_flex": ["quantity", "price", "commission", "realized", "multiplier", "fx"],
+    "tradovate_orders": ["qty", "price"],
+    "generic_roundtrip": ["qty", "open_price", "close_price", "fees"],
+    "generic": ["qty", "price", "fees"],
 }
 
 CSV_ORDER = ["mt5_deals", "ibkr_flex", "tradovate_orders", "generic_roundtrip", "generic"]
@@ -1147,17 +1229,29 @@ def _strip(d):
     return {k: v for k, v in d.items() if not k.startswith("_")}
 
 
+def _html_number_group(t):
+    """The number cells of one MetaTrader table: only rows of its own section(s)."""
+    kind = "mt5_positions" if t["kind"].startswith("mt5_positions") else t["kind"]
+    if kind == "mt4":
+        rows = [r for r in t["rows"] if r["section"] in ("closed transactions", "closed trades", "open trades")]
+    else:
+        rows = [r for r in t["rows"] if r["section"] == t["section"]]
+    return {"rows": rows, "map": t["map"], "fields": NUMERIC_FIELDS[kind]}
+
+
 def parse_file(data):
     text = decode_bytes(data)
     if is_html(text):
         rows = html_rows(text)
         det = detect_html(rows)
+        resolve_number_style([_html_number_group(t) for t in det["tables"]], "dot")
         fmt = det["format"]
         verified = False
         res = parse_mt(det["tables"])
         mode = "gross"
     else:
-        rows = parse_csv(text, sniff_delimiter(text))
+        delim = sniff_delimiter(text)
+        rows = parse_csv(text, delim)
         if not rows:
             fail("E_EMPTY")
         det = detect_csv(rows)
@@ -1167,6 +1261,8 @@ def parse_file(data):
             fail("E_HEADER_ONLY")
         if len(data_rows) > MAX_ROWS:
             fail("E_TOO_LARGE")
+        resolve_number_style([{"rows": rows[hi + 1:], "map": m, "fields": NUMERIC_FIELDS[name]}],
+                             "dot" if delim == "," else None)
         verified = SIGNATURES[name]["verified"]
         if name == "mt5_deals":
             fmt = "mt5"
