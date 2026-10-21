@@ -781,6 +781,9 @@ def load_config():
         prices = json.load(f)
     check_schema(cfg, toml_path)
     set_launch_date(cfg["legal"], toml_path)
+    cfg["site"].setdefault("manual_restore", True)
+    if type(cfg["site"]["manual_restore"]) is not bool:
+        die(f"[site] manual_restore must be true or false, not {cfg['site']['manual_restore']!r} ({toml_path})")
     flags = cfg["flags"]
     check_flags(flags, toml_path)
     if flags["trader_first_home"] != flags["paid_report"]:

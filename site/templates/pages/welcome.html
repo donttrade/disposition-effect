@@ -12,7 +12,11 @@
     <div class="field"><label for="w-link">Restore link</label><input id="w-link" type="text" readonly></div>
     <p><button class="btn btn-secondary" id="w-download" type="button">Download restore file</button>
        <button class="btn btn-secondary" id="w-copy" type="button">Copy link</button> <span id="w-copy-msg" role="status"></span></p>
+    {%- if site.manual_restore %}
+    <p class="small muted" id="w-manual">Save the link or the file now: there is no account. If your access link stops working, email us from the address you paid with and we’ll send a new one.</p>
+    {%- else %}
     <p class="small muted">Save the link or the file now: there is no account, and restore by email is not offered.</p>
+    {%- endif %}
   </section>
   <section id="w-error" data-state hidden>
     <div class="notice notice-error" role="alert"><p id="w-error-msg"></p></div>

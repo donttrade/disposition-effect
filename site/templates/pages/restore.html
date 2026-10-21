@@ -4,5 +4,8 @@
   <h1>Restore your report access</h1>
   <p id="r-status" role="status">Open the restore link or restore file you saved after paying.</p>
   <p><a class="btn" id="r-open" href="/report/" hidden>Open your report</a></p>
+  {%- if site.manual_restore %}
+  <p class="small" id="r-manual">If your access link stops working, <a href="mailto:{{ site.contact_email }}?subject={{ ('Habit report access')|urlencode }}">email us</a> from the address you paid with and we’ll send a new one. {{ site.reply_promise }}</p>
+  {%- endif %}
 </div>
 {% endblock %}

@@ -10,6 +10,10 @@ name = "donttrade"
 base_url = "https://donttrade.ca"
 contact_email = "donttrade.research@gmail.com"
 reply_promise = "We reply within 1 business day (Eastern Time, Monday to Friday)."
+# Manual restore (owner decision 21 Oct ~11:00, Manager review): a buyer whose access link stops working
+# emails us from the address they paid with, and the owner sends a new link by hand, ONLY to the address
+# on the Stripe payment. true: /welcome/, /restore/ and the terms say so. false: "restore by email is not offered".
+manual_restore = true
 same_as = ["https://donttrade.substack.com", "https://github.com/donttrade"]  # Organization JSON-LD: brand accounts only
 
 [flags]
