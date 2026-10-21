@@ -240,6 +240,7 @@ fieldset { border: 0; padding: 0; margin: 0 0 var(--s3); }
 /* ------------------------------------------------------------------ charts (inline SVG + table fallback) */
 .chart { margin: 0 0 var(--s3); }
 .chart svg { display: block; width: 100%; height: auto; }
+.chart-bars svg { max-width: 420px; }
 .chart .grid-line { stroke: var(--border); stroke-width: 1; }
 .chart .axis { fill: var(--muted); font: 12px var(--font-mono); }
 .chart .line-actual { stroke: var(--text); stroke-width: 2; fill: none; }
@@ -249,6 +250,7 @@ fieldset { border: 0; padding: 0; margin: 0 0 var(--s3); }
 .chart .bar-loss { fill: var(--loss); }
 .chart .bar-plain { fill: var(--plan); }
 .chart .bar-flag { fill: var(--rust); }  /* rust = the flagged pattern */
+.chart .bar-label { fill: var(--text); font: 13px var(--font-sans); }
 .chart .annot { fill: var(--rust); font: 600 12px var(--font-sans); }
 .chart figcaption { font-size: var(--fs-0); color: var(--muted); margin-top: var(--s1); }
 .chart details summary { font-weight: 400; font-size: var(--fs-0); color: var(--rust); }

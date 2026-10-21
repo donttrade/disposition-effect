@@ -1,0 +1,36 @@
+# banned.toml — wording rules for checks/lint.py.
+# Source: NON-ADVISER-DESIGN-AND-AUTORENEW A3 (the "Don't use" column) plus the
+# teardown's AI-tell list. Matching is case-insensitive on whole words/phrases.
+# A hit is allowed only inside an allowlisted phrase (the disclaimer and listed negations).
+
+[words]
+advice = ["advice", "advise", "advises", "advising", "adviser", "advisers", "advisor", "advisors"]
+recommend = ["recommend", "recommends", "recommended", "recommendation", "recommendations", "suggested", "best for you"]
+directive = ["should", "must", "need to", "needs to", "fix", "fixes", "stop doing"]
+coaching = ["coach", "coaching", "mentor", "mentoring", "signals", "alerts to trade"]
+promises = ["improve your returns", "become profitable", "win more", "edge guaranteed", "real edge", "proven strategy", "guaranteed"]
+cause = ["you lost $", "because of your"]
+ai_tells = ["unlock", "unlocks", "unlocked", "elevate", "supercharge", "#1", "trusted by"]
+
+[allow]
+# Phrases in which a banned word is fine (negations and the required disclaimer).
+phrases = [
+  "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.",
+  "not investment advice",
+  "nothing here is investment advice",
+  "is not advice",
+  "not advice",
+  "no advice",
+  "not registered as an adviser",
+  "does not recommend",
+  "never recommends",
+  "no signals",
+]
+
+[claims]
+# Phrases that become false once a paid flow exists (CONCERN 6).
+no_upload = ["nothing leaves", "nothing is uploaded", "never leaves your browser"]
+no_analytics = ["no analytics", "runs no analytics"]
+
+[secrets]
+patterns = ['sk_live_[0-9A-Za-z]{8,}', 'sk_test_[0-9A-Za-z]{8,}', 'rk_live_[0-9A-Za-z]{8,}', 'rk_test_[0-9A-Za-z]{8,}', 'whsec_[0-9A-Za-z]{8,}', '-----BEGIN [A-Z ]*PRIVATE KEY-----']

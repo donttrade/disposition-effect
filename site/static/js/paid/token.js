@@ -98,7 +98,7 @@ export function restoreFileHtml(token) {
   const link = restoreLink(token);
   return '<!doctype html><meta charset="utf-8"><title>donttrade restore</title>' +
     '<p>Open your donttrade report access: <a href="' + link + '">' + location.origin + '/restore/</a></p>' +
-    '<p>Keep this file private: it unlocks your purchase.</p>';
+    '<p>Keep this file private: it opens your purchase.</p>';
 }
 
 export function downloadRestoreFile(token) {
