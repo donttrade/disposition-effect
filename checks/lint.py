@@ -174,6 +174,9 @@ def passthrough_rules(html, where, analytics):
             if _phrase_re(c).search(text):
                 out.append(("claim:no_analytics", where, c))
     out += restore_email_claims(text, where)
+    for w in RULES["words"]["trial_cta"]:
+        if _phrase_re(w).search(text):
+            out.append(("banned:trial_cta", where, w))
     for w in RULES["words"]["regular_price"]:
         if _phrase_re(w).search(text):
             out.append(("banned:regular_price", where, w))
