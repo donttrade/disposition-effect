@@ -702,6 +702,38 @@ NUMERIC_FIELDS = {
     "generic": ["qty", "price", "fees"],
 }
 
+# ISO 4217 currency codes; mirrors ISO_CURRENCIES / checkCurrencyColumn() in detect.js.
+ISO_CURRENCIES = [
+    "AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS", "AUD", "AWG", "AZN", "BAM", "BBD", "BDT", "BGN", "BHD",
+    "BIF", "BMD", "BND", "BOB", "BOV", "BRL", "BSD", "BTN", "BWP", "BYN", "BZD", "CAD", "CDF", "CHE", "CHF",
+    "CHW", "CLF", "CLP", "CNY", "COP", "COU", "CRC", "CUC", "CUP", "CVE", "CZK", "DJF", "DKK", "DOP", "DZD",
+    "EGP", "ERN", "ETB", "EUR", "FJD", "FKP", "GBP", "GEL", "GHS", "GIP", "GMD", "GNF", "GTQ", "GYD", "HKD",
+    "HNL", "HTG", "HUF", "IDR", "ILS", "INR", "IQD", "IRR", "ISK", "JMD", "JOD", "JPY", "KES", "KGS", "KHR",
+    "KMF", "KPW", "KRW", "KWD", "KYD", "KZT", "LAK", "LBP", "LKR", "LRD", "LSL", "LYD", "MAD", "MDL", "MGA",
+    "MKD", "MMK", "MNT", "MOP", "MRU", "MUR", "MVR", "MWK", "MXN", "MXV", "MYR", "MZN", "NAD", "NGN", "NIO",
+    "NOK", "NPR", "NZD", "OMR", "PAB", "PEN", "PGK", "PHP", "PKR", "PLN", "PYG", "QAR", "RON", "RSD", "RUB",
+    "RWF", "SAR", "SBD", "SCR", "SDG", "SEK", "SGD", "SHP", "SLE", "SLL", "SOS", "SRD", "SSP", "STN", "SVC",
+    "SYP", "SZL", "THB", "TJS", "TMT", "TND", "TOP", "TRY", "TTD", "TWD", "TZS", "UAH", "UGX", "USD", "USN",
+    "UYI", "UYU", "UYW", "UZS", "VED", "VES", "VND", "VUV", "WST", "XAF", "XAG", "XAU", "XBA", "XBB", "XBC",
+    "XBD", "XCD", "XCG", "XDR", "XOF", "XPD", "XPF", "XPT", "XSU", "XUA", "YER", "ZAR", "ZMW", "ZWG", "ZWL",
+]
+_ISO_SET = set(ISO_CURRENCIES)
+
+
+def check_currency_column(rows, m):
+    """-> (map, ignored): drop 'currency' when any non-empty cell is not an ISO 4217 code."""
+    if "currency" not in m:
+        return m, False
+    i = m["currency"]
+    for r in rows:
+        v = clean(r["cells"][i]).upper() if i < len(r["cells"]) else ""
+        if v != "" and v not in _ISO_SET:
+            rest = dict(m)
+            del rest["currency"]
+            return rest, True
+    return m, False
+
+
 CSV_ORDER = ["mt5_deals", "ibkr_flex", "tradovate_orders", "generic_roundtrip", "generic"]
 HTML_ORDER = ["mt5_deals", "mt5_positions", "mt4"]
 HEADER_TITLES = ["trade history report", "statement", "detailed statement", "account statement"]
@@ -1581,6 +1613,7 @@ def _html_number_group(t):
 
 def parse_file(data):
     text = decode_bytes(data)
+    currency_ignored = False
     if is_html(text):
         rows = html_rows(text)
         det = detect_html(rows)
@@ -1599,13 +1632,15 @@ def parse_file(data):
         if not rows:
             fail("E_EMPTY")
         det = detect_csv(rows)
-        name, hi, m = det["format"], det["header_index"], det["map"]
+        name, hi = det["format"], det["header_index"]
+        # a Currency column whose cells are not all ISO codes is not read at all (F-D3)
+        m, currency_ignored = check_currency_column(rows[hi + 1:], det["map"])
         data_rows = [r for r in rows[hi + 1:] if not _empty(r["cells"])]
         if not data_rows:
             fail("E_HEADER_ONLY")
         if len(data_rows) > MAX_ROWS:
             fail("E_TOO_LARGE")
-        check_quoting(rows, hi, m)
+        check_quoting(rows, hi, det["map"])
         resolve_number_style([{"rows": rows[hi + 1:], "map": m, "fields": NUMERIC_FIELDS[name]}],
                              "dot" if delim == "," else None)
         verified = SIGNATURES[name]["verified"]
@@ -1636,6 +1671,8 @@ def parse_file(data):
         warnings.append(warning("W_SKIPPED_ROWS", n))
     if dup:
         warnings.append(warning("W_DUPLICATE_ROWS", dup))
+    if currency_ignored:
+        warnings.append(warning("W_CURRENCY_IGNORED", 0))
 
     executions = res["executions"]
     open_n = extra.get("open_positions", 0)

@@ -108,6 +108,42 @@ export const NUMERIC_FIELDS = {
   generic: ['qty', 'price', 'fees'],
 };
 
+// ISO 4217 currency codes (the active list, plus the metal and fund codes; not XTS or XXX).
+// A Currency column is read only if every non-empty cell is one of these: anything else
+// (a name shifted in by an unquoted comma, a note, a fragment like "ANN") means the column
+// is not what its header says, so it is ignored as a whole, with a warning that never
+// repeats the cell (Tester F-D3). The page shows and the paid request sends only these.
+export const ISO_CURRENCIES = Object.freeze([
+  'AED', 'AFN', 'ALL', 'AMD', 'ANG', 'AOA', 'ARS', 'AUD', 'AWG', 'AZN', 'BAM', 'BBD', 'BDT', 'BGN', 'BHD',
+  'BIF', 'BMD', 'BND', 'BOB', 'BOV', 'BRL', 'BSD', 'BTN', 'BWP', 'BYN', 'BZD', 'CAD', 'CDF', 'CHE', 'CHF',
+  'CHW', 'CLF', 'CLP', 'CNY', 'COP', 'COU', 'CRC', 'CUC', 'CUP', 'CVE', 'CZK', 'DJF', 'DKK', 'DOP', 'DZD',
+  'EGP', 'ERN', 'ETB', 'EUR', 'FJD', 'FKP', 'GBP', 'GEL', 'GHS', 'GIP', 'GMD', 'GNF', 'GTQ', 'GYD', 'HKD',
+  'HNL', 'HTG', 'HUF', 'IDR', 'ILS', 'INR', 'IQD', 'IRR', 'ISK', 'JMD', 'JOD', 'JPY', 'KES', 'KGS', 'KHR',
+  'KMF', 'KPW', 'KRW', 'KWD', 'KYD', 'KZT', 'LAK', 'LBP', 'LKR', 'LRD', 'LSL', 'LYD', 'MAD', 'MDL', 'MGA',
+  'MKD', 'MMK', 'MNT', 'MOP', 'MRU', 'MUR', 'MVR', 'MWK', 'MXN', 'MXV', 'MYR', 'MZN', 'NAD', 'NGN', 'NIO',
+  'NOK', 'NPR', 'NZD', 'OMR', 'PAB', 'PEN', 'PGK', 'PHP', 'PKR', 'PLN', 'PYG', 'QAR', 'RON', 'RSD', 'RUB',
+  'RWF', 'SAR', 'SBD', 'SCR', 'SDG', 'SEK', 'SGD', 'SHP', 'SLE', 'SLL', 'SOS', 'SRD', 'SSP', 'STN', 'SVC',
+  'SYP', 'SZL', 'THB', 'TJS', 'TMT', 'TND', 'TOP', 'TRY', 'TTD', 'TWD', 'TZS', 'UAH', 'UGX', 'USD', 'USN',
+  'UYI', 'UYU', 'UYW', 'UZS', 'VED', 'VES', 'VND', 'VUV', 'WST', 'XAF', 'XAG', 'XAU', 'XBA', 'XBB', 'XBC',
+  'XBD', 'XCD', 'XCG', 'XDR', 'XOF', 'XPD', 'XPF', 'XPT', 'XSU', 'XUA', 'YER', 'ZAR', 'ZMW', 'ZWG', 'ZWL',
+]);
+const ISO_SET = new Set(ISO_CURRENCIES);
+
+// → {map, ignored}: the column map without 'currency' when its cells are not all ISO codes.
+export function checkCurrencyColumn(rows, map) {
+  if (!('currency' in map)) return { map, ignored: false };
+  const i = map.currency;
+  for (const r of rows) {
+    const v = i < r.cells.length ? clean(r.cells[i]).toUpperCase() : '';
+    if (v !== '' && !ISO_SET.has(v)) {
+      const rest = Object.assign({}, map);
+      delete rest.currency;
+      return { map: rest, ignored: true };
+    }
+  }
+  return { map, ignored: false };
+}
+
 export const CSV_ORDER = ['mt5_deals', 'ibkr_flex', 'tradovate_orders', 'generic_roundtrip', 'generic'];
 export const HTML_ORDER = ['mt5_deals', 'mt5_positions', 'mt4'];
 

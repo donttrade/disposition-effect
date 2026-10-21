@@ -447,6 +447,7 @@ export function finish(fmt, verified, res, mode, tzLabel) {
     warnings.push(warning('W_SKIPPED_ROWS', n, skipKeys.map((k) => `${k.replace(/_/g, ' ')}: ${skipped[k]}`).join(', ') + '.'));
   }
   if (extra.duplicate_rows) warnings.push(warning('W_DUPLICATE_ROWS', extra.duplicate_rows, `${extra.duplicate_rows} found.`));
+  if (extra.currency_ignored) warnings.push(warning('W_CURRENCY_IGNORED', 0));
   let executions = res.executions;
   let openN = extra.open_positions || 0;
   let hedging = 0;
