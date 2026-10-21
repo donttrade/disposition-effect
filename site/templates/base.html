@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ page.lang }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,12 +13,21 @@
 <title>{{ page.title }}</title>
 <meta name="description" content="{{ page.description }}">
 <link rel="canonical" href="{{ site.base_url }}{{ page.path }}">
+{%- for lang, href in page.alternates %}
+<link rel="alternate" hreflang="{{ lang }}" href="{{ site.base_url }}{{ href }}">
+{%- endfor %}
+{%- if page.get("noindex") %}
+<meta name="robots" content="noindex">
+{%- endif %}
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="{{ site.name }}">
 <meta property="og:title" content="{{ page.title }}">
 <meta property="og:description" content="{{ page.description }}">
 <meta property="og:url" content="{{ site.base_url }}{{ page.path }}">
 <meta property="og:image" content="{{ site.base_url }}{{ page.og_image }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{ page.title }}">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -33,6 +42,7 @@
 <script src="{{ s }}" type="module"></script>
 {%- endfor %}
 {%- if flags.analytics %}{% include "partials/analytics.html" %}{% endif %}
+<!--jsonld-->
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>

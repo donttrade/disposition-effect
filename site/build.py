@@ -37,6 +37,11 @@ DOCS = os.path.join(REPO, "docs")
 BASELINE = os.environ.get("DT_BASELINE") or os.path.join(REPO, "checks", "urls-baseline.txt")
 
 PAID_FLAG_MARKER = 'data-requires-flag="paid_report"'
+# Flags that put a sale on the site. Either one makes the build read private.toml, and
+# the seller disclosure block render; with both off, private.toml is never opened.
+COMMERCE_FLAGS = ("paid_report", "pilot_checkout")
+PRIVATE_FIELDS = ("seller_legal_name", "premises_address", "phone")
+LD_MARKER = "<!--jsonld-->"
 PLACEHOLDER_RE = re.compile(r"\[[A-Z ]+ — [^\]]+\]")
 
 # Pages owned by templates. path → template, metadata, and the flag that must be on.
@@ -44,28 +49,33 @@ PAGES = [
     {"template": "pages/home.html", "path": "/", "requires_flag": None,
      "title": "donttrade — behavioural measurement for trading firms",
      "description": "We measure the plan gap: how traders plan to act versus how they act. Fixed price, "
-                    "public script, run on your own systems.", "og_image": "/assets/og/home.png"},
+                    "public script, run on your own systems.", "og_image": "/assets/og/home.png",
+     "updated": "2026-10-21"},
 ]
 
 # Free tools (steps 10-12). connect-src stays 'none' (the csp_for default): these pages
 # cannot send anything, which is what makes "your file is not uploaded" true.
 PAGES += [
     {"template": "pages/tool-trade-stats.html", "path": "/tools/trade-stats/", "requires_flag": None,
-     "modules": ["/static/js/tools/trade-stats.js"], "sample": True,
+     "modules": ["/static/js/tools/trade-stats.js"], "sample": True, "app": True, "updated": "2026-10-21",
+     "crumb": "Trade stats from your own trade file",
      "title": "Free MT5 Report Analyzer: Trade Stats From Your File",
      "description": "Drop your MT5, MT4, IBKR or Tradovate file and get profit factor, expectancy, drawdown and "
                     "streaks, with a real-or-noise check. Runs in your browser."},
     {"template": "pages/tool-prop-sim.html", "path": "/tools/prop-challenge-simulator/", "requires_flag": None,
-     "modules": ["/static/js/tools/prop-sim.js"], "sample": True,
+     "modules": ["/static/js/tools/prop-sim.js"], "sample": True, "app": True, "updated": "2026-10-21",
+     "crumb": "Prop-firm challenge simulator",
      "title": "Prop Firm Challenge Simulator on Your Own Trades",
      "description": "Replay 10,000 challenges built from your own past trading days under the rules you enter. "
                     "Pass, bust and time-out shares, fully explained. Free."},
     {"template": "pages/tool-lot-size.html", "path": "/tools/lot-size-calculator/", "requires_flag": None,
-     "modules": ["/static/js/tools/lot-size.js"],
+     "modules": ["/static/js/tools/lot-size.js"], "app": True, "updated": "2026-10-21",
+     "crumb": "Lot size calculator",
      "title": "Lot Size Calculator: Forex, Gold, Indices and Futures",
      "description": "Work out position size in lots from your balance, risk amount and stop distance. Shows the "
-                    "formula with your numbers and the loss after rounding. No sign-up."},
-    {"template": "pages/tools-index.html", "path": "/tools/", "requires_flag": None,
+                    "formula with your numbers and the loss after rounding."},
+    {"template": "pages/tools-index.html", "path": "/tools/", "requires_flag": None, "updated": "2026-10-21",
+     "crumb": "Free tools", "itemlist": True,
      "title": "Free Trading Tools That Run in Your Browser",
      "description": "Free tools for your own trades: trade stats with a real-or-noise check, a prop-firm challenge "
                     "simulator, a lot size calculator and more. No sign-up."},
@@ -132,13 +142,13 @@ def sample_csv():
 
 PAID_PAGES = [
     {"template": "pages/welcome.html", "path": "/welcome/", "requires_flag": "paid_report", "connect_worker": True,
-     "modules": ["/static/js/paid/welcome.js"], "title": "Thank you — donttrade",
+     "noindex": True, "crumb": "Thank you", "modules": ["/static/js/paid/welcome.js"], "title": "Thank you — donttrade",
      "description": "Your donttrade habit report is ready."},
     {"template": "pages/restore.html", "path": "/restore/", "requires_flag": "paid_report", "connect_worker": True,
-     "modules": ["/static/js/paid/restore.js"], "title": "Restore access — donttrade",
+     "noindex": True, "crumb": "Restore access", "modules": ["/static/js/paid/restore.js"], "title": "Restore access — donttrade",
      "description": "Reopen your donttrade habit report on this browser."},
     {"template": "pages/report.html", "path": "/report/", "requires_flag": "paid_report", "connect_worker": True,
-     "modules": ["/static/js/paid/report.js"], "title": "Your habit report — donttrade",
+     "noindex": True, "crumb": "Your habit report", "modules": ["/static/js/paid/report.js"], "title": "Your habit report — donttrade",
      "description": "Your donttrade habit report, built from your own trade file."},
 ]
 PAGES += PAID_PAGES
@@ -147,6 +157,7 @@ PAGES += PAID_PAGES
 # old page passes through untouched.
 PAGES.append({"template": "pages/pricing_paid.html", "path": "/pricing/", "requires_flag": "paid_report",
               "scripts": ["/static/js/tabs.js", "/static/js/print.js"], "title": "Pricing — donttrade",
+              "crumb": "Pricing", "updated": "2026-10-21",
               "description": "Published prices in USD. Every price on this site comes from one list."})
 
 # Paths that may exist only when paid_report = true.
@@ -173,19 +184,27 @@ def load_config():
             f"paid_report={flags['paid_report']} ({toml_path})")
     if flags["analytics"] and not cfg["analytics"]["cf_beacon_token"]:
         die("analytics = true but [analytics] cf_beacon_token is empty")
+    flags.setdefault("pilot_checkout", False)
     private = {}
-    if flags["paid_report"]:
+    on = [f for f in COMMERCE_FLAGS if flags[f]]
+    if on:
+        # Seller disclosure (O. Reg. 17/05 s. 32): legal name, premises address, phone. These come
+        # ONLY from the gitignored private.toml, read ONLY while a commerce flag is on.
         p = os.environ.get("DT_PRIVATE_TOML") or os.path.join(SITE, "config", "private.toml")
         if not os.path.exists(p):
-            die("paid_report = true needs site/config/private.toml (copy private.example.toml)")
+            die(f"{', '.join(on)} = true needs site/config/private.toml (copy private.example.toml)")
         with open(p, "rb") as f:
             private = tomllib.load(f)
-        for k in ("seller_legal_name", "premises_address", "phone"):
-            if k not in private:
-                die(f"private.toml is missing {k}")
+        for k in PRIVATE_FIELDS:
+            if not isinstance(private.get(k), str) or not private[k].strip():
+                die(f"{', '.join(on)} = true but private.toml is missing {k} (or it is empty)")
             if PLACEHOLDER_RE.search(private[k]) and os.environ.get("DT_ALLOW_PLACEHOLDERS") != "1":
                 die(f"private.toml {k} still holds a placeholder; fill it in "
                     "(or set DT_ALLOW_PLACEHOLDERS=1 for a local test build only)")
+    if flags["pilot_checkout"]:
+        pilot = next(p for p in prices["products"] if p["id"] == "pilot")
+        if not pilot["stripe_link_live"]:
+            die("pilot_checkout = true but prices.json has no stripe_link_live for the pilot")
     if flags["paid_report"]:
         mode = cfg["stripe"]["mode"]
         if mode not in ("test", "live"):
@@ -233,6 +252,97 @@ def csp_for(page, cfg):
     return ("default-src 'self'; script-src " + script + "; style-src 'self'; img-src 'self' data:; "
             "font-src 'self'; connect-src " + connect + "; worker-src 'self'; "
             "form-action 'self' https://api.web3forms.com; base-uri 'none'; object-src 'none'")
+
+
+# ------------------------------------------------------------------ SEO (SEO-PLAN §3)
+def _text(fragment):
+    import html as _h
+    t = re.sub(r"<[^>]+>", " ", fragment)
+    return re.sub(r"\s+", " ", _h.unescape(t)).strip()
+
+
+def faq_from(html):
+    """[(question, answer)] from the rendered FAQ section (the <section> labelled by #faq-h).
+
+    Read from the page itself, so the FAQPage JSON-LD matches the visible text word for word."""
+    m = re.search(r'(?s)<section[^>]*aria-labelledby="faq-h"[^>]*>(.*?)</section>', html)
+    if not m:
+        return []
+    return [(_text(q), _text(a)) for q, a in
+            re.findall(r"(?s)<details[^>]*>\s*<summary>(.*?)</summary>(.*?)</details>", m.group(1))]
+
+
+def jsonld(page, cfg, html, flags, products):
+    """One @graph per page. No address, phone, rating or review anywhere (SEO-PLAN §3.2)."""
+    base = cfg["site"]["base_url"]
+    org = {"@id": base + "/#org"}
+    graph = []
+    if page["path"] == "/":
+        graph.append({"@type": "WebSite", "@id": base + "/#website", "name": cfg["site"]["name"],
+                      "url": base + "/", "publisher": org})
+        graph.append({"@type": "Organization", "@id": base + "/#org", "name": cfg["site"]["name"],
+                      "url": base + "/", "email": cfg["site"]["contact_email"], "sameAs": cfg["site"]["same_as"]})
+    else:
+        items = [("Home", base + "/")]
+        if page["path"].startswith("/tools/") and page["path"] != "/tools/":
+            items.append(("Free tools", base + "/tools/"))
+        items.append((page["crumb"], None))
+        graph.append({"@type": "BreadcrumbList", "itemListElement": [
+            {"@type": "ListItem", "position": i + 1, "name": n, **({"item": u} if u else {})}
+            for i, (n, u) in enumerate(items)]})
+    if page.get("app"):
+        graph.append({"@type": "WebApplication", "@id": base + page["path"] + "#app", "name": page["crumb"],
+                      "url": base + page["path"], "applicationCategory": "FinanceApplication",
+                      "operatingSystem": "Any (runs in a web browser)", "browserRequirements": "Requires JavaScript",
+                      "isAccessibleForFree": True, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+                      "publisher": org, "description": page["description"]})
+    if page.get("itemlist"):
+        graph.append({"@type": "ItemList", "itemListElement": [
+            {"@type": "ListItem", "position": i + 1, "name": t["name"], "url": base + t["href"]}
+            for i, t in enumerate(TOOLS)]})
+    if page.get("product") and flags["paid_report"]:
+        r = products["report39"]
+        graph.append({"@type": "Product", "name": r["name"], "description": page["product"], "brand": org,
+                      "offers": {"@type": "Offer", "price": str(int(r["price_usd"])), "priceCurrency": "USD",
+                                 "availability": "https://schema.org/InStock", "url": base + page["path"]}})
+    faq = faq_from(html)
+    if faq:
+        graph.append({"@type": "FAQPage", "mainEntity": [
+            {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]})
+    data = json.dumps({"@context": "https://schema.org", "@graph": graph}, ensure_ascii=False, sort_keys=True)
+    return '<script type="application/ld+json">' + data.replace("</", "<\\/") + "</script>"
+
+
+def write_sitemap_and_robots(out, cfg, built_pages, flags):
+    """sitemap.xml: today's entries (their dates kept), with template pages dated by their
+    content date (page["updated"]), never the build date. Pages with noindex are left out.
+    robots.txt: allow all; the paid-only pages are disallowed when they exist (and noindexed)."""
+    base = cfg["site"]["base_url"]
+    with open(os.path.join(DOCS, "sitemap.xml"), encoding="utf-8") as f:
+        old = re.findall(r"<loc>" + re.escape(base) + r"(/[^<]*)</loc><lastmod>([^<]+)</lastmod>", f.read())
+    dates = dict(old)
+    order = [p for p, _ in old]
+    index = {}
+    for page in built_pages:
+        if page.get("noindex"):
+            dates.pop(page["path"], None)
+            continue
+        if "updated" not in page:
+            die(f"page {page['path']} has no 'updated' content date for the sitemap")
+        dates[page["path"]] = page["updated"]
+        index[page["path"]] = True
+    order += sorted(p for p in index if p not in order)
+    lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    lines += [f"  <url><loc>{base}{p}</loc><lastmod>{dates[p]}</lastmod></url>" for p in order if p in dates]
+    lines.append("</urlset>")
+    with open(os.path.join(out, "sitemap.xml"), "w", encoding="utf-8", newline="\n") as f:
+        f.write("\n".join(lines) + "\n")
+    robots = ["User-agent: *", "Allow: /"]
+    if flags["paid_report"]:
+        robots += [f"Disallow: {p}" for p in PAID_ONLY_PATHS]
+    robots.append(f"Sitemap: {base}/sitemap.xml")
+    with open(os.path.join(out, "robots.txt"), "w", encoding="utf-8", newline="\n") as f:
+        f.write("\n".join(robots) + "\n")
 
 
 def out_file(out, path):
@@ -324,14 +434,21 @@ def build():
                 "worker": cfg["worker"], "prices": prices, "products": products, "private": private,
                 "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": TOOLS,
                 "evidence": evidence()}
+    built = []
     for rel, page in sorted(owned.items()):
-        page = {"scripts": [], "modules": [], "og_image": "/assets/og/default.png", **page}
+        page = {"scripts": [], "modules": [], "og_image": "/assets/og/default.png", "lang": "en",
+                "alternates": [], **page}
         extra = {"sample_csv": sample_csv()} if page.get("sample") else {}
         html = env.get_template(page["template"]).render(page=page, csp=csp_for(page, cfg), **base_ctx, **extra)
+        if html.count(LD_MARKER) != 1:
+            die(f"{page['template']}: the JSON-LD marker must appear exactly once")
+        html = html.replace(LD_MARKER, jsonld(page, cfg, html, flags, products))
         fp = os.path.join(out, rel)
         os.makedirs(os.path.dirname(fp), exist_ok=True)
         with open(fp, "w", encoding="utf-8", newline="\n") as f:
             f.write(html)
+        built.append(page)
+    write_sitemap_and_robots(out, cfg, built, flags)
 
     verify(out, flags)
     return out
