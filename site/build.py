@@ -371,6 +371,13 @@ FLAGS = ("paid_report", "analytics", "trader_first_home", "pilot_checkout")
 OPTIONAL_FLAGS = {"pilot_checkout": False}  # older site.toml files may lack the line
 
 
+def show_seller(cfg):
+    """Tester D2: whether this build renders the seller block (legal name, address, phone).
+    Always with paid_report; with pilot_checkout alone only if [legal] show_seller_for_pilot."""
+    f = cfg["flags"]
+    return bool(f["paid_report"] or (f["pilot_checkout"] and cfg["legal"].get("show_seller_for_pilot", False)))
+
+
 def check_flags(flags, toml_path):
     """D9: every flag is a real TOML boolean. A quoted "false" is a non-empty string, which
     Python reads as true, so it would switch the feature ON: fail instead. Unknown keys (a typo
@@ -496,6 +503,9 @@ def load_config():
         for name in ESCAPES:
             if os.environ.get(name) == "1":
                 die(f"{name}=1 is for local test builds only; [stripe] mode = \"live\" refuses it")
+    seller_switch = cfg["legal"].get("show_seller_for_pilot", False)
+    if type(seller_switch) is not bool:
+        die(f"[legal] show_seller_for_pilot = {seller_switch!r} must be true or false without quotes")
     private = {}
     on = [f for f in COMMERCE_FLAGS if flags[f]]
     if on:
@@ -693,7 +703,10 @@ def read_baseline():
     return paths, ids
 
 
-def verify(out, flags):
+def verify(out, flags, seller=None):
+    """seller: whether the seller block may appear (show_seller); defaults to any commerce flag."""
+    if seller is None:
+        seller = any(flags.get(f) for f in COMMERCE_FLAGS)
     paths, ids = read_baseline()
     for p in paths:
         if not os.path.exists(out_file(out, p) if p.endswith("/") else os.path.join(out, p.lstrip("/"))):
@@ -703,14 +716,15 @@ def verify(out, flags):
             html = f.read()
         if not re.search(r'\sid="' + re.escape(i) + '"', html):
             die(f"externally linked id missing: {p}#{i}")
-    if not any(flags.get(f) for f in COMMERCE_FLAGS):
+    if not seller:
         for root, _, files in os.walk(out):
             for name in sorted(files):
                 if name.endswith(".html"):
                     fp = os.path.join(root, name)
                     with open(fp, encoding="utf-8", errors="replace") as f:
                         if "data-seller-block" in f.read():
-                            die(f"seller disclosure in {os.path.relpath(fp, out)} while every commerce flag is off")
+                            die(f"seller disclosure in {os.path.relpath(fp, out)} while this build must not show it "
+                                "(paid_report off, and pilot_checkout off or [legal] show_seller_for_pilot = false)")
     if not flags.get("pilot_checkout"):
         for p in PILOT_ONLY_PATHS:
             if os.path.exists(out_file(out, p)):
@@ -780,7 +794,7 @@ def build():
                 "legal": cfg["legal"], "forms": cfg["forms"], "analytics": cfg["analytics"],
                 "worker": cfg["worker"], "prices": prices, "products": products, "private": private,
                 "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": TOOLS,
-                "evidence": evidence(), "footer_privacy": footer_privacy(flags)}
+                "evidence": evidence(), "footer_privacy": footer_privacy(flags), "show_seller": show_seller(cfg)}
     built = []
     for rel, page in sorted(owned.items()):
         page = {"scripts": [], "modules": [], "og_image": "/assets/og/default.png", "lang": "en",
@@ -800,7 +814,7 @@ def build():
         built.append(page)
     write_sitemap_and_robots(out, cfg, built, flags)
 
-    verify(out, flags)
+    verify(out, flags, seller=show_seller(cfg))
     return out
 
 

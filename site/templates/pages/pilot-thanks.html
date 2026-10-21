@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {#- /start/pilot-thanks/ — pilot_checkout only. The Stripe Pilot link comes from prices.json; the
-    seller block from private.toml (the contracting party is named before payment). #}
+    seller block from private.toml only when show_seller (Tester D2: paid_report, or the
+    [legal] show_seller_for_pilot switch); otherwise the contracting-party sentence. #}
 {% block content %}
 {%- from "partials/seller.html" import seller_rows %}
 {%- set pilot = products["pilot"] %}
@@ -18,7 +19,11 @@
   </section>
   <section class="section" aria-labelledby="who-h">
     <h2 id="who-h">Who you are paying</h2>
+    {%- if show_seller %}
     <dl class="byp">{{ seller_rows(private, site, "en") }}</dl>
+    {%- else %}
+    <p>donttrade, a one-person research practice in Canada. {% include "partials/contracting_party.html" %}</p>
+    {%- endif %}
   </section>
   <p class="small muted">The card payment is handled by Stripe; donttrade never sees full card numbers. <a href="/privacy/">Privacy</a></p>
 </div></div>

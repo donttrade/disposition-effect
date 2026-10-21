@@ -94,7 +94,7 @@
       </tbody>
     </table>
     </div>
-    <p>The legal contracting party is named in the engagement agreement, before anything is paid; an NDA or DPA is signed on request. A “no measurable effect” answer is a finished job and is invoiced as one.</p>
+    <p>{% include "partials/contracting_party.html" %} An NDA or DPA is signed on request. A “no measurable effect” answer is a finished job and is invoiced as one.</p>
   </section>
 
   {#- 5. Copy-leader (existing id). #}
@@ -182,7 +182,7 @@ a7f3,2026-03-04,p91,1,240.00</pre>
   {#- 10. FAQ (kept: questions firms ask first). #}
   <section class="section" aria-labelledby="faq-h">
     <h2 id="faq-h">For your compliance team</h2>
-    <details><summary>Who will we contract with?</summary><p>One person. The legal contracting party is named in the engagement agreement, before anything is paid, with whatever identity checks your due diligence needs. The pen name is how the research is published, not a contract term.</p></details>
+    <details><summary>Who will we contract with?</summary><p>One person. {% include "partials/contracting_party.html" %} We provide whatever identity checks your due diligence needs. The pen name is how the research is published, not a contract term.</p></details>
     <details><summary>Does any account data leave our systems?</summary><p>No. Your staff run the script inside your systems; we receive only what it prints. We never need access to your systems.</p></details>
     <details><summary>What if the number is bad for us?</summary><p>Then that is the number. You can keep it private, and we publish nothing from the engagement. The fee is unchanged.</p></details>
     <details><summary>Can you publish without our consent?</summary><p>No. You review anything describing your data first and may decline publication outright. We may say only that an engagement took place, without naming you or the figure.</p></details>

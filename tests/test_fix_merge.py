@@ -308,3 +308,50 @@ def test_nit9_general_enquiry_form_is_not_tagged_snapshot(tmp_path):
         form = html[html.index(f'id="{fid}"'):]
         form = form[:form.index("</form>")]
         assert 'name="product" value="enquiry"' in form, page
+
+
+# ------------------------------------------------------------------ D2: seller block only with paid_report (one switch)
+def _pilot_build(tmp_path, name, switch=None):
+    from test_legal import build, private_with, toml_with
+    toml = toml_with(tmp_path, f"{name}.toml", pilot_checkout=True)
+    if switch is not None:
+        src = open(toml, encoding="utf-8").read()
+        src, n = re.subn(r"(?m)^show_seller_for_pilot = false", f"show_seller_for_pilot = {switch}", src)
+        assert n == 1
+        open(toml, "w", encoding="utf-8").write(src)
+    return build(tmp_path, name, DT_SITE_TOML=toml, DT_PRIVATE_TOML=private_with(tmp_path))
+
+
+def test_d2_pilot_only_build_shows_no_seller_identity(tmp_path):
+    # repro: grep -l "Test Seller ZZQX" -r b-pilot → privacy, terms, start/pilot-thanks before the fix
+    from test_legal import FAKE
+    r, out = _pilot_build(tmp_path, "p")
+    assert r.returncode == 0, r.stderr
+    for p in out.rglob("*.html"):
+        h = p.read_text(encoding="utf-8")
+        assert "data-seller-block" not in h, p
+        for v in FAKE.values():
+            assert v not in h, (p, v)
+    assert L.lint_build(str(out), pilot=True) == []
+
+
+def test_d2_switch_is_one_line_and_shows_the_seller(tmp_path):
+    from test_legal import FAKE
+    r, out = _pilot_build(tmp_path, "s", switch="true")
+    assert r.returncode == 0, r.stderr
+    for page in ("start/pilot-thanks", "terms", "privacy"):
+        h = (out / page / "index.html").read_text(encoding="utf-8")
+        assert FAKE["seller_legal_name"] in h and "data-seller-block" in h, page
+
+
+def test_d2_switch_must_be_a_boolean(tmp_path):
+    r, _ = _pilot_build(tmp_path, "b", switch='"no"')
+    assert r.returncode == 1 and "show_seller_for_pilot" in r.stderr
+
+
+def test_d2_planted_seller_block_in_pilot_only_build_fails_verify(tmp_path):
+    r, out = _pilot_build(tmp_path, "v")
+    assert r.returncode == 0
+    (out / "about" / "index.html").write_text("<dl><dt data-seller-block>Seller</dt></dl>")
+    with pytest.raises(B.BuildError, match="seller disclosure"):
+        B.verify(str(out), {"paid_report": False, "pilot_checkout": True, "analytics": False}, seller=False)

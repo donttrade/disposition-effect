@@ -1,17 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
 {%- from "partials/seller.html" import seller_rows %}
-{%- set commerce = flags.paid_report or flags.pilot_checkout %}
 <div class="wrap"><div class="prose">
   <h1>Privacy</h1>
   <p class="notice">Plain-language notice, version {{ legal.terms_version }}. Where a signed engagement agreement differs, the agreement governs.{% if flags.paid_report %} <a href="/fr/confidentialite/" hreflang="fr" lang="fr">Version française</a>{% endif %}</p>
 
   <h2 id="who">Who we are</h2>
-  {%- if commerce %}
+  {%- if show_seller %}
   <dl class="byp">{{ seller_rows(private, site, "en") }}</dl>
   <p>The person responsible for personal information is the seller named above, at the same address and email.</p>
   {%- else %}
-  <p>donttrade, a one-person research practice in Canada, published under a pen name. Contact: <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>. The legal contracting party is named in writing before anything is paid.</p>
+  <p>donttrade, a one-person research practice in Canada, published under a pen name. Contact: <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>. {% include "partials/contracting_party.html" %}</p>
   {%- endif %}
 
   <h2 id="site">This site</h2>

@@ -134,7 +134,7 @@
     <details><summary>Where does my trade file go?</summary><p>The free tools read it inside your browser tab; those pages block every outgoing request, so the file is not uploaded. When the habit report launches, the page that runs it will say exactly what it sends.</p></details>
     <details><summary>Refunds?</summary><p>Firms: a Pilot is refunded in full if your extract can’t be made to run, or if your own re-run of the same script on the same export does not reproduce the figure. Traders: nothing is sold yet. <a href="/terms/#cancellation">Cancellation and refund terms</a></p></details>
     {%- if not flags.paid_report %}
-    <details><summary>Who’s behind it?</summary><p>donttrade is one person, writing under a pen name, based in Canada. Every study names the script that made its numbers, or says plainly when it is still to follow, so you check the work, not the author. The legal contracting party is named in the engagement agreement, before anything is paid. <a href="/about/">About</a></p></details>
+    <details><summary>Who’s behind it?</summary><p>donttrade is one person, writing under a pen name, based in Canada. Every study names the script that made its numbers, or says plainly when it is still to follow, so you check the work, not the author. {% include "partials/contracting_party.html" %} <a href="/about/">About</a></p></details>
     {%- endif %}
   </section>
 
