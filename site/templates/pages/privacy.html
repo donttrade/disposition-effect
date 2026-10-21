@@ -47,7 +47,8 @@
     <li><strong>Email</strong> is handled by Gmail (Google). We keep form emails there.</li>
     <li><strong>The newsletter</strong> runs on Substack; see <a href="https://substack.com/privacy">Substack’s privacy policy</a>.</li>
     <li><strong>Card payments</strong> (the firm {{ products.pilot.name }}{% if flags.paid_report %}, and the habit report{% endif %}) are handled by Stripe; donttrade never sees full card numbers. For payment data Stripe acts as an independent controller; see <a href="https://stripe.com/privacy">Stripe’s privacy policy</a>.</li>
-    <li>Web3Forms, Google, GitHub, Stripe and Substack{% if flags.paid_report or flags.analytics %} and Cloudflare{% endif %} are mostly in the United States, so what you send may be stored or processed outside Canada, and the authorities there may access it under their laws.</li>
+    {%- set abroad = ["Web3Forms", "Google", "GitHub", "Stripe", "Substack"] + (["Cloudflare"] if flags.paid_report or flags.analytics else []) %}
+    <li>{{ abroad[:-1]|join(", ") }} and {{ abroad[-1] }} are mostly in the United States, so what you send may be stored or processed outside Canada, and the authorities there may access it under their laws.</li>
   </ul>
 
   <h2 id="use">What we do with what you send</h2>
