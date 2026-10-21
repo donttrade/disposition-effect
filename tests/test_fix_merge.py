@@ -688,3 +688,26 @@ def test_nit14_15_pilot_thanks_links_and_direct_visit_note(tmp_path):
     h = (out / "start" / "pilot-thanks" / "index.html").read_text(encoding="utf-8")
     assert 'href="/terms/#pilot-card"' in h and 'href="/terms/#trial"' not in h
     assert "Reached this page without sending the Pilot form?" in h and 'href="/start/?product=pilot#firm"' in h
+
+
+# ------------------------------------------------------------------ NIT 2: lint reads the build's flags
+def _lint_cli(*args):
+    r = subprocess.run([sys.executable, os.path.join(REPO, "checks", "lint.py"), *args], capture_output=True, text=True)
+    return r.returncode, r.stdout + r.stderr
+
+
+def test_nit2_lint_infers_flags_from_the_build(built_site, paid_site, tmp_path):
+    rc, out = _lint_cli(str(built_site["out"]))
+    assert rc == 0 and "paid=off, pilot=off" in out, out
+    rc, out = _lint_cli(str(paid_site["out"]))
+    assert rc == 0 and "paid=on, pilot=off" in out, out
+    r, pilot = _pilot_build(tmp_path, "l")
+    rc, out = _lint_cli(str(pilot))  # before: 4 false problems without --pilot
+    assert rc == 0 and "pilot=on" in out, out
+
+
+def test_nit2_wrong_flags_are_one_clear_problem_not_a_traceback(built_site, paid_site):
+    rc, out = _lint_cli(str(built_site["out"]), "--paid")  # before: FileNotFoundError on /fr/
+    assert rc == 1 and "Traceback" not in out and "--paid given, but the build has no paid pages" in out, out
+    rc, out = _lint_cli(str(paid_site["out"]), "--pilot")
+    assert rc == 1 and "--paid missing" in out and "--pilot given" in out, out

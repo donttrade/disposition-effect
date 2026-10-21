@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """lint.py — wording, flag and leak rules for the v2 site (and for report strings).
 
-    python3 checks/lint.py site/_site [--paid] [--analytics] [--pilot]   # lint a build
+    python3 checks/lint.py site/_site                  # lint a build; flags read from the build
+    python3 checks/lint.py site/_site --paid --pilot   # or state them; a mismatch is reported
     from lint import lint_text                                  # lint any text (report strings)
 
 Rules (banned.toml): A3 banned words outside allowlisted negations/disclaimer; AI-tell
@@ -235,6 +236,9 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None):
     owned_rel = {"/" + os.path.relpath(build.out_file(out_dir, p), out_dir) for p in owned_paths(paid, pilot)}
     for path in owned_paths(paid, pilot):
         fp = build.out_file(out_dir, path)
+        if not os.path.exists(fp):
+            problems.append(("flags", path, "page missing: is the build made with these flags?"))
+            continue
         with open(fp, encoding="utf-8") as f:
             problems += lint_html(f.read(), path, paid, analytics, amounts, priv, commerce=seller, pilot=pilot)
     # leaks and flag rules apply to EVERY file in the build, passthrough included
@@ -262,11 +266,36 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None):
     return problems
 
 
+def flags_of_build(out_dir):
+    """Tester NIT 2: the flags a build was made with, read from the build itself: the paid-only
+    and pilot-only pages exist only with their flag (build.verify enforces it), and the beacon
+    only with analytics."""
+    import build
+    paid = os.path.exists(build.out_file(out_dir, "/welcome/"))
+    pilot = os.path.exists(build.out_file(out_dir, "/start/pilot-thanks/"))
+    home = build.out_file(out_dir, "/")
+    analytics = os.path.exists(home) and "cloudflareinsights" in open(home, encoding="utf-8", errors="replace").read()
+    return {"paid": paid, "pilot": pilot, "analytics": analytics}
+
+
 def main(argv):
-    out_dir = argv[0] if argv else os.path.join(REPO, "site", "_site")
-    paid = "--paid" in argv
-    analytics = "--analytics" in argv
-    problems = lint_build(out_dir, paid, analytics, pilot="--pilot" in argv)
+    out_dir = next((a for a in argv if not a.startswith("--")), os.path.join(REPO, "site", "_site"))
+    found = flags_of_build(out_dir)
+    given = {k: f"--{k}" in argv for k in found}
+    if any(f"--{k}" in argv for k in found) or "--flags-from-args" in argv:
+        wrong = [k for k in found if given[k] != found[k]]
+        if wrong:
+            for k in wrong:
+                print(f"LINT {'flags':22} {out_dir}: --{k} {'given' if given[k] else 'missing'}, but the build "
+                      f"{'has' if found[k] else 'has no'} {k} pages")
+            print(f"lint: {len(wrong)} problem(s)")
+            return 1
+        flags = given
+    else:
+        flags = found
+        print("lint: flags read from the build: " + ", ".join(f"{k}={'on' if v else 'off'}" for k, v in flags.items()))
+    paid, analytics = flags["paid"], flags["analytics"]
+    problems = lint_build(out_dir, paid, analytics, pilot=flags["pilot"])
     for rule, where, detail in problems:
         print(f"LINT {rule:22} {where}: {detail}")
     print("lint:", "PASS" if not problems else f"{len(problems)} problem(s)")
