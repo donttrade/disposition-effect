@@ -683,3 +683,4 @@ pre { font-family: var(--font-mono); font-size: var(--fs-0); background: var(--s
   .hero-dash [data-count]::after { content: none !important; }
   .hero-dash .veil { display: none; }
 }
+@media print { .hero-dash { break-inside: avoid; } } /* the box stays on one page */
