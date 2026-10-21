@@ -44,7 +44,7 @@ PAGES = [
     {"template": "pages/home.html", "path": "/", "requires_flag": None,
      "title": "donttrade — behavioural measurement for trading firms",
      "description": "We measure the plan gap: how traders plan to act versus how they act. Fixed price, "
-                    "public script, run on your own systems."},
+                    "public script, run on your own systems.", "og_image": "/assets/og/home.png"},
 ]
 
 # Free tools (steps 10-12). connect-src stays 'none' (the csp_for default): these pages
@@ -91,6 +91,31 @@ TOOLS = [
 ]
 
 SAMPLE_CSV = os.path.join(SITE, "static", "samples", "demo-trades.csv")
+
+
+def evidence():
+    """Numbers for the homepage evidence strip and finding block, read from today's pages
+    (the same sources the v1 self-count test reads), so the home page cannot drift from
+    them. Fails loudly if a source page changes shape or the counts disagree."""
+    def main_of(rel):
+        with open(os.path.join(DOCS, rel), encoding="utf-8") as f:
+            return f.read()
+    studies = sorted(set(re.findall(r'href="(/research/[a-z0-9-]+/)"', main_of("research/index.html"))))
+    corr = main_of("corrections/index.html")
+    t = re.search(r"(?s)<table.*?<tbody>(.*?)</tbody>", corr)
+    if not t:
+        die("evidence: no corrections table in docs/corrections/index.html")
+    corrections = len(re.findall(r"<tr\b", t.group(1)))
+    m = re.search(r"The scripts behind (\d+) of the (\d+) studies are public", main_of("code/index.html"))
+    if not m:
+        die("evidence: the 'scripts behind N of the M studies' sentence is gone from docs/code/index.html")
+    if int(m.group(2)) != len(studies):
+        die(f"evidence: /code/ says {m.group(2)} studies but /research/ lists {len(studies)}")
+    sentence = "76.1% of 4,659 retail traders realised their gains more readily than their losses."
+    if sentence not in main_of("research/disposition-effect/index.html"):
+        die("evidence: the finding sentence is no longer on /research/disposition-effect/ word for word")
+    return {"studies": len(studies), "corrections": corrections, "scripts_public": int(m.group(1)),
+            "finding": {"pct": "76.1%", "rest": sentence[len("76.1% "):], "url": "/research/disposition-effect/"}}
 
 
 def sample_csv():
@@ -297,7 +322,8 @@ def build():
     base_ctx = {"site": cfg["site"], "flags": flags, "nav": cfg["nav"], "footer": cfg["footer"],
                 "legal": cfg["legal"], "forms": cfg["forms"], "analytics": cfg["analytics"],
                 "worker": cfg["worker"], "prices": prices, "products": products, "private": private,
-                "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": TOOLS}
+                "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": TOOLS,
+                "evidence": evidence()}
     for rel, page in sorted(owned.items()):
         page = {"scripts": [], "modules": [], "og_image": "/assets/og/default.png", **page}
         extra = {"sample_csv": sample_csv()} if page.get("sample") else {}
