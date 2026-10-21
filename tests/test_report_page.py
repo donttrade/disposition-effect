@@ -14,7 +14,8 @@ from test_paid_flow import PRIVATE, new_session, stack  # noqa: E402,F401  (modu
 
 pytestmark = pytest.mark.skipif(not os.path.isdir(PRIVATE), reason="dt-private (server) not present")
 FIX = os.path.join(HERE, "fixtures")
-FILES = ["mt5/deals_netting.htm", "generic/ninety_trades.csv", "generic/pgr_oracle.csv"]
+# Each has at least 30 trades: the server refuses a report on fewer (nothing is counted).
+FILES = ["mt5/deals_netting_40.htm", "generic/ninety_trades.csv", "generic/no_losses.csv"]
 
 
 def open_report(browser, stack, sid, color="light", width=1280, downloads=False):
@@ -62,7 +63,7 @@ def test_rule_library_order_identical_across_reports(three_reports):
 
 
 def test_focus_page_one(three_reports):
-    # the 90-trade fixture has a hold-gap pattern; the 5-trade file has too few trades
+    # the 40-trade MT5 file has groups under 30, so nothing can be distinguishable
     assert "No pattern in this file is distinguishable from noise." in three_reports[FILES[0]]["text"]
     assert three_reports[FILES[0]]["text"].lstrip().startswith("donttrade measures your own past trades.")
 
