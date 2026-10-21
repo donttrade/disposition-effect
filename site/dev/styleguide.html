@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#FFFFFF">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'">
+<title>Styleguide (dev)</title>
+<link rel="preload" href="../static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../static/css/site.css">
+<script src="../static/js/theme.js"></script>
+<script src="../static/js/tabs.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap">
+  <a class="brand" href="#">donttrade</a>
+  <nav class="site-nav" aria-label="Main"><ul><li><a href="#buttons">Buttons</a></li><li><a href="#tables">Tables</a></li><li><a href="#forms">Forms</a></li><li><a href="#charts" aria-current="page">Charts</a></li></ul></nav>
+  <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" hidden>Dark mode</button>
+</div></header>
+<main id="main" class="wrap">
+<h1>Styleguide</h1>
+<p class="muted">Dev only (built with DT_DEV=1, never bundled). Every component of site.css, in both themes.</p>
+
+<section class="section" aria-labelledby="type"><h2 id="type">Type scale (1.25)</h2>
+<p class="display">49 Plex Sans</p>
+<p class="small">14 small text, used for captions and footers.</p>
+<p>16 body text. <a href="#type">A link in rust</a>. Numbers use <span class="num">Plex Mono 1,234.56</span>.</p>
+<h3>25 heading three</h3><h4>20 heading four</h4>
+</section>
+
+<section class="section" aria-labelledby="buttons"><h2 id="buttons">Buttons</h2>
+<p><a class="btn" href="#buttons">Join the waitlist</a> <a class="btn btn-secondary" href="#buttons">See a sample report</a> <button class="btn" type="button" disabled>Disabled</button></p>
+</section>
+
+<section class="section" aria-labelledby="notices"><h2 id="notices">Notices and badges</h2>
+<div class="notice"><strong>Note</strong><p>Plan / neutral information.</p></div>
+<div class="notice notice-caution"><strong>Beta format</strong><p>Built from public documentation, not a real export.</p></div>
+<div class="notice notice-error" role="alert"><strong>E_BAD_DATE</strong><p>A date or time could not be read (row 4, column date).</p></div>
+<div class="notice notice-gap"><strong>Pattern</strong><p>Rust marks the gap / a flagged pattern.</p></div>
+<p><span class="badge badge-real">distinguishable from noise</span> <span class="badge badge-noise">may be noise</span> <span class="badge badge-few">not enough trades to tell</span></p>
+<dl class="stats"><div class="stat"><dt>Trades</dt><dd>90</dd></div><div class="stat"><dt>Win rate</dt><dd>46.7%</dd></div><div class="stat"><dt>Expectancy</dt><dd class="loss">−$11.01</dd></div><div class="stat"><dt>Largest win</dt><dd class="gain">+$74.50</dd></div></dl>
+</section>
+
+<section class="section" aria-labelledby="tables"><h2 id="tables">Table</h2>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Long / short split table"><table><caption>Long / short split</caption>
+<thead><tr><th scope="col">Side</th><th scope="col" class="num">Trades</th><th scope="col" class="num">Win rate</th><th scope="col" class="num">P&amp;L</th></tr></thead>
+<tbody><tr><th scope="row">Long</th><td class="num">63</td><td class="num">47.6%</td><td class="num loss">−$612.30</td></tr>
+<tr><th scope="row">Short</th><td class="num">27</td><td class="num">44.4%</td><td class="num loss">−$378.00</td></tr></tbody></table></div>
+</section>
+
+<section class="section" aria-labelledby="faq"><h2 id="faq">Details (FAQ)</h2>
+<details><summary>Is this advice?</summary><p>No. It describes past behaviour.</p></details>
+<details><summary>Where does my file go?</summary><p>It is read in your browser tab.</p></details>
+</section>
+
+<section class="section" aria-labelledby="forms"><h2 id="forms">Form fields</h2>
+<form action="#" method="post" novalidate>
+<div class="field"><label for="sg-email">Email</label><span class="hint" id="sg-email-hint">We reply within 1 business day.</span>
+<input id="sg-email" name="email" type="email" autocomplete="email" aria-describedby="sg-email-hint sg-email-err" aria-invalid="true">
+<p class="error" id="sg-email-err">Enter an email address like name@example.com.</p></div>
+<div class="field"><label for="sg-platform">Platform</label><select id="sg-platform" name="platform"><option>MetaTrader 5</option><option>IBKR</option></select></div>
+<div class="field"><label for="sg-note">What to measure</label><textarea id="sg-note" name="note"></textarea></div>
+<div class="field"><div class="check"><input id="sg-consent" type="checkbox" name="consent"><label for="sg-consent">Email me once when the report launches.</label></div></div>
+<button class="btn" type="submit">Join the waitlist</button>
+</form>
+</section>
+
+<section class="section" aria-labelledby="tabs-h"><h2 id="tabs-h">Tabs</h2>
+<div role="tablist" aria-label="Audience">
+<button role="tab" id="tab-t" aria-controls="panel-t" aria-selected="true" data-hash="traders" type="button">Traders</button>
+<button role="tab" id="tab-f" aria-controls="panel-f" aria-selected="false" data-hash="firms" type="button" tabindex="-1">Firms</button>
+</div>
+<div role="tabpanel" id="panel-t" aria-labelledby="tab-t"><p>Trader panel.</p></div>
+<div role="tabpanel" id="panel-f" aria-labelledby="tab-f"><p>Firm panel.</p></div>
+</section>
+
+<section class="section" aria-labelledby="charts"><h2 id="charts">Chart with table fallback</h2>
+<figure class="chart">
+<svg viewBox="0 0 600 220" role="img" aria-labelledby="sg-chart-t"><title id="sg-chart-t">Equity curve, 5 trades, sample data</title>
+<line class="grid-line" x1="40" y1="20" x2="590" y2="20"/><line class="grid-line" x1="40" y1="110" x2="590" y2="110"/><line class="grid-line" x1="40" y1="200" x2="590" y2="200"/>
+<text class="axis" x="4" y="24">+$100</text><text class="axis" x="4" y="114">$0</text><text class="axis" x="4" y="204">−$100</text>
+<path class="area-dd" d="M260 60 L370 150 L480 150 L480 60 Z"/>
+<polyline class="line-actual" points="40,110 150,80 260,60 370,150 480,120 590,90"/>
+<text class="annot" x="370" y="170">largest drawdown</text>
+</svg>
+<figcaption>n = 5 closed trades · sample data, not a real trader.</figcaption>
+<details><summary>Show as a table</summary><div class="table-wrap" tabindex="0" role="region" aria-label="Equity curve as a table"><table><thead><tr><th scope="col">Trade</th><th scope="col" class="num">Equity</th></tr></thead><tbody><tr><td>1</td><td class="num">+$33</td></tr><tr><td>2</td><td class="num">+$56</td></tr><tr><td>3</td><td class="num">−$44</td></tr><tr><td>4</td><td class="num">−$11</td></tr><tr><td>5</td><td class="num">+$22</td></tr></tbody></table></div></details>
+</figure>
+</section>
+
+<section class="section" aria-labelledby="drop"><h2 id="drop">Drop zone</h2>
+<div class="dropzone"><p><strong>Drop a trade file here</strong>, or</p><label for="sg-file">Trade file</label> <input id="sg-file" type="file"></div>
+</section>
+</main>
+<footer class="site-footer"><div class="wrap"><div class="cols"><div><h2>Traders</h2><ul><li><a href="#">Free tools</a></li></ul></div><div><h2>Legal</h2><ul><li><a href="#">Terms</a></li><li><a href="#">Privacy</a></li></ul></div></div>
+<p class="legal">donttrade measures your own past trades. It is not investment advice.</p></div></footer>
+</body>
+</html>
