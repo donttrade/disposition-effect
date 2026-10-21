@@ -947,7 +947,8 @@ def parse_mt(tables):
                 size_field = "volume" if kind == "mt5_positions_closed" else "size"
                 ot = parse_date(cell(r, m, "open_time"), "mt", row, "open_time")
                 ct = parse_date(cell(r, m, "close_time"), "mt", row, "close_time")
-                if ct < ot:
+                reordered = ct < ot  # the repeated hour of a fall-back night, flagged (F-N3)
+                if reordered:
                     ct = fall_back_close(ot, ct)
                     if ct is None:
                         fail("E_BAD_DATE", "close before open", row, "close_time")
@@ -966,7 +967,7 @@ def parse_mt(tables):
                 rts.append({"row": row, "symbol": symbol, "dir": "long" if side == "buy" else "short",
                             "open_ts": ot, "close_ts": ct, "qty": qty, "entry": op, "exit": cp, "fees": fee,
                             "pnl_gross": profit + credit, "reported": True, "currency": None, "unit": "account",
-                            "pos_id": pos if pos != "" else None})
+                            "pos_id": pos if pos != "" else None, "reordered": reordered})
     return {"executions": execs, "roundtrips": rts, "skipped": skipped, "extra": extra}
 
 
@@ -1036,7 +1037,8 @@ def parse_generic_roundtrip(rows, hi, m):
             continue
         ot = parse_date(cell(r, m, "open_time"), "generic", row, "open_time")
         ct = parse_date(cell(r, m, "close_time"), "generic", row, "close_time")
-        if ct < ot:
+        reordered = ct < ot  # the repeated hour of a fall-back night, flagged (F-N3)
+        if reordered:
             ct = fall_back_close(ot, ct)
             if ct is None:
                 fail("E_BAD_DATE", "close before open", row, "close_time")
@@ -1050,7 +1052,7 @@ def parse_generic_roundtrip(rows, hi, m):
         cur = cell(r, m, "currency").upper() or None
         rts.append({"row": row, "symbol": symbol, "dir": dr, "open_ts": ot, "close_ts": ct, "qty": qty,
                     "entry": op, "exit": cp, "fees": fee, "pnl_gross": None, "reported": False,
-                    "currency": cur, "unit": cur if cur else "points", "pos_id": None})
+                    "currency": cur, "unit": cur if cur else "points", "pos_id": None, "reordered": reordered})
     return {"executions": execs, "roundtrips": rts, "skipped": skipped, "extra": {}}
 
 
@@ -1558,7 +1560,8 @@ def roundtrip_trades(rts, start_seq):
                        "hold_s": (r["close_ts"] - r["open_ts"]) // 1000, "qty": r["qty"],
                        "entry_vwap": r["entry"], "exit_vwap": r["exit"], "pnl": gross - r["fees"],
                        "pnl_gross": gross, "fees": r["fees"], "pnl_source": src, "pnl_unit": r["unit"],
-                       "fills_n": 2, "currency": r["currency"], "_fx": None, "_seq": start_seq + i})
+                       "fills_n": 2, "currency": r["currency"], "_fx": None, "_seq": start_seq + i,
+                       "_reordered": r.get("reordered") is True})
     return trades
 
 
@@ -1736,6 +1739,9 @@ def parse_file(data):
             dst += 1
     if dst:
         warnings.append(warning("W_DST", dst))
+    reordered = sum(1 for t in trades if t.get("_reordered"))
+    if reordered:
+        warnings.append(warning("W_CLOSE_BEFORE_OPEN", reordered))
     trades.sort(key=lambda t: (t["close_ts"], t["open_ts"], t["symbol"], t["_seq"]))
     if not trades:
         fail("E_NO_CLOSED_TRADES")

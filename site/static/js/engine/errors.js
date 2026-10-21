@@ -65,6 +65,8 @@ export const WARNING_TEXT = Object.freeze({
   W_MIXED_CURRENCY: 'The file mixes currencies.',
   W_CURRENCY_IGNORED:
     'The currency column holds values that are not currency codes, so it was not used: results are shown without a currency unit. Check that no cell before it holds an extra comma.',
+  W_CLOSE_BEFORE_OPEN:
+    'Some round trips close up to one hour before they open, on a night the clocks went back (US or EU dates). They were read as closing in the repeated hour, one hour later than written. If the times in this file have no daylight-saving changes, or the open and close columns are swapped, these trades are wrong: check them.',
   W_DST:
     'Some trades were open during a daylight-saving clock change (US or EU dates). The file\'s times have no time zone, so the hold time of these trades may be off by one hour, and a buy and a sell in the repeated hour may be in the wrong order.',
 });

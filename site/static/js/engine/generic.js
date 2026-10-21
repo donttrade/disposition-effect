@@ -63,7 +63,8 @@ export function parseGenericRoundtrip(rows, hi, m) {
     if (symbol === '') { skip(skipped, 'no_symbol'); continue; }
     const ot = parseDate(cell(r, m, 'open_time'), 'generic', row, 'open_time');
     let ct = parseDate(cell(r, m, 'close_time'), 'generic', row, 'close_time');
-    if (ct < ot) {
+    const reordered = ct < ot; // read as the repeated hour of a fall-back night, and flagged (F-N3)
+    if (reordered) {
       ct = fallBackClose(ot, ct);
       if (ct === null) fail('E_BAD_DATE', 'the close time is before the open time', row, 'close_time');
     }
@@ -74,7 +75,7 @@ export function parseGenericRoundtrip(rows, hi, m) {
     const fee = Math.abs(optNumber(cell(r, m, 'fees'), row, 'fees'));
     const cur = cell(r, m, 'currency').toUpperCase() || null;
     rts.push({ row, symbol, dir, open_ts: ot, close_ts: ct, qty, entry: op, exit: cp, fees: fee,
-      pnl_gross: null, reported: false, currency: cur, unit: cur ? cur : 'points', pos_id: null });
+      pnl_gross: null, reported: false, currency: cur, unit: cur ? cur : 'points', pos_id: null, reordered });
   }
   return { executions: [], roundtrips: rts, skipped, extra: {} };
 }

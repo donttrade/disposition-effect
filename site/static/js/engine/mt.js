@@ -120,7 +120,8 @@ export function parseMt(tables) {
         const sizeField = kind === 'mt5_positions_closed' ? 'volume' : 'size';
         const ot = parseDate(cell(r, m, 'open_time'), 'mt', row, 'open_time');
         let ct = parseDate(cell(r, m, 'close_time'), 'mt', row, 'close_time');
-        if (ct < ot) {
+        const reordered = ct < ot; // read as the repeated hour of a fall-back night, and flagged (F-N3)
+        if (reordered) {
           ct = fallBackClose(ot, ct);
           if (ct === null) fail('E_BAD_DATE', 'the close time is before the open time', row, 'close_time');
         }
@@ -135,7 +136,7 @@ export function parseMt(tables) {
         const pos = kind === 'mt5_positions_closed' ? cell(r, m, 'position') : '';
         rts.push({ row, symbol, dir: side === 'buy' ? 'long' : 'short', open_ts: ot, close_ts: ct, qty,
           entry: op, exit: cp, fees: fee, pnl_gross: profit + credit, reported: true, currency: null,
-          unit: 'account', pos_id: pos !== '' ? pos : null });
+          unit: 'account', pos_id: pos !== '' ? pos : null, reordered });
       }
     }
   }
