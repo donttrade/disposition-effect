@@ -11,7 +11,7 @@
 <script type="module">
 import { runFile } from '/site/static/js/engine/index.js';
 import { freeStats } from '/site/static/js/engine/stats.js';
-import { noiseChecks } from '/site/static/js/engine/noise.js';
+import { noiseChecks, checkExpectancy, SEED_BASE } from '/site/static/js/engine/noise.js';
 import { pgrPlrCounts } from '/site/static/js/engine/pgr.js';
 import { stripRows } from '/site/static/js/paid/strip.js';
 function bytesOf(b64) {
@@ -27,6 +27,8 @@ window.runEngine = (b64) => {
   return JSON.stringify({ result: r.result, stats: freeStats(r.result.trades), noise: noiseChecks(r.result.trades),
     pgr_plr: pgrPlrCounts(r.result.executions) });
 };
+// The free expectancy check alone on P&L vectors (amendment §4 guard vectors).
+window.expectancyChecks = (json) => JSON.stringify(JSON.parse(json).map((x) => checkExpectancy(x, SEED_BASE)));
 // Parse only (no stats or noise checks): the fuzz parity tests run hundreds of files.
 window.parseOnly = (b64) => JSON.stringify(runFile(bytesOf(b64)));
 window.runNoiseInWorker = (b64) => new Promise((resolve) => {
