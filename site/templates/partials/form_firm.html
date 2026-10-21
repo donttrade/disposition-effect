@@ -1,13 +1,17 @@
 {#- Firm / platform request form (FORMS-SPEC §A; V2 step 16). Plain HTML POST to Web3Forms:
     works with JavaScript off. Set before including: fid (id prefix), product (default for the
-    hidden field), heading_id (the id of the heading that labels this form).
-    form-ref.js, when it runs, copies ?ref= and ?product= from the URL into the hidden fields. -#}
+    hidden field), heading_id (the id of the heading that labels this form), and optionally
+    partner = true for the journal/platform partner form.
+    form-ref.js, when it runs, copies ?ref= from the URL into the hidden ref field, and ?product=
+    into the product field of the FIRM form only. The partner form's product is fixed (Tester D1):
+    a partner application is always product=platform, whatever the URL says. -#}
+{%- set is_partner = partner is defined and partner %}
 <form class="request-form" id="{{ fid }}" method="POST" action="{{ forms.endpoint }}" aria-labelledby="{{ heading_id }}">
   <input type="hidden" name="access_key" value="{{ forms.firm_key }}">
-  <input type="hidden" name="subject" value="donttrade: firm request">
+  <input type="hidden" name="subject" value="{{ 'donttrade: partner application' if is_partner else 'donttrade: firm request' }}">
   <input type="hidden" name="from_name" value="donttrade site">
   <input type="hidden" name="redirect" value="{{ forms.redirect_firm }}">
-  <input type="hidden" name="product" value="{{ product }}" data-from-query="product">
+  <input type="hidden" name="product" value="{{ product }}"{% if not is_partner %} data-from-query="product"{% endif %}>
   <input type="hidden" name="page" value="{{ page.path }}">
   <input type="hidden" name="ref" value="" data-from-query="ref">
   <input type="checkbox" name="botcheck" class="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" hidden>
@@ -22,4 +26,4 @@
   <p><button class="btn" type="submit">Send the request</button></p>
   <p class="small muted">We use these details only to reply. {{ site.reply_promise }} <a href="/privacy/">Privacy notice</a></p>
 </form>
-<p class="mailto-line">Prefer email? Write to <a href="mailto:{{ site.contact_email }}?subject={{ ('Pilot request — [your firm]')|urlencode }}">{{ site.contact_email }}</a>.</p>
+<p class="mailto-line">Prefer email? Write to <a href="mailto:{{ site.contact_email }}?subject={{ ('Partner application — [your platform]' if is_partner else 'Pilot request — [your firm]')|urlencode }}">{{ site.contact_email }}</a>.</p>

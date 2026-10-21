@@ -235,7 +235,8 @@ def test_form_ref_capture_and_fields(browser, built_site, path):
     pg.goto(built_site["url"] + base + "?ref=report&product=copy-leader")
     assert pg.input_value(form + " input[name=ref]") == "report"
     if form in ("#ff", "#sf", "#sp", "#fp"):
-        assert pg.input_value(form + " input[name=product]") == "copy-leader"
+        # the firm form takes ?product=; the partner form's product is fixed (Tester D1)
+        assert pg.input_value(form + " input[name=product]") == ("platform" if form in ("#sp", "#fp") else "copy-leader")
         f = form.lstrip("#")
         assert pg.get_attribute(f"#{f}-email", "autocomplete") == "email"
         assert pg.get_attribute(f"#{f}-firm", "autocomplete") == "organization"

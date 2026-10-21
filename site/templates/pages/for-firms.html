@@ -207,7 +207,7 @@ a7f3,2026-03-04,p91,1,240.00</pre>
     {%- if flags.pilot_checkout %}
     {%- with heading_id = "request" %}{% include "partials/pilot_block.html" %}{% endwith %}
     <details><summary id="ff-other-h">Asking about a Snapshot, Memo, Outcomes pack or another test?</summary>
-    {%- with fid = "ff", product = "snapshot", heading_id = "ff-other-h" %}{% include "partials/form_firm.html" %}{% endwith %}
+    {%- with fid = "ff", product = "enquiry", heading_id = "ff-other-h" %}{% include "partials/form_firm.html" %}{% endwith %}
     </details>
     {%- else %}
     {%- with fid = "ff", product = "pilot", heading_id = "request" %}{% include "partials/form_firm.html" %}{% endwith %}
