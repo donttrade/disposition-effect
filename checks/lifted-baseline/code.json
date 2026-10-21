@@ -1,0 +1,101 @@
+{
+ "attrs": [
+  "div[aria-label]=Scripts, data and licences",
+  "input[placeholder]=you@example.com"
+ ],
+ "citation": [],
+ "fixes": [
+  [
+   "Standard-library Python, no network calls; nothing leaves the machine it runs on.",
+   "Standard-library Python with no network calls: the script itself sends nothing anywhere."
+  ]
+ ],
+ "ids": [
+  "em"
+ ],
+ "links": [
+  "a[href]=/research/disposition-effect/",
+  "a[href]=https://github.com/donttrade/disposition-effect",
+  "a[href]=/research/insider-buying-edge/",
+  "a[href]=https://github.com/donttrade/disposition-effect/tree/main/form4",
+  "a[href]=/research/portfolio-driven-disposition-effect/",
+  "a[href]=https://github.com/donttrade/disposition-effect/tree/main/pdde",
+  "a[href]=/research/volatility-scaled-momentum/",
+  "a[href]=https://github.com/donttrade/disposition-effect/tree/main/volmom",
+  "a[href]=/research/swing-trading-strategies/",
+  "a[href]=/research/strategy-tests/",
+  "a[href]=/sample-report/",
+  "a[href]=https://github.com/donttrade/disposition-effect/blob/main/samples/sample_trader_report.py",
+  "a[href]=https://github.com/donttrade/disposition-effect/tree/main/partner",
+  "a[href]=https://github.com/donttrade/disposition-effect/tree/main/partner",
+  "a[href]=/corrections/",
+  "a[href]=mailto:donttrade.research@gmail.com",
+  "a[href]=https://creativecommons.org/licenses/by-nc/4.0/",
+  "a[href]=/assets/fonts/OFL-SourceSerif4.txt",
+  "form[action]=https://donttrade.substack.com/subscribe",
+  "a[href]=/feed.xml"
+ ],
+ "path": "/code/",
+ "source": "docs/code/index.html",
+ "source_sha256": "6595c9c054951ddf26650051edb7483c94e544cf9272de3db161835dafbbe8c9",
+ "tables": [
+  [
+   [
+    "Study",
+    "Script",
+    "Data",
+    "Licence"
+   ],
+   [
+    "Disposition effect (PGR/PLR)",
+    "reproduce.py",
+    "Jin, Li & Zhu replication files, PLoS ONE 16(2), 2021 — CC0, Harvard Dataverse",
+    "MIT"
+   ],
+   [
+    "Insider-buying clusters (Form 4)",
+    "form4/",
+    "SEC Form 4 bulk files, 81 quarters, 2006–2026 Q1. Not yet published: the cut-point sweep, regime pools and contiguous-window enumeration (disclosed in the study).",
+    "MIT"
+   ],
+   [
+    "Portfolio-driven disposition effect (pre-registered replication; headline corrected 17 Oct 2026)",
+    "pdde/ (original test; the code for the stricter 17 Oct test, which gives the corrected headline, is not public yet)",
+    "The same CC0 panel as the disposition-effect study (Harvard Dataverse file 4053809)",
+    "MIT"
+   ],
+   [
+    "Volatility-scaled momentum (pre-registered; negative result)",
+    "volmom/",
+    "Kenneth French data library (momentum factor and market data); S&P 500 membership history (fja05680/sp500, MIT); Yahoo monthly closes",
+    "MIT"
+   ],
+   [
+    "Swing-trading strategies (pre-registered; negative result)",
+    "To be published with the study; the SHA-256 of every pre-registration, data snapshot and output file is listed in the study",
+    "Free vendor-adjusted daily ETF prices, snapshot 16 Oct 2026",
+    "—"
+   ],
+   [
+    "Combined strategy study: swing, investing, overnight, day trading (pre-registered; negative result)",
+    "To be published with the study; the SHA-256 of every pre-registration, addendum, data manifest and output file is listed in the study",
+    "Kenneth French data library; FRED DGS10; free vendor-adjusted daily ETF prices; Alpaca SIP one-minute bars for SPY and QQQ, 2016–2026",
+    "—"
+   ],
+   [
+    "Sample trader report",
+    "samples/sample_trader_report.py",
+    "The same CC0 panel as the disposition-effect study (Harvard Dataverse file 4053809)",
+    "MIT"
+   ],
+   [
+    "Measurement script for a firm’s own records",
+    "partner/",
+    "A five-column extract: one row per position per day. Standard-library Python with no network calls: the script itself sends nothing anywhere.",
+    "PolyForm Noncommercial 1.0.0 from v2 (v1 was MIT). Free for non-commercial use; businesses need a licence, included in every engagement. See the partner/ folder."
+   ]
+  ]
+ ],
+ "text": "\n\n\n  Methods and code\n  The scripts behind 4 of the 6 studies are public, with the data each study used; the other 2 are listed below, with their gaps, on each study. There is no name on this site; the scripts are what you check instead.\n  Swipe the table sideways for more columns →\n    StudyScriptDataLicence\n    \n      Disposition effect (PGR/PLR)reproduce.pyJin, Li & Zhu replication files, PLoS ONE 16(2), 2021 — CC0, Harvard DataverseMIT\n      Insider-buying clusters (Form 4)form4/SEC Form 4 bulk files, 81 quarters, 2006–2026 Q1. Not yet published: the cut-point sweep, regime pools and contiguous-window enumeration (disclosed in the study).MIT\n      Portfolio-driven disposition effect (pre-registered replication; headline corrected 17 Oct 2026)pdde/ (original test; the code for the stricter 17 Oct test, which gives the corrected headline, is not public yet)The same CC0 panel as the disposition-effect study (Harvard Dataverse file 4053809)MIT\n      Volatility-scaled momentum (pre-registered; negative result)volmom/Kenneth French data library (momentum factor and market data); S&P 500 membership history (fja05680/sp500, MIT); Yahoo monthly closesMIT\n      Swing-trading strategies (pre-registered; negative result)To be published with the study; the SHA-256 of every pre-registration, data snapshot and output file is listed in the studyFree vendor-adjusted daily ETF prices, snapshot 16 Oct 2026—\n      Combined strategy study: swing, investing, overnight, day trading (pre-registered; negative result)To be published with the study; the SHA-256 of every pre-registration, addendum, data manifest and output file is listed in the studyKenneth French data library; FRED DGS10; free vendor-adjusted daily ETF prices; Alpaca SIP one-minute bars for SPY and QQQ, 2016–2026—\n      Sample trader reportsamples/sample_trader_report.pyThe same CC0 panel as the disposition-effect study (Harvard Dataverse file 4053809)MIT\n      Measurement script for a firm’s own recordspartner/A five-column extract: one row per position per day. Standard-library Python with no network calls: the script itself sends nothing anywhere.PolyForm Noncommercial 1.0.0 from v2 (v1 was MIT). Free for non-commercial use; businesses need a licence, included in every engagement. See the partner/ folder.\n    \n  \n  Each study whose script is published reproduces from a clean checkout. If it does not, that is a bug, and it belongs on the Corrections page — write to donttrade.research@gmail.com.\n  Study write-ups and charts are licensed CC BY-NC 4.0. The numbers in them are facts and may be quoted freely, with a link. A figure may be described as “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a fixed-scope agreement” only when it comes from a signed engagement; no one may describe it as audited, certified or verified.\n  Open Behavioural Measurement Spec (coming).\n  Site typeface: a subset of Source Serif 4 (Adobe), used under the SIL Open Font License and renamed in this subset as the licence requires.\n\nGet the next study by email. One email per finished study; free, no advice.\n    Email address\n    \n    Email me the next study\n  Or follow the Atom feed of new studies and corrections.\n",
+ "text_collapsed": "Methods and code The scripts behind 4 of the 6 studies are public, with the data each study used; the other 2 are listed below, with their gaps, on each study. There is no name on this site; the scripts are what you check instead. Swipe the table sideways for more columns → StudyScriptDataLicence Disposition effect (PGR/PLR)reproduce.pyJin, Li & Zhu replication files, PLoS ONE 16(2), 2021 — CC0, Harvard DataverseMIT Insider-buying clusters (Form 4)form4/SEC Form 4 bulk files, 81 quarters, 2006–2026 Q1. Not yet published: the cut-point sweep, regime pools and contiguous-window enumeration (disclosed in the study).MIT Portfolio-driven disposition effect (pre-registered replication; headline corrected 17 Oct 2026)pdde/ (original test; the code for the stricter 17 Oct test, which gives the corrected headline, is not public yet)The same CC0 panel as the disposition-effect study (Harvard Dataverse file 4053809)MIT Volatility-scaled momentum (pre-registered; negative result)volmom/Kenneth French data library (momentum factor and market data); S&P 500 membership history (fja05680/sp500, MIT); Yahoo monthly closesMIT Swing-trading strategies (pre-registered; negative result)To be published with the study; the SHA-256 of every pre-registration, data snapshot and output file is listed in the studyFree vendor-adjusted daily ETF prices, snapshot 16 Oct 2026— Combined strategy study: swing, investing, overnight, day trading (pre-registered; negative result)To be published with the study; the SHA-256 of every pre-registration, addendum, data manifest and output file is listed in the studyKenneth French data library; FRED DGS10; free vendor-adjusted daily ETF prices; Alpaca SIP one-minute bars for SPY and QQQ, 2016–2026— Sample trader reportsamples/sample_trader_report.pyThe same CC0 panel as the disposition-effect study (Harvard Dataverse file 4053809)MIT Measurement script for a firm’s own recordspartner/A five-column extract: one row per position per day. Standard-library Python with no network calls: the script itself sends nothing anywhere.PolyForm Noncommercial 1.0.0 from v2 (v1 was MIT). Free for non-commercial use; businesses need a licence, included in every engagement. See the partner/ folder. Each study whose script is published reproduces from a clean checkout. If it does not, that is a bug, and it belongs on the Corrections page — write to donttrade.research@gmail.com. Study write-ups and charts are licensed CC BY-NC 4.0. The numbers in them are facts and may be quoted freely, with a link. A figure may be described as “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a fixed-scope agreement” only when it comes from a signed engagement; no one may describe it as audited, certified or verified. Open Behavioural Measurement Spec (coming). Site typeface: a subset of Source Serif 4 (Adobe), used under the SIL Open Font License and renamed in this subset as the licence requires. Get the next study by email. One email per finished study; free, no advice. Email address Email me the next study Or follow the Atom feed of new studies and corrections."
+}

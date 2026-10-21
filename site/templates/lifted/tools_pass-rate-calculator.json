@@ -1,0 +1,19 @@
+{
+ "citation": [],
+ "crumb": "Prop-firm pass-rate calculator",
+ "description": "Free: a prop-firm evaluation pass rate and payout rate for one cohort, computed correctly. Runs in your browser; nothing is sent.",
+ "og_image": "/assets/og/default.png",
+ "parent": [
+  "Free tools",
+  "/tools/"
+ ],
+ "path": "/tools/pass-rate-calculator/",
+ "scripts": [
+  "/static/js/legacy/pass-rate-calculator.js"
+ ],
+ "section": "/tools/",
+ "source": "docs/tools/pass-rate-calculator/index.html",
+ "source_sha256": "7496ce6b5852500929593c602e3beefe820df1fc2e360a3906efd3e5f42d2d14",
+ "title": "Prop-firm pass-rate calculator — donttrade",
+ "updated": "2026-10-17"
+}

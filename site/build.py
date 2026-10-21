@@ -2,8 +2,11 @@
 """donttrade v2 site build: site.toml + prices.json + Jinja2 templates → site/_site/.
 
 Rules (V2-BUILD-PLAN, STRUCTURE and step 3):
-  * Every page of today's docs/ that no template owns yet is copied through
-    unchanged, so the output always holds every baseline URL.
+  * Every page of today's docs/ that no template owns is copied through unchanged, so the
+    output always holds every baseline URL. Since steps 28–29 every docs/ HTML page is owned
+    (the 20 old pages are lifted templates, LIFTED); non-HTML files (PDFs, CSVs, charts, OG
+    images, feed.xml) still pass through, and any new docs/ HTML page would pass through under
+    the loud chrome guard (fix_passthrough_chrome).
   * The build FAILS LOUDLY (exit 1, with the reason) on:
       - a path in checks/urls-baseline.txt missing from the output,
       - an externally linked id (path#id in the baseline) missing from its page,
@@ -402,22 +405,22 @@ def evidence():
     """Numbers for the homepage evidence strip and finding block, read from today's pages
     (the same sources the v1 self-count test reads), so the home page cannot drift from
     them. Fails loudly if a source page changes shape or the counts disagree."""
-    def main_of(rel):
-        with open(os.path.join(DOCS, rel), encoding="utf-8") as f:
-            return f.read()
-    studies = sorted(set(re.findall(r'href="(/research/[a-z0-9-]+/)"', main_of("research/index.html"))))
-    corr = main_of("corrections/index.html")
+    # Since steps 28–29 these pages are template-owned: read their lifted bodies (the source
+    # of the built pages), not docs/, which the step-30 bundle replaces.
+    main_of = lifted_fragment
+    studies = sorted(set(re.findall(r'href="(/research/[a-z0-9-]+/)"', main_of("research"))))
+    corr = main_of("corrections")
     t = re.search(r"(?s)<table.*?<tbody>(.*?)</tbody>", corr)
     if not t:
-        die("evidence: no corrections table in docs/corrections/index.html")
+        die("evidence: no corrections table in site/templates/lifted/corrections.html")
     corrections = len(re.findall(r"<tr\b", t.group(1)))
-    m = re.search(r"The scripts behind (\d+) of the (\d+) studies are public", main_of("code/index.html"))
+    m = re.search(r"The scripts behind (\d+) of the (\d+) studies are public", main_of("code"))
     if not m:
-        die("evidence: the 'scripts behind N of the M studies' sentence is gone from docs/code/index.html")
+        die("evidence: the 'scripts behind N of the M studies' sentence is gone from site/templates/lifted/code.html")
     if int(m.group(2)) != len(studies):
         die(f"evidence: /code/ says {m.group(2)} studies but /research/ lists {len(studies)}")
     sentence = "76.1% of 4,659 retail traders realised their gains more readily than their losses."
-    if sentence not in main_of("research/disposition-effect/index.html"):
+    if sentence not in main_of("research_disposition-effect"):
         die("evidence: the finding sentence is no longer on /research/disposition-effect/ word for word")
     return {"studies": len(studies), "corrections": corrections, "scripts_public": int(m.group(1)),
             "finding": {"pct": "76.1%", "rest": sentence[len("76.1% "):], "url": "/research/disposition-effect/"}}
@@ -457,6 +460,45 @@ PAGES.append({"template": "pages/pricing.html", "path": "/pricing/", "requires_f
               "title": "Pricing: Published Prices for Firms and Traders",
               "description": "Published prices in USD for prop firms, brokers, trading platforms and traders, the "
                              "same for everyone and fixed in writing before anyone sees data."})
+
+# Lifted pages (plan steps 28–29): the 20 pages that passed through from docs/ in the old design.
+# checks/lift_pages.py copied each old <main> word for word into site/templates/lifted/<slug>.html
+# (only the CSP-forced markup changes: style attributes → ls-* classes, inline scripts → files)
+# and its head facts into <slug>.json. Each renders through pages/lifted.html inside a
+# <!--frozen:start-->…<!--frozen:end--> region; checks/compare.py proves the visible text, ids,
+# links, tables and citation meta equal the old page's, and lint holds the frozen region to the
+# passthrough rules (its words may not change) and everything around it to the full list.
+LIFTED_DIR = os.path.join(SITE, "templates", "lifted")
+LIFTED_JS = "/static/js/lifted.js"
+
+
+def lifted_pages():
+    pages = []
+    for name in sorted(os.listdir(LIFTED_DIR)) if os.path.isdir(LIFTED_DIR) else []:
+        if not name.endswith(".json"):
+            continue
+        with open(os.path.join(LIFTED_DIR, name), encoding="utf-8") as f:
+            m = json.load(f)
+        page = {"template": "pages/lifted.html", "path": m["path"], "requires_flag": None,
+                "lifted": name[:-len(".json")], "main_class": "lifted", "feeds": True,
+                "crumb": m["crumb"], "title": m["title"], "description": m["description"],
+                "og_image": m["og_image"], "citation": m["citation"],
+                "scripts": [LIFTED_JS] + m.get("scripts", [])}
+        for k in ("updated", "noindex", "redirect_to", "article", "form_action", "parent", "section"):
+            if m.get(k):
+                page[k] = m[k]
+        pages.append(page)
+    return pages
+
+
+def lifted_fragment(slug):
+    with open(os.path.join(LIFTED_DIR, slug + ".html"), encoding="utf-8") as f:
+        return f.read()
+
+
+LIFTED = lifted_pages()
+PAGES += LIFTED
+LIFTED_PATHS = [p["path"] for p in LIFTED]
 
 # Paths that may exist only when paid_report = true.
 PAID_APP_PATHS = ["/welcome/", "/restore/", "/report/"]  # noindex, and disallowed in robots.txt
@@ -531,9 +573,10 @@ def trader_nav_label(flags):
     return 'Individual traders <span class="soon">coming soon</span></a>'
 
 
-# Site-wide chrome on every passthrough page (the old header and footer), fixed at build time
-# until steps 28–29 lift those pages. (old, new(flags), expected count per page; None = at
-# least once). A passthrough page whose chrome no longer matches fails the build loudly.
+# Site-wide chrome on a passthrough page (the old header and footer), fixed at build time.
+# Steps 28–29 lifted all 20 old pages, so today no page passes through and this is a guard:
+# a docs/ HTML page that no template owns must still carry the old chrome exactly, or the build
+# fails loudly. (old, new(flags), expected count per page; None = at least once).
 OLD_FOOTER_PRIVACY = ("This site sets no cookies and runs no analytics; it stores only your light/dark choice, in your "
                       "own browser. Forms open on Tally and subscribing opens Substack; their privacy policies apply.")
 PASSTHROUGH_CHROME = [
@@ -556,20 +599,11 @@ def fix_passthrough_chrome(text, rel, flags):
     return text
 
 
-# Exact-text copy fixes applied to passthrough pages until steps 28–29 lift them into templates.
-# docs/ stays untouched; the build fails if a sentence is no longer there exactly once.
-PASSTHROUGH_FIXES = {
-    # D3: the sentence describes the header label, which is now "Start a Pilot"
-    os.path.join("independence", "index.html"): [
-        ("The site header and footer link to Pricing and Start a trial on every page,",
-         "The site header and footer link to Pricing and Start a Pilot on every page,"),
-    ],
-    # D9: "nothing leaves" is banned site-wide (it is false next to the paid pipeline).
-    os.path.join("code", "index.html"): [
-        ("Standard-library Python, no network calls; nothing leaves the machine it runs on.",
-         "Standard-library Python with no network calls: the script itself sends nothing anywhere."),
-    ],
-}
+# Exact-text copy fixes applied to passthrough pages. docs/ stays untouched; the build fails
+# if a sentence is no longer there exactly once. Empty since steps 28–29: the two fixes it held
+# (/independence/ "Start a Pilot", /code/ "sends nothing anywhere") are LIFT_FIXES in
+# checks/lift_pages.py, part of the lifted text. The mechanism stays for any page still passed through.
+PASSTHROUGH_FIXES = {}
 
 
 # Manager C4: /privacy/ (and the home FAQ, /for-traders/) say the free tool pages "block outgoing
@@ -577,6 +611,8 @@ PASSTHROUGH_FIXES = {
 # until steps 28–29, get the same guard here: a CSP meta with connect-src 'none' and nothing from
 # another origin. Their inline script and onsubmit handler need 'unsafe-inline' for scripts and their
 # style attributes for styles; neither lets the page send anything (connect-src and form-action 'none').
+# Since steps 28–29 both are lifted template pages: csp_for gives them the same directives without
+# 'unsafe-inline', and the build fails if either path is neither a template page nor in docs/.
 PASSTHROUGH_CSP = ("default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
                    "img-src 'self' data:; font-src 'self'; connect-src 'none'; worker-src 'none'; "
                    "form-action 'none'; base-uri 'none'; object-src 'none'")
@@ -882,6 +918,16 @@ def usd_fr(n):
 
 
 def csp_for(page, cfg):
+    if os.path.join(page["path"].strip("/"), "index.html") in PASSTHROUGH_CSP_PAGES:
+        # Manager C4 after the merge of steps 28–29: the lifted old calculators keep the strict
+        # no-network policy they had as passthrough pages (connect, worker and form-action 'none'),
+        # now without 'unsafe-inline'. With analytics on, the beacon host is the only addition,
+        # as on every other tool page (plan DoD: "connect-src 'none' (or the beacon host only)").
+        a = cfg["flags"]["analytics"]
+        return ("default-src 'self'; script-src 'self'" + (" https://static.cloudflareinsights.com" if a else "") +
+                "; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'" +
+                (" https://cloudflareinsights.com" if a else "") +
+                "; worker-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'")
     connect = page.get("connect_src", "'none'")
     if page.get("connect_worker"):
         connect = "'self' " + cfg["worker"]["api_base"]
@@ -890,7 +936,8 @@ def csp_for(page, cfg):
     script = "'self'" + (" https://static.cloudflareinsights.com" if cfg["flags"]["analytics"] else "")
     return ("default-src 'self'; script-src " + script + "; style-src 'self'; img-src 'self' data:; "
             "font-src 'self'; connect-src " + connect + "; worker-src 'self'; "
-            "form-action 'self' https://api.web3forms.com; base-uri 'none'; object-src 'none'")
+            "form-action 'self' https://api.web3forms.com" + "".join(" " + a for a in page.get("form_action", [])) +
+            "; base-uri 'none'; object-src 'none'")
 
 
 # ------------------------------------------------------------------ SEO (SEO-PLAN §3)
@@ -923,12 +970,16 @@ def jsonld(page, cfg, html, flags, products):
                       "url": base + "/", "email": cfg["site"]["contact_email"], "sameAs": cfg["site"]["same_as"]})
     else:
         items = [("Home", base + "/")]
-        if page["path"].startswith("/tools/") and page["path"] != "/tools/":
+        if page.get("parent"):
+            items.append((page["parent"][0], base + page["parent"][1]))
+        elif page["path"].startswith("/tools/") and page["path"] != "/tools/":
             items.append(("Free tools", base + "/tools/"))
         items.append((page["crumb"], None))
         graph.append({"@type": "BreadcrumbList", "itemListElement": [
             {"@type": "ListItem", "position": i + 1, "name": n, **({"item": u} if u else {})}
             for i, (n, u) in enumerate(items)]})
+    if page.get("article"):  # lifted study pages: their old Article, by the site Organization
+        graph.append({**page["article"], "author": org, "publisher": org})
     if page.get("app"):
         graph.append({"@type": "WebApplication", "@id": base + page["path"] + "#app", "name": page["crumb"],
                       "url": base + page["path"], "applicationCategory": "FinanceApplication",
@@ -1146,11 +1197,14 @@ def build():
             text = text.replace(old, new)
         with open(fp, "w", encoding="utf-8", newline="") as f:
             f.write(text)
-    for rel in sorted(set(PASSTHROUGH_FIXES) - set(passthrough_pages(owned)) - set(owned)):
-        die(f"passthrough fix: {rel} is not a page in docs/")
+    for rel in sorted(set(PASSTHROUGH_FIXES) - set(passthrough_pages(owned))):
+        # a template owns it (a lifted page carries its fixes in its fragment) or it is not in docs/
+        die(f"passthrough fix: {rel} is not a passthrough page (owned by a template, or not in docs/)")
     for rel in PASSTHROUGH_CSP_PAGES:
+        # Manager C4: the two old calculators never connect anywhere. Passed through, they get the
+        # meta above; lifted (steps 28–29), csp_for gives them NO_NETWORK_CSP (no 'unsafe-inline').
         if rel not in passthrough_pages(owned) and rel not in owned:
-            die(f"passthrough CSP: {rel} is not a page in docs/")
+            die(f"no-network CSP: {rel} is neither a template page nor a page in docs/")
     # 2. static assets of the new design
     copy_tree_sorted(os.path.join(SITE, "static"), os.path.join(out, "static"),
                      skip=(None if flags["paid_report"] else (lambda rel: rel.startswith("js" + os.sep + "paid"))))
@@ -1178,6 +1232,8 @@ def build():
             page["alternates"] = page.get("alternates_if_paid", page["alternates"])
             page.update(page.get("if_paid", {}))  # R5: title/description that sell instead of "waitlist"
         extra = {"sample_csv": sample_csv()} if page.get("sample") else {}
+        if page.get("lifted"):
+            extra["lifted_html"] = Markup(lifted_fragment(page["lifted"]))
         html = env.get_template(page["template"]).render(page=page, csp=csp_for(page, cfg), **base_ctx, **extra)
         if html.count(LD_MARKER) != 1:
             die(f"{page['template']}: the JSON-LD marker must appear exactly once")

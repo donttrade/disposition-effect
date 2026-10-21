@@ -1,0 +1,48 @@
+{
+ "article": {
+  "@type": "Article",
+  "dateModified": "2026-10-16",
+  "datePublished": "2026-10-16",
+  "description": "A pre-registered negative result on volatility-scaled momentum.",
+  "headline": "A pre-registered test of volatility-scaled momentum failed its own kill criteria at five positions",
+  "image": "https://donttrade.ca/assets/og/volmom.png",
+  "isAccessibleForFree": true,
+  "license": "https://creativecommons.org/licenses/by-nc/4.0/",
+  "mainEntityOfPage": "https://donttrade.ca/research/volatility-scaled-momentum/",
+  "url": "https://donttrade.ca/research/volatility-scaled-momentum/"
+ },
+ "citation": [
+  [
+   "citation_title",
+   "A pre-registered test of volatility-scaled momentum failed its own kill criteria at five positions"
+  ],
+  [
+   "citation_author",
+   "donttrade"
+  ],
+  [
+   "citation_publication_date",
+   "2026/10/16"
+  ],
+  [
+   "citation_pdf_url",
+   "https://donttrade.ca/research/volatility-scaled-momentum/donttrade-volatility-scaled-momentum.pdf"
+  ]
+ ],
+ "crumb": "Volatility-scaled momentum",
+ "description": "Pre-registered test of volatility-scaled momentum: the mechanism passed on factor data; the five-position version with costs failed. Not a strategy.",
+ "form_action": [
+  "https://donttrade.substack.com"
+ ],
+ "og_image": "/assets/og/volmom.png",
+ "parent": [
+  "Research",
+  "/research/"
+ ],
+ "path": "/research/volatility-scaled-momentum/",
+ "section": "/research/",
+ "source": "docs/research/volatility-scaled-momentum/index.html",
+ "source_sha256": "7709c633936c4428f30527108697aa3186579d4f48c8ac2cf701c7822156ca23",
+ "title": "Volatility-scaled momentum: a negative result — donttrade",
+ "updated": "2026-10-19"
+}

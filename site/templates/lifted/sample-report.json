@@ -1,0 +1,16 @@
+{
+ "citation": [],
+ "crumb": "Sample trader report",
+ "description": "A sample disposition-effect report for one real trader from a public CC0 research dataset, with the script that made it. Not a customer. Not advice.",
+ "form_action": [
+  "https://donttrade.substack.com"
+ ],
+ "og_image": "/assets/og/sample-report.png",
+ "parent": null,
+ "path": "/sample-report/",
+ "section": null,
+ "source": "docs/sample-report/index.html",
+ "source_sha256": "5921b9ecdd42173b6fc5fb317887147e44106eaf8e5843b85ab8952f09dede59",
+ "title": "Sample trader report, from real public data — donttrade",
+ "updated": "2026-10-19"
+}

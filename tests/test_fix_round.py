@@ -43,22 +43,30 @@ def test_no_upload_claims_on_any_page(built_site):
 
 
 def test_lint_covers_passthrough_pages(tmp_path):
+    """Steps 28–29 lifted the old pages: their frozen body keeps the passthrough rules (and may
+    not change at all), so text planted inside it is still caught."""
     r, out = build(tmp_path, "x")
     assert r.returncode == 0
     assert L.lint_build(str(out)) == []
-    page = out / "glossary" / "index.html"  # a passthrough page
-    page.write_text(page.read_text(encoding="utf-8").replace("</main>", "<p>Nothing is uploaded. Standard prices after launch: $49.</p></main>"),
-                    encoding="utf-8")
-    rules = {r for r, where, _ in L.lint_build(str(out)) if where == "/glossary/index.html"}
-    assert {"claim:no_upload", "banned:regular_price", "price_literal"} <= rules
-    # with analytics on, the old footers' "runs no analytics" is caught on passthrough pages
+    page = out / "glossary" / "index.html"  # a lifted page; the plant goes inside its frozen body
+    page.write_text(page.read_text(encoding="utf-8").replace(
+        "<!--frozen:end-->", "<p>Nothing is uploaded. Standard prices after launch: $49.</p><!--frozen:end-->"),
+        encoding="utf-8")
+    rules = {r for r, where, _ in L.lint_build(str(out)) if where == "/glossary/"}
+    assert {"claim:no_upload", "banned:regular_price", "price_literal", "frozen:text"} <= rules
+    # with analytics on, a footer's "runs no analytics" is caught
     assert any(r == "claim:no_analytics" for r, _, _ in L.lint_build(str(out), analytics=True))
 
 
 def test_passthrough_fix_fails_loudly_when_the_sentence_is_gone(tmp_path, monkeypatch):
+    # a fix for a page a template owns (here the lifted /about/) is refused, not silently skipped
     monkeypatch.setitem(B.PASSTHROUGH_FIXES, os.path.join("about", "index.html"), [("no such sentence", "x")])
     monkeypatch.setenv("DT_OUT", str(tmp_path / "o"))
-    with pytest.raises(B.BuildError, match="passthrough fix"):
+    with pytest.raises(B.BuildError, match="passthrough fix: .* is not a passthrough page"):
+        B.build()
+    # a page that does pass through (un-own /about/) whose sentence is gone fails loudly
+    monkeypatch.setattr(B, "PAGES", [p for p in B.PAGES if p["path"] != "/about/"])
+    with pytest.raises(B.BuildError, match="passthrough fix: .* no longer holds"):
         B.build()
 
 

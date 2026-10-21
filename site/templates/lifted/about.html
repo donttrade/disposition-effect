@@ -1,0 +1,56 @@
+
+
+<div class="wrap page-head"><div class="col">
+  <h1>About</h1>
+  <p class="lede ls-measure">donttrade is one person measuring the plan gap: the difference between how traders plan to act and how they actually act, from account-level data. There’s no name on it on purpose: every study names the script that made its headline numbers (or says when it is still to follow), and any gap is disclosed in the study, so you never have to take my word for anything. (Elsewhere on this site, “we” means this one person.)</p>
+  <div class="subscribe"><p class="lead">One email per finished study. Free, no advice.</p><form action="https://donttrade.substack.com/subscribe" method="get">
+    <label class="skip" for="em">Email address</label>
+    <input id="em" type="email" name="email" placeholder="you@example.com" required autocomplete="email">
+    <button type="submit">Email me the next study</button>
+  </form><p class="fine">6 published studies so far · listed on Quantocracy’s daily wrap, 12 Oct 2026 (<a href="https://quantocracy.com/">quantocracy.com</a>)</p></div>
+  <h2>What donttrade measures</h2>
+  <p>Traders make plans for how they will handle gains and losses, and then often act differently. Heimer, Iliewa, Imas and Weber (“Dynamic Inconsistency in Risky Choice: Evidence from the Lab and Field”, <a href="https://www.nber.org/papers/w30910">NBER Working Paper 30910</a>, 2023) report this pattern in both experiments and brokerage data: people plan to keep taking risk after gains and to stop after losses, then cut gains early and chase losses. Fischbacher, Hoffmann and Schudy (“The Causal Effect of Stop-Loss and Take-Gain Orders on the Disposition Effect”, <a href="https://doi.org/10.1093/rfs/hhx016">Review of Financial Studies</a>, 2017) found that automatic stop-loss and take-gain orders reduced the disposition effect, while reminders of the plan did not significantly reduce it.</p>
+  <p>The disposition effect is the first part of the plan gap that donttrade measures, not the whole of it. Its direction in our public study survived a holding-age control, but its size depends on how “gain” is timed and is uncertain (<a href="/research/disposition-effect/#robustness-update">robustness update</a>). The headline of a second study, on portfolio-driven selling, did not survive a stricter test and has been <a href="/research/portfolio-driven-disposition-effect/#correction">corrected</a>. <a href="/plan-gap/">The plan gap, explained →</a></p>
+  <h2>Track record</h2>
+  <ul class="track">
+    <li><span class="when">6 Oct 2026</span><span><a href="/research/disposition-effect/">Disposition-effect replication</a> — 4,659 traders, public data (Chinese A-share social-trading portfolios, 2016–18), code public; <a href="/research/disposition-effect/#robustness-update">robustness update</a> 17 Oct 2026.</span></li>
+    <li><span class="when">11 Oct 2026</span><span><a href="/research/insider-buying-edge/">Insider-buying study</a> — 470,754 Form 4 records; negative result; two pre-publication corrections logged.</span></li>
+    <li><span class="when">12 Oct 2026</span><span>Listed on Quantocracy’s daily wrap (<a href="https://quantocracy.com/">quantocracy.com</a>).</span></li>
+    <li><span class="when">16 Oct 2026</span><span><a href="/research/portfolio-driven-disposition-effect/">Portfolio-driven disposition effect</a> — pre-registered replication on the same public panel; code public; <a href="/research/portfolio-driven-disposition-effect/#correction">headline corrected</a> 17 Oct 2026: it did not survive a stricter test.</span></li>
+    <li><span class="when">16 Oct 2026</span><span><a href="/research/volatility-scaled-momentum/">Volatility-scaled momentum</a> — pre-registered; failed its own kill criteria at five positions; a negative result, not a strategy; code public.</span></li>
+    <li><span class="when">16 Oct 2026</span><span><a href="/research/swing-trading-strategies/">Swing-trading strategies</a> — 26 rules tested under sealed pre-registration; none passed; a negative result, not a strategy; code to be published with the study.</span></li>
+    <li><span class="when">17 Oct 2026</span><span><a href="/research/strategy-tests/">Combined strategy study</a> — 18 new investing, overnight and day-trading rules added to the swing study’s 32; 0 of 50 passed; a negative result, not a strategy; code to be published with the study.</span></li>
+  </ul>
+  <h2>How this is paid for</h2>
+  <p>Firms pay for fixed-scope measurements of their own data; readers pay nothing; no firm can change a number. <a href="/independence/">Independence policy →</a></p>
+  <h2>What you get, and how often</h2>
+  <p>One study at a time, by email, when it is finished. No fixed day. Each one carries the finding, the thing that nearly fooled me, and the figures to check it with.</p>
+  <h2>What this is not</h2>
+  <p>Not trade ideas. Not signals. Not advice. The author is not a licensed investment professional, and nothing here is investment advice or tailored to anyone.</p>
+  <h2>The credential</h2>
+  <div class="code-shot" tabindex="0" role="region" aria-label="Terminal session: re-running the disposition-effect study">$ git clone https://github.com/donttrade/disposition-effect
+$ cd disposition-effect
+$ pip install -r requirements.txt
+$ python reproduce.py
+sanity: `sale` and `gain` are binary with zero nulls in both files.
+
+========================================================================
+HEADLINE -- main panel (sample2.Rdata)
+========================================================================
+  rows (trader-stock-lot-days) : 2,780,879
+  traders                      : 4,731
+  distinct stocks              : 3,501
+  …
+  traders with both defined    : 4,659
+  …
+  this dataset  (all held days)         : 0.1925/ 0.1200= 1.61
+  …</div>
+  <p class="fine ls-mtn6">Excerpt of what <code>reproduce.py</code> prints; “…” marks lines left out here.</p>
+  <p>That is the credential: a public record of measurements anyone can re-run, including the ones that did not go my way. The scripts are on the <a href="/code/">Code</a> page, with any gaps listed.</p>
+  <h2>Contact</h2>
+  <p>Write to <a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a>. The author reads it. We reply within 1 business day (Eastern Time). Email only — no calls.</p>
+  <p>Firms and brokers: fixed-scope measurements are described on the <a href="/for-firms/">Prop firms &amp; brokers page</a>.</p>
+  <h2>Where to find this</h2>
+  <p>Published only at <a href="https://donttrade.substack.com">donttrade.substack.com</a>, this site and <a href="https://github.com/donttrade">github.com/donttrade</a>. Any message from any other channel or handle is not from us.</p>
+</div></div>
+

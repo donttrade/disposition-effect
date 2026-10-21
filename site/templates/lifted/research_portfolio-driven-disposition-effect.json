@@ -1,0 +1,49 @@
+{
+ "article": {
+  "@type": "Article",
+  "dateModified": "2026-10-17",
+  "datePublished": "2026-10-16",
+  "description": "A pre-registered replication of the portfolio-driven disposition effect on public CC0 data; its headline was corrected on 17 Oct 2026.",
+  "headline": "Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)",
+  "image": "https://donttrade.ca/assets/og/pdde.png",
+  "isAccessibleForFree": true,
+  "license": "https://creativecommons.org/licenses/by-nc/4.0/",
+  "mainEntityOfPage": "https://donttrade.ca/research/portfolio-driven-disposition-effect/",
+  "url": "https://donttrade.ca/research/portfolio-driven-disposition-effect/"
+ },
+ "citation": [
+  [
+   "citation_title",
+   "Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)"
+  ],
+  [
+   "citation_author",
+   "donttrade"
+  ],
+  [
+   "citation_publication_date",
+   "2026/10/16"
+  ],
+  [
+   "citation_pdf_url",
+   "https://donttrade.ca/research/portfolio-driven-disposition-effect/donttrade-portfolio-driven-disposition-effect.pdf"
+  ]
+ ],
+ "crumb": "Portfolio-driven disposition effect",
+ "description": "Corrected 17 Oct 2026: the “about twice as strong” headline did not survive a stricter within-trader test. A pre-registered replication on public CC0 data.",
+ "form_action": [
+  "https://donttrade.substack.com"
+ ],
+ "og_image": "/assets/og/pdde.png",
+ "parent": [
+  "Research",
+  "/research/"
+ ],
+ "path": "/research/portfolio-driven-disposition-effect/",
+ "section": "/research/",
+ "source": "docs/research/portfolio-driven-disposition-effect/index.html",
+ "source_sha256": "69681f25fd0e9dedbf26281306fdd7b7d28e4339b0873ee611f4576caf024edc",
+ "title": "Portfolio-driven disposition effect: headline corrected",
+ "title_was": "Portfolio-driven disposition effect: headline corrected — donttrade",
+ "updated": "2026-10-19"
+}

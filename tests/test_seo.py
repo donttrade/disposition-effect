@@ -44,7 +44,8 @@ def test_head_tags(built_site, page):
     title, desc, canon = head_meta(html)
     assert 10 <= len(title) <= 60, (title, len(title))
     assert 50 <= len(desc) <= 155, (desc, len(desc))
-    assert canon == [BASE + page["path"]]
+    # a redirect stub (/who-pays/, meta refresh) names its target as canonical, as it always has
+    assert canon == [BASE + page.get("redirect_to", page["path"])]
     for tag in ("og:title", "og:description", "og:url", "og:image", "og:image:width", "og:image:height", "og:image:alt"):
         assert f'property="{tag}"' in html, tag
     assert f'<meta property="og:url" content="{BASE + page["path"]}">' in html
@@ -55,6 +56,8 @@ def test_titles_descriptions_canonicals_unique(built_site):
     for page in FLAG_OFF:
         t, d, c = head_meta(read(built_site, page["path"]))
         for k, v in (("title", t), ("desc", d), ("canon", c[0])):
+            if k == "canon" and page.get("redirect_to"):
+                continue  # the stub shares its target's canonical on purpose
             assert v not in seen[k], (k, v, page["path"], seen[k].get(v))
             seen[k][v] = page["path"]
 
