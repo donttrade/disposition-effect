@@ -186,3 +186,17 @@ def test_currency_column_never_echoes_a_name(engine_page):
         res = json.loads(raw)["result"]
         assert res["currency_groups"] == {"points": 40}
         assert [w["code"] for w in res["warnings"]] == ["W_CURRENCY_IGNORED"]
+
+
+def test_expectancy_guard_vectors_match_reference(engine_page):
+    """Amendment section 4: the browser's guarded expectancy check equals the Architect's
+    transcription on his 41 vectors bit for bit (test_noise_guard.py: Python = the same file)."""
+    sys.path.insert(0, HERE)
+    import test_noise_guard as G
+    d = G.load()
+    got = json.loads(engine_page.evaluate("s => window.expectancyChecks(s)", json.dumps(d["vectors"])))
+    for i, (g, x, e) in enumerate(zip(got, d["vectors"], d["expected"])):
+        want = G.as_check(e, x)
+        assert g == want, (i, g, want)
+        for k in ("p", "skew", "p_unguarded", "value"):
+            assert G.bits(g[k]) == G.bits(want[k]), (i, k)

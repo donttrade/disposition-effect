@@ -1925,6 +1925,10 @@ def _longest_loss_run(xs):
 
 EXPECTANCY_METHOD = "bootstrap-t"
 
+# Skew guard (ARCHITECT-STATS-AMENDMENT-2026-10-21 section 4, D-8). Mirrors noise.js.
+SKEW_MIN = 1
+SKEW_C = 10
+
 
 def _student_gap(xs, n, mu):
     """|mean - mu| / sd (n - 1). Zero spread: 0 if mean == mu, else infinity. Mirrors studentGap()."""
@@ -1942,31 +1946,79 @@ def _student_gap(xs, n, mu):
     return abs(m - mu) / sd
 
 
-def check_expectancy(pnls, seed):
-    """Expectancy != 0 by bootstrap-t (Tester D3: the plan's sign flip over-fires on skewed P&L).
-
-    Resample with replacement N times; count resamples whose t around the file's mean is at
-    least the file's t around zero."""
-    n = len(pnls)
-    if n < MIN_GROUP:
-        return {"stat": "expectancy", "method": EXPECTANCY_METHOD, "n_a": n, "n_b": None, "value": None,
-                "p": None, "label": label_for(None, True)}
+def _bootstrap_count(x, seed, n_boot, stop_at):
+    """The shipped bootstrap-t count; stops once it reaches stop_at. Mirrors bootstrapCount()."""
+    n = len(x)
     s = 0.0
-    for v in pnls:
+    for v in x:
         s += v
     obs = s / n
-    t_obs = _student_gap(pnls, n, 0.0)
+    t_obs = _student_gap(x, n, 0.0)
     rand = mulberry32(seed)
     draw = [0.0] * n
     count = 0
-    for _ in range(N_PERM):
+    for _ in range(n_boot):
         for i in range(n):
-            draw[i] = pnls[int(rand() * n)]
+            draw[i] = x[int(rand() * n)]
         if _student_gap(draw, n, obs) >= t_obs:
             count += 1
-    p = p_value(count)
-    return {"stat": "expectancy", "method": EXPECTANCY_METHOD, "n_a": n, "n_b": None, "value": obs, "p": p,
-            "label": label_for(p, False)}
+            if count >= stop_at:
+                break
+    return count
+
+
+def skewness(pnls, m):
+    """Sample skewness g1 (population-moment form), sums in input order. Mirrors skewness()."""
+    n = len(pnls)
+    m2 = 0.0
+    m3 = 0.0
+    for x in pnls:
+        d = x - m
+        m2 += d * d
+        m3 += d * d * d
+    m2 = m2 / n
+    m3 = m3 / n
+    return m3 / (m2 * math.sqrt(m2)) if m2 > 0 else 0.0
+
+
+def check_expectancy(pnls, seed, n_boot=None):
+    """Expectancy != 0 by bootstrap-t (Tester D3), then the skew guard (amendment section 4).
+
+    Resample with replacement N times; count resamples whose t around the file's mean is at
+    least the file's t around zero. n_boot is N_PERM in the product (calibration only: smaller)."""
+    n_boot = N_PERM if n_boot is None else n_boot
+    n = len(pnls)
+    out = {"stat": "expectancy", "method": EXPECTANCY_METHOD, "n_a": n, "n_b": None, "value": None, "p": None,
+           "label": None, "skew": None, "guard": None, "n_needed": None, "extreme": None, "p_unguarded": None}
+    if n < MIN_GROUP:
+        out["label"] = label_for(None, True)
+        return out
+    s = 0.0
+    for v in pnls:
+        s += v
+    m = s / n
+    p = (1 + _bootstrap_count(pnls, seed, n_boot, math.inf)) / (n_boot + 1)
+    g1 = skewness(pnls, m)
+    out["value"] = m
+    out["skew"] = g1
+    against = (m > 0 and g1 <= -SKEW_MIN) or (m < 0 and g1 >= SKEW_MIN)
+    if against and n < SKEW_C * g1 * g1:
+        out.update(label=label_for(None, True), guard="skew_small_n", n_needed=math.floor(SKEW_C * g1 * g1) + 1,
+                   p_unguarded=p)
+        return out
+    if against and p < 0.05:
+        ext = pnls[0]
+        for i in range(1, n):
+            if (pnls[i] > ext) if m < 0 else (pnls[i] < ext):
+                ext = pnls[i]
+        stop = math.ceil(0.05 * (n_boot + 1)) - 1
+        if not ((1 + stop) / (n_boot + 1) >= 0.05 and stop / (n_boot + 1) < 0.05):
+            raise ValueError(f"skew guard: stop {stop} does not mark p >= 0.05 for N = {n_boot}")
+        if _bootstrap_count(list(pnls) + [ext], seed, n_boot, stop) >= stop:
+            out.update(label=label_for(None, True), guard="skew_one_more", extreme=ext, p_unguarded=p)
+            return out
+    out.update(p=p, label=label_for(p, False))
+    return out
 
 
 def check_hold_gap(trades, seed):

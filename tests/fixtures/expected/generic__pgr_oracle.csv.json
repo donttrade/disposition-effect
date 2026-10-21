@@ -2,11 +2,16 @@
  "noise": {
   "checks": [
    {
+    "extreme": null,
+    "guard": null,
     "label": "not enough trades to tell",
     "method": "bootstrap-t",
     "n_a": 4,
     "n_b": null,
+    "n_needed": null,
     "p": null,
+    "p_unguarded": null,
+    "skew": null,
     "stat": "expectancy",
     "value": null
    },
