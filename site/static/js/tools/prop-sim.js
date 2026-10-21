@@ -6,8 +6,7 @@
 // the worker. Manual mode: four summary numbers. Either way the page's CSP is
 // connect-src 'none', nothing is stored, nothing is logged.
 
-import { readTradeFile, startProgress } from './read-file.js';
-import { LIMITS, MESSAGES } from '../engine/errors.js';
+import { createFileSlot, renderReadError, whileBusy, clearFieldErrors, fieldError, showProblems } from './tool-state.js';
 import { RUNS, DEFAULT_SEED, tradingDays } from './prop-sim-core.js';
 import { money, unitNote, pct, intText, el, DASH } from './format.js';
 import { parseStrict, parsePositive, parseWhole, InputError } from './num.js';
@@ -16,10 +15,7 @@ const $ = (id) => document.getElementById(id);
 const MIN_STREAK_BUSTS = 30; // fewer busts than this: too few to describe what led up to them
 let loaded = null;           // {days, unit, n, label} — the file's trading days, in memory only
 let worker = null;
-let reading = null;          // the file being read: {cancel()}
-let readSeq = 0;             // which read is the latest; an older result is dropped
-let readDone = null;         // settles when the latest read finishes, so "Run" can wait for it
-let stopProgress = () => {};
+let slot = null;             // the file being read or on screen (tool-state.js, Tester R1-R3)
 
 function mode() { return document.querySelector('input[name="ps-mode"]:checked').value; }
 
@@ -30,40 +26,25 @@ function syncMode() {
 }
 
 // ------------------------------------------------------------------ file input
-function setFileStatus(text, isError) {
+function setFileStatus(text) {
   const s = $('ps-file-status');
   s.textContent = text;
-  s.className = isError ? 'error' : 'small muted';
   s.hidden = !text;
 }
 
-async function fromFile(file) {
+function clearFile() {
   loaded = null;
-  if (reading) { reading.cancel(); reading = null; stopProgress(); }
-  if (!file) return;
-  if (file.size > LIMITS.MAX_BYTES) { setFileStatus(MESSAGES.E_TOO_LARGE, true); return; }
-  load(new Uint8Array(await file.arrayBuffer()), 'your file');
+  setFileStatus('');
+  $('ps-file-error').hidden = true;
 }
 
-async function load(bytes, label) {
-  loaded = null;
-  if (reading) reading.cancel();
-  stopProgress();
-  stopProgress = startProgress($('ps-progress'));
-  const mine = ++readSeq;
-  const job = readTradeFile(bytes, { onStage: (t) => setFileStatus(t, false) });
-  reading = job;
-  readDone = job.done.catch(() => {});
-  let out;
-  try { out = await job.done; } finally { if (mine === readSeq) { reading = null; readDone = null; stopProgress(); } }
-  if (mine !== readSeq) return; // a newer file replaced this one
-  if (out.error) { setFileStatus(`${out.error.message} (error code ${out.error.code})`, true); return; }
+function showLoaded(out, label) {
   const r = out.result;
   loaded = { days: tradingDays(r.trades), unit: r.trades[0].pnl_unit, n: r.trades.length, label,
     beta: !r.verified_format };
   const plural = (n, one, many) => `${intText(n)} ${n === 1 ? one : many}`;
   setFileStatus(`Read ${label}: ${plural(loaded.n, 'closed trade', 'closed trades')} on ${plural(loaded.days.length, 'trading day', 'trading days')}.` +
-    (loaded.beta ? ' This file format is in beta.' : ''), false);
+    (loaded.beta ? ' This file format is in beta.' : ''));
 }
 
 // ------------------------------------------------------------------ validation
@@ -73,14 +54,7 @@ const FIELDS = {
   'ps-wr': 'the win rate', 'ps-avgwin': 'the average win', 'ps-avgloss': 'the average loss', 'ps-tpd': 'the trades per day',
 };
 
-function clearErrors() {
-  for (const id of Object.keys(FIELDS)) {
-    $(id).removeAttribute('aria-invalid');
-    const e = $(id + '-err');
-    if (e) { e.hidden = true; e.textContent = ''; }
-  }
-  $('ps-errors').hidden = true;
-}
+function clearErrors() { clearFieldErrors(Object.keys(FIELDS), $('ps-errors')); }
 
 function read() {
   clearErrors();
@@ -88,9 +62,7 @@ function read() {
   const get = (id, fn) => {
     try { return fn($(id).value, FIELDS[id]); } catch (e) {
       if (!(e instanceof InputError)) throw e;
-      $(id).setAttribute('aria-invalid', 'true');
-      const box = $(id + '-err');
-      box.textContent = e.message; box.hidden = false;
+      fieldError(id, e.message);
       problems.push({ id, message: e.message });
       return null;
     }
@@ -113,8 +85,7 @@ function read() {
   } else {
     const wr = get('ps-wr', parseStrict);
     if (wr !== null && (wr < 0 || wr > 100)) {
-      $('ps-wr').setAttribute('aria-invalid', 'true');
-      $('ps-wr-err').textContent = 'The win rate has to be between 0 and 100.'; $('ps-wr-err').hidden = false;
+      fieldError('ps-wr', 'The win rate has to be between 0 and 100.');
       problems.push({ id: 'ps-wr', message: 'The win rate has to be between 0 and 100.' });
     }
     p.win_rate = wr === null ? null : wr / 100;
@@ -122,26 +93,16 @@ function read() {
     p.avg_loss = get('ps-avgloss', parsePositive);
     p.trades_per_day = get('ps-tpd', (v, l) => parseWhole(v, l, 1, 50));
   }
-  if (problems.length) {
-    const box = $('ps-errors');
-    box.replaceChildren(el('strong', { text: problems.length === 1 ? 'One input needs a change' : `${problems.length} inputs need a change` }),
-      el('ul', {}, ...problems.map((x) => el('li', {}, el('a', { href: '#' + x.id, text: x.message })))));
-    box.hidden = false;
-    box.focus();
-    return null;
-  }
+  if (problems.length) { showProblems($('ps-errors'), problems); return null; }
   return p;
 }
 
 // ------------------------------------------------------------------ run and render
 async function run(ev) {
   ev.preventDefault();
-  if (readDone && mode() === 'file') { // the file is still being read: run as soon as it is
-    $('ps-run').disabled = true;
-    await readDone;
-    await new Promise((resolve) => setTimeout(resolve, 0)); // let load() finish first
-    $('ps-run').disabled = false;
-  }
+  // A file still being read: wait for it, whichever way it ends (result, error, a newer pick,
+  // an emptied picker), with Run disabled meanwhile and always re-enabled after (R1).
+  if (mode() === 'file' && slot.state === 'reading') await whileBusy($('ps-run'), () => slot.settled());
   const p = read();
   if (!p) return;
   if (worker) worker.terminate();
@@ -150,16 +111,24 @@ async function run(ev) {
   const st = $('ps-status');
   st.textContent = `Running ${intText(p.runs)} simulated challenges…`;
   st.hidden = false;
-  $('ps-run').disabled = true;
+  const btn = $('ps-run');
+  btn.disabled = true;
+  const failed = () => {
+    if (worker) { worker.terminate(); worker = null; }
+    btn.disabled = false;
+    st.textContent = 'The simulation could not run in this browser. Press Run to try again.';
+    st.hidden = false;
+  };
   worker = new Worker(new URL('./prop-sim-worker.js', import.meta.url), { type: 'module' });
   worker.onmessage = (e) => {
     worker.terminate(); worker = null;
-    $('ps-run').disabled = false;
+    btn.disabled = false;
     st.hidden = true;
-    if (e.data.error) { st.textContent = 'The simulation could not run in this browser.'; st.hidden = false; return; }
+    if (!e.data || e.data.error || !e.data.result) { failed(); return; }
     render(p, e.data.result);
   };
-  worker.onerror = () => { $('ps-run').disabled = false; st.textContent = 'The simulation could not run in this browser.'; };
+  worker.onerror = (e) => { if (e && e.preventDefault) e.preventDefault(); failed(); };
+  worker.onmessageerror = failed;
   worker.postMessage(p);
 }
 
@@ -251,8 +220,12 @@ function teaser(res) {
 // ------------------------------------------------------------------ wiring
 function init() {
   for (const r of document.querySelectorAll('input[name="ps-mode"]')) r.addEventListener('change', syncMode);
-  $('ps-file').addEventListener('change', (e) => fromFile(e.target.files[0]));
-  $('ps-sample-btn').addEventListener('click', () => load(new TextEncoder().encode($('ps-sample').textContent.replace(/^\s+/, '')), 'the synthetic sample file'));
+  slot = createFileSlot({
+    progressBox: $('ps-progress'), onStage: setFileStatus, onClear: clearFile, onResult: showLoaded,
+    onError: (err, retry) => renderReadError($('ps-file-error'), err, retry),
+  });
+  $('ps-file').addEventListener('change', (e) => slot.pickFile(e.target.files[0], 'your file'));
+  $('ps-sample-btn').addEventListener('click', () => slot.readBytes(new TextEncoder().encode($('ps-sample').textContent.replace(/^\s+/, '')), 'the synthetic sample file'));
   $('ps-form').addEventListener('submit', run);
   if (!$('ps-seed').value) $('ps-seed').value = String(DEFAULT_SEED);
   $('ps-js-needed').hidden = true;

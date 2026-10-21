@@ -530,7 +530,7 @@ def rows_file(path, trades):
 
 @pytest.mark.parametrize("tool,inp,done", [
     ("/tools/trade-stats/", "#ts-file", "() => !!document.querySelector('#ts-noise table') || !document.getElementById('ts-error').hidden"),
-    ("/tools/prop-challenge-simulator/", "#ps-file", "() => /closed trades? on|error code/.test(document.getElementById('ps-file-status').textContent)"),
+    ("/tools/prop-challenge-simulator/", "#ps-file", "() => /closed trades? on/.test(document.getElementById('ps-file-status').textContent) || !document.getElementById('ps-file-error').hidden"),
 ])
 def test_d7_100k_rows_keep_the_main_thread_free(browser, built_site, tmp_path, tool, inp, done):
     f = rows_file(tmp_path / "rows100k.csv", 50_000)

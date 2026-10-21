@@ -8,6 +8,7 @@
 
 import { parsePositive, InputError } from './num.js';
 import { el, plain } from './format.js';
+import { clearFieldErrors, fieldError, showProblems } from './tool-state.js';
 
 const $ = (id) => document.getElementById(id);
 const LABELS = {
@@ -48,29 +49,15 @@ export function lotSize({ mode, balance, risk, stop, vpp, step }) {
   return out;
 }
 
-function showErrors(problems) {
-  const box = $('ls-errors');
-  box.replaceChildren(el('strong', { text: problems.length === 1 ? 'One input needs a change' : `${problems.length} inputs need a change` }),
-    el('ul', {}, ...problems.map((x) => el('li', {}, el('a', { href: '#' + x.id, text: x.message })))));
-  box.hidden = false;
-  box.focus();
-}
-
 function calculate(ev) {
   ev.preventDefault();
   const problems = [];
-  for (const id of Object.keys(LABELS)) {
-    $(id).removeAttribute('aria-invalid');
-    $(id + '-err').hidden = true;
-  }
-  $('ls-errors').hidden = true;
+  clearFieldErrors(Object.keys(LABELS), $('ls-errors'));
   const get = (id, optional) => {
     if (optional && !$(id).value.trim()) return null;
     try { return parsePositive($(id).value, LABELS[id]); } catch (e) {
       if (!(e instanceof InputError)) throw e;
-      $(id).setAttribute('aria-invalid', 'true');
-      $(id + '-err').textContent = e.message;
-      $(id + '-err').hidden = false;
+      fieldError(id, e.message);
       problems.push({ id, message: e.message });
       return null;
     }
@@ -86,11 +73,10 @@ function calculate(ev) {
   };
   if (mode === 'pct' && v.risk !== null && v.risk > 100) {
     const msg = 'The risk % cannot be more than 100.';
-    $('ls-risk').setAttribute('aria-invalid', 'true');
-    $('ls-risk-err').textContent = msg; $('ls-risk-err').hidden = false;
+    fieldError('ls-risk', msg);
     problems.push({ id: 'ls-risk', message: msg });
   }
-  if (problems.length) { $('ls-out').hidden = true; showErrors(problems); return; }
+  if (problems.length) { $('ls-out').hidden = true; showProblems($('ls-errors'), problems); return; }
   render(v, lotSize(v));
 }
 

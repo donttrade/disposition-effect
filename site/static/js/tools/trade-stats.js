@@ -12,8 +12,7 @@
 // Every figure shown is computed by the engine (stats.js, noise.js). The teaser line uses
 // only those figures. Missing values print as "—", never NaN/Infinity/undefined.
 
-import { readTradeFile, startProgress } from './read-file.js';
-import { LIMITS, MESSAGES } from '../engine/errors.js';
+import { createFileSlot, renderReadError, fieldError } from './tool-state.js';
 import { freeStats, equityCurve, NO_LOSSES } from '../engine/stats.js';
 import { LABELS, N_PERM } from '../engine/noise.js';
 import { money, unitNote, pct, ratio, duration, day, intText, el, signClass, DASH } from './format.js';
@@ -35,9 +34,6 @@ const CHECK_TEXT = {
 
 let state = null; // {result, unit, fileLabel} of the file on screen; never persisted
 let worker = null;  // the noise-check worker, used after an HTML report read on the page
-let reading = null; // the file being read: {cancel()}
-let stopProgress = () => {};
-let readSeq = 0;    // which read is the latest; an older result is dropped
 
 // ------------------------------------------------------------------ status / errors
 function status(text) {
@@ -46,20 +42,9 @@ function status(text) {
   s.hidden = !text;
 }
 
-function showError(err) {
-  const box = $('ts-error');
-  box.replaceChildren(
-    el('strong', { text: 'This file could not be read' }),
-    el('p', { text: err.message }),
-    el('p', { class: 'small', text: `Error code ${err.code}. If your platform is not listed, copy your trades into the CSV template (Date, Time, Symbol, Side, Quantity, Price) and try again.` }));
-  box.hidden = false;
-  box.focus();
-}
-
 function clearOutput() {
   if (worker) { worker.terminate(); worker = null; }
-  if (reading) { reading.cancel(); reading = null; }
-  stopProgress();
+  state = null;
   $('ts-error').hidden = true;
   $('ts-out').replaceChildren();
   $('ts-out').hidden = true;
@@ -67,48 +52,29 @@ function clearOutput() {
 }
 
 // ------------------------------------------------------------------ input
-async function fromFile(file) {
-  clearOutput();
-  if (!file) return;
-  if (file.size > LIMITS.MAX_BYTES) { // refuse before reading a huge file into memory
-    showError({ code: 'E_TOO_LARGE', message: MESSAGES.E_TOO_LARGE });
-    return;
-  }
-  status('Reading your file in this tab…');
-  const bytes = new Uint8Array(await file.arrayBuffer());
-  analyse(bytes, 'your file');
-}
+// The file on screen: one pick at a time, the latest wins (tool-state.js, Tester R1-R3).
+let slot = null;
 
-function fromSample() {
-  clearOutput();
-  const text = $('ts-sample').textContent.replace(/^\s+/, '');
-  analyse(new TextEncoder().encode(text), 'the synthetic sample file');
-}
-
-async function analyse(bytes, fileLabel) {
-  stopProgress = startProgress($('ts-progress'));
-  const mine = ++readSeq;
-  const job = readTradeFile(bytes, {
-    noise: true,
-    onStage: status,
-    onNoise: (noise) => {
-      if (mine !== readSeq) return; // a newer file replaced this one
-      reading = null;
-      if (!noise) { $('ts-noise-status').textContent = 'The checks could not run in this browser.'; return; }
-      renderNoise(noise, state.result.trades.length);
-    },
-  });
-  reading = job;
-  let out;
-  try { out = await job.done; } finally { if (mine === readSeq) { stopProgress(); status(''); } }
-  if (mine !== readSeq) return; // a newer file replaced this one
-  if (out.error) { reading = null; showError(out.error); return; }
+async function showResult(out, fileLabel, job) {
   const r = out.result;
   state = { result: r, unit: r.trades[0].pnl_unit, fileLabel };
   await render();
-  if (mine !== readSeq) return;
-  if (out.onPage) { reading = null; runNoise(r.trades); } // an HTML report was read on the page
+  if (!job.isCurrent() || !state || state.result !== r) return; // a newer file replaced this one
+  if (out.onPage) runNoise(r.trades); // an HTML report was read on the page
   else job.runNoise();
+}
+
+function onNoise(noise) {
+  if (!state) return;
+  if (!noise) { $('ts-noise-status').textContent = 'The checks could not run in this browser.'; return; }
+  renderNoise(noise, state.result.trades.length);
+}
+
+function fromFile(file) { slot.pickFile(file, 'your file'); }
+
+function fromSample() {
+  const text = $('ts-sample').textContent.replace(/^\s+/, '');
+  slot.readBytes(new TextEncoder().encode(text), 'the synthetic sample file');
 }
 
 // Hand the main thread back between the heavy steps, so a 50,000-trade file never blocks it
@@ -126,9 +92,7 @@ function startingBalance() {
     return parsePositive(input.value, 'the starting balance');
   } catch (e) {
     if (!(e instanceof InputError)) throw e;
-    err.textContent = e.message;
-    err.hidden = false;
-    input.setAttribute('aria-invalid', 'true');
+    fieldError('ts-balance', e.message);
     return null;
   }
 }
@@ -166,7 +130,7 @@ async function render(focus = true) {
   if (big) await breathe();
   const points = equityCurve(r.trades);
   if (big) await breathe();
-  if (state.result !== r) return; // another file arrived meanwhile
+  if (!state || state.result !== r) return; // another file arrived meanwhile
   state.stats = s; // the hold-time figures do not depend on the balance; the teaser reuses them
   const out = $('ts-out');
   out.replaceChildren(el('h2', { id: 'ts-out-h', tabindex: '-1', text: state.fileLabel === 'the synthetic sample file' ? 'Results: synthetic sample file' : 'Results: your file' }));
@@ -320,7 +284,13 @@ function runNoise(trades) {
     if (ev.data.error || !ev.data.noise) { $('ts-noise-status').textContent = 'The checks could not run in this browser.'; return; }
     renderNoise(ev.data.noise, started);
   };
-  worker.onerror = () => { $('ts-noise-status').textContent = 'The checks could not run in this browser.'; };
+  const failed = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (worker) { worker.terminate(); worker = null; }
+    $('ts-noise-status').textContent = 'The checks could not run in this browser.';
+  };
+  worker.onerror = failed;
+  worker.onmessageerror = failed;
   // Only two numbers per trade go to the worker: no symbol, no time, nothing else.
   worker.postMessage({ trades: trades.map((t) => ({ pnl: t.pnl, hold_s: t.hold_s })) });
 }
@@ -376,6 +346,11 @@ function teaser(noise) {
 
 // ------------------------------------------------------------------ wiring
 function init() {
+  slot = createFileSlot({
+    progressBox: $('ts-progress'), noise: true, onStage: status, onClear: clearOutput,
+    onResult: showResult, onNoise,
+    onError: (err, retry) => renderReadError($('ts-error'), err, retry),
+  });
   const input = $('ts-file');
   input.addEventListener('change', () => { fromFile(input.files[0]); input.value = ''; });
   $('ts-sample-btn').addEventListener('click', fromSample);
