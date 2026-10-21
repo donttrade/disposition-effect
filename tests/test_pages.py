@@ -20,9 +20,25 @@ sys.path.insert(0, os.path.join(REPO, "site"))
 from a11y import axe_violations, horizontal_overflow  # noqa: E402
 import build as B  # noqa: E402
 
-PAGES = ["/"]
+PAGES = ["/", "/for-traders/", "/for-firms/"]
 # Links to anchors that the NEXT step builds. Each step that builds one removes it here.
-FORWARD = {"/for-traders/#waitlist"}  # built in step 14
+FORWARD = set()
+
+# Every id of today's page that must survive the rebuild (checks/urls-baseline.txt lists the
+# externally linked ones; these are all ids on the old pages, minus "main" which base.html has).
+OLD_IDS = {
+    "/for-traders/": ["founding"],
+    "/for-firms/": ["what-it-costs", "copy-leader", "claims-test"],
+}
+# v1 rule (checks/tests/test_site_content.py): an assurance word only in a sentence with a negation.
+V1_BANNED = re.compile(r"\b(certif(?:ied|ication|y)|verif(?:ied|ication|y)|audit(?:ed|s)?)\b(?!/)", re.I)
+V1_NEG = re.compile(r"\b(not|never|no one|nothing|don[’']t|no longer|nor|isn[’']t|without|no)\b", re.I)
+
+
+def visible(html):
+    import html as H
+    html = re.sub(r"(?is)<(script|style)\b.*?</\1>", " ", html)
+    return re.sub(r"\s+", " ", H.unescape(re.sub(r"<[^>]+>", " ", html))).strip()
 
 
 def html_of(site, path):
@@ -136,3 +152,114 @@ def test_home_hero_is_a_real_screenshot_within_budget(built_site):
         assert f"/static/img/hero-trade-stats-{scheme}.webp" in html
     assert re.search(r'<img src="/static/img/hero-trade-stats-light.webp" width="\d+" height="\d+"', html)
     assert "Sample data, not a real trader." in html
+
+
+# ------------------------------------------------------------------ shared wording checks
+@pytest.mark.parametrize("path", PAGES)
+def test_wording_rules(built_site, path):
+    text = visible(html_of(built_site, path))
+    for sent in re.split(r"(?<=[.!?])\s+", text):
+        if V1_BANNED.search(sent):
+            assert V1_NEG.search(sent), sent
+    # "Trial" only in the formerly line; no regular-price wording; no competitor price talk
+    for m in re.finditer(r"\btrial\b", text, re.I):
+        assert "called “Trial” before 22 Oct 2026" in text[max(0, m.start() - 10):m.end() + 30], text[m.start() - 60:m.end() + 60]
+    assert not re.search(r"standard (prices?|after launch)|regular price|\$49|\$99", text, re.I)
+
+
+@pytest.mark.parametrize("path", sorted(OLD_IDS))
+def test_old_ids_kept(built_site, path):
+    ids = parse(html_of(built_site, path)).ids
+    assert set(OLD_IDS[path]) <= ids
+
+
+# ------------------------------------------------------------------ step 14 (+16): forms
+FORM_PAGES = {"/for-traders/": "#wl", "/for-firms/": "#ff"}
+FIRM_KEY = "f8fdba04-71bb-4856-b700-01ac6796c252"
+TRADER_KEY = "54d01baf-5e02-4d93-988c-16cf5487732d"
+
+
+def _fill(pg, form):
+    for el in pg.query_selector_all(form + " input[required], " + form + " textarea[required]"):
+        t = el.get_attribute("type")
+        if t == "email":
+            el.fill("test-ignore@example.com")
+        elif t == "checkbox":
+            el.check()
+        elif t == "radio":
+            el.check()
+        else:
+            el.fill("TEST - ignore")
+
+
+@pytest.mark.parametrize("path", sorted(FORM_PAGES))
+def test_form_posts_with_javascript_off(browser, built_site, path):
+    """The form POSTs to Web3Forms with JS off, with key, redirect, product, page, ref and honeypot."""
+    form = FORM_PAGES[path]
+    ctx = browser.new_context(java_script_enabled=False, viewport={"width": 375, "height": 900})
+    pg = ctx.new_page()
+    posted = []
+
+    def handle(route):
+        posted.append(route.request.post_data or "")
+        route.fulfill(status=200, body="ok")
+    pg.route("https://api.web3forms.com/**", handle)
+    pg.goto(built_site["url"] + path + "?ref=x1")
+    _fill(pg, form)
+    pg.click(form + " button[type=submit]")
+    pg.wait_for_timeout(500)
+    ctx.close()
+    assert len(posted) == 1
+    from urllib.parse import parse_qs
+    body = {k: v[0] for k, v in parse_qs(posted[0], keep_blank_values=True).items()}
+    assert body["access_key"] == (TRADER_KEY if form == "#wl" else FIRM_KEY)
+    assert body["page"] == path and "botcheck" not in body  # unticked honeypot is not sent
+    assert body["redirect"].startswith("https://donttrade.ca/") and body["redirect"].endswith("/thanks/")
+    assert body["product"] in ("waitlist", "pilot") and body["ref"] == ""  # JS off: defaults
+
+
+@pytest.mark.parametrize("path", sorted(FORM_PAGES))
+def test_form_ref_capture_and_fields(browser, built_site, path):
+    form = FORM_PAGES[path]
+    html = html_of(built_site, path)
+    assert "tally.so" not in html
+    ctx = browser.new_context(viewport={"width": 375, "height": 900})
+    pg = ctx.new_page()
+    pg.goto(built_site["url"] + path + "?ref=report&product=copy-leader")
+    assert pg.input_value(form + " input[name=ref]") == "report"
+    if form == "#ff":
+        assert pg.input_value(form + " input[name=product]") == "copy-leader"
+        assert pg.get_attribute("#ff-email", "autocomplete") == "email"
+        assert pg.get_attribute("#ff-firm", "autocomplete") == "organization"
+        assert pg.get_attribute("#ff-role", "autocomplete") == "organization-title"
+    else:
+        assert not pg.is_checked("#wl-consent") and pg.get_attribute("#wl-consent", "required") is not None
+    # botcheck honeypot present and hidden; every visible field has a label; targets >= 44 px
+    assert pg.locator(form + " input[name=botcheck]").count() == 1 and not pg.is_visible(form + " input[name=botcheck]")
+    for el in pg.query_selector_all(form + " input:not([type=hidden]):not([name=botcheck]), " + form + " textarea"):
+        assert pg.locator(f"label[for='{el.get_attribute('id')}']").count() == 1
+    for el in pg.query_selector_all(form + " button, " + form + " input[type=email], " + form + " input[type=text]"):
+        assert el.bounding_box()["height"] >= 44
+    assert pg.locator("a[href^='mailto:']").count() >= 1
+    pg.goto(built_site["url"] + path + "?ref=<script>")
+    assert pg.input_value(form + " input[name=ref]") == ""
+    ctx.close()
+
+
+def test_for_firms_pilot_rename_and_prices(built_site):
+    html = html_of(built_site, "/for-firms/")
+    text = visible(html)
+    assert "Pilot (called “Trial” before 22 Oct 2026)" in text
+    assert text.count("Trial") == 1
+    assert "Start a Pilot — $745 USD" in text
+    assert "Card payments are accepted through a secure Stripe link, sent only after you accept the scope." in text
+    assert "buy.stripe.com" not in html  # pilot_checkout off
+
+
+def test_for_traders_waitlist_and_privacy_wording(built_site):
+    text = visible(html_of(built_site, "/for-traders/"))
+    assert "Join the waitlist — $39 founding price" in text
+    assert "$39 founding price for the first 100 buyers" in text
+    assert "beta" in text and "not uploaded" in text
+    for bad in ("nothing leaves", "never leaves", "anonymous"):
+        assert bad not in text.lower()

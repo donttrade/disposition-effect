@@ -10,6 +10,12 @@ directive = ["should", "must", "need to", "needs to", "fix", "fixes", "stop doin
 coaching = ["coach", "coaching", "mentor", "mentoring", "signals", "alerts to trade"]
 promises = ["improve your returns", "become profitable", "win more", "edge guaranteed", "real edge", "proven strategy", "guaranteed"]
 cause = ["you lost $", "because of your"]
+# Orchestrator rule (21 Oct): never call donttrade's work, or a firm's figure, any of these.
+assurance = ["certified", "verified", "audited", "certification", "certify", "verification", "audit", "audits"]
+# Trial was renamed Pilot on 22 Oct 2026 (plan step 14); only the "formerly" line may name it.
+renamed = ["trial"]
+# Competition Act regular-price risk (DECISIONS ADDED 20 Oct): no "standard price after launch".
+regular_price = ["standard price", "standard prices", "regular price", "after launch:"]
 ai_tells = ["unlock", "unlocks", "unlocked", "elevate", "supercharge", "#1", "trusted by"]
 
 [allow]
@@ -28,6 +34,16 @@ phrases = [
   "no legal advice",
   "not legal advice",
   "legal advisers",
+  # negations of the assurance words, word for word as they appear on the pages
+  "never audited, certified or verified",
+  "describe it as audited, certified or verified",
+  "call any leader or ranking audited, certified or verified",
+  "call the claim or the product certified, verified or audited",
+  "It is not an audit",
+  "Not an audit and not an assurance engagement",
+  "Isn’t this a kind of audit?",
+  # the one place the old product name may appear
+  "called “Trial” before 22 Oct 2026",
   # FAQ questions whose answer on the page starts with "No."
   "Is this investment advice?",
   "Is this advice?",

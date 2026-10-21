@@ -346,3 +346,15 @@ fieldset legend { font-weight: 600; margin-bottom: 4px; padding: 0; }
 .finding .display { font-variant-numeric: tabular-nums; font-size: 4rem; line-height: 1; }
 @media (max-width: 600px) { .finding .display { font-size: var(--fs-6); } }
 @media (min-width: 900px) { .finding-note { padding-top: var(--s4); } }
+
+/* ------------------------------------------------------------------ audience pages and forms (steps 14-16) */
+.pipeline { list-style: none; margin: var(--s2) 0; padding: 0; counter-reset: none; border-left: 2px solid var(--rust); }
+.pipeline li { padding: var(--s1) 0 var(--s1) var(--s2); }
+.pipeline li strong { display: block; }
+.request-form { max-width: 34rem; }
+.req, .opt { font-weight: 400; color: var(--muted); font-size: var(--fs-0); }
+.mailto-line { margin-top: var(--s2); }
+.price-table td:nth-child(2) { min-width: 16rem; }
+.price-table td:nth-child(3), .price-table td:nth-child(4) { min-width: 8rem; }
+pre { font-family: var(--font-mono); font-size: var(--fs-0); background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: var(--s2); overflow-x: auto; max-width: 100%; }
