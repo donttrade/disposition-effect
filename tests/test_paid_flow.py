@@ -156,7 +156,8 @@ def test_outage_message(browser, stack):
 
 
 def test_restore_by_link_only(browser, stack):
-    """Restore-by-email is not in v1 (decision 20 Oct): the link works, there is no email form or endpoint."""
+    """Restore-by-email is not in v1 (decision 20 Oct): the link works, there is no email form or endpoint.
+    Owner decision 21 Oct ~11:00 (manual restore = YES): the only mention of email is the manual-help line."""
     ctx = browser.new_context()
     page = ctx.new_page()
     sid = new_session(page, stack, "cs_test_restore0000001")
@@ -169,7 +170,10 @@ def test_restore_by_link_only(browser, stack):
     p2.wait_for_selector("#r-open", state="visible")
     assert "Access restored" in p2.inner_text("#r-status")
     assert p2.locator("input[type=email], #r-form").count() == 0
-    assert "email" not in p2.inner_text("main").lower()
+    main = p2.inner_text("main")
+    manual = p2.inner_text("#r-manual")
+    assert "email us from the address you paid with" in manual
+    assert "email" not in main.replace(manual, "").lower()
     gone = p2.request.post(stack["api"] + "/restore", data=json.dumps({"email": "buyer@example.com"}),
                            headers={"content-type": "application/json", "origin": stack["site"]})
     assert gone.status == 404
