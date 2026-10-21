@@ -25,8 +25,10 @@ import lint as L  # noqa: E402
 import build as B  # noqa: E402
 from a11y import axe_violations, horizontal_overflow  # noqa: E402
 
-FAKE = {"seller_legal_name": "Fixture Seller Zqx Holdings", "premises_address": "PO Box 0000, Fixturetown ON A0A 0A0",
-        "phone": "+1 555 0100"}
+# Obviously fake but well-formed (R4): two words of letters, a PO box in a made-up town with a
+# well-formed Ontario postal code, and a 555 area code that is not in service.
+FAKE = {"seller_legal_name": "Zzqx Qqvendor Holdings", "premises_address": "PO Box 9917, Zzqxville ON K9Z 9Z9",
+        "phone": "+1 555 555 0234"}
 SITE_TOML = os.path.join(REPO, "site", "config", "site.toml")
 
 

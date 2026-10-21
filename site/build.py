@@ -9,8 +9,8 @@ Rules (V2-BUILD-PLAN, STRUCTURE and step 3):
       - an externally linked id (path#id in the baseline) missing from its page,
       - trader_first_home != paid_report, or analytics on without a beacon token,
       - a paid-only page or paid-flagged markup in the output while paid_report is off,
-      - a placeholder left in private.toml while a commerce flag is on (placeholder_reason();
-        DT_ALLOW_PLACEHOLDERS=1 skips only this check, for local test builds),
+      - a private.toml value without the shape of a real one while a commerce flag is on
+        (seller_problem(); DT_ALLOW_PLACEHOLDERS=1 skips only this check, for local test builds),
       - a malformed site.toml or private.toml (a BUILD FAILED line, not a traceback).
   * Output is deterministic: sorted walks, no timestamps, so two builds are byte-identical.
 
@@ -31,6 +31,7 @@ Local-test escapes (ESCAPES): each opens ONE guard, prints a WARNING, and is ref
 import json
 import os
 import re
+import unicodedata
 import shutil
 import sys
 import tomllib
@@ -76,21 +77,136 @@ def placeholder_reason(value):
     return None
 
 
+# R4: the seller fields must have a positive shape, not merely avoid a blocklist. Each value is
+# NFKC-normalised first (full-width letters, NBSP, ligatures become plain text), and a value
+# holding an invisible or control character (Unicode Cf/Cc: zero-width, soft hyphen, bidi
+# marks, newlines) is refused outright, so a placeholder cannot hide behind one.
+PLACEHOLDER_TOKENS = frozenset("""
+    seller vendor name legal business company owner here later not yet unknown none null nil
+    test testing tbd tbc todo fixme example sample placeholder lorem ipsum dummy fake changeme demo
+    pending confirm lawyer your my asdf qwerty foo address phone province postal po box tel fax
+""".split())
+# Cyrillic and Greek letters that look like Latin ones, for the token check only (ТВD, ХХХ)
+CONFUSABLES = str.maketrans("АВЕКМНОРСТХаеорсухіјѕԁԛԝΑΒΕΖΗΙΚΜΝΟΡΤΥΧαοντ",
+                            "ABEKMHOPCTXaeopcyxijsdqwABEZHIKMNOPTYXaovt")
+PROVINCES = {"AB": "T", "BC": "V", "MB": "R", "NB": "E", "NL": "A", "NS": "B", "NT": "X", "NU": "X",
+             "ON": "KLMNP", "PE": "C", "QC": "GHJ", "SK": "S", "YT": "Y"}  # code → postal first letters
+POSTAL = re.compile(r"[ABCEGHJ-NPRSTVXY]\d[ABCEGHJ-NPRSTV-Z] \d[ABCEGHJ-NPRSTV-Z]\d")  # A1A 1A1, no D F I O Q U
+NAME_WORD = re.compile(r"[^\W\d_]+(?:['’-][^\W\d_]+)*\.?")      # letters, inner - or ', optional "Inc."
+ADDRESS = re.compile(r"(?P<street>.+?),\s*(?P<city>[^,\d]+?),?\s+(?P<prov>[A-Z]{2})\s+(?P<postal>\S{3} \S{3})(?:,?\s+Canada)?")
+PHONE_CHARS = re.compile(r"(?P<main>\+?[0-9()./ -]+?)(?:\s*(?:ext\.?|x)\s*(?P<ext>\d{1,6}))?", re.IGNORECASE)
+
+
+def normalise_private(value):
+    """(NFKC text with runs of spaces collapsed, None) or (None, why)."""
+    for ch in value:
+        if unicodedata.category(ch) in ("Cf", "Cc", "Zl", "Zp"):
+            return None, f"it holds an invisible or control character (U+{ord(ch):04X})"
+    return " ".join(unicodedata.normalize("NFKC", value).split()), None
+
+
+def _scripts(word):
+    return {unicodedata.name(ch, "?").split(" ")[0] for ch in word if ch.isalpha()}
+
+
+def _token_problem(words):
+    for w in words:
+        if len(_scripts(w)) > 1:
+            return f"the word {w!r} mixes alphabets (a look-alike letter)"
+        bare = w.rstrip(".").translate(CONFUSABLES).lower()
+        if bare in PLACEHOLDER_TOKENS or re.fullmatch(r"x+", bare):
+            return f"{w!r} is a placeholder word, not part of a real value"
+        if len(bare) >= 2 and len(set(bare)) == 1:
+            return f"{w!r} is one letter repeated"
+    return None
+
+
+def name_problem(v):
+    words = v.split(" ")
+    for w in words:
+        if not NAME_WORD.fullmatch(w):
+            return f"{w!r} is not a word of letters (a legal name is letters, with - or ' inside a word)"
+    if sum(len(w.rstrip(".")) >= 2 for w in words) < 2:
+        return "a legal name needs at least two words of two or more letters"
+    return _token_problem(words)
+
+
+def address_problem(v):
+    if not re.fullmatch(r"[^\W_]+(?:[ ,.'’#/-]+[^\W_]*)*\.?", v):
+        return "an address may hold only letters, digits, spaces and , . - ' # /"
+    m = ADDRESS.fullmatch(v)
+    if not m:
+        return "write it as: street number and street (or PO Box N), city, province code, postal code — e.g. 'PO Box 12, Town ON K1A 0B1'"
+    street, city, prov, postal = m.group("street", "city", "prov", "postal")
+    box = re.search(r"\b(?:P\.?\s?O\.?\s+)?Box\b\s*(\S*)", street, re.IGNORECASE)
+    civic = re.search(r"\b\d+[A-Za-z]?\b", street)
+    number = box.group(1) if box else (civic.group(0) if civic else "")
+    if not re.fullmatch(r"\d+[A-Za-z]?", number) or int(re.match(r"\d+", number).group(0)) == 0:
+        return "the street address needs a street number, or the PO Box its number"
+    city_words = city.split(" ")
+    if not all(NAME_WORD.fullmatch(w) for w in city_words) or not any(len(w.rstrip(".")) >= 2 for w in city_words):
+        return f"{city!r} is not a city name"
+    if prov not in PROVINCES:
+        return f"{prov!r} is not a Canadian province or territory code (ON, QC, BC, …)"
+    if not POSTAL.fullmatch(postal):
+        return f"{postal!r} is not a well-formed postal code (A1A 1A1, capitals, one space)"
+    if postal[0] not in PROVINCES[prov]:
+        return f"postal code {postal} does not belong to {prov}"
+    return _token_problem([w for w in re.split(r"[\s,]+", street + " " + city) if w and not w[0].isdigit()
+                           and w.lower().strip(".") not in ("po", "p.o", "box")])
+
+
+def phone_problem(v):
+    m = PHONE_CHARS.fullmatch(v)
+    if not m:
+        return "a phone number may hold only digits, spaces and + ( ) - . /, and an extension (ext 12)"
+    main = m.group("main")
+    if "+" in main and not main.startswith("+1"):
+        return "only a North American number (+1) is accepted"
+    d = re.sub(r"\D", "", main)
+    if len(d) == 11 and d[0] == "1":
+        d = d[1:]
+    if len(d) != 10:
+        return "a North American phone number has 10 digits (area code and number)"
+    npa, nxx, line = d[:3], d[3:6], d[6:]
+    if len(set(d)) == 1:
+        return "every digit is the same"
+    if npa[0] in "01" or npa[1] == "9" or npa[1:] == "11":
+        return f"{npa} is not a valid area code"
+    if nxx[0] in "01" or nxx[1:] == "11":
+        return f"{nxx} is not a valid exchange"
+    if nxx == "555" and line.startswith("01"):
+        return "555-01xx numbers are reserved for fiction"
+    return None
+
+
+FIELD_SHAPE = {"seller_legal_name": name_problem, "premises_address": address_problem, "phone": phone_problem}
+
+
+def seller_problem(field, value):
+    """Why `value` is not a real `field` value, or None. Strings only; callers check type."""
+    norm, why = normalise_private(value)
+    if why:
+        return why
+    return placeholder_reason(norm) or FIELD_SHAPE[field](norm)
+
+
 def check_private(private, on):
-    """Seller fields (O. Reg. 17/05 s. 32) must be real text under either commerce flag. The
-    placeholder check alone can be skipped with DT_ALLOW_PLACEHOLDERS=1 (local test builds)."""
+    """Seller fields (O. Reg. 17/05 s. 32) must be real values under either commerce flag
+    (seller_problem). Returns the fields as published: NFKC text, spaces collapsed. The check
+    alone can be skipped with DT_ALLOW_PLACEHOLDERS=1 (local test builds only)."""
+    out = dict(private)
     for k in PRIVATE_FIELDS:
         v = private.get(k)
         if not isinstance(v, str) or not INVISIBLE.sub("", v):
             die(f"{', '.join(on)} = true but private.toml is missing {k} (or it is empty)")
-        why = placeholder_reason(v)
-        if k == "phone" and not why and len(re.sub(r"\D", "", v)) < 7:
-            why = "a phone number needs at least 7 digits"
-        if k == "phone" and not why and not re.fullmatch(r"[0-9+()./ \-]+(?:\s*(?:ext\.?|x)\s*\d+)?", v.strip(), re.IGNORECASE):
-            why = "a phone number may hold only digits, spaces and + ( ) - . /"
+        why = seller_problem(k, v)
         if why and not escape("DT_ALLOW_PLACEHOLDERS"):
-            die(f"private.toml {k} still looks like a placeholder: {why}. Fill it in "
+            die(f"private.toml {k} is not a real value yet: {why}. Fill it in "
                 "(or set DT_ALLOW_PLACEHOLDERS=1 for a local test build only)")
+        if not why:
+            out[k] = normalise_private(v)[0]
+    return out
 
 # Pages owned by templates. path → template, metadata, and the flag that must be on.
 PAGES = [
@@ -533,8 +649,7 @@ def load_config():
         p = os.environ.get("DT_PRIVATE_TOML") or os.path.join(SITE, "config", "private.toml")
         if not os.path.exists(p):
             die(f"{', '.join(on)} = true needs site/config/private.toml (copy private.example.toml)")
-        private = read_toml(p, "private.toml")
-        check_private(private, on)
+        private = check_private(read_toml(p, "private.toml"), on)
     if flags["paid_report"]:
         check_api_base(cfg["worker"]["api_base"])
     products = {p["id"]: p for p in prices["products"]}

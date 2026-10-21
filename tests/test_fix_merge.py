@@ -115,8 +115,8 @@ def test_b2_real_looking_values_pass(value):
 
 
 def _priv(tmp, **vals):
-    base = {"seller_legal_name": "Fixture Seller Zqx Holdings", "premises_address": "PO Box 0000, Fixturetown ON A0A 0A0",
-            "phone": "+1 555 0100", **vals}
+    from test_legal import FAKE
+    base = {**FAKE, **vals}
     p = tmp / "p.toml"
     p.write_text("".join(f'{k} = "{v}"\n' for k, v in base.items()), encoding="utf-8")
     return str(p)
