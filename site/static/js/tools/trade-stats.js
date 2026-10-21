@@ -204,7 +204,7 @@ async function render(focus = true) {
 
   // The checks (badges build: filled in by the worker), or the three numbers they would cover
   // with the neutral line where each badge was.
-  out.append(B ? B.section() : el('section', { id: 'ts-noise', 'aria-label': 'Checks coming soon' },
+  out.append(B ? B.section() : el('section', { id: 'ts-noise', 'aria-label': 'Checks for three of the numbers' },
     el('ul', { class: 'soon-list' },
       el('li', {}, el('strong', { text: 'Mean result per trade' }), ` (${money(s.expectancy, state.unit)}): ${SOON}`),
       el('li', {}, el('strong', { text: 'Hold time, losers vs winners' }), ` (${ratio(s.hold_ratio)}): ${SOON}`),
