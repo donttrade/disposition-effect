@@ -104,6 +104,13 @@ waive_dispute_filler = ["be", "been", "being", "a", "an", "any", "the", "this", 
                         "déposer", "deposer", "initier", "à", "ce", "cette"]
 waive_dispute_fixed = ["no\\s+(?:chargebacks?|charge[\\s-]backs?|disputes?)", "non-?disput\\w*", "not\\s+disputable",
                        "aucune?\\s+(?:contestations?|rétrofacturations?|litiges?)"]
+# Owner decision 21 Oct ~11:00: no dated or "launch" pricing (it implies a later price rise). Phrases,
+# case-insensitive, whole words, on every page (EN and FR, visible text, meta, JSON-LD strings) and in
+# every script's strings; "priceValidUntil" is also refused anywhere in a page's source (JSON-LD offers).
+dated_pricing = ["launch pricing", "launch price", "launch prices", "valid before", "valid for engagements signed before",
+                 "signed before", "prices valid until", "price valid until", "pricing valid until", "priceValidUntil",
+                 "tarif de lancement", "tarifs de lancement", "prix de lancement", "valable jusqu’au", "valable jusqu'au",
+                 "valables jusqu’au", "valables jusqu'au"]
 not_on_sale_allow = ["Founding price for the first 100 on the trader waitlist added.",
                      "its own research page reads “Coming Soon.”"]
 

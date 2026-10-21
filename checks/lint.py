@@ -84,6 +84,19 @@ def waive_dispute_claims(text, where):
     return out
 
 
+DATED_PRICING = [_phrase_re(p) for p in RULES["claims"]["dated_pricing"]]
+
+
+def dated_pricing_claims(text, where, source=None):
+    """Owner decision 21 Oct ~11:00: no "launch pricing" / "valid before <date>" wording, and no
+    priceValidUntil in a page's JSON-LD (source: the raw page, when there is one)."""
+    out = [("claim:dated_pricing", where, text[max(0, m.start() - 40):m.end() + 40].replace("\n", " "))
+           for rx in DATED_PRICING for m in rx.finditer(text)]
+    if source is not None and re.search(r"priceValidUntil", source, re.IGNORECASE):
+        out.append(("claim:dated_pricing", where, "priceValidUntil in the page source"))
+    return out
+
+
 NOT_ON_SALE = [_phrase_re(p) for p in RULES["claims"]["not_on_sale"]]
 NOT_ON_SALE_ALLOW = [re.compile(re.escape(p), re.IGNORECASE) for p in RULES["claims"]["not_on_sale_allow"]]
 
@@ -298,6 +311,7 @@ def lint_text(text, where="text", paid=False, analytics=False, english=True):
                 out.append(("claim:no_analytics", where, c))
     out += restore_email_claims(text, where)
     out += waive_dispute_claims(text, where)
+    out += dated_pricing_claims(text, where)
     return out
 
 
@@ -306,6 +320,7 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
     commerce = (paid or pilot) if commerce is None else commerce
     french = bool(re.search(r'<html lang="fr', html))
     out = lint_text(readable_text(html), where, paid, analytics, english=not french)
+    out += dated_pricing_claims("", where, html)   # priceValidUntil in JSON-LD (the phrases: lint_text)
     out += tally_mentions(html, where)
     if paid:
         out += not_on_sale_claims(readable_text(html), where)
@@ -388,6 +403,7 @@ def passthrough_rules(html, where, analytics, paid=False):
                 out.append(("claim:no_analytics", where, c))
     out += restore_email_claims(text, where)
     out += waive_dispute_claims(text, where)
+    out += dated_pricing_claims(text, where, html)
     if paid:
         out += not_on_sale_claims(readable_text(html), where)
     for w in RULES["words"]["trial_cta"]:
@@ -487,6 +503,7 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None):
             if name.endswith(".js"):
                 problems += restore_email_claims(js_strings(s), rel)
                 problems += waive_dispute_claims(js_strings(s), rel)
+                problems += dated_pricing_claims(js_strings(s), rel)
                 if paid:  # a script can put text on a paid page too
                     problems += not_on_sale_claims(js_strings(s), rel)
             if name.endswith(".html"):

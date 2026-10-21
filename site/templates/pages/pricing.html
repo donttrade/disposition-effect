@@ -84,7 +84,7 @@
   {%- if flags.paid_report %}
   <p class="small"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Version française : Avant de payer</a></p>
   {%- endif %}
-  <p><strong>Firm prices are launch pricing, valid for engagements signed before 31 March 2027, before any applicable sales tax.</strong></p>
+  <p><strong>Firm prices are in US dollars (USD), before any applicable sales tax.</strong></p>
   {%- if flags.paid_report %}
   <div data-requires-flag="paid_report">
     <div role="tablist" aria-label="Who is buying">
@@ -133,11 +133,11 @@
     <table>
       <thead><tr><th scope="col">Date</th><th scope="col">Change</th></tr></thead>
       <tbody>
-        <tr><td>{{ legal.launch_human }}</td><td>The first firm engagement is renamed {{ pilot.name }} (called “{{ pilot.former_name }}” before {{ legal.launch_human }}), at the same price. The trader prices once listed for after the founding offer are withdrawn; nothing had been sold at them. No price charged today changed.</td></tr>
+        <tr><td>{{ legal.launch_human }}</td><td>The first firm engagement is renamed {{ pilot.name }} (called “{{ pilot.former_name }}” before {{ legal.launch_human }}), at the same price. The trader prices once listed for after the founding offer are withdrawn; nothing had been sold at them. The end date once shown with the firm prices is removed: they have none. No price charged today changed.</td></tr>
         <tr><td>17 Oct 2026</td><td>Claims substantiation test added, at the existing engagements and prices. No price changed.</td></tr>
         <tr><td>17 Oct 2026</td><td>Copy-leader persistence test for copy-trading platforms added, at the existing engagements and prices. No price changed.</td></tr>
         <tr><td>16 Oct 2026</td><td>Founding price for the first 100 on the trader waitlist added.</td></tr>
-        <tr><td>15 Oct 2026</td><td>Launch pricing published.</td></tr>
+        <tr><td>15 Oct 2026</td><td>Firm prices published.</td></tr>
       </tbody>
     </table>
     </div>
@@ -150,7 +150,6 @@
     <details><summary>What is the difference between the {{ pilot.name }}, a Snapshot and a Memo?</summary><p>The {{ pilot.name }} is your first Snapshot at an introductory price, one per firm. A Snapshot is one figure for one population and period. A Memo adds your ratio set beside the public study’s, with the differences explained in writing.</p></details>
     <details><summary>Is the {{ pilot.name }} fee lost if we go ahead?</summary><p>No. {{ pilot.credit_rule }} of delivery.</p></details>
     <details><summary>Can the price change after we accept?</summary><p>No. It is fixed in writing in the scope you accept.</p></details>
-    <details><summary>After 31 March 2027?</summary><p>New prices will be published here with a dated entry. Accepted engagements keep their price.</p></details>
     <details><summary>Does paying change the result?</summary><p>No. <a href="/independence/">Independence policy</a></p></details>
   </section>
   {% include "partials/disclaimer.html" %}
