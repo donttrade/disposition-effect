@@ -28,6 +28,9 @@ phrases = [
   "no legal advice",
   "not legal advice",
   "legal advisers",
+  # FAQ questions whose answer on the page starts with "No."
+  "Is this investment advice?",
+  "Is this advice?",
 ]
 
 [claims]

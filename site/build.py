@@ -47,6 +47,31 @@ PAGES = [
                     "public script, run on your own systems."},
 ]
 
+# Free tools (steps 10-12). connect-src stays 'none' (the csp_for default): these pages
+# cannot send anything, which is what makes "your file is not uploaded" true.
+PAGES += [
+    {"template": "pages/tool-trade-stats.html", "path": "/tools/trade-stats/", "requires_flag": None,
+     "modules": ["/static/js/tools/trade-stats.js"], "sample": True,
+     "title": "Free MT5 Report Analyzer: Trade Stats From Your File",
+     "description": "Drop your MT5, MT4, IBKR or Tradovate file and get profit factor, expectancy, drawdown and "
+                    "streaks, with a real-or-noise check. Runs in your browser."},
+]
+
+SAMPLE_CSV = os.path.join(SITE, "static", "samples", "demo-trades.csv")
+
+
+def sample_csv():
+    """The synthetic demo file, inlined into the page inside <script type="text/csv">.
+
+    Inlined rather than fetched because the page's CSP is connect-src 'none'. The build
+    refuses anything that could end the script element early."""
+    with open(SAMPLE_CSV, encoding="utf-8") as f:
+        text = f.read()
+    if "<" in text or "&" in text:
+        die("demo-trades.csv contains '<' or '&'; it cannot be inlined safely")
+    return text
+
+
 PAID_PAGES = [
     {"template": "pages/welcome.html", "path": "/welcome/", "requires_flag": "paid_report", "connect_worker": True,
      "modules": ["/static/js/paid/welcome.js"], "title": "Thank you — donttrade",
@@ -242,7 +267,8 @@ def build():
                 "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections}
     for rel, page in sorted(owned.items()):
         page = {"scripts": [], "modules": [], "og_image": "/assets/og/default.png", **page}
-        html = env.get_template(page["template"]).render(page=page, csp=csp_for(page, cfg), **base_ctx)
+        extra = {"sample_csv": sample_csv()} if page.get("sample") else {}
+        html = env.get_template(page["template"]).render(page=page, csp=csp_for(page, cfg), **base_ctx, **extra)
         fp = os.path.join(out, rel)
         os.makedirs(os.path.dirname(fp), exist_ok=True)
         with open(fp, "w", encoding="utf-8", newline="\n") as f:
