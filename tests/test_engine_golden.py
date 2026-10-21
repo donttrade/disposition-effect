@@ -143,7 +143,34 @@ def test_generated_histories_match_reference(engine_page):
         times = sorted({f["ts"] for f in fills})
         for cut in [times[0], rng.choice(times), rng.choice(times)]:
             data = G.export(fills, cut)
-            diff = same(comparable(run_js(engine_page, data)), comparable(E.run_fixture(data)))
+            diff = same(comparable(parse_js(engine_page, data)), comparable(parse_py(data)))
             assert not diff, (seed, cut, diff)
             n += 1
     assert n == 120
+
+
+def parse_js(page, data):
+    return json.loads(page.evaluate("b => window.parseOnly(b)", base64.b64encode(data).decode()))
+
+
+def parse_py(data):
+    try:
+        return {"result": E.parse_file(data)}
+    except E.EngineError as e:
+        return {"error": e.to_json()}
+
+
+def test_quote_mutations_match_reference(engine_page):
+    """F-B2: the browser fails or succeeds exactly like the reference on stray-quote files."""
+    sys.path.insert(0, HERE)
+    import quote_fuzz as Q
+    n = 0
+    for name, base in sorted(Q.bases().items()):
+        for i, (label, text) in enumerate(Q.mutations(base, seed=len(name), n_random=100)):
+            if i % 23:
+                continue
+            data = text.encode()
+            diff = same(comparable(parse_js(engine_page, data)), comparable(parse_py(data)))
+            assert not diff, (name, label, diff)
+            n += 1
+    assert n > 300

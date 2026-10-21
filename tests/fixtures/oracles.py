@@ -385,3 +385,9 @@ ORACLES["mt5/fd2_hedge_carried_short.csv"] = {
 # the short it opens (closed by buy out 1.00) has unknown size: nothing is left to analyse. The
 # message names both causes (test_engine_golden checks the text).
 ERRORS["mt5/fd2_inout_reversal_on_carried.csv"] = ("E_NO_CLOSED_TRADES", None, None)
+
+# Tester fix round 2, F-B2: one stray quote mark in an all-quoted CSV is closed by the NEXT row's
+# opening quote, which merged that row into a note and silently lost 30 of 40 trades.
+ERRORS["errors/fb2_allquoted_one_stray.csv"] = ("E_BAD_QUOTE", 22, None)       # row 22's note never closes
+ERRORS["errors/fb2_two_stray_quotes_symbol.csv"] = ("E_BAD_QUOTE", 12, None)   # Symbol cell spans rows 12-13
+ERRORS["errors/fb2_stray_note_into_next_row.csv"] = ("E_BAD_QUOTE", 12, None)  # note closed by row 13's quote

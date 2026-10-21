@@ -27,6 +27,8 @@ window.runEngine = (b64) => {
   return JSON.stringify({ result: r.result, stats: freeStats(r.result.trades), noise: noiseChecks(r.result.trades),
     pgr_plr: pgrPlrCounts(r.result.executions) });
 };
+// Parse only (no stats or noise checks): the fuzz parity tests run hundreds of files.
+window.parseOnly = (b64) => JSON.stringify(runFile(bytesOf(b64)));
 window.runNoiseInWorker = (b64) => new Promise((resolve) => {
   const r = runFile(bytesOf(b64));
   const w = new Worker('/site/static/js/engine/noise-worker.js', { type: 'module' });
