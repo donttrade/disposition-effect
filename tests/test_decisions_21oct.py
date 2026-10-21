@@ -280,7 +280,7 @@ PRIVACY_SENTENCE = (
     "To check that a re-test uses the same trading history as your first report, we keep a scrambled fingerprint of "
     "each trade row (a keyed hash: it cannot be turned back into your trades without our secret key, but it is still "
     "linked to your purchase). We delete these fingerprints as soon as your included re-test has run, or 75 days after "
-    "your purchase, whichever comes first. If you have an active Habit Tracker, we keep them while it is active and "
+    "your first report, whichever comes first. If you have an active Habit Tracker, we keep them while it is active and "
     "delete them 15 days after it ends.")
 
 
