@@ -68,7 +68,7 @@
   <p>For firm engagements we never receive account records, only the aggregate counts the script prints.</p>
 
   <h2 id="rights">Your rights</h2>
-  <p>You can ask by email to see, correct or delete your information, or for a copy in a common format. We reply within 30 days. You can also complain to the <a href="https://www.priv.gc.ca/en/">Office of the Privacy Commissioner of Canada</a>{% if flags.paid_report %}, in Quebec to the Commission d’accès à l’information, in the EU to your country’s data protection authority, and in the UK to the Information Commissioner’s Office{% endif %}.</p>
+  <p>You can ask by email to see, correct or delete your information, or for a copy in a common format. We reply within 30 days. You can also complain to the <a href="https://www.priv.gc.ca/en/">Office of the Privacy Commissioner of Canada</a>{% if flags.paid_report %}, in Quebec to the Commission d’accès à l’information, in the EU to your country’s data protection authority, and in the UK to the Information Commissioner’s Office{% endif %}.{% if flags.paid_report %} If a privacy breach creates a real risk of significant harm to you, we tell you.{% endif %}</p>
   <p class="small muted">Version {{ legal.terms_version }}.</p>
 </div></div>
 {% endblock %}

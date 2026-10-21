@@ -395,3 +395,34 @@ def test_r5_lint_fails_a_paid_build_that_says_waitlist(paid_site, tmp_path, plan
     problems = L.lint_build(str(out), paid=True)
     where = {w for r, w, _ in problems if r == "claim:not_on_sale"}
     assert {"/tools/trade-stats/", "/about/index.html"} <= where, problems
+
+
+# ------------------------------------------------------------------ R6: the French legal pages promise what the English ones do
+LEGAL_PAIRS = [("pricing", "fr/avant-de-payer"), ("terms", "fr/conditions"), ("privacy", "fr/confidentialite")]
+# (English promise, French promise): each pair is on both pages of a language pair, or on neither
+PROMISES = [
+    (r"we (email|send) you a copy|copy of (this summary|the terms) by email|confirmation email",
+     r"envoyons par courriel une copie|courriel de confirmation|copie de ce résumé"),
+    (r"privacy breach creates a real risk of significant harm to you, we tell you", r"incident de confidentialité présente un risque de préjudice sérieux pour vous, nous vous en avisons"),
+    (r"down for more than 24 hours, we refund you on request", r"interrompu plus de 24 heures, nous vous remboursons sur demande"),
+    (r"a person reviews it and writes to you before anything is paused", r"une personne examine la situation et vous écrit avant toute suspension"),
+    (r"We reply within 30 days", r"Nous répondons dans les 30 jours"),
+]
+
+
+def _text(out, rel):
+    return re.sub(r"\s+", " ", L.visible_text(open(os.path.join(out, rel, "index.html"), encoding="utf-8").read()))
+
+
+@pytest.mark.parametrize("en,fr", LEGAL_PAIRS)
+def test_r6_french_and_english_make_the_same_promises(paid_site, en, fr):
+    te, tf = _text(paid_site["out"], en), _text(paid_site["out"], fr)
+    for pe, pf in PROMISES:
+        assert bool(re.search(pe, te, re.I)) == bool(re.search(pf, tf, re.I)), (en, fr, pe, pf)
+
+
+def test_r6_no_terms_copy_email_is_promised_for_the_39_report(paid_site):
+    # TESTER R6 repro: fr/avant-de-payer "Votre copie" row and fr/conditions §11
+    for rel in ("pricing", "terms", "welcome", "fr/avant-de-payer", "fr/conditions", "fr/confidentialite"):
+        t = _text(paid_site["out"], rel)
+        assert not re.search(PROMISES[0][0] + "|" + PROMISES[0][1] + "|Votre copie", t, re.I), rel
