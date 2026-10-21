@@ -241,7 +241,8 @@ export function parseNumber(raw, row, column) {
 // parseNumber reads one cell at a time, so "1.500" alone could be 1.5 or 1,500.
 // resolveNumberStyle decides once per file, from every number cell:
 //   comma evidence: "12,50", "1.234,5", "1.234.567"   dot evidence: "12.5", "1,234.5", "1234.567"
-//   "1.500" / "18.250" (one dot, then exactly 3 digits, at most 3 before it) is evidence of neither.
+//   "1.500" / "18.250" (one dot, then exactly 3 digits, 1-3 before it, not starting with 0) is
+//   evidence of neither. "0.125" is dot evidence: no exporter writes 125 as 0.125.
 // Both kinds in one file → E_BAD_NUMBER (never guess). Comma evidence → the dots in
 // "1.500"-style cells are thousands separators, so they are removed here. Dot evidence
 // → those cells are decimals. Neither → the fallback: 'dot' (comma-separated CSV and
@@ -252,9 +253,10 @@ const SH_INT = /^[+-]?\d+$/;
 const SH_ONE_COMMA = /^[+-]?\d+,(\d+)$/;
 const SH_EURO = /^[+-]?\d{1,3}(\.\d{3})+,\d+$/;
 const SH_US = /^[+-]?\d{1,3}(,\d{3})+(\.\d+)?$/;
-const SH_DOT3 = /^[+-]?\d{1,3}\.\d{3}$/;
+// Thousands groups never start with 0: "0.125" is a decimal (dot evidence), never 125 (Tester F-D7).
+const SH_DOT3 = /^[+-]?[1-9]\d{0,2}\.\d{3}$/;
 const SH_ONE_DOT = /^[+-]?(\d+\.?\d*|\.\d+)$/;
-const SH_DOTS_THOUSANDS = /^[+-]?\d{1,3}(\.\d{3}){2,}$/;
+const SH_DOTS_THOUSANDS = /^[+-]?[1-9]\d{0,2}(\.\d{3}){2,}$/;
 
 export function numberShape(raw) {
   const s = String(raw).replace(RE_STRIP, '').replace(/−/g, '-');

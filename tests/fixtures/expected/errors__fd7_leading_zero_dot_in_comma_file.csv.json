@@ -1,0 +1,7 @@
+{
+ "error": {
+  "code": "E_BAD_NUMBER",
+  "column": "price",
+  "row": 2
+ }
+}

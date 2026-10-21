@@ -92,7 +92,11 @@ def test_number_style_is_decided_per_file():
     assert one("1.500", "12", sep=",") == 1.5     # comma-separated CSV: US style by default
     assert one("1.234.567", "12,5") == 1234567
     assert one("1.234,567", "12,5") == 1234.567   # full European form keeps its decimals
-    for qty, price in [("1.500", "12"), ("12,5", "1,234.5")]:
+    # F-D7: a thousands group never starts with 0, so "0.125" is always a decimal point.
+    assert one("0.125", "12") == 0.125            # ';' file, no other evidence: still 0.125, not ambiguous
+    assert one("0.125", "12.5") == 0.125
+    assert one("-0.125", "12", sep=",") == 0.125  # qty is abs()
+    for qty, price in [("1.500", "12"), ("12,5", "1,234.5"), ("0.125", "12,50"), ("0.125.000", "12,5")]:
         with pytest.raises(E.EngineError) as ei:
             one(qty, price)
         assert ei.value.code == "E_BAD_NUMBER"

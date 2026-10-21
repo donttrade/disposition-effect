@@ -391,3 +391,8 @@ ERRORS["mt5/fd2_inout_reversal_on_carried.csv"] = ("E_NO_CLOSED_TRADES", None, N
 ERRORS["errors/fb2_allquoted_one_stray.csv"] = ("E_BAD_QUOTE", 22, None)       # row 22's note never closes
 ERRORS["errors/fb2_two_stray_quotes_symbol.csv"] = ("E_BAD_QUOTE", 12, None)   # Symbol cell spans rows 12-13
 ERRORS["errors/fb2_stray_note_into_next_row.csv"] = ("E_BAD_QUOTE", 12, None)  # note closed by row 13's quote
+
+# Tester fix round 2, F-D7: "0.125" in a decimal-comma file was read as 125 (x1,000), silently.
+# A thousands group never starts with 0, so "0.125" is a decimal point: with "12,50" in the same
+# file that is two number formats -> E_BAD_NUMBER at the first comma cell after the dot evidence.
+ERRORS["errors/fd7_leading_zero_dot_in_comma_file.csv"] = ("E_BAD_NUMBER", 2, "price")
