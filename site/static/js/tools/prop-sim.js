@@ -210,11 +210,14 @@ function streakLine(res) {
   return `${pct(res.bust_after_streak / res.bust)} of the busted runs broke a limit on a trade that came after 2 or more losses in a row (${intText(res.bust_after_streak)} of ${intText(res.bust)}).`;
 }
 
+// R5: the teaser box says data-on-sale="true" when the build sells the report (partials/trader_offer.html).
+const reportLead = () => ($('ps-teaser').dataset.onSale === 'true' ? 'The habit report' : "We're building a habit report that");
+
 function teaser(res) {
   if (res.bust < MIN_STREAK_BUSTS) {
-    return "We're building a habit report that looks at what you do after a loss in your real record.";
+    return `${reportLead()} looks at what you do after a loss in your real record.`;
   }
-  return `${pct(res.bust_after_streak / res.bust)} of the busted runs began after 2 or more losses in a row. We're building a habit report that tests whether your trading changes after losses in your real record, and what that cost.`;
+  return `${pct(res.bust_after_streak / res.bust)} of the busted runs began after 2 or more losses in a row. ${reportLead()} tests whether your trading changes after losses in your real record, and what that cost.`;
 }
 
 // ------------------------------------------------------------------ wiring

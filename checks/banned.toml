@@ -71,6 +71,14 @@ restore_email = ['restore[\s-]+(?:access[\s-]+|your[\s-]+\w+[\s-]+)?(?:by|via|th
                  'e-?mail(?:ed)?[^.<]{0,30}\brestore[\s-]+link',
                  'restore[^.<]{0,40}\b(?:enter|type)[^.<]{0,20}\be-?mail']
 restore_email_allow = ["restore by email is not offered", "Restore-by-email is not in v1"]
+# R5: false once the habit report is sold. Checked on every page of a paid_report build (EN and
+# FR, visible text, meta/og descriptions, JSON-LD, alt/title/aria-label). The allow list holds
+# the historical price-history row and a quoted competitor page.
+not_on_sale = ["not on sale", "waitlist", "wait list", "wait-list", "nothing is charged now", "no launch date",
+               "coming soon", "launch date", "liste d’attente", "liste d'attente", "pas en vente", "pas encore en vente",
+               "bientôt disponible"]
+not_on_sale_allow = ["Founding price for the first 100 on the trader waitlist added.",
+                     "its own research page reads “Coming Soon.”"]
 
 [secrets]
 patterns = ['sk_live_[0-9A-Za-z]{8,}', 'sk_test_[0-9A-Za-z]{8,}', 'rk_live_[0-9A-Za-z]{8,}', 'rk_test_[0-9A-Za-z]{8,}', 'whsec_[0-9A-Za-z]{8,}', '-----BEGIN [A-Z ]*PRIVATE KEY-----']

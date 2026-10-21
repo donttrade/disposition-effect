@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+{%- import "partials/trader_offer.html" as offer with context %}
 {%- set pilot = products["pilot"] %}{%- set r = products["report39"] %}
 <div class="wrap">
   <h1>Start here</h1>
@@ -38,8 +39,7 @@
 
   <section class="section" aria-labelledby="trader">
     <h2 id="trader">Individual traders</h2>
-    <p>The trader report is not on sale yet. Join the waitlist and we email you once, when it launches. {{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers; nothing is charged now. <a href="/for-traders/#founding">Details</a></p>
-    {%- with heading_id = "trader" %}{% include "partials/form_waitlist.html" %}{% endwith %}
+    {{- offer.signup("trader", intro=true) }}
   </section>
 
   <p>Researchers and press: no form needed. Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>.</p>

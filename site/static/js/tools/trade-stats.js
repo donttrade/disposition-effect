@@ -331,15 +331,18 @@ function renderNoise(noise, total) {
   teaser(noise);
 }
 
+// R5: the teaser box says data-on-sale="true" when the build sells the report (partials/trader_offer.html).
+const reportLead = () => ($('ts-teaser').dataset.onSale === 'true' ? 'The habit report' : "We're building a habit report that");
+
 // The teaser states only figures computed above: the hold gap and its check result.
 function teaser(noise) {
   const s = state.stats || freeStats(state.result.trades);
   const gap = noise.checks.find((c) => c.stat === 'hold_gap_s');
   const text = $('ts-teaser-text');
   if (s.hold_ratio !== null && gap) {
-    text.textContent = `In this file, losing trades were held ${ratio(s.hold_ratio)} as long as winning trades (median ${duration(s.hold_median_loss_s)} against ${duration(s.hold_median_win_s)}), and the check above says: ${gap.label}. We're building a habit report that tests five habits like this one and shows what the matching trades totalled in your file.`;
+    text.textContent = `In this file, losing trades were held ${ratio(s.hold_ratio)} as long as winning trades (median ${duration(s.hold_median_loss_s)} against ${duration(s.hold_median_win_s)}), and the check above says: ${gap.label}. ${reportLead()} tests five habits like this one and shows what the matching trades totalled in your file.`;
   } else {
-    text.textContent = "We're building a habit report that looks for patterns in what you do after a loss, and tests each one for noise.";
+    text.textContent = `${reportLead()} looks for patterns in what you do after a loss, and tests each one for noise.`;
   }
   $('ts-teaser').hidden = false;
 }

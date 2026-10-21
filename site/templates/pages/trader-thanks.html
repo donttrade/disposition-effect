@@ -1,9 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
+{%- import "partials/trader_offer.html" as offer with context %}
 <div class="wrap">
+  {%- if flags.paid_report %}
+  <h1>Thank you.</h1>
+  <p class="lede">The habit report is on sale now.</p>
+  <p>{{ offer.button() }}</p>
+  <p class="small">{{ offer.note() }}</p>
+  <p>To be taken off our launch-email list, write to <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>.</p>
+  {%- else %}
   <h1>You’re on the waitlist.</h1>
   <p class="lede">Nothing is charged. We email you once, when the trader report launches. That’s all.</p>
   <p>To be removed, reply “remove” to that email or write to <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>.</p>
+  {%- endif %}
   <h2>Meanwhile</h2>
   <ul>
     <li><a href="/tools/trade-stats/">Free trade stats</a>: your own file, read in your browser, with three real-or-noise checks.</li>

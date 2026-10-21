@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+{%- import "partials/trader_offer.html" as offer with context %}
 {%- set r = products["report39"] %}
 <div class="wrap">
   <div class="grid">
@@ -40,11 +41,10 @@
 
   <div id="ts-out" class="tool-out" hidden></div>
 
-  <aside id="ts-teaser" class="notice notice-gap teaser" aria-labelledby="ts-teaser-h" hidden>
-    <strong id="ts-teaser-h">What the habit report will add</strong>
+  <aside id="ts-teaser" class="notice notice-gap teaser" aria-labelledby="ts-teaser-h" hidden {{ offer.on_sale_attr() }}>
+    <strong id="ts-teaser-h">{{ offer.teaser_heading() }}</strong>
     <p id="ts-teaser-text"></p>
-    <p><a class="btn" href="/for-traders/#waitlist">Join the waitlist — {{ r.price_usd|usd }} founding price</a></p>
-    <p class="small">Not on sale yet: nothing is charged now. The free tools stay free.</p>
+    {{- offer.teaser() }}
   </aside>
 
   <section class="section" aria-labelledby="files-h">
@@ -92,7 +92,7 @@
       <li><a href="/tools/prop-challenge-simulator/">Prop-firm challenge simulator</a>: replay a challenge from your own trading days.</li>
       <li><a href="/tools/lot-size-calculator/">Lot size calculator</a>: the arithmetic from balance, risk amount and stop distance.</li>
       <li><a href="/tools/disposition-calculator/">Disposition-effect calculator</a>: do you sell winners sooner than losers?</li>
-      <li><a href="/for-traders/">The habit report for traders</a> (waitlist).</li>
+      <li><a href="/for-traders/">The habit report for traders</a> ({{ offer.short_state() }}).</li>
     </ul>
   </section>
   <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR and Tradovate are trademarks of their owners. donttrade is not affiliated with any of them.</p>

@@ -8,6 +8,7 @@
       </div>
 {%- endmacro %}
 {% block content %}
+{%- import "partials/trader_offer.html" as offer with context %}
 {%- set r = products["report39"] %}
 <div class="wrap">
   <div class="grid">
@@ -43,11 +44,10 @@
 
   <div id="ls-out" class="tool-out" hidden></div>
 
-  <aside class="notice notice-gap teaser" aria-labelledby="ls-teaser-h">
-    <strong id="ls-teaser-h">What the habit report will add</strong>
-    <p>Sizing on paper is one thing. We’re building a habit report that checks, from your own trade file, whether your size changes after a loss, and what that cost.</p>
-    <p><a class="btn" href="/for-traders/#waitlist">Join the waitlist — {{ r.price_usd|usd }} founding price</a></p>
-    <p class="small">Not on sale yet: nothing is charged now. The free tools stay free.</p>
+  <aside class="notice notice-gap teaser" aria-labelledby="ls-teaser-h" {{ offer.on_sale_attr() }}>
+    <strong id="ls-teaser-h">{{ offer.teaser_heading() }}</strong>
+    <p>Sizing on paper is one thing. {{ offer.lead() }} checks, from your own trade file, whether your size changes after a loss, and what that cost.</p>
+    {{- offer.teaser() }}
   </aside>
 
   <section class="section" aria-labelledby="vpp-h">

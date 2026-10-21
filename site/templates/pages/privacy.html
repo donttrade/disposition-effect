@@ -43,7 +43,7 @@
 
   <h2 id="forms">Forms, email and payments</h2>
   <ul>
-    <li><strong>Forms</strong> are sent through Web3Forms, which emails each submission to us; it is hosted on AWS and keeps a 30-day history. The firm and partner forms ask for a work email and firm (required), and your role and what you want measured (optional). The trader waitlist asks for an email, the founding price you would use, and an unticked launch-email consent; the platform you use is optional. No phone numbers are collected.</li>
+    <li><strong>Forms</strong> are sent through Web3Forms, which emails each submission to us; it is hosted on AWS and keeps a 30-day history. The firm and partner forms ask for a work email and firm (required), and your role and what you want measured (optional). {% if not flags.paid_report %}The trader waitlist asks for an email, the founding price you would use, and an unticked launch-email consent; the platform you use is optional.{% endif %} No phone numbers are collected.</li>
     <li><strong>Email</strong> is handled by Gmail (Google). We keep form emails there.</li>
     <li><strong>The newsletter</strong> runs on Substack; see <a href="https://substack.com/privacy">Substack’s privacy policy</a>.</li>
     <li><strong>Card payments</strong> (the firm {{ products.pilot.name }}{% if flags.paid_report %}, and the habit report{% endif %}) are handled by Stripe; donttrade never sees full card numbers. For payment data Stripe acts as an independent controller; see <a href="https://stripe.com/privacy">Stripe’s privacy policy</a>.</li>
@@ -56,7 +56,11 @@
     <li>We use it to reply, scope the work and invoice.</li>
     <li>Enquiries that don’t lead to an engagement are deleted within 12 months.</li>
     <li>Engagement and purchase records are kept for as long as Canadian tax law requires (six years).</li>
+    {%- if flags.paid_report %}
+    <li>Addresses given before launch for the one launch email are used for that email only, then deleted unless the person buys.</li>
+    {%- else %}
     <li>Waitlist addresses are used once, to announce the launch, then deleted unless the person buys.</li>
+    {%- endif %}
     <li>Nothing is sold. We use these providers only to run the site, email, the newsletter, forms and card payments.</li>
   </ul>
 
