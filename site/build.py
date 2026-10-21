@@ -472,7 +472,7 @@ def hero_dashboard_body():
 def motion_problem(html, path):
     """Motion plan build guard: motion.js only on MOTION_PAGES; motion markup only with motion.js;
     data-count only inside the generated hero (count-up is for its 6 sample tiles, never a real figure)."""
-    has_js = f'<script src="{MOTION_JS}" defer></script>' in html
+    has_js = re.search(f'<script src="{re.escape(MOTION_JS)}(?:\\?v=[0-9a-f]{{8}})?" defer></script>', html) is not None
     if has_js and path not in MOTION_PAGES:
         return f"motion.js on {path}, which is not one of MOTION_PAGES"
     for marker in ("data-reveal", "data-count", "hero-dash"):
@@ -493,6 +493,85 @@ def check_hero_dashboard():
     if m.group(1) != sha:
         die(f"hero_dashboard.html was captured from a different sample ({m.group(1)[:12]}…, now {sha[:12]}…): "
             "re-run python3 checks/make_hero_dashboard.py")
+
+
+# Tester N5 (motion fixes, 21 Oct 2026): cache-busting. The host sends max-age=600, so for 10 minutes after a
+# deploy new HTML could run with the old cached CSS/JS. Every CSS/JS URL the build emits gets ?v=<first 8 hex of
+# the SHA-256 of the file as served>. Module imports (and module-worker URLs) between our own scripts get the
+# same query, and a script's hash covers its rewritten imports, so a change deep in the engine changes the URL of
+# every module above it: a page never mixes old and new modules either.
+ASSET_REF_RE = re.compile(r'((?:src|href)=")(/static/[^"?#]+\.(?:js|css))(")')
+JS_SPEC_RE = re.compile(r"""(\bfrom\s*|\bimport\s*\(?\s*|\bnew URL\(\s*)(['"])(\.{1,2}/[^'"?#\s]+\.js)\2""")
+UNVERSIONED_RE = re.compile(r'(?:src|href)="/static/[^"]+\.(?:js|css)(?:#[^"]*)?"')
+
+
+def asset_version(data):
+    return hashlib.sha256(data).hexdigest()[:8]
+
+
+def version_assets(out, left_out=lambda rel: False):
+    """Rewrite the built site in place: relative imports in out/static/**/*.js, then every /static/*.js|css
+    URL in every HTML page. Returns {url: version}. Dies on an import cycle or a reference to a missing file,
+    except an import of a file this build leaves out on purpose (left_out(path under static/), e.g. the
+    free-badge module behind its flag), which stays as written: the code only loads it when the flag is on."""
+    static = os.path.join(out, "static")
+    final, versions, active = {}, {}, set()
+
+    def js(fp):
+        if fp in final:
+            return final[fp]
+        if fp in active:
+            die(f"cache-busting: import cycle through {os.path.relpath(fp, out)}")
+        active.add(fp)
+        with open(fp, encoding="utf-8") as f:
+            text = f.read()
+
+        def dep(m):
+            target = os.path.normpath(os.path.join(os.path.dirname(fp), m.group(3)))
+            if not os.path.isfile(target):
+                if left_out(os.path.relpath(target, static)):
+                    return m.group(0)
+                die(f"cache-busting: {os.path.relpath(fp, out)} imports {m.group(3)}, which is not in the build")
+            return f"{m.group(1)}{m.group(2)}{m.group(3)}?v={asset_version(js(target))}{m.group(2)}"
+        final[fp] = JS_SPEC_RE.sub(dep, text).encode("utf-8")
+        active.discard(fp)
+        return final[fp]
+
+    for root, dirs, files in os.walk(static):
+        dirs.sort()
+        for name in sorted(files):
+            fp = os.path.join(root, name)
+            url = "/" + os.path.relpath(fp, out).replace(os.sep, "/")
+            if name.endswith(".js"):
+                versions[url] = asset_version(js(fp))
+            elif name.endswith(".css"):
+                with open(fp, "rb") as f:
+                    versions[url] = asset_version(f.read())
+    for fp, data in final.items():
+        with open(fp, "wb") as f:
+            f.write(data)
+
+    def ref(m, page):
+        if m.group(2) not in versions:
+            die(f"cache-busting: {page} references {m.group(2)}, which is not in the build")
+        return f"{m.group(1)}{m.group(2)}?v={versions[m.group(2)]}{m.group(3)}"
+    for root, dirs, files in os.walk(out):
+        dirs.sort()
+        for name in sorted(files):
+            if name.endswith(".html"):
+                fp = os.path.join(root, name)
+                with open(fp, encoding="utf-8") as f:
+                    html = f.read()
+                new = ASSET_REF_RE.sub(lambda m: ref(m, os.path.relpath(fp, out)), html)
+                if new != html:
+                    with open(fp, "w", encoding="utf-8", newline="") as f:
+                        f.write(new)
+    return versions
+
+
+def unversioned_problem(html):
+    m = UNVERSIONED_RE.search(html)
+    return f"unversioned asset URL {m.group(0)} (cache-busting: version_assets)" if m else None
 
 
 PAID_PAGES = [
@@ -1214,12 +1293,14 @@ def verify(out, flags, seller=None, base_url=None):
                     with open(fp, encoding="utf-8", errors="replace") as f:
                         if PAID_FLAG_MARKER in f.read():
                             die(f"paid-flagged markup in {os.path.relpath(fp, out)} while paid_report = false")
-    for root, _, files in os.walk(out):  # motion plan guard (MOTION_PAGES)
+    for root, _, files in os.walk(out):  # motion plan guard (MOTION_PAGES) + cache-busting (every URL versioned)
         for name in sorted(files):
             if name.endswith(".html"):
                 fp = os.path.join(root, name)
                 with open(fp, encoding="utf-8", errors="replace") as f:
-                    why = motion_problem(f.read(), "/" + os.path.relpath(fp, out).replace(os.sep, "/").replace("index.html", ""))
+                    text = f.read()
+                why = (motion_problem(text, "/" + os.path.relpath(fp, out).replace(os.sep, "/").replace("index.html", ""))
+                       or unversioned_problem(text))
                 if why:
                     die(why)
     # Decision 21 Oct: the footer business line, on every page exactly once under any commerce flag
@@ -1280,9 +1361,10 @@ def build():
         if rel not in passthrough_pages(owned) and rel not in owned:
             die(f"no-network CSP: {rel} is neither a template page nor a page in docs/")
     # 2. static assets of the new design
-    copy_tree_sorted(os.path.join(SITE, "static"), os.path.join(out, "static"),
-                     skip=lambda rel: ((not flags["paid_report"] and rel.startswith("js" + os.sep + "paid"))
-                                       or (not flags["free_badges"] and rel == BADGES_JS)))
+    def static_left_out(rel):
+        return ((not flags["paid_report"] and rel.startswith("js" + os.sep + "paid"))
+                or (not flags["free_badges"] and rel == BADGES_JS))
+    copy_tree_sorted(os.path.join(SITE, "static"), os.path.join(out, "static"), skip=static_left_out)
     # 3. dev pages, only on request; never bundled
     if os.environ.get("DT_DEV") == "1":
         copy_tree_sorted(os.path.join(SITE, "dev"), os.path.join(out, "dev"))
@@ -1321,6 +1403,7 @@ def build():
             f.write(html)
         built.append(page)
     write_sitemap_and_robots(out, cfg, built, flags)
+    version_assets(out, left_out=static_left_out)
 
     verify(out, flags, seller=show_seller(cfg), base_url=cfg["site"]["base_url"])
     return out

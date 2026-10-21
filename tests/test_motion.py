@@ -402,7 +402,7 @@ SHOWN_AT = """window.__shown = null; (function poll() { const d = document.query
 @pytest.mark.parametrize("vp", [DESK, PHONE], ids=["1280", "375"])
 def test_i13_motion_js_blocked_hides_nothing_but_the_numbers_until_1000ms(browser, built_site, vp):
     ctx = _ctx(browser, vp)
-    ctx.route("**/motion.js", lambda r: r.abort())
+    ctx.route("**/motion.js?v=*", lambda r: r.abort())
     ctx.add_init_script(SHOWN_AT)
     pg = ctx.new_page()
     pg.goto(built_site["url"] + "/", wait_until="commit")
@@ -410,6 +410,7 @@ def test_i13_motion_js_blocked_hides_nothing_but_the_numbers_until_1000ms(browse
     shown = pg.evaluate("__shown")
     assert shown is not None and shown <= 1000, shown
     assert pg.evaluate("document.documentElement.classList.contains('dt-motion')"), "motion was on: the failsafe did it"
+    assert not pg.evaluate("__m")["cuSeen"], "motion.js really was blocked (its URL carries ?v=)"
     assert pg.evaluate(HIDDEN) == 0
     _scroll(pg, step=600, pause=30)
     assert pg.evaluate(HIDDEN) == 0 and not pg.evaluate("__m").get("rvSeen")
@@ -423,7 +424,7 @@ def test_i13_motion_js_late_no_count_but_sections_still_reveal(browser, built_si
     def slow(r):
         time.sleep(1.6)
         r.continue_()
-    ctx.route("**/motion.js", slow)
+    ctx.route("**/motion.js?v=*", slow)
     pg = ctx.new_page()
     pg.goto(built_site["url"] + "/")
     pg.wait_for_timeout(500)

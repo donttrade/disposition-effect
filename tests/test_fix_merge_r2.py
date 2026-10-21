@@ -130,7 +130,7 @@ def test_r2_worker_failure_is_shown_with_a_working_retry(browser, built_site, to
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
     body = WORKER_FAILURES.get(mode, dict(status=200, content_type="text/javascript", body="self.onmessage = () => {};"))
-    ctx.route("**/tools/file-worker.js", lambda r: r.fulfill(**body))
+    ctx.route("**/tools/file-worker.js?v=*", lambda r: r.fulfill(**body))
     page.goto(built_site["url"] + (TS if tool == "ts" else PS))
     page.set_input_files(f"#{tool}-file", os.path.join(GEN, "ninety_trades.csv"))
     box = "#ts-error" if tool == "ts" else "#ps-file-error"
@@ -138,7 +138,7 @@ def test_r2_worker_failure_is_shown_with_a_working_retry(browser, built_site, to
     ui = _ui(page, tool)
     text = page.inner_text(box)
     # then the worker comes back, and "Try again" reads the same file
-    ctx.unroute("**/tools/file-worker.js")
+    ctx.unroute("**/tools/file-worker.js?v=*")
     page.click(box + " [data-retry]")
     if tool == "ts":
         page.wait_for_selector("#ts-out:not([hidden])", timeout=30000)
