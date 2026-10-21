@@ -678,7 +678,37 @@ pre { font-family: var(--font-mono); font-size: var(--fs-0); background: var(--s
 .hero-dash .plot { position: relative; margin: 0; }
 .hero-dash .plot svg { display: block; width: 100%; height: auto; }
 
+/* M4 chart draw-in: a veil in the page background slides off to the right (transform only), which
+   reads as the equity line drawing itself. left = L / W of the capture (92 / 496, printed by
+   checks/make_hero_dashboard.py); right must be 0 or the line's last point shows early. Its 32 px
+   soft edge starts outside the clip box. At rest (no .dt-motion) the veil sits off the chart. */
+.hero-dash .veil { position: absolute; top: 0; bottom: 0; left: 18.55%; right: 0; overflow: hidden; pointer-events: none; }
+.hero-dash .veil::before { content: ""; position: absolute; top: 0; bottom: 0; left: -32px; right: 0;
+  background: linear-gradient(90deg, transparent, var(--bg) 32px); transform: translateX(100%); }
+.dt-motion .hero-dash .veil::before { animation: dt-wipe var(--dur-draw) var(--ease-inout) 150ms both; }
+.dt-motion .hero-dash.is-waiting .veil::before { animation-play-state: paused; }
+@keyframes dt-wipe { from { transform: translateX(0); } to { transform: translateX(100%); } }
+
+/* M5 count-up, the 6 hero tiles only (sample data). The DOM text is always the final value (crawlers,
+   copy, no JS). While counting, the dd is visibility:hidden (it keeps its width) and ::after paints
+   data-cu over it. Before motion.js runs the value is hidden only under .dt-motion, and at most until
+   1200 ms (the CSS failsafe). */
+.hero-dash [data-count] { position: relative; }
+.dt-motion .hero-dash [data-count] { visibility: hidden; animation: dt-show 1ms linear 1200ms forwards; }
+.dt-motion .hero-dash [data-count].cu-on { animation: none; }
+.dt-motion .hero-dash [data-count].cu-on::after { content: attr(data-cu); position: absolute; left: 0; top: 0; visibility: visible; white-space: nowrap; }
+.dt-motion .hero-dash [data-count].cu-done { visibility: visible; animation: none; }
+@keyframes dt-show { to { visibility: visible; } }
+
 /* motion resets: reduced motion and print */
+@media (prefers-reduced-motion: reduce) {
+  .hero-dash [data-count] { visibility: visible !important; animation: none !important; }
+  .hero-dash [data-count]::after { content: none !important; }
+  .hero-dash .veil { display: none; }
+}
 @media print {
+  .hero-dash [data-count] { visibility: visible !important; animation: none !important; }
+  .hero-dash [data-count]::after { content: none !important; }
+  .hero-dash .veil { display: none; }
   .btn::after, .lifted .btn-2::after, .lifted .subscribe button::after, .lifted .next-block button::after { display: none; }
 }
