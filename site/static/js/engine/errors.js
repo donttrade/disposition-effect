@@ -61,6 +61,8 @@ export const WARNING_TEXT = Object.freeze({
     'Positions that were already open when the file starts were left out: their opening fills are before the date range of this export, so their hold time and direction are unknown.',
   W_POINTS_ONLY: 'Some contracts are not in the built-in table, so their results are in price points, not dollars.',
   W_MIXED_CURRENCY: 'The file mixes currencies.',
+  W_DST:
+    'Some trades were open during a daylight-saving clock change (US or EU dates). The file\'s times have no time zone, so the hold time of these trades may be off by one hour, and a buy and a sell in the repeated hour may be in the wrong order.',
 });
 
 export function warning(code, n, extra = '') {

@@ -297,6 +297,59 @@ export function utcMs(y, mo, d, h, mi, s, row, column) {
   return Date.UTC(y, mo - 1, d, h, mi, s);
 }
 
+// ---------------------------------------------------------------- daylight-saving changes
+// Times are read as naive wall-clock time (plan rule), so a trade held across a
+// daylight-saving change can be off by one hour, and in the repeated hour of a fall-back
+// night a close can even read earlier than its open (Tester D4). The file has no time
+// zone, so the engine cannot correct this; it flags it. A DST night is the early hours,
+// 00:00–05:00, of a US change Sunday (2nd Sunday of March, 1st Sunday of November) or an
+// EU one (last Sunday of March and of October); 05:00 covers the UK, central and eastern
+// European change times.
+
+const DAY = 86400000;
+const DST_NIGHT_MS = 5 * 3600000;
+
+function nthSunday(y, month, n) {
+  // n = 1, 2, … from the start of the month; n = -1 is the last Sunday.
+  if (n > 0) {
+    const first = Date.UTC(y, month - 1, 1);
+    const dow = (Math.floor(first / DAY) + 4) % 7; // 0 = Sunday (1970-01-01 was a Thursday)
+    return first + (((7 - dow) % 7) + 7 * (n - 1)) * DAY;
+  }
+  const last = Date.UTC(y, month, 0); // day 0 of the next month = last day of this one
+  const dow = (Math.floor(last / DAY) + 4) % 7;
+  return last - dow * DAY;
+}
+
+// [start, end, fallBack] for the four DST nights of year y.
+export function dstNights(y) {
+  return [[nthSunday(y, 3, 2), false], [nthSunday(y, 11, 1), true], [nthSunday(y, 3, -1), false], [nthSunday(y, 10, -1), true]]
+    .map(([d, fb]) => [d, d + DST_NIGHT_MS, fb]);
+}
+
+export function yearOf(ms) {
+  return new Date(ms).getUTCFullYear();
+}
+
+// True if [openTs, closeTs] overlaps a DST night.
+export function spansDstNight(openTs, closeTs) {
+  for (let y = yearOf(openTs); y <= yearOf(closeTs); y++) {
+    for (const [s, e] of dstNights(y)) if (openTs < e && closeTs >= s) return true;
+  }
+  return false;
+}
+
+// A round-trip row whose close reads up to 1 hour before its open, both on a fall-back
+// night: the close is in the repeated hour, so it is read as the second pass (+1 hour)
+// and the trade is flagged by W_DST. Anything else stays E_BAD_DATE.
+export function fallBackClose(openTs, closeTs) {
+  if (closeTs >= openTs || openTs - closeTs > 3600000) return null;
+  for (const [s, e, fallBack] of dstNights(yearOf(openTs))) {
+    if (fallBack && openTs >= s && openTs < e && closeTs >= s && closeTs < e) return closeTs + 3600000;
+  }
+  return null;
+}
+
 const RE_MT = /^(\d{4})\.(\d{1,2})\.(\d{1,2})[ T]+(\d{1,2}):(\d{2})(?::(\d{2}))?$/;
 const RE_ISO = /^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T]+(\d{1,2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?Z?)?$/;
 const RE_IBKR = /^(\d{4})(\d{2})(\d{2})(?:[;, ]+(\d{2}):?(\d{2}):?(\d{2}))?$/;

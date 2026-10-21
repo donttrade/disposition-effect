@@ -8,6 +8,7 @@
 // the remainder. Positions still open at the end of the file are left out.
 
 import { fail, warning } from './errors.js';
+import { spansDstNight } from './csv.js';
 
 const UNIT = 1e8; // positions tracked in 1e-8 lots, so 0.1 + 0.2 - 0.3 is exactly flat
 
@@ -282,6 +283,9 @@ export function finish(fmt, verified, res, mode, tzLabel) {
     trades = trades.filter((t) => t.pnl_unit === keep);
     warnings.push(warning('W_MIXED_CURRENCY', excluded, `Only the ${keep} trades are analysed; ${excluded} trades in other currencies were left out.`));
   }
+  let dst = 0;
+  for (const t of trades) if (spansDstNight(t.open_ts, t.close_ts)) dst++;
+  if (dst) warnings.push(warning('W_DST', dst, `${dst} found.`));
   trades.sort((a, b) => (a.close_ts - b.close_ts) || (a.open_ts - b.open_ts) || cmpStr(a.symbol, b.symbol) || (a._seq - b._seq));
   if (!trades.length) fail('E_NO_CLOSED_TRADES', noTradesReason(openN, openAtStart, skipped));
   return {

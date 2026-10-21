@@ -302,3 +302,27 @@ ORACLES["generic/tv2_side_cover.csv"] = {
     "skipped": {},
 }
 ERRORS["errors/no_closed_skipped_sides.csv"] = ("E_NO_CLOSED_TRADES", None, None)  # message names the skipped rows
+
+# Tester v2 D4 (t_quote_dst.py): naive times across a daylight-saving change are flagged (W_DST).
+ORACLES["tradovate/tv2_dst_spring.csv"] = {
+    # US spring forward 2026-03-08: 01:30 -> 03:30 reads 7200 s (the real hold is 3600 s). Flagged.
+    # ES x50: (5001 - 5000) * 50 = 50
+    "trades": [dict(symbol="ESH6", dir="long", qty=1, pnl=50.0, hold_s=7200)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_DST": 1},
+    "skipped": {},
+}
+ORACLES["tradovate/tv2_dst_fall.csv"] = {
+    # US fall back 2026-11-01: buy 01:50 EDT, sell 01:10 EST (20 real minutes later). The times
+    # alone put the sell first, so the engine reads a short of 2400 s. It cannot know better
+    # without a time zone; it flags the trade. short: (5004 - 5000) * 50 = 200
+    "trades": [dict(symbol="ESZ6", dir="short", qty=1, pnl=200.0, hold_s=2400)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_DST": 1},
+    "skipped": {},
+}
+ORACLES["generic_roundtrip/tv2_dst_fall.csv"] = {
+    # Same night, round-trip layout: close 01:10 < open 01:50, both in the fall-back night, so the
+    # close is the repeated hour (02:10 in naive time): hold 1200 s, long, 4 points. Flagged.
+    "trades": [dict(symbol="ES", dir="long", qty=1, pnl=4.0, hold_s=1200)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_DST": 1},
+    "skipped": {},
+}
