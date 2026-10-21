@@ -13,6 +13,7 @@ import { parseStrict, parsePositive, parseWhole, InputError } from './num.js';
 
 const $ = (id) => document.getElementById(id);
 const MIN_STREAK_BUSTS = 30; // fewer busts than this: too few to describe what led up to them
+const plural = (n, one, many) => `${intText(n)} ${n === 1 ? one : many}`;  // "1 day", "2 days" (launch NIT N1)
 let loaded = null;           // {days, unit, n, label} — the file's trading days, in memory only
 let worker = null;
 let slot = null;             // the file being read or on screen (tool-state.js, Tester R1-R3)
@@ -42,7 +43,6 @@ function showLoaded(out, label) {
   const r = out.result;
   loaded = { days: tradingDays(r.trades), unit: r.trades[0].pnl_unit, n: r.trades.length, label,
     beta: !r.verified_format };
-  const plural = (n, one, many) => `${intText(n)} ${n === 1 ? one : many}`;
   setFileStatus(`Read ${label}: ${plural(loaded.n, 'closed trade', 'closed trades')} on ${plural(loaded.days.length, 'trading day', 'trading days')}.` +
     (loaded.beta ? ' This file format is in beta.' : ''));
 }
@@ -168,12 +168,12 @@ function render(p, res) {
     { key: 'timeout', label: 'Ran out of time', n: res.timeout, share: res.timeout / res.runs, cls: 'bar-plain' },
   ];
   const source = p.mode === 'file'
-    ? `whole trading days drawn at random from ${loaded.label} (${intText(loaded.days.length)} days, ${intText(loaded.n)} trades)`
-    : `${intText(p.trades_per_day)} trades a day, each a win of ${m(p.avg_win)} with probability ${pct(p.win_rate)} or a loss of ${m(p.avg_loss)}`;
+    ? `whole trading days drawn at random from ${loaded.label} (${plural(loaded.days.length, 'day', 'days')}, ${plural(loaded.n, 'trade', 'trades')})`
+    : `${plural(p.trades_per_day, 'trade', 'trades')} a day, each a win of ${m(p.avg_win)} with probability ${pct(p.win_rate)} or a loss of ${m(p.avg_loss)}`;
   const r = p.rules;
   const rulesText = `Profit target ${m(r.target)}; daily loss limit ${r.daily_loss === null ? 'none' : m(r.daily_loss)}; ` +
     `maximum loss ${m(r.max_loss)} (${r.trailing ? 'trailing the highest end-of-day balance' : 'static, from the starting balance'}); ` +
-    `${intText(r.time_limit)} trading days; at least ${intText(r.min_days)} trading days to pass; seed ${p.seed}.`;
+    `${plural(r.time_limit, 'trading day', 'trading days')}; at least ${plural(r.min_days, 'trading day', 'trading days')} to pass; seed ${p.seed}.`;
   const table = el('table', {},
     el('caption', { text: `Outcome of ${intText(res.runs)} simulated challenges` }),
     el('thead', {}, el('tr', {}, el('th', { scope: 'col', text: 'Outcome' }), el('th', { scope: 'col', class: 'num', text: 'Runs' }), el('th', { scope: 'col', class: 'num', text: 'Share' }))),
@@ -186,7 +186,7 @@ function render(p, res) {
   ];
   const out = $('ps-out');
   const warn = [];
-  if (p.mode === 'file' && loaded.days.length < 30) warn.push(`Your file has ${intText(loaded.days.length)} trading days, so the results lean heavily on a few days.`);
+  if (p.mode === 'file' && loaded.days.length < 30) warn.push(`Your file has ${plural(loaded.days.length, 'trading day', 'trading days')}, so the results lean heavily on a few days.`);
   if (p.mode === 'file' && loaded.beta) warn.push('This file format is in beta: check a few trades by hand on the trade-stats page.');
   out.replaceChildren(...[
     el('h2', { id: 'ps-out-h', tabindex: '-1', text: `Results: ${intText(res.runs)} simulated challenges` }),
