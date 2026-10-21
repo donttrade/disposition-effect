@@ -1,5 +1,5 @@
-// restore.js — /restore/#t=<token>: the restore link or file saved after payment. There is no
-// restore by email in v1 (decision 20 Oct): the link on the welcome screen is the only way back.
+// restore.js — /restore/#t=<token>: the restore link or file saved on /welcome/.
+// Restore-by-email is not in v1 (decision 20 Oct), so this page has no email form.
 import { api, saveToken, tokenFromHash, OUTAGE } from './token.js';
 
 const $ = (id) => document.getElementById(id);
@@ -18,4 +18,3 @@ async function fromToken(token) {
 
 const token = tokenFromHash();
 if (token) fromToken(token);
-else $('r-status').textContent = 'Open the restore link or the restore file you saved after payment. Restore by email is not offered.';

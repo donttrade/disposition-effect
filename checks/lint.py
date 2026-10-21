@@ -82,7 +82,7 @@ def lint_text(text, where="text", paid=False, analytics=False, english=True):
         for m in rx.finditer(masked):
             ctx = text[max(0, m.start() - 40):m.end() + 40].replace("\n", " ")
             out.append((f"banned:{cat}", where, f"“{w}” in …{ctx}…"))
-    if paid:
+    if True:  # D9: false next to the paid pipeline, so banned on every page, flag or not
         for c in RULES["claims"]["no_upload"]:
             if _phrase_re(c).search(text):
                 out.append(("claim:no_upload", where, c))
@@ -131,6 +131,33 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
     return out
 
 
+def passthrough_rules(html, where, analytics):
+    """D9: the rules that must hold on passthrough pages too (the full word list waits for
+    steps 28–29, which lift the study pages word for word): upload/analytics claims, the old
+    regular-price wording and retired amounts, Tally."""
+    out = []
+    text = visible_text(html)
+    for c in RULES["claims"]["no_upload"]:
+        if _phrase_re(c).search(text):
+            out.append(("claim:no_upload", where, c))
+    if analytics:
+        for c in RULES["claims"]["no_analytics"]:
+            if _phrase_re(c).search(text):
+                out.append(("claim:no_analytics", where, c))
+    for w in RULES["words"]["regular_price"]:
+        if _phrase_re(w).search(text):
+            out.append(("banned:regular_price", where, w))
+    with open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8") as f:
+        retired = set(json.load(f)["retired_amounts"]["amounts"])
+    from harvest_prices import amounts_in
+    for a in amounts_in(html):
+        if a in retired:
+            out.append(("price_literal", where, f"${a:g} is a retired price"))
+    if "tally.so" in html:
+        out.append(("tally", where, "tally.so"))
+    return out
+
+
 def allowed_amounts():
     from harvest_prices import allowed_amounts as aa
     with open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8") as f:
@@ -164,6 +191,7 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False):
         problems.append(("dev_in_build", "/dev/", "dev pages are in the build"))
     amounts = allowed_amounts()
     priv = private_values()
+    owned_rel = {"/" + os.path.relpath(build.out_file(out_dir, p), out_dir) for p in owned_paths(paid, pilot)}
     for path in owned_paths(paid, pilot):
         fp = build.out_file(out_dir, path)
         with open(fp, encoding="utf-8") as f:
@@ -180,6 +208,8 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False):
             for rx in SECRETS:
                 if rx.search(s):
                     problems.append(("secret", rel, rx.pattern))
+            if name.endswith(".html") and rel not in owned_rel:
+                problems += passthrough_rules(s, rel, analytics)
             if not (paid or pilot):
                 for v in priv:
                     if v and v in s:
