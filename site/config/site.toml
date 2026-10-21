@@ -27,6 +27,7 @@ firm_key = "f8fdba04-71bb-4856-b700-01ac6796c252"     # Web3Forms access keys ar
 trader_key = "54d01baf-5e02-4d93-988c-16cf5487732d"
 redirect_firm = "https://donttrade.ca/start/thanks/"
 redirect_trader = "https://donttrade.ca/for-traders/thanks/"
+redirect_pilot = "https://donttrade.ca/start/pilot-thanks/"   # used only with pilot_checkout = true
 
 [worker]
 api_base = "http://127.0.0.1:8787"  # local dev server only; no production value yet

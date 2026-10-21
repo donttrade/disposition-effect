@@ -93,9 +93,9 @@ def lint_text(text, where="text", paid=False, analytics=False, english=True):
     return out
 
 
-def lint_html(html, where, paid, analytics, allowed_amounts, private_values, commerce=None):
-    """commerce: True when any commerce flag (paid_report, pilot_checkout) is on; defaults to paid."""
-    commerce = paid if commerce is None else commerce
+def lint_html(html, where, paid, analytics, allowed_amounts, private_values, commerce=None, pilot=False):
+    """commerce: True when any commerce flag (paid_report, pilot_checkout) is on; defaults to paid or pilot."""
+    commerce = (paid or pilot) if commerce is None else commerce
     french = bool(re.search(r'<html lang="fr', html))
     out = lint_text(visible_text(html), where, paid, analytics, english=not french)
     if "tally.so" in html:
@@ -112,6 +112,10 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
             out.append(("flag:paid_markup", where, "paid-only markup with paid_report = false"))
         if '"@type": "Product"' in html or '"@type":"Product"' in html:
             out.append(("flag:product_jsonld", where, "Product JSON-LD with paid_report = false"))
+    if not pilot and 'data-requires-flag="pilot_checkout"' in html:
+        out.append(("flag:pilot_markup", where, "pilot-checkout markup with pilot_checkout = false"))
+    if not (pilot or paid) and "buy.stripe.com" in html:
+        out.append(("flag:stripe_link", where, "a Stripe link with every commerce flag off"))
     if not commerce:
         for v in private_values:
             if v and v in html:
@@ -142,11 +146,12 @@ def private_values():
     return [d.get(k, "") for k in ("seller_legal_name", "premises_address", "phone")]
 
 
-def owned_paths(paid):
+def owned_paths(paid, pilot=False):
     import build
+    on = {"paid_report": paid, "pilot_checkout": pilot}
     out = []
     for p in build.PAGES:
-        if p["requires_flag"] and not paid:
+        if p["requires_flag"] and not on[p["requires_flag"]]:
             continue
         out.append(p["path"])
     return out
@@ -159,10 +164,10 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False):
         problems.append(("dev_in_build", "/dev/", "dev pages are in the build"))
     amounts = allowed_amounts()
     priv = private_values()
-    for path in owned_paths(paid):
+    for path in owned_paths(paid, pilot):
         fp = build.out_file(out_dir, path)
         with open(fp, encoding="utf-8") as f:
-            problems += lint_html(f.read(), path, paid, analytics, amounts, priv, commerce=paid or pilot)
+            problems += lint_html(f.read(), path, paid, analytics, amounts, priv, commerce=paid or pilot, pilot=pilot)
     # leaks and flag rules apply to EVERY file in the build, passthrough included
     for root, _, files in os.walk(out_dir):
         for name in files:

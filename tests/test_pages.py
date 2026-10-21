@@ -295,3 +295,12 @@ def test_form_redirects_land_on_built_thank_you_pages(built_site):
             assert (built_site["out"] / target.lstrip("/") / "index.html").exists(), url
     assert "within 1 business day" in visible(html_of(built_site, "/start/thanks/"))
     assert "Nothing is charged" in visible(html_of(built_site, "/for-traders/thanks/"))
+
+
+def test_home_finding_not_next_to_an_offer(built_site):
+    html = html_of(built_site, "/")
+    sections = re.findall(r"(?s)<section\b.*?</section>", html)
+    i = next(k for k, s in enumerate(sections) if "76.1%" in s)
+    for s in (sections[i - 1], sections[i + 1]):
+        t = visible(s)
+        assert "$" not in t and "Start a Pilot" not in t and "waitlist" not in t.lower(), t[:200]
