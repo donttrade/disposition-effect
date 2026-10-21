@@ -166,6 +166,40 @@ def test_i5_i6_i11_no_motion_layout_shift_no_long_task_no_overflow(browser, buil
     ctx.close()
 
 
+# ------------------------------------------------------------------ Tester D1: a hero value never wraps
+# Each value is one line and fits its tile: final, and every ::after value during the count (measured with a
+# throwaway nowrap span holding the same text). 320 x 200 at scale 4 = a 1280 x 800 window at 400% zoom.
+FIT = """() => [...document.querySelectorAll('.hero-dash [data-count]')].map(dd => {
+  const tile = dd.closest('.stat'), rg = document.createRange(); rg.selectNodeContents(dd);
+  let w = rg.getBoundingClientRect().width; const cu = dd.getAttribute('data-cu');
+  if (cu !== null) { const sp = document.createElement('span'); sp.textContent = cu; sp.style.cssText = 'position:absolute;white-space:nowrap;visibility:hidden';
+    dd.append(sp); w = Math.max(w, sp.getBoundingClientRect().width); sp.remove(); }
+  return {v: dd.textContent, cu, lines: rg.getClientRects().length, room: tile.clientWidth - w};
+}).filter(x => x.lines !== 1 || x.room < 0)"""
+
+
+@pytest.mark.parametrize("w,h,scale", [(320, 568, 1), (324, 640, 1), (328, 640, 1), (360, 640, 1), (375, 812, 1),
+                                       (320, 200, 4)], ids=["320", "324", "328", "360", "375", "1280@400%"])
+def test_d1_hero_values_never_wrap_or_overflow_their_tile(browser, built_site, w, h, scale):
+    for motion in (False, True):
+        ctx = _ctx(browser, {"width": w, "height": h}, init=False, device_scale_factor=scale, bypass_csp=True,
+                   reduced_motion="no-preference" if motion else "reduce")
+        pg = ctx.new_page()
+        pg.goto(built_site["url"] + "/")
+        if motion:
+            pg.evaluate("document.querySelector('.hero-dash').scrollIntoView()")
+            seen = 0
+            for _ in range(16):
+                seen += pg.evaluate("document.querySelectorAll('.hero-dash [data-cu]').length")
+                assert pg.evaluate(FIT) == [], (w, "mid-count")
+                pg.wait_for_timeout(60)
+            assert seen, "the count ran while sampled"
+            pg.wait_for_timeout(1200)
+        assert pg.evaluate(FIT) == [], (w, "final")
+        assert pg.evaluate(OVERFLOW) == 0
+        ctx.close()
+
+
 # ------------------------------------------------------------------ I7, I17: composited only, timing
 SAMPLE_ANIMS = """() => document.getAnimations().map(a => {
   const t = a.effect.getComputedTiming();
