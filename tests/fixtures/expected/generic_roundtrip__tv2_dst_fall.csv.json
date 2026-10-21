@@ -105,6 +105,10 @@
    {
     "code": "W_DST",
     "n": 1
+   },
+   {
+    "code": "W_CLOSE_BEFORE_OPEN",
+    "n": 1
    }
   ]
  },

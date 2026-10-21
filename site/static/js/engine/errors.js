@@ -59,8 +59,14 @@ export const WARNING_TEXT = Object.freeze({
   W_OPEN_POSITIONS: 'Positions still open at the end of the file were left out.',
   W_OPEN_AT_START:
     'Positions that were already open when the file starts were left out: their opening fills are before the date range of this export, so their hold time and direction are unknown.',
+  W_AMBIGUOUS_FILLS:
+    'Some fills could not be placed in a position for certain, so they and the trades they belong to were left out: either fills on one symbol have the same time to the second and their order decides which position they close, or one fill closed a position opened before the file and opened a new one, so the size of the new one is unknown.',
   W_POINTS_ONLY: 'Some contracts are not in the built-in table, so their results are in price points, not dollars.',
   W_MIXED_CURRENCY: 'The file mixes currencies.',
+  W_CURRENCY_IGNORED:
+    'The currency column holds values that are not currency codes, so it was not used: results are shown without a currency unit. Check that no cell before it holds an extra comma.',
+  W_CLOSE_BEFORE_OPEN:
+    'Some round trips close up to one hour before they open, on a night the clocks went back (US or EU dates). They were read as closing in the repeated hour, one hour later than written. If the times in this file have no daylight-saving changes, or the open and close columns are swapped, these trades are wrong: check them.',
   W_DST:
     'Some trades were open during a daylight-saving clock change (US or EU dates). The file\'s times have no time zone, so the hold time of these trades may be off by one hour, and a buy and a sell in the repeated hour may be in the wrong order.',
 });

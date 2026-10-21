@@ -120,3 +120,69 @@ def test_no_closed_trades_message_names_the_cause(engine_page):
     assert "still open" not in msg, msg
     one = run_js(engine_page, b"Date,Time,Symbol,Side,Quantity,Price\n2026-01-05,09:30:00,AAA,Buy,1,100\n")
     assert "1 position is still open at the end of the file" in one["error"]["message"], one
+
+
+def test_no_closed_trades_message_names_carried_and_ambiguous(engine_page):
+    """F-D2: an in/out reversal on a pre-file position leaves nothing; the message says why."""
+    with open(os.path.join(FIX, "mt5", "fd2_inout_reversal_on_carried.csv"), "rb") as f:
+        msg = run_js(engine_page, f.read())["error"]["message"]
+    assert "1 position was already open when the file starts" in msg, msg
+    assert "1 symbol has fills whose order or split the file does not show" in msg, msg
+
+
+def test_generated_histories_match_reference(engine_page):
+    """F-B1 / F-D2: random IBKR histories cut mid-position (tests/lots_gen.py), with
+    same-second fills and C;O reversals: the browser gives exactly the reference's result."""
+    import random
+    sys.path.insert(0, HERE)
+    import lots_gen as G
+    n = 0
+    for seed in range(40):
+        fills, _ = G.history(seed, n_symbols=3, n_trades=8, ties=seed % 2 == 0, reversals=True)
+        rng = random.Random(seed)
+        times = sorted({f["ts"] for f in fills})
+        for cut in [times[0], rng.choice(times), rng.choice(times)]:
+            data = G.export(fills, cut)
+            diff = same(comparable(parse_js(engine_page, data)), comparable(parse_py(data)))
+            assert not diff, (seed, cut, diff)
+            n += 1
+    assert n == 120
+
+
+def parse_js(page, data):
+    return json.loads(page.evaluate("b => window.parseOnly(b)", base64.b64encode(data).decode()))
+
+
+def parse_py(data):
+    try:
+        return {"result": E.parse_file(data)}
+    except E.EngineError as e:
+        return {"error": e.to_json()}
+
+
+def test_quote_mutations_match_reference(engine_page):
+    """F-B2: the browser fails or succeeds exactly like the reference on stray-quote files."""
+    sys.path.insert(0, HERE)
+    import quote_fuzz as Q
+    n = 0
+    for name, base in sorted(Q.bases().items()):
+        for i, (label, text) in enumerate(Q.mutations(base, seed=len(name), n_random=100)):
+            if i % 23:
+                continue
+            data = text.encode()
+            diff = same(comparable(parse_js(engine_page, data)), comparable(parse_py(data)))
+            assert not diff, (name, label, diff)
+            n += 1
+    assert n > 300
+
+
+def test_currency_column_never_echoes_a_name(engine_page):
+    """F-D3: a name shifted into Currency is never shown (messages included) or used as a unit."""
+    for rel in ("generic/fd3_name_shifted_into_currency.csv", "generic/fd3_three_letter_fragment.csv"):
+        with open(os.path.join(FIX, rel), "rb") as f:
+            raw = json.dumps(run_js(engine_page, f.read()), ensure_ascii=False)
+        for word in ("JANE", "Jane", "jane", "ANN", "Ann", "Doe", "DOE", "U123"):
+            assert word not in raw, (rel, word)
+        res = json.loads(raw)["result"]
+        assert res["currency_groups"] == {"points": 40}
+        assert [w["code"] for w in res["warnings"]] == ["W_CURRENCY_IGNORED"]

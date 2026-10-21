@@ -187,9 +187,11 @@ def sniff_delimiter(text):
 
 
 def parse_csv(text, delim):
-    """Mirrors parseCsv() in csv.js, including the stray-quote checks:
+    """Mirrors parseCsv() in csv.js, including the stray-quote bookkeeping:
     a quoted cell open at the end of the file is E_BAD_QUOTE at the row it opened in;
-    swallow = most delimiters on one physical line inside a quoted cell after a line break."""
+    swallow = most delimiters on one physical line inside a quoted cell after a line break;
+    ml = indexes of cells spanning a line break; broken = such a cell closed by a quote
+    followed by more text (the next row's opening quote closing a stray one)."""
     out = []
     cells = []
     field = []
@@ -199,6 +201,9 @@ def parse_csv(text, delim):
     rec_line = 1
     swallow = 0
     line_delims = -1
+    ml = []
+    broken = False
+    closed_ml = False
     n = len(text)
 
     def end_field():
@@ -208,14 +213,17 @@ def parse_csv(text, delim):
         at_start = True
 
     def end_record():
-        nonlocal cells, swallow
+        nonlocal cells, swallow, ml, broken
         end_field()
         if not (len(cells) == 1 and clean(cells[0]) == ""):
-            out.append({"row": rec_line, "cells": [clean(c) for c in cells], "swallow": swallow})
+            out.append({"row": rec_line, "cells": [clean(c) for c in cells], "swallow": swallow, "ml": ml,
+                        "broken": broken})
             if len(out) > MAX_ROWS + 1:
                 fail("E_TOO_LARGE")
         cells = []
         swallow = 0
+        ml = []
+        broken = False
 
     i = 0
     while i < n:
@@ -226,6 +234,9 @@ def parse_csv(text, delim):
                     field.append('"')
                     i += 2
                     continue
+                if line_delims >= 0:
+                    ml.append(len(cells))
+                    closed_ml = True
                 in_q = False
                 line_delims = -1
                 i += 1
@@ -247,6 +258,10 @@ def parse_csv(text, delim):
             field.append(ch)
             i += 1
             continue
+        if closed_ml:
+            if ch != delim and ch not in "\r\n":
+                broken = True
+            closed_ml = False
         if ch == '"' and at_start:
             in_q = True
             at_start = False
@@ -275,14 +290,18 @@ def parse_csv(text, delim):
     return out
 
 
-def check_swallowed_rows(rows, hi):
-    """A quoted cell that holds whole rows (two stray quote marks): E_BAD_QUOTE at that row."""
+def check_quoting(rows, hi, m):
+    """Data records whose quoting shows merged or cut rows: E_BAD_QUOTE. Mirrors checkQuoting()."""
     width = len(rows[hi]["cells"])
-    if width < 3:
-        return
+    idx = list(m.values())
+    if rows[hi]["ml"] or rows[hi]["broken"]:
+        fail("E_BAD_QUOTE", "header cell spans lines", rows[hi]["row"])
     for r in rows[hi + 1:]:
-        if r["swallow"] >= width - 1:
-            fail("E_BAD_QUOTE", "quoted cell holds whole rows", r["row"])
+        if r["broken"] or (r["ml"] and len(r["cells"]) > width) or (width >= 3 and r["swallow"] >= width - 1):
+            fail("E_BAD_QUOTE", "quoting merged rows", r["row"])
+        for i in idx:
+            if i in r["ml"] or (i < len(r["cells"]) and '"' in r["cells"][i]):
+                fail("E_BAD_QUOTE", "quote or line break in a read column", r["row"])
 
 
 # ----------------------------------------------------------------- HTML rows
@@ -414,9 +433,9 @@ _SH_INT = re.compile(r"^[+-]?\d+$", re.ASCII)
 _SH_ONE_COMMA = re.compile(r"^[+-]?\d+,(\d+)$", re.ASCII)
 _SH_EURO = re.compile(r"^[+-]?\d{1,3}(\.\d{3})+,\d+$", re.ASCII)
 _SH_US = re.compile(r"^[+-]?\d{1,3}(,\d{3})+(\.\d+)?$", re.ASCII)
-_SH_DOT3 = re.compile(r"^[+-]?\d{1,3}\.\d{3}$", re.ASCII)
+_SH_DOT3 = re.compile(r"^[+-]?[1-9]\d{0,2}\.\d{3}$", re.ASCII)  # never a leading 0 (F-D7)
 _SH_ONE_DOT = re.compile(r"^[+-]?(\d+\.?\d*|\.\d+)$", re.ASCII)
-_SH_DOTS_THOUSANDS = re.compile(r"^[+-]?\d{1,3}(\.\d{3}){2,}$", re.ASCII)
+_SH_DOTS_THOUSANDS = re.compile(r"^[+-]?[1-9]\d{0,2}(\.\d{3}){2,}$", re.ASCII)
 
 
 def number_shape(raw):
@@ -683,6 +702,38 @@ NUMERIC_FIELDS = {
     "generic": ["qty", "price", "fees"],
 }
 
+# ISO 4217 currency codes; mirrors ISO_CURRENCIES / checkCurrencyColumn() in detect.js.
+ISO_CURRENCIES = [
+    "AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS", "AUD", "AWG", "AZN", "BAM", "BBD", "BDT", "BGN", "BHD",
+    "BIF", "BMD", "BND", "BOB", "BOV", "BRL", "BSD", "BTN", "BWP", "BYN", "BZD", "CAD", "CDF", "CHE", "CHF",
+    "CHW", "CLF", "CLP", "CNY", "COP", "COU", "CRC", "CUC", "CUP", "CVE", "CZK", "DJF", "DKK", "DOP", "DZD",
+    "EGP", "ERN", "ETB", "EUR", "FJD", "FKP", "GBP", "GEL", "GHS", "GIP", "GMD", "GNF", "GTQ", "GYD", "HKD",
+    "HNL", "HTG", "HUF", "IDR", "ILS", "INR", "IQD", "IRR", "ISK", "JMD", "JOD", "JPY", "KES", "KGS", "KHR",
+    "KMF", "KPW", "KRW", "KWD", "KYD", "KZT", "LAK", "LBP", "LKR", "LRD", "LSL", "LYD", "MAD", "MDL", "MGA",
+    "MKD", "MMK", "MNT", "MOP", "MRU", "MUR", "MVR", "MWK", "MXN", "MXV", "MYR", "MZN", "NAD", "NGN", "NIO",
+    "NOK", "NPR", "NZD", "OMR", "PAB", "PEN", "PGK", "PHP", "PKR", "PLN", "PYG", "QAR", "RON", "RSD", "RUB",
+    "RWF", "SAR", "SBD", "SCR", "SDG", "SEK", "SGD", "SHP", "SLE", "SLL", "SOS", "SRD", "SSP", "STN", "SVC",
+    "SYP", "SZL", "THB", "TJS", "TMT", "TND", "TOP", "TRY", "TTD", "TWD", "TZS", "UAH", "UGX", "USD", "USN",
+    "UYI", "UYU", "UYW", "UZS", "VED", "VES", "VND", "VUV", "WST", "XAF", "XAG", "XAU", "XBA", "XBB", "XBC",
+    "XBD", "XCD", "XCG", "XDR", "XOF", "XPD", "XPF", "XPT", "XSU", "XUA", "YER", "ZAR", "ZMW", "ZWG", "ZWL",
+]
+_ISO_SET = set(ISO_CURRENCIES)
+
+
+def check_currency_column(rows, m):
+    """-> (map, ignored): drop 'currency' when any non-empty cell is not an ISO 4217 code."""
+    if "currency" not in m:
+        return m, False
+    i = m["currency"]
+    for r in rows:
+        v = clean(r["cells"][i]).upper() if i < len(r["cells"]) else ""
+        if v != "" and v not in _ISO_SET:
+            rest = dict(m)
+            del rest["currency"]
+            return rest, True
+    return m, False
+
+
 CSV_ORDER = ["mt5_deals", "ibkr_flex", "tradovate_orders", "generic_roundtrip", "generic"]
 HTML_ORDER = ["mt5_deals", "mt5_positions", "mt4"]
 HEADER_TITLES = ["trade history report", "statement", "detailed statement", "account statement"]
@@ -891,12 +942,13 @@ def parse_mt(tables):
                 execs.append({"row": row, "ts": ts, "symbol": symbol, "side": side, "qty": qty, "price": price,
                               "fee": fee, "currency": None, "oc": oc, "pos_id": pos if pos != "" else None,
                               "pnl_reported": profit + credit, "multiplier": 1, "_unit": "account",
-                              "_fx": None})
+                              "_fx": None, "_rev": d == "in/out"})
             else:
                 size_field = "volume" if kind == "mt5_positions_closed" else "size"
                 ot = parse_date(cell(r, m, "open_time"), "mt", row, "open_time")
                 ct = parse_date(cell(r, m, "close_time"), "mt", row, "close_time")
-                if ct < ot:
+                reordered = ct < ot  # the repeated hour of a fall-back night, flagged (F-N3)
+                if reordered:
                     ct = fall_back_close(ot, ct)
                     if ct is None:
                         fail("E_BAD_DATE", "close before open", row, "close_time")
@@ -915,7 +967,7 @@ def parse_mt(tables):
                 rts.append({"row": row, "symbol": symbol, "dir": "long" if side == "buy" else "short",
                             "open_ts": ot, "close_ts": ct, "qty": qty, "entry": op, "exit": cp, "fees": fee,
                             "pnl_gross": profit + credit, "reported": True, "currency": None, "unit": "account",
-                            "pos_id": pos if pos != "" else None})
+                            "pos_id": pos if pos != "" else None, "reordered": reordered})
     return {"executions": execs, "roundtrips": rts, "skipped": skipped, "extra": extra}
 
 
@@ -985,7 +1037,8 @@ def parse_generic_roundtrip(rows, hi, m):
             continue
         ot = parse_date(cell(r, m, "open_time"), "generic", row, "open_time")
         ct = parse_date(cell(r, m, "close_time"), "generic", row, "close_time")
-        if ct < ot:
+        reordered = ct < ot  # the repeated hour of a fall-back night, flagged (F-N3)
+        if reordered:
             ct = fall_back_close(ot, ct)
             if ct is None:
                 fail("E_BAD_DATE", "close before open", row, "close_time")
@@ -999,7 +1052,7 @@ def parse_generic_roundtrip(rows, hi, m):
         cur = cell(r, m, "currency").upper() or None
         rts.append({"row": row, "symbol": symbol, "dir": dr, "open_ts": ot, "close_ts": ct, "qty": qty,
                     "entry": op, "exit": cp, "fees": fee, "pnl_gross": None, "reported": False,
-                    "currency": cur, "unit": cur if cur else "points", "pos_id": None})
+                    "currency": cur, "unit": cur if cur else "points", "pos_id": None, "reordered": reordered})
     return {"executions": execs, "roundtrips": rts, "skipped": skipped, "extra": {}}
 
 
@@ -1083,7 +1136,7 @@ def parse_ibkr(rows, hi, m):
             fx = req_number(cell(r, m, "fx"), row, "fx")
         e = {"row": row, "ts": ts, "symbol": symbol, "side": side, "qty": qty, "price": price,
              "fee": fee, "currency": cur, "oc": oc, "pos_id": None, "pnl_reported": realized,
-             "multiplier": mult, "_unit": cur if cur else "points", "_fx": fx}
+             "multiplier": mult, "_unit": cur if cur else "points", "_fx": fx, "_rev": has_o and has_c}
         (cancels if is_cancel else execs).append(e)
     return {"executions": _apply_cancels(execs, cancels, skipped), "roundtrips": [], "skipped": skipped, "extra": {}}
 
@@ -1158,7 +1211,7 @@ def _new_trade(e, dr, seq):
     return {"symbol": e["symbol"], "dir": dr, "open_ts": e["ts"], "close_ts": None, "peak": 0,
             "entry_qty": 0.0, "entry_not": 0.0, "exit_qty": 0.0, "exit_not": 0.0, "fees": 0.0,
             "rep_sum": 0.0, "rep_missing": False, "fills": 0, "multiplier": e["multiplier"],
-            "currency": e["currency"], "unit": e["_unit"], "fx": None, "seq": seq, "ks": [], "by_reversal": False}
+            "currency": e["currency"], "unit": e["_unit"], "fx": None, "seq": seq}
 
 
 def chrono_order(execs):
@@ -1175,25 +1228,163 @@ def chrono_order(execs):
     return sorted(range(len(execs)), key=lambda k: (execs[k]["ts"], sign * execs[k]["row"], sign * k))
 
 
-def build_trades(execs, reported_mode, detect_hedging=False):
-    """Flat-to-flat round trips per symbol. reported_mode: None | "gross" | "net".
+# ----------------------------------------------------------------- positions opened before the file
+# Mirrors lotKind(), lotWalk(), preFileLots(), nettingWalk(), tieOrder(), tradeKey() and
+# buildTrades() in trades.js, operation for operation; the comments there explain the
+# rules. In short: with open/close codes, a close bigger than the units opened in the file
+# (per direction) closes a lot from before the file, and everything from the start of the
+# file through the last such close is left out (netting: the whole stretch up to a flat
+# count; MT5 hedging: that direction's fills). A reversal with nothing in the file to close
+# opens a lot of unknown size; one that closed more than the file opened shows when the
+# first direction opens again. Same-second fills are also read closes-first and
+# opens-first; only trades all readings agree on are kept.
 
-    Positions opened before the file starts: with open/close codes (IBKR O/C, MT5
-    in/out), inv[sym] counts units opened in this file and not yet closed
-    (direction-blind). A closing fill bigger than inv closes a position opened
-    before the file; that fill and any trade in progress on the symbol are left
-    out and counted once per position (W_OPEN_AT_START), never inverted."""
-    order = chrono_order(execs)
+LONG = 0
+SHORT = 1
+
+
+def lot_kind(e):
+    if e["oc"] == "open":
+        return "open"
+    if e["oc"] == "close":
+        return "close"
+    return "reverse" if e.get("_rev") else "net"
+
+
+def lot_walk(execs, lst, allow_hedging):
+    n = len(lst)
+    inv = [0, 0]
+    spans = [[], []]
+    unknown_from = [-1, -1]
+    rev_at = [-1, -1]
+    carried = [False, False]
+    flat = [True] * n
+    st = {"ambiguous": False, "hedged": False, "hedges": 0, "signs": 0}
+
+    def excess(d, i):
+        st["signs"] += 1
+        if unknown_from[d] >= 0:
+            spans[d].append((unknown_from[d], i))
+            unknown_from[d] = -1
+        else:
+            spans[d].append((0, i))
+            carried[d] = True
+            if allow_hedging and inv[1 - d] > 0:
+                st["hedged"] = True
+                st["hedges"] += 1
+        inv[d] = 0
+        rev_at[d] = -1
+
+    for i, k in enumerate(lst):
+        e = execs[k]
+        q = round_half_away(e["qty"] * UNIT)
+        if q == 0:
+            flat[i] = i == 0 or flat[i - 1]
+            continue
+        opens = LONG if e["side"] == "buy" else SHORT
+        closes = 1 - opens
+        kind = lot_kind(e)
+        if kind == "open" and (inv[closes] > 0 or unknown_from[closes] >= 0):
+            if rev_at[closes] >= 0 or unknown_from[closes] >= 0:
+                spans[opens].append((0, i - 1))
+                spans[closes].append((0, i - 1))
+                if rev_at[closes] >= 0:
+                    carried[opens] = True
+                st["signs"] += 1
+                inv[closes] = 0
+                rev_at[closes] = -1
+                unknown_from[closes] = -1
+                st["ambiguous"] = True
+            elif allow_hedging:
+                st["hedged"] = True
+        if kind == "open":
+            inv[opens] += q
+        elif kind == "close":
+            if q <= inv[closes]:
+                inv[closes] -= q
+                if inv[closes] == 0:
+                    rev_at[closes] = -1
+            else:
+                excess(closes, i)
+        elif kind == "reverse" and inv[closes] == 0:
+            excess(closes, i)
+            if unknown_from[opens] < 0:
+                unknown_from[opens] = i
+            st["ambiguous"] = True
+        else:
+            c = min(q, inv[closes])
+            inv[closes] -= c
+            if inv[closes] == 0:
+                rev_at[closes] = -1
+            if kind == "reverse" and q > c and inv[opens] == 0:
+                rev_at[opens] = i
+            inv[opens] += q - c
+        flat[i] = inv[LONG] == 0 and inv[SHORT] == 0 and unknown_from[LONG] < 0 and unknown_from[SHORT] < 0
+    for d in (LONG, SHORT):
+        if unknown_from[d] >= 0:
+            st["ambiguous"] = True
+    excluded = set()
+    if st["hedged"]:
+        for d in (LONG, SHORT):
+            if unknown_from[d] >= 0:
+                spans[d].append((unknown_from[d], n - 1))
+        for i, k in enumerate(lst):
+            e = execs[k]
+            opens = LONG if e["side"] == "buy" else SHORT
+            kind = lot_kind(e)
+            for d in (LONG, SHORT):
+                if kind == "open":
+                    touches = opens == d
+                elif kind == "close":
+                    touches = opens != d
+                else:
+                    touches = True
+                if touches and any(a <= i <= b for a, b in spans[d]):
+                    excluded.add(k)
+    else:
+        last = -1
+        for d in (LONG, SHORT):
+            for _a, b in spans[d]:
+                last = max(last, b)
+        if last >= 0:
+            while last < n - 1 and not flat[last]:
+                last += 1
+            for i in range(last + 1):
+                excluded.add(lst[i])
+    return {"excluded": excluded, "carried": carried, "ambiguous": st["ambiguous"], "hedges": st["hedges"],
+            "signs": st["signs"]}
+
+
+def pre_file_lots(execs, order, allow_hedging):
+    by_sym = {}
+    for k in order:
+        by_sym.setdefault(execs[k]["symbol"], []).append(k)
+    excluded = set()
+    ambiguous_syms = set()
+    signs = {}
+    open_at_start = 0
+    hedges = 0
+    for sym, lst in by_sym.items():
+        w = lot_walk(execs, lst, allow_hedging)
+        excluded |= w["excluded"]
+        open_at_start += sum(1 for c in w["carried"] if c)
+        if w["ambiguous"]:
+            ambiguous_syms.add(sym)
+        hedges += w["hedges"]
+        signs[sym] = w["signs"]
+    return {"excluded": excluded, "open_at_start": open_at_start, "ambiguous_syms": ambiguous_syms,
+            "hedges": hedges, "signs": signs}
+
+
+def netting_walk(execs, order, excluded, detect_hedging):
     pos = {}
     cur = {}
-    inv = {}
-    carried = {}
     done = []
-    excluded = set()  # execution indexes left out as part of a pre-file position
     hedging = 0
-    open_at_start = 0
     seq = 0
     for k in order:
+        if k in excluded:
+            continue
         e = execs[k]
         sym = e["symbol"]
         s = 1 if e["side"] == "buy" else -1
@@ -1201,29 +1392,6 @@ def build_trades(execs, reported_mode, detect_hedging=False):
         if q_units == 0:
             continue
         p = pos.get(sym, 0)
-        have = inv.get(sym, 0)
-        if e["oc"] == "close":
-            if q_units > have:
-                if not carried.get(sym):
-                    open_at_start += 1
-                    carried[sym] = True
-                excluded.add(k)
-                if sym in cur:
-                    t = cur[sym]
-                    # a fill that reversed into this trade also closed a finished trade: keep it
-                    for j in (t["ks"][1:] if t["by_reversal"] else t["ks"]):
-                        excluded.add(j)
-                cur.pop(sym, None)
-                pos[sym] = 0
-                inv[sym] = 0
-                continue
-            inv[sym] = have - q_units
-        elif e["oc"] == "open":
-            inv[sym] = have + q_units
-            carried[sym] = False
-        else:
-            closing = min(q_units, abs(p)) if (p != 0 and (p > 0) != (s > 0)) else 0
-            inv[sym] = max(0, have - closing) + (q_units - closing)
         if detect_hedging and e["oc"] == "open" and p != 0 and (p > 0) != (s > 0):
             hedging += 1
         if p == 0 or (p > 0) == (s > 0):
@@ -1231,7 +1399,6 @@ def build_trades(execs, reported_mode, detect_hedging=False):
                 cur[sym] = _new_trade(e, "long" if s > 0 else "short", seq)
                 seq += 1
             t = cur[sym]
-            t["ks"].append(k)
             t["entry_qty"] += e["qty"]
             t["entry_not"] += e["qty"] * e["price"]
             t["fees"] += e["fee"]
@@ -1246,7 +1413,6 @@ def build_trades(execs, reported_mode, detect_hedging=False):
             continue
         # reducing: close part (and maybe reverse with the remainder)
         t = cur[sym]
-        t["ks"].append(k)
         close_units = min(q_units, abs(p))
         rem_units = q_units - close_units
         if rem_units == 0:
@@ -1272,8 +1438,6 @@ def build_trades(execs, reported_mode, detect_hedging=False):
         if rem_units:
             nt = _new_trade(e, "long" if s > 0 else "short", seq)
             seq += 1
-            nt["ks"].append(k)
-            nt["by_reversal"] = True
             rq = rem_units / UNIT
             nt["entry_qty"] += rq
             nt["entry_not"] += rq * e["price"]
@@ -1286,6 +1450,74 @@ def build_trades(execs, reported_mode, detect_hedging=False):
             p = s * rem_units
         pos[sym] = p
     open_n = sum(1 for v in pos.values() if v != 0)
+    return {"done": done, "open_n": open_n, "hedging": hedging}
+
+
+TIE_RANK = {"close": 0, "reverse": 1, "net": 1, "open": 2}
+
+
+def tie_order(execs, order, opens_first):
+    sign = -1 if opens_first else 1
+    return sorted(order, key=lambda k: (execs[k]["ts"], sign * TIE_RANK[lot_kind(execs[k])]))
+
+
+def trade_key(t):
+    def r(x):
+        return math.floor(x * 1e6 + 0.5)
+    return (t["symbol"], t["dir"], t["open_ts"], t["close_ts"], t["peak"], t["fills"], r(t["entry_qty"]),
+            r(t["entry_not"]), r(t["exit_qty"]), r(t["exit_not"]), r(t["fees"]), r(t["rep_sum"]), t["rep_missing"])
+
+
+def build_trades(execs, reported_mode, detect_hedging=False):
+    """Flat-to-flat round trips per symbol. reported_mode: None | "gross" | "net"."""
+    order = chrono_order(execs)
+    lots = pre_file_lots(execs, order, detect_hedging)
+    walk = netting_walk(execs, order, lots["excluded"], detect_hedging)
+    done = walk["done"]
+    excluded = set(lots["excluded"])
+    ambiguous_syms = set(lots["ambiguous_syms"])
+    others = []
+    for o in (tie_order(execs, order, False), tie_order(execs, order, True)):
+        if o == order or any(o == x["order"] for x in others):
+            continue
+        lo = pre_file_lots(execs, o, detect_hedging)
+        others.append({"order": o, "lots": lo, "done": netting_walk(execs, o, lo["excluded"], detect_hedging)["done"]})
+    if others:
+        def keys_of(lst):
+            m = {}
+            for t in lst:
+                m.setdefault(t["symbol"], set()).add(trade_key(t))
+            return m
+        mine = keys_of(done)
+        for x in others:
+            x["keys"] = keys_of(x["done"])
+        lost = set()
+        drop_all = set()
+        fair_of = {}
+        for sym in lots["signs"]:
+            fewest = min([lots["signs"][sym]] + [x["lots"]["signs"][sym] for x in others])
+            fair = [x for x in others if x["lots"]["signs"][sym] == fewest]
+            fair_of[sym] = fair
+            for x in fair:
+                for k in x["order"]:
+                    if execs[k]["symbol"] == sym and k in x["lots"]["excluded"]:
+                        excluded.add(k)
+            if lots["signs"][sym] > fewest:
+                lost.add(sym)
+                drop_all.add(sym)
+                continue
+            a = mine.get(sym, set())
+            for x in fair:
+                if a != x["keys"].get(sym, set()):
+                    lost.add(sym)
+        if lost:
+            done = [t for t in done if t["symbol"] not in lost or (
+                t["symbol"] not in drop_all and
+                all(trade_key(t) in x["keys"].get(t["symbol"], set()) for x in fair_of[t["symbol"]]))]
+            ambiguous_syms |= lost
+            for k, e in enumerate(execs):
+                if e["symbol"] in lost:
+                    excluded.add(k)
     trades = []
     for t in done:
         entry_vwap = t["entry_not"] / t["entry_qty"]
@@ -1310,7 +1542,8 @@ def build_trades(execs, reported_mode, detect_hedging=False):
                        "entry_vwap": entry_vwap, "exit_vwap": exit_vwap, "pnl": pnl, "pnl_gross": gross,
                        "fees": t["fees"], "pnl_source": src, "pnl_unit": t["unit"], "fills_n": t["fills"],
                        "currency": t["currency"], "_fx": t["fx"], "_seq": t["seq"]})
-    return trades, open_n, hedging, open_at_start, excluded
+    hedging = (lots["hedges"] if detect_hedging else 0) + walk["hedging"]
+    return trades, walk["open_n"], hedging, lots["open_at_start"], len(ambiguous_syms), excluded
 
 
 def roundtrip_trades(rts, start_seq):
@@ -1327,7 +1560,8 @@ def roundtrip_trades(rts, start_seq):
                        "hold_s": (r["close_ts"] - r["open_ts"]) // 1000, "qty": r["qty"],
                        "entry_vwap": r["entry"], "exit_vwap": r["exit"], "pnl": gross - r["fees"],
                        "pnl_gross": gross, "fees": r["fees"], "pnl_source": src, "pnl_unit": r["unit"],
-                       "fills_n": 2, "currency": r["currency"], "_fx": None, "_seq": start_seq + i})
+                       "fills_n": 2, "currency": r["currency"], "_fx": None, "_seq": start_seq + i,
+                       "_reordered": r.get("reordered") is True})
     return trades
 
 
@@ -1382,6 +1616,7 @@ def _html_number_group(t):
 
 def parse_file(data):
     text = decode_bytes(data)
+    currency_ignored = False
     if is_html(text):
         rows = html_rows(text)
         det = detect_html(rows)
@@ -1400,13 +1635,15 @@ def parse_file(data):
         if not rows:
             fail("E_EMPTY")
         det = detect_csv(rows)
-        name, hi, m = det["format"], det["header_index"], det["map"]
+        name, hi = det["format"], det["header_index"]
+        # a Currency column whose cells are not all ISO codes is not read at all (F-D3)
+        m, currency_ignored = check_currency_column(rows[hi + 1:], det["map"])
         data_rows = [r for r in rows[hi + 1:] if not _empty(r["cells"])]
         if not data_rows:
             fail("E_HEADER_ONLY")
         if len(data_rows) > MAX_ROWS:
             fail("E_TOO_LARGE")
-        check_swallowed_rows(rows, hi)
+        check_quoting(rows, hi, det["map"])
         resolve_number_style([{"rows": rows[hi + 1:], "map": m, "fields": NUMERIC_FIELDS[name]}],
                              "dot" if delim == "," else None)
         verified = SIGNATURES[name]["verified"]
@@ -1437,18 +1674,21 @@ def parse_file(data):
         warnings.append(warning("W_SKIPPED_ROWS", n))
     if dup:
         warnings.append(warning("W_DUPLICATE_ROWS", dup))
+    if currency_ignored:
+        warnings.append(warning("W_CURRENCY_IGNORED", 0))
 
     executions = res["executions"]
     open_n = extra.get("open_positions", 0)
     hedging = 0
     open_at_start = 0
+    ambiguous = 0
     if fmt == "mt5" and extra.get("has_closed_positions"):
         trades = roundtrip_trades(res["roundtrips"], 0)
     elif res["roundtrips"]:
         trades = roundtrip_trades(res["roundtrips"], 0)
         executions = roundtrip_executions(res["roundtrips"])
     else:
-        trades, o, hedging, open_at_start, excluded = build_trades(executions, mode, detect_hedging=(fmt == "mt5"))
+        trades, o, hedging, open_at_start, ambiguous, excluded = build_trades(executions, mode, detect_hedging=(fmt == "mt5"))
         open_n += o
         # fills of positions opened before the file are left out of every later step (PGR/PLR too)
         if excluded:
@@ -1459,6 +1699,8 @@ def parse_file(data):
         warnings.append(warning("W_OPEN_POSITIONS", open_n))
     if open_at_start:
         warnings.append(warning("W_OPEN_AT_START", open_at_start))
+    if ambiguous:
+        warnings.append(warning("W_AMBIGUOUS_FILLS", ambiguous))
     pts = 0
     if fmt == "tradovate_orders":
         for t in trades:
@@ -1497,6 +1739,9 @@ def parse_file(data):
             dst += 1
     if dst:
         warnings.append(warning("W_DST", dst))
+    reordered = sum(1 for t in trades if t.get("_reordered"))
+    if reordered:
+        warnings.append(warning("W_CLOSE_BEFORE_OPEN", reordered))
     trades.sort(key=lambda t: (t["close_ts"], t["open_ts"], t["symbol"], t["_seq"]))
     if not trades:
         fail("E_NO_CLOSED_TRADES")

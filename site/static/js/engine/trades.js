@@ -19,67 +19,201 @@ function roundHalfAway(x) {
 function newTrade(e, dir, seq) {
   return { symbol: e.symbol, dir, open_ts: e.ts, close_ts: null, peak: 0, entry_qty: 0, entry_not: 0,
     exit_qty: 0, exit_not: 0, fees: 0, rep_sum: 0, rep_missing: false, fills: 0, multiplier: e.multiplier,
-    currency: e.currency, unit: e._unit, fx: null, seq, ks: [], by_reversal: false };
+    currency: e.currency, unit: e._unit, fx: null, seq };
 }
 
-// reportedMode: null (compute P&L) | 'gross' (reported profit before fees, MetaTrader)
-//             | 'net' (reported P&L after fees, IBKR realized P&L)
+// ---------------------------------------------------------------- positions opened before the file
+// An export whose date range starts mid-position holds closing fills for lots bought (or
+// sold short) before the file. Formats with open/close codes (IBKR O/C, MT5 in/out) say
+// which fills close something, so those lots can be found; files without codes cannot
+// show them and are unaffected (a leading sell there is a short, as the plan says).
 //
-// Positions opened before the file starts (an export whose date range begins
-// mid-position). Formats with open/close codes (IBKR O/C, MT5 in/out) say which
-// fills close a position. `inv` counts, per symbol, the units opened in this file
-// and not yet closed, direction-blind so hedged legs count too. A closing fill
-// bigger than `inv` closes something opened before the file: that fill, and any
-// trade in progress on the symbol (it was never flat since before the file), are
-// left out and counted once per position in openAtStart (W_OPEN_AT_START). They
-// are never turned into an opposite trade. Files without codes are unaffected.
-export function buildTrades(execs, reportedMode, detectHedging) {
-  const order = chronoOrder(execs);
+// lotWalk keeps, per direction (long, short), the units opened IN THE FILE and not yet
+// closed. A close bigger than that closes a lot from before the file ("excess"). The
+// plan's trade runs flat to flat, and the real position was not flat from the start of
+// the file until that close, so every fill from the start of the file through the LAST
+// such close is left out: in-file adds, partial closes and any trade that seemed to
+// finish inside it (Tester F-B1: a carried long + an add + two closes made a 1-day trade
+// carrying the older lot's FIFO P&L). One count per symbol and direction goes to
+// W_OPEN_AT_START.
+//
+// A netting account (IBKR; MT5 netting) has one position per symbol, so what is left out
+// is a stretch of the symbol's timeline from the start of the file to a fill after which
+// the count is flat: the fills after it start from flat. An MT5 hedging account keeps long
+// and short legs apart; a symbol shows it when a leg opens, or a pre-file lot closes,
+// while the other direction is open in the file. There only the fills of the pre-file
+// lot's direction are left out and the other legs are kept (W_HEDGING).
+//
+// A reversal fill (both codes: IBKR "C;O", MT5 "in/out") closes the whole position and
+// opens the other way with the rest. Two cases cannot be read from the file, and nothing
+// is guessed (Tester F-D2):
+//   * The file opened nothing for it to close: it closes a pre-file lot of unknown size,
+//     so the new position's size is unknown too ("unknown lot"). It is left out through
+//     the next close the file did not open in its direction (any later such close extends
+//     what is left out, as for a pre-file lot), or to the end of the file.
+//   * The file opened less than the reversal really closed (a pre-file lot plus in-file
+//     adds): the new position then looks bigger than it is. That shows later, when a fill
+//     opens the first direction again while the new one still looks open, which a netting
+//     account cannot do; everything up to that fill is left out.
+// Both count in W_AMBIGUOUS_FILLS.
+//
+// Convention, stated: the file is read as if nothing was open before it unless the file
+// itself shows otherwise (a close it did not open, or the contradiction above). A pre-file
+// lot that the file only adds to and then closes with a reversal, with nothing later that
+// contradicts the count, cannot be seen by any reader of the file alone.
+
+const LONG = 0;
+const SHORT = 1;
+
+// What one fill does to the lots: 'open', 'close', 'reverse' (both codes) or 'net' (no
+// code: closes the other direction first, like the netting walk).
+function lotKind(e) {
+  if (e.oc === 'open') return 'open';
+  if (e.oc === 'close') return 'close';
+  return e._rev ? 'reverse' : 'net';
+}
+
+// One symbol's fills (execution indexes, in walk order) →
+// {excluded: Set, carried: [long, short], ambiguous, hedges}.
+// allowHedging: the format can hold hedged legs (MT5). hedges counts pre-file lots closed
+// while the other direction was open in the file (W_HEDGING).
+function lotWalk(execs, list, allowHedging) {
+  const inv = [0, 0];
+  const spans = [[], []];       // per direction: [first, last] positions in `list` to leave out
+  const unknownFrom = [-1, -1]; // per direction: where an unknown lot opened, or -1
+  const revAt = [-1, -1];       // per direction: the reversal that opened the in-file lot, or -1
+  const carried = [false, false];
+  const flat = new Array(list.length).fill(true); // the count is flat after fill i
+  let ambiguous = false;
+  let hedged = false;
+  let hedges = 0;
+  let signs = 0; // fills that show something open before the file (or a reversal too big)
+  const excess = (d, i) => {
+    signs++;
+    if (unknownFrom[d] >= 0) { spans[d].push([unknownFrom[d], i]); unknownFrom[d] = -1; }
+    else {
+      spans[d].push([0, i]);
+      carried[d] = true;
+      if (allowHedging && inv[1 - d] > 0) { hedged = true; hedges++; }
+    }
+    inv[d] = 0;
+    revAt[d] = -1;
+  };
+  for (let i = 0; i < list.length; i++) {
+    const e = execs[list[i]];
+    const q = roundHalfAway(e.qty * UNIT);
+    if (q === 0) { flat[i] = i === 0 || flat[i - 1]; continue; }
+    const opens = e.side === 'buy' ? LONG : SHORT;
+    const closes = 1 - opens;
+    const kind = lotKind(e);
+    if (kind === 'open' && (inv[closes] > 0 || unknownFrom[closes] >= 0)) {
+      if (revAt[closes] >= 0 || unknownFrom[closes] >= 0) {
+        // A netting account cannot open this way while the other way is open: the lot a
+        // reversal opened was smaller than the count says, and ended before this fill.
+        spans[opens].push([0, i - 1]);
+        spans[closes].push([0, i - 1]);
+        if (revAt[closes] >= 0) carried[opens] = true;
+        signs++;
+        inv[closes] = 0;
+        revAt[closes] = -1;
+        unknownFrom[closes] = -1;
+        ambiguous = true;
+      } else if (allowHedging) hedged = true;
+    }
+    if (kind === 'open') inv[opens] += q;
+    else if (kind === 'close') {
+      if (q <= inv[closes]) {
+        inv[closes] -= q;
+        if (inv[closes] === 0) revAt[closes] = -1;
+      } else excess(closes, i);
+    } else if (kind === 'reverse' && inv[closes] === 0) {
+      excess(closes, i);
+      if (unknownFrom[opens] < 0) unknownFrom[opens] = i;
+      ambiguous = true;
+    } else {
+      const c = Math.min(q, inv[closes]);
+      inv[closes] -= c;
+      if (inv[closes] === 0) revAt[closes] = -1;
+      if (kind === 'reverse' && q > c && inv[opens] === 0) revAt[opens] = i;
+      inv[opens] += q - c;
+    }
+    // An unknown lot never makes the count flat: its size is not known.
+    flat[i] = inv[LONG] === 0 && inv[SHORT] === 0 && unknownFrom[LONG] < 0 && unknownFrom[SHORT] < 0;
+  }
+  for (const d of [LONG, SHORT]) if (unknownFrom[d] >= 0) ambiguous = true;
+  const excluded = new Set();
+  if (hedged) {
+    // Hedging legs: only the fills of the pre-file lot's own direction.
+    for (const d of [LONG, SHORT]) {
+      if (unknownFrom[d] >= 0) spans[d].push([unknownFrom[d], list.length - 1]);
+    }
+    for (let i = 0; i < list.length; i++) {
+      const e = execs[list[i]];
+      const opens = e.side === 'buy' ? LONG : SHORT;
+      const kind = lotKind(e);
+      for (const d of [LONG, SHORT]) {
+        const touches = kind === 'open' ? opens === d : kind === 'close' ? opens !== d : true;
+        if (touches && spans[d].some(([a, b]) => i >= a && i <= b)) excluded.add(list[i]);
+      }
+    }
+  } else {
+    // Netting: from the start of the file to the first flat count at or after the last
+    // span (an unknown lot still open runs to the end of the file).
+    let last = -1;
+    for (const d of [LONG, SHORT]) for (const [, b] of spans[d]) last = Math.max(last, b);
+    if (last >= 0) {
+      while (last < list.length - 1 && !flat[last]) last++;
+      for (let i = 0; i <= last; i++) excluded.add(list[i]);
+    }
+  }
+  return { excluded, carried, ambiguous, hedges, signs };
+}
+
+// All symbols, in one walk order → {excluded: Set of execution indexes, openAtStart,
+// ambiguousSyms: Set, hedges, signs: Map symbol → n}. openAtStart: symbol-directions with
+// a lot from before the file.
+export function preFileLots(execs, order, allowHedging) {
+  const bySym = new Map();
+  for (const k of order) {
+    const sym = execs[k].symbol;
+    if (!bySym.has(sym)) bySym.set(sym, []);
+    bySym.get(sym).push(k);
+  }
+  const excluded = new Set();
+  const ambiguousSyms = new Set();
+  const signs = new Map();
+  let openAtStart = 0;
+  let hedges = 0;
+  for (const [sym, list] of bySym) {
+    const w = lotWalk(execs, list, allowHedging);
+    for (const k of w.excluded) excluded.add(k);
+    for (const c of w.carried) if (c) openAtStart++;
+    if (w.ambiguous) ambiguousSyms.add(sym);
+    hedges += w.hedges;
+    signs.set(sym, w.signs);
+  }
+  return { excluded, openAtStart, ambiguousSyms, hedges, signs };
+}
+
+// The netting walk (flat to flat per symbol) over `order`, skipping `excluded`.
+function nettingWalk(execs, order, excluded, detectHedging) {
   const pos = new Map();
   const cur = new Map();
-  const inv = new Map();
-  const carried = new Map();
   const done = [];
-  const excluded = new Set(); // execution indexes left out as part of a pre-file position
   let hedging = 0;
-  let openAtStart = 0;
   let seq = 0;
   for (const k of order) {
+    if (excluded.has(k)) continue;
     const e = execs[k];
     const sym = e.symbol;
     const s = e.side === 'buy' ? 1 : -1;
     const qUnits = roundHalfAway(e.qty * UNIT);
     if (qUnits === 0) continue;
     let p = pos.has(sym) ? pos.get(sym) : 0;
-    const have = inv.has(sym) ? inv.get(sym) : 0;
-    if (e.oc === 'close') {
-      if (qUnits > have) {
-        if (!carried.get(sym)) { openAtStart++; carried.set(sym, true); }
-        excluded.add(k);
-        if (cur.has(sym)) {
-          const t = cur.get(sym);
-          // A fill that reversed into this trade also closed a finished trade: keep it.
-          for (const j of t.by_reversal ? t.ks.slice(1) : t.ks) excluded.add(j);
-        }
-        cur.delete(sym);
-        pos.set(sym, 0);
-        inv.set(sym, 0);
-        continue;
-      }
-      inv.set(sym, have - qUnits);
-    } else if (e.oc === 'open') {
-      inv.set(sym, have + qUnits);
-      carried.set(sym, false);
-    } else {
-      // No code, or both codes (a reversal): the netting walk decides what closes.
-      const closing = p !== 0 && (p > 0) !== (s > 0) ? Math.min(qUnits, Math.abs(p)) : 0;
-      inv.set(sym, Math.max(0, have - closing) + (qUnits - closing));
-    }
     if (detectHedging && e.oc === 'open' && p !== 0 && (p > 0) !== (s > 0)) hedging++;
     if (p === 0 || (p > 0) === (s > 0)) {
       if (p === 0) { cur.set(sym, newTrade(e, s > 0 ? 'long' : 'short', seq)); seq++; }
       const t = cur.get(sym);
-      t.ks.push(k);
       t.entry_qty += e.qty;
       t.entry_not += e.qty * e.price;
       t.fees += e.fee;
@@ -93,7 +227,6 @@ export function buildTrades(execs, reportedMode, detectHedging) {
     }
     // Reducing: close part (and reverse with any remainder).
     const t = cur.get(sym);
-    t.ks.push(k);
     const closeUnits = Math.min(qUnits, Math.abs(p));
     const remUnits = qUnits - closeUnits;
     let cq, cf;
@@ -111,8 +244,6 @@ export function buildTrades(execs, reportedMode, detectHedging) {
     if (remUnits) {
       const nt = newTrade(e, s > 0 ? 'long' : 'short', seq);
       seq++;
-      nt.ks.push(k);
-      nt.by_reversal = true;
       const rq = remUnits / UNIT;
       nt.entry_qty += rq;
       nt.entry_not += rq * e.price;
@@ -127,6 +258,89 @@ export function buildTrades(execs, reportedMode, detectHedging) {
   }
   let openN = 0;
   for (const v of pos.values()) if (v !== 0) openN++;
+  return { done, openN, hedging };
+}
+
+// Fills of one symbol with the same time to the second have no order in the file. When
+// that order changes the trades (Tester F-D2: a carried close and a new open in one second
+// made a 0-second trade), nothing is guessed: the file is also read with same-second
+// closes first and with opens first. A reading that needs more signs of a pre-file lot
+// than another is not a fair reading of the file (it would close something the file never
+// opened), so per symbol only the readings with the fewest signs count. The file-order
+// trades all of them agree on are kept; if the file order is not among them, none are.
+// A symbol that loses trades this way counts in W_AMBIGUOUS_FILLS, and its fills are left
+// out of `executions` too (PGR/PLR).
+const TIE_RANK = { close: 0, reverse: 1, net: 1, open: 2 };
+
+function tieOrder(execs, order, opensFirst) {
+  const sign = opensFirst ? -1 : 1;
+  return order.slice().sort((a, b) => (execs[a].ts - execs[b].ts) ||
+    sign * (TIE_RANK[lotKind(execs[a])] - TIE_RANK[lotKind(execs[b])]));
+}
+
+function sameOrder(a, b) {
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+  return true;
+}
+
+// Everything that defines a finished trade, rounded so two summation orders compare equal.
+function tradeKey(t) {
+  const r = (x) => Math.floor(x * 1e6 + 0.5);
+  return [t.symbol, t.dir, t.open_ts, t.close_ts, t.peak, t.fills, r(t.entry_qty), r(t.entry_not), r(t.exit_qty),
+    r(t.exit_not), r(t.fees), r(t.rep_sum), t.rep_missing].join('\u0001');
+}
+
+// reportedMode: null (compute P&L) | 'gross' (reported profit before fees, MetaTrader)
+//             | 'net' (reported P&L after fees, IBKR realized P&L)
+export function buildTrades(execs, reportedMode, detectHedging) {
+  const order = chronoOrder(execs);
+  const lots = preFileLots(execs, order, detectHedging);
+  const walk = nettingWalk(execs, order, lots.excluded, detectHedging);
+  let done = walk.done;
+  const excluded = new Set(lots.excluded);
+  const ambiguousSyms = new Set(lots.ambiguousSyms);
+  const others = [];
+  for (const o of [tieOrder(execs, order, false), tieOrder(execs, order, true)]) {
+    if (sameOrder(o, order) || others.some((x) => sameOrder(o, x.order))) continue;
+    const l = preFileLots(execs, o, detectHedging);
+    others.push({ order: o, lots: l, done: nettingWalk(execs, o, l.excluded, detectHedging).done });
+  }
+  if (others.length) {
+    const keysOf = (list) => {
+      const m = new Map();
+      for (const t of list) {
+        if (!m.has(t.symbol)) m.set(t.symbol, new Set());
+        m.get(t.symbol).add(tradeKey(t));
+      }
+      return m;
+    };
+    const mine = keysOf(done);
+    for (const x of others) x.keys = keysOf(x.done);
+    const none = new Set();
+    const lost = new Set();   // symbols whose fair readings do not agree
+    const dropAll = new Set(); // symbols where the file order is not a fair reading
+    const fairOf = new Map();
+    for (const sym of lots.signs.keys()) {
+      const fewest = Math.min(lots.signs.get(sym), ...others.map((x) => x.lots.signs.get(sym)));
+      const fair = others.filter((x) => x.lots.signs.get(sym) === fewest);
+      fairOf.set(sym, fair);
+      for (const x of fair) {
+        for (const k of x.order) if (execs[k].symbol === sym && x.lots.excluded.has(k)) excluded.add(k);
+      }
+      if (lots.signs.get(sym) > fewest) { lost.add(sym); dropAll.add(sym); continue; }
+      const a = mine.get(sym) || none;
+      for (const x of fair) {
+        const b = x.keys.get(sym) || none;
+        if (a.size !== b.size || [...a].some((key) => !b.has(key))) lost.add(sym);
+      }
+    }
+    if (lost.size) {
+      done = done.filter((t) => !lost.has(t.symbol) || (!dropAll.has(t.symbol) &&
+        fairOf.get(t.symbol).every((x) => (x.keys.get(t.symbol) || none).has(tradeKey(t)))));
+      for (const sym of lost) ambiguousSyms.add(sym);
+      execs.forEach((e, k) => { if (lost.has(e.symbol)) excluded.add(k); });
+    }
+  }
   const trades = done.map((t) => {
     const entryVwap = t.entry_not / t.entry_qty;
     const exitVwap = t.exit_not / t.exit_qty;
@@ -148,7 +362,8 @@ export function buildTrades(execs, reportedMode, detectHedging) {
       exit_vwap: exitVwap, pnl, pnl_gross: gross, fees: t.fees, pnl_source: src, pnl_unit: t.unit,
       fills_n: t.fills, currency: t.currency, _fx: t.fx, _seq: t.seq };
   });
-  return { trades, openN, hedging, openAtStart, excluded };
+  return { trades, openN: walk.openN, hedging: (detectHedging ? lots.hedges : 0) + walk.hedging,
+    openAtStart: lots.openAtStart, ambiguous: ambiguousSyms.size, excluded };
 }
 
 // Execution indexes in time order. Fills with the same time keep their file order,
@@ -177,7 +392,7 @@ export function roundtripTrades(rts, startSeq) {
     return { symbol: r.symbol, dir: r.dir, open_ts: r.open_ts, close_ts: r.close_ts,
       hold_s: Math.floor((r.close_ts - r.open_ts) / 1000), qty: r.qty, entry_vwap: r.entry, exit_vwap: r.exit,
       pnl: gross - r.fees, pnl_gross: gross, fees: r.fees, pnl_source: src, pnl_unit: r.unit, fills_n: 2,
-      currency: r.currency, _fx: null, _seq: startSeq + i };
+      currency: r.currency, _fx: null, _seq: startSeq + i, _reordered: r.reordered === true };
   });
 }
 
@@ -195,7 +410,7 @@ export function roundtripExecutions(rts) {
 
 // Why nothing closed, from what the file did contain (Tester D8: the old message always
 // said "every position is still open", even when the real cause was skipped rows).
-function noTradesReason(openN, openAtStart, skipped) {
+function noTradesReason(openN, openAtStart, ambiguous, skipped) {
   const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
   const parts = [];
   let nSkipped = 0;
@@ -206,6 +421,7 @@ function noTradesReason(openN, openAtStart, skipped) {
   }
   if (openN) parts.push(`${plural(openN, 'position is', 'positions are')} still open at the end of the file`);
   if (openAtStart) parts.push(`${plural(openAtStart, 'position was', 'positions were')} already open when the file starts`);
+  if (ambiguous) parts.push(`${plural(ambiguous, 'symbol has', 'symbols have')} fills whose order or split the file does not show`);
   if (!parts.length) return 'The file has no buy and sell that open and close a position.';
   return parts.join('; ') + '.';
 }
@@ -231,10 +447,12 @@ export function finish(fmt, verified, res, mode, tzLabel) {
     warnings.push(warning('W_SKIPPED_ROWS', n, skipKeys.map((k) => `${k.replace(/_/g, ' ')}: ${skipped[k]}`).join(', ') + '.'));
   }
   if (extra.duplicate_rows) warnings.push(warning('W_DUPLICATE_ROWS', extra.duplicate_rows, `${extra.duplicate_rows} found.`));
+  if (extra.currency_ignored) warnings.push(warning('W_CURRENCY_IGNORED', 0));
   let executions = res.executions;
   let openN = extra.open_positions || 0;
   let hedging = 0;
   let openAtStart = 0;
+  let ambiguous = 0;
   let trades;
   if (fmt === 'mt5' && extra.has_closed_positions) {
     trades = roundtripTrades(res.roundtrips, 0);
@@ -247,12 +465,14 @@ export function finish(fmt, verified, res, mode, tzLabel) {
     openN += b.openN;
     hedging = b.hedging;
     openAtStart = b.openAtStart;
+    ambiguous = b.ambiguous;
     // Fills of positions opened before the file are left out of every later step (PGR/PLR too).
     if (b.excluded.size) executions = executions.filter((_, k) => !b.excluded.has(k));
   }
   if (hedging) warnings.push(warning('W_HEDGING', hedging));
   if (openN) warnings.push(warning('W_OPEN_POSITIONS', openN, `${openN} left out.`));
   if (openAtStart) warnings.push(warning('W_OPEN_AT_START', openAtStart, `${openAtStart} left out.`));
+  if (ambiguous) warnings.push(warning('W_AMBIGUOUS_FILLS', ambiguous, `${ambiguous} ${ambiguous === 1 ? 'symbol' : 'symbols'} affected.`));
   if (fmt === 'tradovate_orders') {
     let pts = 0;
     for (const t of trades) if (t.pnl_unit === 'points') pts++;
@@ -286,8 +506,11 @@ export function finish(fmt, verified, res, mode, tzLabel) {
   let dst = 0;
   for (const t of trades) if (spansDstNight(t.open_ts, t.close_ts)) dst++;
   if (dst) warnings.push(warning('W_DST', dst, `${dst} found.`));
+  let reordered = 0;
+  for (const t of trades) if (t._reordered) reordered++;
+  if (reordered) warnings.push(warning('W_CLOSE_BEFORE_OPEN', reordered, `${reordered} found.`));
   trades.sort((a, b) => (a.close_ts - b.close_ts) || (a.open_ts - b.open_ts) || cmpStr(a.symbol, b.symbol) || (a._seq - b._seq));
-  if (!trades.length) fail('E_NO_CLOSED_TRADES', noTradesReason(openN, openAtStart, skipped));
+  if (!trades.length) fail('E_NO_CLOSED_TRADES', noTradesReason(openN, openAtStart, ambiguous, skipped));
   return {
     format: fmt,
     verified_format: verified,

@@ -1,0 +1,154 @@
+{
+ "noise": {
+  "checks": [
+   {
+    "label": "not enough trades to tell",
+    "method": "bootstrap-t",
+    "n_a": 1,
+    "n_b": null,
+    "p": null,
+    "stat": "expectancy",
+    "value": null
+   },
+   {
+    "label": "not enough trades to tell",
+    "method": "label permutation",
+    "n_a": 0,
+    "n_b": 1,
+    "p": null,
+    "stat": "hold_gap_s",
+    "value": null
+   },
+   {
+    "label": "not enough trades to tell",
+    "method": "order shuffle",
+    "n_a": 1,
+    "n_b": null,
+    "p": null,
+    "stat": "longest_losing_streak",
+    "value": null
+   }
+  ],
+  "limited": false,
+  "n_used": 1
+ },
+ "pgr_plr": {
+  "coverage_pct": null,
+  "pg": 0,
+  "pl": 0,
+  "rg": 1,
+  "rl": 0
+ },
+ "result": {
+  "currency_groups": {
+   "account": 1
+  },
+  "executions": [
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": "open",
+    "pnl_reported": 0.0,
+    "pos_id": null,
+    "price": 1.3,
+    "qty": 1.0,
+    "row": 5,
+    "side": "buy",
+    "symbol": "GBPUSD",
+    "ts": 1788944400000
+   },
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": "close",
+    "pnl_reported": 100.0,
+    "pos_id": null,
+    "price": 1.301,
+    "qty": 1.0,
+    "row": 6,
+    "side": "sell",
+    "symbol": "GBPUSD",
+    "ts": 1788948000000
+   }
+  ],
+  "format": "mt5",
+  "skipped": {},
+  "trades": [
+   {
+    "close_ts": 1788948000000,
+    "currency": null,
+    "dir": "long",
+    "entry_vwap": 1.3,
+    "exit_vwap": 1.301,
+    "fees": 0.0,
+    "fills_n": 2,
+    "hold_s": 3600,
+    "id": "t1",
+    "open_ts": 1788944400000,
+    "pnl": 100.0,
+    "pnl_gross": 100.0,
+    "pnl_source": "reported",
+    "pnl_unit": "account",
+    "qty": 1.0,
+    "symbol": "GBPUSD"
+   }
+  ],
+  "tz_label": "broker server time",
+  "verified_format": false,
+  "warnings": [
+   {
+    "code": "W_UNVERIFIED_FORMAT",
+    "n": 0
+   },
+   {
+    "code": "W_OPEN_AT_START",
+    "n": 1
+   }
+  ]
+ },
+ "stats": {
+  "avg_loss": null,
+  "avg_win": 100.0,
+  "expectancy": 100.0,
+  "gross_loss": 0.0,
+  "gross_profit": 100.0,
+  "hold_median_loss_s": null,
+  "hold_median_win_s": 3600,
+  "hold_ratio": null,
+  "largest_loss": null,
+  "largest_win": 100.0,
+  "long": {
+   "losses": 0,
+   "n": 1,
+   "pnl": 100.0,
+   "win_rate": 1.0,
+   "wins": 1
+  },
+  "losses": 0,
+  "max_consec_losses": {
+   "n": 0,
+   "pnl": 0.0
+  },
+  "max_consec_wins": {
+   "n": 1,
+   "pnl": 100.0
+  },
+  "max_drawdown_abs": 0.0,
+  "max_drawdown_pct": null,
+  "n": 1,
+  "net_pnl": 100.0,
+  "profit_factor": "no losing trades",
+  "scratch": 0,
+  "short": {
+   "losses": 0,
+   "n": 0,
+   "pnl": 0.0,
+   "win_rate": null,
+   "wins": 0
+  },
+  "win_rate": 1.0,
+  "wins": 1
+ }
+}
