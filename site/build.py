@@ -572,6 +572,27 @@ PASSTHROUGH_FIXES = {
 }
 
 
+# Manager C4: /privacy/ (and the home FAQ, /for-traders/) say the free tool pages "block outgoing
+# requests". The template tool pages do (csp_for); the two old calculators, passed through from docs/
+# until steps 28–29, get the same guard here: a CSP meta with connect-src 'none' and nothing from
+# another origin. Their inline script and onsubmit handler need 'unsafe-inline' for scripts and their
+# style attributes for styles; neither lets the page send anything (connect-src and form-action 'none').
+PASSTHROUGH_CSP = ("default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
+                   "img-src 'self' data:; font-src 'self'; connect-src 'none'; worker-src 'none'; "
+                   "form-action 'none'; base-uri 'none'; object-src 'none'")
+PASSTHROUGH_CSP_PAGES = (os.path.join("tools", "disposition-calculator", "index.html"),
+                         os.path.join("tools", "pass-rate-calculator", "index.html"))
+
+
+def add_passthrough_csp(text, rel):
+    if rel not in PASSTHROUGH_CSP_PAGES:
+        return text
+    if "Content-Security-Policy" in text or text.count("<meta charset") != 1:
+        die(f"passthrough CSP: {rel} must hold exactly one <meta charset> and no CSP of its own")
+    i = text.index(">", text.index("<meta charset")) + 1
+    return text[:i] + f'\n<meta http-equiv="Content-Security-Policy" content="{PASSTHROUGH_CSP}">' + text[i:]
+
+
 def passthrough_pages(owned):
     """Relative paths of the docs/ HTML pages that no template owns (copied through)."""
     pages = []
@@ -1117,6 +1138,7 @@ def build():
         with open(fp, encoding="utf-8") as f:
             text = f.read()
         text = fix_passthrough_chrome(text, rel, flags)
+        text = add_passthrough_csp(text, rel)
         text = add_business_line(text, rel, business_id_line(cfg, private))
         for old, new in PASSTHROUGH_FIXES.get(rel, []):
             if text.count(old) != 1:
@@ -1126,6 +1148,9 @@ def build():
             f.write(text)
     for rel in sorted(set(PASSTHROUGH_FIXES) - set(passthrough_pages(owned)) - set(owned)):
         die(f"passthrough fix: {rel} is not a page in docs/")
+    for rel in PASSTHROUGH_CSP_PAGES:
+        if rel not in passthrough_pages(owned) and rel not in owned:
+            die(f"passthrough CSP: {rel} is not a page in docs/")
     # 2. static assets of the new design
     copy_tree_sorted(os.path.join(SITE, "static"), os.path.join(out, "static"),
                      skip=(None if flags["paid_report"] else (lambda rel: rel.startswith("js" + os.sep + "paid"))))
