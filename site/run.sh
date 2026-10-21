@@ -5,6 +5,7 @@
 #   check        build, then every check that exists so far
 #   test-engine  engine tests (Python reference + Chromium golden tests)
 #   test-worker  the private paid-analysis server's Node tests (../dt-private), if present
+#   site-tests   the three v1 site test files against a local dir (default site/_site; docs = today's pages)
 #   bundle       replace docs/ on this branch with the build (step 30 only; asks for DT_BUNDLE=yes)
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -23,10 +24,11 @@ case "${1:-}" in
   test-engine) python3 -m pytest -q tests/test_engine_ref.py tests/test_engine_golden.py tests/test_engine_stats.py tests/test_engine_limits.py tests/test_alias_parity.py tests/test_sniff.py ;;
   test-worker)
     if [ -d "$REPO/../dt-private" ]; then (cd "$REPO/../dt-private" && node --test); else echo "dt-private not present: the paid-analysis server is kept out of this repo"; fi ;;
+  site-tests) python3 site/build.py && python3 checks/tests/run_site_tests.py "${2:-site/_site}" ;;
   bundle)
     if [ "${DT_BUNDLE:-}" != "yes" ]; then echo "bundle replaces docs/ — run with DT_BUNDLE=yes (step 30, after the owner's review)"; exit 1; fi
     python3 site/build.py
     rm -rf docs && cp -R site/_site docs && rm -rf docs/dev && printf 'donttrade.ca\n' > docs/CNAME && touch docs/.nojekyll
     echo "docs/ replaced from site/_site" ;;
-  *) sed -n '2,9p' "$0"; exit 1 ;;
+  *) sed -n '2,10p' "$0"; exit 1 ;;
 esac

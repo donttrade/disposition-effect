@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
+{%- set r = products["report39"] %}
+{%- set ev = evidence %}
 <div class="wrap">
   {%- if flags.trader_first_home %}
   <section class="section" aria-labelledby="hero" data-requires-flag="paid_report">
@@ -7,23 +9,144 @@
       <div class="span-7">
         <h1 id="hero">See where your trades leave your plan.</h1>
         <p>A habit report built from your own trade history. It measures behaviour, like holding losers longer than winners. It doesn't tell you what to trade.</p>
-        <p><a class="btn" href="/pricing/#traders">Get the habit report — {{ products["report39"].price_usd|usd }}</a> <a class="btn btn-secondary" href="/tools/trade-stats/">Free trade stats</a></p>
+        <p><a class="btn" href="/pricing/#traders">Get the habit report — {{ r.price_usd|usd }}</a> <a class="btn btn-secondary" href="/tools/trade-stats/">Free trade stats</a></p>
         <p class="small muted">One-time price. Not investment advice.</p>
         <p><a href="/for-firms/">For firms: measure the gap between your traders’ plans and their trades</a></p>
       </div>
     </div>
   </section>
   {%- else %}
-  <section class="section" aria-labelledby="hero">
+  {#- 1. Hero, 7/5: firm copy left, the real free dashboard right. No firm prices on the home page. #}
+  <section class="hero" aria-labelledby="hero">
     <div class="grid">
       <div class="span-7">
         <h1 id="hero">Measure the gap between your traders’ plans and their trades.</h1>
-        <p>Fixed-scope behavioural measurement on your data, using a published method. Fixed price, public script, run on your own systems.</p>
-        <p><a class="btn" href="/for-firms/">For firms</a> <a class="btn btn-secondary" href="/tools/trade-stats/">Traders: free trade stats</a></p>
+        <p class="lede">Traders plan how they will handle wins and losses. What they actually do can differ. We call that difference the plan gap, and we measure it, starting with one measure available today: are your traders more likely to sell a winning trade than a losing one?</p>
+        <p>Your staff run our public script on your own systems. Only totals come back to us. You get the number, how sure it is, and a one-page memo, at a fixed price published before you ask.</p>
+        <p class="btn-row"><a class="btn" href="/start/?product=pilot#firm">Start a Pilot</a> <a class="btn btn-secondary" href="/sample-memo/">See a sample memo</a></p>
+        <p class="small muted">Refunded in full if your own re-run of the same script on the same export does not reproduce the figure. <a href="/pricing/">Pricing</a></p>
+        <div class="trader-line">
+          <p><strong>Trading your own account?</strong> The free trade-stats dashboard reads your MT5, IBKR or Tradovate file inside your browser. A habit report for traders is on the way.</p>
+          <p class="btn-row"><a class="btn" href="/for-traders/#waitlist">Join the waitlist — {{ r.price_usd|usd }} founding price</a> <a href="/tools/trade-stats/">Try the free trade stats</a></p>
+        </div>
+      </div>
+      <figure class="span-5 hero-shot">
+        <picture>
+          <source srcset="/static/img/hero-trade-stats-dark.webp" media="(prefers-color-scheme: dark)" type="image/webp">
+          <img src="/static/img/hero-trade-stats-light.webp" width="1044" height="918"
+               alt="The free trade-stats dashboard on the synthetic sample file: 160 closed trades, a net result of plus 277.95 US dollars, win rate 51.9%, profit factor 1.14, and an equity and drawdown chart.">
+        </picture>
+        <figcaption>The free <a href="/tools/trade-stats/">trade-stats dashboard</a>, run on its synthetic sample file. Sample data, not a real trader.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  {#- 3. Evidence strip: counts read from /research/, /code/ and /corrections/ at build time. #}
+  <ul class="evidence" aria-label="What you can check before you pay">
+    <li><a href="/research/">{{ ev.studies }} published studies</a></li>
+    <li><a href="/code/">Scripts public for {{ ev.scripts_public }} of {{ ev.studies }}</a></li>
+    <li><a href="/corrections/">{{ ev.corrections }} corrections, dated and logged</a></li>
+    <li><a href="/independence/">No firm can pay to change a number</a></li>
+  </ul>
+
+  {#- 5. How it works (sequential, so numbered). #}
+  <section class="section" aria-labelledby="how-h">
+    <h2 id="how-h">How it works for a firm</h2>
+    <ol class="steps">
+      <li><strong>Tell us which traders and which dates.</strong> A short form or an email, about five minutes.</li>
+      <li><strong>Get a written scope and a fixed price within 1 business day.</strong> Your staff run the public script on your own systems. Only totals come back.</li>
+      <li><strong>Get the number, how sure it is, and a one-page memo.</strong> You decide whether anything is published.</li>
+    </ol>
+    <p><a href="/for-firms/">What firms get, and what it costs</a></p>
+  </section>
+
+  {#- 4. Finding block (placed after How it works so it never sits next to an offer): the sentence is checked word for word against the study page by the build. #}
+  <section class="section finding" aria-labelledby="finding-h">
+    <h2 id="finding-h" class="visually-hidden">A published finding</h2>
+    <div class="grid">
+      <div class="span-7">
+        <p class="display">{{ ev.finding.pct }}</p>
+        <p class="finding-text">{{ ev.finding.rest }}</p>
+      </div>
+      <div class="span-5 finding-note">
+        <p class="muted">From our replication of Odean (1998) on a free, public (CC0) data set. The disposition effect is common; a measurement on your own records shows whether it is in your traders’ trades.</p>
+        <p><a href="{{ ev.finding.url }}">Read the study and method</a></p>
       </div>
     </div>
   </section>
+
+  {#- 7. Free tools, as rows. #}
+  <section class="section" aria-labelledby="tools-h">
+    <h2 id="tools-h">Free tools. No account.</h2>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Free tools">
+    <table class="tool-list">
+      <thead><tr><th scope="col">Tool</th><th scope="col">The question it answers</th><th scope="col">What you give it</th></tr></thead>
+      <tbody>
+      {%- for t in tools[:3] %}
+        <tr><th scope="row"><a href="{{ t.href }}">{{ t.name }}</a></th><td>{{ t.question }}</td><td>{{ t.input }}</td></tr>
+      {%- endfor %}
+      </tbody>
+    </table>
+    </div>
+    <p><a href="/tools/">All free tools</a></p>
+  </section>
+
+  {#- 8. Pricing teaser: no tabs (paid flag off) and no firm prices. #}
+  <section class="section" aria-labelledby="price-h">
+    <h2 id="price-h">Pricing, in short</h2>
+    <dl class="split">
+      <div><dt>Firms</dt><dd>Fixed prices, published and the same for every firm, starting with a Pilot. The price is set in writing before anyone sees data. <a href="/pricing/#firms">Firm pricing</a></dd></div>
+      <div><dt>Traders</dt><dd>The free tools cost nothing. The habit report is not on sale yet: {{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers. Nothing is charged now. <a href="/pricing/#traders">Trader pricing</a></dd></div>
+    </dl>
+  </section>
+
+  {#- 9. Comparison, generic and claim-safe: no brands named. #}
+  <section class="section" aria-labelledby="cmp-h">
+    <h2 id="cmp-h">What donttrade adds to a trading journal</h2>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Comparison with a typical trading journal">
+    <table>
+      <thead><tr><th scope="col"><span class="visually-hidden">Question</span></th><th scope="col">Most trading journals</th><th scope="col">donttrade</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Logs your trades</th><td>Yes</td><td>No: it reads the export your platform already makes</td></tr>
+        <tr><th scope="row">Needs an account</th><td>Usually</td><td>No account or login</td></tr>
+        <tr><th scope="row">Tests whether a pattern is more than noise</th><td>Varies</td><td>Yes, a stated statistical check, with “not enough trades to tell” under 30 trades</td></tr>
+        <tr><th scope="row">Shows the method and the code</th><td>Rarely</td><td>Yes</td></tr>
+        <tr><th scope="row">Tells you what to buy or sell</th><td>Some do</td><td>No</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  {#- 10. Trust and privacy. The "No analytics" claim is printed only while it is true. #}
+  <section class="section" aria-labelledby="trust-h">
+    <h2 id="trust-h">{% if not flags.analytics %}No cookies. No analytics. {% else %}No cookies. {% endif %}Firms can’t pay to change a number.</h2>
+    <p>Firms pay for fixed-scope measurements of their own data. Readers pay nothing. Nothing on the research pages is for sale, and every correction is logged with its date.</p>
+    <p><a href="/independence/">Independence policy</a> · <a href="/privacy/">Privacy</a> · <a href="/corrections/">Corrections</a></p>
+  </section>
+
+  {#- 11. FAQ. #}
+  <section class="section" aria-labelledby="faq-h">
+    <h2 id="faq-h">Questions</h2>
+    <details><summary>Is our firm’s data safe?</summary><p>Your trading records never leave your systems. Your staff run our public script on your own computers, and you can read every line first. Only the totals it prints come back to us: no account IDs, no trades, no names.</p></details>
+    <details><summary>What if no effect is found?</summary><p>Then that is your answer, and it is a finished result. The price is fixed before anyone sees data, so you pay the same either way. The result stays private unless you choose to publish it.</p></details>
+    <details><summary>What does it cost?</summary><p>Every price is published on the <a href="/pricing/">pricing page</a>, the same for every firm, and fixed in writing in the scope before any data is seen. No cancellation fees.</p></details>
+    <details><summary>Is this advice?</summary><p>No. It describes past behaviour. It does not tell anyone what to trade.</p></details>
+    <details><summary>Where does my trade file go?</summary><p>The free tools read it inside your browser tab; those pages block every outgoing request, so the file is not uploaded. When the habit report launches, the page that runs it will say exactly what it sends.</p></details>
+    <details><summary>Refunds?</summary><p>Firms: a Pilot is refunded in full if your extract can’t be made to run, or if your own re-run of the same script on the same export does not reproduce the figure. Traders: nothing is sold yet. <a href="/terms/#cancellation">Cancellation and refund terms</a></p></details>
+    {%- if not flags.paid_report %}
+    <details><summary>Who’s behind it?</summary><p>donttrade is one person, writing under a pen name, based in Canada. Every study names the script that made its numbers, or says plainly when it is still to follow, so you check the work, not the author. The legal contracting party is named in the engagement agreement, before anything is paid. <a href="/about/">About</a></p></details>
+    {%- endif %}
+  </section>
+
+  {#- 12. Closing. #}
+  <section class="section closing" aria-labelledby="close-h">
+    <h2 id="close-h">Two ways to start</h2>
+    <div class="grid">
+      <div class="span-6"><h3>Trading your own account</h3><p>Start with the free trade-stats dashboard: your own file, in your browser, in seconds.</p><p><a class="btn btn-secondary" href="/tools/trade-stats/">Open trade stats</a></p></div>
+      <div class="span-6"><h3>At a firm</h3><p>Tell us the population and the period. You get a written scope and a fixed price within 1 business day.</p><p><a class="btn" href="/start/?product=pilot#firm">Start a Pilot</a></p></div>
+    </div>
+    <p class="small muted">Prefer email? Write to <a href="mailto:{{ site.contact_email }}?subject=Question">{{ site.contact_email }}</a>. {{ site.reply_promise }}</p>
+  </section>
   {%- endif %}
-  <div class="notice"><strong>v2 preview</strong><p>Placeholder home page in the new design. The full home page is built in step 13.</p></div>
 </div>
 {% endblock %}

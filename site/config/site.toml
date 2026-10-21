@@ -7,11 +7,13 @@ name = "donttrade"
 base_url = "https://donttrade.ca"
 contact_email = "donttrade.research@gmail.com"
 reply_promise = "We reply within 1 business day (Eastern Time, Monday to Friday)."
+same_as = ["https://donttrade.substack.com", "https://github.com/donttrade"]  # Organization JSON-LD: brand accounts only
 
 [flags]
 paid_report = false        # the $39 report, its pages and the trader Stripe links
 analytics = false          # Cloudflare Web Analytics beacon
 trader_first_home = false  # must equal paid_report (the build fails otherwise)
+pilot_checkout = false     # "Start a Pilot" block + thanks page with the live Stripe Pilot link
 
 [analytics]
 cf_beacon_token = ""       # required when analytics = true
@@ -25,11 +27,13 @@ firm_key = "f8fdba04-71bb-4856-b700-01ac6796c252"     # Web3Forms access keys ar
 trader_key = "54d01baf-5e02-4d93-988c-16cf5487732d"
 redirect_firm = "https://donttrade.ca/start/thanks/"
 redirect_trader = "https://donttrade.ca/for-traders/thanks/"
+redirect_pilot = "https://donttrade.ca/start/pilot-thanks/"   # used only with pilot_checkout = true
 
 [worker]
 api_base = "http://127.0.0.1:8787"  # local dev server only; no production value yet
 
 [legal]
+terms_version = "2026-10-22"  # the version date printed on /terms/ and /privacy/ (and the French pages); change it with every legal edit
 # Verbatim from NON-ADVISER-DESIGN-AND-AUTORENEW A3 (the only approved wording).
 disclaimer_short = "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results."
 disclaimer_long = "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results."

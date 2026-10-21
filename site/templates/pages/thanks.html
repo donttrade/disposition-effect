@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{#- /thanks/: the old single thank-you page (forms now redirect to /start/thanks/ or
+    /for-traders/thanks/). Kept because the URL is in the baseline. #}
+{% block content %}
+<div class="wrap">
+  <h1>Got it, thank you.</h1>
+  <p><strong>Traders on the waitlist:</strong> nothing is charged. We email you once, when the trader report launches.</p>
+  <p><strong>Firms, journals and platforms:</strong> you’ll get a reply within 1 business day from <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>. Nothing is owed until you accept a written scope.</p>
+  <p class="small muted">No reply after 1 business day? Check your spam folder, then write to us.</p>
+  <p><a href="/pricing/">Pricing</a> · <a href="/research/">Research</a> · <a href="/feed.xml">Atom feed</a></p>
+</div>
+{% endblock %}

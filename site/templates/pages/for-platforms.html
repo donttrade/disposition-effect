@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="wrap">
+  <section class="section" aria-labelledby="fp-h">
+    <div class="grid"><div class="span-8">
+      <h1 id="fp-h">Behavioural measurement inside your product — with no user records leaving your systems.</h1>
+      <p class="lede">Journals and trading platforms can show their users their plan gap: the difference between how they planned to trade and how they did. The first measure is the disposition effect, how readily they close winning positions versus losing ones, computed by our public measurement script. You host it and run it; we never receive user records.</p>
+      <p class="btn-row"><a class="btn" href="#apply">Apply to partner</a></p>
+      <p class="small">Run a copy-trading platform? See the <a href="/for-firms/#copy-leader">copy-leader persistence test</a>. Does your marketing say your product changes how traders behave? See the <a href="/for-firms/#claims-test">claims substantiation test</a>.</p>
+    </div></div>
+  </section>
+
+  <section class="section" aria-labelledby="first-h">
+    <h2 id="first-h">For the first three partners</h2>
+    <ul>
+      <li>A free 12-month commercial licence to run the script in your product.</li>
+      <li>A co-published study about your users, in aggregate only, with small groups suppressed and your platform named as data partner if you agree. You see the draft before publication and can correct facts about your platform; you cannot change a result.</li>
+      <li>Public code. Your engineers can read every line before running it: one Python file, standard library only, no network calls. <a href="https://github.com/donttrade/disposition-effect/tree/main/partner">partner/ on GitHub</a></li>
+      <li>No user records leave your systems; only aggregate counts, and only for the co-published study you agree to.</li>
+      <li>No referral fees, either way. We don’t pay or take commissions, and we don’t rank or promote firms or platforms.</li>
+    </ul>
+    <p>After 12 months, continuing is optional; any fee is agreed in writing before renewal.</p>
+  </section>
+
+  <section class="section" aria-labelledby="ask-h">
+    <h2 id="ask-h">What we ask in return</h2>
+    <p>Attribution (“Method: donttrade”, with a link) and the aggregate counts for the co-published study.</p>
+    <h3>What the script needs</h3>
+    <p>A five-column extract, one row per open position per day. The <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/EXPORT-GUIDE.md">export guide</a> defines it, and <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/make_fixture.py">make_fixture.py</a> writes a synthetic file to test with.</p>
+  </section>
+
+  <section class="section" aria-labelledby="faq-h">
+    <h2 id="faq-h">Questions</h2>
+    <details><summary>Do you need access to our systems?</summary><p>No.</p></details>
+    <details><summary>Are you a data processor for us?</summary><p>We receive no user records; only aggregate counts for the study you agree to.</p></details>
+    <details><summary>What does it cost after year one?</summary><p>Continuing is optional; any fee is agreed in writing before renewal.</p></details>
+    <details><summary>Will you grade our users?</summary><p>No. It is a measurement. It is not a grade or a badge, and it is not advice.</p></details>
+  </section>
+
+  <section class="section" aria-labelledby="apply">
+    <h2 id="apply">Apply to partner</h2>
+    {%- with fid = "fp", product = "platform", heading_id = "apply" %}{% include "partials/form_firm.html" %}{% endwith %}
+  </section>
+  {% include "partials/disclaimer.html" %}
+</div>
+{% endblock %}

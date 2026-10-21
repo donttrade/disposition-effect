@@ -15,3 +15,4 @@ site/config/private.toml
 worker/.dev.vars
 .pytest_cache/
 tests/fixtures/generated/
+checks/tests/anon_terms.txt

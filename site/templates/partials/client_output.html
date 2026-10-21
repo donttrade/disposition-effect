@@ -1,0 +1,85 @@
+{#- Verbatim from today's /for-firms/ (main e5e6234): partner_disposition.py on the make_fixture.py synthetic file. -#}
+<pre tabindex="0" role="region" aria-label="Client script output on the synthetic test file" class="client-out">$ python3 make_fixture.py --out fixture.csv --seed 7
+$ python3 partner_disposition.py fixture.csv --pnl-basis price
+pnl basis:            price (funding excluded)
+accounts:             30
+qualifying sale days: 256
+
+data rows parsed:                   14400
+blank records skipped:              0
+rows in qualifying pairs:           2048
+rows discarded (no close that day): 12352
+same-day marks superseded by close: 0
+orphan closes (no mark row):        14 of 335 (4.2%)
+identifier spelling collisions:     0
+unicode data version:               14.0.0
+
+PGR                   0.2178
+PLR                   0.1119
+ratio (PGR/PLR)       1.9470
+t statistic           6.51
+n gains  (RG+PG)      1001
+n losses (RL+PL)      1046
+
+realised gains   RG   218
+paper gains      PG   783
+realised losses  RL   117
+paper losses     PL   929
+zero-pnl rows excluded 1
+
+AGE-CONTROLLED FIGURES (holding age = calendar days since the
+position&#x27;s first row in this file)
+positions with a known open date:               329
+positions open on the first date (left out):    240
+rows used (qualifying pairs, pnl not 0):        975
+
+ratio, ages pooled, same rows:                  2.0325
+within-age ratio (Mantel-Haenszel):             1.9273
+                                                95% interval 1.3825 to 2.6867, by account
+
+holding age      gain rows  loss rows     PGR     PLR   ratio  within-age
+&lt;=1 day                 43         32  0.2093  0.0938   2.233       2.232
+2-5 days                73         75  0.2055  0.1333   1.541       1.618
+6-20 days              192        224  0.2240  0.0804   2.787       2.595
+21-60 days             168        168  0.1667  0.1071   1.556       1.441
+61-250 days              0          0       -       -       -           -
+251+ days                0          0       -       -       -           -
+
+fixed effects (account + holding day), linear probability model:
+  gain coefficient:                             0.103986
+  standard error (account and date):            0.021478
+  ratio implied for gain rows (ATT):            2.0878
+                                                95% interval 1.4495 to 3.7307
+
+gain timing (rows that have a previous row for the same position):
+  rows:                                         933
+  ratio, ages pooled: same day / previous row:  2.0604 / 1.8627
+  within-age ratio: same day / previous row:    1.9488 / 1.7481
+  fixed-effects ATT: same day / previous row:   2.0993 / 1.8586
+  sign changed since previous row, sold rows:   10 of 138
+  sign changed since previous row, unsold rows: 60 of 795
+
+HOW TO READ THE AGE-CONTROLLED FIGURES
+- Positions are sold less often the longer they are held. If losing
+  positions are on average older than winning ones, the pooled ratio at
+  the top can show an effect that is only an age pattern. The within-age
+  ratio compares winners and losers of the same holding age; use it, not
+  the pooled ratio, for the size of the effect.
+- Holding age is counted from each position&#x27;s first row in this file.
+  Positions already open on the file&#x27;s first date are left out of these
+  figures because their age is unknown; the pooled figures still use them.
+- The fixed-effects line compares each account with itself, at the same
+  holding day. It is a different average from the pooled ratio, so the two
+  are not expected to match.
+- Gain timing: a position&#x27;s gain or loss on the day it is sold may partly
+  reflect the sale itself (the fill or the closing mark). The lines that
+  take the gain or loss from the position&#x27;s previous row avoid that. If
+  they are much smaller, the effect depends on same-day timing.
+- Not ruled out: traders may sell large moves in either direction more
+  often (a V-shaped pattern, Ben-David and Hirshleifer 2012). Separating
+  that from a preference for selling winners needs the size of each gain
+  or loss relative to the position, which these five columns do not carry.
+- The intervals here are clustered by account (the within-age ratio) and
+  by account and date (fixed effects). The t statistic at the top treats
+  every row as independent and is not.
+- NOT MEASURED means the data cannot support the figure, never zero.</pre>
