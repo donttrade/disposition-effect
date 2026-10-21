@@ -149,14 +149,35 @@ def test_home_has_no_firm_prices_and_the_trader_cta(built_site):
     assert "standard" not in html.lower() or "after launch" not in html.lower()
 
 
-def test_home_hero_is_a_real_screenshot_within_budget(built_site):
+OLD_HERO_ALT = ("The free trade-stats dashboard on the synthetic sample file: 160 closed trades, a net result of plus "
+                "277.95 US dollars, win rate 51.9%, profit factor 1.14, and an equity and drawdown chart.")
+
+
+def test_home_hero_is_the_real_dashboard_capture(browser, built_site):
+    """Motion plan I21 (+ I10's markup half): the hero is the tool's own markup, captured on the current
+    sample, with the tool's numbers, no free-badge text, no ids, and no OS-only <picture> source."""
+    import hashlib
+    from lint import FREE_BADGE_STRINGS
+    part = open(os.path.join(REPO, "site", "templates", "partials", "hero_dashboard.html"), encoding="utf-8").read()
+    sha = hashlib.sha256(open(os.path.join(REPO, "site", "static", "samples", "demo-trades.csv"), "rb").read()).hexdigest()
+    assert re.search(r"sample-sha256: ([0-9a-f]{64})", part).group(1) == sha
+    body = part.split("#}", 1)[1]
+    assert " id=" not in body and not [x for x in FREE_BADGE_STRINGS if x in body]
+    assert len(part.encode("utf-8")) <= 8 * 1024
     html = html_of(built_site, "/")
-    for scheme in ("light", "dark"):
-        f = built_site["out"] / "static" / "img" / f"hero-trade-stats-{scheme}.webp"
-        assert f.exists() and f.stat().st_size <= 120 * 1024
-        assert f"/static/img/hero-trade-stats-{scheme}.webp" in html
-    assert re.search(r'<img src="/static/img/hero-trade-stats-light.webp" width="\d+" height="\d+"', html)
+    assert html.count('class="hero-dash"') == 1 and "<picture" not in html and "<source" not in html
+    assert f'role="img" aria-label="{OLD_HERO_ALT}"' in html
     assert "Sample data, not a real trader." in html
+    assert not (built_site["out"] / "static" / "img").exists(), "the old hero .webp images are gone"
+    hero = re.findall(r"<dd data-count[^>]*>([^<]*)</dd>", html)
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+    pg = ctx.new_page()
+    pg.goto(built_site["url"] + "/tools/trade-stats/")
+    pg.click("#ts-sample-btn")
+    pg.wait_for_selector("#ts-out dl.stats dd")
+    tool = pg.eval_on_selector_all("#ts-out dl.stats dd", "ds => ds.map(d => d.textContent)")
+    ctx.close()
+    assert hero == tool and len(hero) == 6, (hero, tool)
 
 
 # ------------------------------------------------------------------ shared wording checks

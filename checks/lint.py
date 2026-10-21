@@ -319,6 +319,21 @@ def lint_text(text, where="text", paid=False, analytics=False, english=True):
     return out
 
 
+HERO_DASH = os.path.join(REPO, "site", "templates", "partials", "hero_dashboard.html")
+
+
+def without_hero_dash(html, where):
+    """The home hero (motion plan D1) is the free tool's own output on the synthetic sample file:
+    its dollar figures are sample trade results, not prices. They are left out of the price check
+    only on / and only when the block is byte-identical to the generated partial
+    (checks/make_hero_dashboard.py), so an edited hero, or a price added to it, is checked as usual."""
+    if where != "/":
+        return html
+    with open(HERO_DASH, encoding="utf-8") as f:
+        body = f.read().split("#}", 1)[1].strip()
+    return html.replace(body, " ") if html.count(body) == 1 else html
+
+
 def lint_html(html, where, paid, analytics, allowed_amounts, private_values, commerce=None, pilot=False):
     """commerce: True when the seller block may appear (build.show_seller); defaults to paid or pilot."""
     commerce = (paid or pilot) if commerce is None else commerce
@@ -329,7 +344,7 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
     if paid:
         out += not_on_sale_claims(readable_text(html), where)
     from harvest_prices import amounts_in
-    for a in amounts_in(html):
+    for a in amounts_in(without_hero_dash(html, where)):
         if a not in allowed_amounts and a != 0:  # "$0" (free) is not a price
             out.append(("price_literal", where, f"${a:g} is not in prices.json"))
     for rx in SECRETS:

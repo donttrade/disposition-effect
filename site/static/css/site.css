@@ -669,6 +669,15 @@ pre { font-family: var(--font-mono); font-size: var(--fs-0); background: var(--s
   .lifted .next-block button:hover:not([disabled]):not([aria-disabled="true"])::after { opacity: 1; }
 }
 
+/* M3 hero dashboard: a DOM capture of the real tool (partials/hero_dashboard.html, made by
+   checks/make_hero_dashboard.py), coloured by the same tokens as the page, so it follows the theme toggle. */
+.hero-dash { margin: 0; padding: var(--s2); border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); }
+.hero-dash .dash-h { margin: 0 0 var(--s1); font-weight: 600; }
+.hero-dash .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s1) var(--s2); margin: 0 0 var(--s2); }
+.hero-dash .stat dd { font-size: var(--fs-1); }
+.hero-dash .plot { position: relative; margin: 0; }
+.hero-dash .plot svg { display: block; width: 100%; height: auto; }
+
 /* motion resets: reduced motion and print */
 @media print {
   .btn::after, .lifted .btn-2::after, .lifted .subscribe button::after, .lifted .next-block button::after { display: none; }
