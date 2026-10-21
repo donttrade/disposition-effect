@@ -33,6 +33,7 @@ if (!sid) {
   // NIT 13: it is UNVERIFIED that a Stripe receipt carries this page's link, so the message
   // does not rely on it: email is the one path that always exists.
   $('w-error-msg').textContent = 'No checkout was found in this link. If you paid, email us (address below) with the date and amount on your Stripe receipt.';
+  $('w-retry-row').hidden = true; // NIT 7: with no checkout id there is nothing to try again
   show('w-error');
 } else {
   history.replaceState(null, '', location.pathname); // the session id never stays in the address bar
