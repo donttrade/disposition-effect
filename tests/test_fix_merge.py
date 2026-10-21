@@ -410,3 +410,30 @@ def test_d5_paid_home_axe_and_overflow(browser, paid_site, width, color):
     page.goto(paid_site["url"] + "/")
     assert horizontal_overflow(page) == [] and axe_violations(page) == []
     ctx.close()
+
+
+# ------------------------------------------------------------------ D4: footers tell the truth about storage, per flag
+def test_d4_paid_footers_describe_the_token_and_stripped_numbers(paid_site):
+    # repro: grep -c "stores only your light/dark choice" b-paid/about/index.html → 1 before the fix
+    flags = {"paid_report": True, "pilot_checkout": False, "analytics": False}
+    line = B.footer_privacy(flags)
+    assert "access key" in line and "stripped trade numbers" in line and "does not keep" in line
+    pages = [p for p in paid_site["out"].rglob("*.html") if "<footer" in p.read_text(encoding="utf-8")]
+    assert len(pages) >= 40
+    for p in pages:
+        h = p.read_text(encoding="utf-8")
+        assert "stores only your light/dark choice" not in h, p
+        assert line in h, p
+
+
+def test_d4_analytics_build_footers_drop_no_analytics(tmp_path):
+    from test_legal import build, toml_with
+    toml = toml_with(tmp_path, analytics=True)
+    src = open(toml, encoding="utf-8").read().replace('cf_beacon_token = ""', 'cf_beacon_token = "fixture0token"')
+    open(toml, "w", encoding="utf-8").write(src)
+    r, out = build(tmp_path, "a", DT_SITE_TOML=toml)
+    assert r.returncode == 0, r.stderr
+    for p in out.rglob("*.html"):
+        h = p.read_text(encoding="utf-8")
+        if "<footer" in h:
+            assert "runs no analytics" not in L.visible_text(h[h.index("<footer"):]), p
