@@ -311,7 +311,15 @@ def footer_privacy(flags):
         parts = ["This site sets no cookies. Visits are counted with Cloudflare Web Analytics, which sets no cookie."]
     else:
         parts = ["This site sets no cookies and runs no analytics."]
-    parts.append("It stores only your light/dark choice, in your own browser.")
+    if flags["paid_report"]:
+        # D4: true once /welcome/ keeps the access key (localStorage and IndexedDB)
+        parts.append("It stores your light/dark choice in your own browser and, if you buy the habit report, your "
+                     "access key there too. For that report your browser sends only stripped trade numbers, which our "
+                     "server does not keep; your file itself is not uploaded.")
+    else:
+        parts.append("It stores only your light/dark choice, in your own browser.")
+    if flags["paid_report"] or flags["pilot_checkout"]:
+        parts.append("Card payments are handled by Stripe.")
     parts.append("Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; "
                  "their privacy policies apply.")
     return " ".join(parts)
