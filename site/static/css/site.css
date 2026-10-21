@@ -670,17 +670,15 @@ pre { font-family: var(--font-mono); font-size: var(--fs-0); background: var(--s
 .dt-motion .hero-dash.is-waiting .veil::before { animation-play-state: paused; }
 @keyframes dt-wipe { from { transform: translateX(0); } to { transform: translateX(100%); } }
 
-/* M5 count-up: DOM text stays final; ::after paints data-cu; failsafe at 1200 ms */
+/* M5 count-up: DOM text stays final; ::after paints data-cu; failsafe = theme.js .dt-fs at 800 ms */
 .hero-dash [data-count] { position: relative; }
-.dt-motion .hero-dash [data-count] { visibility: hidden; animation: dt-show 1ms linear 1200ms forwards; }
-.dt-motion .hero-dash [data-count].cu-on { animation: none; }
+.dt-motion:not(.dt-fs) .hero-dash [data-count], .dt-motion .hero-dash [data-count].cu-on { visibility: hidden; }
 .dt-motion .hero-dash [data-count].cu-on::after { content: attr(data-cu); position: absolute; left: 0; top: 0; visibility: visible; white-space: nowrap; }
-.dt-motion .hero-dash [data-count].cu-done { visibility: visible; animation: none; }
-@keyframes dt-show { to { visibility: visible; } }
+.dt-motion .hero-dash [data-count].cu-done { visibility: visible; }
 
 @media (prefers-reduced-motion: reduce), print {
   .rv { opacity: 1 !important; transform: none !important; transition: none !important; }
-  .hero-dash [data-count] { visibility: visible !important; animation: none !important; }
+  .hero-dash [data-count] { visibility: visible !important; }
   .hero-dash [data-count]::after { content: none !important; }
   .hero-dash .veil { display: none; }
 }
