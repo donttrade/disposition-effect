@@ -1,0 +1,10 @@
+{
+  "note": "The paid report's access and re-test numbers: the ONE source the site's statements are tested against (tests/test_delta_fixes.py reads /terms/, /fr/conditions/, /fr/avant-de-payer/, /pricing/ before-you-pay, /privacy/ and the report page's re-test line). dt-private's parity test checks every value here against the server's constants (src/core/app.mjs, token.mjs), and the .ics against the server's own answer. Change a number here, on the pages and in the server together.",
+  "key_days_after_purchase": 90,
+  "key_days_after_first_report": 75,
+  "retest_opens_days_after_first_report": 30,
+  "retest_closes_days_after_first_report": 60,
+  "prints_buffer_days": 15,
+  "prints_keep_days_after_first_report": 75,
+  "tracker_prints_grace_days": 15
+}
