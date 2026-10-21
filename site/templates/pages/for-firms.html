@@ -204,7 +204,14 @@ a7f3,2026-03-04,p91,1,240.00</pre>
   <section class="section" aria-labelledby="request">
     <h2 id="request">Start a {{ pilot.name }}, or ask a question</h2>
     <p>Tell us which traders and which dates. You get a written scope and a fixed price back, free. Nothing is owed until you accept the scope.</p>
+    {%- if flags.pilot_checkout %}
+    {%- with heading_id = "request" %}{% include "partials/pilot_block.html" %}{% endwith %}
+    <details><summary id="ff-other-h">Asking about a Snapshot, Memo, Outcomes pack or another test?</summary>
+    {%- with fid = "ff", product = "snapshot", heading_id = "ff-other-h" %}{% include "partials/form_firm.html" %}{% endwith %}
+    </details>
+    {%- else %}
     {%- with fid = "ff", product = "pilot", heading_id = "request" %}{% include "partials/form_firm.html" %}{% endwith %}
+    {%- endif %}
   </section>
   {% include "partials/disclaimer.html" %}
 </div>

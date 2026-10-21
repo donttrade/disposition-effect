@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{#- /start/pilot-thanks/ — pilot_checkout only. The Stripe Pilot link comes from prices.json; the
+    seller block from private.toml (the contracting party is named before payment). #}
+{% block content %}
+{%- from "partials/seller.html" import seller_rows %}
+{%- set pilot = products["pilot"] %}
+<div class="wrap" data-requires-flag="pilot_checkout"><div class="prose">
+  <h1>Got it. Two ways to pay for the {{ pilot.name }}.</h1>
+  <p class="lede">You’ll get a reply from <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a> within 1 business day with the written scope: which traders and which dates. You can pay now or wait for the scope.</p>
+  <section class="section" aria-labelledby="pay-card">
+    <h2 id="pay-card">Pay by card now</h2>
+    <p><a class="btn" href="{{ pilot.stripe_link_live }}" rel="noopener">Pay {{ pilot.price_usd|usd }} USD by card (Stripe)</a></p>
+    <p class="small">Paying accepts the <a href="/terms/#trial">{{ pilot.name }} terms</a>. If we can’t agree the scope with you, the fee is refunded in full. It is also refunded if your extract can’t be made to run, or if your own re-run of the same script version on the same export does not reproduce the figure. {{ pilot.credit_rule }} of delivery.</p>
+  </section>
+  <section class="section" aria-labelledby="pay-later">
+    <h2 id="pay-later">Or pay after the scope, by invoice</h2>
+    <p>Reply to our email, or write to <a href="mailto:{{ site.contact_email }}?subject={{ ('Pilot — invoice please')|urlencode }}">{{ site.contact_email }}</a>. Bank transfer, or Interac e-Transfer in Canada. Nothing is owed until you accept the scope.</p>
+  </section>
+  <section class="section" aria-labelledby="who-h">
+    <h2 id="who-h">Who you are paying</h2>
+    <dl class="byp">{{ seller_rows(private, site, "en") }}</dl>
+  </section>
+  <p class="small muted">The card payment is handled by Stripe; donttrade never sees full card numbers. <a href="/privacy/">Privacy</a></p>
+</div></div>
+{% endblock %}

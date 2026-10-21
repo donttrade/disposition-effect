@@ -161,6 +161,16 @@ PAGES += [
 ]
 PAID_ONLY_PATHS_FR = ["/fr/avant-de-payer/", "/fr/conditions/", "/fr/confidentialite/"]
 
+# Hybrid "Start a Pilot" (pilot_checkout, default off): the thank-you page with the Stripe link.
+PAGES += [
+    {"template": "pages/pilot-thanks.html", "path": "/start/pilot-thanks/", "requires_flag": "pilot_checkout",
+     "noindex": True, "crumb": "Pay for the Pilot", "title": "Pilot request received — donttrade",
+     "description": "Your Pilot request reached donttrade. Pay by card now through Stripe, or wait for the written "
+                    "scope and pay by invoice."},
+]
+PILOT_ONLY_PATHS = ["/start/pilot-thanks/"]
+PILOT_FLAG_MARKER = 'data-requires-flag="pilot_checkout"'
+
 # The /tools/ index rows: tool, the question it answers, input, Open (plan step 12).
 TOOLS = [
     {"name": "Trade stats", "href": "/tools/trade-stats/",
@@ -486,6 +496,17 @@ def verify(out, flags):
                     with open(fp, encoding="utf-8", errors="replace") as f:
                         if "data-seller-block" in f.read():
                             die(f"seller disclosure in {os.path.relpath(fp, out)} while every commerce flag is off")
+    if not flags.get("pilot_checkout"):
+        for p in PILOT_ONLY_PATHS:
+            if os.path.exists(out_file(out, p)):
+                die(f"pilot-only page {p} is in the build while pilot_checkout = false")
+        for root, _, files in os.walk(out):
+            for name in sorted(files):
+                if name.endswith(".html"):
+                    fp = os.path.join(root, name)
+                    with open(fp, encoding="utf-8", errors="replace") as f:
+                        if PILOT_FLAG_MARKER in f.read():
+                            die(f"pilot-checkout markup in {os.path.relpath(fp, out)} while pilot_checkout = false")
     if not flags["paid_report"]:
         for p in PAID_ONLY_PATHS:
             if os.path.exists(out_file(out, p)):

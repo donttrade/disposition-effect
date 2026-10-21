@@ -40,6 +40,9 @@ def rules(html, paid=False, analytics=False, priv=()):
     ('<div data-requires-flag="paid_report">x</div>', "flag:paid_markup"),
     ('<script type="application/ld+json">{"@type": "Product"}</script>', "flag:product_jsonld"),
     ("<p>[SELLER — lawyer to confirm]</p>", "flag:seller_placeholder"),
+    ("<dl><dt data-seller-block>Seller</dt></dl>", "flag:seller_block"),
+    ('<form data-requires-flag="pilot_checkout"></form>', "flag:pilot_markup"),
+    ('<a href="https://buy.stripe.com/x">pay</a>', "flag:stripe_link"),
     ('<script src="https://static.cloudflareinsights.com/beacon.min.js"></script>', "flag:beacon"),
 ])
 def test_planted_violation_fails(html, rule):
