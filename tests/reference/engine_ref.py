@@ -433,9 +433,9 @@ _SH_INT = re.compile(r"^[+-]?\d+$", re.ASCII)
 _SH_ONE_COMMA = re.compile(r"^[+-]?\d+,(\d+)$", re.ASCII)
 _SH_EURO = re.compile(r"^[+-]?\d{1,3}(\.\d{3})+,\d+$", re.ASCII)
 _SH_US = re.compile(r"^[+-]?\d{1,3}(,\d{3})+(\.\d+)?$", re.ASCII)
-_SH_DOT3 = re.compile(r"^[+-]?\d{1,3}\.\d{3}$", re.ASCII)
+_SH_DOT3 = re.compile(r"^[+-]?[1-9]\d{0,2}\.\d{3}$", re.ASCII)  # never a leading 0 (F-D7)
 _SH_ONE_DOT = re.compile(r"^[+-]?(\d+\.?\d*|\.\d+)$", re.ASCII)
-_SH_DOTS_THOUSANDS = re.compile(r"^[+-]?\d{1,3}(\.\d{3}){2,}$", re.ASCII)
+_SH_DOTS_THOUSANDS = re.compile(r"^[+-]?[1-9]\d{0,2}(\.\d{3}){2,}$", re.ASCII)
 
 
 def number_shape(raw):
