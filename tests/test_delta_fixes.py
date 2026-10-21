@@ -415,3 +415,43 @@ def test_manual_restore_must_be_a_boolean(tmp_path):
 
 def test_manual_restore_sentence_passes_the_restore_email_rule():
     assert not L.restore_email_claims(L.normalise(MANUAL), "/welcome/")
+
+
+# ------------------------------------------------------------------ Manager C4: every tool page blocks outgoing requests
+TOOL_PAGES = ["/tools/trade-stats/", "/tools/prop-challenge-simulator/", "/tools/lot-size-calculator/",
+              "/tools/disposition-calculator/", "/tools/pass-rate-calculator/"]
+
+
+def _csp(html):
+    import html as _h
+    m = re.search(r'<meta http-equiv="Content-Security-Policy" content="([^"]*)"', html)
+    return _h.unescape(m.group(1)) if m else None
+
+
+def test_c4_every_tool_page_has_a_csp_with_no_connections(built_site):
+    for path in TOOL_PAGES:
+        csp = _csp((built_site["out"] / path.strip("/") / "index.html").read_text(encoding="utf-8"))
+        assert csp, path
+        d = dict((x.split(" ", 1) + [""])[:2] for x in (y.strip() for y in csp.split(";")))
+        assert d["connect-src"] == "'none'", (path, csp)
+        assert d["default-src"] == "'self'" and "http" not in d["script-src"], (path, csp)
+    tools = [p for p in (built_site["out"] / "tools").iterdir() if (p / "index.html").exists()]
+    assert sorted("/tools/" + p.name + "/" for p in tools) == sorted(TOOL_PAGES), "a new tool page: add it here"
+
+
+@pytest.mark.parametrize("path,example,out_id", [("/tools/disposition-calculator/", "#dc-example", "#dc-t"),
+                                                 ("/tools/pass-rate-calculator/", "#pr-example", "#pr-rate")])
+def test_c4_old_calculators_still_work_and_cannot_send(browser, built_site, path, example, out_id):
+    page = browser.new_page()
+    errors = []
+    page.on("console", lambda m: errors.append(m.text) if "Content Security Policy" in m.text else None)
+    page.goto(built_site["url"] + path)
+    page.click(example)
+    assert page.inner_text(out_id).strip() not in ("", "—"), "the calculator still computes"
+    blocked = page.evaluate("""async () => { const out = [];
+        for (const u of ['/x.json', 'https://example.com/x']) { try { await fetch(u); out.push('sent ' + u); } catch (e) { out.push('blocked'); } }
+        try { navigator.sendBeacon('/beacon', 'x') ? out.push('beacon queued') : out.push('blocked'); } catch (e) { out.push('blocked'); }
+        return out; }""")
+    page.close()
+    assert blocked[:2] == ["blocked", "blocked"], blocked
+    assert not [e for e in errors if "fetch" not in e.lower() and "beacon" not in e.lower() and "connect" not in e.lower()], errors
