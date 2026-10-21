@@ -223,7 +223,14 @@ def test_no_horizontal_overflow_or_console_errors(browser, vp):
 def test_pages_have_unique_title_and_description(browser):
     page = browser.new_page()
     titles, problems = {}, []
+    checked = set()
     for url in html_pages():
+        # /start/?product=pilot is /start/ with a form tag (FORMS-SPEC §A), not another page;
+        # its canonical is the path, so titles are compared once per path.
+        path = urlparse(url).path
+        if path in checked:
+            continue
+        checked.add(path)
         page.goto(url)
         t = page.title()
         d = page.evaluate("(document.querySelector('meta[name=description]')||{}).content||''")
