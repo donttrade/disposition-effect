@@ -6,12 +6,13 @@
 //  * The page's CSP is connect-src 'none', so even a bug here could not send it anywhere.
 //  * Nothing is written to storage or cookies; the only stored value on the site is the
 //    theme (theme.js). Nothing is logged to the console.
-//  * The noise checks run in a Web Worker that receives only {pnl, hold_s} per trade.
+//  * The file is parsed, and the noise checks run, in a Web Worker (read-file.js), so a
+//    100,000-row file never freezes the page; an HTML report is parsed on the page.
 //
 // Every figure shown is computed by the engine (stats.js, noise.js). The teaser line uses
 // only those figures. Missing values print as "—", never NaN/Infinity/undefined.
 
-import { runFile } from '../engine/index.js';
+import { readTradeFile, startProgress } from './read-file.js';
 import { LIMITS, MESSAGES } from '../engine/errors.js';
 import { freeStats, equityCurve, NO_LOSSES } from '../engine/stats.js';
 import { LABELS, N_PERM } from '../engine/noise.js';
@@ -33,7 +34,10 @@ const CHECK_TEXT = {
 };
 
 let state = null; // {result, unit, fileLabel} of the file on screen; never persisted
-let worker = null;
+let worker = null;  // the noise-check worker, used after an HTML report read on the page
+let reading = null; // the file being read: {cancel()}
+let stopProgress = () => {};
+let readSeq = 0;    // which read is the latest; an older result is dropped
 
 // ------------------------------------------------------------------ status / errors
 function status(text) {
@@ -54,6 +58,8 @@ function showError(err) {
 
 function clearOutput() {
   if (worker) { worker.terminate(); worker = null; }
+  if (reading) { reading.cancel(); reading = null; }
+  stopProgress();
   $('ts-error').hidden = true;
   $('ts-out').replaceChildren();
   $('ts-out').hidden = true;
@@ -79,15 +85,36 @@ function fromSample() {
   analyse(new TextEncoder().encode(text), 'the synthetic sample file');
 }
 
-function analyse(bytes, fileLabel) {
-  const out = runFile(bytes);
-  status('');
-  if (out.error) { showError(out.error); return; }
+async function analyse(bytes, fileLabel) {
+  stopProgress = startProgress($('ts-progress'));
+  const mine = ++readSeq;
+  const job = readTradeFile(bytes, {
+    noise: true,
+    onStage: status,
+    onNoise: (noise) => {
+      if (mine !== readSeq) return; // a newer file replaced this one
+      reading = null;
+      if (!noise) { $('ts-noise-status').textContent = 'The checks could not run in this browser.'; return; }
+      renderNoise(noise, state.result.trades.length);
+    },
+  });
+  reading = job;
+  let out;
+  try { out = await job.done; } finally { if (mine === readSeq) { stopProgress(); status(''); } }
+  if (mine !== readSeq) return; // a newer file replaced this one
+  if (out.error) { reading = null; showError(out.error); return; }
   const r = out.result;
   state = { result: r, unit: r.trades[0].pnl_unit, fileLabel };
-  render();
-  runNoise(r.trades);
+  await render();
+  if (mine !== readSeq) return;
+  if (out.onPage) { reading = null; runNoise(r.trades); } // an HTML report was read on the page
+  else job.runNoise();
 }
+
+// Hand the main thread back between the heavy steps, so a 50,000-trade file never blocks it
+// for long (Tester D7): the browser paints and handles input in between.
+const breathe = () => new Promise((resolve) => setTimeout(resolve, 0));
+const BIG = 5000;
 
 function startingBalance() {
   const input = $('ts-balance');
@@ -131,9 +158,16 @@ const streak = (st, k) => el('span', { 'data-k': k },
 
 const m = (n, k) => ({ text: money(n, state.unit), cls: signClass(n) || '', k });
 
-function render(focus = true) {
+async function render(focus = true) {
   const r = state.result;
+  // A big file is drawn in steps; a normal one (up to BIG trades) at once, with no await.
+  const big = r.trades.length > BIG;
   const s = freeStats(r.trades, startingBalance());
+  if (big) await breathe();
+  const points = equityCurve(r.trades);
+  if (big) await breathe();
+  if (state.result !== r) return; // another file arrived meanwhile
+  state.stats = s; // the hold-time figures do not depend on the balance; the teaser reuses them
   const out = $('ts-out');
   out.replaceChildren(el('h2', { id: 'ts-out-h', tabindex: '-1', text: state.fileLabel === 'the synthetic sample file' ? 'Results: synthetic sample file' : 'Results: your file' }));
 
@@ -142,7 +176,7 @@ function render(focus = true) {
   const read = el('section', { 'aria-labelledby': 'ts-read-h' },
     el('h3', { id: 'ts-read-h', text: 'What was read' }),
     el('p', {}, `Format: ${FORMAT_NAMES[r.format] || r.format}${r.verified_format ? '' : ' (beta)'}. `,
-      `${intText(r.trades.length)} closed trades from ${intText(r.executions.length)} fills, closed ${day(first.close_ts)} to ${day(last.close_ts)}. `,
+      `${intText(r.trades.length)} closed trades from ${intText(r.n_fills)} fills, closed ${day(first.close_ts)} to ${day(last.close_ts)}. `,
       `Times are ${r.tz_label}. ${unitNote(state.unit)}`),
   );
   if (state.fileLabel === 'the synthetic sample file') {
@@ -168,7 +202,7 @@ function render(focus = true) {
       statRow('Largest drawdown', money(-s.max_drawdown_abs, state.unit, { sign: true }), s.max_drawdown_abs > 0 ? 'loss' : null, 'max_drawdown_abs'))));
 
   // Equity and drawdown chart
-  out.append(chart(equityCurve(r.trades)));
+  out.append(chart(points));
 
   // Full stats table
   const ddPct = s.max_drawdown_pct === null ? 'enter a starting balance above' : pct(s.max_drawdown_pct);
@@ -327,7 +361,7 @@ function renderNoise(noise, total) {
 
 // The teaser states only figures computed above: the hold gap and its check result.
 function teaser(noise) {
-  const s = freeStats(state.result.trades);
+  const s = state.stats || freeStats(state.result.trades);
   const gap = noise.checks.find((c) => c.stat === 'hold_gap_s');
   const text = $('ts-teaser-text');
   if (s.hold_ratio !== null && gap) {
@@ -343,7 +377,12 @@ function init() {
   const input = $('ts-file');
   input.addEventListener('change', () => { fromFile(input.files[0]); input.value = ''; });
   $('ts-sample-btn').addEventListener('click', fromSample);
-  $('ts-balance').addEventListener('change', () => { if (state) { const keep = $('ts-noise'); render(false); $('ts-noise').replaceWith(keep); } else startingBalance(); });
+  $('ts-balance').addEventListener('change', async () => {
+    if (!state) { startingBalance(); return; }
+    const keep = $('ts-noise');
+    await render(false);
+    if ($('ts-noise') !== keep) $('ts-noise').replaceWith(keep);
+  });
   const dz = $('ts-drop');
   dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('is-over'); });
   dz.addEventListener('dragleave', () => dz.classList.remove('is-over'));

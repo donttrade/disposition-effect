@@ -502,3 +502,82 @@ def test_d3_lint_catches_trial_cta_on_passthrough(tmp_path):
     page.write_text(page.read_text(encoding="utf-8").replace("</main>", "<p><a href='/start/'>Start a trial</a></p></main>"),
                     encoding="utf-8")
     assert any(rule == "banned:trial_cta" for rule, where, _ in L.lint_build(str(out)) if where == "/glossary/index.html")
+
+
+# ------------------------------------------------------------------ D7: a 100k-row file never freezes the page
+GAP_PROBE = ("() => { window.__gaps = []; let last = performance.now(); window.__raf = true;"
+             " const tick = (t) => { if (t - last > 200) window.__gaps.push(Math.round(t - last)); last = t;"
+             " if (window.__raf) requestAnimationFrame(tick); }; requestAnimationFrame(tick); }")  # tools_test.py
+
+
+def rows_file(path, trades):
+    """The Tester's garbage/rows100k.csv shape: generic CSV, one buy and one sell per trade."""
+    import datetime as dt
+    import random
+    rnd = random.Random(20261021)
+    t0 = dt.datetime(2020, 1, 2, 9, 30)
+    lines = ["Date,Time,Symbol,Side,Quantity,Price,Currency,Fees"]
+    for i in range(trades):
+        a, b = t0 + dt.timedelta(minutes=10 * i), t0 + dt.timedelta(minutes=10 * i + 5)  # never overlapping
+        px = round(100 + rnd.uniform(-5, 5), 2)
+        out = round(px + rnd.uniform(-2, 2), 2)
+        sym = "DEMO-" + "ABC"[i % 3]
+        lines.append(f"{a:%Y-%m-%d},{a:%H:%M:%S},{sym},Buy,10,{px},USD,1.00")
+        lines.append(f"{b:%Y-%m-%d},{b:%H:%M:%S},{sym},Sell,10,{out},USD,1.00")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return str(path)
+
+
+@pytest.mark.parametrize("tool,inp,done", [
+    ("/tools/trade-stats/", "#ts-file", "() => !!document.querySelector('#ts-noise table') || !document.getElementById('ts-error').hidden"),
+    ("/tools/prop-challenge-simulator/", "#ps-file", "() => /closed trades on|error code/.test(document.getElementById('ps-file-status').textContent)"),
+])
+def test_d7_100k_rows_keep_the_main_thread_free(browser, built_site, tmp_path, tool, inp, done):
+    f = rows_file(tmp_path / "rows100k.csv", 50_000)
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+    page = ctx.new_page()
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.goto(built_site["url"] + tool)
+    page.evaluate(GAP_PROBE)
+    page.set_input_files(inp, f)
+    page.wait_for_timeout(250)
+    progress = page.evaluate("() => { const e = document.querySelector('.progress-line'); return !!e && !e.hidden && !!e.querySelector('progress'); }")
+    page.wait_for_function(done, timeout=240000)
+    page.evaluate("() => { window.__raf = false; }")
+    gaps = page.evaluate("() => window.__gaps")
+    text = page.inner_text("main")
+    ctx.close()
+    assert errors == []
+    assert progress, "no progress shown while the file was read"
+    assert gaps == [], f"main thread blocked: {gaps} ms"   # before the fix: 3050 ms
+    n = int(re.search(r"([\d,]+) closed trades", text).group(1).replace(",", ""))
+    assert n == 50_000, n
+
+
+def test_d7_200001_rows_refused_without_freezing(browser, built_site, tmp_path):
+    p = tmp_path / "rows200001.csv"
+    p.write_text("Date,Time,Symbol,Side,Quantity,Price,Currency,Fees\n" +
+                 "".join(f"2025-01-02,09:30:00,DEMO-A,{'Buy' if i % 2 == 0 else 'Sell'},10,100.00,USD,1.00\n" for i in range(200_001)),
+                 encoding="utf-8")
+    ctx = browser.new_context()
+    page = ctx.new_page()
+    page.goto(built_site["url"] + "/tools/trade-stats/")
+    page.evaluate(GAP_PROBE)
+    page.set_input_files("#ts-file", str(p))
+    page.wait_for_selector("#ts-error:not([hidden])", timeout=60000)
+    gaps = page.evaluate("() => window.__gaps")
+    text = page.inner_text("#ts-error")
+    ctx.close()
+    assert "E_TOO_LARGE" in text and gaps == [], gaps   # before the fix: 1867 ms
+
+
+def test_d7_html_report_still_read_on_the_page(browser, built_site):
+    # DOMParser does not exist in a worker, so an MT5 HTML report is parsed on the page
+    ctx = browser.new_context()
+    page = ctx.new_page()
+    page.goto(built_site["url"] + "/tools/trade-stats/")
+    page.set_input_files("#ts-file", os.path.join(REPO, "tests", "fixtures", "mt5", "deals_netting_40.htm"))
+    page.wait_for_selector("#ts-noise table", timeout=90000)
+    assert "MetaTrader 5 report" in page.inner_text("#ts-out")
+    ctx.close()
