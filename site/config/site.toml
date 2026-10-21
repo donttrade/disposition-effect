@@ -7,11 +7,13 @@ name = "donttrade"
 base_url = "https://donttrade.ca"
 contact_email = "donttrade.research@gmail.com"
 reply_promise = "We reply within 1 business day (Eastern Time, Monday to Friday)."
+same_as = ["https://donttrade.substack.com", "https://github.com/donttrade"]  # Organization JSON-LD: brand accounts only
 
 [flags]
 paid_report = false        # the $39 report, its pages and the trader Stripe links
 analytics = false          # Cloudflare Web Analytics beacon
 trader_first_home = false  # must equal paid_report (the build fails otherwise)
+pilot_checkout = false     # "Start a Pilot" block + thanks page with the live Stripe Pilot link
 
 [analytics]
 cf_beacon_token = ""       # required when analytics = true
