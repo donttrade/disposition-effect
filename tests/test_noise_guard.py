@@ -108,3 +108,37 @@ def test_guard_wording_passes_the_lint():
     assert out["s"] == ("Not enough trades to tell. With one more trade the size of this file's largest win ($412.5), "
                         "the average would be within what chance alone produces.")
     assert "at least 57 trades" in out["a"] and "a few large losses" in out["a"]
+
+
+def test_f6_runtime_in_chromium_5000_trades(browser, repo_server):
+    """F-6: 5,000 trades, worst cases included, <= 2 s in Chromium. The worst case is a claim
+    against the tail that SURVIVES one more trade (the second bootstrap runs to the end);
+    a skew_one_more file stops its second bootstrap early. Min of 3 runs (the machine is shared)."""
+    if os.environ.get("DT_SKIP_TIMING") == "1":
+        pytest.skip("DT_SKIP_TIMING=1")
+    page = browser.new_page()
+    page.goto(repo_server + "/tests/harness.html")
+    page.wait_for_function("document.getElementById('status').textContent === 'ready'")
+    res = page.evaluate("""async () => {
+      const N = await import('/site/static/js/engine/noise.js');
+      const G = await import('/checks/calib_gen.mjs');
+      const base = G.freeFile('trend_right_skew', 5000, 1, 3);
+      const out = {};
+      for (const sh of [0, -0.06, -0.1]) {
+        const x = base.map((v) => Math.round((v + sh * 25) * 100) / 100);
+        const ms = [];
+        let r = null;
+        for (let k = 0; k < 3; k++) { const t0 = performance.now(); r = N.checkExpectancy(x, N.SEED_BASE); ms.push(performance.now() - t0); }
+        out[sh] = { ms: Math.min(...ms), guard: r.guard, label: r.label, value: r.value, skew: r.skew };
+      }
+      return out;
+    }""")
+    page.close()
+    assert res["0"]["label"] == "may be noise" and res["0"]["guard"] is None, res
+    assert res["-0.06"]["guard"] == "skew_one_more", res
+    survives = res["-0.1"]
+    assert survives["guard"] is None and survives["label"] == "distinguishable from noise", res
+    assert survives["value"] < 0 and survives["skew"] >= 1, res      # against the tail: two full bootstraps
+    print("F-6 Chromium ms:", {k: round(v["ms"]) for k, v in res.items()})
+    for k, v in res.items():
+        assert v["ms"] <= 2000, (k, v)

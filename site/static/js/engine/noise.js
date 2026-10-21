@@ -137,17 +137,24 @@ function studentGap(xs, n, mu) {
 // The shipped bootstrap-t: resample with replacement nBoot times; count the resamples whose
 // t around the file's own mean is at least the file's t around zero. stopAt (optional) ends
 // the loop once the count reaches it; only a decision "count >= stopAt" may use that count.
+// mulberry32 is inlined (the same sequence as mulberry32(seed)): in Chromium a fresh rand()
+// closure per call made every call after the first about 2.5x slower (CODER-STATS-REPORT, F-6).
 function bootstrapCount(x, seed, nBoot, stopAt) {
   const n = x.length;
   let s = 0;
   for (const v of x) s += v;
   const obs = s / n;
   const tObs = studentGap(x, n, 0);
-  const rand = mulberry32(seed);
+  let a = seed | 0;  // mulberry32 state
   const draw = new Float64Array(n);
   let count = 0;
   for (let k = 0; k < nBoot; k++) {
-    for (let i = 0; i < n; i++) draw[i] = x[Math.floor(rand() * n)];
+    for (let i = 0; i < n; i++) {
+      a = (a + 0x6d2b79f5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      draw[i] = x[Math.floor((((t ^ (t >>> 14)) >>> 0) / 4294967296) * n)];
+    }
     if (studentGap(draw, n, obs) >= tObs) {
       count++;
       if (count >= stopAt) break;
