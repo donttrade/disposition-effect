@@ -192,6 +192,23 @@ export function roundtripExecutions(rts) {
   return out;
 }
 
+// Why nothing closed, from what the file did contain (Tester D8: the old message always
+// said "every position is still open", even when the real cause was skipped rows).
+function noTradesReason(openN, openAtStart, skipped) {
+  const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+  const parts = [];
+  let nSkipped = 0;
+  for (const k of Object.keys(skipped)) nSkipped += skipped[k];
+  if (nSkipped) {
+    const why = Object.keys(skipped).map((k) => `${k.replace(/_/g, ' ')}: ${skipped[k]}`).join(', ');
+    parts.push(`${plural(nSkipped, 'row was', 'rows were')} skipped (${why}), so a position may never return to flat`);
+  }
+  if (openN) parts.push(`${plural(openN, 'position is', 'positions are')} still open at the end of the file`);
+  if (openAtStart) parts.push(`${plural(openAtStart, 'position was', 'positions were')} already open when the file starts`);
+  if (!parts.length) return 'The file has no buy and sell that open and close a position.';
+  return parts.join('; ') + '.';
+}
+
 function strip(o) {
   const out = {};
   for (const [k, v] of Object.entries(o)) if (!k.startsWith('_')) out[k] = v;
@@ -266,7 +283,7 @@ export function finish(fmt, verified, res, mode, tzLabel) {
     warnings.push(warning('W_MIXED_CURRENCY', excluded, `Only the ${keep} trades are analysed; ${excluded} trades in other currencies were left out.`));
   }
   trades.sort((a, b) => (a.close_ts - b.close_ts) || (a.open_ts - b.open_ts) || cmpStr(a.symbol, b.symbol) || (a._seq - b._seq));
-  if (!trades.length) fail('E_NO_CLOSED_TRADES');
+  if (!trades.length) fail('E_NO_CLOSED_TRADES', noTradesReason(openN, openAtStart, skipped));
   return {
     format: fmt,
     verified_format: verified,

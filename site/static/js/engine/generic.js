@@ -7,9 +7,11 @@ import { fail } from './errors.js';
 import { cell, reqNumber, optNumber, skip, isEmptyRow } from './mt.js';
 
 export function sideLetter(v) {
-  // Like Tradervue: anything starting with B is a buy, with S a sell.
+  // Like Tradervue: anything starting with B is a buy, with S a sell ("Short" too).
+  // "Long" and "Cover" are buys as well (Tester D8: they were skipped, which left the
+  // position open and lost every later trade on the symbol).
   v = v.trim().toUpperCase();
-  if (v.startsWith('B')) return 'buy';
+  if (v.startsWith('B') || v === 'LONG' || v === 'COVER') return 'buy';
   if (v.startsWith('S')) return 'sell';
   return null;
 }

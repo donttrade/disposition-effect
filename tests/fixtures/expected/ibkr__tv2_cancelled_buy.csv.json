@@ -1,0 +1,156 @@
+{
+ "noise": {
+  "checks": [
+   {
+    "label": "not enough trades to tell",
+    "method": "bootstrap-t",
+    "n_a": 1,
+    "n_b": null,
+    "p": null,
+    "stat": "expectancy",
+    "value": null
+   },
+   {
+    "label": "not enough trades to tell",
+    "method": "label permutation",
+    "n_a": 0,
+    "n_b": 1,
+    "p": null,
+    "stat": "hold_gap_s",
+    "value": null
+   },
+   {
+    "label": "not enough trades to tell",
+    "method": "order shuffle",
+    "n_a": 1,
+    "n_b": null,
+    "p": null,
+    "stat": "longest_losing_streak",
+    "value": null
+   }
+  ],
+  "limited": false,
+  "n_used": 1
+ },
+ "pgr_plr": {
+  "coverage_pct": null,
+  "pg": 0,
+  "pl": 0,
+  "rg": 1,
+  "rl": 0
+ },
+ "result": {
+  "currency_groups": {
+   "USD": 1
+  },
+  "executions": [
+   {
+    "currency": "USD",
+    "fee": 1.0,
+    "multiplier": 1,
+    "oc": "open",
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 10.0,
+    "qty": 100.0,
+    "row": 4,
+    "side": "buy",
+    "symbol": "AAA",
+    "ts": 1788429600000
+   },
+   {
+    "currency": "USD",
+    "fee": 1.0,
+    "multiplier": 1,
+    "oc": "close",
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 11.0,
+    "qty": 100.0,
+    "row": 5,
+    "side": "sell",
+    "symbol": "AAA",
+    "ts": 1788516000000
+   }
+  ],
+  "format": "ibkr_flex",
+  "skipped": {
+   "cancelled": 2
+  },
+  "trades": [
+   {
+    "close_ts": 1788516000000,
+    "currency": "USD",
+    "dir": "long",
+    "entry_vwap": 10.0,
+    "exit_vwap": 11.0,
+    "fees": 2.0,
+    "fills_n": 2,
+    "hold_s": 86400,
+    "id": "t1",
+    "open_ts": 1788429600000,
+    "pnl": 98.0,
+    "pnl_gross": 100.0,
+    "pnl_source": "computed",
+    "pnl_unit": "USD",
+    "qty": 100.0,
+    "symbol": "AAA"
+   }
+  ],
+  "tz_label": "as exported",
+  "verified_format": false,
+  "warnings": [
+   {
+    "code": "W_UNVERIFIED_FORMAT",
+    "n": 0
+   },
+   {
+    "code": "W_SKIPPED_ROWS",
+    "n": 2
+   }
+  ]
+ },
+ "stats": {
+  "avg_loss": null,
+  "avg_win": 98.0,
+  "expectancy": 98.0,
+  "gross_loss": 0.0,
+  "gross_profit": 98.0,
+  "hold_median_loss_s": null,
+  "hold_median_win_s": 86400,
+  "hold_ratio": null,
+  "largest_loss": null,
+  "largest_win": 98.0,
+  "long": {
+   "losses": 0,
+   "n": 1,
+   "pnl": 98.0,
+   "win_rate": 1.0,
+   "wins": 1
+  },
+  "losses": 0,
+  "max_consec_losses": {
+   "n": 0,
+   "pnl": 0.0
+  },
+  "max_consec_wins": {
+   "n": 1,
+   "pnl": 98.0
+  },
+  "max_drawdown_abs": 0.0,
+  "max_drawdown_pct": null,
+  "n": 1,
+  "net_pnl": 98.0,
+  "profit_factor": "no losing trades",
+  "scratch": 0,
+  "short": {
+   "losses": 0,
+   "n": 0,
+   "pnl": 0.0,
+   "win_rate": null,
+   "wins": 0
+  },
+  "win_rate": 1.0,
+  "wins": 1
+ }
+}

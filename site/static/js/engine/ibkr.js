@@ -12,8 +12,32 @@ import { parseDate } from './csv.js';
 import { cell, reqNumber, optNumber, skip, isEmptyRow } from './mt.js';
 import { sideLetter } from './generic.js';
 
+// A cancellation row ("BUY (Ca.)" / "SELL (Ca.)", or the code Ca; UNVERIFIED spellings
+// from the Flex docs) takes back an earlier execution. It is not a fill: the execution it
+// cancels (same symbol, side, quantity and price, the latest one at or before its time)
+// is removed, and both rows count as skipped "cancelled" (Tester D8). A cancellation with
+// no such execution in the file counts as "cancel_unmatched".
+const RE_CANCEL_SIDE = /\(CA\.?\)/;
+
+function applyCancels(execs, cancels, skipped) {
+  for (const c of cancels) {
+    let best = -1;
+    for (let k = 0; k < execs.length; k++) {
+      const e = execs[k];
+      if (e === null || e.symbol !== c.symbol || e.side !== c.side || e.qty !== c.qty || e.price !== c.price || e.ts > c.ts) continue;
+      if (best === -1 || e.ts >= execs[best].ts) best = k;
+    }
+    if (best === -1) { skip(skipped, 'cancel_unmatched'); continue; }
+    execs[best] = null;
+    skip(skipped, 'cancelled');
+    skip(skipped, 'cancelled');
+  }
+  return execs.filter((e) => e !== null);
+}
+
 export function parseIbkr(rows, hi, m) {
   const execs = [];
+  const cancels = [];
   const skipped = {};
   for (const r of rows.slice(hi + 1)) {
     if (isEmptyRow(r.cells)) continue;
@@ -21,6 +45,9 @@ export function parseIbkr(rows, hi, m) {
     const level = cell(r, m, 'level').toUpperCase();
     // ORDER / CLOSED_LOT / summary rows would double-count the executions.
     if (level !== '' && level !== 'EXECUTION') { skip(skipped, 'not_execution'); continue; }
+    const sideText = cell(r, m, 'side').toUpperCase();
+    const codeToks = cell(r, m, 'code').toUpperCase().split(';').map((x) => x.trim());
+    const isCancel = RE_CANCEL_SIDE.test(sideText) || codeToks.includes('CA');
     const side = sideLetter(cell(r, m, 'side'));
     if (side === null) { skip(skipped, 'bad_side'); continue; }
     const symbol = cell(r, m, 'symbol');
@@ -53,8 +80,9 @@ export function parseIbkr(rows, hi, m) {
     const cur = cell(r, m, 'currency').toUpperCase() || null;
     let fx = null;
     if ('fx' in m && cell(r, m, 'fx') !== '') fx = reqNumber(cell(r, m, 'fx'), row, 'fx');
-    execs.push({ row, ts, symbol, side, qty, price, fee, currency: cur, oc, pos_id: null,
-      pnl_reported: realized, multiplier: mult, _unit: cur ? cur : 'points', _fx: fx });
+    const e = { row, ts, symbol, side, qty, price, fee, currency: cur, oc, pos_id: null,
+      pnl_reported: realized, multiplier: mult, _unit: cur ? cur : 'points', _fx: fx };
+    if (isCancel) cancels.push(e); else execs.push(e);
   }
-  return { executions: execs, roundtrips: [], skipped, extra: {} };
+  return { executions: applyCancels(execs, cancels, skipped), roundtrips: [], skipped, extra: {} };
 }

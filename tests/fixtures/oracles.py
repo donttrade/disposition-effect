@@ -273,3 +273,32 @@ ORACLES["generic/tv2_same_second_newest_first.csv"] = {
     "warnings": {},
     "skipped": {},
 }
+
+# Tester v2 D8: rows the parser did not understand left positions stranded.
+ORACLES["ibkr/tv2_cancelled_buy.csv"] = {
+    # "BUY (Ca.)" (code Ca) takes back the 09-02 10:00 BUY 100 @10: both rows skipped as cancelled.
+    # Left: BUY 100 O @10 09-03 -> SELL 100 C @11 09-04: gross 100, fees 1 + 1 = 2, pnl 98 (computed), 1 day.
+    "trades": [dict(symbol="AAA", dir="long", qty=100, pnl_gross=100.0, fees=2.0, pnl=98.0, hold_s=86400)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_SKIPPED_ROWS": 2},
+    "skipped": {"cancelled": 2},
+}
+ORACLES["tradovate/tv2_partial_then_cancel.csv"] = {
+    # Buy 2 @5000; a Canceled order that filled 1 @5010; Sell 1 @5004.
+    # ES x50: (5010 - 5000) * 50 + (5004 - 5000) * 50 = 500 + 200 = 700 ; 09:31:04 -> 09:50:00 = 1136 s
+    "trades": [dict(symbol="ESZ6", dir="long", qty=2, pnl=700.0, hold_s=1136, fills_n=3, pnl_unit="USD")],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0},
+    "skipped": {},
+}
+ORACLES["generic/tv2_side_long_short_words.csv"] = {
+    # "Long" = buy, "Short" = sell: long +1, 1 h
+    "trades": [dict(symbol="AAA", dir="long", qty=1, pnl=1.0, hold_s=3600)],
+    "warnings": {},
+    "skipped": {},
+}
+ORACLES["generic/tv2_side_cover.csv"] = {
+    # "Short" = sell, "Cover" = buy: short +1, 1 h
+    "trades": [dict(symbol="AAA", dir="short", qty=1, pnl=1.0, hold_s=3600)],
+    "warnings": {},
+    "skipped": {},
+}
+ERRORS["errors/no_closed_skipped_sides.csv"] = ("E_NO_CLOSED_TRADES", None, None)  # message names the skipped rows

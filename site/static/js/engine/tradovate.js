@@ -6,7 +6,7 @@
 // documentation only (UNVERIFIED). The Account column is never read.
 // Mirrors parse_tradovate() in tests/reference/engine_ref.py.
 
-import { parseDate } from './csv.js';
+import { parseDate, parseNumber } from './csv.js';
 import { cell, reqNumber, skip, isEmptyRow } from './mt.js';
 import { sideLetter } from './generic.js';
 
@@ -16,6 +16,12 @@ export const CME_MULTIPLIERS = Object.freeze({
 });
 
 const RE_CONTRACT = /^([A-Z0-9]+?)[FGHJKMNQUVXZ][0-9]{1,2}$/;
+const PARTIAL_STATUSES = ['canceled', 'cancelled', 'expired'];
+
+function filledSome(raw, row) {
+  const v = parseNumber(raw, row, 'qty');
+  return v !== null && v !== 0;
+}
 
 export function productRoot(contract, product) {
   const p = product.trim().toUpperCase();
@@ -31,7 +37,14 @@ export function parseTradovate(rows, hi, m) {
   for (const r of rows.slice(hi + 1)) {
     if (isEmptyRow(r.cells)) continue;
     const row = r.row;
-    if (cell(r, m, 'status').trim().toLowerCase() !== 'filled') { skip(skipped, 'not_filled'); continue; }
+    // A Canceled or Expired order that filled part of its size is still a fill of that part
+    // (Tester D8: dropping it left the position open). UNVERIFIED: avgPrice is the average of
+    // the filled part, as for Filled orders.
+    const status = cell(r, m, 'status').trim().toLowerCase();
+    if (status !== 'filled' && !(PARTIAL_STATUSES.includes(status) && filledSome(cell(r, m, 'qty'), row))) {
+      skip(skipped, 'not_filled');
+      continue;
+    }
     const side = sideLetter(cell(r, m, 'side'));
     if (side === null) { skip(skipped, 'bad_side'); continue; }
     const contract = cell(r, m, 'contract');
