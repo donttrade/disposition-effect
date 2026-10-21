@@ -393,21 +393,52 @@ def read_toml(path, label):
         die(f"{label} ({path}) is not valid TOML: {e}")
 
 
-LOCAL_API_RE = re.compile(r"^http://(127\.0\.0\.1|localhost)(:\d+)?$")
+LOCAL_API_RE = re.compile(r"^http://(127\.0\.0\.1|localhost)(:\d{1,5})?$")
+_LABEL = r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?"
+# Origin only: https, a lowercase DNS name with a letters-only top-level domain (so no IPv4 or
+# IPv6 literal can match), an optional port, and nothing else: no path, query, space, quote,
+# semicolon or other CSP syntax can reach the CSP meta or the dt-api meta.
+PUBLIC_API_RE = re.compile(rf"https://((?:{_LABEL}\.)+[a-z]{{2,63}})(?::(\d{{1,5}}))?$")
+# Special-use names (RFC 2606, 6761, 6762, 7686, 8375) that are never a public host.
+RESERVED_TLDS = {"localhost", "local", "localdomain", "test", "example", "invalid", "internal", "lan", "home",
+                 "arpa", "onion", "corp", "intranet", "private"}
+RESERVED_DOMAINS = {"example.com", "example.net", "example.org"}
+
+
+def api_base_problem(api):
+    """Why [worker] api_base can't be used in a real paid build, or None."""
+    if not isinstance(api, str):
+        return "it is not a string"
+    m = PUBLIC_API_RE.fullmatch(api)
+    if not m:
+        return ("it must be exactly https://<public host name>[:port], lowercase, with no path, query, "
+                "spaces, quotes, semicolons or IP address")
+    host, port = m.group(1), m.group(2)
+    labels = host.split(".")
+    if labels[-1] in RESERVED_TLDS or ".".join(labels[-2:]) in RESERVED_DOMAINS:
+        return f"{host} is a reserved or local name, not a public host"
+    if port is not None and not 1 <= int(port) <= 65535:
+        return f"port {port} is out of range"
+    return None
 
 
 def check_api_base(api):
-    """Fix D12: the paid pages put [worker] api_base into their CSP connect-src and the dt-api
-    meta. A real paid build must use https. A loopback http address is allowed only in an
-    explicit local test build (DT_ALLOW_LOCAL_API=1, or DT_ALLOW_PLACEHOLDERS=1, which is
-    local-test-only already); anything else fails, whatever the environment."""
-    if api.startswith("https://") and "127.0.0.1" not in api and "localhost" not in api:
+    """D12 + D8: the paid pages put [worker] api_base into their CSP connect-src and the dt-api
+    meta, so a real paid build needs a public https origin (api_base_problem). A loopback http
+    address is allowed only with DT_ALLOW_LOCAL_API=1 (local test builds); that variable allows
+    nothing else, and no other variable allows it."""
+    why = api_base_problem(api)
+    if why is None:
         return
-    local_test = os.environ.get("DT_ALLOW_LOCAL_API") == "1" or os.environ.get("DT_ALLOW_PLACEHOLDERS") == "1"
-    if LOCAL_API_RE.match(api) and local_test:
+    if os.environ.get("DT_ALLOW_LOCAL_API") == "1" and isinstance(api, str) and LOCAL_API_RE.fullmatch(api):
+        warn(f"DT_ALLOW_LOCAL_API=1: api_base {api} is a local test address; this build is not for publishing")
         return
-    die(f"paid_report = true but [worker] api_base is {api!r}: a real build needs an https:// address "
-        "(a local http address only with DT_ALLOW_LOCAL_API=1, for local test builds)")
+    die(f"paid_report = true but [worker] api_base is {api!r}: {why} "
+        "(a loopback http address only with DT_ALLOW_LOCAL_API=1, for local test builds)")
+
+
+def warn(msg):
+    print(f"WARNING: {msg}", file=sys.stderr)
 
 
 def load_config():

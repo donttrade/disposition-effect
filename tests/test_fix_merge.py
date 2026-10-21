@@ -169,3 +169,37 @@ def test_d9_unknown_flag_fails(tmp_path):
     toml = _flag_toml(tmp_path, r"^analytics = false", "analytics = false\npaid_reprot = true")
     r, _ = build(tmp_path, "o", DT_SITE_TOML=toml)
     assert r.returncode == 1 and "paid_reprot is not a known flag" in r.stderr, r.stderr
+
+
+# ------------------------------------------------------------------ D8: api_base is a public https origin
+D8_BAD = ["https://", "https://[::1]:8787", "https://0.0.0.0", "https://192.168.0.10", "https://10.1.2.3:443",
+          "https://api.example.com; script-src *", "https://api.example.com/path?q", "https://api.donttrade.ca/",
+          "https://api.donttrade.ca 'unsafe-inline'", 'https://api.donttrade.ca"', "https://localhost:8787",
+          "https://api.localhost", "https://x.local", "https://api.test-fake.example", "https://api.example.com",
+          "HTTPS://api.donttrade.ca", "https://API.donttrade.ca", "https://api.donttrade.ca:99999", " https://api.donttrade.ca",
+          "http://api.donttrade.ca", "https://api.donttrade.ca\n"]
+
+
+@pytest.mark.parametrize("api", D8_BAD)
+def test_d8_bad_api_base_is_refused(api):
+    assert B.api_base_problem(api)
+
+
+@pytest.mark.parametrize("api", ["https://api.donttrade.ca", "https://dt-api.workers.dev", "https://api.donttrade.ca:8443"])
+def test_d8_public_https_origin_is_accepted(api):
+    assert B.api_base_problem(api) is None
+
+
+@pytest.mark.parametrize("api,env", [("https://api.example.com; script-src *", {}),
+                                     ("https://192.168.0.10", {"DT_ALLOW_LOCAL_API": "1"}),
+                                     ("https://", {"DT_ALLOW_PLACEHOLDERS": "1"}),
+                                     ("http://127.0.0.1:8787", {"DT_ALLOW_PLACEHOLDERS": "1"})])
+def test_d8_paid_build_fails_and_writes_nothing_into_csp(tmp_path, api, env):
+    # repro: failmodes.out — these passed the api check; the CSP got "…; script-src * 'unsafe-inline'"
+    from test_legal import build, toml_with
+    toml = toml_with(tmp_path, paid_report=True, trader_first_home=True)
+    src = re.sub(r'(?m)^api_base = "[^"]*"', 'api_base = ' + __import__("json").dumps(api), open(toml).read())
+    open(toml, "w").write(src)
+    r, out = build(tmp_path, "o", DT_SITE_TOML=toml, DT_PRIVATE_TOML=_priv(tmp_path), **env)
+    assert r.returncode == 1 and "api_base" in r.stderr, r.stderr
+    assert not (out / "report").exists()

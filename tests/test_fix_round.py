@@ -73,7 +73,7 @@ def test_prices_json_has_no_standard_price():
 
 def test_no_standard_price_wording_flag_off_or_on(built_site, tmp_path):
     r, on = build(tmp_path, "on", DT_SITE_TOML=toml_with(tmp_path, paid_report=True, trader_first_home=True),
-                  DT_PRIVATE_TOML=private_with(tmp_path), DT_ALLOW_PLACEHOLDERS="1")
+                  DT_PRIVATE_TOML=private_with(tmp_path), DT_ALLOW_PLACEHOLDERS="1", DT_ALLOW_LOCAL_API="1")
     assert r.returncode == 0, r.stderr
     for out in (built_site["out"], on):
         for p in out.rglob("*.html"):
