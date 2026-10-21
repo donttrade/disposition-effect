@@ -152,8 +152,7 @@ def test_outage_message(browser, stack):
     ctx.close()
 
 
-def test_restore_by_link_only(browser, stack):
-    """Restore-by-email is not in v1 (decision 20 Oct): the welcome link restores; no email form exists."""
+def test_restore_by_link_and_email(browser, stack):
     ctx = browser.new_context()
     page = ctx.new_page()
     sid = new_session(page, stack, "cs_test_restore0000001")
@@ -165,6 +164,10 @@ def test_restore_by_link_only(browser, stack):
     p2.goto(link)
     p2.wait_for_selector("#r-open", state="visible")
     assert "Access restored" in p2.inner_text("#r-status")
-    assert p2.locator("input[type=email], #r-form").count() == 0
+    p2.fill("#r-email", "buyer@example.com")
+    p2.click("#r-form button")
+    p2.locator("#r-sent", has_text="restore link").wait_for()  # a locator wait: the page CSP forbids eval
+    mail = json.loads(p2.request.get(stack["api"] + "/__test/mail").text())
+    assert mail and "#t=" in mail[-1]["text"] and "15 minutes" in mail[-1]["text"]
     fresh.close()
     ctx.close()

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Harvest check: every $ amount on today's live /pricing/ page must come from prices.json.
 
-An amount passes if it is a product's price_usd or standard_price_usd, or is computed
+An amount passes if it is a product's price_usd, or is computed
 from a rule in the file (the re-check is percent_of_engagement % of a firm price).
 Run against docs/pricing/index.html (the live page) or any built page.
 """
@@ -18,8 +18,6 @@ def allowed_amounts(prices, include_retired=False):
     out = set(prices["retired_amounts"]["amounts"]) if include_retired else set()
     for p in prices["products"]:
         out.add(p["price_usd"])
-        if p["standard_price_usd"] is not None:
-            out.add(p["standard_price_usd"])
     pct = prices["rules"]["recheck"]["percent_of_engagement"]
     for p in prices["products"]:
         if p["audience"] == "firm":

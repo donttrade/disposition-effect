@@ -20,6 +20,7 @@ Environment:
   DT_ALLOW_PLACEHOLDERS=1  allow private.toml placeholders (local test mode only)
   DT_BASELINE=path         use another URL baseline (tests plant a missing URL this way)
   DT_PRIVATE_TOML=path     read private.toml from elsewhere (flag-on test builds)
+  DT_ALLOW_LOCAL_API=1     allow a loopback http [worker] api_base in a paid build (local test mode only)
 """
 
 import json
@@ -256,12 +257,40 @@ PAID_APP_PATHS = ["/welcome/", "/restore/", "/report/"]  # noindex, and disallow
 PAID_ONLY_PATHS = PAID_APP_PATHS + PAID_ONLY_PATHS_FR
 
 
+# Exact-text copy fixes applied to passthrough pages until steps 28–29 lift them into templates.
+# docs/ stays untouched; the build fails if a sentence is no longer there exactly once.
+PASSTHROUGH_FIXES = {
+    # D9: "nothing leaves" is banned site-wide (it is false next to the paid pipeline).
+    os.path.join("code", "index.html"): [
+        ("Standard-library Python, no network calls; nothing leaves the machine it runs on.",
+         "Standard-library Python with no network calls: the script itself sends nothing anywhere."),
+    ],
+}
+
+
 class BuildError(Exception):
     pass
 
 
 def die(msg):
     raise BuildError(msg)
+
+
+LOCAL_API_RE = re.compile(r"^http://(127\.0\.0\.1|localhost)(:\d+)?$")
+
+
+def check_api_base(api):
+    """Fix D12: the paid pages put [worker] api_base into their CSP connect-src and the dt-api
+    meta. A real paid build must use https. A loopback http address is allowed only in an
+    explicit local test build (DT_ALLOW_LOCAL_API=1, or DT_ALLOW_PLACEHOLDERS=1, which is
+    local-test-only already); anything else fails, whatever the environment."""
+    if api.startswith("https://") and "127.0.0.1" not in api and "localhost" not in api:
+        return
+    local_test = os.environ.get("DT_ALLOW_LOCAL_API") == "1" or os.environ.get("DT_ALLOW_PLACEHOLDERS") == "1"
+    if LOCAL_API_RE.match(api) and local_test:
+        return
+    die(f"paid_report = true but [worker] api_base is {api!r}: a real build needs an https:// address "
+        "(a local http address only with DT_ALLOW_LOCAL_API=1, for local test builds)")
 
 
 def load_config():
@@ -293,6 +322,8 @@ def load_config():
             if PLACEHOLDER_RE.search(private[k]) and os.environ.get("DT_ALLOW_PLACEHOLDERS") != "1":
                 die(f"private.toml {k} still holds a placeholder; fill it in "
                     "(or set DT_ALLOW_PLACEHOLDERS=1 for a local test build only)")
+    if flags["paid_report"]:
+        check_api_base(cfg["worker"]["api_base"])
     if flags["pilot_checkout"]:
         pilot = next(p for p in prices["products"] if p["id"] == "pilot")
         if not pilot["stripe_link_live"]:
@@ -536,6 +567,18 @@ def build():
 
     # 1. passthrough of every docs/ file a template does not own yet
     copy_tree_sorted(DOCS, out, skip=lambda rel: rel in owned)
+    for rel, fixes in sorted(PASSTHROUGH_FIXES.items()):
+        if rel in owned:
+            continue
+        fp = os.path.join(out, rel)
+        with open(fp, encoding="utf-8") as f:
+            text = f.read()
+        for old, new in fixes:
+            if text.count(old) != 1:
+                die(f"passthrough fix: {rel} no longer holds this sentence exactly once: {old!r}")
+            text = text.replace(old, new)
+        with open(fp, "w", encoding="utf-8", newline="") as f:
+            f.write(text)
     # 2. static assets of the new design
     copy_tree_sorted(os.path.join(SITE, "static"), os.path.join(out, "static"),
                      skip=(None if flags["paid_report"] else (lambda rel: rel.startswith("js" + os.sep + "paid"))))

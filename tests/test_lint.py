@@ -51,7 +51,8 @@ def test_planted_violation_fails(html, rule):
 
 def test_claims_flip_with_flags():
     assert "claim:no_upload" in rules("<p>Nothing leaves your computer.</p>", paid=True)
-    assert "claim:no_upload" not in rules("<p>Nothing leaves your computer.</p>", paid=False)
+    # fix D9 (21 Oct): these claims are false next to the paid pipeline, so they fail with the flag off too
+    assert "claim:no_upload" in rules("<p>Nothing leaves your computer.</p>", paid=False)
     assert "claim:no_analytics" in rules("<p>This site runs no analytics.</p>", analytics=True)
     assert "flag:seller_identity" in rules("<p>Jane Q Seller</p>", priv=["Jane Q Seller"])
 

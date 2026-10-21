@@ -7,6 +7,7 @@
 // tab; the wording only describes past trades (NON-ADVISER A3).
 
 import { runFile } from '../engine/index.js';
+import { ics, RETEST_LINE } from './retest-copy.js';
 import { pgrPlrCounts } from '../engine/pgr.js';
 import { stripRows } from './strip.js';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js';
@@ -141,16 +142,7 @@ function habitSection(h, unit) {
   return sec;
 }
 
-export function ics(now = new Date()) {
-  // A calendar reminder 30 days out for the one included re-test. Built locally.
-  const d = new Date(now.getTime() + 30 * 86400000);
-  const ymd = d.toISOString().slice(0, 10).replace(/-/g, '');
-  const stamp = now.toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z';
-  return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//donttrade//habit report//EN', 'BEGIN:VEVENT',
-    `UID:retest-${stamp}@donttrade.ca`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${ymd}`,
-    'SUMMARY:donttrade re-test', 'DESCRIPTION:Export your trades again and run your included re-test at https://donttrade.ca/report/',
-    'END:VEVENT', 'END:VCALENDAR', ''].join('\r\n');
-}
+export { ics };  // moved to retest-copy.js with the re-test wording (fix D2)
 
 function download(name, type, text) {
   const a = el('a', { download: name });
@@ -218,7 +210,7 @@ export function renderReport(report, out, meta) {
   const body = 'I ran a donttrade habit report on my own trades. Your firm can measure the same on its own records: https://donttrade.ca/for-firms/?ref=report';
   const mail = el('a', { class: 'btn btn-secondary', href: 'mailto:?subject=' + encodeURIComponent('A trading-habit measurement for your firm') + '&body=' + encodeURIComponent(body), text: 'Send to your firm' });
   out.append(el('section', { class: 'section no-print' }, el('h2', { text: 'Next' }),
-    el('p', { text: 'Your purchase includes one re-test on the same account 30 to 60 days from now.' }),
+    el('p', { text: RETEST_LINE }),
     el('p', {}, ics_, ' ', print, ' ', mail)));
   out.append(el('p', { class: 'small muted', text: `Engine ${report.engine_commit} · rule library ${report.rule_library_version}.` }));
 }
@@ -235,7 +227,7 @@ function status(msg, kind = '') {
 }
 
 async function run(file) {
-  if (!token) { status('No access found on this device. Open the restore link or restore file you saved after payment.', 'error'); return; }
+  if (!token) { status('No access found on this device. Open the restore link or restore file you saved after paying.', 'error'); return; }
   const payload = decodeToken(token);
   if (!payload) { status('This access link is damaged. Use your restore link.', 'error'); return; }
   status('Reading your file in this tab…');
