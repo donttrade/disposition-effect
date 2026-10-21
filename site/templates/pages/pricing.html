@@ -29,7 +29,7 @@
       </tbody>
     </table>
     </div>
-    <p class="small muted">{{ pilot.name }} (called “{{ pilot.former_name }}” before 22 Oct 2026). The disposition effect is selling winning positions more readily than losing ones; PGR and PLR are the shares of winning and losing positions that were sold. <a href="/glossary/">Glossary</a></p>
+    <p class="small muted">{{ pilot.name }} (called “{{ pilot.former_name }}” before {{ legal.launch_human }}). The disposition effect is selling winning positions more readily than losing ones; PGR and PLR are the shares of winning and losing positions that were sold. <a href="/glossary/">Glossary</a></p>
     <p><strong>Quarterly re-check:</strong> the same measurement on a fresh extract, at {{ pct }}% of the price of the engagement being repeated (for example {{ (ex.price_usd * pct / 100)|usd }} for a {{ ex.name }}), payable in advance, delivered in {{ prices.rules.recheck.turnaround_days }} business days.</p>
     <p class="btn-row"><a class="btn" href="/start/?product=pilot#firm">Start a {{ pilot.name }} — {{ pilot.price_usd|usd }} USD</a> <a class="btn btn-secondary" href="/for-firms/#what-it-costs">Full detail for firms</a></p>
   </section>
@@ -133,7 +133,7 @@
     <table>
       <thead><tr><th scope="col">Date</th><th scope="col">Change</th></tr></thead>
       <tbody>
-        <tr><td>22 Oct 2026</td><td>The first firm engagement is renamed {{ pilot.name }} (called “{{ pilot.former_name }}” before 22 Oct 2026), at the same price. The trader prices once listed for after the founding offer are withdrawn; nothing had been sold at them. No price charged today changed.</td></tr>
+        <tr><td>{{ legal.launch_human }}</td><td>The first firm engagement is renamed {{ pilot.name }} (called “{{ pilot.former_name }}” before {{ legal.launch_human }}), at the same price. The trader prices once listed for after the founding offer are withdrawn; nothing had been sold at them. No price charged today changed.</td></tr>
         <tr><td>17 Oct 2026</td><td>Claims substantiation test added, at the existing engagements and prices. No price changed.</td></tr>
         <tr><td>17 Oct 2026</td><td>Copy-leader persistence test for copy-trading platforms added, at the existing engagements and prices. No price changed.</td></tr>
         <tr><td>16 Oct 2026</td><td>Founding price for the first 100 on the trader waitlist added.</td></tr>

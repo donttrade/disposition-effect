@@ -23,6 +23,7 @@ Environment:
   DT_BASELINE=path         use another URL baseline (tests plant a missing URL this way)
   DT_PRIVATE_TOML=path     read private.toml from elsewhere (flag-on test builds)
   DT_PRICES_JSON=path      read prices.json from elsewhere (test builds plant a test link)
+  DT_REQUIRE_LAUNCH_DATE=1 fail if [legal] launch_date is empty (./site/run.sh bundle sets it)
 Local-test escapes (ESCAPES): each opens ONE guard, prints a WARNING, and is refused when
 [stripe] mode = "live". A paid build with well-formed values needs none of them.
   DT_ALLOW_PLACEHOLDERS=1    allow private.toml values that look like placeholders
@@ -628,8 +629,8 @@ SITE_SCHEMA = {
     "stripe": ({"mode"}, {"mode"}),
     "forms": ({"endpoint", "firm_key", "trader_key", "redirect_firm", "redirect_trader"}, None),
     "worker": ({"api_base"}, {"api_base"}),
-    "legal": ({"terms_version", "disclaimer_short", "disclaimer_long"},
-              {"terms_version", "disclaimer_short", "disclaimer_long", "show_seller_for_pilot"}),
+    "legal": ({"launch_date", "disclaimer_short", "disclaimer_long"},
+              {"launch_date", "disclaimer_short", "disclaimer_long", "show_seller_for_pilot"}),
 }  # table: (required keys, every allowed key or None when the table is open)
 
 
@@ -738,6 +739,38 @@ def check_stripe_link(link, mode, what):
             f"{'test_' if mode == 'test' else ''}…)")
 
 
+MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+
+def set_launch_date(legal, toml_path, today=None):
+    """Manager C3: [legal] launch_date (YYYY-MM-DD; empty = the build date) dates every launch
+    statement. Sets legal.terms_version (ISO, the terms/privacy version) and legal.launch_human
+    ("23 Oct 2026"). A future date fails: no page may state a date that has not come yet.
+    DT_REQUIRE_LAUNCH_DATE=1 (./site/run.sh bundle) refuses an empty one."""
+    import datetime as dt
+    today = today or dt.date.today()
+    raw = legal.get("launch_date")
+    if not isinstance(raw, str):
+        die(f"[legal] launch_date must be a string, YYYY-MM-DD or empty ({toml_path})")
+    if raw == "":
+        if os.environ.get("DT_REQUIRE_LAUNCH_DATE") == "1":
+            die(f"[legal] launch_date is empty: set it to the push day (YYYY-MM-DD) before bundling ({toml_path})")
+        d = today
+    else:
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", raw):
+            die(f"[legal] launch_date {raw!r} is not YYYY-MM-DD ({toml_path})")
+        try:
+            d = dt.date.fromisoformat(raw)
+        except ValueError:
+            die(f"[legal] launch_date {raw!r} is not a real date ({toml_path})")
+        if d > today:
+            die(f"[legal] launch_date {raw} is after the build date {today.isoformat()}: pages would state a "
+                f"date that has not come yet ({toml_path})")
+    legal["terms_version"] = d.isoformat()
+    legal["launch_human"] = f"{d.day} {MONTHS[d.month - 1]} {d.year}"
+    return d
+
+
 def load_config():
     toml_path = os.environ.get("DT_SITE_TOML") or os.path.join(SITE, "config", "site.toml")
     cfg = read_toml(toml_path, "site.toml")
@@ -747,6 +780,7 @@ def load_config():
     with open(prices_path, encoding="utf-8") as f:
         prices = json.load(f)
     check_schema(cfg, toml_path)
+    set_launch_date(cfg["legal"], toml_path)
     flags = cfg["flags"]
     check_flags(flags, toml_path)
     if flags["trader_first_home"] != flags["paid_report"]:

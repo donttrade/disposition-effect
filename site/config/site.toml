@@ -40,7 +40,12 @@ api_base = "http://127.0.0.1:8787"  # local dev server only; no production value
 # no seller name while paid_report is off, so: false until the owner decides (Tester D2).
 # paid_report always shows them (consumer sale, O. Reg. 17/05 s. 32).
 show_seller_for_pilot = false
-terms_version = "2026-10-23"  # the version date printed on /terms/ and /privacy/ (and the French pages); change it with every legal edit
+# The push day, YYYY-MM-DD (Manager C3). ONE setting for every launch-dated statement: the terms and
+# privacy version (/terms/, /privacy/, the French pages), "Pilot (called 'Trial' before <date>)" and
+# the price-history row of the launch changes. Empty = the build date, for builds before launch.
+# Set it on push day and keep it: a date after the build date fails the build, and
+# ./site/run.sh bundle refuses an empty one. Change it again with any later legal edit.
+launch_date = ""
 # Verbatim from NON-ADVISER-DESIGN-AND-AUTORENEW A3 (the only approved wording).
 disclaimer_short = "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results."
 disclaimer_long = "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results."

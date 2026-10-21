@@ -40,6 +40,7 @@ def _phrase_re(p):
 
 WORDS = [(cat, w, _phrase_re(w)) for cat, ws in RULES["words"].items() for w in ws]
 ALLOW = [_phrase_re(p) for p in RULES["allow"]["phrases"]]
+ALLOW += [re.compile(p, re.IGNORECASE) for p in RULES["allow"].get("patterns", [])]
 SECRETS = [re.compile(p) for p in RULES["secrets"]["patterns"]]
 RESTORE_EMAIL = [re.compile(p, re.IGNORECASE) for p in RULES["claims"]["restore_email"]]
 RESTORE_EMAIL_ALLOW = [re.compile(re.escape(p), re.IGNORECASE) for p in RULES["claims"]["restore_email_allow"]]

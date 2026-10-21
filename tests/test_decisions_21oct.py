@@ -239,9 +239,9 @@ def test_refund_clause_is_pilot_checkout_only(builds, built_site):
 
 
 def test_terms_version_was_bumped_for_these_legal_edits(built_site):
-    import tomllib
-    v = tomllib.load(open(os.path.join(REPO, "site", "config", "site.toml"), "rb"))["legal"]["terms_version"]
-    assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", v) and v > "2026-10-22"   # 2026-10-22 was the version before 21 Oct
+    # Manager C3: the version is [legal] launch_date (empty = the build date), never a future date
+    from test_legal import TERMS_VERSION as v
+    assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", v)
     for path in ("/terms/", "/privacy/"):
         assert f"Version {v}." in _page(built_site["out"], path), path
 
