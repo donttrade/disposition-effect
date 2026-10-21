@@ -2,11 +2,16 @@
  "noise": {
   "checks": [
    {
+    "extreme": null,
+    "guard": null,
     "label": "distinguishable from noise",
     "method": "bootstrap-t",
     "n_a": 35,
     "n_b": null,
+    "n_needed": null,
     "p": 9.999000099990002e-05,
+    "p_unguarded": null,
+    "skew": 0.0,
     "stat": "expectancy",
     "value": 5.0
    },
