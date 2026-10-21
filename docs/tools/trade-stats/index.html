@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src &#39;self&#39;; script-src &#39;self&#39;; style-src &#39;self&#39;; img-src &#39;self&#39; data:; font-src &#39;self&#39;; connect-src &#39;none&#39;; worker-src &#39;self&#39;; form-action &#39;self&#39; https://api.web3forms.com; base-uri &#39;none&#39;; object-src &#39;none&#39;">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16181C" media="(prefers-color-scheme: dark)">
+<title>Free MT5 Report Analyzer: Trade Stats From Your File</title>
+<meta name="description" content="Drop your MT5, MT4, IBKR or Tradovate file and get profit factor, expectancy, drawdown and streaks. Runs in your browser.">
+<link rel="canonical" href="https://donttrade.ca/tools/trade-stats/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="donttrade">
+<meta property="og:title" content="Free MT5 Report Analyzer: Trade Stats From Your File">
+<meta property="og:description" content="Drop your MT5, MT4, IBKR or Tradovate file and get profit factor, expectancy, drawdown and streaks. Runs in your browser.">
+<meta property="og:url" content="https://donttrade.ca/tools/trade-stats/">
+<meta property="og:image" content="https://donttrade.ca/assets/og/default.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Free MT5 Report Analyzer: Trade Stats From Your File">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/static/css/site.css">
+<script src="/static/js/theme.js"></script>
+<script src="/static/js/nav.js" defer></script>
+<script src="/static/js/tools/trade-stats.js" type="module"></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "item": "https://donttrade.ca/tools/", "name": "Free tools", "position": 2}, {"@type": "ListItem", "name": "Trade stats from your own trade file", "position": 3}]}, {"@id": "https://donttrade.ca/tools/trade-stats/#app", "@type": "WebApplication", "applicationCategory": "FinanceApplication", "browserRequirements": "Requires JavaScript", "description": "Drop your MT5, MT4, IBKR or Tradovate file and get profit factor, expectancy, drawdown and streaks. Runs in your browser.", "isAccessibleForFree": true, "name": "Trade stats from your own trade file", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "operatingSystem": "Any (runs in a web browser)", "publisher": {"@id": "https://donttrade.ca/#org"}, "url": "https://donttrade.ca/tools/trade-stats/"}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. The file is read and analysed by code running in this browser tab, and the page’s security policy blocks it from making network requests. Open your browser’s developer tools, choose the Network tab, and watch it stay empty during the analysis."}, "name": "Is my trade file uploaded?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "MT5 and MT4 history reports saved as HTML, IBKR Flex Query trade files and Tradovate order exports (all in beta), and a CSV with one row per fill or per round trip. If your platform is not listed, copy your trades into the CSV template above."}, "name": "Which files does it read?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Profit factor is gross profit divided by gross loss; above 1 means the trades in the file made more than they lost. There is no universal good number, and a high figure from a small sample is often luck. If there are no losing trades the page says so instead of printing a number."}, "name": "What is a good profit factor?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "The tool counts a trade from flat to flat on each symbol, takes fees off the result when the file includes them, and leaves out positions still open at the end of the file. A note on the results says when rows were skipped or hedged positions were found."}, "name": "Why do my numbers differ from my platform’s report?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. It measures your own past trades and does not recommend any security, trade, size or exit. Past results do not predict future results."}, "name": "Is this investment advice?"}]}]}</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header"><div class="wrap">
+  <a class="brand" href="/">donttrade</a>
+  <nav class="site-nav" aria-label="Main"><ul class="nav-row">
+    <li><a href="/for-firms/">For firms</a></li>
+    <li><a href="/for-traders/">For traders</a></li>
+    <li><a href="/tools/">Free tools</a></li>
+    <li><a href="/pricing/">Pricing</a></li>
+    <li><a href="/research/">Research</a></li>
+    <li><a href="/about/">About</a></li>
+  </ul>
+  <details class="nav-menu" data-nav-menu>
+    <summary><svg class="i-menu" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg><svg class="i-close" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>Menu</summary>
+    <ul class="nav-panel">
+    <li><a href="/for-firms/">For firms</a></li>
+    <li><a href="/for-traders/">For traders</a></li>
+    <li><a href="/tools/">Free tools</a></li>
+    <li><a href="/pricing/">Pricing</a></li>
+    <li><a href="/research/">Research</a></li>
+    <li><a href="/about/">About</a></li>
+    </ul>
+  </details></nav>
+  <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" hidden><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg><span class="tt-label">Dark mode</span></button>
+</div></header>
+
+<main id="main">
+
+<div class="wrap">
+  <div class="grid">
+    <div class="span-8">
+      <p class="crumb small"><a href="/tools/">Free tools</a></p>
+      <h1>Trade stats from your own trade file</h1>
+      <p class="lede">Drop the trade file your platform already exports and get the core numbers in seconds: net result, win rate, average win and loss, profit factor, mean result per trade, largest drawdown, and your longest winning and losing streaks. It reads MT5 and MT4 HTML reports, IBKR Flex Query trade files and Tradovate order exports (all three in beta), and a plain CSV template.</p>
+      <p>Everything is calculated inside this browser tab. The page’s security policy blocks every outgoing network request, so your file is not uploaded anywhere; you can watch your browser’s network tab to check. A ‘real or noise’ check for three of the numbers is coming soon. No sign-up, no cookies, no ads.</p>
+    </div>
+  </div>
+  <p class="disclaimer">donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.</p>
+
+
+  <section class="tool" aria-labelledby="ts-tool-h">
+    <h2 id="ts-tool-h">Your file</h2>
+    <p id="ts-js-needed" class="notice notice-caution">This tool runs in your browser and needs JavaScript turned on.</p>
+    <div id="ts-controls" hidden>
+      <div class="dropzone" id="ts-drop">
+        <p><strong>Drop a trade file here</strong>, or choose one from your computer.</p>
+        <p class="small muted">MT5 or MT4 report (.htm, .html), IBKR Flex Query (.csv), Tradovate Orders (.csv), or the CSV template. Up to 50 MB and 200,000 rows.</p>
+        <div class="file-pick">
+          <label for="ts-file">Your trade file</label>
+          <input id="ts-file" type="file" accept=".csv,.htm,.html,.txt">
+        </div>
+        <p class="btn-row"><span class="muted">No file to hand?</span> <button class="btn btn-secondary" id="ts-sample-btn" type="button">Try a sample file</button></p>
+        <p class="small muted">The sample is synthetic: 160 made-up trades on three fictional symbols, not a real trader. <a href="/static/samples/demo-trades.csv" download>Download the sample</a> to see the CSV template.</p>
+      </div>
+      <div class="field">
+        <label for="ts-balance">Starting balance (optional)</label>
+        <span class="hint" id="ts-balance-hint">Only used to show the largest drawdown as a % of the account. Digits and a decimal point, for example 25000.</span>
+        <input id="ts-balance" type="text" inputmode="decimal" autocomplete="off" aria-describedby="ts-balance-hint ts-balance-err">
+        <p class="error" id="ts-balance-err" hidden></p>
+      </div>
+    </div>
+    <p id="ts-status" class="muted" role="status" hidden></p>
+    <p id="ts-progress" class="progress-line small muted" hidden><progress aria-label="Reading your file"></progress> <span data-elapsed aria-hidden="true"></span></p>
+    <div id="ts-error" class="notice notice-error" role="alert" tabindex="-1" hidden></div>
+  </section>
+
+  <div id="ts-out" class="tool-out" data-free-badges="false" hidden></div>
+
+  <aside id="ts-teaser" class="notice notice-gap teaser" aria-labelledby="ts-teaser-h" hidden data-on-sale="false">
+    <strong id="ts-teaser-h">What the habit report will add</strong>
+    <p id="ts-teaser-text"></p>
+    <p><a class="btn" href="/for-traders/#waitlist">Join the waitlist — $39 founding price</a></p>
+    <p class="small">Not on sale yet: nothing is charged now. The free tools stay free.</p>
+  </aside>
+
+  <section class="section" aria-labelledby="files-h">
+    <h2 id="files-h">Which files it reads</h2>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Supported files">
+    <table>
+      <thead><tr><th scope="col">Platform</th><th scope="col">What to export</th><th scope="col">Status</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">MetaTrader 5</th><td>The account history report, saved as HTML (History tab, right-click, Report).</td><td>Beta</td></tr>
+        <tr><th scope="row">MetaTrader 4</th><td>The account history statement, saved as a detailed report (HTML).</td><td>Beta</td></tr>
+        <tr><th scope="row">Interactive Brokers</th><td>A Flex Query with the Trades section at execution level, as CSV.</td><td>Beta</td></tr>
+        <tr><th scope="row">Tradovate</th><td>The Orders export, as CSV. Only filled orders are counted.</td><td>Beta</td></tr>
+        <tr><th scope="row">Any other platform</th><td>The CSV template below.</td><td>Ready</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="small muted">Beta: built from each platform’s public documentation, not yet checked against a real export. The page says so on the results, and you can check a few trades by hand.</p>
+    <h3 id="template">The CSV template</h3>
+    <p>One row per fill, with these columns in any order: <code>Date</code> (yyyy-mm-dd), <code>Time</code> (hh:mm:ss), <code>Symbol</code>, <code>Side</code> (Buy or Sell), <code>Quantity</code>, <code>Price</code>. Optional: <code>Currency</code> and <code>Fees</code>. A file with one row per round trip (open time, close time, symbol, direction, volume, open and close price) is read too.</p>
+  </section>
+
+  <section class="section" aria-labelledby="count-h">
+    <h2 id="count-h">How the numbers are counted</h2>
+    <ul>
+      <li>A trade runs from flat to flat on each symbol: it opens when your position leaves zero and closes when it returns to zero. A fill that crosses zero closes one trade and opens the opposite one.</li>
+      <li>Results are net of fees when the file has them. Positions still open at the end of the file are left out, and the page says how many.</li>
+      <li>Times are read exactly as written in the file, so results are the same in every time zone.</li>
+      <li>Drawdown is measured on closed-trade equity: the largest fall from a previous high after any trade closed.</li>
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="faq-h">
+    <h2 id="faq-h">Questions</h2>
+    <details><summary>Is my trade file uploaded?</summary><p>No. The file is read and analysed by code running in this browser tab, and the page’s security policy blocks it from making network requests. Open your browser’s developer tools, choose the Network tab, and watch it stay empty during the analysis.</p></details>
+    <details><summary>Which files does it read?</summary><p>MT5 and MT4 history reports saved as HTML, IBKR Flex Query trade files and Tradovate order exports (all in beta), and a CSV with one row per fill or per round trip. If your platform is not listed, copy your trades into the CSV template above.</p></details>
+    <details><summary>What is a good profit factor?</summary><p>Profit factor is gross profit divided by gross loss; above 1 means the trades in the file made more than they lost. There is no universal good number, and a high figure from a small sample is often luck. If there are no losing trades the page says so instead of printing a number.</p></details>
+    <details><summary>Why do my numbers differ from my platform’s report?</summary><p>The tool counts a trade from flat to flat on each symbol, takes fees off the result when the file includes them, and leaves out positions still open at the end of the file. A note on the results says when rows were skipped or hedged positions were found.</p></details>
+    <details><summary>Is this investment advice?</summary><p>No. It measures your own past trades and does not recommend any security, trade, size or exit. Past results do not predict future results.</p></details>
+  </section>
+
+  <section class="section" aria-labelledby="more-h">
+    <h2 id="more-h">Related</h2>
+    <ul>
+      <li><a href="/tools/prop-challenge-simulator/">Prop-firm challenge simulator</a>: replay a challenge from your own trading days.</li>
+      <li><a href="/tools/lot-size-calculator/">Lot size calculator</a>: the arithmetic from balance, risk amount and stop distance.</li>
+      <li><a href="/tools/disposition-calculator/">Disposition-effect calculator</a>: do you sell winners sooner than losers?</li>
+      <li><a href="/for-traders/">The habit report for traders</a> (waitlist).</li>
+    </ul>
+  </section>
+  <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR and Tradovate are trademarks of their owners. donttrade is not affiliated with any of them.</p>
+</div>
+<script type="text/csv" id="ts-sample">
+Date,Time,Symbol,Side,Quantity,Price,Currency,Fees
+2026-06-01,10:09:00,DEMO-C,Sell,20,23.50,USD,1.00
+2026-06-01,10:29:25,DEMO-C,Buy,20,23.16,USD,1.00
+2026-06-01,10:53:25,DEMO-A,Sell,20,48.00,USD,1.00
+2026-06-01,11:33:51,DEMO-A,Buy,20,48.33,USD,1.00
+2026-06-02,09:51:00,DEMO-A,Buy,25,48.17,USD,1.00
+2026-06-02,10:30:03,DEMO-A,Sell,25,47.85,USD,1.00
+2026-06-03,09:45:00,DEMO-C,Sell,20,23.06,USD,1.00
+2026-06-03,11:21:09,DEMO-C,Buy,20,23.36,USD,1.00
+2026-06-03,12:00:09,DEMO-A,Buy,20,47.94,USD,1.00
+2026-06-03,12:49:33,DEMO-A,Sell,20,47.12,USD,1.00
+2026-06-04,09:35:00,DEMO-B,Sell,50,112.00,USD,1.00
+2026-06-04,10:20:51,DEMO-B,Buy,50,110.12,USD,1.00
+2026-06-05,10:08:00,DEMO-C,Buy,50,23.28,USD,1.00
+2026-06-05,10:25:17,DEMO-C,Sell,50,23.44,USD,1.00
+2026-06-08,10:08:00,DEMO-C,Buy,20,23.52,USD,1.00
+2026-06-08,11:45:13,DEMO-C,Sell,20,23.17,USD,1.00
+2026-06-08,11:55:13,DEMO-C,Buy,40,23.08,USD,1.00
+2026-06-08,12:34:10,DEMO-C,Sell,40,23.56,USD,1.00
+2026-06-09,09:57:00,DEMO-C,Sell,30,23.62,USD,1.00
+2026-06-09,10:17:32,DEMO-C,Buy,30,23.27,USD,1.00
+2026-06-10,09:38:00,DEMO-B,Sell,25,109.75,USD,1.00
+2026-06-10,10:07:45,DEMO-B,Buy,25,108.21,USD,1.00
+2026-06-11,09:55:00,DEMO-C,Buy,25,23.25,USD,1.00
+2026-06-11,10:17:00,DEMO-C,Sell,25,23.61,USD,1.00
+2026-06-12,10:15:00,DEMO-C,Buy,25,23.66,USD,1.00
+2026-06-12,10:25:52,DEMO-C,Sell,25,24.10,USD,1.00
+2026-06-15,10:01:00,DEMO-C,Buy,50,24.11,USD,1.00
+2026-06-15,10:40:58,DEMO-C,Sell,50,24.37,USD,1.00
+2026-06-15,10:57:58,DEMO-A,Sell,30,47.09,USD,1.00
+2026-06-15,12:12:56,DEMO-A,Buy,30,47.68,USD,1.00
+2026-06-16,09:50:00,DEMO-B,Sell,50,107.85,USD,1.00
+2026-06-16,10:03:00,DEMO-B,Buy,50,106.96,USD,1.00
+2026-06-17,09:45:00,DEMO-C,Buy,30,24.33,USD,1.00
+2026-06-17,09:54:27,DEMO-C,Sell,30,24.80,USD,1.00
+2026-06-18,10:15:00,DEMO-B,Buy,25,107.21,USD,1.00
+2026-06-18,11:00:21,DEMO-B,Sell,25,108.95,USD,1.00
+2026-06-18,11:19:21,DEMO-C,Sell,40,24.75,USD,1.00
+2026-06-18,11:54:45,DEMO-C,Buy,40,24.50,USD,1.00
+2026-06-19,09:39:00,DEMO-C,Buy,30,24.47,USD,1.00
+2026-06-19,11:00:55,DEMO-C,Sell,30,24.11,USD,1.00
+2026-06-22,09:42:00,DEMO-C,Buy,20,24.13,USD,1.00
+2026-06-22,10:23:36,DEMO-C,Sell,20,24.63,USD,1.00
+2026-06-23,10:08:00,DEMO-C,Buy,50,24.55,USD,1.00
+2026-06-23,10:40:07,DEMO-C,Sell,50,24.11,USD,1.00
+2026-06-24,09:52:00,DEMO-B,Buy,30,108.61,USD,1.00
+2026-06-24,10:15:32,DEMO-B,Sell,30,110.40,USD,1.00
+2026-06-25,09:49:00,DEMO-A,Sell,30,47.76,USD,1.00
+2026-06-25,10:26:28,DEMO-A,Buy,30,47.29,USD,1.00
+2026-06-25,11:14:28,DEMO-C,Buy,30,24.13,USD,1.00
+2026-06-25,11:31:54,DEMO-C,Sell,30,24.40,USD,1.00
+2026-06-26,09:41:00,DEMO-C,Buy,30,24.31,USD,1.00
+2026-06-26,10:09:25,DEMO-C,Sell,30,24.53,USD,1.00
+2026-06-29,09:59:00,DEMO-B,Sell,40,110.56,USD,1.00
+2026-06-29,10:06:09,DEMO-B,Buy,40,108.61,USD,1.00
+2026-06-29,10:52:09,DEMO-A,Buy,50,47.42,USD,1.00
+2026-06-29,11:33:14,DEMO-A,Sell,50,48.36,USD,1.00
+2026-06-30,10:12:00,DEMO-C,Sell,30,24.62,USD,1.00
+2026-06-30,10:25:21,DEMO-C,Buy,30,24.43,USD,1.00
+2026-06-30,10:46:21,DEMO-B,Sell,50,108.89,USD,1.00
+2026-06-30,11:22:34,DEMO-B,Buy,50,107.87,USD,1.00
+2026-07-01,10:00:00,DEMO-C,Buy,50,24.39,USD,1.00
+2026-07-01,12:23:13,DEMO-C,Sell,50,24.06,USD,1.00
+2026-07-02,09:57:00,DEMO-C,Buy,40,23.99,USD,1.00
+2026-07-02,10:07:10,DEMO-C,Sell,40,24.45,USD,1.00
+2026-07-03,09:46:00,DEMO-A,Buy,40,48.19,USD,1.00
+2026-07-03,10:30:06,DEMO-A,Sell,40,47.37,USD,1.00
+2026-07-03,10:56:06,DEMO-A,Buy,40,47.47,USD,1.00
+2026-07-03,11:36:34,DEMO-A,Sell,40,46.89,USD,1.00
+2026-07-06,09:35:00,DEMO-C,Buy,25,24.35,USD,1.00
+2026-07-06,09:59:28,DEMO-C,Sell,25,24.89,USD,1.00
+2026-07-07,10:10:00,DEMO-C,Buy,40,24.90,USD,1.00
+2026-07-07,10:55:05,DEMO-C,Sell,40,25.40,USD,1.00
+2026-07-07,11:25:05,DEMO-A,Buy,25,46.80,USD,1.00
+2026-07-07,14:04:40,DEMO-A,Sell,25,46.40,USD,1.00
+2026-07-08,10:14:00,DEMO-C,Buy,50,25.32,USD,1.00
+2026-07-08,12:44:17,DEMO-C,Sell,50,25.03,USD,1.00
+2026-07-09,09:53:00,DEMO-A,Buy,50,46.23,USD,1.00
+2026-07-09,10:55:31,DEMO-A,Sell,50,45.85,USD,1.00
+2026-07-09,11:16:31,DEMO-B,Buy,50,108.26,USD,1.00
+2026-07-09,11:35:28,DEMO-B,Sell,50,109.93,USD,1.00
+2026-07-10,10:02:00,DEMO-B,Buy,40,109.81,USD,1.00
+2026-07-10,10:52:05,DEMO-B,Sell,40,109.12,USD,1.00
+2026-07-10,11:23:05,DEMO-A,Buy,50,46.02,USD,1.00
+2026-07-10,13:10:52,DEMO-A,Sell,50,45.58,USD,1.00
+2026-07-13,09:52:00,DEMO-A,Sell,25,45.75,USD,1.00
+2026-07-13,12:09:33,DEMO-A,Buy,25,46.23,USD,1.00
+2026-07-13,12:45:33,DEMO-A,Buy,50,46.33,USD,1.00
+2026-07-13,12:52:31,DEMO-A,Sell,50,47.40,USD,1.00
+2026-07-14,09:39:00,DEMO-A,Buy,50,47.50,USD,1.00
+2026-07-14,10:18:58,DEMO-A,Sell,50,48.21,USD,1.00
+2026-07-14,10:56:58,DEMO-C,Sell,40,25.12,USD,1.00
+2026-07-14,11:48:02,DEMO-C,Buy,40,25.28,USD,1.00
+2026-07-15,10:03:00,DEMO-B,Sell,25,108.74,USD,1.00
+2026-07-15,12:41:26,DEMO-B,Buy,25,110.05,USD,1.00
+2026-07-16,10:14:00,DEMO-A,Sell,25,48.14,USD,1.00
+2026-07-16,10:53:00,DEMO-A,Buy,25,47.65,USD,1.00
+2026-07-17,09:45:00,DEMO-B,Sell,50,109.80,USD,1.00
+2026-07-17,11:49:34,DEMO-B,Buy,50,111.12,USD,1.00
+2026-07-17,12:28:34,DEMO-A,Buy,20,47.73,USD,1.00
+2026-07-17,13:26:52,DEMO-A,Sell,20,46.79,USD,1.00
+2026-07-20,09:42:00,DEMO-A,Buy,40,46.69,USD,1.00
+2026-07-20,10:29:24,DEMO-A,Sell,40,46.04,USD,1.00
+2026-07-20,10:44:24,DEMO-A,Buy,20,45.89,USD,1.00
+2026-07-20,13:05:00,DEMO-A,Sell,20,45.47,USD,1.00
+2026-07-21,10:06:00,DEMO-C,Buy,25,25.36,USD,1.00
+2026-07-21,10:52:20,DEMO-C,Sell,25,25.03,USD,1.00
+2026-07-21,11:08:20,DEMO-C,Sell,20,25.00,USD,1.00
+2026-07-21,11:51:08,DEMO-C,Buy,20,24.44,USD,1.00
+2026-07-22,09:54:00,DEMO-B,Sell,40,111.23,USD,1.00
+2026-07-22,12:04:52,DEMO-B,Buy,40,113.37,USD,1.00
+2026-07-23,09:53:00,DEMO-C,Sell,40,24.37,USD,1.00
+2026-07-23,10:35:03,DEMO-C,Buy,40,24.11,USD,1.00
+2026-07-23,10:49:03,DEMO-A,Buy,30,45.39,USD,1.00
+2026-07-23,11:20:08,DEMO-A,Sell,30,45.91,USD,1.00
+2026-07-24,09:47:00,DEMO-A,Sell,30,45.75,USD,1.00
+2026-07-24,11:17:41,DEMO-A,Buy,30,45.99,USD,1.00
+2026-07-27,09:49:00,DEMO-A,Buy,25,45.98,USD,1.00
+2026-07-27,12:26:33,DEMO-A,Sell,25,45.29,USD,1.00
+2026-07-28,09:37:00,DEMO-C,Sell,40,24.09,USD,1.00
+2026-07-28,11:11:38,DEMO-C,Buy,40,24.34,USD,1.00
+2026-07-29,09:54:00,DEMO-B,Buy,50,113.51,USD,1.00
+2026-07-29,10:38:59,DEMO-B,Sell,50,115.24,USD,1.00
+2026-07-29,11:01:59,DEMO-B,Buy,25,115.29,USD,1.00
+2026-07-29,12:12:45,DEMO-B,Sell,25,114.16,USD,1.00
+2026-07-30,09:57:00,DEMO-C,Buy,50,24.37,USD,1.00
+2026-07-30,10:35:01,DEMO-C,Sell,50,24.75,USD,1.00
+2026-07-30,10:58:01,DEMO-B,Sell,25,113.85,USD,1.00
+2026-07-30,12:02:16,DEMO-B,Buy,25,114.98,USD,1.00
+2026-07-31,09:35:00,DEMO-C,Sell,20,24.84,USD,1.00
+2026-07-31,09:44:14,DEMO-C,Buy,20,24.61,USD,1.00
+2026-07-31,09:56:14,DEMO-C,Sell,50,24.57,USD,1.00
+2026-07-31,10:18:47,DEMO-C,Buy,50,24.24,USD,1.00
+2026-08-03,10:13:00,DEMO-A,Buy,25,45.41,USD,1.00
+2026-08-03,11:31:06,DEMO-A,Sell,25,44.57,USD,1.00
+2026-08-04,10:01:00,DEMO-C,Buy,30,24.28,USD,1.00
+2026-08-04,10:45:08,DEMO-C,Sell,30,24.63,USD,1.00
+2026-08-04,11:34:08,DEMO-B,Buy,30,114.77,USD,1.00
+2026-08-04,14:10:13,DEMO-B,Sell,30,113.26,USD,1.00
+2026-08-05,09:46:00,DEMO-A,Sell,30,44.65,USD,1.00
+2026-08-05,12:17:47,DEMO-A,Buy,30,45.46,USD,1.00
+2026-08-05,12:36:47,DEMO-B,Buy,25,113.44,USD,1.00
+2026-08-05,15:00:22,DEMO-B,Sell,25,111.76,USD,1.00
+2026-08-06,09:35:00,DEMO-C,Buy,40,24.58,USD,1.00
+2026-08-06,09:41:14,DEMO-C,Sell,40,24.79,USD,1.00
+2026-08-07,09:40:00,DEMO-B,Sell,40,112.13,USD,1.00
+2026-08-07,10:01:28,DEMO-B,Buy,40,109.97,USD,1.00
+2026-08-07,10:44:28,DEMO-C,Buy,20,24.70,USD,1.00
+2026-08-07,10:58:45,DEMO-C,Sell,20,24.99,USD,1.00
+2026-08-10,09:36:00,DEMO-B,Sell,20,109.78,USD,1.00
+2026-08-10,10:37:04,DEMO-B,Buy,20,111.78,USD,1.00
+2026-08-10,11:19:04,DEMO-C,Buy,50,25.00,USD,1.00
+2026-08-10,11:48:46,DEMO-C,Sell,50,25.27,USD,1.00
+2026-08-11,09:54:00,DEMO-B,Buy,25,111.56,USD,1.00
+2026-08-11,10:39:25,DEMO-B,Sell,25,114.24,USD,1.00
+2026-08-11,11:04:25,DEMO-B,Sell,25,114.31,USD,1.00
+2026-08-11,11:30:35,DEMO-B,Buy,25,112.79,USD,1.00
+2026-08-12,09:53:00,DEMO-C,Buy,30,25.35,USD,1.00
+2026-08-12,10:29:46,DEMO-C,Sell,30,25.69,USD,1.00
+2026-08-12,11:15:46,DEMO-B,Sell,20,113.16,USD,1.00
+2026-08-12,13:51:17,DEMO-B,Buy,20,115.19,USD,1.00
+2026-08-13,09:41:00,DEMO-C,Sell,30,25.63,USD,1.00
+2026-08-13,12:05:46,DEMO-C,Buy,30,25.91,USD,1.00
+2026-08-14,09:59:00,DEMO-B,Buy,20,115.12,USD,1.00
+2026-08-14,10:52:53,DEMO-B,Sell,20,113.16,USD,1.00
+2026-08-14,11:10:53,DEMO-C,Buy,40,25.93,USD,1.00
+2026-08-14,13:25:05,DEMO-C,Sell,40,25.43,USD,1.00
+2026-08-17,09:38:00,DEMO-A,Buy,50,45.45,USD,1.00
+2026-08-17,10:15:47,DEMO-A,Sell,50,46.05,USD,1.00
+2026-08-17,10:54:47,DEMO-C,Buy,40,25.49,USD,1.00
+2026-08-17,11:34:13,DEMO-C,Sell,40,25.91,USD,1.00
+2026-08-18,09:42:00,DEMO-A,Sell,40,46.02,USD,1.00
+2026-08-18,10:25:30,DEMO-A,Buy,40,45.69,USD,1.00
+2026-08-19,09:53:00,DEMO-B,Sell,40,113.51,USD,1.00
+2026-08-19,11:26:56,DEMO-B,Buy,40,114.41,USD,1.00
+2026-08-19,11:58:56,DEMO-C,Sell,25,25.99,USD,1.00
+2026-08-19,12:35:10,DEMO-C,Buy,25,25.60,USD,1.00
+2026-08-20,09:49:00,DEMO-B,Buy,30,114.68,USD,1.00
+2026-08-20,10:02:03,DEMO-B,Sell,30,117.12,USD,1.00
+2026-08-20,10:28:03,DEMO-B,Buy,20,116.81,USD,1.00
+2026-08-20,11:35:51,DEMO-B,Sell,20,114.83,USD,1.00
+2026-08-21,09:36:00,DEMO-B,Buy,40,114.70,USD,1.00
+2026-08-21,09:55:24,DEMO-B,Sell,40,116.46,USD,1.00
+2026-08-21,10:38:24,DEMO-A,Buy,50,45.58,USD,1.00
+2026-08-21,11:23:36,DEMO-A,Sell,50,46.41,USD,1.00
+2026-08-24,09:45:00,DEMO-C,Sell,20,25.52,USD,1.00
+2026-08-24,11:07:59,DEMO-C,Buy,20,25.71,USD,1.00
+2026-08-24,11:32:59,DEMO-A,Sell,30,46.49,USD,1.00
+2026-08-24,11:42:56,DEMO-A,Buy,30,45.56,USD,1.00
+2026-08-25,09:58:00,DEMO-B,Buy,20,116.36,USD,1.00
+2026-08-25,10:33:39,DEMO-B,Sell,20,114.13,USD,1.00
+2026-08-25,11:16:39,DEMO-B,Buy,50,114.53,USD,1.00
+2026-08-25,11:54:08,DEMO-B,Sell,50,116.15,USD,1.00
+2026-08-26,09:45:00,DEMO-B,Buy,30,116.13,USD,1.00
+2026-08-26,12:12:28,DEMO-B,Sell,30,113.98,USD,1.00
+2026-08-27,10:05:00,DEMO-B,Buy,20,114.36,USD,1.00
+2026-08-27,12:14:35,DEMO-B,Sell,20,112.09,USD,1.00
+2026-08-28,09:39:00,DEMO-A,Buy,20,45.58,USD,1.00
+2026-08-28,12:14:30,DEMO-A,Sell,20,44.87,USD,1.00
+2026-08-28,12:52:30,DEMO-A,Sell,30,44.80,USD,1.00
+2026-08-28,13:58:43,DEMO-A,Buy,30,45.08,USD,1.00
+2026-08-31,10:13:00,DEMO-C,Sell,25,25.65,USD,1.00
+2026-08-31,11:00:16,DEMO-C,Buy,25,25.99,USD,1.00
+2026-08-31,11:42:16,DEMO-A,Buy,20,44.93,USD,1.00
+2026-08-31,13:49:34,DEMO-A,Sell,20,44.42,USD,1.00
+2026-09-01,09:48:00,DEMO-B,Sell,20,111.86,USD,1.00
+2026-09-01,10:46:42,DEMO-B,Buy,20,113.08,USD,1.00
+2026-09-01,11:36:42,DEMO-C,Sell,20,25.90,USD,1.00
+2026-09-01,12:55:06,DEMO-C,Buy,20,26.09,USD,1.00
+2026-09-02,09:52:00,DEMO-C,Buy,20,26.13,USD,1.00
+2026-09-02,10:23:16,DEMO-C,Sell,20,26.55,USD,1.00
+2026-09-02,11:11:16,DEMO-C,Buy,30,26.53,USD,1.00
+2026-09-02,13:49:04,DEMO-C,Sell,30,26.04,USD,1.00
+2026-09-03,09:52:00,DEMO-B,Buy,40,112.86,USD,1.00
+2026-09-03,10:13:44,DEMO-B,Sell,40,113.87,USD,1.00
+2026-09-04,09:40:00,DEMO-A,Buy,50,44.38,USD,1.00
+2026-09-04,10:07:24,DEMO-A,Sell,50,44.97,USD,1.00
+2026-09-04,10:45:24,DEMO-A,Buy,30,44.95,USD,1.00
+2026-09-04,12:53:44,DEMO-A,Sell,30,44.45,USD,1.00
+2026-09-07,10:05:00,DEMO-A,Sell,25,44.56,USD,1.00
+2026-09-07,11:20:18,DEMO-A,Buy,25,45.24,USD,1.00
+2026-09-07,11:57:18,DEMO-C,Buy,20,26.02,USD,1.00
+2026-09-07,12:53:53,DEMO-C,Sell,20,25.56,USD,1.00
+2026-09-08,09:59:00,DEMO-B,Buy,40,114.26,USD,1.00
+2026-09-08,12:15:43,DEMO-B,Sell,40,113.01,USD,1.00
+2026-09-08,12:35:43,DEMO-A,Sell,25,45.40,USD,1.00
+2026-09-08,13:15:04,DEMO-A,Buy,25,44.55,USD,1.00
+2026-09-09,09:42:00,DEMO-B,Sell,25,112.60,USD,1.00
+2026-09-09,12:13:35,DEMO-B,Buy,25,113.50,USD,1.00
+2026-09-09,12:34:35,DEMO-A,Buy,50,44.44,USD,1.00
+2026-09-09,12:54:18,DEMO-A,Sell,50,44.98,USD,1.00
+2026-09-10,09:51:00,DEMO-C,Buy,40,25.56,USD,1.00
+2026-09-10,10:02:45,DEMO-C,Sell,40,25.98,USD,1.00
+2026-09-11,10:08:00,DEMO-B,Buy,20,113.16,USD,1.00
+2026-09-11,10:28:49,DEMO-B,Sell,20,115.66,USD,1.00
+2026-09-11,10:54:49,DEMO-C,Sell,50,26.01,USD,1.00
+2026-09-11,13:11:38,DEMO-C,Buy,50,26.52,USD,1.00
+2026-09-14,09:57:00,DEMO-B,Sell,25,116.09,USD,1.00
+2026-09-14,12:12:38,DEMO-B,Buy,25,116.96,USD,1.00
+2026-09-14,12:28:38,DEMO-C,Sell,30,26.61,USD,1.00
+2026-09-14,12:48:38,DEMO-C,Buy,30,26.45,USD,1.00
+2026-09-15,10:14:00,DEMO-C,Buy,30,26.41,USD,1.00
+2026-09-15,10:20:39,DEMO-C,Sell,30,26.78,USD,1.00
+2026-09-15,10:36:39,DEMO-C,Sell,40,26.68,USD,1.00
+2026-09-15,10:48:47,DEMO-C,Buy,40,26.35,USD,1.00
+2026-09-16,09:57:00,DEMO-B,Buy,50,116.55,USD,1.00
+2026-09-16,10:27:16,DEMO-B,Sell,50,118.01,USD,1.00
+2026-09-17,10:15:00,DEMO-A,Buy,30,44.80,USD,1.00
+2026-09-17,10:51:16,DEMO-A,Sell,30,44.38,USD,1.00
+2026-09-17,11:22:16,DEMO-C,Buy,50,26.44,USD,1.00
+2026-09-17,13:28:55,DEMO-C,Sell,50,25.93,USD,1.00
+2026-09-18,10:01:00,DEMO-B,Buy,25,118.20,USD,1.00
+2026-09-18,10:12:42,DEMO-B,Sell,25,119.11,USD,1.00
+2026-09-18,10:28:42,DEMO-A,Buy,40,44.27,USD,1.00
+2026-09-18,11:02:58,DEMO-A,Sell,40,44.83,USD,1.00
+2026-09-21,10:06:00,DEMO-B,Buy,25,119.40,USD,1.00
+2026-09-21,11:44:59,DEMO-B,Sell,25,118.01,USD,1.00
+2026-09-21,12:03:59,DEMO-B,Buy,25,118.17,USD,1.00
+2026-09-21,14:15:42,DEMO-B,Sell,25,116.42,USD,1.00
+2026-09-22,10:04:00,DEMO-C,Buy,40,25.85,USD,1.00
+2026-09-22,10:15:51,DEMO-C,Sell,40,26.02,USD,1.00
+2026-09-23,10:05:00,DEMO-C,Buy,30,26.12,USD,1.00
+2026-09-23,10:50:41,DEMO-C,Sell,30,26.59,USD,1.00
+2026-09-23,11:23:41,DEMO-C,Buy,40,26.50,USD,1.00
+2026-09-23,11:54:50,DEMO-C,Sell,40,27.13,USD,1.00
+2026-09-24,10:14:00,DEMO-A,Sell,20,44.84,USD,1.00
+2026-09-24,10:42:08,DEMO-A,Buy,20,44.35,USD,1.00
+2026-09-24,10:54:08,DEMO-C,Buy,30,27.20,USD,1.00
+2026-09-24,11:39:39,DEMO-C,Sell,30,27.85,USD,1.00
+2026-09-25,09:43:00,DEMO-B,Buy,50,116.09,USD,1.00
+2026-09-25,09:58:45,DEMO-B,Sell,50,117.26,USD,1.00
+2026-09-25,10:29:45,DEMO-B,Buy,25,117.27,USD,1.00
+2026-09-25,10:52:50,DEMO-B,Sell,25,119.05,USD,1.00
+2026-09-28,09:58:00,DEMO-A,Sell,30,44.29,USD,1.00
+2026-09-28,11:53:03,DEMO-A,Buy,30,45.07,USD,1.00
+2026-09-28,12:20:03,DEMO-C,Buy,25,27.79,USD,1.00
+2026-09-28,14:04:04,DEMO-C,Sell,25,27.35,USD,1.00
+2026-09-29,09:37:00,DEMO-A,Buy,30,45.05,USD,1.00
+2026-09-29,12:01:55,DEMO-A,Sell,30,44.27,USD,1.00
+2026-09-29,12:50:55,DEMO-B,Sell,50,119.30,USD,1.00
+2026-09-29,15:00:34,DEMO-B,Buy,50,120.77,USD,1.00
+2026-09-30,09:38:00,DEMO-A,Buy,20,44.42,USD,1.00
+2026-09-30,09:46:38,DEMO-A,Sell,20,45.35,USD,1.00
+2026-09-30,10:31:38,DEMO-C,Buy,25,27.31,USD,1.00
+2026-09-30,13:09:06,DEMO-C,Sell,25,27.07,USD,1.00
+2026-10-01,09:53:00,DEMO-C,Sell,30,26.99,USD,1.00
+2026-10-01,11:14:03,DEMO-C,Buy,30,27.42,USD,1.00
+2026-10-02,09:49:00,DEMO-A,Sell,25,45.32,USD,1.00
+2026-10-02,10:13:31,DEMO-A,Buy,25,44.68,USD,1.00
+2026-10-05,09:38:00,DEMO-B,Buy,25,121.24,USD,1.00
+2026-10-05,10:20:19,DEMO-B,Sell,25,122.97,USD,1.00
+2026-10-05,11:10:19,DEMO-C,Buy,25,27.48,USD,1.00
+2026-10-05,11:31:05,DEMO-C,Sell,25,27.74,USD,1.00
+2026-10-06,10:01:00,DEMO-C,Sell,20,27.83,USD,1.00
+2026-10-06,10:33:51,DEMO-C,Buy,20,27.44,USD,1.00
+2026-10-07,10:04:00,DEMO-A,Buy,40,44.71,USD,1.00
+2026-10-07,12:15:01,DEMO-A,Sell,40,43.91,USD,1.00
+2026-10-08,09:49:00,DEMO-A,Sell,30,43.91,USD,1.00
+2026-10-08,11:00:37,DEMO-A,Buy,30,44.43,USD,1.00
+2026-10-08,11:44:37,DEMO-A,Sell,50,44.43,USD,1.00
+2026-10-08,11:50:44,DEMO-A,Buy,50,43.97,USD,1.00
+2026-10-09,09:45:00,DEMO-B,Buy,40,123.05,USD,1.00
+2026-10-09,10:14:00,DEMO-B,Sell,40,125.53,USD,1.00
+2026-10-12,09:40:00,DEMO-A,Buy,40,44.11,USD,1.00
+2026-10-12,10:12:55,DEMO-A,Sell,40,44.58,USD,1.00
+2026-10-12,10:35:55,DEMO-B,Buy,40,125.39,USD,1.00
+2026-10-12,11:40:03,DEMO-B,Sell,40,123.83,USD,1.00
+2026-10-13,09:55:00,DEMO-C,Buy,20,27.44,USD,1.00
+2026-10-13,11:54:28,DEMO-C,Sell,20,27.03,USD,1.00
+2026-10-13,12:05:28,DEMO-A,Buy,50,44.61,USD,1.00
+2026-10-13,14:46:25,DEMO-A,Sell,50,44.30,USD,1.00
+2026-10-14,10:03:00,DEMO-C,Sell,40,27.07,USD,1.00
+2026-10-14,11:40:08,DEMO-C,Buy,40,27.28,USD,1.00
+2026-10-14,12:24:08,DEMO-C,Sell,50,27.34,USD,1.00
+2026-10-14,14:33:37,DEMO-C,Buy,50,27.52,USD,1.00
+2026-10-15,09:56:00,DEMO-C,Buy,30,27.63,USD,1.00
+2026-10-15,10:20:29,DEMO-C,Sell,30,27.83,USD,1.00
+2026-10-16,09:38:00,DEMO-B,Buy,25,123.58,USD,1.00
+2026-10-16,10:05:07,DEMO-B,Sell,25,126.34,USD,1.00
+2026-10-19,10:09:00,DEMO-B,Buy,25,126.69,USD,1.00
+2026-10-19,11:11:51,DEMO-B,Sell,25,125.23,USD,1.00
+</script>
+
+</main>
+<footer class="site-footer"><div class="wrap">
+  <div class="cols">
+    <nav aria-label="Traders"><h2>Traders</h2><ul><li><a href="/tools/">Free tools</a></li><li><a href="/tools/trade-stats/">Trade stats</a></li><li><a href="/for-traders/">Individual traders</a></li>
+    </ul></nav>
+    <nav aria-label="Firms"><h2>Firms</h2><ul><li><a href="/for-firms/">Prop firms &amp; brokers</a></li><li><a href="/for-platforms/">Journals &amp; platforms</a></li><li><a href="/for-firms/#copy-leader">Copy-trading platforms</a></li><li><a href="/for-firms/#claims-test">Firms making behaviour claims</a></li><li><a href="/pricing/">Pricing</a></li><li><a href="/start/#firm">Start a Pilot</a></li>
+    </ul></nav>
+    <nav aria-label="Research"><h2>Research</h2><ul><li><a href="/research/">Research</a></li><li><a href="/plan-gap/">The plan gap</a></li><li><a href="/sample-memo/">Sample &amp; method</a></li><li><a href="/code/">Code</a></li><li><a href="/glossary/">Glossary</a></li><li><a href="/corrections/">Corrections</a></li><li><a href="/feed.xml">Atom feed</a></li>
+    </ul></nav>
+    <nav aria-label="Trust"><h2>Trust</h2><ul><li><a href="/independence/">Independence</a></li><li><a href="/about/">About</a></li><li><a href="/for-researchers/">Researchers &amp; press</a></li>
+    </ul></nav>
+    <nav aria-label="Legal"><h2>Legal</h2><ul><li><a href="/terms/">Terms</a></li><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/#cancellation">Cancellations &amp; refunds</a></li>
+    </ul></nav>
+  </div>
+  <p class="legal">Email <a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a>. We reply within 1 business day (Eastern Time, Monday to Friday).</p>
+  <p class="legal"><strong>Firms pay for fixed-scope measurements of their own data. Readers pay nothing. No firm can pay to change a number.</strong> <a href="/independence/">Independence policy</a></p>
+  <p class="legal">donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.</p>
+  <p class="legal">This site sets no cookies and runs no analytics. It stores only your light/dark choice, in your own browser. Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; their privacy policies apply. <a href="/privacy/">Privacy</a></p>
+  <p class="legal">&copy; 2026 donttrade. Text and charts <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>; numbers are facts, quote them with a link.</p>
+</div></footer>
+
+</body>
+</html>
