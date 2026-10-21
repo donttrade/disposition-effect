@@ -1158,7 +1158,7 @@ def _new_trade(e, dr, seq):
     return {"symbol": e["symbol"], "dir": dr, "open_ts": e["ts"], "close_ts": None, "peak": 0,
             "entry_qty": 0.0, "entry_not": 0.0, "exit_qty": 0.0, "exit_not": 0.0, "fees": 0.0,
             "rep_sum": 0.0, "rep_missing": False, "fills": 0, "multiplier": e["multiplier"],
-            "currency": e["currency"], "unit": e["_unit"], "fx": None, "seq": seq, "ks": [], "by_reversal": False}
+            "currency": e["currency"], "unit": e["_unit"], "fx": None, "seq": seq}
 
 
 def chrono_order(execs):
@@ -1175,25 +1175,86 @@ def chrono_order(execs):
     return sorted(range(len(execs)), key=lambda k: (execs[k]["ts"], sign * execs[k]["row"], sign * k))
 
 
+# ----------------------------------------------------------------- positions opened before the file
+# Mirrors lotKind(), lotWalk() and preFileLots() in trades.js. With open/close codes, a
+# close bigger than the units opened in the file (per direction) closes a lot from before
+# the file; every fill of that direction from the start of the file through the LAST such
+# close is left out (the position was never flat), counted once per symbol and direction.
+
+LONG = 0
+SHORT = 1
+
+
+def lot_kind(e):
+    if e["oc"] == "open":
+        return "open"
+    if e["oc"] == "close":
+        return "close"
+    return "reverse" if e.get("_rev") else "net"
+
+
+def lot_walk(execs, lst):
+    inv = [0, 0]
+    last_excess = [-1, -1]
+    for i, k in enumerate(lst):
+        e = execs[k]
+        q = round_half_away(e["qty"] * UNIT)
+        if q == 0:
+            continue
+        opens = LONG if e["side"] == "buy" else SHORT
+        closes = 1 - opens
+        kind = lot_kind(e)
+        if kind == "open":
+            inv[opens] += q
+        elif kind == "close":
+            if q <= inv[closes]:
+                inv[closes] -= q
+            else:
+                last_excess[closes] = i
+                inv[closes] = 0
+        else:
+            c = min(q, inv[closes])
+            inv[closes] -= c
+            inv[opens] += q - c
+    excluded = set()
+    for i, k in enumerate(lst):
+        e = execs[k]
+        opens = LONG if e["side"] == "buy" else SHORT
+        kind = lot_kind(e)
+        for d in (LONG, SHORT):
+            touches = (opens == d) if kind == "open" else (opens != d) if kind == "close" else True
+            if touches and i <= last_excess[d]:
+                excluded.add(k)
+    return {"excluded": excluded, "carried": [last_excess[LONG] >= 0, last_excess[SHORT] >= 0]}
+
+
+def pre_file_lots(execs, order):
+    by_sym = {}
+    for k in order:
+        by_sym.setdefault(execs[k]["symbol"], []).append(k)
+    excluded = set()
+    open_at_start = 0
+    for lst in by_sym.values():
+        w = lot_walk(execs, lst)
+        excluded |= w["excluded"]
+        open_at_start += sum(1 for c in w["carried"] if c)
+    return {"excluded": excluded, "open_at_start": open_at_start}
+
+
 def build_trades(execs, reported_mode, detect_hedging=False):
     """Flat-to-flat round trips per symbol. reported_mode: None | "gross" | "net".
-
-    Positions opened before the file starts: with open/close codes (IBKR O/C, MT5
-    in/out), inv[sym] counts units opened in this file and not yet closed
-    (direction-blind). A closing fill bigger than inv closes a position opened
-    before the file; that fill and any trade in progress on the symbol are left
-    out and counted once per position (W_OPEN_AT_START), never inverted."""
+    The netting walk runs on the fills left after pre_file_lots()."""
     order = chrono_order(execs)
+    lots = pre_file_lots(execs, order)
+    excluded = lots["excluded"]
     pos = {}
     cur = {}
-    inv = {}
-    carried = {}
     done = []
-    excluded = set()  # execution indexes left out as part of a pre-file position
     hedging = 0
-    open_at_start = 0
     seq = 0
     for k in order:
+        if k in excluded:
+            continue
         e = execs[k]
         sym = e["symbol"]
         s = 1 if e["side"] == "buy" else -1
@@ -1201,29 +1262,6 @@ def build_trades(execs, reported_mode, detect_hedging=False):
         if q_units == 0:
             continue
         p = pos.get(sym, 0)
-        have = inv.get(sym, 0)
-        if e["oc"] == "close":
-            if q_units > have:
-                if not carried.get(sym):
-                    open_at_start += 1
-                    carried[sym] = True
-                excluded.add(k)
-                if sym in cur:
-                    t = cur[sym]
-                    # a fill that reversed into this trade also closed a finished trade: keep it
-                    for j in (t["ks"][1:] if t["by_reversal"] else t["ks"]):
-                        excluded.add(j)
-                cur.pop(sym, None)
-                pos[sym] = 0
-                inv[sym] = 0
-                continue
-            inv[sym] = have - q_units
-        elif e["oc"] == "open":
-            inv[sym] = have + q_units
-            carried[sym] = False
-        else:
-            closing = min(q_units, abs(p)) if (p != 0 and (p > 0) != (s > 0)) else 0
-            inv[sym] = max(0, have - closing) + (q_units - closing)
         if detect_hedging and e["oc"] == "open" and p != 0 and (p > 0) != (s > 0):
             hedging += 1
         if p == 0 or (p > 0) == (s > 0):
@@ -1231,7 +1269,6 @@ def build_trades(execs, reported_mode, detect_hedging=False):
                 cur[sym] = _new_trade(e, "long" if s > 0 else "short", seq)
                 seq += 1
             t = cur[sym]
-            t["ks"].append(k)
             t["entry_qty"] += e["qty"]
             t["entry_not"] += e["qty"] * e["price"]
             t["fees"] += e["fee"]
@@ -1246,7 +1283,6 @@ def build_trades(execs, reported_mode, detect_hedging=False):
             continue
         # reducing: close part (and maybe reverse with the remainder)
         t = cur[sym]
-        t["ks"].append(k)
         close_units = min(q_units, abs(p))
         rem_units = q_units - close_units
         if rem_units == 0:
@@ -1272,8 +1308,6 @@ def build_trades(execs, reported_mode, detect_hedging=False):
         if rem_units:
             nt = _new_trade(e, "long" if s > 0 else "short", seq)
             seq += 1
-            nt["ks"].append(k)
-            nt["by_reversal"] = True
             rq = rem_units / UNIT
             nt["entry_qty"] += rq
             nt["entry_not"] += rq * e["price"]
@@ -1310,7 +1344,7 @@ def build_trades(execs, reported_mode, detect_hedging=False):
                        "entry_vwap": entry_vwap, "exit_vwap": exit_vwap, "pnl": pnl, "pnl_gross": gross,
                        "fees": t["fees"], "pnl_source": src, "pnl_unit": t["unit"], "fills_n": t["fills"],
                        "currency": t["currency"], "_fx": t["fx"], "_seq": t["seq"]})
-    return trades, open_n, hedging, open_at_start, excluded
+    return trades, open_n, hedging, lots["open_at_start"], excluded
 
 
 def roundtrip_trades(rts, start_seq):

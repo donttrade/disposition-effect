@@ -19,67 +19,114 @@ function roundHalfAway(x) {
 function newTrade(e, dir, seq) {
   return { symbol: e.symbol, dir, open_ts: e.ts, close_ts: null, peak: 0, entry_qty: 0, entry_not: 0,
     exit_qty: 0, exit_not: 0, fees: 0, rep_sum: 0, rep_missing: false, fills: 0, multiplier: e.multiplier,
-    currency: e.currency, unit: e._unit, fx: null, seq, ks: [], by_reversal: false };
+    currency: e.currency, unit: e._unit, fx: null, seq };
+}
+
+// ---------------------------------------------------------------- positions opened before the file
+// An export whose date range starts mid-position holds closing fills for lots bought (or
+// sold short) before the file. Formats with open/close codes (IBKR O/C, MT5 in/out) say
+// which fills close something, so those lots can be found; files without codes cannot
+// show them and are unaffected (a leading sell there is a short, as the plan says).
+//
+// lotWalk keeps, per direction (long, short), the units opened IN THE FILE and not yet
+// closed. A close bigger than that closes a lot from before the file ("excess"). The
+// plan's trade runs flat to flat, and the real position was not flat from the start of
+// the file until that close, so every fill of that direction from the start of the file
+// through the LAST such close is left out: in-file adds, partial closes and any trade
+// that seemed to finish inside it (Tester F-B1: a carried long + an add + two closes made
+// a 1-day trade carrying the older lot's FIFO P&L). The pre-file lot is taken to be
+// closed by its last excess close; nothing after it is attributed to it. Fills of the
+// other direction are separate legs (an MT5 hedging account) and are kept. One count per
+// symbol and direction goes to W_OPEN_AT_START.
+
+const LONG = 0;
+const SHORT = 1;
+
+// What one fill does to the lots: 'open', 'close', 'reverse' (both codes: IBKR "C;O",
+// MT5 "in/out") or 'net' (no code: closes the other direction first, like the netting walk).
+function lotKind(e) {
+  if (e.oc === 'open') return 'open';
+  if (e.oc === 'close') return 'close';
+  return e._rev ? 'reverse' : 'net';
+}
+
+// One symbol's fills (execution indexes, in walk order) → the fills to leave out, and
+// which directions had a lot from before the file.
+function lotWalk(execs, list) {
+  const inv = [0, 0];
+  const lastExcess = [-1, -1]; // position in `list` of the last close of a pre-file lot
+  for (let i = 0; i < list.length; i++) {
+    const e = execs[list[i]];
+    const q = roundHalfAway(e.qty * UNIT);
+    if (q === 0) continue;
+    const opens = e.side === 'buy' ? LONG : SHORT;
+    const closes = 1 - opens;
+    const kind = lotKind(e);
+    if (kind === 'open') inv[opens] += q;
+    else if (kind === 'close') {
+      if (q <= inv[closes]) inv[closes] -= q;
+      else { lastExcess[closes] = i; inv[closes] = 0; }
+    } else {
+      const c = Math.min(q, inv[closes]);
+      inv[closes] -= c;
+      inv[opens] += q - c;
+    }
+  }
+  const excluded = new Set();
+  for (let i = 0; i < list.length; i++) {
+    const e = execs[list[i]];
+    const opens = e.side === 'buy' ? LONG : SHORT;
+    const kind = lotKind(e);
+    for (const d of [LONG, SHORT]) {
+      const touches = kind === 'open' ? opens === d : kind === 'close' ? opens !== d : true;
+      if (touches && i <= lastExcess[d]) excluded.add(list[i]);
+    }
+  }
+  return { excluded, carried: [lastExcess[LONG] >= 0, lastExcess[SHORT] >= 0] };
+}
+
+// All symbols: {excluded: Set of execution indexes, openAtStart}.
+export function preFileLots(execs, order) {
+  const bySym = new Map();
+  for (const k of order) {
+    const sym = execs[k].symbol;
+    if (!bySym.has(sym)) bySym.set(sym, []);
+    bySym.get(sym).push(k);
+  }
+  const excluded = new Set();
+  let openAtStart = 0;
+  for (const list of bySym.values()) {
+    const w = lotWalk(execs, list);
+    for (const k of w.excluded) excluded.add(k);
+    for (const c of w.carried) if (c) openAtStart++;
+  }
+  return { excluded, openAtStart };
 }
 
 // reportedMode: null (compute P&L) | 'gross' (reported profit before fees, MetaTrader)
 //             | 'net' (reported P&L after fees, IBKR realized P&L)
-//
-// Positions opened before the file starts (an export whose date range begins
-// mid-position). Formats with open/close codes (IBKR O/C, MT5 in/out) say which
-// fills close a position. `inv` counts, per symbol, the units opened in this file
-// and not yet closed, direction-blind so hedged legs count too. A closing fill
-// bigger than `inv` closes something opened before the file: that fill, and any
-// trade in progress on the symbol (it was never flat since before the file), are
-// left out and counted once per position in openAtStart (W_OPEN_AT_START). They
-// are never turned into an opposite trade. Files without codes are unaffected.
+// The netting walk runs on the fills left after preFileLots.
 export function buildTrades(execs, reportedMode, detectHedging) {
   const order = chronoOrder(execs);
+  const lots = preFileLots(execs, order);
+  const excluded = lots.excluded;
   const pos = new Map();
   const cur = new Map();
-  const inv = new Map();
-  const carried = new Map();
   const done = [];
-  const excluded = new Set(); // execution indexes left out as part of a pre-file position
   let hedging = 0;
-  let openAtStart = 0;
   let seq = 0;
   for (const k of order) {
+    if (excluded.has(k)) continue;
     const e = execs[k];
     const sym = e.symbol;
     const s = e.side === 'buy' ? 1 : -1;
     const qUnits = roundHalfAway(e.qty * UNIT);
     if (qUnits === 0) continue;
     let p = pos.has(sym) ? pos.get(sym) : 0;
-    const have = inv.has(sym) ? inv.get(sym) : 0;
-    if (e.oc === 'close') {
-      if (qUnits > have) {
-        if (!carried.get(sym)) { openAtStart++; carried.set(sym, true); }
-        excluded.add(k);
-        if (cur.has(sym)) {
-          const t = cur.get(sym);
-          // A fill that reversed into this trade also closed a finished trade: keep it.
-          for (const j of t.by_reversal ? t.ks.slice(1) : t.ks) excluded.add(j);
-        }
-        cur.delete(sym);
-        pos.set(sym, 0);
-        inv.set(sym, 0);
-        continue;
-      }
-      inv.set(sym, have - qUnits);
-    } else if (e.oc === 'open') {
-      inv.set(sym, have + qUnits);
-      carried.set(sym, false);
-    } else {
-      // No code, or both codes (a reversal): the netting walk decides what closes.
-      const closing = p !== 0 && (p > 0) !== (s > 0) ? Math.min(qUnits, Math.abs(p)) : 0;
-      inv.set(sym, Math.max(0, have - closing) + (qUnits - closing));
-    }
     if (detectHedging && e.oc === 'open' && p !== 0 && (p > 0) !== (s > 0)) hedging++;
     if (p === 0 || (p > 0) === (s > 0)) {
       if (p === 0) { cur.set(sym, newTrade(e, s > 0 ? 'long' : 'short', seq)); seq++; }
       const t = cur.get(sym);
-      t.ks.push(k);
       t.entry_qty += e.qty;
       t.entry_not += e.qty * e.price;
       t.fees += e.fee;
@@ -93,7 +140,6 @@ export function buildTrades(execs, reportedMode, detectHedging) {
     }
     // Reducing: close part (and reverse with any remainder).
     const t = cur.get(sym);
-    t.ks.push(k);
     const closeUnits = Math.min(qUnits, Math.abs(p));
     const remUnits = qUnits - closeUnits;
     let cq, cf;
@@ -111,8 +157,6 @@ export function buildTrades(execs, reportedMode, detectHedging) {
     if (remUnits) {
       const nt = newTrade(e, s > 0 ? 'long' : 'short', seq);
       seq++;
-      nt.ks.push(k);
-      nt.by_reversal = true;
       const rq = remUnits / UNIT;
       nt.entry_qty += rq;
       nt.entry_not += rq * e.price;
@@ -148,7 +192,7 @@ export function buildTrades(execs, reportedMode, detectHedging) {
       exit_vwap: exitVwap, pnl, pnl_gross: gross, fees: t.fees, pnl_source: src, pnl_unit: t.unit,
       fills_n: t.fills, currency: t.currency, _fx: t.fx, _seq: t.seq };
   });
-  return { trades, openN, hedging, openAtStart, excluded };
+  return { trades, openN, hedging, openAtStart: lots.openAtStart, excluded };
 }
 
 // Execution indexes in time order. Fills with the same time keep their file order,

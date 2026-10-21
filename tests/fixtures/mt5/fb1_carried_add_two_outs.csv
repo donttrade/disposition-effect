@@ -1,0 +1,6 @@
+Time,Deal,Symbol,Type,Direction,Volume,Price,Order,Commission,Fee,Swap,Profit,Balance,Comment
+2026.09.05 09:00:00,2,EURUSD,buy,in,1.00,1.0900,2,0,0,0,0.00,0,
+2026.09.05 12:00:00,3,EURUSD,sell,out,1.00,1.0950,3,0,0,0,300.00,0,
+2026.09.08 12:00:00,4,EURUSD,sell,out,1.00,1.1000,4,0,0,0,100.00,0,
+2026.09.09 09:00:00,5,GBPUSD,buy,in,1.00,1.3000,5,0,0,0,0.00,0,
+2026.09.09 10:00:00,6,GBPUSD,sell,out,1.00,1.3010,6,0,0,0,100.00,0,
