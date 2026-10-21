@@ -55,6 +55,11 @@ PAGES += [
      "title": "Free MT5 Report Analyzer: Trade Stats From Your File",
      "description": "Drop your MT5, MT4, IBKR or Tradovate file and get profit factor, expectancy, drawdown and "
                     "streaks, with a real-or-noise check. Runs in your browser."},
+    {"template": "pages/tool-prop-sim.html", "path": "/tools/prop-challenge-simulator/", "requires_flag": None,
+     "modules": ["/static/js/tools/prop-sim.js"], "sample": True,
+     "title": "Prop Firm Challenge Simulator on Your Own Trades",
+     "description": "Replay 10,000 challenges built from your own past trading days under the rules you enter. "
+                    "Pass, bust and time-out shares, fully explained. Free."},
 ]
 
 SAMPLE_CSV = os.path.join(SITE, "static", "samples", "demo-trades.csv")

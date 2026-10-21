@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{%- macro field(id, label, hint, mode="decimal") %}
+      <div class="field">
+        <label for="{{ id }}">{{ label }}</label>
+        {%- if hint %}<span class="hint" id="{{ id }}-hint">{{ hint }}</span>{% endif %}
+        <input id="{{ id }}" type="text" inputmode="{{ mode }}" autocomplete="off" aria-describedby="{% if hint %}{{ id }}-hint {% endif %}{{ id }}-err">
+        <p class="error" id="{{ id }}-err" hidden></p>
+      </div>
+{%- endmacro %}
+{% block content %}
+{%- set r = products["report39"] %}
+<div class="wrap">
+  <div class="grid">
+    <div class="span-8">
+      <p class="crumb small"><a href="/tools/">Free tools</a></p>
+      <h1>Prop-firm challenge simulator</h1>
+      <p class="lede">Most challenge simulators ask for a win rate and an average win and loss, then invent trades from them. This one can start from your own record.</p>
+      <p>Drop a trade file and it builds 10,000 simulated challenges by drawing whole trading days from your history at random, so a day with three quick losses stays a day with three quick losses, which is what daily loss limits react to. Enter the rules you face: profit target, daily loss limit, maximum loss as a static or trailing limit, time limit and minimum trading days. The result shows the share of runs that passed, busted or ran out of time, and how many busts came after two or more losses in a row. No file? A manual mode takes the usual summary numbers instead. The random seed is fixed, so the same inputs always give the same answer.</p>
+      <p><strong>This is a simulation of your past trades, not a prediction.</strong> It runs entirely in your browser: the page’s security policy blocks every outgoing request.</p>
+    </div>
+  </div>
+  {% include "partials/disclaimer.html" %}
+
+  <section class="tool" aria-labelledby="ps-tool-h">
+    <h2 id="ps-tool-h">Your trades and your rules</h2>
+    <p id="ps-js-needed" class="notice notice-caution">This tool runs in your browser and needs JavaScript turned on.</p>
+    <form id="ps-form" novalidate hidden>
+      <fieldset>
+        <legend>Where the trades come from</legend>
+        <div class="check"><input type="radio" id="ps-mode-file" name="ps-mode" value="file" checked><label for="ps-mode-file">From my trade file (whole trading days, in their real order within each day)</label></div>
+        <div class="check"><input type="radio" id="ps-mode-manual" name="ps-mode" value="manual"><label for="ps-mode-manual">Manual numbers (win rate, average win and loss, trades per day)</label></div>
+      </fieldset>
+      <div id="ps-file-fields" class="dropzone">
+        <div class="file-pick">
+          <label for="ps-file">Your trade file</label>
+          <input id="ps-file" type="file" accept=".csv,.htm,.html,.txt" aria-describedby="ps-file-status">
+        </div>
+        <p class="btn-row"><span class="muted">No file to hand?</span> <button class="btn btn-secondary" id="ps-sample-btn" type="button">Try a sample file</button></p>
+        <p id="ps-file-status" class="small muted" role="status" hidden></p>
+        <p class="small muted">Same formats as <a href="/tools/trade-stats/">trade stats</a>: MT5/MT4 report, IBKR Flex Query, Tradovate Orders (all beta) or the CSV template. The sample is synthetic, not a real trader.</p>
+      </div>
+      <div id="ps-manual-fields" class="field-grid" hidden>
+        {{ field("ps-wr", "Win rate (%)", "Between 0 and 100. Break-even trades are not modelled.") }}
+        {{ field("ps-avgwin", "Average winning trade", "In your account currency, as a positive number.") }}
+        {{ field("ps-avgloss", "Average losing trade", "In your account currency, as a positive number (for a loss of 80, enter 80).") }}
+        {{ field("ps-tpd", "Trades per trading day", "A whole number from 1 to 50.", "numeric") }}
+      </div>
+      <h3>The challenge rules</h3>
+      <p class="small muted">Enter the numbers from your own firm’s current rules, in your account currency, as amounts above or below the starting balance. No firm’s rules are built in.</p>
+      <div class="field-grid">
+      {{ field("ps-target", "Profit target", "For example, for a 10% target on a 50,000 account, enter 5000.") }}
+      {{ field("ps-daily", "Daily loss limit (optional)", "The most the balance may fall within one day. Leave blank if your challenge has none.") }}
+      {{ field("ps-maxloss", "Maximum loss", "How far the balance may fall: below the starting balance (static), or below its highest end-of-day level (trailing).") }}
+      </div>
+      <fieldset>
+        <legend>How the maximum loss is measured</legend>
+        <div class="check"><input type="radio" id="ps-trail-static" name="ps-trail" value="static" checked><label for="ps-trail-static">Static: from the starting balance</label></div>
+        <div class="check"><input type="radio" id="ps-trail-trailing" name="ps-trail" value="trailing"><label for="ps-trail-trailing">Trailing: from the highest end-of-day balance so far</label></div>
+      </fieldset>
+      <div class="field-grid">
+      {{ field("ps-days", "Time limit (trading days)", "A whole number from 1 to 365.", "numeric") }}
+      {{ field("ps-mindays", "Minimum trading days (optional)", "Leave blank for none.", "numeric") }}
+      {{ field("ps-seed", "Random seed", "Fixed so a result can be repeated. Change it to see how much the answer moves.", "numeric") }}
+      </div>
+      <div id="ps-errors" class="notice notice-error" role="alert" tabindex="-1" hidden></div>
+      <p><button class="btn" id="ps-run" type="submit">Run 10,000 challenges</button></p>
+    </form>
+    <p id="ps-status" class="muted" role="status" hidden></p>
+  </section>
+
+  <div id="ps-out" class="tool-out" hidden></div>
+
+  <aside id="ps-teaser" class="notice notice-gap teaser" aria-labelledby="ps-teaser-h" hidden>
+    <strong id="ps-teaser-h">What the habit report will add</strong>
+    <p id="ps-teaser-text"></p>
+    <p><a class="btn" href="/for-traders/#waitlist">Join the waitlist — {{ r.price_usd|usd }} founding price</a></p>
+    <p class="small">Not on sale yet: nothing is charged now. The free tools stay free.</p>
+  </aside>
+
+  <section class="section" aria-labelledby="how-h">
+    <h2 id="how-h">How each run works</h2>
+    <ol>
+      <li>Each simulated day is one of your past trading days, drawn at random (a day can be drawn more than once), with its trades replayed in their real order. In manual mode each day is the number of trades you entered, each a win or a loss at your win rate.</li>
+      <li>After every trade, the run busts if the day’s loss reaches the daily limit, or if the balance reaches the maximum-loss floor. Reaching a limit counts as breaking it.</li>
+      <li>At the end of each day, a trailing floor moves up to the highest end-of-day balance minus the maximum loss. Then the run passes if the balance is at or above the target and it has traded the minimum number of days.</li>
+      <li>A run that neither passes nor busts within the time limit has run out of time.</li>
+    </ol>
+    <p>Only closed trades are in a trade file, so the simulation sees each trade’s final result, not how far it went against you while open. A limit that a firm checks on open positions can break earlier than shown here.</p>
+  </section>
+
+  <section class="section" aria-labelledby="faq-h">
+    <h2 id="faq-h">Questions</h2>
+    <details><summary>Is this a prediction of whether I will pass?</summary><p>No. It shows how your past trading days would have fared under the rules you entered if they came in a different order. Future days can differ from past ones, and past results do not predict future results.</p></details>
+    <details><summary>Why resample days instead of single trades?</summary><p>Daily loss limits depend on how losses bunch within a day. Drawing whole days keeps that bunching, while drawing single trades would spread a bad morning across many days and make daily limits look safer than they were.</p></details>
+    <details><summary>How many trading days do I need in the file?</summary><p>The simulation runs with any number, but with fewer than 30 trading days the page warns that the results lean heavily on a few days. More history gives a steadier picture.</p></details>
+    <details><summary>Why are my results the same every time?</summary><p>The random number generator uses a fixed seed, so anyone can reproduce a result from the same inputs. Change the seed to see how much the answer moves.</p></details>
+    <details><summary>Which firms’ rules does it include?</summary><p>None are built in or named. Enter the numbers from your own firm’s current rules, because rules change and vary by account type.</p></details>
+    <details><summary>Is my file uploaded?</summary><p>No. The file is read in this tab and all 10,000 runs happen in your browser. The page’s security policy blocks outgoing requests.</p></details>
+  </section>
+
+  <section class="section" aria-labelledby="more-h">
+    <h2 id="more-h">Related</h2>
+    <ul>
+      <li><a href="/tools/trade-stats/">Trade stats</a>: win rate, profit factor and drawdown from the same file.</li>
+      <li><a href="/tools/lot-size-calculator/">Lot size calculator</a>: the arithmetic from balance, risk amount and stop distance.</li>
+      <li><a href="/tools/pass-rate-calculator/">Pass-rate calculator</a>, for firm operators: a cohort’s pass and payout rates.</li>
+    </ul>
+  </section>
+  <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR and Tradovate are trademarks of their owners. donttrade is not affiliated with any of them.</p>
+</div>
+<script type="text/csv" id="ps-sample">
+{{ sample_csv|safe }}</script>
+{% endblock %}

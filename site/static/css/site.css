@@ -307,3 +307,7 @@ input[type="file"]::file-selector-button {
   background: var(--rust); color: var(--on-rust); font: 600 var(--fs-1)/1.2 var(--font-sans); cursor: pointer;
 }
 input[type="file"]:focus-visible { outline: 2px solid var(--rust); outline-offset: 2px; }
+.field-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: 0 var(--gutter); max-width: 60rem; }
+.field-grid[hidden] { display: none; }
+.field-grid .field { max-width: none; }
+fieldset legend { font-weight: 600; margin-bottom: 4px; padding: 0; }
