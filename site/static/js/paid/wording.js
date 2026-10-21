@@ -69,11 +69,17 @@ export function methodLine(h, fmt) {
   throw new Error(`methodLine: ${h.id} is not a tested habit`);
 }
 
+// PLAN CONFLICT §7.1 (CODER-STATS-REPORT-2026-10-21) — pending Architect sign-off.
+// §7.1 has no sentence for a report whose distinguishable gaps include one in the habit's own
+// direction whose dollar figure is not negative: it cannot be the focus (D-6), and the
+// opposite-way sentence would be false. NO_LOSS_ONE is the sentence the stats Coder suggested,
+// word for word; NO_LOSS_MANY is its plural, for two or more such gaps. Both describe only and
+// pass checks/lint.py (tests/test_paid_wording.py). No French report copy exists yet: the
+// translator gets both (CODER-WIRING-REPORT-2026-10-21).
+export const NO_LOSS_ONE = "The distinguishable gap in this pattern's direction did not total a loss, so no pattern is shown first.";  // pending Architect sign-off
+export const NO_LOSS_MANY = "The distinguishable gaps in these patterns' directions did not total a loss, so no pattern is shown first.";  // pending Architect sign-off
+
 // Page 1: the headline lines. Returns a list of sentences.
-// PLAN CONFLICT (CODER-STATS-REPORT): §7.1 has no sentence for a report whose distinguishable
-// gaps include one in the habit's own direction whose dollar figure is not negative (focus null,
-// but not because every gap runs the opposite way). For that case no "no pattern is shown first"
-// line is returned (the opposite-way sentence would be false) until the Architect supplies one.
 export function page1Lines(report, fmt) {
   const f = fmtOf(fmt);
   const k = report.n_distinguishable, n = report.n_tested;
@@ -93,7 +99,15 @@ export function page1Lines(report, fmt) {
     lines.push(dist.length === 1
       ? 'The distinguishable gap runs the opposite way to its pattern name, so no pattern is shown first.'
       : 'The distinguishable gaps run the opposite way to their pattern names, so no pattern is shown first.');
+    return lines;
   }
+  // Focus is null although a gap runs the habit's own way: by D-6 every such gap did not total a
+  // loss. Any opposite-way gap is already described under its own habit. Pending Architect sign-off.
+  const own = dist.filter((h) => h.direction === 'habit');
+  if (own.some((h) => h.dollars && h.dollars.amount < 0)) {
+    throw new Error('page1Lines: focus is null but a habit-direction gap totalled a loss (D-6)');
+  }
+  lines.push(own.length === 1 ? NO_LOSS_ONE : NO_LOSS_MANY);
   return lines;
 }
 

@@ -31,6 +31,12 @@ out.focus = W.page1Lines(rFocus, fmt);
 out.opp1 = W.page1Lines(R(all.map((id) => H(id, id === 'tilt' ? { direction: 'opposite', effect: 4 } : { verdict: 'not_distinguishable' }))), fmt);
 out.opp2 = W.page1Lines(R(all.map((id) => H(id, id === 'tilt' || id === 'size_up' ? { direction: 'opposite' } : { verdict: 'not_distinguishable' }))), fmt);
 out.uncovered = W.page1Lines(R(all.map((id) => H(id, id === 'revenge' ? { dollars: { label: labels[id], amount: 120, n_trades: 40 } } : { verdict: 'not_distinguishable' }))), fmt);
+const gain = (id) => ({ dollars: { label: labels[id], amount: 120, n_trades: 40 } });
+out.uncovered2 = W.page1Lines(R(all.map((id) => H(id, id === 'revenge' || id === 'tilt' ? gain(id) : { verdict: 'not_distinguishable' }))), fmt);
+out.mixed = W.page1Lines(R(all.map((id) => H(id, id === 'revenge' ? gain(id) : id === 'tilt' ? { direction: 'opposite' } : { verdict: 'not_distinguishable' }))), fmt);
+try { W.page1Lines(R(all.map((id) => H(id, id === 'revenge' ? {} : { verdict: 'not_distinguishable' }))), fmt); out.inconsistent = 'no error'; }
+catch (e) { out.inconsistent = e.message; }
+out.pending = [W.NO_LOSS_ONE, W.NO_LOSS_MANY];
 out.none = W.page1Lines(R(all.map((id) => H(id, { verdict: 'not_distinguishable' }))), fmt);
 const tf = R(all.map((id) => H(id, id === 'revenge' || id === 'size_up' ? { verdict: 'too_few', p_raw: null, p_holm: null, n_perm: null, n_a: 12, n_a_compared: id === 'size_up' ? 9 : null } : {})));
 out.coverage = W.coverageLines(tf);
@@ -76,7 +82,18 @@ def test_page1_and_coverage_wording_is_the_amendments():
     assert s["opp1"][1] == "The distinguishable gap runs the opposite way to its pattern name, so no pattern is shown first."
     assert s["opp2"][0].startswith("2 of the 4 patterns tested in this file are distinguishable")
     assert s["opp2"][1] == "The distinguishable gaps run the opposite way to their pattern names, so no pattern is shown first."
-    assert len(s["uncovered"]) == 1          # PLAN CONFLICT case: no false "opposite way" line
+    # PLAN CONFLICT §7.1 (pending Architect sign-off): a gap in the habit's own direction that did not
+    # total a loss. The stats Coder's sentence, word for word; never the false "opposite way" line.
+    assert s["uncovered"] == [s["focus"][0], "The distinguishable gap in this pattern's direction did not total a loss, so no "
+                              "pattern is shown first."]
+    assert s["uncovered2"][0].startswith("2 of the 4 patterns tested in this file are distinguishable")
+    assert s["uncovered2"][1] == ("The distinguishable gaps in these patterns' directions did not total a loss, so no pattern "
+                                  "is shown first.")
+    assert s["mixed"][1] == s["uncovered"][1] and len(s["mixed"]) == 2
+    assert "opposite way" not in " ".join(s["uncovered"] + s["uncovered2"] + s["mixed"])
+    assert s["inconsistent"] == "page1Lines: focus is null but a habit-direction gap totalled a loss (D-6)"
+    for t in s["pending"]:
+        assert lint_text(t) == [] and lint_text(t, "pending", paid=True) == [], t
     assert s["none"] == ["No pattern in this file is distinguishable from noise.",
                          "That does not show the patterns are absent; it means this file cannot tell them apart from chance."]
     assert s["coverage"] == ["2 of the 4 patterns could be tested. Each one compares two groups of at least 30 trades.",
