@@ -59,6 +59,12 @@ PAID_PAGES = [
      "description": "Your donttrade habit report, built from your own trade file."},
 ]
 PAGES += PAID_PAGES
+# Flag-on /pricing/: Traders | Firms tabs. Its firm and shared sections are lifted
+# word for word from today's live page (see lift_sections), so with the flag off the
+# old page passes through untouched.
+PAGES.append({"template": "pages/pricing_paid.html", "path": "/pricing/", "requires_flag": "paid_report",
+              "scripts": ["/static/js/tabs.js", "/static/js/print.js"], "title": "Pricing — donttrade",
+              "description": "Published prices in USD. Every price on this site comes from one list."})
 
 # Paths that may exist only when paid_report = true.
 PAID_ONLY_PATHS = ["/welcome/", "/restore/", "/report/"]
@@ -97,7 +103,34 @@ def load_config():
             if PLACEHOLDER_RE.search(private[k]) and os.environ.get("DT_ALLOW_PLACEHOLDERS") != "1":
                 die(f"private.toml {k} still holds a placeholder; fill it in "
                     "(or set DT_ALLOW_PLACEHOLDERS=1 for a local test build only)")
+    if flags["paid_report"]:
+        mode = cfg["stripe"]["mode"]
+        if mode not in ("test", "live"):
+            die(f"[stripe] mode must be test or live, not {mode!r}")
+        for p in prices["products"]:
+            if p["requires_flag"] == "paid_report" and p["id"] == "report39":
+                if not p["stripe_link_" + mode] and os.environ.get("DT_ALLOW_PLACEHOLDERS") != "1":
+                    die(f"paid_report = true but prices.json has no stripe_link_{mode} for report39")
     return cfg, prices, private
+
+
+def lift_sections(rel_path):
+    """{id: html} for each <h2 id=...> section of an old docs/ page's <main>, verbatim.
+
+    A section runs from its <h2 id> to the next <h2 id> (or the end of <main>). Key
+    "_intro" holds what comes before the first one."""
+    with open(os.path.join(DOCS, rel_path), encoding="utf-8") as f:
+        html = f.read()
+    m = re.search(r"(?s)<main[^>]*>(.*)</main>", html)
+    if not m:
+        die(f"lift: no <main> in docs/{rel_path}")
+    main = m.group(1)
+    cuts = [(mm.start(), mm.group(1)) for mm in re.finditer(r'<h2[^>]*\sid="([^"]+)"', main)]
+    out = {"_intro": main[: cuts[0][0]] if cuts else main}
+    for k, (start, sid) in enumerate(cuts):
+        end = cuts[k + 1][0] if k + 1 < len(cuts) else len(main)
+        out[sid] = main[start:end]
+    return out
 
 
 def usd(n):
@@ -205,7 +238,8 @@ def build():
     products = {p["id"]: p for p in prices["products"]}
     base_ctx = {"site": cfg["site"], "flags": flags, "nav": cfg["nav"], "footer": cfg["footer"],
                 "legal": cfg["legal"], "forms": cfg["forms"], "analytics": cfg["analytics"],
-                "worker": cfg["worker"], "prices": prices, "products": products, "private": private}
+                "worker": cfg["worker"], "prices": prices, "products": products, "private": private,
+                "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections}
     for rel, page in sorted(owned.items()):
         page = {"scripts": [], "modules": [], "og_image": "/assets/og/default.png", **page}
         html = env.get_template(page["template"]).render(page=page, csp=csp_for(page, cfg), **base_ctx)

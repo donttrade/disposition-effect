@@ -1,0 +1,29 @@
+{#- "Before you pay" (GET-PAID L1 / O. Reg. 17/05 s. 32, shown before Stripe, printable).
+    Rendered only when paid_report = true; the supplier block comes from the gitignored private.toml. -#}
+{%- set r = products["report39"] %}
+<section class="notice" id="before-you-pay" aria-labelledby="byp-h" data-requires-flag="paid_report">
+  <h3 id="byp-h">Before you pay</h3>
+  <dl class="byp">
+    <dt>Supplier</dt><dd>{{ private.seller_legal_name }}, operating as {{ site.name }}</dd>
+    <dt>Business address</dt><dd>{{ private.premises_address }}</dd>
+    <dt>Phone</dt><dd>{{ private.phone }}</dd>
+    <dt>Email</dt><dd><a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a></dd>
+    <dt>What you buy</dt><dd>{{ r.name }}: a report on habits in your own past trades, built from a trade file you choose.
+      It describes what happened; it does not tell you what to trade.</dd>
+    <dt>Technical requirements</dt><dd>A current version of Chrome, Edge, Firefox or Safari. Files: MetaTrader 5 or 4 HTML report,
+      Interactive Brokers Flex Query CSV, Tradovate Orders CSV, or the donttrade CSV template. Your browser reads the file and sends
+      our server only stripped trade numbers (no names, account numbers or symbols) to compute the report.</dd>
+    <dt>Price</dt><dd>{{ r.price_usd|usd }} USD, one time. No sales tax is charged. Total: {{ r.price_usd|usd }} USD.</dd>
+    <dt>Currency and fees</dt><dd>Charged in US dollars. Stripe may show an amount in your own currency, and your card issuer may
+      charge a currency conversion fee.</dd>
+    <dt>Payment</dt><dd>Card, through Stripe's checkout page.</dd>
+    <dt>When you get it</dt><dd>Right after payment, in your browser. One re-test is included, to run 30 to 60 days later.
+      Access lasts 90 days.</dd>
+    <dt>Restrictions</dt><dd>Two runs: the report and one re-test of the same account (the re-test file has to share at least
+      half of the first file's trades). At most 20,000 trades per file. A habit with fewer than 30 trades in either group is
+      shown as "not enough trades to tell".</dd>
+    <dt>Refunds</dt><dd>Full refund if you ask within 14 days of buying: <a href="/terms/#cancellation">cancellation and refund terms</a>.</dd>
+  </dl>
+  <p class="small">{{ legal.disclaimer_short }}</p>
+  <p class="no-print"><button class="btn btn-secondary" type="button" data-print>Print this</button></p>
+</section>

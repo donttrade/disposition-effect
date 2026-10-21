@@ -78,7 +78,7 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values):
         out.append(("tally", where, "tally.so"))
     from harvest_prices import amounts_in
     for a in amounts_in(html):
-        if a not in allowed_amounts:
+        if a not in allowed_amounts and a != 0:  # "$0" (free) is not a price
             out.append(("price_literal", where, f"${a:g} is not in prices.json"))
     for rx in SECRETS:
         if rx.search(html):

@@ -30,7 +30,11 @@
     var start = tabs[0];
     var hash = window.location.hash.slice(1);
     tabs.forEach(function (t) { if (hash && t.getAttribute('data-hash') === hash) start = t; });
+    // A link to any id inside a panel (e.g. /pricing/#copy-leader) opens that panel.
+    var target = hash ? document.getElementById(hash) : null;
+    if (target) tabs.forEach(function (t) { var p = panelOf(t); if (p && p.contains(target)) start = t; });
     select(start, false);
+    if (target && start.getAttribute('data-hash') !== hash) target.scrollIntoView();
   }
   function run() { Array.prototype.forEach.call(document.querySelectorAll('[role="tablist"]'), init); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();

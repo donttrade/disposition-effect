@@ -1,6 +1,19 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="wrap">
+  {%- if flags.trader_first_home %}
+  <section class="section" aria-labelledby="hero" data-requires-flag="paid_report">
+    <div class="grid">
+      <div class="span-7">
+        <h1 id="hero">See where your trades leave your plan.</h1>
+        <p>A habit report built from your own trade history. It measures behaviour, like holding losers longer than winners. It doesn't tell you what to trade.</p>
+        <p><a class="btn" href="/pricing/#traders">Get the habit report — {{ products["report39"].price_usd|usd }}</a> <a class="btn btn-secondary" href="/tools/trade-stats/">Free trade stats</a></p>
+        <p class="small muted">One-time price. Not investment advice.</p>
+        <p><a href="/for-firms/">For firms: measure the gap between your traders’ plans and their trades</a></p>
+      </div>
+    </div>
+  </section>
+  {%- else %}
   <section class="section" aria-labelledby="hero">
     <div class="grid">
       <div class="span-7">
@@ -10,6 +23,7 @@
       </div>
     </div>
   </section>
+  {%- endif %}
   <div class="notice"><strong>v2 preview</strong><p>Placeholder home page in the new design. The full home page is built in step 13.</p></div>
 </div>
 {% endblock %}

@@ -262,6 +262,12 @@ fieldset { border: 0; padding: 0; margin: 0 0 var(--s3); }
 }
 .dropzone.is-over { border-color: var(--rust); }
 
+/* ------------------------------------------------------------------ before-you-pay */
+.byp { display: grid; grid-template-columns: minmax(0, 11rem) minmax(0, 1fr); gap: 6px var(--s2); margin: 0 0 var(--s2); }
+.byp dt { font-weight: 600; }
+.byp dd { margin: 0; }
+@media (max-width: 600px) { .byp { grid-template-columns: 1fr; } .byp dd { margin-bottom: var(--s1); } }
+
 /* ------------------------------------------------------------------ print */
 @media print {
   .site-header, .site-footer, .no-print, .theme-toggle { display: none !important; }
