@@ -232,7 +232,7 @@ fieldset { border: 0; padding: 0; margin: 0 0 var(--s3); }
 .loss { color: var(--loss); }
 
 /* ------------------------------------------------------------------ stat rows */
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: var(--s2); margin: 0 0 var(--s3); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--s2); margin: 0 0 var(--s3); }
 .stat { border-top: 2px solid var(--border); padding-top: var(--s1); }
 .stat dt { color: var(--muted); font-size: var(--fs-0); }
 .stat dd { margin: 0; font-family: var(--font-mono); font-size: var(--fs-3); font-variant-numeric: tabular-nums; }
@@ -275,3 +275,35 @@ fieldset { border: 0; padding: 0; margin: 0 0 var(--s3); }
   a { color: #000; }
   .section { padding: 12px 0; }
 }
+
+/* ------------------------------------------------------------------ pages and tools (steps 10–17) */
+.lede { font-size: var(--fs-2); line-height: 1.45; max-width: var(--prose); }
+@media (max-width: 600px) { .lede { font-size: var(--fs-1); } }
+.crumb { margin: var(--s3) 0 0; }
+.crumb + h1 { margin-top: var(--s1); }
+.btn-row { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s2); align-items: center; }
+.tool { margin: var(--s4) 0; }
+.tool-out { margin-top: var(--s4); }
+.tool-out > h2 { margin-top: 0; }
+.tool-out h3 { margin-top: var(--s5); }
+.teaser { margin-top: var(--s4); }
+.disclaimer { font-size: var(--fs-0); color: var(--muted); max-width: var(--prose); border-top: 1px solid var(--border); padding-top: var(--s1); }
+/* Numbers read best close to their labels: results tables and the equity chart are
+   capped instead of stretching across 1200 px (SVG text also scales with the width). */
+.tool-out .table-wrap, .tool-out .chart { max-width: 820px; }
+.tool-out .chart svg { max-width: 760px; }
+/* Table words wrap at spaces, never mid-word (body uses overflow-wrap: anywhere for long URLs). */
+.table-wrap th, .table-wrap td { overflow-wrap: normal; } /* inside a scroll container, so a wide table scrolls */
+.tool-out tbody th[scope="row"] { min-width: 9rem; }
+@media (max-width: 600px) { .tool-out td.num { white-space: normal; } .stat dd { font-size: var(--fs-2); } }
+.nowrap { white-space: nowrap; }
+/* The file picker is the native input (keyboard and screen readers handle it for free);
+   only its button is styled. */
+.file-pick { max-width: 32rem; margin: 0 0 var(--s2); }
+.file-pick label { display: block; font-weight: 600; margin-bottom: 4px; }
+.file-pick input[type="file"] { background: var(--bg); padding: 6px; }
+input[type="file"]::file-selector-button {
+  min-height: 36px; margin-right: var(--s2); padding: 6px 16px; border: 2px solid var(--rust); border-radius: var(--radius);
+  background: var(--rust); color: var(--on-rust); font: 600 var(--fs-1)/1.2 var(--font-sans); cursor: pointer;
+}
+input[type="file"]:focus-visible { outline: 2px solid var(--rust); outline-offset: 2px; }

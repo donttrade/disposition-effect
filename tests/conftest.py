@@ -34,3 +34,20 @@ def browser():
         b = p.chromium.launch()
         yield b
         b.close()
+
+
+@pytest.fixture(scope="session")
+def built_site(tmp_path_factory):
+    """A flag-off build of the site in a temp dir, served on 127.0.0.1. {out, url}."""
+    import subprocess
+    import sys
+    out = tmp_path_factory.mktemp("site") / "_site"
+    env = {**os.environ, "DT_OUT": str(out)}
+    env.pop("DT_DEV", None)
+    r = subprocess.run([sys.executable, os.path.join(REPO, "site", "build.py")], env=env, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    handler = functools.partial(_Quiet, directory=str(out))
+    srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    yield {"out": out, "url": f"http://127.0.0.1:{srv.server_address[1]}"}
+    srv.shutdown()
