@@ -440,9 +440,11 @@ def footer_privacy(flags):
         parts = ["This site sets no cookies and runs no analytics."]
     if flags["paid_report"]:
         # D4: true once /welcome/ keeps the access key (localStorage and IndexedDB)
+        # NIT 13: complete, matching /privacy/#report (the fingerprints kept for the re-test match)
         parts.append("It stores your light/dark choice in your own browser and, if you buy the habit report, your "
-                     "access key there too. For that report your browser sends only stripped trade numbers, which our "
-                     "server does not keep; your file itself is not uploaded.")
+                     "access key there too. For that report your browser sends only stripped trade numbers; our "
+                     "server does not keep them, only scrambled fingerprints to check that a re-test is on the same "
+                     "history. Your file itself is not uploaded.")
     else:
         parts.append("It stores only your light/dark choice, in your own browser.")
     if flags["paid_report"] or flags["pilot_checkout"]:

@@ -638,3 +638,18 @@ def test_nit2_lint_reads_dt_private_toml_and_names_the_switch(tmp_path):
 def test_nit16_lint_on_a_missing_directory_is_one_clear_line(tmp_path):
     r = _lint_cli(str(tmp_path / "nonexistent"))
     assert r.returncode == 2 and "no such directory" in r.stdout and "page missing" not in r.stdout, r.stdout
+
+
+# ------------------------------------------------------------------ NIT 8, 13: welcome and footer wording
+def test_nit8_welcome_does_not_assume_a_stripe_receipt():
+    js = open(os.path.join(REPO, "site", "static", "js", "paid", "welcome.js"), encoding="utf-8").read()
+    assert "receipt" not in L.js_strings(js).lower()
+    assert "with the date and amount of your payment" in js
+
+
+def test_nit13_paid_footer_mentions_the_kept_fingerprints(paid_site):
+    line = B.footer_privacy({"paid_report": True, "pilot_checkout": False, "analytics": False})
+    assert "does not keep them, only scrambled fingerprints" in line
+    privacy = L.visible_text((paid_site["out"] / "privacy" / "index.html").read_text(encoding="utf-8"))
+    assert "scrambled fingerprints of the trades in your first report" in privacy   # what the footer now points at
+    assert line in (paid_site["out"] / "about" / "index.html").read_text(encoding="utf-8")
