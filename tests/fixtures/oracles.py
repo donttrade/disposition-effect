@@ -353,3 +353,35 @@ ORACLES["mt5/fb1_carried_add_two_outs.csv"] = {
     "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_OPEN_AT_START": 1},
     "skipped": {},
 }
+
+# Tester fix round 2, F-D2 (t_b1b.py): reversal codes, same-second fills and an MT5 hedge on a
+# carried position. Nothing is guessed: what the file cannot show is left out and flagged.
+ORACLES["ibkr/fd2_carried_reversal_co.csv"] = {
+    # AAPL SELL 200 "C;O" 09-02 with nothing opened in the file: it closes a pre-file long of
+    # unknown size, so the short it opens has unknown size too. BUY 100 C 09-03 closes that short.
+    # Both left out: W_OPEN_AT_START 1 (the long), W_AMBIGUOUS_FILLS 1 (AAPL). Only MSFT (+100, 1 day).
+    "trades": [dict(symbol="MSFT", dir="long", qty=10, pnl=100.0, hold_s=86400)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_OPEN_AT_START": 1, "W_AMBIGUOUS_FILLS": 1},
+    "skipped": {},
+}
+ORACLES["ibkr/fd2_same_second_carried_close.csv"] = {
+    # AAPL BUY 100 O and SELL 100 C in the same second 09-10, SELL 100 C 09-12. In file order the
+    # 09-12 sell closes a pre-file long (all AAPL left out); with the sell first, the 09-10 sell
+    # closes it and 09-10 -> 09-12 is a trade. The file cannot say which: no AAPL trade, and
+    # never the old 0-second +800 trade. W_OPEN_AT_START 1, W_AMBIGUOUS_FILLS 1. Only MSFT.
+    "trades": [dict(symbol="MSFT", dir="long", qty=10, pnl=100.0, hold_s=86400)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_OPEN_AT_START": 1, "W_AMBIGUOUS_FILLS": 1},
+    "skipped": {},
+}
+ORACLES["mt5/fd2_hedge_carried_short.csv"] = {
+    # buy in 1 @1.0900 09:00 (a new long while a pre-file short is open: a hedge), buy out 10:00
+    # closes the pre-file short (left out), sell out @1.0950 12:00 closes the long: profit 50,
+    # 10800 s. W_HEDGING 1 (the carried short was closed while the long was open).
+    "trades": [dict(symbol="EURUSD", dir="long", qty=1, pnl=50.0, hold_s=10800)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_HEDGING": 1, "W_OPEN_AT_START": 1},
+    "skipped": {},
+}
+# sell 2.00 "in/out" with nothing opened in the file closes a pre-file long of unknown size, so
+# the short it opens (closed by buy out 1.00) has unknown size: nothing is left to analyse. The
+# message names both causes (test_engine_golden checks the text).
+ERRORS["mt5/fd2_inout_reversal_on_carried.csv"] = ("E_NO_CLOSED_TRADES", None, None)

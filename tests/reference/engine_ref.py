@@ -891,7 +891,7 @@ def parse_mt(tables):
                 execs.append({"row": row, "ts": ts, "symbol": symbol, "side": side, "qty": qty, "price": price,
                               "fee": fee, "currency": None, "oc": oc, "pos_id": pos if pos != "" else None,
                               "pnl_reported": profit + credit, "multiplier": 1, "_unit": "account",
-                              "_fx": None})
+                              "_fx": None, "_rev": d == "in/out"})
             else:
                 size_field = "volume" if kind == "mt5_positions_closed" else "size"
                 ot = parse_date(cell(r, m, "open_time"), "mt", row, "open_time")
@@ -1083,7 +1083,7 @@ def parse_ibkr(rows, hi, m):
             fx = req_number(cell(r, m, "fx"), row, "fx")
         e = {"row": row, "ts": ts, "symbol": symbol, "side": side, "qty": qty, "price": price,
              "fee": fee, "currency": cur, "oc": oc, "pos_id": None, "pnl_reported": realized,
-             "multiplier": mult, "_unit": cur if cur else "points", "_fx": fx}
+             "multiplier": mult, "_unit": cur if cur else "points", "_fx": fx, "_rev": has_o and has_c}
         (cancels if is_cancel else execs).append(e)
     return {"executions": _apply_cancels(execs, cancels, skipped), "roundtrips": [], "skipped": skipped, "extra": {}}
 
@@ -1176,10 +1176,15 @@ def chrono_order(execs):
 
 
 # ----------------------------------------------------------------- positions opened before the file
-# Mirrors lotKind(), lotWalk() and preFileLots() in trades.js. With open/close codes, a
-# close bigger than the units opened in the file (per direction) closes a lot from before
-# the file; every fill of that direction from the start of the file through the LAST such
-# close is left out (the position was never flat), counted once per symbol and direction.
+# Mirrors lotKind(), lotWalk(), preFileLots(), nettingWalk(), tieOrder(), tradeKey() and
+# buildTrades() in trades.js, operation for operation; the comments there explain the
+# rules. In short: with open/close codes, a close bigger than the units opened in the file
+# (per direction) closes a lot from before the file, and everything from the start of the
+# file through the last such close is left out (netting: the whole stretch up to a flat
+# count; MT5 hedging: that direction's fills). A reversal with nothing in the file to close
+# opens a lot of unknown size; one that closed more than the file opened shows when the
+# first direction opens again. Same-second fills are also read closes-first and
+# opens-first; only trades all readings agree on are kept.
 
 LONG = 0
 SHORT = 1
@@ -1193,60 +1198,132 @@ def lot_kind(e):
     return "reverse" if e.get("_rev") else "net"
 
 
-def lot_walk(execs, lst):
+def lot_walk(execs, lst, allow_hedging):
+    n = len(lst)
     inv = [0, 0]
-    last_excess = [-1, -1]
+    spans = [[], []]
+    unknown_from = [-1, -1]
+    rev_at = [-1, -1]
+    carried = [False, False]
+    flat = [True] * n
+    st = {"ambiguous": False, "hedged": False, "hedges": 0, "signs": 0}
+
+    def excess(d, i):
+        st["signs"] += 1
+        if unknown_from[d] >= 0:
+            spans[d].append((unknown_from[d], i))
+            unknown_from[d] = -1
+        else:
+            spans[d].append((0, i))
+            carried[d] = True
+            if allow_hedging and inv[1 - d] > 0:
+                st["hedged"] = True
+                st["hedges"] += 1
+        inv[d] = 0
+        rev_at[d] = -1
+
     for i, k in enumerate(lst):
         e = execs[k]
         q = round_half_away(e["qty"] * UNIT)
         if q == 0:
+            flat[i] = i == 0 or flat[i - 1]
             continue
         opens = LONG if e["side"] == "buy" else SHORT
         closes = 1 - opens
         kind = lot_kind(e)
+        if kind == "open" and (inv[closes] > 0 or unknown_from[closes] >= 0):
+            if rev_at[closes] >= 0 or unknown_from[closes] >= 0:
+                spans[opens].append((0, i - 1))
+                spans[closes].append((0, i - 1))
+                if rev_at[closes] >= 0:
+                    carried[opens] = True
+                st["signs"] += 1
+                inv[closes] = 0
+                rev_at[closes] = -1
+                unknown_from[closes] = -1
+                st["ambiguous"] = True
+            elif allow_hedging:
+                st["hedged"] = True
         if kind == "open":
             inv[opens] += q
         elif kind == "close":
             if q <= inv[closes]:
                 inv[closes] -= q
+                if inv[closes] == 0:
+                    rev_at[closes] = -1
             else:
-                last_excess[closes] = i
-                inv[closes] = 0
+                excess(closes, i)
+        elif kind == "reverse" and inv[closes] == 0:
+            excess(closes, i)
+            if unknown_from[opens] < 0:
+                unknown_from[opens] = i
+            st["ambiguous"] = True
         else:
             c = min(q, inv[closes])
             inv[closes] -= c
+            if inv[closes] == 0:
+                rev_at[closes] = -1
+            if kind == "reverse" and q > c and inv[opens] == 0:
+                rev_at[opens] = i
             inv[opens] += q - c
+        flat[i] = inv[LONG] == 0 and inv[SHORT] == 0 and unknown_from[LONG] < 0 and unknown_from[SHORT] < 0
+    for d in (LONG, SHORT):
+        if unknown_from[d] >= 0:
+            st["ambiguous"] = True
     excluded = set()
-    for i, k in enumerate(lst):
-        e = execs[k]
-        opens = LONG if e["side"] == "buy" else SHORT
-        kind = lot_kind(e)
+    if st["hedged"]:
         for d in (LONG, SHORT):
-            touches = (opens == d) if kind == "open" else (opens != d) if kind == "close" else True
-            if touches and i <= last_excess[d]:
-                excluded.add(k)
-    return {"excluded": excluded, "carried": [last_excess[LONG] >= 0, last_excess[SHORT] >= 0]}
+            if unknown_from[d] >= 0:
+                spans[d].append((unknown_from[d], n - 1))
+        for i, k in enumerate(lst):
+            e = execs[k]
+            opens = LONG if e["side"] == "buy" else SHORT
+            kind = lot_kind(e)
+            for d in (LONG, SHORT):
+                if kind == "open":
+                    touches = opens == d
+                elif kind == "close":
+                    touches = opens != d
+                else:
+                    touches = True
+                if touches and any(a <= i <= b for a, b in spans[d]):
+                    excluded.add(k)
+    else:
+        last = -1
+        for d in (LONG, SHORT):
+            for _a, b in spans[d]:
+                last = max(last, b)
+        if last >= 0:
+            while last < n - 1 and not flat[last]:
+                last += 1
+            for i in range(last + 1):
+                excluded.add(lst[i])
+    return {"excluded": excluded, "carried": carried, "ambiguous": st["ambiguous"], "hedges": st["hedges"],
+            "signs": st["signs"]}
 
 
-def pre_file_lots(execs, order):
+def pre_file_lots(execs, order, allow_hedging):
     by_sym = {}
     for k in order:
         by_sym.setdefault(execs[k]["symbol"], []).append(k)
     excluded = set()
+    ambiguous_syms = set()
+    signs = {}
     open_at_start = 0
-    for lst in by_sym.values():
-        w = lot_walk(execs, lst)
+    hedges = 0
+    for sym, lst in by_sym.items():
+        w = lot_walk(execs, lst, allow_hedging)
         excluded |= w["excluded"]
         open_at_start += sum(1 for c in w["carried"] if c)
-    return {"excluded": excluded, "open_at_start": open_at_start}
+        if w["ambiguous"]:
+            ambiguous_syms.add(sym)
+        hedges += w["hedges"]
+        signs[sym] = w["signs"]
+    return {"excluded": excluded, "open_at_start": open_at_start, "ambiguous_syms": ambiguous_syms,
+            "hedges": hedges, "signs": signs}
 
 
-def build_trades(execs, reported_mode, detect_hedging=False):
-    """Flat-to-flat round trips per symbol. reported_mode: None | "gross" | "net".
-    The netting walk runs on the fills left after pre_file_lots()."""
-    order = chrono_order(execs)
-    lots = pre_file_lots(execs, order)
-    excluded = lots["excluded"]
+def netting_walk(execs, order, excluded, detect_hedging):
     pos = {}
     cur = {}
     done = []
@@ -1320,6 +1397,74 @@ def build_trades(execs, reported_mode, detect_hedging=False):
             p = s * rem_units
         pos[sym] = p
     open_n = sum(1 for v in pos.values() if v != 0)
+    return {"done": done, "open_n": open_n, "hedging": hedging}
+
+
+TIE_RANK = {"close": 0, "reverse": 1, "net": 1, "open": 2}
+
+
+def tie_order(execs, order, opens_first):
+    sign = -1 if opens_first else 1
+    return sorted(order, key=lambda k: (execs[k]["ts"], sign * TIE_RANK[lot_kind(execs[k])]))
+
+
+def trade_key(t):
+    def r(x):
+        return math.floor(x * 1e6 + 0.5)
+    return (t["symbol"], t["dir"], t["open_ts"], t["close_ts"], t["peak"], t["fills"], r(t["entry_qty"]),
+            r(t["entry_not"]), r(t["exit_qty"]), r(t["exit_not"]), r(t["fees"]), r(t["rep_sum"]), t["rep_missing"])
+
+
+def build_trades(execs, reported_mode, detect_hedging=False):
+    """Flat-to-flat round trips per symbol. reported_mode: None | "gross" | "net"."""
+    order = chrono_order(execs)
+    lots = pre_file_lots(execs, order, detect_hedging)
+    walk = netting_walk(execs, order, lots["excluded"], detect_hedging)
+    done = walk["done"]
+    excluded = set(lots["excluded"])
+    ambiguous_syms = set(lots["ambiguous_syms"])
+    others = []
+    for o in (tie_order(execs, order, False), tie_order(execs, order, True)):
+        if o == order or any(o == x["order"] for x in others):
+            continue
+        lo = pre_file_lots(execs, o, detect_hedging)
+        others.append({"order": o, "lots": lo, "done": netting_walk(execs, o, lo["excluded"], detect_hedging)["done"]})
+    if others:
+        def keys_of(lst):
+            m = {}
+            for t in lst:
+                m.setdefault(t["symbol"], set()).add(trade_key(t))
+            return m
+        mine = keys_of(done)
+        for x in others:
+            x["keys"] = keys_of(x["done"])
+        lost = set()
+        drop_all = set()
+        fair_of = {}
+        for sym in lots["signs"]:
+            fewest = min([lots["signs"][sym]] + [x["lots"]["signs"][sym] for x in others])
+            fair = [x for x in others if x["lots"]["signs"][sym] == fewest]
+            fair_of[sym] = fair
+            for x in fair:
+                for k in x["order"]:
+                    if execs[k]["symbol"] == sym and k in x["lots"]["excluded"]:
+                        excluded.add(k)
+            if lots["signs"][sym] > fewest:
+                lost.add(sym)
+                drop_all.add(sym)
+                continue
+            a = mine.get(sym, set())
+            for x in fair:
+                if a != x["keys"].get(sym, set()):
+                    lost.add(sym)
+        if lost:
+            done = [t for t in done if t["symbol"] not in lost or (
+                t["symbol"] not in drop_all and
+                all(trade_key(t) in x["keys"].get(t["symbol"], set()) for x in fair_of[t["symbol"]]))]
+            ambiguous_syms |= lost
+            for k, e in enumerate(execs):
+                if e["symbol"] in lost:
+                    excluded.add(k)
     trades = []
     for t in done:
         entry_vwap = t["entry_not"] / t["entry_qty"]
@@ -1344,7 +1489,8 @@ def build_trades(execs, reported_mode, detect_hedging=False):
                        "entry_vwap": entry_vwap, "exit_vwap": exit_vwap, "pnl": pnl, "pnl_gross": gross,
                        "fees": t["fees"], "pnl_source": src, "pnl_unit": t["unit"], "fills_n": t["fills"],
                        "currency": t["currency"], "_fx": t["fx"], "_seq": t["seq"]})
-    return trades, open_n, hedging, lots["open_at_start"], excluded
+    hedging = (lots["hedges"] if detect_hedging else 0) + walk["hedging"]
+    return trades, walk["open_n"], hedging, lots["open_at_start"], len(ambiguous_syms), excluded
 
 
 def roundtrip_trades(rts, start_seq):
@@ -1476,13 +1622,14 @@ def parse_file(data):
     open_n = extra.get("open_positions", 0)
     hedging = 0
     open_at_start = 0
+    ambiguous = 0
     if fmt == "mt5" and extra.get("has_closed_positions"):
         trades = roundtrip_trades(res["roundtrips"], 0)
     elif res["roundtrips"]:
         trades = roundtrip_trades(res["roundtrips"], 0)
         executions = roundtrip_executions(res["roundtrips"])
     else:
-        trades, o, hedging, open_at_start, excluded = build_trades(executions, mode, detect_hedging=(fmt == "mt5"))
+        trades, o, hedging, open_at_start, ambiguous, excluded = build_trades(executions, mode, detect_hedging=(fmt == "mt5"))
         open_n += o
         # fills of positions opened before the file are left out of every later step (PGR/PLR too)
         if excluded:
@@ -1493,6 +1640,8 @@ def parse_file(data):
         warnings.append(warning("W_OPEN_POSITIONS", open_n))
     if open_at_start:
         warnings.append(warning("W_OPEN_AT_START", open_at_start))
+    if ambiguous:
+        warnings.append(warning("W_AMBIGUOUS_FILLS", ambiguous))
     pts = 0
     if fmt == "tradovate_orders":
         for t in trades:
