@@ -273,3 +273,33 @@ def test_lint_refuses_waiving_dispute_rights(bad):
 ])
 def test_lint_waive_rule_has_no_false_positive(ok):
     assert L.waive_dispute_claims(L.normalise(ok), "/x/") == []
+
+
+# ------------------------------------------------------------------ 3. re-test fingerprint retention (privacy page)
+PRIVACY_SENTENCE = (
+    "To check that a re-test uses the same trading history as your first report, we keep a scrambled fingerprint of "
+    "each trade row (a keyed hash: it cannot be turned back into your trades without our secret key, but it is still "
+    "linked to your purchase). We delete these fingerprints as soon as your included re-test has run, or 75 days after "
+    "your purchase, whichever comes first. If you have an active Habit Tracker, we keep them while it is active and "
+    "delete them 15 days after it ends.")
+
+
+@pytest.mark.parametrize("combo", ["paid", "both"])
+def test_privacy_states_the_retention_rule_word_for_word(builds, combo):
+    h = _page(builds[combo][0], "/privacy/")
+    section = h[h.index('<h2 id="report">'):h.index('<h2 id="forms">')]
+    p = re.search(r'(?s)<p id="fingerprints">(.*?)</p>', section)
+    assert p and _text(p.group(1)) == PRIVACY_SENTENCE
+    assert "90 days" not in _text(section)
+
+
+def test_retention_sentence_only_where_the_paid_report_exists(builds, built_site):
+    for out in (built_site["out"], builds["pilot"][0]):
+        assert "fingerprint" not in _page(out, "/privacy/")
+
+
+def test_french_privacy_section_is_marked_translation_pending(builds):
+    src = open(os.path.join(REPO, "site", "templates", "pages", "fr", "confidentialite.html"), encoding="utf-8").read()
+    assert "TRANSLATION PENDING" in src and "do not machine-translate" in src
+    fr = _page(builds["paid"][0], "/fr/confidentialite/")
+    assert "75" not in _text(fr) and "TRANSLATION PENDING" not in fr     # nothing machine-translated, no marker shown
