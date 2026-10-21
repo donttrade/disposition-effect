@@ -620,3 +620,56 @@ pre { font-family: var(--font-mono); font-size: var(--fs-0); background: var(--s
 .lifted .ls-m0 { margin: 0 !important; }
 .lifted .ls-boxhead { margin: 0 0 8px !important; padding: 0 !important; border: 0 !important; font-size: var(--fs-2) !important; }
 .lifted .ls-mt24 { margin-top: 24px !important; }
+
+/* ------------------------------------------------------------------ motion (ARCHITECT-MOTION-PLAN 2026-10-21)
+   Every hidden or moving state below needs .dt-motion on <html> (theme.js adds it before first paint, only
+   when prefers-reduced-motion is no-preference) or a class that motion.js adds. No JS: nothing is hidden.
+   Only transform and opacity animate (plus the discrete visibility failsafe and the colour transitions). */
+:root {
+  --ease-out: cubic-bezier(0.25, 1, 0.5, 1);    /* easeOutQuart */
+  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1); /* easeInOutCubic */
+  --dur-hover: 160ms;
+  --dur-reveal: 500ms;
+  --dur-draw: 1000ms;
+  --rise: 16px;
+  --lift-shadow: 0 6px 16px -6px rgb(22 24 28 / 0.35);
+}
+@media (max-width: 600px) { :root { --rise: 12px; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --lift-shadow: 0 6px 16px -6px rgb(0 0 0 / 0.7); } }
+:root[data-theme="dark"] { --lift-shadow: 0 6px 16px -6px rgb(0 0 0 / 0.7); }
+
+/* M1 button lift: buttons only, no card lift (plan D4). The shadow sits on ::after and only its opacity
+   animates. The transition keeps the colour transitions of the base rule above (the shorthand replaces it). */
+.btn, .lifted .btn-2, .lifted .subscribe button, .lifted .next-block button { position: relative; }
+.btn::after, .lifted .btn-2::after, .lifted .subscribe button::after, .lifted .next-block button::after {
+  content: ""; position: absolute; inset: -2px; border-radius: inherit; box-shadow: var(--lift-shadow);
+  opacity: 0; pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .btn, .lifted .btn-2, .lifted .subscribe button, .lifted .next-block button {
+    transition: color 150ms, background-color 150ms, border-color 150ms, transform var(--dur-hover) var(--ease-out); }
+  .btn::after, .lifted .btn-2::after, .lifted .subscribe button::after, .lifted .next-block button::after {
+    transition: opacity var(--dur-hover) var(--ease-out); }
+  .btn:focus-visible:not([disabled]):not([aria-disabled="true"]),
+  .lifted .btn-2:focus-visible:not([disabled]):not([aria-disabled="true"]),
+  .lifted .subscribe button:focus-visible:not([disabled]):not([aria-disabled="true"]),
+  .lifted .next-block button:focus-visible:not([disabled]):not([aria-disabled="true"]) { transform: translateY(-1px); }
+  .btn:active:not([disabled]):not([aria-disabled="true"]),
+  .lifted .btn-2:active:not([disabled]):not([aria-disabled="true"]),
+  .lifted .subscribe button:active:not([disabled]):not([aria-disabled="true"]),
+  .lifted .next-block button:active:not([disabled]):not([aria-disabled="true"]) { transform: translateY(0); transition-duration: 60ms; }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .btn:hover:not([disabled]):not([aria-disabled="true"]),
+  .lifted .btn-2:hover:not([disabled]):not([aria-disabled="true"]),
+  .lifted .subscribe button:hover:not([disabled]):not([aria-disabled="true"]),
+  .lifted .next-block button:hover:not([disabled]):not([aria-disabled="true"]) { transform: translateY(-1px); }
+  .btn:hover:not([disabled]):not([aria-disabled="true"])::after,
+  .lifted .btn-2:hover:not([disabled]):not([aria-disabled="true"])::after,
+  .lifted .subscribe button:hover:not([disabled]):not([aria-disabled="true"])::after,
+  .lifted .next-block button:hover:not([disabled]):not([aria-disabled="true"])::after { opacity: 1; }
+}
+
+/* motion resets: reduced motion and print */
+@media print {
+  .btn::after, .lifted .btn-2::after, .lifted .subscribe button::after, .lifted .next-block button::after { display: none; }
+}

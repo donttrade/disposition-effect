@@ -7,6 +7,10 @@
   var KEY = 'donttrade-theme';
   var root = document.documentElement;
   var COLORS = { dark: '#16181C', light: '#FFFFFF' };
+  try { // motion: decided before first paint (this file blocks in <head>); motion.js and site.css read it
+    if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches && 'IntersectionObserver' in window)
+      root.classList.add('dt-motion');
+  } catch (e) { /* no motion */ }
 
   function setMeta(t) {
     var m = document.querySelectorAll('meta[name="theme-color"]');
