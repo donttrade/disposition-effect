@@ -1,0 +1,33 @@
+{
+ "attrs": [],
+ "citation": [],
+ "fixes": [],
+ "ids": [
+  "pr-form",
+  "pr-started",
+  "pr-open",
+  "pr-passed",
+  "pr-paid",
+  "pr-traders",
+  "pr-example",
+  "pr-clear",
+  "pr-msg",
+  "pr-results",
+  "pr-rate",
+  "pr-range",
+  "pr-perEval",
+  "pr-perFunded",
+  "pr-trader-wrap",
+  "pr-perTrader",
+  "pr-notes"
+ ],
+ "links": [
+  "a[href]=/for-firms/"
+ ],
+ "path": "/tools/pass-rate-calculator/",
+ "source": "docs/tools/pass-rate-calculator/index.html",
+ "source_sha256": "7496ce6b5852500929593c602e3beefe820df1fc2e360a3906efd3e5f42d2d14",
+ "tables": [],
+ "text": "\n\n\nProp-firm pass-rate calculator\nFor firm operators. Enter the counts for one cohort and get pass and payout rates that say what they measure. Free. It runs in your browser and nothing is sent anywhere.\n\nA cohort is all the evaluations that started in one fixed window, for example everything started in March. Use the same cohort for every number below.\n\n\n  \n    Evaluations startedAccounts, not people\n    Still open at the cut-offNeither passed nor failed yet\n    Passed all stages (funded)Accounts\n    Funded with at least one payoutAccounts\n    Unique traders (optional)People behind the started accounts\n  \n  \n    Fill a made-up example\n    Clear\n  \n  The example (1,000 started, 150 open, 170 passed, 40 paid, 800 traders) is made-up. It is not a real firm’s data.\n  \n\n  \n    Result\n    \n      Pass rate among finished evaluations (passed ÷ (started − open))–\n      Range if every open one fails / passes–\n      Payout rate per evaluation (paid ÷ started)–\n      Payout rate per funded account (paid ÷ passed)–\n      Accounts per trader–\n    \n    \n  \n\n\n\n  Common mistakes\n  \n    Mixing cohorts, such as dividing this month’s passes by this month’s starts. Those passes mostly came from earlier starts.\n    Dropping open accounts. They are neither passes nor failures yet, so show the range.\n    Counting resets and retries as new people. They are new accounts, but not new traders.\n    Quoting the payout rate per funded account as if it were per evaluation. The two use different denominators.\n  \n\n\nWhat this calculator can’t do\nIt checks the arithmetic. It cannot tell anyone your inputs are right: a rate a firm computes about itself is still the firm’s own claim.\nOur paid work measures something no pass rate shows: how your traders handle winning and losing trades, computed from your own records by someone outside the firm, with the method published.\nWhat firms get →\n\n\n\n",
+ "text_collapsed": "Prop-firm pass-rate calculator For firm operators. Enter the counts for one cohort and get pass and payout rates that say what they measure. Free. It runs in your browser and nothing is sent anywhere. A cohort is all the evaluations that started in one fixed window, for example everything started in March. Use the same cohort for every number below. Evaluations startedAccounts, not people Still open at the cut-offNeither passed nor failed yet Passed all stages (funded)Accounts Funded with at least one payoutAccounts Unique traders (optional)People behind the started accounts Fill a made-up example Clear The example (1,000 started, 150 open, 170 passed, 40 paid, 800 traders) is made-up. It is not a real firm’s data. Result Pass rate among finished evaluations (passed ÷ (started − open))– Range if every open one fails / passes– Payout rate per evaluation (paid ÷ started)– Payout rate per funded account (paid ÷ passed)– Accounts per trader– Common mistakes Mixing cohorts, such as dividing this month’s passes by this month’s starts. Those passes mostly came from earlier starts. Dropping open accounts. They are neither passes nor failures yet, so show the range. Counting resets and retries as new people. They are new accounts, but not new traders. Quoting the payout rate per funded account as if it were per evaluation. The two use different denominators. What this calculator can’t do It checks the arithmetic. It cannot tell anyone your inputs are right: a rate a firm computes about itself is still the firm’s own claim. Our paid work measures something no pass rate shows: how your traders handle winning and losing trades, computed from your own records by someone outside the firm, with the method published. What firms get →"
+}

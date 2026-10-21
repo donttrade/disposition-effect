@@ -1,0 +1,35 @@
+{
+ "attrs": [],
+ "citation": [],
+ "fixes": [],
+ "ids": [
+  "dc-form",
+  "dc-rg",
+  "dc-pg",
+  "dc-rl",
+  "dc-pl",
+  "dc-example",
+  "dc-clear",
+  "dc-msg",
+  "dc-results",
+  "dc-reading",
+  "dc-pgr",
+  "dc-plr",
+  "dc-ratio",
+  "dc-diff",
+  "dc-se",
+  "dc-t"
+ ],
+ "links": [
+  "a[href]=/sample-memo/",
+  "a[href]=/glossary/",
+  "a[href]=/for-firms/",
+  "a[href]=/for-traders/"
+ ],
+ "path": "/tools/disposition-calculator/",
+ "source": "docs/tools/disposition-calculator/index.html",
+ "source_sha256": "6df14b941b3edc37352b01952dadc279be29f3aeb7d8db33c248582a1c4ac9e9",
+ "tables": [],
+ "text": "\n\n\nDisposition-effect calculator\nCount your own wins and losses, and see whether you sold winners more readily than losers. Free. It runs in your browser and nothing is sent anywhere.\n\nHow to count\nThis follows Odean (1998). On each day an account sells something, look at every position in it. Each position sold at a gain is a realised gain. Each position still held at a gain is a paper gain. Losses work the same way: sold at a loss is a realised loss, still held at a loss is a paper loss. Positions with no gain or loss that day are left out. Add up the counts across all those days, then enter the four totals below.\n\n\n  \n    Realised gainsPositions sold at a gain\n    Paper gainsPositions held at a gain\n    Realised lossesPositions sold at a loss\n    Paper lossesPositions held at a loss\n  \n  \n    Fill a made-up example\n    Clear\n  \n  The example (420, 1,780, 260, 2,240) is made-up. It is not real trading data.\n  \n\n  \n    Result\n    \n    \n      PGR (share of gains sold)–\n      PLR (share of losses sold)–\n      Ratio PGR / PLR–\n      Difference PGR − PLR–\n      Standard error (Odean 1998)–\n      t-statistic–\n    \n    PGR = realised gains ÷ (realised gains + paper gains). PLR = realised losses ÷ (realised losses + paper losses). A t-statistic beyond about ±1.96 is conventionally treated as unlikely to be noise alone.\n  \n\n\n\n  What this does not tell you\n  This pools every position as if each one were independent. That overstates how precise the result is when a few accounts account for most of the positions. It is not the method of our client script, and it is not an audit.\n  It also ignores holding age. Positions are sold less often the longer they are held, so if your losing positions are older than your winning ones, these four counts can show an effect that is only an age pattern. Controlling for it needs each position’s open date, which four totals do not carry.\n  How we measure it on a firm’s own records → · Glossary →\n\nWhat this calculator can’t do\nIt needs the four counts already worked out, and that is the hard part: on every day an account sold anything, each position it still held has to be classed as a gain or a loss, from the full trade history. Done by hand, that stops being practical after a few dozen trades.\nThe paid work starts from your raw records. A firm gets a figure computed by someone outside the firm, its significance and counts, a written comparison and the right to quote it. Traders, at launch, get their own report from a trade export, and where they stand against everyone else.\nFor firms → · For traders →\n\n\n\n",
+ "text_collapsed": "Disposition-effect calculator Count your own wins and losses, and see whether you sold winners more readily than losers. Free. It runs in your browser and nothing is sent anywhere. How to count This follows Odean (1998). On each day an account sells something, look at every position in it. Each position sold at a gain is a realised gain. Each position still held at a gain is a paper gain. Losses work the same way: sold at a loss is a realised loss, still held at a loss is a paper loss. Positions with no gain or loss that day are left out. Add up the counts across all those days, then enter the four totals below. Realised gainsPositions sold at a gain Paper gainsPositions held at a gain Realised lossesPositions sold at a loss Paper lossesPositions held at a loss Fill a made-up example Clear The example (420, 1,780, 260, 2,240) is made-up. It is not real trading data. Result PGR (share of gains sold)– PLR (share of losses sold)– Ratio PGR / PLR– Difference PGR − PLR– Standard error (Odean 1998)– t-statistic– PGR = realised gains ÷ (realised gains + paper gains). PLR = realised losses ÷ (realised losses + paper losses). A t-statistic beyond about ±1.96 is conventionally treated as unlikely to be noise alone. What this does not tell you This pools every position as if each one were independent. That overstates how precise the result is when a few accounts account for most of the positions. It is not the method of our client script, and it is not an audit. It also ignores holding age. Positions are sold less often the longer they are held, so if your losing positions are older than your winning ones, these four counts can show an effect that is only an age pattern. Controlling for it needs each position’s open date, which four totals do not carry. How we measure it on a firm’s own records → · Glossary → What this calculator can’t do It needs the four counts already worked out, and that is the hard part: on every day an account sold anything, each position it still held has to be classed as a gain or a loss, from the full trade history. Done by hand, that stops being practical after a few dozen trades. The paid work starts from your raw records. A firm gets a figure computed by someone outside the firm, its significance and counts, a written comparison and the right to quote it. Traders, at launch, get their own report from a trade export, and where they stand against everyone else. For firms → · For traders →"
+}
