@@ -545,3 +545,17 @@ def test_nit3_nit4_site_toml_shape_errors_fail_cleanly(tmp_path, sub, repl, flag
     from test_legal import build
     r, _ = build(tmp_path, "o", DT_SITE_TOML=_toml_edit(tmp_path, sub, repl, **flags))
     assert r.returncode == 1 and "BUILD FAILED" in r.stderr and expect in r.stderr and "Traceback" not in r.stderr, r.stderr
+
+
+# ------------------------------------------------------------------ NIT 5: api_base IDN TLD and port; NBSP phone
+@pytest.mark.parametrize("api,ok", [("https://api.xn--p1ai", True), ("https://api.zzqx-fixture.xn--p1ai:8443", True),
+                                    ("https://api.zzqx-fixture.ca:00443", False), ("https://api.zzqx-fixture.ca:0443", False),
+                                    ("https://api.zzqx-fixture.ca:443", True), ("https://api.xn--", False),
+                                    ("https://10.0.0.1", False)])
+def test_nit5_api_base_idn_tld_and_port_leading_zero(api, ok):
+    assert (B.api_base_problem(api) is None) == ok, (api, B.api_base_problem(api))
+
+
+def test_nit5_phone_with_nbsp_is_accepted_and_published_plain():
+    assert B.seller_problem("phone", "+1 555 555 0234") is None
+    assert B.normalise_private("+1 555 555 0234")[0] == "+1 555 555 0234"

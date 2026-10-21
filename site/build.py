@@ -587,10 +587,13 @@ def read_toml(path, label):
 
 LOCAL_API_RE = re.compile(r"^http://(127\.0\.0\.1|localhost)(:\d{1,5})?$")
 _LABEL = r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?"
-# Origin only: https, a lowercase DNS name with a letters-only top-level domain (so no IPv4 or
-# IPv6 literal can match), an optional port, and nothing else: no path, query, space, quote,
+# Origin only: https, a lowercase DNS name whose top-level domain is letters or xn-- punycode (so
+# no IPv4 or IPv6 literal can match), an optional port, and nothing else: no path, query, space, quote,
 # semicolon or other CSP syntax can reach the CSP meta or the dt-api meta.
-PUBLIC_API_RE = re.compile(rf"https://((?:{_LABEL}\.)+[a-z]{{2,63}})(?::(\d{{1,5}}))?$")
+# NIT 5: the top-level domain is letters, or an IDN TLD in punycode (xn--p1ai); a port has no
+# leading zero (:00443 is refused).
+_TLD = r"(?:[a-z]{2,63}|xn--[a-z0-9-]{1,59})"
+PUBLIC_API_RE = re.compile(rf"https://((?:{_LABEL}\.)+{_TLD})(?::([1-9]\d{{0,4}}))?$")
 # Special-use names (RFC 2606, 6761, 6762, 7686, 8375) that are never a public host.
 RESERVED_TLDS = {"localhost", "local", "localdomain", "test", "example", "invalid", "internal", "lan", "home",
                  "arpa", "onion", "corp", "intranet", "private"}
