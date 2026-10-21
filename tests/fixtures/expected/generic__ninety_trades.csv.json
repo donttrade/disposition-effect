@@ -3,10 +3,10 @@
   "checks": [
    {
     "label": "distinguishable from noise",
-    "method": "sign-flip permutation",
+    "method": "bootstrap-t",
     "n_a": 90,
     "n_b": null,
-    "p": 0.008399160083991601,
+    "p": 0.007999200079992,
     "stat": "expectancy",
     "value": -11.01444444444447
    },

@@ -3,7 +3,7 @@
   "checks": [
    {
     "label": "distinguishable from noise",
-    "method": "sign-flip permutation",
+    "method": "bootstrap-t",
     "n_a": 35,
     "n_b": null,
     "p": 9.999000099990002e-05,

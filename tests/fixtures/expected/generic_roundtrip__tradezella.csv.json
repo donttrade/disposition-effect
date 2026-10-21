@@ -3,7 +3,7 @@
   "checks": [
    {
     "label": "not enough trades to tell",
-    "method": "sign-flip permutation",
+    "method": "bootstrap-t",
     "n_a": 2,
     "n_b": null,
     "p": null,
