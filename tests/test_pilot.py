@@ -120,8 +120,11 @@ def test_thanks_page_shows_stripe_link_mailto_and_seller(pilot_site):
     h = html(pilot_site["out"], "/start/pilot-thanks/")
     assert f'href="{PILOT["stripe_link_live"]}"' in h
     assert re.search(r'href="mailto:[^"]+\?subject=', h)
+    # Tester D2: with pilot_checkout alone the seller block is hidden (plan DoD), until the owner
+    # flips [legal] show_seller_for_pilot; the page says how to learn the contracting party first
     for v in FAKE.values():
-        assert v in h
+        assert v not in h
+    assert "data-seller-block" not in h and "ask by email and we name it in writing first" in h
     assert '<meta name="robots" content="noindex">' in h
     assert "pilot-thanks" not in (pilot_site["out"] / "sitemap.xml").read_text()
     terms = html(pilot_site["out"], "/terms/")

@@ -10,7 +10,6 @@
 {%- set pilot = products["pilot"] %}{%- set r = products["report39"] %}{%- set t = products["tracker79"] %}
 {%- set pct = prices.rules.recheck.percent_of_engagement %}
 {%- set ex = products[prices.rules.recheck.example_product] %}
-{%- set commerce = flags.paid_report or flags.pilot_checkout %}
 <div class="wrap"><div class="prose">
   <h1>Terms, refunds and the {{ pilot.name }}</h1>
   <p class="notice">Plain-language terms, version {{ legal.terms_version }}. Where a signed engagement agreement differs, the agreement governs.{% if flags.paid_report %} <a href="/fr/conditions/" hreflang="fr" lang="fr">Version française</a>{% endif %}</p>
@@ -103,7 +102,7 @@
   <p>These terms are governed by the laws of the Province of Ontario and the federal laws of Canada applicable there, and disputes go to the courts of Ontario.{% if flags.paid_report %} If you are a consumer, this does not take away the protection of the mandatory rules of the law where you live, or your right to go to the courts there.{% endif %}</p>
 
   <h2 id="contact">Contact</h2>
-  {%- if commerce %}
+  {%- if show_seller %}
   <dl class="byp">{{ seller_rows(private, site, "en") }}</dl>
   {%- else %}
   <p>Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>. {{ site.reply_promise }}</p>

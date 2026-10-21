@@ -1,0 +1,7 @@
+{#- Where the legal contracting party is named, when the seller block is not shown (Tester D2).
+    True in both flag states: with pilot_checkout a card payment can come before the scope. -#}
+{%- if flags.pilot_checkout -%}
+The legal contracting party is named in the written scope and the engagement agreement. To know it before paying by card, ask by email and we name it in writing first.
+{%- else -%}
+The legal contracting party is named in writing, in the engagement agreement, before anything is paid.
+{%- endif -%}

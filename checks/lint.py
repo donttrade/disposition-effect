@@ -124,7 +124,7 @@ def lint_text(text, where="text", paid=False, analytics=False, english=True):
 
 
 def lint_html(html, where, paid, analytics, allowed_amounts, private_values, commerce=None, pilot=False):
-    """commerce: True when any commerce flag (paid_report, pilot_checkout) is on; defaults to paid or pilot."""
+    """commerce: True when the seller block may appear (build.show_seller); defaults to paid or pilot."""
     commerce = (paid or pilot) if commerce is None else commerce
     french = bool(re.search(r'<html lang="fr', html))
     out = lint_text(visible_text(html), where, paid, analytics, english=not french)
@@ -213,9 +213,18 @@ def owned_paths(paid, pilot=False):
     return out
 
 
-def lint_build(out_dir, paid=False, analytics=False, pilot=False):
+def seller_allowed(paid, pilot):
+    """build.show_seller for these flags, with the committed [legal] show_seller_for_pilot switch."""
+    import build
+    cfg = build.read_toml(os.path.join(REPO, "site", "config", "site.toml"), "site.toml")
+    return build.show_seller({"flags": {"paid_report": paid, "pilot_checkout": pilot}, "legal": cfg["legal"]})
+
+
+def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None):
+    """seller: whether the seller block may appear; defaults to the committed switch (seller_allowed)."""
     import build
     problems = []
+    seller = seller_allowed(paid, pilot) if seller is None else seller
     if os.path.isdir(os.path.join(out_dir, "dev")):
         problems.append(("dev_in_build", "/dev/", "dev pages are in the build"))
     amounts = allowed_amounts()
@@ -224,7 +233,7 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False):
     for path in owned_paths(paid, pilot):
         fp = build.out_file(out_dir, path)
         with open(fp, encoding="utf-8") as f:
-            problems += lint_html(f.read(), path, paid, analytics, amounts, priv, commerce=paid or pilot, pilot=pilot)
+            problems += lint_html(f.read(), path, paid, analytics, amounts, priv, commerce=seller, pilot=pilot)
     # leaks and flag rules apply to EVERY file in the build, passthrough included
     for root, _, files in os.walk(out_dir):
         for name in files:
@@ -241,7 +250,7 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False):
                 problems += passthrough_rules(s, rel, analytics)
             if name.endswith(".js"):
                 problems += restore_email_claims(js_strings(s), rel)
-            if not (paid or pilot):
+            if not seller:
                 for v in priv:
                     if v and v in s:
                         problems.append(("flag:seller_identity", rel, "private.toml value in the build"))
