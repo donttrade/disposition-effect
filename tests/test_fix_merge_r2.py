@@ -235,3 +235,75 @@ def test_nit6_too_large_drop_during_read_clears_the_reading_status(browser, buil
     ctx.close()
     assert "E_TOO_LARGE" in ui["error"] and ui["status"] is None and ui["progress"] is None and ui["out"] is None, ui
     assert errors == []
+
+
+# ------------------------------------------------------------------ R4: seller fields need a positive shape
+# failmodes2.py NAME/PHONE/ADDR_VARIANTS: every "XX" line (built, should have failed), plus more
+R4_BAD = {
+    "seller_legal_name": [
+        "SELLER", "Seller name", "Name", "Address", "PO Box", "test", "unknown", "NA", "n.a.", "(SELLER)", "«SELLER»",
+        "［SELLER］", "T​BD", "TO­DO", "ТВD", "ХХХ", "Owner — lawyer to confirm", "Seller name lawyer-to-confirm",
+        "Business name — pendng", "Legal name here", "not yet", "later", "asdf", "nil", "aaaa", "0000", "A", "ＴＢＤ",
+        "Zzqx &amp; Qqvendor", "Zzqx\nHoldings", "ХХХ Holdings", "Zzqx Qqvеndor",   # Cyrillic е inside a Latin word
+        "Zzqx‮Qqvendor Holdings", "Test Company", "Sample Vendor", "Zzqx Qqvendor‍"],
+    "premises_address": [
+        "TBD", "PO Box", "-", "Address", "ADDRESS — pending", "PO Box 9917, Qqvilletown ON Z9Z 9Z9",   # Z never first
+        "PO Box 0, Zzqxville ON K9Z 9Z9", "Main Street, Zzqxville ON K9Z 9Z9", "PO Box 12, Zzqxville XQ K9Z 9Z9",
+        "PO Box 12, Zzqxville ON k9z 9z9", "PO Box 12, Zzqxville ON K9Z9Z9", "PO Box 12, Zzqxville ON V9Z 9Z9",
+        "PO Box 12, Zzqxville ON K9D 9Z9", "PO Box 12, TBD ON K9Z 9Z9", "PO Box 12 Zzqxville", "PO Box 12, Zzqx​ville ON K9Z 9Z9",
+        "[ADDRESS — virtual mailbox pending]", "12 Fake Street, Zzqxville ON K9Z 9Z9", "«PO Box 12», Zzqxville ON K9Z 9Z9"],
+    "phone": [
+        "555", "0000000", "1111111", "+1 (000) 000-0000", "123-4567", "+1 555 555 5555", "+1 555 555 0199",
+        "+1 555 555 0199 ext 12", "+1 555 555 0234​", "(911) 555-0234", "+1 555 911 0234", "+1 195 555 0234",
+        "+44 20 7946 0000", "+1 555 555 02345", "[PHONE — pending]", "555-555-0234 call me"],
+}
+R4_GOOD = {
+    "seller_legal_name": ["Zzqx Qqvendor Holdings", "Qqvendor Trading Ltd.", "Société Zzqx Inc.", "Mary-Jane O'Zzqx",
+                          "Li Na", "Zzqx Qqvendor Holdings"],
+    "premises_address": ["PO Box 9917, Zzqxville ON K9Z 9Z9", "P.O. Box 9917, Zzqxville ON K9Z 9Z9",
+                         "Suite 4, 12 Qqvendor Road, Zzqxville ON K9Z 9Z9", "12A Qqvendor Road, St. Zzqx-Ville QC H9Z 9Z9, Canada"],
+    "phone": ["+1 555 555 0234", "(555) 555-0234", "555.555.0234 ext 12", "1 555 555 0234", "+1 555 555 0234",
+              "５５５ ５５５ ０２３４"],
+}
+
+
+@pytest.mark.parametrize("field,value", [(f, v) for f, vs in R4_BAD.items() for v in vs])
+def test_r4_placeholder_shaped_values_are_refused(field, value):
+    assert B.seller_problem(field, value), (field, value)
+
+
+@pytest.mark.parametrize("field,value", [(f, v) for f, vs in R4_GOOD.items() for v in vs])
+def test_r4_well_formed_fake_values_pass(field, value):
+    assert B.seller_problem(field, value) is None, (field, value, B.seller_problem(field, value))
+
+
+@pytest.mark.parametrize("flags", [dict(pilot_checkout=True), dict(paid_report=True, trader_first_home=True)],
+                         ids=["pilot", "paid"])
+@pytest.mark.parametrize("field,value", [("seller_legal_name", "SELLER"), ("seller_legal_name", "T​BD"),
+                                         ("seller_legal_name", "ТВD"), ("premises_address", "PO Box"),
+                                         ("phone", "0000000"), ("phone", "+1 (000) 000-0000")])
+def test_r4_commerce_build_fails_on_second_way_placeholders(tmp_path, flags, field, value):
+    # failmodes2.py: these built with rc=0 before the fix
+    from test_legal import build, private_with, toml_with, FAKE_API
+    extra = {"api": FAKE_API} if "paid_report" in flags else {}
+    r, _ = build(tmp_path, "o", DT_SITE_TOML=toml_with(tmp_path, **extra, **flags),
+                 DT_PRIVATE_TOML=private_with(tmp_path, **{field: value}))
+    assert r.returncode == 1 and "BUILD FAILED" in r.stderr and field in r.stderr, r.stderr
+
+
+def test_r4_published_value_is_the_normalised_one(tmp_path):
+    from test_legal import build, private_with, toml_with
+    r, out = build(tmp_path, "o", DT_SITE_TOML=toml_with(tmp_path, pilot_checkout=True),
+                   DT_PRIVATE_TOML=private_with(tmp_path, phone="５５５ ５５５ ０２３４"))
+    assert r.returncode == 0, r.stderr
+    # pilot-only build with the seller switch off renders no seller block: check the value check_private returns
+    assert B.check_private({"seller_legal_name": "Zzqx  Qqvendor Holdings", "premises_address": "PO Box 9917, Zzqxville ON K9Z 9Z9",
+                            "phone": "５５５ ５５５ ０２３４"}, ["pilot_checkout"]) == {
+        "seller_legal_name": "Zzqx Qqvendor Holdings", "premises_address": "PO Box 9917, Zzqxville ON K9Z 9Z9", "phone": "555 555 0234"}
+
+
+def test_r4_example_placeholders_still_build_with_the_escape(tmp_path):
+    from test_legal import build, toml_with
+    r, _ = build(tmp_path, "o", DT_SITE_TOML=toml_with(tmp_path, pilot_checkout=True),
+                 DT_PRIVATE_TOML=os.path.join(REPO, "site", "config", "private.example.toml"), DT_ALLOW_PLACEHOLDERS="1")
+    assert r.returncode == 0 and "WARNING: DT_ALLOW_PLACEHOLDERS=1" in r.stderr, r.stderr

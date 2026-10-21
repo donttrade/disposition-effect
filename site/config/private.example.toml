@@ -1,7 +1,11 @@
 # private.example.toml — copy to private.toml (gitignored) and fill in.
 # Read by the build ONLY while a commerce flag (paid_report or pilot_checkout) is on. The build
-# fails while any value still looks like a placeholder (brackets, TBD/TODO/XXX, "lawyer to
-# confirm", "pending", empty, …), unless DT_ALLOW_PLACEHOLDERS=1 (local test mode only).
+# fails until every value has the shape of a real one, unless DT_ALLOW_PLACEHOLDERS=1 (local
+# test mode only). Checked after NFKC normalisation; any invisible character fails.
+#   seller_legal_name  two or more words of letters (- and ' inside a word, "Inc." allowed), none
+#                      of them a placeholder word (seller, name, test, TBD, …)
+#   premises_address   "<number> <street>, <city> <PROV> <A1A 1A1>" or "PO Box <n>, <city> <PROV> <A1A 1A1>"
+#   phone              a 10-digit North American number, +1 optional, "ext 12" allowed
 seller_legal_name = "[SELLER — lawyer to confirm]"
 premises_address = "[ADDRESS — virtual mailbox pending]"
 phone = "[PHONE — pending]"
