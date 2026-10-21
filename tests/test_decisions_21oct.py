@@ -172,3 +172,104 @@ def test_business_line_without_an_address_fails_loudly():
     with pytest.raises(B.BuildError, match="no mailing address"):
         B.business_id_line(cfg, {})
     assert B.business_id_line({**cfg, "flags": {"paid_report": False, "pilot_checkout": False}}, {}) == ""
+
+
+# ------------------------------------------------------------------ 2. Pilot refund clause
+# The exact sentence (owner decision 21 Oct ~09:00); the amount is rendered from prices.json.
+def refund_sentence(price):
+    return ("If the scope is not confirmed in writing by both of us within 10 business days of payment, we refund the "
+            f"full US${price:,} by the end of the next business day, without being asked.")
+
+
+PRICES = __import__("json").load(open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8"))
+PILOT_PRICE = next(p for p in PRICES["products"] if p["id"] == "pilot")["price_usd"]
+SENTENCE = refund_sentence(PILOT_PRICE)
+
+
+def _page(out, path):
+    return (out / path.strip("/") / "index.html").read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("path", ["/start/", "/for-firms/"])
+@pytest.mark.parametrize("combo", ["pilot", "both"])
+def test_refund_clause_sits_right_above_the_required_box(builds, combo, path):
+    h = _page(builds[combo][0], path)
+    form = re.search(r'(?s)<form class="request-form" id="pc".*?</form>', h).group(0)
+    m = re.search(r'(?s)<p class="small" id="pc-refund">(.*?)</p>\s*<div class="check field"><input id="pc-read"[^>]*required', form)
+    assert m, "the clause is not the element right before the required box"
+    assert _text(m.group(1)) == "Automatic refund: " + SENTENCE
+
+
+@pytest.mark.parametrize("combo", ["pilot", "both"])
+def test_refund_clause_in_terms_pilot_section_and_on_the_thanks_page(builds, combo):
+    out = builds[combo][0]
+    terms = _page(out, "/terms/")
+    section = terms[terms.index('<h2 id="trial">'):terms.index('<h2 id="cancellation">')]
+    li = re.search(r'(?s)<li id="pilot-refund">(.*?)</li>', section)
+    assert li and _text(li.group(1)) == "Automatic refund if the scope isn’t confirmed: " + SENTENCE
+    thanks = _page(out, "/start/pilot-thanks/")
+    p = re.search(r'(?s)<p id="pilot-refund">(.*?)</p>', thanks)
+    assert p and _text(p.group(1)) == "Automatic refund: " + SENTENCE
+    assert thanks.index('id="pilot-refund"') < thanks.index("buy.stripe.com")   # read before the Pay button
+    for h in (terms, thanks):
+        assert "If we can’t agree the scope with you" not in h                   # the vaguer wording is gone
+
+
+def test_refund_amount_comes_from_prices_json(tmp_path):
+    import json
+    d = json.loads(json.dumps(PRICES))
+    for p in d["products"]:
+        if p["id"] == "pilot":
+            p["price_usd"] = 845
+    prices = tmp_path / "prices.json"
+    prices.write_text(json.dumps(d), encoding="utf-8")
+    r, out = build(tmp_path, "o", DT_SITE_TOML=toml_with(tmp_path, pilot_checkout=True),
+                   DT_PRIVATE_TOML=private_with(tmp_path, premises_address=BOX), DT_PRICES_JSON=str(prices))
+    assert r.returncode == 0, r.stderr
+    for path in ("/start/", "/for-firms/", "/terms/", "/start/pilot-thanks/"):
+        text = _text(_page(out, path))
+        assert refund_sentence(845) in text and "US$745" not in text, path
+
+
+def test_refund_clause_is_pilot_checkout_only(builds, built_site):
+    for rel, h in all_html(built_site["out"]).items():
+        assert "within 10 business days of payment" not in h, rel
+    for rel, h in all_html(builds["paid"][0]).items():
+        assert "within 10 business days of payment" not in h, rel
+
+
+def test_terms_version_was_bumped_for_these_legal_edits(built_site):
+    import tomllib
+    v = tomllib.load(open(os.path.join(REPO, "site", "config", "site.toml"), "rb"))["legal"]["terms_version"]
+    assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", v) and v > "2026-10-22"   # 2026-10-22 was the version before 21 Oct
+    for path in ("/terms/", "/privacy/"):
+        assert f"Version {v}." in _page(built_site["out"], path), path
+
+
+# ------------------------------------------------------------------ 2. lint: never ask to waive dispute rights
+@pytest.mark.parametrize("bad", [
+    "By paying you agree to waive your right to dispute this charge.",
+    "Chargebacks are waived once the scope is sent.",
+    "You waive any chargeback.",
+    "The client agrees not to dispute the payment with its bank.",
+    "You agree not to initiate a charge-back.",
+    "You give up the right to contest the charge with your card issuer.",
+    "Vous renoncez à toute rétrofacturation.",
+    "Le client renonce à contester le paiement.",
+])
+def test_lint_refuses_waiving_dispute_rights(bad):
+    html = f'<html lang="en"><body><main><p>{bad}</p></main></body></html>'
+    problems = L.lint_html(html, "/x/", False, False, {745}, [], pilot=True)
+    assert any(p[0] == "claim:waive_dispute" for p in problems), (bad, problems)
+    assert any(p[0] == "claim:waive_dispute" for p in L.passthrough_rules(html, "/x/", False))
+    assert L.waive_dispute_claims(L.js_strings(f"const m = '{bad}';"), "/x.js")
+
+
+@pytest.mark.parametrize("ok", [
+    SENTENCE,
+    "These terms are governed by the laws of the Province of Ontario, and disputes go to the courts of Ontario.",
+    "We can’t help with disputes about a firm.",
+    "The credit has no cash value and cannot be transferred.",
+])
+def test_lint_waive_rule_has_no_false_positive(ok):
+    assert L.waive_dispute_claims(L.normalise(ok), "/x/") == []

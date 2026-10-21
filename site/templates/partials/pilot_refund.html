@@ -1,0 +1,9 @@
+{#- Pilot refund clause (owner decision 21 Oct ~09:00, DECISIONS-RESEARCH-2026-10-21 §2): the exact
+    sentence, with the amount from prices.json. Shown only with pilot_checkout on (paying by card
+    before the scope is agreed): above the required box of the Start-a-Pilot block, in /terms/#pilot-refund
+    and on /start/pilot-thanks/. Never pair it with wording that asks a client to waive a dispute or
+    chargeback right (Visa Core Rules 5.4.2.5; lint rule claim:waive_dispute).
+    Usage: {% from "partials/pilot_refund.html" import pilot_refund %}{{ pilot_refund(products) }} -#}
+{%- macro pilot_refund(products) -%}
+If the scope is not confirmed in writing by both of us within 10 business days of payment, we refund the full US{{ products["pilot"].price_usd|usd }} by the end of the next business day, without being asked.
+{%- endmacro %}

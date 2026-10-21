@@ -3,6 +3,7 @@
     which shows the Stripe Pilot link and the mailto fallback. Plain HTML: works with JS off.
     Set before including: heading_id. Never place it next to a study finding. -#}
 {%- set pilot = products["pilot"] %}
+{%- from "partials/pilot_refund.html" import pilot_refund %}
 <form class="request-form" id="pc" method="POST" action="{{ forms.endpoint }}" aria-labelledby="{{ heading_id }}" data-requires-flag="pilot_checkout">
   <input type="hidden" name="access_key" value="{{ forms.firm_key }}">
   <input type="hidden" name="subject" value="donttrade: Pilot request (card link shown)">
@@ -18,6 +19,7 @@
     <input id="pc-firm" name="firm" type="text" autocomplete="organization" required></div>
   <div class="field"><label for="pc-what">What do you want measured? <span class="opt">(optional)</span></label>
     <textarea id="pc-what" name="message" rows="3" placeholder="e.g. funded accounts, January to June"></textarea></div>
+  <p class="small" id="pc-refund"><strong>Automatic refund:</strong> {{ pilot_refund(products) }}</p>
   <div class="check field"><input id="pc-read" name="read_scope_and_terms" type="checkbox" value="yes" required aria-describedby="pc-read-links">
     <label for="pc-read">I’ve read the {{ pilot.name }} scope and terms. <span class="req">(required)</span></label></div>
   <p class="small" id="pc-read-links">Read them first: <a href="/for-firms/#what-it-costs">the {{ pilot.name }} scope</a> and <a href="/terms/#trial">the {{ pilot.name }} terms</a>.</p>

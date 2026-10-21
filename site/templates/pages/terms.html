@@ -7,7 +7,7 @@
     not rendered anywhere: the Tracker is not built (V2 NOT IN SCOPE). #}
 {% block content %}
 {%- from "partials/seller.html" import seller_rows %}
-{%- set pilot = products["pilot"] %}{%- set r = products["report39"] %}{%- set t = products["tracker79"] %}
+{%- set pilot = products["pilot"] %}{%- from "partials/pilot_refund.html" import pilot_refund %}{%- set r = products["report39"] %}{%- set t = products["tracker79"] %}
 {%- set pct = prices.rules.recheck.percent_of_engagement %}
 {%- set ex = products[prices.rules.recheck.example_product] %}
 <div class="wrap"><div class="prose">
@@ -43,7 +43,8 @@
     <li><strong>Extract refund:</strong> if your extract can’t be made to run with the script, even with our help by email, the fee is refunded in full.</li>
     <li><strong>Reproduction refund:</strong> if your own re-run of the same published script version on the same export (same file hash) does not reproduce the figure, the fee is refunded in full, by the original payment method, within 10 business days.</li>
     {%- if flags.pilot_checkout %}
-    <li id="pilot-card"><strong>Paying by card before the scope:</strong> after you send the {{ pilot.name }} request form and confirm you have read these terms, a card link is shown. Paying through it accepts these {{ pilot.name }} terms. We then send the written scope naming the traders and dates. If we can’t agree the scope with you, the fee is refunded in full. The delivery clock starts only once the scope is agreed, payment is received and the script’s output comes back clean.</li>
+    <li id="pilot-card"><strong>Paying by card before the scope:</strong> after you send the {{ pilot.name }} request form and confirm you have read these terms, a card link is shown. Paying through it accepts these {{ pilot.name }} terms. We then send the written scope naming the traders and dates. The delivery clock starts only once the scope is agreed, payment is received and the script’s output comes back clean.</li>
+    <li id="pilot-refund"><strong>Automatic refund if the scope isn’t confirmed:</strong> {{ pilot_refund(products) }}</li>
     {%- endif %}
   </ul>
 

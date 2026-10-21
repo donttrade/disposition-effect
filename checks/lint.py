@@ -45,6 +45,22 @@ RESTORE_EMAIL = [re.compile(p, re.IGNORECASE) for p in RULES["claims"]["restore_
 RESTORE_EMAIL_ALLOW = [re.compile(re.escape(p), re.IGNORECASE) for p in RULES["claims"]["restore_email_allow"]]
 
 
+WAIVE = re.compile(r"(?<![\w])(?:" + "|".join(RULES["claims"]["waive_dispute_waive"]) + r")(?![\w])", re.IGNORECASE)
+DISPUTE = re.compile(r"(?<![\w])(?:" + "|".join(RULES["claims"]["waive_dispute_target"]) + r")(?![\w])", re.IGNORECASE)
+WAIVE_WINDOW = RULES["claims"]["waive_dispute_window"]
+
+
+def waive_dispute_claims(text, where):
+    """Decision 21 Oct: no wording that asks a client to waive (give up, agree not to use) a
+    dispute or chargeback right: a waive-word within WAIVE_WINDOW characters of a dispute-word."""
+    out = []
+    for m in WAIVE.finditer(text):
+        near = text[max(0, m.start() - WAIVE_WINDOW):m.end() + WAIVE_WINDOW]
+        if DISPUTE.search(near):
+            out.append(("claim:waive_dispute", where, " ".join(near.split())))
+    return out
+
+
 NOT_ON_SALE = [_phrase_re(p) for p in RULES["claims"]["not_on_sale"]]
 NOT_ON_SALE_ALLOW = [re.compile(re.escape(p), re.IGNORECASE) for p in RULES["claims"]["not_on_sale_allow"]]
 
@@ -258,6 +274,7 @@ def lint_text(text, where="text", paid=False, analytics=False, english=True):
             if _phrase_re(c).search(text):
                 out.append(("claim:no_analytics", where, c))
     out += restore_email_claims(text, where)
+    out += waive_dispute_claims(text, where)
     return out
 
 
@@ -347,6 +364,7 @@ def passthrough_rules(html, where, analytics, paid=False):
             if _phrase_re(c).search(text):
                 out.append(("claim:no_analytics", where, c))
     out += restore_email_claims(text, where)
+    out += waive_dispute_claims(text, where)
     if paid:
         out += not_on_sale_claims(readable_text(html), where)
     for w in RULES["words"]["trial_cta"]:
@@ -445,6 +463,7 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None):
                 problems += passthrough_rules(s, rel, analytics, paid)
             if name.endswith(".js"):
                 problems += restore_email_claims(js_strings(s), rel)
+                problems += waive_dispute_claims(js_strings(s), rel)
                 if paid:  # a script can put text on a paid page too
                     problems += not_on_sale_claims(js_strings(s), rel)
             if name.endswith(".html"):
