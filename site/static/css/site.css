@@ -670,6 +670,48 @@ pre { font-family: var(--font-mono); font-size: var(--fs-0); background: var(--s
 .lifted .ls-boxhead { margin: 0 0 8px !important; padding: 0 !important; border: 0 !important; font-size: var(--fs-2) !important; }
 .lifted .ls-mt24 { margin-top: 24px !important; }
 
+/* ------------------------------------------------------------------ /start/ chooser (ARCHITECT-V3 §c.6)
+   JS off: a choice is a link to #<id>; :target shows that section only, :has() hides the list.
+   start-chooser.js keeps the same CSS: it only moves the hash (with a view transition) and focus. */
+.start-flow { margin: var(--s3) 0 var(--s5); }
+.choice-list { list-style: none; padding: 0; margin: 0 0 var(--s2); display: grid; gap: var(--s1); max-width: 46rem; }
+a.choice-link { display: grid; grid-template-columns: 1fr auto; gap: 2px var(--s2); padding: 14px var(--s2); min-height: var(--target);
+  border: 1px solid var(--field-border); border-radius: var(--radius); color: var(--text); text-decoration: none; }
+a.choice-link:hover { border-color: var(--rust); background: var(--surface); color: var(--text); }
+.cl-name { font-weight: 600; font-size: var(--fs-2); color: var(--rust); }
+.cl-price { font-family: var(--font-mono); font-variant-numeric: tabular-nums; align-self: center; text-align: right; }
+.cl-meta { grid-column: 1 / -1; color: var(--muted); font-size: var(--fs-0); }
+.choice { display: none; max-width: 46rem; }
+.choice:target { display: block; }
+.start-flow:has(> .choice:target) > .chooser { display: none; }
+.choice-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 var(--s2); }
+.choice-head h2 { margin-top: 0; }
+.choice-back { display: inline-flex; align-items: center; min-height: var(--target); }
+.recap { font-weight: 600; }
+.choice h2:focus, .chooser h2:focus { outline: none; }
+.choice h2:focus-visible, .chooser h2:focus-visible { outline: 2px solid var(--rust); outline-offset: 2px; }
+
+/* ------------------------------------------------------------------ home v3 (ARCHITECT-V3 §c.3) */
+.firm-door { border-left: 4px solid var(--plan); padding: var(--s1) 0 var(--s1) var(--s2); margin-top: var(--s4); }
+.firm-door p:last-child { margin-bottom: 0; }
+.tool-rows { list-style: none; padding: 0; margin: 0 0 var(--s2); display: grid; gap: 0 var(--s4); }
+@media (min-width: 900px) { .tool-rows { grid-template-columns: 1fr 1fr; } }
+.tool-rows li { display: flex; gap: 12px; align-items: flex-start; padding: var(--s2) 0; border-top: 1px solid var(--border); max-width: none; }
+.tool-rows .ni { margin-top: 12px; color: var(--muted); }
+.tool-rows a { display: inline-flex; align-items: center; min-height: var(--target); font-weight: 600; font-size: var(--fs-2); }
+.tool-rows p { margin: 0 0 4px; }
+.finding .evidence { margin-top: var(--s3); border-top: 1px solid var(--border); }
+.trust-list { padding-left: 1.25rem; }
+.ladder-rows { display: grid; gap: var(--s3); }
+@media (min-width: 900px) { .ladder-rows { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.ladder-row { border-top: 2px solid var(--field-border); padding-top: var(--s2); }
+.ladder-row h3 { font-size: var(--fs-2); margin-top: 0; }
+.ladder-row .btn { white-space: normal; text-align: center; }
+.latest-list { list-style: none; padding: 0; }
+.latest-list li { padding: var(--s1) 0; border-top: 1px solid var(--border); max-width: none; }
+.latest-list a { display: inline-flex; align-items: center; min-height: var(--target); }
+.latest .when { display: inline-block; min-width: 7.5rem; font-family: var(--font-mono); font-size: var(--fs-0); color: var(--muted); }
+
 /* ------------------------------------------------------------------ motion (ARCHITECT-MOTION-PLAN 2026-10-21)
    Hidden/moving states need .dt-motion (theme.js, pre-paint) or a motion.js class. */
 :root {

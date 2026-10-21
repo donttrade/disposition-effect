@@ -200,7 +200,9 @@ def test_old_ids_kept(built_site, path):
 
 
 # ------------------------------------------------------------------ step 14 (+16): forms
-FORM_PAGES = {"/for-traders/": "#wl", "/for-firms/": "#ff", "/start/": "#sf", "/start/#platform": "#sp",
+# v3 (ARCHITECT-V3 §c.6): /start/ has one form per firm product, each in its own section (#pilot, #memo, …)
+FORM_PAGES = {"/for-traders/": "#wl", "/for-firms/": "#ff", "/start/#pilot": "#sf-pilot", "/start/#memo": "#sf-memo",
+              "/start/#platform": "#sp",
               "/start/#trader": "#wl", "/for-platforms/": "#fp"}
 FIRM_KEY = "f8fdba04-71bb-4856-b700-01ac6796c252"
 TRADER_KEY = "54d01baf-5e02-4d93-988c-16cf5487732d"
@@ -243,7 +245,7 @@ def test_form_posts_with_javascript_off(browser, built_site, path):
     assert body["access_key"] == (TRADER_KEY if form == "#wl" else FIRM_KEY)
     assert body["page"] == base and "botcheck" not in body  # unticked honeypot is not sent
     assert body["redirect"].startswith("https://donttrade.ca/") and body["redirect"].endswith("/thanks/")
-    assert body["product"] in ("waitlist", "pilot", "platform") and body["ref"] == ""  # JS off: defaults
+    assert body["product"] in ("waitlist", "pilot", "platform", "memo") and body["ref"] == ""  # JS off: defaults
 
 
 @pytest.mark.parametrize("path", sorted(FORM_PAGES))
@@ -254,11 +256,13 @@ def test_form_ref_capture_and_fields(browser, built_site, path):
     assert "tally.so" not in html
     ctx = browser.new_context(viewport={"width": 375, "height": 900})
     pg = ctx.new_page()
-    pg.goto(built_site["url"] + base + "?ref=report&product=copy-leader")
+    hash_ = "#" + frag if frag else ""
+    pg.goto(built_site["url"] + base + "?ref=report&product=copy-leader" + hash_)
     assert pg.input_value(form + " input[name=ref]") == "report"
-    if form in ("#ff", "#sf", "#sp", "#fp"):
-        # the firm form takes ?product=; the partner form's product is fixed (Tester D1)
-        assert pg.input_value(form + " input[name=product]") == ("platform" if form in ("#sp", "#fp") else "copy-leader")
+    if form in ("#ff", "#sf-pilot", "#sf-memo", "#sp", "#fp"):
+        # the /for-firms/ form takes ?product=; the partner form (Tester D1) and the /start/ product forms (v3 C3) are fixed
+        fixed = {"#sp": "platform", "#fp": "platform", "#sf-pilot": "pilot", "#sf-memo": "memo"}
+        assert pg.input_value(form + " input[name=product]") == fixed.get(form, "copy-leader")
         f = form.lstrip("#")
         assert pg.get_attribute(f"#{f}-email", "autocomplete") == "email"
         assert pg.get_attribute(f"#{f}-firm", "autocomplete") == "organization"
@@ -272,7 +276,7 @@ def test_form_ref_capture_and_fields(browser, built_site, path):
     for el in pg.query_selector_all(form + " button, " + form + " input[type=email], " + form + " input[type=text]"):
         assert el.bounding_box()["height"] >= 44
     assert pg.locator("a[href^='mailto:']").count() >= 1
-    pg.goto(built_site["url"] + base + "?ref=<script>")
+    pg.goto(built_site["url"] + base + "?ref=<script>" + hash_)
     assert pg.input_value(form + " input[name=ref]") == ""
     ctx.close()
 
