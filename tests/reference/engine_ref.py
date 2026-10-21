@@ -499,6 +499,56 @@ def utc_ms(y, mo, d, h, mi, s, row, column):
     return ((_days_from_civil(y, mo, d) * 24 + h) * 60 + mi) * 60000 + s * 1000
 
 
+# ----------------------------------------------------------------- daylight-saving nights
+# Mirrors csv.js: a DST night is 00:00-05:00 of a US (2nd Sun Mar, 1st Sun Nov) or EU (last Sun
+# Mar, last Sun Oct) change Sunday. Trades open during one are flagged (W_DST); a round-trip close
+# up to 1 h before its open, both on a fall-back night, is read as the repeated hour (+1 h).
+
+DAY_MS_ = 86400000
+DST_NIGHT_MS = 5 * 3600000
+
+
+def _nth_sunday(y, month, n):
+    if n > 0:
+        first = _days_from_civil(y, month, 1) * DAY_MS_
+        dow = (first // DAY_MS_ + 4) % 7
+        return first + (((7 - dow) % 7) + 7 * (n - 1)) * DAY_MS_
+    ny, nm = (y + 1, 1) if month == 12 else (y, month + 1)
+    last = (_days_from_civil(ny, nm, 1) - 1) * DAY_MS_
+    dow = (last // DAY_MS_ + 4) % 7
+    return last - dow * DAY_MS_
+
+
+def dst_nights(y):
+    out = []
+    for d, fb in [(_nth_sunday(y, 3, 2), False), (_nth_sunday(y, 11, 1), True), (_nth_sunday(y, 3, -1), False),
+                  (_nth_sunday(y, 10, -1), True)]:
+        out.append((d, d + DST_NIGHT_MS, fb))
+    return out
+
+
+def year_of(ms):
+    import datetime
+    return (datetime.datetime(1970, 1, 1) + datetime.timedelta(milliseconds=ms)).year
+
+
+def spans_dst_night(open_ts, close_ts):
+    for y in range(year_of(open_ts), year_of(close_ts) + 1):
+        for s, e, _ in dst_nights(y):
+            if open_ts < e and close_ts >= s:
+                return True
+    return False
+
+
+def fall_back_close(open_ts, close_ts):
+    if close_ts >= open_ts or open_ts - close_ts > 3600000:
+        return None
+    for s, e, fb in dst_nights(year_of(open_ts)):
+        if fb and s <= open_ts < e and s <= close_ts < e:
+            return close_ts + 3600000
+    return None
+
+
 _RE_MT = re.compile(r"^(\d{4})\.(\d{1,2})\.(\d{1,2})[ T]+(\d{1,2}):(\d{2})(?::(\d{2}))?$", re.ASCII)
 _RE_ISO = re.compile(r"^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T]+(\d{1,2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?Z?)?$", re.ASCII)
 _RE_IBKR = re.compile(r"^(\d{4})(\d{2})(\d{2})(?:[;, ]+(\d{2}):?(\d{2}):?(\d{2}))?$", re.ASCII)
@@ -847,7 +897,9 @@ def parse_mt(tables):
                 ot = parse_date(cell(r, m, "open_time"), "mt", row, "open_time")
                 ct = parse_date(cell(r, m, "close_time"), "mt", row, "close_time")
                 if ct < ot:
-                    fail("E_BAD_DATE", "close before open", row, "close_time")
+                    ct = fall_back_close(ot, ct)
+                    if ct is None:
+                        fail("E_BAD_DATE", "close before open", row, "close_time")
                 qty = abs(req_number(cell(r, m, size_field), row, size_field))
                 if qty == 0:
                     _skip(skipped, "zero_qty")
@@ -934,7 +986,9 @@ def parse_generic_roundtrip(rows, hi, m):
         ot = parse_date(cell(r, m, "open_time"), "generic", row, "open_time")
         ct = parse_date(cell(r, m, "close_time"), "generic", row, "close_time")
         if ct < ot:
-            fail("E_BAD_DATE", "close before open", row, "close_time")
+            ct = fall_back_close(ot, ct)
+            if ct is None:
+                fail("E_BAD_DATE", "close before open", row, "close_time")
         qty = abs(req_number(cell(r, m, "qty"), row, "qty"))
         if qty == 0:
             _skip(skipped, "zero_qty")
@@ -1437,6 +1491,12 @@ def parse_file(data):
         trades = [t for t in trades if t["pnl_unit"] == keep]
         warnings.append(warning("W_MIXED_CURRENCY", excluded))
 
+    dst = 0
+    for t in trades:
+        if spans_dst_night(t["open_ts"], t["close_ts"]):
+            dst += 1
+    if dst:
+        warnings.append(warning("W_DST", dst))
     trades.sort(key=lambda t: (t["close_ts"], t["open_ts"], t["symbol"], t["_seq"]))
     if not trades:
         fail("E_NO_CLOSED_TRADES")

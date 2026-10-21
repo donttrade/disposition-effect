@@ -6,7 +6,7 @@
 // mapped, so its text never reaches a result. Balance, credit and cancelled rows
 // are skipped and counted. Mirrors parse_mt() in tests/reference/engine_ref.py.
 
-import { clean, parseNumber, parseDate } from './csv.js';
+import { clean, parseNumber, parseDate, fallBackClose } from './csv.js';
 import { fail, LIMITS } from './errors.js';
 
 // Rows of an HTML document, like the reference's _Rows parser:
@@ -119,8 +119,11 @@ export function parseMt(tables) {
       } else {
         const sizeField = kind === 'mt5_positions_closed' ? 'volume' : 'size';
         const ot = parseDate(cell(r, m, 'open_time'), 'mt', row, 'open_time');
-        const ct = parseDate(cell(r, m, 'close_time'), 'mt', row, 'close_time');
-        if (ct < ot) fail('E_BAD_DATE', 'the close time is before the open time', row, 'close_time');
+        let ct = parseDate(cell(r, m, 'close_time'), 'mt', row, 'close_time');
+        if (ct < ot) {
+          ct = fallBackClose(ot, ct);
+          if (ct === null) fail('E_BAD_DATE', 'the close time is before the open time', row, 'close_time');
+        }
         const qty = Math.abs(reqNumber(cell(r, m, sizeField), row, sizeField));
         if (qty === 0) { skip(skipped, 'zero_qty'); continue; }
         const op = reqNumber(cell(r, m, 'open_price'), row, 'open_price');

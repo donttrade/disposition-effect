@@ -2,7 +2,7 @@
 // TradeZella-style round-trip layout. Mirrors parse_generic() and
 // parse_generic_roundtrip() in tests/reference/engine_ref.py.
 
-import { parseDate } from './csv.js';
+import { parseDate, fallBackClose } from './csv.js';
 import { fail } from './errors.js';
 import { cell, reqNumber, optNumber, skip, isEmptyRow } from './mt.js';
 
@@ -62,8 +62,11 @@ export function parseGenericRoundtrip(rows, hi, m) {
     const symbol = cell(r, m, 'symbol');
     if (symbol === '') { skip(skipped, 'no_symbol'); continue; }
     const ot = parseDate(cell(r, m, 'open_time'), 'generic', row, 'open_time');
-    const ct = parseDate(cell(r, m, 'close_time'), 'generic', row, 'close_time');
-    if (ct < ot) fail('E_BAD_DATE', 'the close time is before the open time', row, 'close_time');
+    let ct = parseDate(cell(r, m, 'close_time'), 'generic', row, 'close_time');
+    if (ct < ot) {
+      ct = fallBackClose(ot, ct);
+      if (ct === null) fail('E_BAD_DATE', 'the close time is before the open time', row, 'close_time');
+    }
     const qty = Math.abs(reqNumber(cell(r, m, 'qty'), row, 'qty'));
     if (qty === 0) { skip(skipped, 'zero_qty'); continue; }
     const op = reqNumber(cell(r, m, 'open_price'), row, 'open_price');
