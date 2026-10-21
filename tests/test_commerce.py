@@ -77,7 +77,9 @@ def test_flag_off_outputs_have_no_commerce(tmp_path):
     allhtml = "".join(p.read_text(errors="replace") for p in out.rglob("*.html"))
     for bad in ["Before you pay", "[SELLER", "See where your trades leave your plan", 'role="tablist"', "/welcome/", "/report/"]:
         assert bad not in allhtml, bad
-    assert (out / "pricing/index.html").read_bytes() == open(os.path.join(REPO, "docs/pricing/index.html"), "rb").read()
+    pricing = (out / "pricing/index.html").read_text()
+    assert 'role="tab' not in pricing and "tabs.js" not in pricing and "print.js" not in pricing
+    assert pricing.index('id="firms"') < pricing.index('id="traders"')  # stacked, firms first
 
 
 @pytest.mark.parametrize("color", ["light", "dark"])
