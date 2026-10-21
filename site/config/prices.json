@@ -1,7 +1,6 @@
 {
   "currency": "USD",
   "source": "Harvested from https://donttrade.ca/pricing/ (docs/pricing/index.html at main e5e6234) on 2026-10-20.",
-  "launch_valid_until": "2027-03-31",
   "retired_amounts": {
     "note": "On today's live /pricing/ only; withdrawn 20 Oct 2026 (DECISIONS ADDED: Competition Act regular-price risk). The harvest check of the old page accepts them; lint rejects them on every built page.",
     "amounts": [49, 99]

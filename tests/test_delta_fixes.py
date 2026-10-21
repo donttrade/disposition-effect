@@ -315,3 +315,50 @@ def test_c3_the_old_terms_version_key_is_refused(tmp_path):
 def test_c3_bundle_requires_the_launch_date():
     sh = open(os.path.join(REPO, "site", "run.sh"), encoding="utf-8").read()
     assert "DT_REQUIRE_LAUNCH_DATE=1 python3 site/build.py" in sh[sh.index("bundle)"):]
+
+
+# ------------------------------------------------------------------ Owner 21 Oct ~11:00: no dated / launch pricing
+@pytest.mark.parametrize("bad", [
+    "Launch pricing, valid for engagements signed before 31 March 2027.",
+    "Firm prices are launch pricing.",
+    "These launch prices end soon.",
+    "Prices valid until 31 March 2027.",
+    "Offer valid before 1 April.",
+    "Tarif de lancement pour les firmes.",
+    "Prix valables jusqu’au 31 mars 2027.",
+])
+def test_owner_lint_refuses_dated_or_launch_pricing(bad):
+    html = f'<html lang="en"><body><main><p>{bad}</p></main></body></html>'
+    assert any(p[0] == "claim:dated_pricing" for p in L.lint_html(html, "/x/", False, False, {745}, [], pilot=True)), bad
+    assert any(p[0] == "claim:dated_pricing" for p in L.passthrough_rules(html, "/x/", False)), bad
+    assert L.dated_pricing_claims(L.js_strings("const m = " + json.dumps(bad) + ";"), "/x.js"), bad
+
+
+def test_owner_lint_refuses_price_valid_until_in_json_ld():
+    ld = '<script type="application/ld+json">{"offers": {"@type": "Offer", "price": "39", "priceValidUntil": "2027-03-31"}}</script>'
+    html = f'<html lang="en"><head>{ld}</head><body><main><p>Hi.</p></main></body></html>'
+    assert any(p[0] == "claim:dated_pricing" for p in L.lint_html(html, "/x/", False, False, {39}, []))
+    assert any(p[0] == "claim:dated_pricing" for p in L.passthrough_rules(html, "/x/", False))
+
+
+def test_owner_no_ok_wording_is_refused():
+    for ok in ("Four of these gates had to be redesigned before they could work.",
+               "Your first Snapshot at an introductory price, one per firm.",
+               "Firm prices are in US dollars (USD), before any applicable sales tax."):
+        assert L.dated_pricing_claims(L.normalise(ok), "/x/") == [], ok
+
+
+def test_owner_launch_pricing_is_gone_from_every_build_and_prices_json(both_build, tmp_path):
+    from test_legal import build
+    r, off = build(tmp_path, "off")
+    assert r.returncode == 0, r.stderr
+    for out in (off, both_build):
+        for p in out.rglob("*.html"):
+            h = p.read_text(encoding="utf-8")
+            t = L.visible_text(h)
+            assert not re.search(r"(?i)launch pric|31 March 2027|priceValidUntil", h + t), p
+    prices = json.load(open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8"))
+    assert "launch_valid_until" not in prices and "2027-03-31" not in json.dumps(prices)
+    pricing = (off / "pricing" / "index.html").read_text(encoding="utf-8")
+    assert "Firm prices are in US dollars (USD), before any applicable sales tax." in L.visible_text(pricing)
+    assert "The end date once shown with the firm prices is removed" in L.visible_text(pricing)
