@@ -494,6 +494,23 @@ def test_i16_print_shows_everything_and_no_veil(browser, built_site):
     ctx.close()
 
 
+@pytest.mark.parametrize("fmt", ["Letter", "A4"])
+def test_n3_print_keeps_the_hero_box_on_one_page(browser, built_site, tmp_path, fmt):
+    pypdf = pytest.importorskip("pypdf")
+    ctx = _ctx(browser, init=False)
+    pg = ctx.new_page()
+    pg.goto(built_site["url"] + "/")
+    pg.wait_for_timeout(300)
+    pdf = tmp_path / "home.pdf"
+    pg.pdf(path=str(pdf), format=fmt)
+    ctx.close()
+    pages = [p.extract_text() for p in pypdf.PdfReader(str(pdf)).pages]
+    first, last = "Headline numbers", "trade 160"     # top of the box, last label of its chart
+    on = [i for i, t in enumerate(pages) if first in t], [i for i, t in enumerate(pages) if last in t]
+    assert len(on[0]) == 1 and on[0] == on[1], (fmt, on)
+    assert all(v in pages[on[0][0]] for v in FINAL), "the values print, final"
+
+
 # ------------------------------------------------------------------ I18: SEO
 def test_i18_head_and_headings_are_unchanged_by_motion(built_site):
     for path in MOTION:
