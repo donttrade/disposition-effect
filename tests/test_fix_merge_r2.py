@@ -379,7 +379,8 @@ def test_r5_tool_teaser_script_wording_follows_the_offer(browser, paid_site, bui
         page.wait_for_selector("#ts-teaser:not([hidden])", timeout=60000)
         texts[name] = page.inner_text("#ts-teaser")
         ctx.close()
-    assert "The habit report tests five habits" in texts["paid"] and "We're building" not in texts["paid"]
+    # one of the five habits is described, not tested (CODER-WIRING-REPORT-2026-10-21)
+    assert "The habit report measures five habits like this one, tests four of them" in texts["paid"] and "We're building" not in texts["paid"]
     assert "We're building a habit report" in texts["off"]
 
 

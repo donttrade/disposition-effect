@@ -11,6 +11,7 @@ import { ics, RETEST_LINE } from './retest-copy.js';
 import { pgrPlrCounts } from '../engine/pgr.js';
 import { stripRows } from './strip.js';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js';
+import { habitSentences, methodLine, page1Lines, coverageLines } from './wording.js';
 
 const $ = (id) => document.getElementById(id);
 const MINUS = '−';
@@ -49,6 +50,12 @@ function duration(s) {
 
 const pct = (x) => (x === null || x === undefined ? '—' : (100 * x).toFixed(1) + '%');
 const num = (x, dp = 2) => (x === null || x === undefined ? '—' : x.toFixed(dp));
+const count = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+// The formatters wording.js fills its sentences with (ARCHITECT-STATS-AMENDMENT §7.1: money as now).
+const wordingFmt = (unit) => ({ money: (x) => money(x, unit), duration, ratio: (x) => num(x), count });
+
+const TESTED = ['hold_gap', 'revenge', 'size_up', 'tilt'];
 
 const VERDICT = {
   distinguishable: ['badge badge-real', 'distinguishable from noise'],
@@ -62,7 +69,8 @@ function badge(v) {
   return el('span', { class: cls, text });
 }
 
-// What each habit's two measures mean, in plain words.
+// What each habit's two measures mean, in plain words. Only the descriptive habit
+// (oversized_loss) shows this list; a tested habit shows the §7.1 sentences and detailLine().
 function measures(h, unit) {
   switch (h.id) {
     case 'hold_gap': return [`Median hold of losing trades: ${duration(h.measure_a)}`, `Median hold of winning trades: ${duration(h.measure_b)}`, h.effect === null ? null : `Losers were held ${num(h.effect)} times as long as winners.`];
@@ -74,6 +82,16 @@ function measures(h, unit) {
     default: return [];
   }
 }
+
+// The one extra measure a tested habit's §7.1 sentences leave out (hold_gap's ratio, tilt's
+// 3-loss runs), or null.
+function detailLine(h, unit) {
+  if (h.id === 'hold_gap' || h.id === 'tilt') return measures(h, unit)[2];
+  return null;
+}
+
+// "after adjusting for the 4 patterns tested": the count is the report's own n_tested.
+const testedPhrase = (n) => `the ${n} pattern${n === 1 ? '' : 's'} tested`;
 
 function dollarsLine(h, unit) {
   return `${h.dollars.label}: ${h.dollars.n_trades} trades, totalling ${money(h.dollars.amount, unit)} (historical).`;
@@ -125,13 +143,26 @@ function twoBarChart(h, unit) {
     el('details', {}, el('summary', { text: 'Show as a table' }), el('div', { class: 'table-wrap', tabindex: '0', role: 'region', 'aria-label': h.name + ' table' }, table)));
 }
 
-function habitSection(h, unit) {
+function habitSection(h, unit, report) {
   const sec = el('section', { class: 'habit', id: 'habit-' + h.id, 'aria-labelledby': 'h-' + h.id });
   sec.append(el('h3', { id: 'h-' + h.id, text: h.name }), el('p', { class: 'muted', text: h.question }), el('p', {}, badge(h.verdict)));
-  const ul = el('ul');
-  for (const line of measures(h, unit)) if (line) ul.append(el('li', { text: line }));
-  sec.append(ul, el('p', { text: dollarsLine(h, unit) }));
-  if (h.p_holm !== null) sec.append(el('p', { class: 'small muted', text: `Permutation test on past data, 10,000 shuffles: p = ${h.p_raw.toPrecision(3)}, ${h.p_holm.toPrecision(3)} after the Holm correction for testing four habits.` }));
+  if (TESTED.includes(h.id)) {
+    // ARCHITECT-STATS-AMENDMENT §7.1: the measures sentence and the verdict-by-direction
+    // sentence (too_few: the one sentence that replaces both), from wording.js.
+    for (const s of habitSentences(h, report, wordingFmt(unit))) sec.append(el('p', { class: 'habit-sentence', text: s }));
+    const extra = h.verdict === 'too_few' ? null : detailLine(h, unit);
+    if (extra) sec.append(el('p', { text: extra }));
+  } else {
+    const ul = el('ul');
+    for (const line of measures(h, unit)) if (line) ul.append(el('li', { text: line }));
+    sec.append(ul);
+  }
+  sec.append(el('p', { text: dollarsLine(h, unit) }));
+  // The method line carries the habit's own n_perm (it scales with the file size, D-4).
+  const method = methodLine(h, wordingFmt(unit));
+  if (method && h.p_raw !== null && h.p_holm !== null) {
+    sec.append(el('p', { class: 'small muted habit-method', text: `${method} On past data: p = ${h.p_raw.toPrecision(3)}, or ${h.p_holm.toPrecision(3)} after adjusting for ${testedPhrase(report.n_tested)} (Holm).` }));
+  }
   const chart = twoBarChart(h, unit);
   if (chart) sec.append(chart);
   if (h.research_ref) {
@@ -156,16 +187,18 @@ export function renderReport(report, out, meta) {
   const unit = report.currency;
   out.replaceChildren();
   out.append(el('p', { class: 'disclaimer notice', text: report.disclaimer }));
-  // Page 1: the focus habit, or the plain statement that nothing stands out.
+  // Page 1 (ARCHITECT-STATS-AMENDMENT §7.1): the headline, the focus habit or why none is
+  // shown first, then the coverage line. All sentences come from wording.js.
   const focus = report.habits.find((h) => h.id === report.focus) || null;
   const p1 = el('section', { class: 'section', id: 'focus', 'aria-labelledby': 'focus-h' });
   p1.append(el('h2', { id: 'focus-h', text: 'Page 1' }));
-  if (focus) {
-    p1.append(el('div', { class: 'notice notice-gap' }, el('strong', { text: focus.name }),
-      el('p', { text: focus.question }), el('p', {}, badge(focus.verdict)), el('p', { text: dollarsLine(focus, unit) })));
-  } else {
-    p1.append(el('div', { class: 'notice' }, el('p', { text: 'No pattern in this file is distinguishable from noise.' })));
-  }
+  const head = el('div', { class: focus ? 'notice notice-gap' : 'notice', id: 'focus-lines' });
+  for (const line of page1Lines(report, wordingFmt(unit))) head.append(el('p', { text: line }));
+  if (focus) head.append(el('p', { class: 'muted', text: focus.question }), el('p', {}, badge(focus.verdict)));
+  p1.append(head);
+  const cov = el('div', { id: 'coverage' });
+  for (const line of coverageLines(report)) cov.append(el('p', { class: 'small', text: line }));
+  p1.append(cov);
   p1.append(el('p', { class: 'small muted', text: `${report.n_trades} trades over about ${report.period_weeks} week${report.period_weeks === 1 ? '' : 's'}.${meta && meta.limited ? ' Only the most recent 20,000 trades were used.' : ''}` }));
   out.append(p1);
 
@@ -181,7 +214,7 @@ export function renderReport(report, out, meta) {
         el('th', { scope: 'col', class: 'num', text: 'Matching trades totalled (historical)' }), el('th', { scope: 'col', class: 'num', text: 'Trades' }))), tbody))));
 
   const details = el('section', { class: 'section', 'aria-labelledby': 'det-h' }, el('h2', { id: 'det-h', text: 'Each habit' }));
-  for (const h of report.habits) details.append(habitSection(h, unit));
+  for (const h of report.habits) details.append(habitSection(h, unit, report));
   out.append(details);
 
   if (report.pgr_plr) {
