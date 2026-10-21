@@ -559,3 +559,47 @@ def test_nit5_api_base_idn_tld_and_port_leading_zero(api, ok):
 def test_nit5_phone_with_nbsp_is_accepted_and_published_plain():
     assert B.seller_problem("phone", "+1 555 555 0234") is None
     assert B.normalise_private("+1 555 555 0234")[0] == "+1 555 555 0234"
+
+
+# ------------------------------------------------------------------ NIT 9: ?product=pilot never retags the enquiry forms
+@pytest.fixture(scope="module")
+def pilot_site(tmp_path_factory):
+    import functools
+    import http.server
+    import threading
+    from conftest import _Quiet
+    from test_legal import build, private_with, toml_with
+    tmp = tmp_path_factory.mktemp("r2-pilot")
+    r, out = build(tmp, "p", DT_SITE_TOML=toml_with(tmp, pilot_checkout=True), DT_PRIVATE_TOML=private_with(tmp))
+    assert r.returncode == 0, r.stderr
+    srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(_Quiet, directory=str(out)))
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    yield {"out": out, "url": f"http://127.0.0.1:{srv.server_address[1]}"}
+    srv.shutdown()
+
+
+@pytest.mark.parametrize("path,form,expect", [("/start/?product=pilot#firm", "#sf", "enquiry"),   # the home "Start a Pilot" link
+                                              ("/for-firms/?product=pilot", "#ff", "enquiry"),
+                                              ("/start/?product=PILOT", "#sf", "enquiry"),
+                                              ("/start/?product=memo", "#sf", "memo")])
+def test_nit9_enquiry_form_refuses_pilot_from_the_url(browser, pilot_site, path, form, expect):
+    from urllib.parse import parse_qs
+    ctx = browser.new_context()
+    pg = ctx.new_page()
+    posted = []
+    pg.route("https://api.web3forms.com/**", lambda route: (posted.append(route.request.post_data or ""),
+                                                             route.fulfill(status=200, body="ok")))
+    pg.goto(pilot_site["url"] + path)
+    pg.evaluate("document.querySelectorAll('details').forEach(d => d.open = true)")  # the enquiry form sits in a <details>
+    pg.fill(form + " input[type=email]", "test-ignore@example.org")
+    pg.fill(form + " input[name=firm]", "TEST - ignore")
+    pg.click(form + " button[type=submit]")
+    pg.wait_for_timeout(400)
+    ctx.close()
+    assert len(posted) == 1
+    assert parse_qs(posted[0])["product"][0] == expect
+
+
+def test_nit9_flag_off_firm_form_still_takes_pilot(browser, built_site):
+    from test_fix_merge import _post
+    assert _post(browser, built_site["url"] + "/start/?product=pilot#firm", "#sf")["product"] == "pilot"
