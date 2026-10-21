@@ -9,6 +9,8 @@ Rules (V2-BUILD-PLAN, STRUCTURE and step 3):
       - an externally linked id (path#id in the baseline) missing from its page,
       - trader_first_home != paid_report, or analytics on without a beacon token,
       - a paid-only page or paid-flagged markup in the output while paid_report is off,
+      - a page without exactly one footer business line while a commerce flag is on, or with
+        one while both are off (business_id_line(); decision 21 Oct),
       - a private.toml value without the shape of a real one while a commerce flag is on
         (seller_problem(); DT_ALLOW_PLACEHOLDERS=1 skips only this check, for local test builds),
       - a malformed site.toml or private.toml (a BUILD FAILED line, not a traceback).
@@ -37,6 +39,7 @@ import sys
 import tomllib
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from markupsafe import Markup
 
 SITE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(SITE)
@@ -138,7 +141,9 @@ def address_problem(v):
     if not m:
         return "write it as: street number and street (or PO Box N), city, province code, postal code — e.g. 'PO Box 12, Town ON K1A 0B1'"
     street, city, prov, postal = m.group("street", "city", "prov", "postal")
-    box = re.search(r"\b(?:P\.?\s?O\.?\s+)?Box\b\s*(\S*)", street, re.IGNORECASE)
+    # Decision 21 Oct: a Canada Post box ("PO Box 1234 STN Main", "PO Box 1234, STN Main") or a
+    # mailbox-store street address ("123 Street Rd #456") is the business mailing address.
+    box = re.search(r"\b(?:P\.?\s?O\.?\s+)?Box\b\s*#?\s*([^\s,]*)", street, re.IGNORECASE)
     civic = re.search(r"\b\d+[A-Za-z]?\b", street)
     number = box.group(1) if box else (civic.group(0) if civic else "")
     if not re.fullmatch(r"\d+[A-Za-z]?", number) or int(re.match(r"\d+", number).group(0)) == 0:
@@ -452,6 +457,45 @@ def footer_privacy(flags):
     parts.append("Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; "
                  "their privacy policies apply.")
     return " ".join(parts)
+
+
+# Decision 21 Oct (revised 09:00): with ANY commerce flag on, every page footer identifies the
+# business: name, country/province, the mailing address from private.toml and the business email
+# (Visa Core Rules 5.8.4.1 "address for Cardholder correspondence" + merchant country; CASL).
+# The seller's legal name and phone stay in the seller block (show_seller). With every commerce
+# flag off this line does not exist and private.toml is not read. One wording for template
+# pages and passthrough pages. build.verify() and lint check every page has it exactly once.
+BUSINESS_ID_ATTR = "data-business-id"
+BUSINESS_ID_RE = re.compile(r"(?s)<p\b[^>]*\bdata-business-id\b[^>]*>.*?</p>")
+BUSINESS_REGION = "Ontario, Canada"
+
+
+def business_id_line(cfg, private, css_class=None):
+    """The footer's business-identification paragraph, or "" with every commerce flag off."""
+    import html as _h
+    if not any(cfg["flags"][f] for f in COMMERCE_FLAGS):
+        return ""
+    address = private.get("premises_address")
+    if not isinstance(address, str) or not address.strip():
+        die("a commerce flag is on but there is no mailing address (private.toml premises_address) for the footer")
+    email = cfg["site"]["contact_email"]
+    cls = f' class="{css_class}"' if css_class else ""
+    return (f"<p{cls} {BUSINESS_ID_ATTR}>{_h.escape(cfg['site']['name'])} · {BUSINESS_REGION} · "
+            f"{_h.escape(address)} · <a href=\"mailto:{_h.escape(email)}\">{_h.escape(email)}</a></p>")
+
+
+# Where the line goes in a passthrough page: just before the "who pays" paragraph, right
+# under the contact line (every passthrough page has exactly one).
+PASSTHROUGH_BUSINESS_ANCHOR = '  <p class="whopays">'
+
+
+def add_business_line(text, rel, line):
+    if not line:
+        return text
+    n = text.count(PASSTHROUGH_BUSINESS_ANCHOR)
+    if n != 1:
+        die(f"business line: {rel} holds the footer anchor {PASSTHROUGH_BUSINESS_ANCHOR.strip()!r} {n} time(s), expected 1")
+    return text.replace(PASSTHROUGH_BUSINESS_ANCHOR, "  " + line + "\n" + PASSTHROUGH_BUSINESS_ANCHOR)
 
 
 def trader_nav_label(flags):
@@ -973,6 +1017,20 @@ def verify(out, flags, seller=None, base_url=None):
                     with open(fp, encoding="utf-8", errors="replace") as f:
                         if PAID_FLAG_MARKER in f.read():
                             die(f"paid-flagged markup in {os.path.relpath(fp, out)} while paid_report = false")
+    # Decision 21 Oct: the footer business line, on every page exactly once under any commerce flag
+    commerce = any(flags.get(f) for f in COMMERCE_FLAGS)
+    for root, _, files in os.walk(out):
+        for name in sorted(files):
+            if name.endswith(".html"):
+                fp = os.path.join(root, name)
+                with open(fp, encoding="utf-8", errors="replace") as f:
+                    text = f.read()
+                n, m = text.count(BUSINESS_ID_ATTR), len(BUSINESS_ID_RE.findall(text))
+                if commerce and (n != 1 or m != 1):
+                    die(f"business line: {os.path.relpath(fp, out)} has {n} business-identification line(s), "
+                        "expected exactly 1 while a commerce flag is on")
+                if not commerce and n:
+                    die(f"business line in {os.path.relpath(fp, out)} while every commerce flag is off")
 
 
 def build():
@@ -996,6 +1054,7 @@ def build():
         with open(fp, encoding="utf-8") as f:
             text = f.read()
         text = fix_passthrough_chrome(text, rel, flags)
+        text = add_business_line(text, rel, business_id_line(cfg, private))
         for old, new in PASSTHROUGH_FIXES.get(rel, []):
             if text.count(old) != 1:
                 die(f"passthrough fix: {rel} no longer holds this sentence exactly once: {old!r}")
@@ -1020,7 +1079,8 @@ def build():
                 "legal": cfg["legal"], "forms": cfg["forms"], "analytics": cfg["analytics"],
                 "worker": cfg["worker"], "prices": prices, "products": products, "private": private,
                 "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": TOOLS,
-                "evidence": evidence(), "footer_privacy": footer_privacy(flags), "show_seller": show_seller(cfg)}
+                "evidence": evidence(), "footer_privacy": footer_privacy(flags), "show_seller": show_seller(cfg),
+                "business_id_line": Markup(business_id_line(cfg, private, "legal"))}
     built = []
     for rel, page in sorted(owned.items()):
         page = {"scripts": [], "modules": [], "og_image": "/assets/og/default.png", "lang": "en",

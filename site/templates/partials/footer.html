@@ -7,6 +7,9 @@
   {%- endfor %}
   </div>
   <p class="legal">Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>. {{ site.reply_promise }}</p>
+  {%- if business_id_line %}{# any commerce flag on: build.business_id_line (name, region, mailing address, email) #}
+  {{ business_id_line }}
+  {%- endif %}
   <p class="legal"><strong>Firms pay for fixed-scope measurements of their own data. Readers pay nothing. No firm can pay to change a number.</strong> <a href="/independence/">Independence policy</a></p>
   <p class="legal">{{ legal.disclaimer_short }}</p>
   <p class="legal">{{ footer_privacy }} <a href="/privacy/">Privacy</a></p>

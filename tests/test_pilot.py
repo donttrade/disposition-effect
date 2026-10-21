@@ -122,8 +122,10 @@ def test_thanks_page_shows_stripe_link_mailto_and_seller(pilot_site):
     assert re.search(r'href="mailto:[^"]+\?subject=', h)
     # Tester D2: with pilot_checkout alone the seller block is hidden (plan DoD), until the owner
     # flips [legal] show_seller_for_pilot; the page says how to learn the contracting party first
+    # decision 21 Oct: the address only in the footer's business line; no legal name or phone
     for v in FAKE.values():
-        assert v not in h
+        assert v not in re.sub(r"(?s)<p\b[^>]*data-business-id[^>]*>.*?</p>", "", h)
+    assert FAKE["seller_legal_name"] not in h and FAKE["phone"] not in h
     assert "data-seller-block" not in h and "ask by email and we name it in writing first" in h
     assert '<meta name="robots" content="noindex">' in h
     assert "pilot-thanks" not in (pilot_site["out"] / "sitemap.xml").read_text()
