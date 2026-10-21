@@ -6,12 +6,15 @@
     into the product field of the FIRM form only. The partner form's product is fixed (Tester D1):
     a partner application is always product=platform, whatever the URL says. -#}
 {%- set is_partner = partner is defined and partner %}
+{#- NIT 9: the "Snapshot, Memo…" enquiry form (product = "enquiry", shown with pilot_checkout on)
+    never takes ?product=pilot: Pilots go through the card form above it. -#}
+{%- set no_pilot = product == "enquiry" %}
 <form class="request-form" id="{{ fid }}" method="POST" action="{{ forms.endpoint }}" aria-labelledby="{{ heading_id }}">
   <input type="hidden" name="access_key" value="{{ forms.firm_key }}">
   <input type="hidden" name="subject" value="{{ 'donttrade: partner application' if is_partner else 'donttrade: firm request' }}">
   <input type="hidden" name="from_name" value="donttrade site">
   <input type="hidden" name="redirect" value="{{ forms.redirect_firm }}">
-  <input type="hidden" name="product" value="{{ product }}"{% if not is_partner %} data-from-query="product"{% endif %}>
+  <input type="hidden" name="product" value="{{ product }}"{% if not is_partner %} data-from-query="product"{% endif %}{% if no_pilot %} data-refuse="pilot"{% endif %}>
   <input type="hidden" name="page" value="{{ page.path }}">
   <input type="hidden" name="ref" value="" data-from-query="ref">
   <input type="checkbox" name="botcheck" class="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" hidden>

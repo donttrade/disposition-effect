@@ -14,6 +14,9 @@
       var v = (params.get(key) || '').toLowerCase();
       if (!/^[a-z0-9-]{1,40}$/.test(v)) continue;
       if (key === 'product' && PRODUCTS.indexOf(v) === -1) continue;
+      // NIT 9: a field may refuse some products (the enquiry form never becomes a Pilot request)
+      var refuse = (inputs[i].getAttribute('data-refuse') || '').split(' ');
+      if (refuse.indexOf(v) !== -1) continue;
       inputs[i].value = v;
     }
   }
