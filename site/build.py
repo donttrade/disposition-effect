@@ -34,6 +34,7 @@ Local-test escapes (ESCAPES): each opens ONE guard, prints a WARNING, and is ref
   DT_ALLOW_NO_STRIPE_LINK=1  allow a paid build without the report39 Payment Link
 """
 
+import hashlib
 import json
 import os
 import re
@@ -449,6 +450,24 @@ def sample_csv():
     if "<" in text or "&" in text:
         die("demo-trades.csv contains '<' or '&'; it cannot be inlined safely")
     return text
+
+
+# Motion plan D1 (21 Oct 2026): the home hero is a DOM capture of /tools/trade-stats/ on the sample
+# file (checks/make_hero_dashboard.py). The partial records the sample's SHA-256; a different sample
+# means the hero shows numbers the tool no longer prints, so the build stops until it is re-captured.
+HERO_DASH = os.path.join(SITE, "templates", "partials", "hero_dashboard.html")
+
+
+def check_hero_dashboard():
+    with open(HERO_DASH, encoding="utf-8") as f:
+        m = re.search(r"sample-sha256: ([0-9a-f]{64})\b", f.read())
+    with open(SAMPLE_CSV, "rb") as f:
+        sha = hashlib.sha256(f.read()).hexdigest()
+    if not m:
+        die("hero_dashboard.html records no sample-sha256: re-run python3 checks/make_hero_dashboard.py")
+    if m.group(1) != sha:
+        die(f"hero_dashboard.html was captured from a different sample ({m.group(1)[:12]}…, now {sha[:12]}…): "
+            "re-run python3 checks/make_hero_dashboard.py")
 
 
 PAID_PAGES = [
@@ -1200,8 +1219,12 @@ def build():
             continue
         owned[os.path.relpath(out_file(out, page["path"]), out)] = page
 
-    # 1. passthrough of every docs/ file a template does not own yet
-    copy_tree_sorted(DOCS, out, skip=lambda rel: rel in owned)
+    check_hero_dashboard()
+
+    # 1. passthrough of every docs/ file a template does not own yet. docs/static/ is the last bundle's
+    # copy of site/static/ (step 30), never a source: skipped, so a file deleted from site/static/
+    # (the old hero .webp images, motion plan) does not come back from docs/.
+    copy_tree_sorted(DOCS, out, skip=lambda rel: rel in owned or rel.startswith("static" + os.sep))
     for rel in passthrough_pages(owned):
         fp = os.path.join(out, rel)
         with open(fp, encoding="utf-8") as f:
