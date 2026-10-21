@@ -9,6 +9,7 @@
  ],
  "path": "/tools/pass-rate-calculator/",
  "scripts": [
+  "/static/js/legacy/numbers.js",
   "/static/js/legacy/pass-rate-calculator.js"
  ],
  "section": "/tools/",
