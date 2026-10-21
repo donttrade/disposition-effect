@@ -507,3 +507,18 @@ def test_nit1_js_string_evasions_are_caught(expr):
 def test_nit1_clean_builds_still_pass(built_site, paid_site):
     assert L.lint_build(str(built_site["out"])) == []
     assert L.lint_build(str(paid_site["out"]), paid=True) == []
+
+
+# ------------------------------------------------------------------ NIT 7: no dead "Try again" on /welcome/
+@pytest.mark.parametrize("query", ["", "?session_id=", "?session_id"])
+def test_nit7_welcome_without_a_session_shows_no_retry_button(browser, paid_site, query):
+    ctx = browser.new_context()
+    page = ctx.new_page()
+    requests = []
+    page.on("request", lambda r: requests.append(r.url) if "/redeem" in r.url else None)
+    page.goto(paid_site["url"] + "/welcome/" + query)
+    page.wait_for_selector("#w-error:not([hidden])")
+    visible = page.is_visible("#w-retry")
+    msg = page.inner_text("#w-error")
+    ctx.close()
+    assert not visible and "No checkout was found" in msg and requests == []
