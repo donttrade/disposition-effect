@@ -1,0 +1,399 @@
+
+
+<div class="wrap page-head"><div class="col">
+  <p class="kicker">STUDY · NEGATIVE RESULT · 16 OCT 2026</p>
+  <h1 class="long">A pre-registered test of volatility-scaled momentum failed its own kill criteria at five positions</h1>
+  <div class="banner"><strong>This page reports a negative research result. It is not a strategy, a recommendation or a signal, and nothing on it says what anyone should hold.</strong></div>
+  <p class="lede ls-measure">The mechanism passed on 45.7 years of survivorship-free factor data. The version a small account could hold, five long positions with costs charged, failed: no specification passed all four of its kill criteria, so no money was committed.</p>
+  <p class="meta">Pre-registered 10 Oct 2026 · Run 10 Oct 2026 · Re-run and published 16 Oct 2026 · Script: <a href="https://github.com/donttrade/disposition-effect/tree/main/volmom">volmom/</a> · Data: Kenneth French data library; S&amp;P 500 membership history (fja05680/sp500, MIT); Yahoo monthly closes</p>
+  <p class="funding"><strong>Funding: none.</strong> No firm paid for, saw or approved this study. <a href="/independence/">How donttrade is paid →</a></p>
+  <div class="standing">Published whether or not the result was interesting. This one was not the result its author hoped for: the test was set up to decide whether a strategy would be used, and it said no.</div>
+  <nav class="toc" aria-label="Contents"><strong>Contents</strong><ol><li><a href="#the-short-version">The short version</a></li><li><a href="#what-was-tested-and-why">What was tested, and why</a></li><li><a href="#what-was-fixed-before-any-return-was-computed">What was fixed before any return was computed</a></li><li><a href="#data-and-period">Data and period</a></li><li><a href="#method">Method</a></li><li><a href="#results">Results</a></li><li><a href="#what-this-does-not-show">What this does not show</a></li><li><a href="#reproduce-it">Reproduce it</a></li><li><a href="#references">References</a></li></ol></nav>
+  <div class="post">
+  <h2 id="the-short-version">The short version</h2>
+<p>Volatility-scaled momentum is a published idea (Barroso &amp; Santa-Clara, 2015): take the classic
+momentum factor and shrink exposure when its recent volatility is high. Before any return was
+computed, I wrote down three specifications, the sample splits, a cost model and seven numeric kill
+criteria.</p>
+<p><strong>Part A, the mechanism, passed.</strong> On 45.7 years of survivorship-free factor data the specification
+had never been fitted on, the volatility-scaled version had a Sharpe ratio of <strong>0.78</strong> (t = <strong>5.25</strong>)
+against <strong>0.37</strong> for plain momentum, and it removed most of the crash risk in the return
+distribution.</p>
+<p><strong>Part B, the version a small account could hold, failed.</strong> With five long positions, a minimum price
+and costs charged, <strong>no specification passed all four of its kill criteria</strong>. Over the same
+2013–2026 holdout, simply holding the S&amp;P 500 index fund (SPY) had a higher Sharpe ratio (<strong>1.06</strong>)
+than any of the three specifications (best <strong>0.71</strong>). The two specifications that earned high returns
+would have hit a 10% drawdown limit <strong>11 and 9 times</strong> in 13.75 years. Under the pre-registration,
+that meant no money was committed and the result was to be published.</p>
+<h2 id="what-was-tested-and-why">What was tested, and why</h2>
+<p>The question had two parts, and the second was the one that mattered:</p>
+<ol>
+<li>Does scaling momentum by its own recent volatility improve risk-adjusted returns at all?</li>
+<li>Does it survive a small retail account’s constraints: five positions, long only, real costs, and a
+   10% drawdown limit?</li>
+</ol>
+<p>The academic literature answers the first, on long-short portfolios of hundreds of stocks. It does
+not answer the second. A pre-registered test with kill criteria set in advance was the way to get an
+answer that could not be adjusted after seeing it.</p>
+<h2 id="what-was-fixed-before-any-return-was-computed">What was fixed before any return was computed</h2>
+<p class="scroll-hint" aria-hidden="true">Swipe the table sideways for more columns →</p><div class="table-scroll sticky1" tabindex="0" role="region" aria-label="Table 1"><table>
+<thead>
+<tr>
+<th><span class="vh">Row</span></th>
+<th>Specification</th>
+<th>Part A (factor)</th>
+<th>Part B (five positions)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>S1</strong></td>
+<td>Plain momentum (control)</td>
+<td>Momentum factor, monthly</td>
+<td>Top 5 by 12-1 month return, equal weight</td>
+</tr>
+<tr>
+<td><strong>S2</strong></td>
+<td>Volatility-scaled</td>
+<td>Scale by 0.12 ÷ realised volatility</td>
+<td>Same scaling on total exposure</td>
+</tr>
+<tr>
+<td><strong>S3</strong></td>
+<td>Trend filter</td>
+<td>Hold only when the market index is above its 10-month average</td>
+<td>Hold a name only above its own average</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Ranking:</strong> 12-1 momentum, the return from 12 months ago to 1 month ago, skipping the latest month.</li>
+<li><strong>Parameters:</strong> 12% target volatility, 126-trading-day window. These are Barroso &amp; Santa-Clara’s own
+  values and were not tuned. No parameter sweep was allowed.</li>
+<li><strong>Significance bar:</strong> three specifications, Bonferroni-corrected, so nothing counts below
+  <strong>|t| = 2.394</strong>.</li>
+<li><strong>Splits, holdout evaluated once:</strong> Part A in-sample 1927–1980, holdout <strong>Jan 1981 – Aug 2026
+  (548 months)</strong>. Part B in-sample 1997–2012, holdout <strong>Jan 2013 – Sep 2026 (165 months)</strong>.</li>
+</ul>
+<h2 id="data-and-period">Data and period</h2>
+<ul>
+<li><strong>Part A:</strong> Kenneth French’s momentum factor and market data, built from CRSP, which keeps delisted
+  firms, so this part has no survivorship bias. 1,196 monthly observations from January
+  1927 and 26,216 daily observations from November 1926, both to August 2026; no rows dropped in parsing.</li>
+<li><strong>Part B:</strong> point-in-time S&amp;P 500 membership from <code>fja05680/sp500</code> (MIT), 2,720 dated snapshots;
+  monthly closing prices from Yahoo. Constraints: 5 positions, long only, minimum price $5, and a
+  0.20% cost charged on each side of every trade.</li>
+</ul>
+<h2 id="method">Method</h2>
+<p>Part A uses the published factor directly. Part B rebuilds the strategy from individual stocks each
+month, with costs charged on the fraction of the portfolio replaced. Three conventions are worth
+knowing before reading the tables:</p>
+<ul>
+<li><strong>The Sharpe ratio is not annual return ÷ annual volatility here.</strong> Annual return compounds the
+  monthly mean; the Sharpe ratio scales it linearly. The two drift apart as the mean grows, which is
+  why S2's row in Part A (13.31% return, Sharpe 0.78) does not divide neatly.</li>
+<li><strong>Realised volatility is uncentred</strong>, <code>sqrt(252 × mean(r²))</code>, which is Barroso &amp; Santa-Clara’s
+  published formula. The centred version moves S2's holdout Sharpe from 0.777 to 0.776.</li>
+<li><strong>Kurtosis is raw, not excess</strong> (a normal distribution has 3).</li>
+<li><strong>The 10% drawdown limit was measured, not applied.</strong> The pre-registration asked whether the holdout
+  <em>would</em> trip it more than three times, so trips are counted on the uninterrupted return series and
+  trading never actually stops. That is why a −42.9% drawdown can appear in Part B.</li>
+</ul>
+<h2 id="results">Results</h2>
+<h3 id="part-a-the-mechanism-survivorship-free-holdout-1981-2026-n-5">Part A: the mechanism, survivorship-free (holdout 1981–2026, n = 548 months)</h3>
+<p class="scroll-hint" aria-hidden="true">Swipe the table sideways for more columns →</p><div class="table-scroll sticky1" tabindex="0" role="region" aria-label="Table 2"><table>
+<thead>
+<tr>
+<th>Specification</th>
+<th>Annual return</th>
+<th>Sharpe</th>
+<th>Max drawdown</th>
+<th>Worst month</th>
+<th>t</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S1 plain momentum</td>
+<td>5.75%</td>
+<td>0.37</td>
+<td>−57.8%</td>
+<td>−34.4%</td>
+<td>2.49</td>
+</tr>
+<tr>
+<td><strong>S2 volatility-scaled</strong></td>
+<td><strong>13.31%</strong></td>
+<td><strong>0.78</strong></td>
+<td>−27.8%</td>
+<td>−20.6%</td>
+<td><strong>5.25</strong></td>
+</tr>
+<tr>
+<td>S3 trend filter</td>
+<td>4.99%</td>
+<td>0.47</td>
+<td>−26.0%</td>
+<td>−12.6%</td>
+<td>3.18</td>
+</tr>
+</tbody>
+</table></div>
+<p>The crash risk is visible in the shape of the returns. Plain momentum’s holdout skew is <strong>−1.43</strong> with
+kurtosis <strong>13.22</strong>. Volatility-scaled: skew <strong>+0.05</strong>, kurtosis <strong>5.07</strong>.</p>
+<p><strong>Implementation check</strong> against Barroso &amp; Santa-Clara’s published figures for 1927–2011. This
+code’s figures are for November 1927 – December 2011, the paper’s window after the 10-month warm-up
+the trend filter needs; they come from the independent implementation in <code>verify/</code>:</p>
+<p class="scroll-hint" aria-hidden="true">Swipe the table sideways for more columns →</p><div class="table-scroll sticky1" tabindex="0" role="region" aria-label="Table 3"><table>
+<thead>
+<tr>
+<th><span class="vh">Row</span></th>
+<th>This code</th>
+<th>The paper</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S1 Sharpe</td>
+<td>0.48</td>
+<td>0.53</td>
+</tr>
+<tr>
+<td>S2 Sharpe</td>
+<td>0.93</td>
+<td>0.97</td>
+</tr>
+<tr>
+<td>S2 max drawdown</td>
+<td>−42.6%</td>
+<td>−45.2%</td>
+</tr>
+<tr>
+<td>S2 worst month</td>
+<td>−29.0%</td>
+<td>−28.4%</td>
+</tr>
+<tr>
+<td>S1 worst month</td>
+<td>−52.6%</td>
+<td>−79.0%</td>
+</tr>
+</tbody>
+</table></div>
+<p>S2 reproduces closely. S1's worst month does not. The likely cause is that the paper builds its
+factor from six size-by-momentum portfolios while this code uses French’s published factor. That has
+not been verified, and the gap stays on the record.</p>
+<p><strong>Part A kill criteria</strong></p>
+<p class="scroll-hint" aria-hidden="true">Swipe the table sideways for more columns →</p><div class="table-scroll sticky1" tabindex="0" role="region" aria-label="Table 4"><table>
+<thead>
+<tr>
+<th><span class="vh">Row</span></th>
+<th>Criterion</th>
+<th>Measured</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>K1a</td>
+<td>S2 holdout Sharpe ≥ 0.50</td>
+<td>0.78</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>K1b</td>
+<td>S2 beats S1 by ≥ 0.15 Sharpe</td>
+<td>0.41</td>
+<td>Pass</td>
+</tr>
+<tr>
+<td>K2</td>
+<td>Probability of backtest overfitting ≤ 0.50</td>
+<td>0.00 to 0.76</td>
+<td><strong>Indeterminate</strong></td>
+</tr>
+<tr>
+<td>K3</td>
+<td>Deflated Sharpe "≤ 0"</td>
+<td>0.876 / 1.000 / 0.973</td>
+<td><strong>Cannot fire</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>K2 and K3 are defects in the pre-registration, not results. K2 never said which return matrix to use:
+in-sample gives <strong>0.7638</strong> (fail), holdout <strong>0.0000</strong> (pass), the common sample <strong>0.0828</strong> (pass). With
+only three specifications the statistic has almost no resolution, so it is reported as a range. K3
+was written as "≤ 0", but the deflated Sharpe is a probability between 0 and 1, so it could never have
+fired. A conventional &gt; 0.95 threshold would pass S2, but that threshold was not pre-registered and is
+not used here as a pass.</p>
+<h3 id="part-b-five-positions-long-only-costs-charged-holdout-2013-2">Part B: five positions, long only, costs charged (holdout 2013–2026, n = 165 months)</h3>
+<p class="scroll-hint" aria-hidden="true">Swipe the table sideways for more columns →</p><div class="table-scroll sticky1" tabindex="0" role="region" aria-label="Table 5"><table>
+<thead>
+<tr>
+<th>Specification, 0.20% per side</th>
+<th>Annual return</th>
+<th>Sharpe</th>
+<th>Max drawdown</th>
+<th>Times a 10% limit would trip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S1 plain momentum</td>
+<td>25.49%</td>
+<td>0.71</td>
+<td>−37.3%</td>
+<td><strong>11</strong></td>
+</tr>
+<tr>
+<td>S2 volatility-scaled</td>
+<td>10.57%</td>
+<td>0.66</td>
+<td>−24.6%</td>
+<td><strong>2</strong></td>
+</tr>
+<tr>
+<td>S3 trend filter</td>
+<td>25.69%</td>
+<td>0.71</td>
+<td>−42.9%</td>
+<td><strong>9</strong></td>
+</tr>
+<tr>
+<td>SPY, held throughout (benchmark)</td>
+<td>16.05%</td>
+<td>1.06</td>
+<td>−23.9%</td>
+<td>3</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Every Part B return is an upper bound</strong>, for the survivorship reason below.</p>
+<p>In-sample (1997–2012) was no better: <strong>no specification reached t = 2</strong>, and SPY’s Sharpe of 0.42
+matched S2's 0.43.</p>
+<p><strong>Part B kill criteria: no specification passes all four</strong></p>
+<p class="scroll-hint" aria-hidden="true">Swipe the table sideways for more columns →</p><div class="table-scroll sticky1" tabindex="0" role="region" aria-label="Table 6"><table>
+<thead>
+<tr>
+<th><span class="vh">Row</span></th>
+<th>K4 Sharpe ≥ 0.30</th>
+<th>K5 beats SPY</th>
+<th>K6 ≤ 3 limit trips</th>
+<th>K7 breakeven cost ≥ 0.50% round trip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S1</td>
+<td>0.71 Pass</td>
+<td>Pass</td>
+<td><strong>11 Fail</strong></td>
+<td>0.868% Pass</td>
+</tr>
+<tr>
+<td>S2</td>
+<td>0.66 Pass</td>
+<td><strong>Fail</strong></td>
+<td>2 Pass</td>
+<td><strong>0.467% Fail</strong></td>
+</tr>
+<tr>
+<td>S3</td>
+<td>0.71 Pass</td>
+<td>Pass</td>
+<td><strong>9 Fail</strong></td>
+<td>0.866% Pass</td>
+</tr>
+</tbody>
+</table></div>
+<p>S1 and S3 earn the returns and fail on drawdown. S2 stays within the limit and loses to the
+benchmark. No specification passes everything, so under the pre-registration nothing was traded.</p>
+<h2 id="what-this-does-not-show">What this does not show</h2>
+<ol>
+<li><strong>It is not a strategy, a recommendation or a signal, and it is not a recommendation to hold SPY
+   or anything else.</strong> It is a negative research result. SPY is the benchmark the pre-registration
+   named. Beating a strategy over one 13.75-year window is a fact about that window.</li>
+<li><strong>Free price data cannot see the stocks that failed.</strong> Of 503 current index members, 501 had
+   prices (<strong>99.6%</strong>); of 706 departed members, only 261 did (<strong>37.0%</strong>). At rebalance dates, median
+   index coverage was <strong>52.6% in-sample and 84.8% in the holdout</strong>, as printed by the public script on
+   fresh downloads on 16 October 2026 (an earlier README figure of 85.0% could not be
+   reproduced; see Versions). The missing names are
+   disproportionately the ones that went bust, so Part B returns are biased upward. Pricing
+   delistings at 0%, −30% (Shumway 1997) or −100% gives identical results, because the missing names
+   never enter the panel at all.</li>
+<li><strong>The "zero throttling" check on the price download is weak.</strong> The fetch logged no rate-limiting,
+   but the detector cannot see a batch that silently comes back empty. Some of the missing departed
+   names could be missing for that reason rather than because the source lacks them.</li>
+<li><strong>2013–2026 was an unusual period for large-cap momentum.</strong> A top-5 screen on US large caps over
+   that window is largely a concentrated bet on a few mega-cap technology names. 25% a year with a
+   −37% drawdown and 11 limit trips looks like a sector bet, not a durable edge.</li>
+<li><strong>Part A is not tradeable as measured.</strong> It is a long-short factor across hundreds of stocks with
+   no costs. Every difference between that and five long positions cuts the same way.</li>
+<li><strong>Two forced deviations in Part B.</strong> The pre-registration specified daily windows but Part B has
+   monthly prices, so S2 uses 12 monthly returns for volatility (noisier, leverage capped at 3×) and
+   S3 uses a 10-month average instead of 200 days. Neither was chosen after seeing a result.</li>
+<li><strong>Only Part A has a second implementation.</strong> Part A was rebuilt from the pre-registration text by
+   code written without reading the original computation, and every Part A figure matched. Part B has
+   no independent reimplementation.</li>
+</ol>
+<h2 id="reproduce-it">Reproduce it</h2>
+<p>Folder: <a href="https://github.com/donttrade/disposition-effect/tree/main/volmom"><code>volmom/</code></a> in
+<code>donttrade/disposition-effect</code>.</p>
+<pre tabindex="0" role="region" aria-label="Commands, block 1"><code>pip install -r requirements.txt
+python reproduce_volmom.py
+</code></pre>
+<p>Part A takes about a minute. Part B fetches monthly closes for 1,209 tickers on first run (about ten
+minutes), then caches them. Both download their own data; no data is shipped in the repository.</p>
+<p>On 16 October 2026 the public script was re-run from a clean directory, downloading all of its own
+data. Every Part A and Part B figure on this page matched its output.</p>
+<p>Since 16 October 2026 the script prints each breakeven cost both per side (0.434%, 0.234%, 0.433%) and
+as a round trip (0.868%, 0.467%, 0.866%), and the K7 verdicts S1 pass, S2 fail, S3 pass, matching this
+page. Its Part B banner says the 10% limit is counted, not applied (see Versions).</p>
+<p>The independent Part A reimplementation, which also produces the K2 range, is in
+<a href="https://github.com/donttrade/disposition-effect/tree/main/volmom/verify"><code>volmom/verify/</code></a>:</p>
+<pre tabindex="0" role="region" aria-label="Commands, block 2"><code>pip install pandas numpy scipy
+python fetch.py
+python volmom.py
+</code></pre>
+<h2 id="references">References</h2>
+<ul>
+<li>Barroso, P. &amp; Santa-Clara, P. (2015). "Momentum has its moments." <em>Journal of Financial Economics</em>
+  116(1), 111–120.</li>
+<li>Jegadeesh, N. &amp; Titman, S. (1993). "Returns to Buying Winners and Selling Losers." <em>Journal of
+  Finance</em> 48(1), 65–91.</li>
+<li>Bailey, D. &amp; López de Prado, M. (2014). "The Deflated Sharpe Ratio." <em>Journal of Portfolio
+  Management</em> 40(5).</li>
+<li>Shumway, T. (1997). "The Delisting Bias in CRSP Data." <em>Journal of Finance</em> 52(1), 327–340.</li>
+<li>Kenneth French data library. fja05680/sp500 (MIT).</li>
+</ul>
+<p>Methods and negative results, yes. Live signals, never.</p>
+
+  </div>
+  <p class="funding"><strong>Again: this is a negative research result, not a strategy, a recommendation or a signal.</strong> Nothing here says what anyone should buy, sell or hold.</p>
+  <h2 id="versions">Versions</h2>
+<div class="table-scroll versions" tabindex="0" role="region" aria-label="Versions table"><table><thead><tr><th>Date</th><th>What changed</th></tr></thead><tbody><tr><td>10 Oct 2026</td><td>Pre-registration written before any return was computed. Part A and Part B run.</td></tr><tr><td>10 Oct 2026</td><td>Correction: the first write-up said a look-ahead filter in the Part B portfolio builder inflated returns. Measured afterwards, it changed nothing: there were 0 delistings in 1,775 position-months. The claim was withdrawn.</td></tr><tr><td>13 Oct 2026</td><td>Write-up and code prepared for <code>volmom/</code>. Added the three conventions in Method, the K2 range and the K3 defect, and the independent Part A reimplementation.</td></tr><tr><td>After 13 Oct 2026</td><td>Three corrections to <code>volmom/README.md</code>: the 10% drawdown limit is measured, not applied; costs are 0.20% per side (0.40% round trip), and the pre-registration’s own wording allowed both readings, a third defect in it; the heading “every specification fails at least two” was false, because per-side breakevens had been compared against a round-trip floor. Doubled to round trips, S1 and S3 pass K7. The conclusion did not change: no specification passes all four.</td></tr><tr><td>16 Oct 2026</td><td>Published on this site. Re-run from a clean directory with fresh downloads: every figure matched. The script’s labels now match this page: it prints breakevens per side and round trip, the K7 verdicts S1 pass, S2 fail, S3 pass, and a banner saying the 10% limit is counted, not applied; its downloads send an explicit User-Agent. No computed number changed. S2’s round-trip breakeven is 0.467%, as the script prints. Holdout median coverage is 84.8%, as printed on two fresh fetches; an earlier README figure of 85.0% could not be reproduced. See Corrections.</td></tr></tbody></table></div>
+  <p class="meta">Text and charts: <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>. Study code: MIT. The numbers are facts: quote them freely, with a link. A figure may be described as “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a fixed-scope agreement” only when it comes from a signed engagement; no one may describe it as audited, certified or verified.</p>
+  <details class="cite"><summary>Cite this study</summary>
+<p>donttrade (2026). <em>A pre-registered test of volatility-scaled momentum failed its own kill criteria at five positions</em>. Published 16 Oct 2026. https://donttrade.ca/research/volatility-scaled-momentum/</p>
+<pre tabindex="0" role="region" aria-label="BibTeX citation"><code>@misc{donttrade2026volmom,
+  author = {donttrade},
+  title  = {A pre-registered test of volatility-scaled momentum failed its own kill criteria at five positions},
+  year   = {2026},
+  url    = {https://donttrade.ca/research/volatility-scaled-momentum/},
+  note   = {Code: https://github.com/donttrade/disposition-effect}
+}</code></pre></details>
+  <section class="next-block" aria-label="What next">
+  <p class="kicker">WHAT NEXT</p>
+  <ol>
+    <li><p class="lead ls-mb10-ui">Get the next study by email</p><form action="https://donttrade.substack.com/subscribe" method="get">
+    <label class="skip" for="em">Email address</label>
+    <input id="em" type="email" name="email" placeholder="you@example.com" required autocomplete="email">
+    <button type="submit">Email me the next study</button>
+  </form></li>
+    <li><a href="/research/insider-buying-edge/">Read the other negative result: the insider-buying edge was mostly 2008 →</a></li>
+    <li><a href="https://github.com/donttrade/disposition-effect/tree/main/volmom">Re-run this one (script) →</a></li>
+  </ol>
+</section>
+<p class="study-firms">Work at a prop firm or broker? <a href="/for-firms/">For firms →</a></p>
+</div></div>
+

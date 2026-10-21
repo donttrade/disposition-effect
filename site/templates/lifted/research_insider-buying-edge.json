@@ -1,0 +1,48 @@
+{
+ "article": {
+  "@type": "Article",
+  "dateModified": "2026-10-17",
+  "datePublished": "2026-10-11",
+  "description": "A negative result on insider-buying clusters in 470,754 SEC Form 4 records.",
+  "headline": "The insider-buying edge was mostly 2008",
+  "image": "https://donttrade.ca/assets/og/insider.png",
+  "isAccessibleForFree": true,
+  "license": "https://creativecommons.org/licenses/by-nc/4.0/",
+  "mainEntityOfPage": "https://donttrade.ca/research/insider-buying-edge/",
+  "url": "https://donttrade.ca/research/insider-buying-edge/"
+ },
+ "citation": [
+  [
+   "citation_title",
+   "We looked for the insider-buying edge in 470,754 Form 4 records and, outside 2008–09, did not find it"
+  ],
+  [
+   "citation_author",
+   "donttrade"
+  ],
+  [
+   "citation_publication_date",
+   "2026/10/11"
+  ],
+  [
+   "citation_pdf_url",
+   "https://donttrade.ca/research/insider-buying-edge/donttrade-insider-buying-edge.pdf"
+  ]
+ ],
+ "crumb": "The insider-buying edge",
+ "description": "Forty years of research said insiders beat the market. In 470,754 SEC Form 4 records, two years supplied 94% of the excess return.",
+ "form_action": [
+  "https://donttrade.substack.com"
+ ],
+ "og_image": "/assets/og/insider.png",
+ "parent": [
+  "Research",
+  "/research/"
+ ],
+ "path": "/research/insider-buying-edge/",
+ "section": "/research/",
+ "source": "docs/research/insider-buying-edge/index.html",
+ "source_sha256": "47fd097765038c96ba570eba215774835d54db4fd9e0311ada8c7a2b0a406f33",
+ "title": "The insider-buying edge was mostly 2008 — donttrade",
+ "updated": "2026-10-19"
+}

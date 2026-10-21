@@ -1,0 +1,32 @@
+{
+ "article": {
+  "@type": "Article",
+  "dateModified": "2026-10-17",
+  "datePublished": "2026-10-16",
+  "description": "A pre-registered negative result on 26 swing-trading strategies.",
+  "headline": "We tested 26 swing-trading strategies under pre-registered rules. None survived.",
+  "image": "https://donttrade.ca/assets/og/swing.png",
+  "isAccessibleForFree": true,
+  "license": "https://creativecommons.org/licenses/by-nc/4.0/",
+  "mainEntityOfPage": "https://donttrade.ca/research/swing-trading-strategies/",
+  "url": "https://donttrade.ca/research/swing-trading-strategies/"
+ },
+ "citation": [],
+ "crumb": "26 swing-trading strategies",
+ "description": "Hash-sealed, pre-registered tests of 26 swing-trading rules on ETFs, judged once on locked holdouts, net of costs. None passed. Not a strategy or a signal.",
+ "form_action": [
+  "https://donttrade.substack.com"
+ ],
+ "og_image": "/assets/og/swing.png",
+ "parent": [
+  "Research",
+  "/research/"
+ ],
+ "path": "/research/swing-trading-strategies/",
+ "section": "/research/",
+ "source": "docs/research/swing-trading-strategies/index.html",
+ "source_sha256": "e9d246ebd02c751b52369a35762a6b5467bfefb394ef223ae0dbfa21975f6e0c",
+ "title": "26 swing-trading strategies, pre-registered: none survived",
+ "title_was": "26 swing-trading strategies, pre-registered: none survived — donttrade",
+ "updated": "2026-10-19"
+}

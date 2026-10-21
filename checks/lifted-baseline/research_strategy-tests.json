@@ -1,0 +1,594 @@
+{
+ "attrs": [
+  "nav[aria-label]=Contents",
+  "div[aria-label]=Table 1",
+  "div[aria-label]=Table 2",
+  "div[aria-label]=Table 3",
+  "div[aria-label]=Table 4",
+  "div[aria-label]=Table 5",
+  "div[aria-label]=Table 6",
+  "div[aria-label]=Table 7",
+  "div[aria-label]=Table 8",
+  "div[aria-label]=Table 9",
+  "div[aria-label]=Versions table",
+  "pre[aria-label]=BibTeX citation",
+  "section[aria-label]=What next",
+  "input[placeholder]=you@example.com"
+ ],
+ "citation": [],
+ "fixes": [],
+ "ids": [
+  "s-1-the-short-version",
+  "s-2-how-we-counted",
+  "s-3-how-we-tested",
+  "sealed-pre-registration",
+  "discovery-then-one-touch-confirmation",
+  "the-bar-bonferroni-across-k-7",
+  "deflated-sharpe",
+  "integrity-gates-before-any-verdict",
+  "costs",
+  "s-4-results-investing-rules-inv",
+  "discovery-1926-2012-french-data-library",
+  "inv7-confirmation-one-touch-two-data-sets-fail",
+  "momentum-is-a-known-published-effect",
+  "s-5-results-overnight-and-intraday-holding-on",
+  "s-6-results-day-trading-rules-id",
+  "s-7-scalping-literature-only",
+  "s-8-what-this-means-for-a-trader",
+  "s-9-the-addenda-four-gates-redesigned-with-timestamps",
+  "s-10-real-data-exposures",
+  "s-11-deviations-mismatches-and-other-limitations",
+  "s-12-reproduce-it",
+  "versions",
+  "em"
+ ],
+ "links": [
+  "a[href]=/independence/",
+  "a[href]=#s-1-the-short-version",
+  "a[href]=#s-2-how-we-counted",
+  "a[href]=#s-3-how-we-tested",
+  "a[href]=#s-4-results-investing-rules-inv",
+  "a[href]=#s-5-results-overnight-and-intraday-holding-on",
+  "a[href]=#s-6-results-day-trading-rules-id",
+  "a[href]=#s-7-scalping-literature-only",
+  "a[href]=#s-8-what-this-means-for-a-trader",
+  "a[href]=#s-9-the-addenda-four-gates-redesigned-with-timestamps",
+  "a[href]=#s-10-real-data-exposures",
+  "a[href]=#s-11-deviations-mismatches-and-other-limitations",
+  "a[href]=#s-12-reproduce-it",
+  "a[href]=/research/swing-trading-strategies/",
+  "a[href]=https://creativecommons.org/licenses/by-nc/4.0/",
+  "form[action]=https://donttrade.substack.com/subscribe",
+  "a[href]=/research/swing-trading-strategies/",
+  "a[href]=/for-firms/"
+ ],
+ "path": "/research/strategy-tests/",
+ "source": "docs/research/strategy-tests/index.html",
+ "source_sha256": "343a6cf195ec58f74d4db119733f113fce253ffa794433a3ca4cb29111841e62",
+ "tables": [
+  [
+   [
+    "Step",
+    "Count",
+    "Source"
+   ],
+   [
+    "Swing-study ledger: trials",
+    "36",
+    "TOURNEY_LEDGER.md (13 earlier + 23 tournament rules)"
+   ],
+   [
+    "minus 3 shift variants (C1–C3 rerun one period late as an integrity check)",
+    "33",
+    "strategy-search LEDGER.md rows 7–9"
+   ],
+   [
+    "minus R1 (a replication of C2, not a new strategy)",
+    "32 distinct strategies",
+    "LEDGER.md row 12"
+   ],
+   [
+    "New round: trials registered (INV1–INV7, ON1–ON7, ID1–ID4)",
+    "+18",
+    "BROADEN_LEDGER.md rows 37–54"
+   ],
+   [
+    "Combined ledger: trials",
+    "54",
+    "BROADEN_LEDGER.md, N = 54"
+   ],
+   [
+    "Combined: distinct strategies (32 + 18)",
+    "50",
+    "—"
+   ],
+   [
+    "of which under sealed pre-registration (26 + 18)",
+    "44",
+    "swing study \"How we counted\"; SEAL-BROADEN.md"
+   ]
+  ],
+  [
+   [
+    "Family",
+    "Discovery",
+    "Confirmation (locked)"
+   ],
+   [
+    "INV",
+    "French data library, every month to 2012-12",
+    "French data 2013-01 to 2026-08, plus real ETFs 2013-01 to 2026-09; a rule must pass on both"
+   ],
+   [
+    "ON",
+    "Daily ETF prices to 2012-12-31",
+    "2013-01-01 to 2026-09-30"
+   ],
+   [
+    "ID",
+    "One-minute bars, 2016-01-04 to 2020-12-31",
+    "2021-01-04 to 2026-09-30"
+   ]
+  ],
+  [
+   [
+    "Family",
+    "Null passes per rule (limit 10 of 100)",
+    "Planted passes per rule (need 95 of 100)",
+    "Seal refusal",
+    "Look-ahead"
+   ],
+   [
+    "INV",
+    "0, 1, 2, 1, 1, 0, 3",
+    "100 each",
+    "passed",
+    "passed"
+   ],
+   [
+    "ON",
+    "0 for all seven",
+    "100 each",
+    "passed",
+    "passed"
+   ],
+   [
+    "ID",
+    "0 for all four",
+    "100, 100, 100, 99",
+    "passed",
+    "passed"
+   ]
+  ],
+  [
+   [
+    "ID",
+    "Rule",
+    "Months",
+    "Δ (monthly)",
+    "t",
+    "Sharpe, rule vs market",
+    "Max drawdown, rule vs market",
+    "Verdict"
+   ],
+   [
+    "INV1",
+    "10-month moving-average timing",
+    "1,028",
+    "0.031",
+    "1.09",
+    "0.50 vs 0.39",
+    "43.1% vs 83.7%",
+    "FAIL: t below 2.0"
+   ],
+   [
+    "INV2",
+    "12-month absolute momentum vs T-bills",
+    "1,026",
+    "0.039",
+    "1.42",
+    "0.53 vs 0.39",
+    "44.5% vs 83.7%",
+    "FAIL: t below 2.0"
+   ],
+   [
+    "INV3",
+    "Dual momentum, US vs ex-US, T-bill hurdle",
+    "258",
+    "0.064",
+    "1.01",
+    "0.66 vs 0.44",
+    "22.3% vs 50.3%",
+    "FAIL: t below 2.0"
+   ],
+   [
+    "INV4",
+    "60/40 stocks/bonds, monthly rebalance",
+    "611",
+    "0.016",
+    "1.21",
+    "0.40 vs 0.34",
+    "30.3% vs 50.3%",
+    "FAIL: t below 2.0"
+   ],
+   [
+    "INV5",
+    "Inverse-volatility stocks/bonds",
+    "575",
+    "0.024",
+    "0.71",
+    "0.41 vs 0.33",
+    "15.8% vs 50.3%",
+    "FAIL: t below 2.0; placebo 82.0"
+   ],
+   [
+    "INV6",
+    "Big-cap value tilt",
+    "1,038",
+    "0.007",
+    "0.50",
+    "0.42 vs 0.40",
+    "89.3% vs 83.7%",
+    "FAIL: t below 2.0; deeper drawdown"
+   ],
+   [
+    "INV7",
+    "Big-cap momentum tilt",
+    "1,032",
+    "0.041",
+    "3.93",
+    "0.54 vs 0.40",
+    "77.6% vs 83.7%",
+    "Advanced"
+   ]
+  ],
+  [
+   [
+    "Row",
+    "French run (BIG HiPRIOR vs market)",
+    "Tradable run (MTUM vs SPY)"
+   ],
+   [
+    "Months",
+    "164 (2013-01 to 2026-08)",
+    "161 (2013-05 to 2026-09)"
+   ],
+   [
+    "Sharpe difference t (bar 2.690)",
+    "−0.82",
+    "−0.16"
+   ],
+   [
+    "Annual Sharpe, rule vs benchmark",
+    "0.83 vs 0.91",
+    "0.87 vs 0.89"
+   ],
+   [
+    "Annual growth rate, rule vs benchmark",
+    "14.4% vs 15.0%",
+    "15.8% vs 14.3%"
+   ],
+   [
+    "Max drawdown, rule vs benchmark",
+    "24.5% vs 24.8%",
+    "30.2% vs 23.9%"
+   ],
+   [
+    "Deflated Sharpe (bar 0.95)",
+    "0.006",
+    "0.055"
+   ],
+   [
+    "Failed criteria",
+    "K1, K4, K5",
+    "K1, K4, K5, K6"
+   ]
+  ],
+  [
+   [
+    "ID",
+    "Rule",
+    "Days",
+    "Sharpe diff t",
+    "Net mean t",
+    "Breakeven cost, bp per side",
+    "Needed (2.5× base)",
+    "Sharpe/yr: gross, net, buy-and-hold"
+   ],
+   [
+    "ON1",
+    "SPY overnight",
+    "5,017",
+    "−2.25",
+    "0.22",
+    "1.06",
+    "5",
+    "1.01, 0.04, 0.49"
+   ],
+   [
+    "ON2",
+    "QQQ overnight",
+    "3,475",
+    "0.30",
+    "1.23",
+    "2.22",
+    "5",
+    "0.95, 0.30, 0.23"
+   ],
+   [
+    "ON3",
+    "IWM overnight",
+    "3,167",
+    "−1.96",
+    "−0.54",
+    "1.68",
+    "7.5",
+    "1.00, −0.13, 0.37"
+   ],
+   [
+    "ON4",
+    "9 sector ETFs, equal weight, overnight",
+    "3,521",
+    "−5.81",
+    "−4.41",
+    "1.84",
+    "12.5",
+    "1.19, −1.02, 0.37"
+   ],
+   [
+    "ON5",
+    "XIU.TO overnight",
+    "3,329",
+    "−4.06",
+    "−3.73",
+    "1.89",
+    "12.5",
+    "1.14, −0.81, 0.41"
+   ],
+   [
+    "ON6",
+    "Top-3 sector momentum, overnight",
+    "3,269",
+    "−5.36",
+    "−4.46",
+    "1.79",
+    "12.5",
+    "1.07, −1.11, 0.29"
+   ],
+   [
+    "ON7",
+    "SPY intraday",
+    "5,017",
+    "−9.32",
+    "−3.26",
+    "0.00",
+    "5",
+    "−0.05, −0.65, 0.49"
+   ]
+  ],
+  [
+   [
+    "ID",
+    "Rule (source)",
+    "Trades",
+    "Gross per trade",
+    "Cost per trade",
+    "Net mean per day",
+    "t",
+    "Placebo pct",
+    "Breakeven cost multiple",
+    "Max drawdown"
+   ],
+   [
+    "ID1",
+    "ORB 5-minute, QQQ (Zarattini and Aziz)",
+    "1,220",
+    "+3.56 bp",
+    "5.47 bp",
+    "−1.85 bp",
+    "−1.21",
+    "99.4",
+    "0.65",
+    "27.4%"
+   ],
+   [
+    "ID2",
+    "ORB 5-minute, SPY",
+    "1,222",
+    "+0.56 bp",
+    "5.55 bp",
+    "−4.85 bp",
+    "−4.38",
+    "78.7",
+    "0.10",
+    "47.4%"
+   ],
+   [
+    "ID3",
+    "Market intraday momentum, SPY (Gao, Han, Li and Zhou)",
+    "1,240",
+    "−0.14 bp",
+    "4.00 bp",
+    "−4.08 bp",
+    "−4.08",
+    "45.2",
+    "0.00",
+    "41.0%"
+   ],
+   [
+    "ID4",
+    "Noise-area momentum, SPY (Zarattini, Aziz and Barbon)",
+    "1,111",
+    "+1.42 bp",
+    "4.00 bp",
+    "−2.28 bp",
+    "−2.03",
+    "76.8",
+    "0.36",
+    "28.3%"
+   ]
+  ],
+  [
+   [
+    "Sealed (UTC)",
+    "Addendum",
+    "What changed",
+    "What had been seen on real data"
+   ],
+   [
+    "16 Oct, 21:14:06",
+    "PREREG-INV, PREREG-ON",
+    "Sealed",
+    "Nothing; no data downloaded"
+   ],
+   [
+    "16 Oct, 21:34:27",
+    "PREREG-ID",
+    "Sealed",
+    "The earliest available timestamp only"
+   ],
+   [
+    "16 Oct, 22:13:03",
+    "ADDENDUM-1",
+    "Gate 1: INV and ON planted tests moved to synthetic panels and resized, because the overnight plant could not clear the cost bar by construction. Cost-timing deviation ratified (Section 11).",
+    "Downloads, file hashes, structural counts, overnight data-quality counts. No return or statistic."
+   ],
+   [
+    "16 Oct, 23:12:33",
+    "ADDENDUM-2",
+    "Gate 2: ID planted test resized and moved to synthetic panels. The literal early-close rule (it flagged no real half days) replaced by the NYSE’s published calendar of 21 early closes.",
+    "Timestamps of the one-minute bars only"
+   ],
+   [
+    "16 Oct, 23:30:02",
+    "ADDENDUM-3",
+    "Gate 3: the null tests of all three families rebuilt to have exactly zero edge. The sealed investing null let 60/40 pass in 80 of 100 panels, because it gave stocks and bonds independent positive returns. One-touch, advance-list and seal-anchor rules added.",
+    "Real discovery Sharpe differences for INV1, INV2, INV3 and INV5 (from a shift test); see Section 10"
+   ],
+   [
+    "17 Oct, 00:31:21",
+    "ADDENDUM-4",
+    "Gate 4: the ID3/ID4 planted edge raised from 12 to 13 bp per trade, because ID4 sat on the 95-of-100 line. Acceptance rule fixed before the re-check.",
+    "ID timestamps only"
+   ],
+   [
+    "17 Oct, 00:39:31 / 00:41:28",
+    "—",
+    "INV and ON discovery outputs sealed",
+    "—"
+   ],
+   [
+    "17 Oct, 01:03:06",
+    "DISCLOSURE-1",
+    "Four undisclosed real-data exposures recorded, and a ruling that the failed sealed null does not halt INV",
+    "—"
+   ],
+   [
+    "17 Oct, 01:04:05",
+    "—",
+    "INV7 confirmation output sealed (FAIL)",
+    "—"
+   ],
+   [
+    "17 Oct, 01:10:14",
+    "—",
+    "ID discovery output sealed (nothing advanced)",
+    "—"
+   ]
+  ],
+  [
+   [
+    "File",
+    "SHA-256"
+   ],
+   [
+    "PREREG-INV.md",
+    "987cdf3611734a6c0670191746edddf8676f63012ff69dff2ba8b09be129b095"
+   ],
+   [
+    "PREREG-ON.md",
+    "59a7709b857303e84d8e62131c1103867534b58cfe0a941171ced18e6b807ecc"
+   ],
+   [
+    "PREREG-ID.md",
+    "ff3149821e6bf0b357defde5e4c4806746b507c6b374bd34d47f4821686dd686"
+   ],
+   [
+    "ADDENDUM-1-2026-10-16.md",
+    "99d2dfb1fe783d17fbe1f8daa7f7d8a366856b0bc989b2a67c25255085b5a6c1"
+   ],
+   [
+    "ADDENDUM-2-2026-10-16.md",
+    "eeb3983a69beb3b12a752ce99a4a3aef906d413eed6680b95c2127e400b1efae"
+   ],
+   [
+    "ADDENDUM-3-2026-10-16.md",
+    "8ec93d95c01e546f48bc0d440f805a506e4797a782270d220f84a334968a4912"
+   ],
+   [
+    "ADDENDUM-4-2026-10-17.md",
+    "7ffc32b6481070dc51542e12555a83a6e082cb4516853bbf2874a54277d1ab5f"
+   ],
+   [
+    "DISCLOSURE-1-2026-10-17.md",
+    "525f7338ad1bb6e7e1338189d7bf3e883cdb6356b05774bcfb6397ab2bd55bc3"
+   ],
+   [
+    "DECISIONS-M1-M3-2026-10-16.md",
+    "8b93f48f496a1ff6c1d2ba89cbb47c5479be149814822a810a1f54ee814c3a7b"
+   ],
+   [
+    "inv/DATA_SHA256.txt (11 files)",
+    "64849d3c8e5f580cafa6ee21e73885c273562509a772d4b187963064c3a00425"
+   ],
+   [
+    "on/DATA_SHA256.txt (13 files)",
+    "e061fa2f6910075aafda4526c26826bcc3d436ebd0d3add909da18da771a9510"
+   ],
+   [
+    "id/data/DATA_SHA256.txt (258 files)",
+    "c723c5f6dd4754f084b127c8ba5792adf9519915686d31dba847d294bf6cf02c"
+   ],
+   [
+    "inv/out/discovery.json",
+    "cf617069b55638494c75ef1e1ac4241dd8ace2f0e5dd8617a8261120ca0c8197"
+   ],
+   [
+    "on/out/discovery.json",
+    "bd8d6d407ba60b302e985e40f993deeb8d555584d2e77db3c89b91f5cd3d566a"
+   ],
+   [
+    "id/out/discovery.json",
+    "d6170e78b7896fc49da0cd412603bcee4a97ee4b7521c390191ec596ea040e31"
+   ],
+   [
+    "inv/out/confirmation_INV7.json",
+    "8f614ab6ca7e787695c07037dd1590ca2d8e48e668e43b4b11e18bf460effca6"
+   ],
+   [
+    "SEAL-BROADEN.md (8,605 bytes, final)",
+    "870ff73a26b4a3f0764add8531a1d3684047608b1263ed8f22cd9b72d476f1b9"
+   ]
+  ],
+  [
+   [
+    "Date",
+    "What changed"
+   ],
+   [
+    "16 Oct 2026",
+    "Investing and overnight pre-registrations sealed at 21:14:06 UTC; day-trading pre-registration sealed at 21:34:27 UTC, before any one-minute bar was downloaded in bulk."
+   ],
+   [
+    "16–17 Oct 2026",
+    "Four addenda sealed before the discovery runs, each listed in the study with its timestamp; one disclosure note sealed before the only confirmation run. The investing confirmation ran once (INV7, FAIL). Nothing else reached confirmation."
+   ],
+   [
+    "17 Oct 2026",
+    "Published on this site."
+   ]
+  ]
+ ],
+ "text": "\n\n\n  STUDY · PRE-REGISTERED · NEGATIVE RESULT · 17 OCT 2026\n  We tested 50 trading strategies, from swing trades to day trades. None survived.\n  This page reports a negative research result. It is not a strategy, a recommendation or a signal, and nothing on it says what anyone should hold.\n  The swing study’s 32 strategies plus 18 new rules: 7 investing rules judged against holding the market, 7 overnight rules and 4 day-trading rules on one-minute bars. Each new rule was sealed with a SHA-256 hash before any data was downloaded, and judged net of costs. None passed: 0 of 50 across the project, 0 of 44 under sealed pre-registration.\n  Pre-registered and sealed 16 Oct 2026 (investing and overnight 21:14:06 UTC; day trading 21:34:27 UTC) · Run 16–17 Oct 2026 · Published 17 Oct 2026 · Code: to be published with this study; the SHA-256 of every file is under “Reproduce it” · Data: Kenneth French data library; FRED; free vendor-adjusted daily ETF prices; Alpaca one-minute bars\n  Funding: none. No firm paid for, saw or approved this study. How donttrade is paid →\n  Published whether or not the result was interesting. Four integrity gates were redesigned after sealing; each change, its timestamp and what had been seen at the time is listed in the study.\n  Contents1. The short version2. How we counted3. How we tested4. Results: investing rules (INV)5. Results: overnight and intraday holding (ON)6. Results: day-trading rules (ID)7. Scalping: literature only8. What this means for a trader9. The addenda: four gates redesigned, with timestamps10. Real-data exposures11. Deviations, mismatches and other limitations12. Reproduce it\n  \n  This study combines two rounds of work. The first, published on 16 October as the swing-trading study, covered 32 distinct strategies across the project. The second round, run on 16–17 October, added 18 new rules: 7 investing rules, 7 overnight rules and 4 day-trading rules. That makes 50 distinct strategies. None of them passed. Of the 50, 44 were tested under sealed pre-registration; the other 6 were tested earlier under looser protocols, as the swing study explains. The section \"How we counted\" shows both ledgers line by line.\n1. The short version\n\n50 distinct strategies, 0 survivors. 26 swing rules and 18 new rules were tested under rules sealed with a hash before any result was computed, which makes 0 of 44 under sealed pre-registration. Counting the 6 earlier strategies, it is 0 of 50 across the project.\nThe new round covered three styles. Seven monthly investing rules (trend timing, momentum, 60/40, value and momentum tilts) were judged against simply holding the US stock market. Seven overnight rules bought an ETF at the close and sold it at the next open, or the reverse. Four day-trading rules were tested on one-minute bars of SPY and QQQ, including the opening-range breakout (ORB) popular with futures traders.\nThe one investing rule that looked strong was a famous effect, re-measured. A big-cap momentum tilt beat the market’s Sharpe ratio before 2013 with a t-statistic of 3.93. Momentum was published as an anomaly decades before 2013, on that same history, so this was a re-measurement, not a discovery. After 2013 it did not beat the market: t −0.82 on the research portfolios and t −0.16 on the real momentum ETF, MTUM. MTUM also fell further than the S&P 500 at its worst (30.2% against 23.9%).\nOvernight holding looked good before costs and failed after them. SPY held only overnight had a gross Sharpe ratio of 1.01 a year over 1993–2012, against 0.49 for holding it all the time. After an assumed 2 basis points per trade, its Sharpe fell to 0.04, and $1,000 became $977 instead of $4,690. All seven failed the cost test.\nThe opening-range breakout reproduced its gross edge and lost it to costs. On QQQ, 2016–2020, the rule made +3.56 basis points per trade before costs. Our assumed costs were 5.47 basis points per trade, so the net result was −1.85 basis points a day (t −1.21). An independent replication on five index CFDs, published before this test, found the same thing: gross edge reproduced, net about zero.\n\nA basis point (bp) is one hundredth of one percent: 10 bp is 0.10%.\n2. How we counted\nTwo ledgers record every trial. Rows are appended and never edited, and a trial that dies still counts. The trial count, N, feeds the deflated Sharpe test described below, so every attempt makes passing harder for every later one.\nSwipe the table sideways for more columns →\n\n\nStep\nCount\nSource\n\n\n\n\nSwing-study ledger: trials\n36\nTOURNEY_LEDGER.md (13 earlier + 23 tournament rules)\n\n\nminus 3 shift variants (C1–C3 rerun one period late as an integrity check)\n33\nstrategy-search LEDGER.md rows 7–9\n\n\nminus R1 (a replication of C2, not a new strategy)\n32 distinct strategies\nLEDGER.md row 12\n\n\nNew round: trials registered (INV1–INV7, ON1–ON7, ID1–ID4)\n+18\nBROADEN_LEDGER.md rows 37–54\n\n\nCombined ledger: trials\n54\nBROADEN_LEDGER.md, N = 54\n\n\nCombined: distinct strategies (32 + 18)\n50\n—\n\n\nof which under sealed pre-registration (26 + 18)\n44\nswing study \"How we counted\"; SEAL-BROADEN.md\n\n\n\nThree points of precision:\n\n\"Distinct\" means different rules. Shift variants and the R1 replication are trials, and they count in N, but they reuse a rule already counted.\nThe 54 could be 58. The project plan says any shift test on real data adds one trial. The Tester ran four such shift tests (INV1, INV2, INV3, INV5) as an integrity check, and they were not added to the ledger. Whether they count was flagged in the internal review and has not been ruled on. It changes no verdict: the investing and overnight tests fixed N = 50 in their sealed pre-registrations, and the day-trading test fixed N = 54.\nOutcome rows are missing from the new ledger. BROADEN_LEDGER.md registers the 18 rules, but status rows for their outcomes had not been appended when this was written. The outcomes themselves are recorded, with their file hashes, in the sealed log SEAL-BROADEN.md.\n\nScalping was not tested. Section 7 explains why and summarises the research instead.\n3. How we tested\nThe swing study explains the basic ideas (backtests, overfitting, multiple testing, alphas and Sharpe ratios) in plain words. This round used the same approach, with a stricter bar.\nSealed pre-registration\nEvery rule, data source, date split, cost and pass/fail test was written down before any data was downloaded. Each file was then fingerprinted with SHA-256 and the fingerprint recorded in SEAL-BROADEN.md. A fingerprint changes completely if one character of the file changes.\n\nThe investing (INV) and overnight (ON) pre-registrations were sealed at 21:14:06 UTC on 16 October 2026.\nThe day-trading (ID) pre-registration was sealed at 21:34:27 UTC the same day, after a probe that read only the earliest available timestamp of the data.\n\nEvery later clarification went into a separate, fingerprinted addendum. Wherever two readings of a rule existed, the worse verdict counted. Section 9 lists the addenda with their timestamps.\nDiscovery, then one-touch confirmation\nEach family had a discovery period, used to decide which rules deserved a final test, and a locked confirmation period, used once for the verdict.\nSwipe the table sideways for more columns →\n\n\nFamily\nDiscovery\nConfirmation (locked)\n\n\n\n\nINV\nFrench data library, every month to 2012-12\nFrench data 2013-01 to 2026-08, plus real ETFs 2013-01 to 2026-09; a rule must pass on both\n\n\nON\nDaily ETF prices to 2012-12-31\n2013-01-01 to 2026-09-30\n\n\nID\nOne-minute bars, 2016-01-04 to 2020-12-31\n2021-01-04 to 2026-09-30\n\n\n\nThe day-trading split differs because the free one-minute history starts in January 2016.\nThe lock was enforced in code. The data loader refused any confirmation-dated row unless an unlock file held the exact fingerprint of the sealed pre-registration. Every read, allowed or refused, was logged. The unlock was consumed (renamed) just before the first confirmation row was parsed, so a second run was impossible. A crash after that point would have counted as a FAIL.\nThe bar: Bonferroni across k = 7\nSeven confirmation slots were reserved for the whole round (INV up to 3, ON up to 2, ID up to 2), whether or not they were used. The Bonferroni correction divides the allowed error rate across those seven. That sets the t-statistic bar at 2.690, against 2.394 or 1.96 in the swing study, and the placebo bar at the 99.286th percentile. Only one slot was used.\nTo reach confirmation, a rule had to clear a discovery gate first: a t of at least 2.0, a placebo percentile of at least 95, a smaller drawdown than its benchmark (INV, ON) or at most 20% (ID), a cost cushion (ON, ID), and a minimum sample size.\nDeflated Sharpe\nThe deflated Sharpe ratio (Bailey and López de Prado, 2014) asks how likely it is that a Sharpe ratio this high is real, given how many strategies were tried. It returns a probability between 0 and 1, and every confirmation needed at least 0.95. N was 50 for the investing and overnight rules and 54 for the day-trading rules.\nIntegrity gates before any verdict\nBefore discovery could run, each family’s machinery had to pass four checks:\n\nNull test. 100 synthetic panels with exactly zero edge. A rule’s discovery gate could pass in no more than 10 of them.\nPlanted test. 100 synthetic panels with a known edge added. The gate had to pass in at least 95 of them.\nSeal refusal. A read of a confirmation-dated row without the unlock file had to be refused and logged.\nLook-ahead. The code had to assert that every decision used only data available at that moment.\n\nSwipe the table sideways for more columns →\n\n\nFamily\nNull passes per rule (limit 10 of 100)\nPlanted passes per rule (need 95 of 100)\nSeal refusal\nLook-ahead\n\n\n\n\nINV\n0, 1, 2, 1, 1, 0, 3\n100 each\npassed\npassed\n\n\nON\n0 for all seven\n100 each\npassed\npassed\n\n\nID\n0 for all four\n100, 100, 100, 99\npassed\npassed\n\n\n\nFour of these gates had to be redesigned before they could work. That history is in Section 9.\nCosts\nEvery result is net of costs, and every cost is an assumption, because none of the free data sources includes bid and ask quotes.\n\nINV: 0.10% of traded value per side. The French research portfolios also pay an assumed fund-cost drag: 0.20% a year for value, 0.50% a year for momentum.\nON: two trades a day, at an assumed half-spread of 2 bp per side for SPY and QQQ, 3 bp for IWM, and 5 bp for the sector funds and XIU.TO.\nID: 2 bp per side for market orders, 4 bp for stop exits and 1 bp for limit targets.\n\n4. Results: investing rules (INV)\nEach rule was compared with holding 100% of the US stock market, on monthly returns above the T-bill rate. The primary test was the difference in Sharpe ratio, strategy minus market. The drawdown also had to be smaller than the market’s.\nDiscovery, 1926–2012 (French data library)\nSharpe ratios are annualised, net of costs. The \"Δ\" column is the monthly Sharpe difference that was tested.\nSwipe the table sideways for more columns →\n\n\nID\nRule\nMonths\nΔ (monthly)\nt\nSharpe, rule vs market\nMax drawdown, rule vs market\nVerdict\n\n\n\n\nINV1\n10-month moving-average timing\n1,028\n0.031\n1.09\n0.50 vs 0.39\n43.1% vs 83.7%\nFAIL: t below 2.0\n\n\nINV2\n12-month absolute momentum vs T-bills\n1,026\n0.039\n1.42\n0.53 vs 0.39\n44.5% vs 83.7%\nFAIL: t below 2.0\n\n\nINV3\nDual momentum, US vs ex-US, T-bill hurdle\n258\n0.064\n1.01\n0.66 vs 0.44\n22.3% vs 50.3%\nFAIL: t below 2.0\n\n\nINV4\n60/40 stocks/bonds, monthly rebalance\n611\n0.016\n1.21\n0.40 vs 0.34\n30.3% vs 50.3%\nFAIL: t below 2.0\n\n\nINV5\nInverse-volatility stocks/bonds\n575\n0.024\n0.71\n0.41 vs 0.33\n15.8% vs 50.3%\nFAIL: t below 2.0; placebo 82.0\n\n\nINV6\nBig-cap value tilt\n1,038\n0.007\n0.50\n0.42 vs 0.40\n89.3% vs 83.7%\nFAIL: t below 2.0; deeper drawdown\n\n\nINV7\nBig-cap momentum tilt\n1,032\n0.041\n3.93\n0.54 vs 0.40\n77.6% vs 83.7%\nAdvanced\n\n\n\nThe market column changes between rows because each rule is compared over its own months.\nThe timing and allocation rules (INV1–INV5) all had higher Sharpe ratios than the market and much smaller drawdowns. None had a Sharpe advantage large enough to rule out luck: the best t was 1.42. A smaller drawdown is not the same as a better risk-adjusted return.\nINV7 confirmation: one touch, two data sets, FAIL\nINV7 held big-cap stocks with the strongest past 12-month returns. It was tested once, on 17 October at 01:03:49 UTC, on the French research portfolio and on the real ETF, MTUM, against the market and SPY.\nSwipe the table sideways for more columns →\n\n\nRow\nFrench run (BIG HiPRIOR vs market)\nTradable run (MTUM vs SPY)\n\n\n\n\nMonths\n164 (2013-01 to 2026-08)\n161 (2013-05 to 2026-09)\n\n\nSharpe difference t (bar 2.690)\n−0.82\n−0.16\n\n\nAnnual Sharpe, rule vs benchmark\n0.83 vs 0.91\n0.87 vs 0.89\n\n\nAnnual growth rate, rule vs benchmark\n14.4% vs 15.0%\n15.8% vs 14.3%\n\n\nMax drawdown, rule vs benchmark\n24.5% vs 24.8%\n30.2% vs 23.9%\n\n\nDeflated Sharpe (bar 0.95)\n0.006\n0.055\n\n\nFailed criteria\nK1, K4, K5\nK1, K4, K5, K6\n\n\n\nOn MTUM the growth rate was higher than SPY’s. Its Sharpe ratio was not, and its worst fall was deeper. The pre-registered question was whether the tilt gave a better risk-adjusted result. It did not.\nMomentum is a known, published effect\nMomentum was published as an anomaly by Jegadeesh and Titman in 1993. Carhart (1997) and the Fama-French size/momentum portfolios, which supplied INV7’s discovery data, were built and studied on the same pre-2013 history. INV7’s discovery t of 3.93 is therefore a re-measurement of a published effect on its own publication-era data. It is not an out-of-sample discovery, and we do not present it as one.\nThe only out-of-sample evidence here is the 2013–2026 confirmation. That period starts two decades after publication and uses an ETF launched to harvest the effect, so it tests whether the effect persisted after publication and whether a fund could capture it. It found no risk-adjusted advantage. Research on how anomaly returns decay after publication (McLean and Pontiff, 2016) is the relevant prior; it was not re-read for this study. The INV pre-registration also recorded the wider contamination risk in advance: anyone writing these rules knows, in broad terms, how US stocks, value and momentum behaved after 2012. Choosing only published default parameters, with no grid search, was the only defence.\n5. Results: overnight and intraday holding (ON)\nThese rules hold an ETF for only part of each day. Overnight means buy at the close and sell at the next open; intraday is the reverse. Each was compared with holding the same ETF all the time, with no cost. Two trades a day means about 252 round trips a year, so the cost assumption decides almost everything.\nSwipe the table sideways for more columns →\n\n\nID\nRule\nDays\nSharpe diff t\nNet mean t\nBreakeven cost, bp per side\nNeeded (2.5× base)\nSharpe/yr: gross, net, buy-and-hold\n\n\n\n\nON1\nSPY overnight\n5,017\n−2.25\n0.22\n1.06\n5\n1.01, 0.04, 0.49\n\n\nON2\nQQQ overnight\n3,475\n0.30\n1.23\n2.22\n5\n0.95, 0.30, 0.23\n\n\nON3\nIWM overnight\n3,167\n−1.96\n−0.54\n1.68\n7.5\n1.00, −0.13, 0.37\n\n\nON4\n9 sector ETFs, equal weight, overnight\n3,521\n−5.81\n−4.41\n1.84\n12.5\n1.19, −1.02, 0.37\n\n\nON5\nXIU.TO overnight\n3,329\n−4.06\n−3.73\n1.89\n12.5\n1.14, −0.81, 0.41\n\n\nON6\nTop-3 sector momentum, overnight\n3,269\n−5.36\n−4.46\n1.79\n12.5\n1.07, −1.11, 0.29\n\n\nON7\nSPY intraday\n5,017\n−9.32\n−3.26\n0.00\n5\n−0.05, −0.65, 0.49\n\n\n\nEvery overnight rule failed on cost. The breakeven column is the cost per side at which the rule stops beating buy-and-hold. For ON1–ON6 it ranged from 1.06 to 2.22 bp. The sealed bar required at least 2.5 times the assumed base cost, which is 5 to 12.5 bp. Where an overnight edge exists in this data, it is smaller than an assumed 2–5 bp half-spread. ON7, intraday-only SPY, lost money before any cost. None of the seven advanced, so the overnight confirmation data was never opened.\nThe gross pattern is striking. Over 1993–2012, a dollar in SPY held only overnight grew 7.27 times before costs, held only during the day it shrank to 0.65 of a dollar, and held all the time it grew 4.69 times. QQQ shows the same split (6.44, 0.21 and 1.35 times, 1999–2012). This matches the overnight premium reported for QQQ by Kelly and Clark (2011). It is also descriptive only: it ignores the cost of trading twice a day, and those costs erase it. QQQ overnight (ON2) came closest. It beat buy-and-hold even after costs (net growth 3.5% a year against 2.2%), but its edge was not statistically distinguishable from luck (t 0.30) and its cost cushion was 2.22 bp against the 5 bp required.\n6. Results: day-trading rules (ID)\nThe four rules came from published papers and were coded from the authors' own PDFs. They were tested at one times notional (no leverage), long and short, on consolidated one-minute bars from Alpaca’s free plan: 258 monthly files, 4,235,681 rows, fingerprinted before any price was read.\nSwipe the table sideways for more columns →\n\n\nID\nRule (source)\nTrades\nGross per trade\nCost per trade\nNet mean per day\nt\nPlacebo pct\nBreakeven cost multiple\nMax drawdown\n\n\n\n\nID1\nORB 5-minute, QQQ (Zarattini and Aziz)\n1,220\n+3.56 bp\n5.47 bp\n−1.85 bp\n−1.21\n99.4\n0.65\n27.4%\n\n\nID2\nORB 5-minute, SPY\n1,222\n+0.56 bp\n5.55 bp\n−4.85 bp\n−4.38\n78.7\n0.10\n47.4%\n\n\nID3\nMarket intraday momentum, SPY (Gao, Han, Li and Zhou)\n1,240\n−0.14 bp\n4.00 bp\n−4.08 bp\n−4.08\n45.2\n0.00\n41.0%\n\n\nID4\nNoise-area momentum, SPY (Zarattini, Aziz and Barbon)\n1,111\n+1.42 bp\n4.00 bp\n−2.28 bp\n−2.03\n76.8\n0.36\n28.3%\n\n\n\nEach rule needed a net t of at least 2.0, a breakeven cost multiple of at least 2.5 and a drawdown of at most 20%. All four failed all three. ID2, ID3 and ID4 also failed the random-direction placebo, so their direction choices were no better than coin flips. Nothing advanced, so the day-trading confirmation data (2021–2026) was never opened.\nORB on QQQ is the notable result. It was the only rule whose direction clearly beat chance: its placebo percentile of 99.4 means it beat 99.4% of 1,000 random-direction versions of itself. Its gross edge of +3.56 bp per trade is real in this data. The assumed costs were 5.47 bp per trade, and the rule broke even at 0.65 times those costs. Even at half the assumed cost, the net mean was +0.80 bp a day with a t of 0.53, far from significant.\nThat is what an independent replication found before this test. Krueger (September 2026), replicating the same ORB paper on five index CFDs over 2015–2026, reported a gross average of +0.131 R per trade on the Nasdaq-100 (t 2.9) and a net average of +0.002 R (t 0.0). R is the risk per trade, the distance from entry to stop. His conclusion was \"gross reproduced, net zero\". Ours is the same, on different data and a different cost model.\nA reproduction check run as part of the integrity tests confirms that the engine matches the paper. With the paper’s own sizing and its commission of $0.0005 per share, and no slippage, our 2016–2020 QQQ run gave 1,220 trades, a 23.9% win rate, +0.130 R per trade and a Sharpe ratio of 1.14. The paper reports 1,795 trades over 2016–2023, a 24% win rate, +0.13 R and a Sharpe ratio of 1.12. The gap between the paper and our verdict is the cost model: the paper assumed no slippage, and we charged spread and slippage.\nThe day-trading run happened after the internal Manager review. That review, written at 00:51 UTC on 17 October, recorded ID as \"still NOT RUN\". The ID integrity tests and discovery ran afterwards, under the ADDENDUM-4 rules, and the discovery output was sealed at 01:10:14 UTC.\n7. Scalping: literature only\nScalping was declared untestable in the plan, before any data was read. A scalp’s edge is a few ticks, about the same size as the spread, the trader’s place in the order queue and the delay in reaching the exchange. One-minute bars cannot show whether a limit order would have filled or what a market order would have paid at that millisecond. An honest test needs tick-by-tick trades and quotes with a model of the queue, and the free data has neither.\nWhat the research we read says (each source as read for this study):\n\nSpeed decides who wins. Baron, Brogaard, Hagströmer and Kirilenko (2019) find that relative latency explains large performance gaps between high-frequency trading firms, and that firms that got faster did better.\nMost persistent day traders lose. Chague, De-Losso and Giovannetti (2019) followed people who began day-trading Brazilian index futures in 2013–2015. Of the 1,551 who kept going for at least 300 days, 97% lost money, and 17 (1.1%) earned more than the Brazilian minimum wage. (We read a summary on Quantpedia, not the paper.)\nVery few are predictably profitable. Barber, Lee, Liu and Odean (2014), using Taiwanese data for 1992–2006, find that less than 1% of the day-trader population predictably earns positive returns after fees. The top 500, ranked on the prior year, earned 61.3 bp a day before fees and 37.9 bp after.\n\nThese base rates apply with even more force to retail scalpers, whose edge per trade is smaller still.\n8. What this means for a trader\nThese are facts from the runs above, not advice.\n\nCosts decide short-horizon rules. Overnight SPY doubled the market’s gross Sharpe ratio and lost it all at 2 bp per trade. The ORB had a gross edge and lost it at 5.47 bp per trade. Before trusting any intraday backtest, check whether it charges the spread and slippage, not just commission.\nA futures trader can compare our breakeven with their own costs. ORB on QQQ broke even when costs were 0.65 times our assumed 5.47 bp per trade: about 3.56 bp per round trip, the size of its gross edge. Your own all-in cost per round trip on the futures you trade is the number to compare with that. We do not know it.\nA famous published edge is not a fresh one. Big-cap momentum was the strongest investing result before 2013 and had no risk-adjusted advantage after it, on research data or on the ETF built to capture it.\nSmaller drawdowns are not proof of skill. The trend-timing rules roughly halved the worst fall over 1927–2012 (43.1% and 44.5% against 83.7%) but did not show a Sharpe advantage that could be told apart from luck.\nMany prop firms rule out overnight holds anyway. Topstep, for example, states that it \"does not permit holding positions from one session to the next\". An overnight edge, even a real one, is out of reach for those accounts.\nLow win rates are normal for breakout rules. ORB on QQQ won 23.0% of trades after costs and still came closest to working. Win rate alone says little about whether a rule makes money.\nBuy-and-hold was the bar, and nothing beat it. Every investing rule was compared with simply holding the market. None did better on a risk-adjusted basis in a way that survived these tests.\n\n9. The addenda: four gates redesigned, with timestamps\nA sealed pre-registration cannot be edited, so every change was made in a new, fingerprinted addendum. Four of the integrity gates in Section 3 had been specified in a way that a correct engine could not pass, or passed too easily. They were redesigned. We say this plainly because it is the part of the process most open to abuse: a gate redesigned after seeing results can be bent to let a favourite through.\nSwipe the table sideways for more columns →\n\n\nSealed (UTC)\nAddendum\nWhat changed\nWhat had been seen on real data\n\n\n\n\n16 Oct, 21:14:06\nPREREG-INV, PREREG-ON\nSealed\nNothing; no data downloaded\n\n\n16 Oct, 21:34:27\nPREREG-ID\nSealed\nThe earliest available timestamp only\n\n\n16 Oct, 22:13:03\nADDENDUM-1\nGate 1: INV and ON planted tests moved to synthetic panels and resized, because the overnight plant could not clear the cost bar by construction. Cost-timing deviation ratified (Section 11).\nDownloads, file hashes, structural counts, overnight data-quality counts. No return or statistic.\n\n\n16 Oct, 23:12:33\nADDENDUM-2\nGate 2: ID planted test resized and moved to synthetic panels. The literal early-close rule (it flagged no real half days) replaced by the NYSE’s published calendar of 21 early closes.\nTimestamps of the one-minute bars only\n\n\n16 Oct, 23:30:02\nADDENDUM-3\nGate 3: the null tests of all three families rebuilt to have exactly zero edge. The sealed investing null let 60/40 pass in 80 of 100 panels, because it gave stocks and bonds independent positive returns. One-touch, advance-list and seal-anchor rules added.\nReal discovery Sharpe differences for INV1, INV2, INV3 and INV5 (from a shift test); see Section 10\n\n\n17 Oct, 00:31:21\nADDENDUM-4\nGate 4: the ID3/ID4 planted edge raised from 12 to 13 bp per trade, because ID4 sat on the 95-of-100 line. Acceptance rule fixed before the re-check.\nID timestamps only\n\n\n17 Oct, 00:39:31 / 00:41:28\n—\nINV and ON discovery outputs sealed\n—\n\n\n17 Oct, 01:03:06\nDISCLOSURE-1\nFour undisclosed real-data exposures recorded, and a ruling that the failed sealed null does not halt INV\n—\n\n\n17 Oct, 01:04:05\n—\nINV7 confirmation output sealed (FAIL)\n—\n\n\n17 Oct, 01:10:14\n—\nID discovery output sealed (nothing advanced)\n—\n\n\n\nWhat did not change: no kill criterion, discovery threshold, date split, rule, cost, k or N was altered by any addendum. Each redesigned gate was calibrated on synthetic data, and for ADDENDUM-4 the acceptance rule was written down before the re-check ran.\nWhat we cannot claim: ADDENDUM-3 was written after some real discovery numbers had been seen. They were Sharpe-difference point estimates for four timing rules, not gate results, and none of those rules later advanced. ADDENDUM-3 changed no outcome rule. But it did decide whether the investing family continued at all. The sealed text said INV halts if an integrity test fails, and the sealed null had failed. The lead’s written ruling (DISCLOSURE-1) is that a gate a correct engine fails by construction is a design defect and may be replaced, following the ADDENDUM-1 precedent. It notes that no INV7 statistic existed before ADDENDUM-3. A reader may judge that ruling differently. If INV had halted, INV7 would never have been confirmed, and the result, nothing passed, would be the same.\nThe lesson is recorded for the next pre-registration: run every integrity test on synthetic null and planted data before sealing.\n10. Real-data exposures\nA locked holdout means nothing if someone looks at it. These are every real-data read we know of outside the logged discovery and confirmation runs.\n\nCoder (before any discovery): downloads, file hashes, structural counts and data-quality counts. For the day-trading data, it also read bar timestamps for both windows, including one direct read of every month’s timestamps (2021 onwards included) outside the logging loader. No price was read. Three scratch scripts that read real ID timestamps were kept outside the study folder and, at the time of the Manager review, had not been archived or hashed.\nTester, before ADDENDUM-3: the shift test computed real discovery Sharpe differences, unshifted and shifted, for INV1 (0.0311 and 0.0181), INV2 (0.0393 and 0.0036), INV3 (0.0638 and 0.0562) and INV5 (0.0242 and 0.0235). It also produced the sealed null’s pass counts using real moments, and pass counts from the sealed planted tests run on real data.\nTester diagnostic, before ADDENDUM-3: a script printed real discovery-period (1962–2012) stock and bond statistics: monthly mean and standard deviation 0.00869 and 0.04517 for stocks, 0.00603 and 0.02300 for bonds, a T-bill mean of 0.00418, and monthly excess Sharpe ratios of 0.0997 and 0.0803. Only their correlation (0.108) had been disclosed in ADDENDUM-3.\nTester seal attacks (16 Oct, 23:17 UTC and 17 Oct, 00:32 UTC): these opened confirmation sessions in scratch copies that held the real data. They read SPY daily rows through 2026-09-30 (8,475 rows, three times) and the French monthly market file through 2026-08 (1,202 rows, once). That file contains the market and T-bill series for INV7’s French confirmation. Only row counts were printed; no return or statistic was computed or shown. Future seal attacks run on synthetic data only.\nManager: the independent INV7 check read the French discovery rows (to 2012-12) directly from the zip files, bypassing the access log. No confirmation row was read.\nThe lead’s decisions file (M1–M3, written before any data was read) was sealed late, at 01:03:06 UTC on 17 October.\nEarlier project runs: the overnight files' confirmation rows were read once on 16 October by the swing study’s C22 run, a close-based rule. No overnight or intraday statistic was computed from them, and the overnight confirmation was never opened.\nThe literature: the day-trading confirmation window overlaps the ORB authors' sample (to February 2023) and the noise-area authors' sample (to April 2024). It was unseen by this project, not by the literature. As it turned out, no day-trading rule reached confirmation.\n\n11. Deviations, mismatches and other limitations\n\nINV7’s cost criterion could not fail for cost reasons. K4 required a breakeven cost of at least 0.25% per side. A static tilt and its benchmark each pay a single initial purchase, so trading cost cannot change which one has the higher Sharpe ratio. In discovery the breakeven was reported as above 5%. In confirmation K4 is recorded as failed only because the Sharpe difference was already negative at zero cost. The real cost tests were the MTUM run, whose fund fees are inside its price, and the assumed drag on the French portfolio.\nINV7 drag sensitivity. The French run charged an assumed 0.50% a year. On discovery data, the Manager’s separate recompute found that the advantage would vanish at a drag of 3.28% a year, and the t-statistic would fall below 2.0 at 1.87% a year. This was information only and not a trial.\nCost timing (disclosed deviation). The INV pre-registration says a trade’s cost is charged \"in the month the trade happens\". The code charges it in the month the new weights are held. Total cost is identical except for the final trade. The lead ratified this in ADDENDUM-1, before any discovery run, and the literal reading was not implemented.\nPython 3.11 only. The pre-registrations name Python 3.9. No 3.9 interpreter was available, and the installed numpy and pandas need 3.11 or later. The code was checked for 3.9 compatibility at syntax and API level only, and every run used Python 3.11.\nThe French T-bill source changed in 2024. From June 2024 the French library’s risk-free rate comes from the ICE BofA 1-month T-bill index instead of Ibbotson, according to the file header. Every INV comparison subtracts it from both legs, so it shifts both Sharpe ratios together. Its effect was not separately measured.\nThe French portfolio is not MTUM’s index. BIG HiPRIOR is the value-weighted top third of big-cap stocks by prior 12-month return. MTUM tracks MSCI’s risk-weighted momentum index. The tradable run also starts four months later (2013-05, MTUM’s first full month) and ends one month later than the French run. Both had to pass, so the mismatch could only make passing harder.\nCosts are assumed, not measured. No quote data was available for any family. One-minute bars are consolidated last-sale prices, not quotes, and stop fills in fast markets may be worse than 4 bp.\nETFs stand in for futures. Prop-firm traders mostly trade index futures. We tested SPY and QQQ, and their breakeven costs in basis points are the comparison point.\nLow power for investing rules. About 164 months is short for a Sharpe-difference test at a bar of 2.690. A FAIL here does not show a rule is harmful. It shows the rule is not proven better than holding the market.\nNot checked here: whether a Canadian broker supports market-on-open and market-on-close orders, the currency cost of buying US-listed ETFs, and the tax treatment of frequent trading. None of these mattered, because no rule passed.\nThis is not proof that no strategy works. These 50 rules, as written, on this data, with these costs, did not pass these tests. Strict tests trade some missed real edges for far fewer false ones.\n\n12. Reproduce it\nEvery file below can be checked with sha256sum. Code to be published with this study. The swing study’s files are listed on its own page.\n\n\n\nFile\nSHA-256\n\n\n\n\nPREREG-INV.md\n987cdf3611734a6c0670191746edddf8676f63012ff69dff2ba8b09be129b095\n\n\nPREREG-ON.md\n59a7709b857303e84d8e62131c1103867534b58cfe0a941171ced18e6b807ecc\n\n\nPREREG-ID.md\nff3149821e6bf0b357defde5e4c4806746b507c6b374bd34d47f4821686dd686\n\n\nADDENDUM-1-2026-10-16.md\n99d2dfb1fe783d17fbe1f8daa7f7d8a366856b0bc989b2a67c25255085b5a6c1\n\n\nADDENDUM-2-2026-10-16.md\neeb3983a69beb3b12a752ce99a4a3aef906d413eed6680b95c2127e400b1efae\n\n\nADDENDUM-3-2026-10-16.md\n8ec93d95c01e546f48bc0d440f805a506e4797a782270d220f84a334968a4912\n\n\nADDENDUM-4-2026-10-17.md\n7ffc32b6481070dc51542e12555a83a6e082cb4516853bbf2874a54277d1ab5f\n\n\nDISCLOSURE-1-2026-10-17.md\n525f7338ad1bb6e7e1338189d7bf3e883cdb6356b05774bcfb6397ab2bd55bc3\n\n\nDECISIONS-M1-M3-2026-10-16.md\n8b93f48f496a1ff6c1d2ba89cbb47c5479be149814822a810a1f54ee814c3a7b\n\n\ninv/DATA_SHA256.txt (11 files)\n64849d3c8e5f580cafa6ee21e73885c273562509a772d4b187963064c3a00425\n\n\non/DATA_SHA256.txt (13 files)\ne061fa2f6910075aafda4526c26826bcc3d436ebd0d3add909da18da771a9510\n\n\nid/data/DATA_SHA256.txt (258 files)\nc723c5f6dd4754f084b127c8ba5792adf9519915686d31dba847d294bf6cf02c\n\n\ninv/out/discovery.json\ncf617069b55638494c75ef1e1ac4241dd8ace2f0e5dd8617a8261120ca0c8197\n\n\non/out/discovery.json\nbd8d6d407ba60b302e985e40f993deeb8d555584d2e77db3c89b91f5cd3d566a\n\n\nid/out/discovery.json\nd6170e78b7896fc49da0cd412603bcee4a97ee4b7521c390191ec596ea040e31\n\n\ninv/out/confirmation_INV7.json\n8f614ab6ca7e787695c07037dd1590ca2d8e48e668e43b4b11e18bf460effca6\n\n\nSEAL-BROADEN.md (8,605 bytes, final)\n870ff73a26b4a3f0764add8531a1d3684047608b1263ed8f22cd9b72d476f1b9\n\n\n\nSEAL-ANCHOR.md records the fingerprint of SEAL-BROADEN.md after every append, so the seal log can be checked as append-only. The INV7 confirmation ran once with python3 -I inv/run_confirmation.py INV7, and its unlock file was consumed.\n\n  \n  Again: this is a negative research result, not a strategy, a recommendation or a signal. Nothing here says what anyone should buy, sell or hold.\n  Versions\nDateWhat changed16 Oct 2026Investing and overnight pre-registrations sealed at 21:14:06 UTC; day-trading pre-registration sealed at 21:34:27 UTC, before any one-minute bar was downloaded in bulk.16–17 Oct 2026Four addenda sealed before the discovery runs, each listed in the study with its timestamp; one disclosure note sealed before the only confirmation run. The investing confirmation ran once (INV7, FAIL). Nothing else reached confirmation.17 Oct 2026Published on this site.\n  Text and charts: CC BY-NC 4.0. Study code: MIT. The numbers are facts: quote them freely, with a link. A figure may be described as “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a fixed-scope agreement” only when it comes from a signed engagement; no one may describe it as audited, certified or verified.\n  Cite this study\ndonttrade (2026). We tested 50 trading strategies, from swing trades to day trades. None survived.. Published 17 Oct 2026. https://donttrade.ca/research/strategy-tests/\n@misc{donttrade2026strategies,\n  author = {donttrade},\n  title  = {We tested 50 trading strategies, from swing trades to day trades. None survived.},\n  year   = {2026},\n  url    = {https://donttrade.ca/research/strategy-tests/},\n  note   = {Code: https://github.com/donttrade/disposition-effect}\n}\n  \n  WHAT NEXT\n  \n    Get the next study by email\n    Email address\n    \n    Email me the next study\n  \n    Read the swing-trading study it builds on →\n  \n\nWork at a prop firm or broker? For firms →\n\n\n",
+ "text_collapsed": "STUDY · PRE-REGISTERED · NEGATIVE RESULT · 17 OCT 2026 We tested 50 trading strategies, from swing trades to day trades. None survived. This page reports a negative research result. It is not a strategy, a recommendation or a signal, and nothing on it says what anyone should hold. The swing study’s 32 strategies plus 18 new rules: 7 investing rules judged against holding the market, 7 overnight rules and 4 day-trading rules on one-minute bars. Each new rule was sealed with a SHA-256 hash before any data was downloaded, and judged net of costs. None passed: 0 of 50 across the project, 0 of 44 under sealed pre-registration. Pre-registered and sealed 16 Oct 2026 (investing and overnight 21:14:06 UTC; day trading 21:34:27 UTC) · Run 16–17 Oct 2026 · Published 17 Oct 2026 · Code: to be published with this study; the SHA-256 of every file is under “Reproduce it” · Data: Kenneth French data library; FRED; free vendor-adjusted daily ETF prices; Alpaca one-minute bars Funding: none. No firm paid for, saw or approved this study. How donttrade is paid → Published whether or not the result was interesting. Four integrity gates were redesigned after sealing; each change, its timestamp and what had been seen at the time is listed in the study. Contents1. The short version2. How we counted3. How we tested4. Results: investing rules (INV)5. Results: overnight and intraday holding (ON)6. Results: day-trading rules (ID)7. Scalping: literature only8. What this means for a trader9. The addenda: four gates redesigned, with timestamps10. Real-data exposures11. Deviations, mismatches and other limitations12. Reproduce it This study combines two rounds of work. The first, published on 16 October as the swing-trading study, covered 32 distinct strategies across the project. The second round, run on 16–17 October, added 18 new rules: 7 investing rules, 7 overnight rules and 4 day-trading rules. That makes 50 distinct strategies. None of them passed. Of the 50, 44 were tested under sealed pre-registration; the other 6 were tested earlier under looser protocols, as the swing study explains. The section \"How we counted\" shows both ledgers line by line. 1. The short version 50 distinct strategies, 0 survivors. 26 swing rules and 18 new rules were tested under rules sealed with a hash before any result was computed, which makes 0 of 44 under sealed pre-registration. Counting the 6 earlier strategies, it is 0 of 50 across the project. The new round covered three styles. Seven monthly investing rules (trend timing, momentum, 60/40, value and momentum tilts) were judged against simply holding the US stock market. Seven overnight rules bought an ETF at the close and sold it at the next open, or the reverse. Four day-trading rules were tested on one-minute bars of SPY and QQQ, including the opening-range breakout (ORB) popular with futures traders. The one investing rule that looked strong was a famous effect, re-measured. A big-cap momentum tilt beat the market’s Sharpe ratio before 2013 with a t-statistic of 3.93. Momentum was published as an anomaly decades before 2013, on that same history, so this was a re-measurement, not a discovery. After 2013 it did not beat the market: t −0.82 on the research portfolios and t −0.16 on the real momentum ETF, MTUM. MTUM also fell further than the S&P 500 at its worst (30.2% against 23.9%). Overnight holding looked good before costs and failed after them. SPY held only overnight had a gross Sharpe ratio of 1.01 a year over 1993–2012, against 0.49 for holding it all the time. After an assumed 2 basis points per trade, its Sharpe fell to 0.04, and $1,000 became $977 instead of $4,690. All seven failed the cost test. The opening-range breakout reproduced its gross edge and lost it to costs. On QQQ, 2016–2020, the rule made +3.56 basis points per trade before costs. Our assumed costs were 5.47 basis points per trade, so the net result was −1.85 basis points a day (t −1.21). An independent replication on five index CFDs, published before this test, found the same thing: gross edge reproduced, net about zero. A basis point (bp) is one hundredth of one percent: 10 bp is 0.10%. 2. How we counted Two ledgers record every trial. Rows are appended and never edited, and a trial that dies still counts. The trial count, N, feeds the deflated Sharpe test described below, so every attempt makes passing harder for every later one. Swipe the table sideways for more columns → Step Count Source Swing-study ledger: trials 36 TOURNEY_LEDGER.md (13 earlier + 23 tournament rules) minus 3 shift variants (C1–C3 rerun one period late as an integrity check) 33 strategy-search LEDGER.md rows 7–9 minus R1 (a replication of C2, not a new strategy) 32 distinct strategies LEDGER.md row 12 New round: trials registered (INV1–INV7, ON1–ON7, ID1–ID4) +18 BROADEN_LEDGER.md rows 37–54 Combined ledger: trials 54 BROADEN_LEDGER.md, N = 54 Combined: distinct strategies (32 + 18) 50 — of which under sealed pre-registration (26 + 18) 44 swing study \"How we counted\"; SEAL-BROADEN.md Three points of precision: \"Distinct\" means different rules. Shift variants and the R1 replication are trials, and they count in N, but they reuse a rule already counted. The 54 could be 58. The project plan says any shift test on real data adds one trial. The Tester ran four such shift tests (INV1, INV2, INV3, INV5) as an integrity check, and they were not added to the ledger. Whether they count was flagged in the internal review and has not been ruled on. It changes no verdict: the investing and overnight tests fixed N = 50 in their sealed pre-registrations, and the day-trading test fixed N = 54. Outcome rows are missing from the new ledger. BROADEN_LEDGER.md registers the 18 rules, but status rows for their outcomes had not been appended when this was written. The outcomes themselves are recorded, with their file hashes, in the sealed log SEAL-BROADEN.md. Scalping was not tested. Section 7 explains why and summarises the research instead. 3. How we tested The swing study explains the basic ideas (backtests, overfitting, multiple testing, alphas and Sharpe ratios) in plain words. This round used the same approach, with a stricter bar. Sealed pre-registration Every rule, data source, date split, cost and pass/fail test was written down before any data was downloaded. Each file was then fingerprinted with SHA-256 and the fingerprint recorded in SEAL-BROADEN.md. A fingerprint changes completely if one character of the file changes. The investing (INV) and overnight (ON) pre-registrations were sealed at 21:14:06 UTC on 16 October 2026. The day-trading (ID) pre-registration was sealed at 21:34:27 UTC the same day, after a probe that read only the earliest available timestamp of the data. Every later clarification went into a separate, fingerprinted addendum. Wherever two readings of a rule existed, the worse verdict counted. Section 9 lists the addenda with their timestamps. Discovery, then one-touch confirmation Each family had a discovery period, used to decide which rules deserved a final test, and a locked confirmation period, used once for the verdict. Swipe the table sideways for more columns → Family Discovery Confirmation (locked) INV French data library, every month to 2012-12 French data 2013-01 to 2026-08, plus real ETFs 2013-01 to 2026-09; a rule must pass on both ON Daily ETF prices to 2012-12-31 2013-01-01 to 2026-09-30 ID One-minute bars, 2016-01-04 to 2020-12-31 2021-01-04 to 2026-09-30 The day-trading split differs because the free one-minute history starts in January 2016. The lock was enforced in code. The data loader refused any confirmation-dated row unless an unlock file held the exact fingerprint of the sealed pre-registration. Every read, allowed or refused, was logged. The unlock was consumed (renamed) just before the first confirmation row was parsed, so a second run was impossible. A crash after that point would have counted as a FAIL. The bar: Bonferroni across k = 7 Seven confirmation slots were reserved for the whole round (INV up to 3, ON up to 2, ID up to 2), whether or not they were used. The Bonferroni correction divides the allowed error rate across those seven. That sets the t-statistic bar at 2.690, against 2.394 or 1.96 in the swing study, and the placebo bar at the 99.286th percentile. Only one slot was used. To reach confirmation, a rule had to clear a discovery gate first: a t of at least 2.0, a placebo percentile of at least 95, a smaller drawdown than its benchmark (INV, ON) or at most 20% (ID), a cost cushion (ON, ID), and a minimum sample size. Deflated Sharpe The deflated Sharpe ratio (Bailey and López de Prado, 2014) asks how likely it is that a Sharpe ratio this high is real, given how many strategies were tried. It returns a probability between 0 and 1, and every confirmation needed at least 0.95. N was 50 for the investing and overnight rules and 54 for the day-trading rules. Integrity gates before any verdict Before discovery could run, each family’s machinery had to pass four checks: Null test. 100 synthetic panels with exactly zero edge. A rule’s discovery gate could pass in no more than 10 of them. Planted test. 100 synthetic panels with a known edge added. The gate had to pass in at least 95 of them. Seal refusal. A read of a confirmation-dated row without the unlock file had to be refused and logged. Look-ahead. The code had to assert that every decision used only data available at that moment. Swipe the table sideways for more columns → Family Null passes per rule (limit 10 of 100) Planted passes per rule (need 95 of 100) Seal refusal Look-ahead INV 0, 1, 2, 1, 1, 0, 3 100 each passed passed ON 0 for all seven 100 each passed passed ID 0 for all four 100, 100, 100, 99 passed passed Four of these gates had to be redesigned before they could work. That history is in Section 9. Costs Every result is net of costs, and every cost is an assumption, because none of the free data sources includes bid and ask quotes. INV: 0.10% of traded value per side. The French research portfolios also pay an assumed fund-cost drag: 0.20% a year for value, 0.50% a year for momentum. ON: two trades a day, at an assumed half-spread of 2 bp per side for SPY and QQQ, 3 bp for IWM, and 5 bp for the sector funds and XIU.TO. ID: 2 bp per side for market orders, 4 bp for stop exits and 1 bp for limit targets. 4. Results: investing rules (INV) Each rule was compared with holding 100% of the US stock market, on monthly returns above the T-bill rate. The primary test was the difference in Sharpe ratio, strategy minus market. The drawdown also had to be smaller than the market’s. Discovery, 1926–2012 (French data library) Sharpe ratios are annualised, net of costs. The \"Δ\" column is the monthly Sharpe difference that was tested. Swipe the table sideways for more columns → ID Rule Months Δ (monthly) t Sharpe, rule vs market Max drawdown, rule vs market Verdict INV1 10-month moving-average timing 1,028 0.031 1.09 0.50 vs 0.39 43.1% vs 83.7% FAIL: t below 2.0 INV2 12-month absolute momentum vs T-bills 1,026 0.039 1.42 0.53 vs 0.39 44.5% vs 83.7% FAIL: t below 2.0 INV3 Dual momentum, US vs ex-US, T-bill hurdle 258 0.064 1.01 0.66 vs 0.44 22.3% vs 50.3% FAIL: t below 2.0 INV4 60/40 stocks/bonds, monthly rebalance 611 0.016 1.21 0.40 vs 0.34 30.3% vs 50.3% FAIL: t below 2.0 INV5 Inverse-volatility stocks/bonds 575 0.024 0.71 0.41 vs 0.33 15.8% vs 50.3% FAIL: t below 2.0; placebo 82.0 INV6 Big-cap value tilt 1,038 0.007 0.50 0.42 vs 0.40 89.3% vs 83.7% FAIL: t below 2.0; deeper drawdown INV7 Big-cap momentum tilt 1,032 0.041 3.93 0.54 vs 0.40 77.6% vs 83.7% Advanced The market column changes between rows because each rule is compared over its own months. The timing and allocation rules (INV1–INV5) all had higher Sharpe ratios than the market and much smaller drawdowns. None had a Sharpe advantage large enough to rule out luck: the best t was 1.42. A smaller drawdown is not the same as a better risk-adjusted return. INV7 confirmation: one touch, two data sets, FAIL INV7 held big-cap stocks with the strongest past 12-month returns. It was tested once, on 17 October at 01:03:49 UTC, on the French research portfolio and on the real ETF, MTUM, against the market and SPY. Swipe the table sideways for more columns → Row French run (BIG HiPRIOR vs market) Tradable run (MTUM vs SPY) Months 164 (2013-01 to 2026-08) 161 (2013-05 to 2026-09) Sharpe difference t (bar 2.690) −0.82 −0.16 Annual Sharpe, rule vs benchmark 0.83 vs 0.91 0.87 vs 0.89 Annual growth rate, rule vs benchmark 14.4% vs 15.0% 15.8% vs 14.3% Max drawdown, rule vs benchmark 24.5% vs 24.8% 30.2% vs 23.9% Deflated Sharpe (bar 0.95) 0.006 0.055 Failed criteria K1, K4, K5 K1, K4, K5, K6 On MTUM the growth rate was higher than SPY’s. Its Sharpe ratio was not, and its worst fall was deeper. The pre-registered question was whether the tilt gave a better risk-adjusted result. It did not. Momentum is a known, published effect Momentum was published as an anomaly by Jegadeesh and Titman in 1993. Carhart (1997) and the Fama-French size/momentum portfolios, which supplied INV7’s discovery data, were built and studied on the same pre-2013 history. INV7’s discovery t of 3.93 is therefore a re-measurement of a published effect on its own publication-era data. It is not an out-of-sample discovery, and we do not present it as one. The only out-of-sample evidence here is the 2013–2026 confirmation. That period starts two decades after publication and uses an ETF launched to harvest the effect, so it tests whether the effect persisted after publication and whether a fund could capture it. It found no risk-adjusted advantage. Research on how anomaly returns decay after publication (McLean and Pontiff, 2016) is the relevant prior; it was not re-read for this study. The INV pre-registration also recorded the wider contamination risk in advance: anyone writing these rules knows, in broad terms, how US stocks, value and momentum behaved after 2012. Choosing only published default parameters, with no grid search, was the only defence. 5. Results: overnight and intraday holding (ON) These rules hold an ETF for only part of each day. Overnight means buy at the close and sell at the next open; intraday is the reverse. Each was compared with holding the same ETF all the time, with no cost. Two trades a day means about 252 round trips a year, so the cost assumption decides almost everything. Swipe the table sideways for more columns → ID Rule Days Sharpe diff t Net mean t Breakeven cost, bp per side Needed (2.5× base) Sharpe/yr: gross, net, buy-and-hold ON1 SPY overnight 5,017 −2.25 0.22 1.06 5 1.01, 0.04, 0.49 ON2 QQQ overnight 3,475 0.30 1.23 2.22 5 0.95, 0.30, 0.23 ON3 IWM overnight 3,167 −1.96 −0.54 1.68 7.5 1.00, −0.13, 0.37 ON4 9 sector ETFs, equal weight, overnight 3,521 −5.81 −4.41 1.84 12.5 1.19, −1.02, 0.37 ON5 XIU.TO overnight 3,329 −4.06 −3.73 1.89 12.5 1.14, −0.81, 0.41 ON6 Top-3 sector momentum, overnight 3,269 −5.36 −4.46 1.79 12.5 1.07, −1.11, 0.29 ON7 SPY intraday 5,017 −9.32 −3.26 0.00 5 −0.05, −0.65, 0.49 Every overnight rule failed on cost. The breakeven column is the cost per side at which the rule stops beating buy-and-hold. For ON1–ON6 it ranged from 1.06 to 2.22 bp. The sealed bar required at least 2.5 times the assumed base cost, which is 5 to 12.5 bp. Where an overnight edge exists in this data, it is smaller than an assumed 2–5 bp half-spread. ON7, intraday-only SPY, lost money before any cost. None of the seven advanced, so the overnight confirmation data was never opened. The gross pattern is striking. Over 1993–2012, a dollar in SPY held only overnight grew 7.27 times before costs, held only during the day it shrank to 0.65 of a dollar, and held all the time it grew 4.69 times. QQQ shows the same split (6.44, 0.21 and 1.35 times, 1999–2012). This matches the overnight premium reported for QQQ by Kelly and Clark (2011). It is also descriptive only: it ignores the cost of trading twice a day, and those costs erase it. QQQ overnight (ON2) came closest. It beat buy-and-hold even after costs (net growth 3.5% a year against 2.2%), but its edge was not statistically distinguishable from luck (t 0.30) and its cost cushion was 2.22 bp against the 5 bp required. 6. Results: day-trading rules (ID) The four rules came from published papers and were coded from the authors' own PDFs. They were tested at one times notional (no leverage), long and short, on consolidated one-minute bars from Alpaca’s free plan: 258 monthly files, 4,235,681 rows, fingerprinted before any price was read. Swipe the table sideways for more columns → ID Rule (source) Trades Gross per trade Cost per trade Net mean per day t Placebo pct Breakeven cost multiple Max drawdown ID1 ORB 5-minute, QQQ (Zarattini and Aziz) 1,220 +3.56 bp 5.47 bp −1.85 bp −1.21 99.4 0.65 27.4% ID2 ORB 5-minute, SPY 1,222 +0.56 bp 5.55 bp −4.85 bp −4.38 78.7 0.10 47.4% ID3 Market intraday momentum, SPY (Gao, Han, Li and Zhou) 1,240 −0.14 bp 4.00 bp −4.08 bp −4.08 45.2 0.00 41.0% ID4 Noise-area momentum, SPY (Zarattini, Aziz and Barbon) 1,111 +1.42 bp 4.00 bp −2.28 bp −2.03 76.8 0.36 28.3% Each rule needed a net t of at least 2.0, a breakeven cost multiple of at least 2.5 and a drawdown of at most 20%. All four failed all three. ID2, ID3 and ID4 also failed the random-direction placebo, so their direction choices were no better than coin flips. Nothing advanced, so the day-trading confirmation data (2021–2026) was never opened. ORB on QQQ is the notable result. It was the only rule whose direction clearly beat chance: its placebo percentile of 99.4 means it beat 99.4% of 1,000 random-direction versions of itself. Its gross edge of +3.56 bp per trade is real in this data. The assumed costs were 5.47 bp per trade, and the rule broke even at 0.65 times those costs. Even at half the assumed cost, the net mean was +0.80 bp a day with a t of 0.53, far from significant. That is what an independent replication found before this test. Krueger (September 2026), replicating the same ORB paper on five index CFDs over 2015–2026, reported a gross average of +0.131 R per trade on the Nasdaq-100 (t 2.9) and a net average of +0.002 R (t 0.0). R is the risk per trade, the distance from entry to stop. His conclusion was \"gross reproduced, net zero\". Ours is the same, on different data and a different cost model. A reproduction check run as part of the integrity tests confirms that the engine matches the paper. With the paper’s own sizing and its commission of $0.0005 per share, and no slippage, our 2016–2020 QQQ run gave 1,220 trades, a 23.9% win rate, +0.130 R per trade and a Sharpe ratio of 1.14. The paper reports 1,795 trades over 2016–2023, a 24% win rate, +0.13 R and a Sharpe ratio of 1.12. The gap between the paper and our verdict is the cost model: the paper assumed no slippage, and we charged spread and slippage. The day-trading run happened after the internal Manager review. That review, written at 00:51 UTC on 17 October, recorded ID as \"still NOT RUN\". The ID integrity tests and discovery ran afterwards, under the ADDENDUM-4 rules, and the discovery output was sealed at 01:10:14 UTC. 7. Scalping: literature only Scalping was declared untestable in the plan, before any data was read. A scalp’s edge is a few ticks, about the same size as the spread, the trader’s place in the order queue and the delay in reaching the exchange. One-minute bars cannot show whether a limit order would have filled or what a market order would have paid at that millisecond. An honest test needs tick-by-tick trades and quotes with a model of the queue, and the free data has neither. What the research we read says (each source as read for this study): Speed decides who wins. Baron, Brogaard, Hagströmer and Kirilenko (2019) find that relative latency explains large performance gaps between high-frequency trading firms, and that firms that got faster did better. Most persistent day traders lose. Chague, De-Losso and Giovannetti (2019) followed people who began day-trading Brazilian index futures in 2013–2015. Of the 1,551 who kept going for at least 300 days, 97% lost money, and 17 (1.1%) earned more than the Brazilian minimum wage. (We read a summary on Quantpedia, not the paper.) Very few are predictably profitable. Barber, Lee, Liu and Odean (2014), using Taiwanese data for 1992–2006, find that less than 1% of the day-trader population predictably earns positive returns after fees. The top 500, ranked on the prior year, earned 61.3 bp a day before fees and 37.9 bp after. These base rates apply with even more force to retail scalpers, whose edge per trade is smaller still. 8. What this means for a trader These are facts from the runs above, not advice. Costs decide short-horizon rules. Overnight SPY doubled the market’s gross Sharpe ratio and lost it all at 2 bp per trade. The ORB had a gross edge and lost it at 5.47 bp per trade. Before trusting any intraday backtest, check whether it charges the spread and slippage, not just commission. A futures trader can compare our breakeven with their own costs. ORB on QQQ broke even when costs were 0.65 times our assumed 5.47 bp per trade: about 3.56 bp per round trip, the size of its gross edge. Your own all-in cost per round trip on the futures you trade is the number to compare with that. We do not know it. A famous published edge is not a fresh one. Big-cap momentum was the strongest investing result before 2013 and had no risk-adjusted advantage after it, on research data or on the ETF built to capture it. Smaller drawdowns are not proof of skill. The trend-timing rules roughly halved the worst fall over 1927–2012 (43.1% and 44.5% against 83.7%) but did not show a Sharpe advantage that could be told apart from luck. Many prop firms rule out overnight holds anyway. Topstep, for example, states that it \"does not permit holding positions from one session to the next\". An overnight edge, even a real one, is out of reach for those accounts. Low win rates are normal for breakout rules. ORB on QQQ won 23.0% of trades after costs and still came closest to working. Win rate alone says little about whether a rule makes money. Buy-and-hold was the bar, and nothing beat it. Every investing rule was compared with simply holding the market. None did better on a risk-adjusted basis in a way that survived these tests. 9. The addenda: four gates redesigned, with timestamps A sealed pre-registration cannot be edited, so every change was made in a new, fingerprinted addendum. Four of the integrity gates in Section 3 had been specified in a way that a correct engine could not pass, or passed too easily. They were redesigned. We say this plainly because it is the part of the process most open to abuse: a gate redesigned after seeing results can be bent to let a favourite through. Swipe the table sideways for more columns → Sealed (UTC) Addendum What changed What had been seen on real data 16 Oct, 21:14:06 PREREG-INV, PREREG-ON Sealed Nothing; no data downloaded 16 Oct, 21:34:27 PREREG-ID Sealed The earliest available timestamp only 16 Oct, 22:13:03 ADDENDUM-1 Gate 1: INV and ON planted tests moved to synthetic panels and resized, because the overnight plant could not clear the cost bar by construction. Cost-timing deviation ratified (Section 11). Downloads, file hashes, structural counts, overnight data-quality counts. No return or statistic. 16 Oct, 23:12:33 ADDENDUM-2 Gate 2: ID planted test resized and moved to synthetic panels. The literal early-close rule (it flagged no real half days) replaced by the NYSE’s published calendar of 21 early closes. Timestamps of the one-minute bars only 16 Oct, 23:30:02 ADDENDUM-3 Gate 3: the null tests of all three families rebuilt to have exactly zero edge. The sealed investing null let 60/40 pass in 80 of 100 panels, because it gave stocks and bonds independent positive returns. One-touch, advance-list and seal-anchor rules added. Real discovery Sharpe differences for INV1, INV2, INV3 and INV5 (from a shift test); see Section 10 17 Oct, 00:31:21 ADDENDUM-4 Gate 4: the ID3/ID4 planted edge raised from 12 to 13 bp per trade, because ID4 sat on the 95-of-100 line. Acceptance rule fixed before the re-check. ID timestamps only 17 Oct, 00:39:31 / 00:41:28 — INV and ON discovery outputs sealed — 17 Oct, 01:03:06 DISCLOSURE-1 Four undisclosed real-data exposures recorded, and a ruling that the failed sealed null does not halt INV — 17 Oct, 01:04:05 — INV7 confirmation output sealed (FAIL) — 17 Oct, 01:10:14 — ID discovery output sealed (nothing advanced) — What did not change: no kill criterion, discovery threshold, date split, rule, cost, k or N was altered by any addendum. Each redesigned gate was calibrated on synthetic data, and for ADDENDUM-4 the acceptance rule was written down before the re-check ran. What we cannot claim: ADDENDUM-3 was written after some real discovery numbers had been seen. They were Sharpe-difference point estimates for four timing rules, not gate results, and none of those rules later advanced. ADDENDUM-3 changed no outcome rule. But it did decide whether the investing family continued at all. The sealed text said INV halts if an integrity test fails, and the sealed null had failed. The lead’s written ruling (DISCLOSURE-1) is that a gate a correct engine fails by construction is a design defect and may be replaced, following the ADDENDUM-1 precedent. It notes that no INV7 statistic existed before ADDENDUM-3. A reader may judge that ruling differently. If INV had halted, INV7 would never have been confirmed, and the result, nothing passed, would be the same. The lesson is recorded for the next pre-registration: run every integrity test on synthetic null and planted data before sealing. 10. Real-data exposures A locked holdout means nothing if someone looks at it. These are every real-data read we know of outside the logged discovery and confirmation runs. Coder (before any discovery): downloads, file hashes, structural counts and data-quality counts. For the day-trading data, it also read bar timestamps for both windows, including one direct read of every month’s timestamps (2021 onwards included) outside the logging loader. No price was read. Three scratch scripts that read real ID timestamps were kept outside the study folder and, at the time of the Manager review, had not been archived or hashed. Tester, before ADDENDUM-3: the shift test computed real discovery Sharpe differences, unshifted and shifted, for INV1 (0.0311 and 0.0181), INV2 (0.0393 and 0.0036), INV3 (0.0638 and 0.0562) and INV5 (0.0242 and 0.0235). It also produced the sealed null’s pass counts using real moments, and pass counts from the sealed planted tests run on real data. Tester diagnostic, before ADDENDUM-3: a script printed real discovery-period (1962–2012) stock and bond statistics: monthly mean and standard deviation 0.00869 and 0.04517 for stocks, 0.00603 and 0.02300 for bonds, a T-bill mean of 0.00418, and monthly excess Sharpe ratios of 0.0997 and 0.0803. Only their correlation (0.108) had been disclosed in ADDENDUM-3. Tester seal attacks (16 Oct, 23:17 UTC and 17 Oct, 00:32 UTC): these opened confirmation sessions in scratch copies that held the real data. They read SPY daily rows through 2026-09-30 (8,475 rows, three times) and the French monthly market file through 2026-08 (1,202 rows, once). That file contains the market and T-bill series for INV7’s French confirmation. Only row counts were printed; no return or statistic was computed or shown. Future seal attacks run on synthetic data only. Manager: the independent INV7 check read the French discovery rows (to 2012-12) directly from the zip files, bypassing the access log. No confirmation row was read. The lead’s decisions file (M1–M3, written before any data was read) was sealed late, at 01:03:06 UTC on 17 October. Earlier project runs: the overnight files' confirmation rows were read once on 16 October by the swing study’s C22 run, a close-based rule. No overnight or intraday statistic was computed from them, and the overnight confirmation was never opened. The literature: the day-trading confirmation window overlaps the ORB authors' sample (to February 2023) and the noise-area authors' sample (to April 2024). It was unseen by this project, not by the literature. As it turned out, no day-trading rule reached confirmation. 11. Deviations, mismatches and other limitations INV7’s cost criterion could not fail for cost reasons. K4 required a breakeven cost of at least 0.25% per side. A static tilt and its benchmark each pay a single initial purchase, so trading cost cannot change which one has the higher Sharpe ratio. In discovery the breakeven was reported as above 5%. In confirmation K4 is recorded as failed only because the Sharpe difference was already negative at zero cost. The real cost tests were the MTUM run, whose fund fees are inside its price, and the assumed drag on the French portfolio. INV7 drag sensitivity. The French run charged an assumed 0.50% a year. On discovery data, the Manager’s separate recompute found that the advantage would vanish at a drag of 3.28% a year, and the t-statistic would fall below 2.0 at 1.87% a year. This was information only and not a trial. Cost timing (disclosed deviation). The INV pre-registration says a trade’s cost is charged \"in the month the trade happens\". The code charges it in the month the new weights are held. Total cost is identical except for the final trade. The lead ratified this in ADDENDUM-1, before any discovery run, and the literal reading was not implemented. Python 3.11 only. The pre-registrations name Python 3.9. No 3.9 interpreter was available, and the installed numpy and pandas need 3.11 or later. The code was checked for 3.9 compatibility at syntax and API level only, and every run used Python 3.11. The French T-bill source changed in 2024. From June 2024 the French library’s risk-free rate comes from the ICE BofA 1-month T-bill index instead of Ibbotson, according to the file header. Every INV comparison subtracts it from both legs, so it shifts both Sharpe ratios together. Its effect was not separately measured. The French portfolio is not MTUM’s index. BIG HiPRIOR is the value-weighted top third of big-cap stocks by prior 12-month return. MTUM tracks MSCI’s risk-weighted momentum index. The tradable run also starts four months later (2013-05, MTUM’s first full month) and ends one month later than the French run. Both had to pass, so the mismatch could only make passing harder. Costs are assumed, not measured. No quote data was available for any family. One-minute bars are consolidated last-sale prices, not quotes, and stop fills in fast markets may be worse than 4 bp. ETFs stand in for futures. Prop-firm traders mostly trade index futures. We tested SPY and QQQ, and their breakeven costs in basis points are the comparison point. Low power for investing rules. About 164 months is short for a Sharpe-difference test at a bar of 2.690. A FAIL here does not show a rule is harmful. It shows the rule is not proven better than holding the market. Not checked here: whether a Canadian broker supports market-on-open and market-on-close orders, the currency cost of buying US-listed ETFs, and the tax treatment of frequent trading. None of these mattered, because no rule passed. This is not proof that no strategy works. These 50 rules, as written, on this data, with these costs, did not pass these tests. Strict tests trade some missed real edges for far fewer false ones. 12. Reproduce it Every file below can be checked with sha256sum. Code to be published with this study. The swing study’s files are listed on its own page. File SHA-256 PREREG-INV.md 987cdf3611734a6c0670191746edddf8676f63012ff69dff2ba8b09be129b095 PREREG-ON.md 59a7709b857303e84d8e62131c1103867534b58cfe0a941171ced18e6b807ecc PREREG-ID.md ff3149821e6bf0b357defde5e4c4806746b507c6b374bd34d47f4821686dd686 ADDENDUM-1-2026-10-16.md 99d2dfb1fe783d17fbe1f8daa7f7d8a366856b0bc989b2a67c25255085b5a6c1 ADDENDUM-2-2026-10-16.md eeb3983a69beb3b12a752ce99a4a3aef906d413eed6680b95c2127e400b1efae ADDENDUM-3-2026-10-16.md 8ec93d95c01e546f48bc0d440f805a506e4797a782270d220f84a334968a4912 ADDENDUM-4-2026-10-17.md 7ffc32b6481070dc51542e12555a83a6e082cb4516853bbf2874a54277d1ab5f DISCLOSURE-1-2026-10-17.md 525f7338ad1bb6e7e1338189d7bf3e883cdb6356b05774bcfb6397ab2bd55bc3 DECISIONS-M1-M3-2026-10-16.md 8b93f48f496a1ff6c1d2ba89cbb47c5479be149814822a810a1f54ee814c3a7b inv/DATA_SHA256.txt (11 files) 64849d3c8e5f580cafa6ee21e73885c273562509a772d4b187963064c3a00425 on/DATA_SHA256.txt (13 files) e061fa2f6910075aafda4526c26826bcc3d436ebd0d3add909da18da771a9510 id/data/DATA_SHA256.txt (258 files) c723c5f6dd4754f084b127c8ba5792adf9519915686d31dba847d294bf6cf02c inv/out/discovery.json cf617069b55638494c75ef1e1ac4241dd8ace2f0e5dd8617a8261120ca0c8197 on/out/discovery.json bd8d6d407ba60b302e985e40f993deeb8d555584d2e77db3c89b91f5cd3d566a id/out/discovery.json d6170e78b7896fc49da0cd412603bcee4a97ee4b7521c390191ec596ea040e31 inv/out/confirmation_INV7.json 8f614ab6ca7e787695c07037dd1590ca2d8e48e668e43b4b11e18bf460effca6 SEAL-BROADEN.md (8,605 bytes, final) 870ff73a26b4a3f0764add8531a1d3684047608b1263ed8f22cd9b72d476f1b9 SEAL-ANCHOR.md records the fingerprint of SEAL-BROADEN.md after every append, so the seal log can be checked as append-only. The INV7 confirmation ran once with python3 -I inv/run_confirmation.py INV7, and its unlock file was consumed. Again: this is a negative research result, not a strategy, a recommendation or a signal. Nothing here says what anyone should buy, sell or hold. Versions DateWhat changed16 Oct 2026Investing and overnight pre-registrations sealed at 21:14:06 UTC; day-trading pre-registration sealed at 21:34:27 UTC, before any one-minute bar was downloaded in bulk.16–17 Oct 2026Four addenda sealed before the discovery runs, each listed in the study with its timestamp; one disclosure note sealed before the only confirmation run. The investing confirmation ran once (INV7, FAIL). Nothing else reached confirmation.17 Oct 2026Published on this site. Text and charts: CC BY-NC 4.0. Study code: MIT. The numbers are facts: quote them freely, with a link. A figure may be described as “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a fixed-scope agreement” only when it comes from a signed engagement; no one may describe it as audited, certified or verified. Cite this study donttrade (2026). We tested 50 trading strategies, from swing trades to day trades. None survived.. Published 17 Oct 2026. https://donttrade.ca/research/strategy-tests/ @misc{donttrade2026strategies, author = {donttrade}, title = {We tested 50 trading strategies, from swing trades to day trades. None survived.}, year = {2026}, url = {https://donttrade.ca/research/strategy-tests/}, note = {Code: https://github.com/donttrade/disposition-effect} } WHAT NEXT Get the next study by email Email address Email me the next study Read the swing-trading study it builds on → Work at a prop firm or broker? For firms →"
+}

@@ -1,0 +1,42 @@
+{
+ "attrs": [
+  "input[placeholder]=you@example.com"
+ ],
+ "citation": [],
+ "fixes": [],
+ "ids": [
+  "disposition-effect",
+  "pgr",
+  "plr",
+  "paper",
+  "realised",
+  "qualifying",
+  "orphan",
+  "denominator",
+  "interval",
+  "t",
+  "form4",
+  "em"
+ ],
+ "links": [
+  "a[href]=https://doi.org/10.1111/j.1540-6261.1985.tb05002.x",
+  "a[href]=https://doi.org/10.1111/0022-1082.00072",
+  "a[href]=https://doi.org/10.1111/0022-1082.00072",
+  "a[href]=https://doi.org/10.1111/0022-1082.00072",
+  "a[href]=https://doi.org/10.1111/0022-1082.00072",
+  "a[href]=https://doi.org/10.1111/0022-1082.00072",
+  "a[href]=https://github.com/donttrade/disposition-effect/tree/main/partner",
+  "a[href]=https://github.com/donttrade/disposition-effect/tree/main/partner",
+  "a[href]=https://www.itl.nist.gov/div898/handbook/prc/section1/prc14.htm",
+  "a[href]=https://www.itl.nist.gov/div898/handbook/eda/section3/eda352.htm",
+  "a[href]=https://www.investor.gov/introduction-investing/investing-basics/glossary/form-4",
+  "form[action]=https://donttrade.substack.com/subscribe",
+  "a[href]=/feed.xml"
+ ],
+ "path": "/glossary/",
+ "source": "docs/glossary/index.html",
+ "source_sha256": "557be2fc5b9d45b506b0cbe3fe608f10ac02dae22087a52c5d96180604d068ab",
+ "tables": [],
+ "text": "\n\n\n  Glossary\n  The handful of terms the studies use, in plain words, each with its source.\n  Disposition effectThe tendency to sell positions that are up more readily than positions that are down. Named by Shefrin and Statman (1985); measured on brokerage records by Odean (1998). Source: Shefrin & Statman (1985); Odean (1998)PGR — proportion of gains realisedIn Odean’s method: on the days a trader sells something, the share of their winning positions they actually sold, realised gains ÷ (realised gains + paper gains). The figures in this site’s public-panel study count every day a position is held instead, so there PGR is a daily rate: the share of held winning positions closed that day. Levels from the two conventions are not comparable; ratios are approximately comparable. Source: Odean (1998)PLR — proportion of losses realisedThe same share for losing positions: realised losses ÷ (realised losses + paper losses). If PGR is bigger than PLR, gains are being realised more readily than losses. The same two conventions apply as for PGR. Source: Odean (1998)Paper gain / paper lossA position that is up (or down) and was not sold that day. In Odean’s method only days on which the trader sold something else count; in this site’s public-panel study every held day counts. Source: Odean (1998)Realised gain / realised lossA position sold that day while it was up (or down). Source: Odean (1998)Qualifying sale dayA day on which an account closed at least one position. In Odean’s method and in the client script (partner_disposition.py), only these days count, so a trader who rarely trades is not scored as disciplined. The public-panel study counts every held day instead; see PGR. Source: partner/ READMEOrphan closeA closed position with no earlier day on which it was held as a paper position. A few are normal (positions opened and closed the same day); a majority means the export did not join correctly, and the script refuses it. Source: partner/ READMEDenominatorExactly who or what was counted underneath a percentage. Two honest studies can report very different levels because their denominators differ, which is why the ratio is the thing to compare. Source: this site’s studies95% intervalA range that, by a stated method, would contain the true value in 95% of repeated samples. It shows how precisely the data pins a number down. Source: NIST/SEMATECH e-Handbookt statisticAn estimate divided by its standard error. Large values mean the estimate is far from zero relative to its noise; with very large samples it gets large even for small effects, so it is not a measure of size. Source: NIST/SEMATECH e-HandbookForm 4The filing a company insider makes with the SEC after buying or selling the company’s shares. Source: Investor.gov\n\nGet the next study by email. One email per finished study; free, no advice.\n    Email address\n    \n    Email me the next study\n  Or follow the Atom feed of new studies and corrections.\n",
+ "text_collapsed": "Glossary The handful of terms the studies use, in plain words, each with its source. Disposition effectThe tendency to sell positions that are up more readily than positions that are down. Named by Shefrin and Statman (1985); measured on brokerage records by Odean (1998). Source: Shefrin & Statman (1985); Odean (1998)PGR — proportion of gains realisedIn Odean’s method: on the days a trader sells something, the share of their winning positions they actually sold, realised gains ÷ (realised gains + paper gains). The figures in this site’s public-panel study count every day a position is held instead, so there PGR is a daily rate: the share of held winning positions closed that day. Levels from the two conventions are not comparable; ratios are approximately comparable. Source: Odean (1998)PLR — proportion of losses realisedThe same share for losing positions: realised losses ÷ (realised losses + paper losses). If PGR is bigger than PLR, gains are being realised more readily than losses. The same two conventions apply as for PGR. Source: Odean (1998)Paper gain / paper lossA position that is up (or down) and was not sold that day. In Odean’s method only days on which the trader sold something else count; in this site’s public-panel study every held day counts. Source: Odean (1998)Realised gain / realised lossA position sold that day while it was up (or down). Source: Odean (1998)Qualifying sale dayA day on which an account closed at least one position. In Odean’s method and in the client script (partner_disposition.py), only these days count, so a trader who rarely trades is not scored as disciplined. The public-panel study counts every held day instead; see PGR. Source: partner/ READMEOrphan closeA closed position with no earlier day on which it was held as a paper position. A few are normal (positions opened and closed the same day); a majority means the export did not join correctly, and the script refuses it. Source: partner/ READMEDenominatorExactly who or what was counted underneath a percentage. Two honest studies can report very different levels because their denominators differ, which is why the ratio is the thing to compare. Source: this site’s studies95% intervalA range that, by a stated method, would contain the true value in 95% of repeated samples. It shows how precisely the data pins a number down. Source: NIST/SEMATECH e-Handbookt statisticAn estimate divided by its standard error. Large values mean the estimate is far from zero relative to its noise; with very large samples it gets large even for small effects, so it is not a measure of size. Source: NIST/SEMATECH e-HandbookForm 4The filing a company insider makes with the SEC after buying or selling the company’s shares. Source: Investor.gov Get the next study by email. One email per finished study; free, no advice. Email address Email me the next study Or follow the Atom feed of new studies and corrections."
+}

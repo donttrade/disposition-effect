@@ -1,0 +1,16 @@
+{
+ "citation": [],
+ "crumb": "Research",
+ "description": "Dated archive of every donttrade study, with scripts and data linked as they are published. Negative results included.",
+ "form_action": [
+  "https://donttrade.substack.com"
+ ],
+ "og_image": "/assets/og/research.png",
+ "parent": null,
+ "path": "/research/",
+ "section": "/research/",
+ "source": "docs/research/index.html",
+ "source_sha256": "ac0b96f0f10eb0a3ee1adf4ef14e24eabb3e84f30c8e47cb9d4dbee433545de1",
+ "title": "Research — donttrade",
+ "updated": "2026-10-19"
+}

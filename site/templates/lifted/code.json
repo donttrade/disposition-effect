@@ -1,0 +1,16 @@
+{
+ "citation": [],
+ "crumb": "Methods and code",
+ "description": "Every published donttrade script with the data each study used.",
+ "form_action": [
+  "https://donttrade.substack.com"
+ ],
+ "og_image": "/assets/og/default.png",
+ "parent": null,
+ "path": "/code/",
+ "section": null,
+ "source": "docs/code/index.html",
+ "source_sha256": "6595c9c054951ddf26650051edb7483c94e544cf9272de3db161835dafbbe8c9",
+ "title": "Methods and code — donttrade",
+ "updated": "2026-10-19"
+}
