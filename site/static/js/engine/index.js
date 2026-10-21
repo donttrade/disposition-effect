@@ -4,7 +4,7 @@
 // cookies or storage, and raw rows are never kept: only whitelisted fields
 // survive into executions and trades.
 
-import { decodeBytes, isHtml, parseCsv, sniffDelimiter, resolveNumberStyle } from './csv.js';
+import { decodeBytes, isHtml, parseCsv, sniffDelimiter, resolveNumberStyle, checkSwallowedRows } from './csv.js';
 import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS } from './detect.js';
 import { fail, LIMITS } from './errors.js';
 import { htmlRows, parseMt, isEmptyRow } from './mt.js';
@@ -44,6 +44,7 @@ export function parseFile(bytes) {
   for (let i = hi + 1; i < rows.length; i++) if (!isEmptyRow(rows[i].cells)) dataRows++;
   if (dataRows === 0) fail('E_HEADER_ONLY');
   if (dataRows > LIMITS.MAX_ROWS) fail('E_TOO_LARGE');
+  checkSwallowedRows(rows, hi);
   resolveNumberStyle([{ rows: rows.slice(hi + 1), map: m, fields: NUMERIC_FIELDS[name] }], delim === ',' ? 'dot' : null);
   const verified = SIGNATURES[name].verified;
   if (name === 'mt5_deals') {

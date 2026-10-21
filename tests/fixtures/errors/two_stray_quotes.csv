@@ -1,0 +1,7 @@
+Date,Time,Symbol,Side,Quantity,Price,Notes
+2026-02-02,09:00:00,AAA,Buy,1,100,ok
+2026-02-02,10:00:00,AAA,Sell,1,101,"oops
+2026-02-03,09:00:00,BBB,Buy,1,50,fine
+2026-02-03,10:00:00,BBB,Sell,1,49,fine
+2026-02-04,09:00:00,CCC,Buy,1,10,x"
+2026-02-04,10:00:00,CCC,Sell,1,11,ok

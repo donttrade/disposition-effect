@@ -232,3 +232,13 @@ ORACLES["generic/tv2_eu_dot_thousands_price.csv"] = {
 }
 ERRORS["errors/mixed_decimal_styles.csv"] = ("E_BAD_NUMBER", 3, "price")   # "12,50" then "13.5"
 ERRORS["errors/dot3_no_evidence.csv"] = ("E_BAD_NUMBER", 2, "qty")       # ';' file, "1.500" and integers only
+
+# Tester v2 B3: a stray quote mark must never hide rows.
+ERRORS["errors/tv2_stray_quote.csv"] = ("E_BAD_QUOTE", 102, None)   # data row 101 = physical line 102
+ERRORS["errors/two_stray_quotes.csv"] = ("E_BAD_QUOTE", 3, None)     # the cell opened on line 3 holds lines 4-5
+ORACLES["generic/quoted_multiline_note.csv"] = {
+    # The note spans two lines but holds one comma, so it is a note, not swallowed rows. +1 point, 1 h.
+    "trades": [dict(symbol="AAA", dir="long", qty=1, pnl=1.0, hold_s=3600)],
+    "warnings": {},
+    "skipped": {},
+}

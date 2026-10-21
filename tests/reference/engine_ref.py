@@ -39,6 +39,7 @@ MESSAGES = {
     "E_AMBIGUOUS_DATE": "A date uses slashes. Write dates as yyyy-mm-dd.",
     "E_BAD_NUMBER": "A number could not be read",
     "E_ENCODING": "The file is not a text, CSV or HTML file that can be read.",
+    "E_BAD_QUOTE": "A quote mark opens a cell that is never closed.",
     "E_TOO_LARGE": "The file is too large: the limit is 50 MB and 200,000 rows.",
     "E_NO_CLOSED_TRADES": "No closed trades were found.",
 }
@@ -186,6 +187,9 @@ def sniff_delimiter(text):
 
 
 def parse_csv(text, delim):
+    """Mirrors parseCsv() in csv.js, including the stray-quote checks:
+    a quoted cell open at the end of the file is E_BAD_QUOTE at the row it opened in;
+    swallow = most delimiters on one physical line inside a quoted cell after a line break."""
     out = []
     cells = []
     field = []
@@ -193,6 +197,8 @@ def parse_csv(text, delim):
     at_start = True
     line = 1
     rec_line = 1
+    swallow = 0
+    line_delims = -1
     n = len(text)
 
     def end_field():
@@ -202,13 +208,14 @@ def parse_csv(text, delim):
         at_start = True
 
     def end_record():
-        nonlocal cells
+        nonlocal cells, swallow
         end_field()
         if not (len(cells) == 1 and clean(cells[0]) == ""):
-            out.append({"row": rec_line, "cells": [clean(c) for c in cells]})
+            out.append({"row": rec_line, "cells": [clean(c) for c in cells], "swallow": swallow})
             if len(out) > MAX_ROWS + 1:
                 fail("E_TOO_LARGE")
         cells = []
+        swallow = 0
 
     i = 0
     while i < n:
@@ -220,6 +227,7 @@ def parse_csv(text, delim):
                     i += 2
                     continue
                 in_q = False
+                line_delims = -1
                 i += 1
                 continue
             if ch in "\r\n":
@@ -230,7 +238,12 @@ def parse_csv(text, delim):
                     field.append(ch)
                     i += 1
                 line += 1
+                line_delims = 0
                 continue
+            if ch == delim and line_delims >= 0:
+                line_delims += 1
+                if line_delims > swallow:
+                    swallow = line_delims
             field.append(ch)
             i += 1
             continue
@@ -255,9 +268,21 @@ def parse_csv(text, delim):
         field.append(ch)
         at_start = False
         i += 1
+    if in_q:
+        fail("E_BAD_QUOTE", "unclosed quote", rec_line)
     if field or cells:
         end_record()
     return out
+
+
+def check_swallowed_rows(rows, hi):
+    """A quoted cell that holds whole rows (two stray quote marks): E_BAD_QUOTE at that row."""
+    width = len(rows[hi]["cells"])
+    if width < 3:
+        return
+    for r in rows[hi + 1:]:
+        if r["swallow"] >= width - 1:
+            fail("E_BAD_QUOTE", "quoted cell holds whole rows", r["row"])
 
 
 # ----------------------------------------------------------------- HTML rows
@@ -1261,6 +1286,7 @@ def parse_file(data):
             fail("E_HEADER_ONLY")
         if len(data_rows) > MAX_ROWS:
             fail("E_TOO_LARGE")
+        check_swallowed_rows(rows, hi)
         resolve_number_style([{"rows": rows[hi + 1:], "map": m, "fields": NUMERIC_FIELDS[name]}],
                              "dot" if delim == "," else None)
         verified = SIGNATURES[name]["verified"]

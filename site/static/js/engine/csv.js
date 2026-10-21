@@ -101,8 +101,13 @@ export function sniffDelimiter(text) {
   return counts[best] === 0 ? ',' : cands[best];
 }
 
-// RFC 4180 with the usual leniencies. Returns [{row, cells}] where row is the
+// RFC 4180 with the usual leniencies. Returns [{row, cells, swallow}] where row is the
 // 1-based physical line the record starts on. Blank lines are dropped.
+// A stray quote mark must never hide rows silently:
+//   * a quoted cell still open at the end of the file → E_BAD_QUOTE at the row it opened in;
+//   * swallow = the most delimiters on one physical line *inside* a quoted cell after a
+//     line break. A cell that swallowed whole rows has (columns − 1) of them; index.js
+//     checks that against the header (checkSwallowedRows).
 export function parseCsv(text, delim) {
   const out = [];
   let cells = [];
@@ -111,15 +116,18 @@ export function parseCsv(text, delim) {
   let atStart = true; // at the start of a field (a quote here opens a quoted field)
   let line = 1;
   let recLine = 1;
+  let swallow = 0;
+  let lineDelims = -1; // delimiters on the current inner line of a quoted cell; -1 = no line break yet
   const n = text.length;
   const endField = () => { cells.push(field); field = ''; atStart = true; };
   const endRecord = () => {
     endField();
     if (!(cells.length === 1 && clean(cells[0]) === '')) {
-      out.push({ row: recLine, cells: cells.map(clean) });
+      out.push({ row: recLine, cells: cells.map(clean), swallow });
       if (out.length > LIMITS.MAX_ROWS + 1) fail('E_TOO_LARGE');
     }
     cells = [];
+    swallow = 0;
   };
   let i = 0;
   while (i < n) {
@@ -127,14 +135,16 @@ export function parseCsv(text, delim) {
     if (inQ) {
       if (ch === '"') {
         if (i + 1 < n && text[i + 1] === '"') { field += '"'; i += 2; continue; }
-        inQ = false; i++; continue;
+        inQ = false; lineDelims = -1; i++; continue;
       }
       if (ch === '\r' || ch === '\n') {
         if (ch === '\r' && i + 1 < n && text[i + 1] === '\n') { field += '\r\n'; i += 2; }
         else { field += ch; i++; }
         line++;
+        lineDelims = 0;
         continue;
       }
+      if (ch === delim && lineDelims >= 0) { lineDelims++; if (lineDelims > swallow) swallow = lineDelims; }
       field += ch; i++; continue;
     }
     if (ch === '"' && atStart) { inQ = true; atStart = false; i++; continue; }
@@ -148,8 +158,18 @@ export function parseCsv(text, delim) {
     }
     field += ch; atStart = false; i++;
   }
+  if (inQ) fail('E_BAD_QUOTE', '', recLine);
   if (field !== '' || cells.length > 0) endRecord();
   return out;
+}
+
+// A quoted cell that holds whole rows (two stray quote marks): refuse, naming the row.
+export function checkSwallowedRows(rows, hi) {
+  const width = rows[hi].cells.length;
+  if (width < 3) return;
+  for (let k = hi + 1; k < rows.length; k++) {
+    if (rows[k].swallow >= width - 1) fail('E_BAD_QUOTE', '', rows[k].row);
+  }
 }
 
 // ---------------------------------------------------------------- numbers
