@@ -5,7 +5,8 @@ no box marked wrong before it has been typed in, left, or the form submitted.
     parseNumber) for every input the engine accepts, and refuses every input it refuses; the only
     difference is the documented one for typed input: a space must group thousands ("4 2" refused).
   * "1,5" never becomes 15: it reads as 1.5, which is not a count, and says so next to the box.
-  * "1,780" (one comma, 3 digits) and a lone "1.780" are ambiguous: a message, never a number.
+  * "1,780" (one comma, 3 digits) and a lone "1.780" are ambiguous for the engine; the calculators'
+    boxes take whole numbers only (readForm whole mode), where they can only mean 1780 (NIT N3).
   * first load: no aria-invalid, no visible message, in light and dark.
   * the v1 worked examples give the same figures (also in test_oldpages).
 """
@@ -149,8 +150,8 @@ def test_one_comma_five_is_refused_next_to_its_box_never_read_as_15(page):
     assert page.get_attribute("#dc-rg", "aria-describedby").split() == ["dc-rg-err", "dc-msg"]
 
 
-@pytest.mark.parametrize("raw,word", [("1,780", "1.78"), ("12,780", "1.78"), ("4 2", "space"), ("1,0,0", "not a number"),
-                                      ("1.780", "1.78"), ("-3", "negative"), ("1000000000001", "too large")])
+@pytest.mark.parametrize("raw,word", [("4 2", "space"), ("1,0,0", "not a number"), ("1,2.3", "not a number"),
+                                      ("-3", "negative"), ("-1,780", "negative"), ("1000000000001", "too large")])
 def test_ambiguous_or_wrong_input_gets_a_clear_message(page, raw, word):
     page.goto(page.base + DC)
     for sel, v in zip(DC_IDS, [raw, "10", "2", "10"]):
@@ -159,7 +160,9 @@ def test_ambiguous_or_wrong_input_gets_a_clear_message(page, raw, word):
     assert word in _state(page, DC_IDS)[0][1], (raw, _state(page, DC_IDS))
 
 
-@pytest.mark.parametrize("raw", ["1780", "1 780", "1,234,567", "1.234.567"])
+# "1,780" / "1.780": ambiguous in general (the engine refuses them), but these boxes take whole
+# numbers only, so 1780 is the only reading (launch NIT N3; the page's example is "1,780").
+@pytest.mark.parametrize("raw", ["1780", "1 780", "1,234,567", "1.234.567", "1,780", "1.780"])
 def test_unambiguous_thousands_are_read(page, raw):
     page.goto(page.base + DC)
     for sel, v in zip(DC_IDS, ["420", raw, "260", "2240"]):
@@ -260,9 +263,30 @@ def test_axe_and_overflow_with_every_message_showing(browser, built_site, path, 
     p = ctx.new_page()
     p.goto(built_site["url"] + path)
     p.wait_for_load_state("networkidle")
-    for sel, v in zip(ids, ["1,5", "1,780", "4 2", "x", "-"]):
+    for sel, v in zip(ids, ["1,5", "1,2,3", "4 2", "x", "-"]):
         p.fill(sel, v)
     assert p.locator(".error:visible").count() == len(ids)
     assert horizontal_overflow(p) == []
     assert axe_violations(p) == []
     ctx.close()
+
+
+def test_the_example_as_the_page_writes_it(page):
+    """The fine print says "(420, 1,780, 260, 2,240)": typed that way it gives the example's figures."""
+    page.goto(page.base + DC)
+    for sel, v in zip(DC_IDS, ["420", "1,780", "260", "2,240"]):
+        page.fill(sel, v)
+    assert page.inner_text("#dc-pgr") == f"{420 / 2200:.4f}" and page.inner_text("#dc-plr") == f"{260 / 2500:.4f}"
+    assert all(s == [None, ""] for s in _state(page, DC_IDS))
+
+
+def test_whole_mode_in_node():
+    got = [(g["ok"], g["value"]) for g in _parity_whole(["1,780", "1.780", "1,5", "12,780", "-1,780"])]
+    assert got == [(True, 1780), (True, 1780), (True, 1.5), (True, 12780), (True, -1780)]   # 1.5 → "has decimals"
+
+
+def _parity_whole(raws):
+    r = subprocess.run(["node", "-e", "const N = require(process.argv[1]); console.log(JSON.stringify(process.argv.slice(2).map(x => N.readForm([x], {whole: true})[0])));",
+                        NUMBERS, *raws], capture_output=True, text=True, timeout=30)
+    assert r.returncode == 0, r.stderr
+    return json.loads(r.stdout)
