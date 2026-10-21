@@ -81,3 +81,87 @@ def test_d1_report_page_uses_the_servers_window_and_hides_the_reminder_after_the
     js = open(os.path.join(REPO, "site", "static", "js", "paid", "report.js"), encoding="utf-8").read()
     assert "retest: r.json.retest" in js and "ics(win)" in js
     assert "ics()" not in js, "the .ics is never built from the browser's own clock"
+
+
+# ------------------------------------------------------------------ D3: every stated window number = paid_terms.json
+TERMS = json.load(open(os.path.join(REPO, "site", "config", "paid_terms.json"), encoding="utf-8"))
+OPENS, CLOSES = TERMS["retest_opens_days_after_first_report"], TERMS["retest_closes_days_after_first_report"]
+KEY, KEY_FR = TERMS["key_days_after_purchase"], TERMS["key_days_after_first_report"]
+KEEP, GRACE = TERMS["prints_keep_days_after_first_report"], TERMS["tracker_prints_grace_days"]
+N = r"(\d+)"
+# page → [(pattern with the numbers as groups, the numbers it must state)]. Each must occur at least once.
+STATEMENTS = {
+    "/terms/": [(rf"one re-test, which opens {N} days after your first report and closes {N} days after it", (OPENS, CLOSES)),
+                (rf"Your key is valid for {N} days after purchase, or until {N} days after your first report", (KEY, KEY_FR))],
+    "/fr/conditions/": [(rf"Le nouveau test est offert de {N} à {N} jours après votre premier rapport", (OPENS, CLOSES)),
+                        (rf"valide {N} jours après l’achat, ou jusqu’à {N} jours après votre premier rapport", (KEY, KEY_FR))],
+    "/fr/avant-de-payer/": [(rf"à partir de {N} jours et jusqu’à {N} jours après votre premier rapport", (OPENS, CLOSES)),
+                            (rf"valide {N} jours après l’achat, ou jusqu’à {N} jours après votre premier rapport", (KEY, KEY_FR))],
+    "/pricing/": [(rf"One re-test is included, to run {N} to {N} days after your first report", (OPENS, CLOSES)),
+                  (rf"Access lasts {N} days after purchase, or until {N} days after your first report", (KEY, KEY_FR))],
+    "/privacy/": [(rf"or {N} days after your first report, whichever comes first", (KEEP,)),
+                  (rf"delete them {N} days after it ends", (GRACE,))],
+}
+# Anywhere on any page: a stated re-test window must be the server's.
+SWEEP = [rf"re-test[^.]{{0,80}}?\b{N} to {N} days", rf"nouveau test[^.]{{0,80}}?\bde {N} à {N} jours",
+         rf"à partir de {N} jours et jusqu’à {N} jours"]
+
+
+def statement_problems(path, text):
+    out = []
+    for pat, want in STATEMENTS.get(path, []):
+        found = [tuple(int(x) for x in m.groups()) for m in re.finditer(pat, text)]
+        if not found:
+            out.append((path, "missing", pat))
+        out += [(path, f, want) for f in found if f != want]
+    for pat in SWEEP:
+        out += [(path, tuple(int(x) for x in m.groups()), (OPENS, CLOSES)) for m in re.finditer(pat, text)
+                if tuple(int(x) for x in m.groups()) != (OPENS, CLOSES)]
+    return out
+
+
+def test_d3_paid_terms_json_is_consistent():
+    assert KEEP == CLOSES + TERMS["prints_buffer_days"]
+    assert KEY_FR == KEEP and CLOSES > OPENS > 0
+
+
+@pytest.fixture(scope="module")
+def both_build(tmp_path_factory):
+    from test_legal import build, paid_env
+    tmp = tmp_path_factory.mktemp("delta-d3")
+    r, out = build(tmp, "out", **paid_env(tmp, pilot_checkout=True))
+    assert r.returncode == 0, r.stderr
+    return out
+
+
+def _visible(out, path):
+    return " ".join(L.visible_text((out / path.strip("/") / "index.html").read_text(encoding="utf-8")).split())
+
+
+def test_d3_every_page_states_the_window_and_key_of_paid_terms_json(both_build):
+    problems = []
+    for path in STATEMENTS:
+        problems += statement_problems(path, _visible(both_build, path))
+    for p in both_build.rglob("*.html"):
+        rel = "/" + str(p.parent.relative_to(both_build)).strip(".") + "/"
+        problems += [x for x in statement_problems(rel.replace("//", "/"), " ".join(L.visible_text(p.read_text(encoding="utf-8")).split()))
+                     if x[1] != "missing"]
+    assert problems == []
+
+
+def test_d3_the_checker_catches_the_testers_mutations():
+    # mutate.sh terms_close / fr_window: "60→90" on /terms/ and "30 à 60 → 30 à 90" on /fr/conditions/
+    terms = ("one re-test, which opens 30 days after your first report and closes 90 days after it. "
+             "Your key is valid for 90 days after purchase, or until 75 days after your first report")
+    assert statement_problems("/terms/", terms)
+    fr = ("Le nouveau test est offert de 30 à 90 jours après votre premier rapport. "
+          "valide 90 jours après l’achat, ou jusqu’à 75 jours après votre premier rapport")
+    assert statement_problems("/fr/conditions/", fr)
+    assert statement_problems("/home/", "one free re-test 30 to 90 days after your first report")
+    assert statement_problems("/terms/", "") and statement_problems("/terms/", "")[0][1] == "missing"
+
+
+def test_d3_report_page_line_states_paid_terms_json():
+    d = node("import(process.argv[1]).then(m => process.stdout.write(JSON.stringify({line: m.RETEST_LINE})));")
+    m = re.search(rf"re-test on the same account, {N} to {N} days after your first report", d["line"])
+    assert m and (int(m.group(1)), int(m.group(2))) == (OPENS, CLOSES)
