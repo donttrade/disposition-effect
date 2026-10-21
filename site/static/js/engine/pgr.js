@@ -7,13 +7,14 @@
 // symbol traded that same day (the last execution price that day); unmarked
 // position-days lower coverage_pct. Mirrors pgr_plr_counts() in engine_ref.py.
 
+import { chronoOrder } from './trades.js';
+
 const UNIT = 1e8;
 const DAY_MS = 86400000;
 const roundHalfAway = (x) => Math.floor(Math.abs(x) + 0.5) * (x >= 0 ? 1 : -1);
 
 export function pgrPlrCounts(executions) {
-  const order = executions.map((_, k) => k);
-  order.sort((a, b) => (executions[a].ts - executions[b].ts) || (executions[a].row - executions[b].row) || (a - b));
+  const order = chronoOrder(executions);
   const pos = new Map(); // symbol -> [units, avg]
   let rg = 0, rl = 0, pg = 0, pl = 0, marked = 0, total = 0;
   let i = 0;
