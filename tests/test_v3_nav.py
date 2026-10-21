@@ -202,3 +202,132 @@ def test_n8_header_one_line_and_opening_a_panel_shifts_nothing(browser, built_si
             assert pg.evaluate("document.querySelector('main').getBoundingClientRect().top") == main_top
         assert pg.evaluate("__cls") == before, width
         ctx.close()
+
+
+# ------------------------------------------------------------------ N5: Escape and focus-out (nav.js)
+def test_n5_escape_returns_focus_and_tabbing_out_closes(browser, built_site):
+    ctx = _ctx(browser, 1280)
+    pg = ctx.new_page()
+    pg.goto(built_site["url"] + "/about/")
+    pg.focus(".nav-dd-li:nth-child(2) summary")
+    pg.keyboard.press("Enter")
+    assert pg.evaluate(OPEN) == [False, True, False]
+    pg.keyboard.press("ArrowDown")   # APG optional: ↓ on an open summary focuses the first link
+    assert pg.evaluate("document.activeElement.getAttribute('href')") == "/research/"
+    pg.keyboard.press("Escape")
+    assert pg.evaluate(OPEN) == [False, False, False]
+    assert pg.evaluate("document.activeElement.matches('.nav-dd-li:nth-child(2) summary')")
+    # Tab out of the last link of For firms (to Pricing, still in the nav: stays open), then out of the nav
+    pg.focus(".nav-dd-li:nth-child(3) summary")
+    pg.keyboard.press(" ")
+    pg.focus(".nav-dd-li:nth-child(3) .nav-foot a")
+    pg.keyboard.press("Tab")
+    assert pg.evaluate("document.activeElement.getAttribute('href')") == "/pricing/"
+    pg.focus(".nav-dd-li:nth-child(3) .nav-foot a")
+    assert pg.evaluate(OPEN)[2] is True
+    pg.focus("[data-theme-toggle]")   # focus leaves nav.site-nav
+    assert pg.evaluate(OPEN) == [False, False, False]
+    # a click outside closes; a click on the panel's own padding does not
+    pg.click(".nav-dd-li:nth-child(1) summary")
+    box = pg.locator(".nav-dd-li:nth-child(1) .nav-pop").bounding_box()
+    pg.mouse.click(box["x"] + 3, box["y"] + box["height"] - 3)
+    assert pg.evaluate(OPEN)[0] is True
+    pg.mouse.click(40, 700)
+    assert pg.evaluate(OPEN) == [False, False, False]
+    ctx.close()
+
+
+# ------------------------------------------------------------------ N6: hover intent
+TRACE = """window.__t = []; document.addEventListener('toggle', e => { if (e.target.matches('.nav-dd'))
+  __t.push([e.target.parentNode.querySelector('summary').textContent, e.target.open, performance.now()]); }, true);"""
+
+
+def test_n6_hover_intent_timings_and_click_guard(browser, built_site):
+    ctx = _ctx(browser, 1280)
+    ctx.add_init_script(TRACE)
+    pg = ctx.new_page()
+    pg.goto(built_site["url"] + "/about/")
+    pg.wait_for_load_state("networkidle")
+    assert pg.evaluate("matchMedia('(hover: hover) and (pointer: fine)').matches")
+    s = pg.locator(".nav-dd-li:nth-child(1) summary").bounding_box()
+    pg.mouse.move(40, 400)
+    t0 = pg.evaluate("performance.now()")
+    pg.mouse.move(s["x"] + 10, s["y"] + s["height"] / 2)
+    pg.wait_for_timeout(60)
+    assert pg.evaluate(OPEN)[0] is False, "no open before 100 ms"
+    pg.wait_for_timeout(120)
+    assert pg.evaluate(OPEN)[0] is True, "open by 150 ms (+ headless slack)"
+    opened = [t for _, o, t in pg.evaluate("__t") if o][0]
+    assert 95 <= opened - t0 <= 220
+    # summary → down through the gap → a panel link: stays open
+    link = pg.locator(".nav-dd-li:nth-child(1) .nav-item").first.bounding_box()
+    pg.mouse.move(s["x"] + 10, s["y"] + s["height"] + 5, steps=3)
+    pg.mouse.move(link["x"] + 20, link["y"] + 10, steps=5)
+    pg.wait_for_timeout(450)
+    assert pg.evaluate(OPEN)[0] is True
+    # leave: closes within 350 ms
+    t1 = pg.evaluate("performance.now()")
+    pg.mouse.move(40, 700)
+    pg.wait_for_timeout(450)
+    closed = [t for _, o, t in pg.evaluate("__t") if not o][-1]
+    assert pg.evaluate(OPEN)[0] is False and closed - t1 <= 350 + 50
+    # hover-open then click at once: stays open (the "hover opened, click closed" bug)
+    pg.mouse.move(s["x"] + 10, s["y"] + s["height"] / 2)
+    pg.wait_for_function("document.querySelector('.nav-dd').open")
+    pg.mouse.down(); pg.mouse.up()
+    pg.wait_for_timeout(50)
+    assert pg.evaluate(OPEN)[0] is True
+    pg.wait_for_timeout(450)
+    pg.mouse.down(); pg.mouse.up()   # a later click toggles as usual
+    assert pg.evaluate(OPEN)[0] is False
+    ctx.close()
+
+
+def test_n6_no_hover_logic_on_touch(browser, built_site):
+    ctx = browser.new_context(viewport={"width": 1280, "height": 800}, has_touch=True, is_mobile=True)
+    pg = ctx.new_page()
+    pg.goto(built_site["url"] + "/about/")
+    if pg.evaluate("matchMedia('(hover: hover) and (pointer: fine)').matches"):
+        pytest.skip("this Chromium reports a fine hover pointer under touch emulation")
+    s = pg.locator(".nav-dd-li:nth-child(1) summary")
+    if not s.is_visible():   # is_mobile may shrink to the phone layout; then there is no drop-down to hover
+        ctx.close()
+        return
+    box = s.bounding_box()
+    pg.mouse.move(box["x"] + 10, box["y"] + 10)
+    pg.wait_for_timeout(400)
+    assert pg.evaluate(OPEN)[0] is False
+    ctx.close()
+
+
+# ------------------------------------------------------------------ N7: motion
+PANEL_ANIMS = """() => document.getAnimations().map(a => {
+  const t = a.effect.getComputedTiming();
+  const props = a.transitionProperty ? [a.transitionProperty]
+    : a.effect.getKeyframes().flatMap(k => Object.keys(k).filter(x => !['offset', 'computedOffset', 'easing', 'composite'].includes(x)));
+  return {props, end: t.delay + t.duration, iter: t.iterations};
+})"""
+
+
+@pytest.mark.parametrize("motion", ["reduce", "no-preference"])
+def test_n7_panel_motion(browser, built_site, motion):
+    ctx = _ctx(browser, 1280, reduced_motion=motion)
+    pg = ctx.new_page()
+    pg.goto(built_site["url"] + "/pricing/")
+    pg.wait_for_load_state("networkidle")
+    for i in range(3):
+        pg.focus(f".nav-dd-li:nth-child({i + 1}) summary")
+        pg.keyboard.press("Enter")
+        anims = pg.evaluate(PANEL_ANIMS)
+        if motion == "reduce":
+            assert anims == [], anims
+        else:
+            assert anims, "the panel fades in"
+            for a in anims:
+                assert set(a["props"]) <= {"opacity", "transform"} and a["iter"] == 1 and a["end"] <= 240, a
+        pg.keyboard.press("Escape")
+    ctx.close()
+
+
+def test_a2_nav_js_budget():
+    assert os.path.getsize(os.path.join(REPO, "site", "static", "js", "nav.js")) <= 3072
