@@ -1,0 +1,218 @@
+#!/usr/bin/env python3
+"""donttrade v2 site build: site.toml + prices.json + Jinja2 templates → site/_site/.
+
+Rules (V2-BUILD-PLAN, STRUCTURE and step 3):
+  * Every page of today's docs/ that no template owns yet is copied through
+    unchanged, so the output always holds every baseline URL.
+  * The build FAILS LOUDLY (exit 1, with the reason) on:
+      - a path in checks/urls-baseline.txt missing from the output,
+      - an externally linked id (path#id in the baseline) missing from its page,
+      - trader_first_home != paid_report, or analytics on without a beacon token,
+      - a paid-only page or paid-flagged markup in the output while paid_report is off,
+      - a placeholder left in private.toml when paid_report is on
+        (unless DT_ALLOW_PLACEHOLDERS=1, for local test builds only).
+  * Output is deterministic: sorted walks, no timestamps, so two builds are byte-identical.
+
+Environment:
+  DT_DEV=1                 also build site/dev/ (styleguide, sniffer) into _site/dev/
+  DT_SITE_TOML=path        use another site.toml (test builds with flags on)
+  DT_OUT=path              write somewhere other than site/_site
+  DT_ALLOW_PLACEHOLDERS=1  allow private.toml placeholders (local test mode only)
+  DT_BASELINE=path         use another URL baseline (tests plant a missing URL this way)
+"""
+
+import json
+import os
+import re
+import shutil
+import sys
+import tomllib
+
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
+
+SITE = os.path.dirname(os.path.abspath(__file__))
+REPO = os.path.dirname(SITE)
+DOCS = os.path.join(REPO, "docs")
+BASELINE = os.environ.get("DT_BASELINE") or os.path.join(REPO, "checks", "urls-baseline.txt")
+
+PAID_FLAG_MARKER = 'data-requires-flag="paid_report"'
+PLACEHOLDER_RE = re.compile(r"\[[A-Z ]+ — [^\]]+\]")
+
+# Pages owned by templates. path → template, metadata, and the flag that must be on.
+PAGES = [
+    {"template": "pages/home.html", "path": "/", "requires_flag": None,
+     "title": "donttrade — behavioural measurement for trading firms",
+     "description": "We measure the plan gap: how traders plan to act versus how they act. Fixed price, "
+                    "public script, run on your own systems."},
+]
+
+# Paths that may exist only when paid_report = true.
+PAID_ONLY_PATHS = ["/welcome/", "/restore/", "/report/"]
+
+
+class BuildError(Exception):
+    pass
+
+
+def die(msg):
+    raise BuildError(msg)
+
+
+def load_config():
+    toml_path = os.environ.get("DT_SITE_TOML") or os.path.join(SITE, "config", "site.toml")
+    with open(toml_path, "rb") as f:
+        cfg = tomllib.load(f)
+    with open(os.path.join(SITE, "config", "prices.json"), encoding="utf-8") as f:
+        prices = json.load(f)
+    flags = cfg["flags"]
+    if flags["trader_first_home"] != flags["paid_report"]:
+        die(f"flag mismatch: trader_first_home={flags['trader_first_home']} must equal "
+            f"paid_report={flags['paid_report']} ({toml_path})")
+    if flags["analytics"] and not cfg["analytics"]["cf_beacon_token"]:
+        die("analytics = true but [analytics] cf_beacon_token is empty")
+    private = {}
+    if flags["paid_report"]:
+        p = os.path.join(SITE, "config", "private.toml")
+        if not os.path.exists(p):
+            die("paid_report = true needs site/config/private.toml (copy private.example.toml)")
+        with open(p, "rb") as f:
+            private = tomllib.load(f)
+        for k in ("seller_legal_name", "premises_address", "phone"):
+            if k not in private:
+                die(f"private.toml is missing {k}")
+            if PLACEHOLDER_RE.search(private[k]) and os.environ.get("DT_ALLOW_PLACEHOLDERS") != "1":
+                die(f"private.toml {k} still holds a placeholder; fill it in "
+                    "(or set DT_ALLOW_PLACEHOLDERS=1 for a local test build only)")
+    return cfg, prices, private
+
+
+def usd(n):
+    """$745, $2,500 — prices are whole dollars on this site."""
+    if n != int(n):
+        die(f"price {n} is not a whole number of dollars")
+    return "${:,}".format(int(n))
+
+
+def csp_for(page, cfg):
+    connect = page.get("connect_src", "'none'")
+    if page.get("connect_worker"):
+        connect = "'self' " + cfg["worker"]["api_base"]
+    if cfg["flags"]["analytics"]:
+        connect += " https://cloudflareinsights.com"
+    script = "'self'" + (" https://static.cloudflareinsights.com" if cfg["flags"]["analytics"] else "")
+    return ("default-src 'self'; script-src " + script + "; style-src 'self'; img-src 'self' data:; "
+            "font-src 'self'; connect-src " + connect + "; worker-src 'self'; "
+            "form-action 'self' https://api.web3forms.com; base-uri 'none'; object-src 'none'")
+
+
+def out_file(out, path):
+    rel = path.lstrip("/")
+    if rel == "" or rel.endswith("/"):
+        rel += "index.html"
+    return os.path.join(out, rel)
+
+
+def copy_tree_sorted(src, dst, skip=None):
+    for root, dirs, files in os.walk(src):
+        dirs.sort()
+        for name in sorted(files):
+            s = os.path.join(root, name)
+            rel = os.path.relpath(s, src)
+            if skip and skip(rel):
+                continue
+            d = os.path.join(dst, rel)
+            os.makedirs(os.path.dirname(d), exist_ok=True)
+            shutil.copyfile(s, d)  # content only: no timestamps carried over
+
+
+def read_baseline():
+    paths, ids = [], []
+    with open(BASELINE, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if "#" in line:
+                ids.append(tuple(line.split("#", 1)))
+            else:
+                paths.append(line)
+    return paths, ids
+
+
+def verify(out, flags):
+    paths, ids = read_baseline()
+    for p in paths:
+        if not os.path.exists(out_file(out, p) if p.endswith("/") else os.path.join(out, p.lstrip("/"))):
+            die(f"baseline URL missing from the build: {p}")
+    for p, i in ids:
+        with open(out_file(out, p), encoding="utf-8") as f:
+            html = f.read()
+        if not re.search(r'\sid="' + re.escape(i) + '"', html):
+            die(f"externally linked id missing: {p}#{i}")
+    if not flags["paid_report"]:
+        for p in PAID_ONLY_PATHS:
+            if os.path.exists(out_file(out, p)):
+                die(f"paid-only page {p} is in the build while paid_report = false")
+        for root, _, files in os.walk(out):
+            for name in files:
+                if name.endswith(".html"):
+                    fp = os.path.join(root, name)
+                    with open(fp, encoding="utf-8", errors="replace") as f:
+                        if PAID_FLAG_MARKER in f.read():
+                            die(f"paid-flagged markup in {os.path.relpath(fp, out)} while paid_report = false")
+
+
+def build():
+    cfg, prices, private = load_config()
+    flags = cfg["flags"]
+    out = os.environ.get("DT_OUT") or os.path.join(SITE, "_site")
+    if os.path.exists(out):
+        shutil.rmtree(out)
+    os.makedirs(out)
+
+    owned = {}
+    for page in PAGES:
+        if page["requires_flag"] and not flags[page["requires_flag"]]:
+            continue
+        owned[os.path.relpath(out_file(out, page["path"]), out)] = page
+
+    # 1. passthrough of every docs/ file a template does not own yet
+    copy_tree_sorted(DOCS, out, skip=lambda rel: rel in owned)
+    # 2. static assets of the new design
+    copy_tree_sorted(os.path.join(SITE, "static"), os.path.join(out, "static"),
+                     skip=(None if flags["paid_report"] else (lambda rel: rel.startswith("js" + os.sep + "paid"))))
+    # 3. dev pages, only on request; never bundled
+    if os.environ.get("DT_DEV") == "1":
+        copy_tree_sorted(os.path.join(SITE, "dev"), os.path.join(out, "dev"))
+
+    env = Environment(loader=FileSystemLoader(os.path.join(SITE, "templates")), undefined=StrictUndefined,
+                      autoescape=True, keep_trailing_newline=True)
+    env.filters["usd"] = usd
+    products = {p["id"]: p for p in prices["products"]}
+    base_ctx = {"site": cfg["site"], "flags": flags, "nav": cfg["nav"], "footer": cfg["footer"],
+                "legal": cfg["legal"], "forms": cfg["forms"], "analytics": cfg["analytics"],
+                "worker": cfg["worker"], "prices": prices, "products": products, "private": private}
+    for rel, page in sorted(owned.items()):
+        page = {"scripts": [], "modules": [], "og_image": "/assets/og/default.png", **page}
+        html = env.get_template(page["template"]).render(page=page, csp=csp_for(page, cfg), **base_ctx)
+        fp = os.path.join(out, rel)
+        os.makedirs(os.path.dirname(fp), exist_ok=True)
+        with open(fp, "w", encoding="utf-8", newline="\n") as f:
+            f.write(html)
+
+    verify(out, flags)
+    return out
+
+
+def main():
+    try:
+        out = build()
+    except BuildError as e:
+        print(f"BUILD FAILED: {e}", file=sys.stderr)
+        return 1
+    print(f"built {out}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,18 @@
+<footer class="site-footer"><div class="wrap">
+  <div class="cols">
+  {%- for col in footer %}
+    <nav aria-label="{{ col.heading }}"><h2>{{ col.heading }}</h2><ul>
+    {%- for label, href in col.links %}<li><a href="{{ href }}">{{ label }}</a></li>{% endfor %}
+    </ul></nav>
+  {%- endfor %}
+  </div>
+  <p class="legal">Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>. {{ site.reply_promise }}</p>
+  <p class="legal"><strong>Firms pay for fixed-scope measurements of their own data. Readers pay nothing. No firm can pay to change a number.</strong> <a href="/independence/">Independence policy</a></p>
+  <p class="legal">{{ legal.disclaimer_short }}</p>
+  {%- if not flags.paid_report and not flags.analytics %}
+  <p class="legal">This site sets no cookies and runs no analytics. It stores only your light/dark choice, in your own browser. <a href="/privacy/">Privacy</a></p>
+  {%- else %}
+  <p class="legal">This site sets no cookies. <a href="/privacy/">Privacy</a> explains what is stored and sent.</p>
+  {%- endif %}
+  <p class="legal">&copy; 2026 donttrade. Text and charts <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>; numbers are facts, quote them with a link.</p>
+</div></footer>
