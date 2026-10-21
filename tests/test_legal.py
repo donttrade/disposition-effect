@@ -30,8 +30,16 @@ FAKE = {"seller_legal_name": "Fixture Seller Zqx Holdings", "premises_address": 
 SITE_TOML = os.path.join(REPO, "site", "config", "site.toml")
 
 
-def toml_with(tmp, name="site.toml", **flags):
+# Well-formed fake values for a paid build that needs no escape variable (Tester D10).
+FAKE_API = "https://api.fixture-zqx.ca"
+FAKE_TEST_LINK = "https://buy.stripe.com/test_fixture0000zqx"
+
+
+def toml_with(tmp, name="site.toml", api=None, **flags):
     src = open(SITE_TOML, encoding="utf-8").read()
+    if api is not None:
+        src, n = re.subn(r'(?m)^api_base = "[^"]*"', 'api_base = "' + api + '"', src)
+        assert n == 1
     for k, v in flags.items():
         src, n = re.subn(rf"(?m)^{k} = (true|false)", f"{k} = {'true' if v else 'false'}", src)
         assert n == 1, k
@@ -45,6 +53,24 @@ def private_with(tmp, name="private.toml", **over):
     p = tmp / name
     p.write_text("".join(f'{k} = "{v}"\n' for k, v in vals.items() if v is not None), encoding="utf-8")
     return str(p)
+
+
+def prices_with_test_link(tmp, link=FAKE_TEST_LINK):
+    """A copy of prices.json with a report39 test Payment Link (the committed file has none yet)."""
+    import json
+    d = json.load(open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8"))
+    for p in d["products"]:
+        if p["id"] == "report39":
+            p["stripe_link_test"] = link
+    out = tmp / "prices.json"
+    out.write_text(json.dumps(d, indent=2), encoding="utf-8")
+    return str(out)
+
+
+def paid_env(tmp, **flags):
+    """Env for a paid build with well-formed fake values and NO escape variable."""
+    return {"DT_SITE_TOML": toml_with(tmp, "paid.toml", api=FAKE_API, paid_report=True, trader_first_home=True, **flags),
+            "DT_PRIVATE_TOML": private_with(tmp, "paid-private.toml"), "DT_PRICES_JSON": prices_with_test_link(tmp)}
 
 
 def build(tmp, name, **env):
@@ -77,8 +103,7 @@ def all_html(out):
 @pytest.fixture(scope="module")
 def paid(tmp_path_factory):
     tmp = tmp_path_factory.mktemp("legal-paid")
-    r, out = build(tmp, "on", DT_SITE_TOML=toml_with(tmp, paid_report=True, trader_first_home=True),
-                   DT_PRIVATE_TOML=private_with(tmp), DT_ALLOW_PLACEHOLDERS="1")
+    r, out = build(tmp, "on", **paid_env(tmp))
     assert r.returncode == 0, r.stderr
     return out
 

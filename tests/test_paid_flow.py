@@ -56,8 +56,10 @@ def stack(tmp_path_factory):
     toml = toml.replace('api_base = "http://127.0.0.1:8787"', f'api_base = "{api}"')
     (tmp / "site.toml").write_text(toml, encoding="utf-8")
     out = tmp / "site"
+    from test_legal import prices_with_test_link, private_with
+    # well-formed fake seller and Stripe test link; only the local dev server's http address needs an escape
     env = {**os.environ, "DT_SITE_TOML": str(tmp / "site.toml"), "DT_OUT": str(out),
-           "DT_PRIVATE_TOML": os.path.join(REPO, "site/config/private.example.toml"), "DT_ALLOW_PLACEHOLDERS": "1"}
+           "DT_PRIVATE_TOML": private_with(tmp), "DT_PRICES_JSON": prices_with_test_link(tmp), "DT_ALLOW_LOCAL_API": "1"}
     r = subprocess.run([sys.executable, os.path.join(REPO, "site/build.py")], env=env, capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
     srv = http.server.ThreadingHTTPServer(("127.0.0.1", site_port), functools.partial(Quiet, directory=str(out)))

@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.join(REPO, "checks"))
 sys.path.insert(0, os.path.join(REPO, "site"))
 import lint as L  # noqa: E402
 import build as B  # noqa: E402
-from test_legal import build, private_with, toml_with  # noqa: E402
+from test_legal import build, paid_env, prices_with_test_link, private_with, toml_with  # noqa: E402
 
 PHRASE = "export the same account from the same start date as your first file"
 
@@ -72,8 +72,7 @@ def test_prices_json_has_no_standard_price():
 
 
 def test_no_standard_price_wording_flag_off_or_on(built_site, tmp_path):
-    r, on = build(tmp_path, "on", DT_SITE_TOML=toml_with(tmp_path, paid_report=True, trader_first_home=True),
-                  DT_PRIVATE_TOML=private_with(tmp_path), DT_ALLOW_PLACEHOLDERS="1", DT_ALLOW_LOCAL_API="1")
+    r, on = build(tmp_path, "on", **paid_env(tmp_path))
     assert r.returncode == 0, r.stderr
     for out in (built_site["out"], on):
         for p in out.rglob("*.html"):
@@ -99,19 +98,10 @@ def _api_toml(tmp, api):
     ("https://api.donttrade.ca", {}, True),
 ])
 def test_paid_build_needs_https_api(tmp_path, api, env, ok):
-    e = {"DT_SITE_TOML": _api_toml(tmp_path, api), "DT_PRIVATE_TOML": private_with(tmp_path), **env}
-    # report39 has no Stripe test link yet, so a real (no-placeholder) build stops there; plant one in a copy
-    prices = os.path.join(REPO, "site", "config", "prices.json")
-    backup = open(prices, encoding="utf-8").read()
-    try:
-        d = json.loads(backup)
-        for p in d["products"]:
-            if p["id"] == "report39":
-                p["stripe_link_test"] = "https://buy.stripe.com/test_00000000000000"
-        open(prices, "w", encoding="utf-8").write(json.dumps(d, indent=2))
-        r, out = build(tmp_path, "b", **e)
-    finally:
-        open(prices, "w", encoding="utf-8").write(backup)
+    # report39 has no Stripe test link in the committed prices.json; a copy with one is passed in
+    e = {"DT_SITE_TOML": _api_toml(tmp_path, api), "DT_PRIVATE_TOML": private_with(tmp_path),
+         "DT_PRICES_JSON": prices_with_test_link(tmp_path), **env}
+    r, out = build(tmp_path, "b", **e)
     if not ok:
         assert r.returncode == 1 and "api_base" in r.stderr, r.stderr
         return

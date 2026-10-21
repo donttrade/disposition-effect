@@ -103,8 +103,15 @@ def test_paid_on_needs_filled_private_toml(tmp_path):
         shutil.copyfile(os.path.join(SITE, "config", "private.example.toml"), priv)
         r, _ = run_build(tmp_path, "x", DT_SITE_TOML=toml)
         assert r.returncode == 1 and "placeholder" in r.stderr
+        # each escape opens one guard only: placeholders, then the local api, then the missing link (D10)
         r, _ = run_build(tmp_path, "y", DT_SITE_TOML=toml, DT_ALLOW_PLACEHOLDERS="1")
+        assert r.returncode == 1 and "api_base" in r.stderr, r.stderr
+        r, _ = run_build(tmp_path, "y", DT_SITE_TOML=toml, DT_ALLOW_PLACEHOLDERS="1", DT_ALLOW_LOCAL_API="1")
+        assert r.returncode == 1 and "stripe_link_test" in r.stderr, r.stderr
+        r, _ = run_build(tmp_path, "y", DT_SITE_TOML=toml, DT_ALLOW_PLACEHOLDERS="1", DT_ALLOW_LOCAL_API="1",
+                         DT_ALLOW_NO_STRIPE_LINK="1")
         assert r.returncode == 0, r.stderr
+        assert r.stderr.count("WARNING") == 3
     finally:
         os.remove(priv)
 
