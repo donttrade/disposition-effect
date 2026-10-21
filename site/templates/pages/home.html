@@ -4,17 +4,86 @@
 {%- set ev = evidence %}
 <div class="wrap">
   {%- if flags.trader_first_home %}
-  <section class="section" aria-labelledby="hero" data-requires-flag="paid_report">
+  {#- Trader-first home (paid_report only; Tester D5). Prices from prices.json. No study finding
+      on this page, so none can sit next to an offer. #}
+  <div data-requires-flag="paid_report">
+  <section class="hero" aria-labelledby="hero">
     <div class="grid">
       <div class="span-7">
         <h1 id="hero">See where your trades leave your plan.</h1>
-        <p>A habit report built from your own trade history. It measures behaviour, like holding losers longer than winners. It doesn't tell you what to trade.</p>
-        <p><a class="btn" href="/pricing/#traders">Get the habit report — {{ r.price_usd|usd }}</a> <a class="btn btn-secondary" href="/tools/trade-stats/">Free trade stats</a></p>
-        <p class="small muted">One-time price. Not investment advice.</p>
-        <p><a href="/for-firms/">For firms: measure the gap between your traders’ plans and their trades</a></p>
+        <p class="lede">A habit report built from your own trade history. It measures behaviour, like holding losing trades longer than winning ones, and tests whether each pattern is more than noise. It doesn’t tell you what to trade.</p>
+        <p class="btn-row"><a class="btn" href="/pricing/#traders">Get the habit report — {{ r.price_usd|usd }}</a> <a class="btn btn-secondary" href="/tools/trade-stats/">Free trade stats</a></p>
+        <p class="small">{{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers. One time, in US dollars, with one free re-test 30 to 60 days later. A full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying.</p>
+        <p class="small muted">Not investment advice. <a href="/pricing/#before-you-pay">Before you pay</a></p>
       </div>
+      <figure class="span-5 hero-shot">
+        <picture>
+          <source srcset="/static/img/hero-trade-stats-dark.webp" media="(prefers-color-scheme: dark)" type="image/webp">
+          <img src="/static/img/hero-trade-stats-light.webp" width="1044" height="918"
+               alt="The free trade-stats dashboard on the synthetic sample file: 160 closed trades, a net result of plus 277.95 US dollars, win rate 51.9%, profit factor 1.14, and an equity and drawdown chart.">
+        </picture>
+        <figcaption>The free <a href="/tools/trade-stats/">trade-stats dashboard</a>, run on its synthetic sample file. Sample data, not a real trader.</figcaption>
+      </figure>
     </div>
   </section>
+
+  <section class="section" aria-labelledby="t-measure-h">
+    <h2 id="t-measure-h">What the report measures</h2>
+    <p>Five habits, each measured in your own closed trades.</p>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="The five habits">
+    <table>
+      <thead><tr><th scope="col">Habit</th><th scope="col">The question about your own trades</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Hold gap</th><td>Did you hold losing trades longer than winning ones?</td></tr>
+        <tr><th scope="row">Re-entry after a loss</th><td>Did trades opened within 15 minutes of a loss turn out differently from the rest?</td></tr>
+        <tr><th scope="row">Size after a loss</th><td>Was the trade after a loss larger than the trade after a win?</td></tr>
+        <tr><th scope="row">Trading after a losing run</th><td>Did trades after two or more losses in a row turn out differently?</td></tr>
+        <tr><th scope="row">Unusually large losses</th><td>How many losses were more than twice your typical loss, and what share of your losses they made up (described, not tested)</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>Each tested habit gets one of three results: “distinguishable from noise”, “may be noise”, or “not enough trades to tell” when either group has fewer than 30 trades. Dollar figures are historical totals from your file, such as “trades matching this pattern totalled −$X”. They describe what happened; they do not show that a habit caused a result.</p>
+  </section>
+
+  <section class="section" aria-labelledby="t-how-h">
+    <h2 id="t-how-h">How it works</h2>
+    <ol class="steps">
+      <li><strong>Export your history.</strong> A MetaTrader 5 or 4 report, an IBKR Flex Query or a Tradovate orders export (all three in beta), or the donttrade CSV template.</li>
+      <li><strong>Your browser reads it.</strong> It removes names, account numbers and symbols, and sends our server only stripped trade numbers, which are not stored.</li>
+      <li><strong>Read your report.</strong> Run the free re-test on the same account 30 to 60 days later.</li>
+    </ol>
+    <p><a href="/privacy/#report">Exactly what is sent and kept</a></p>
+  </section>
+
+  <section class="section" aria-labelledby="tools-h">
+    <h2 id="tools-h">Free tools. No account.</h2>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Free tools">
+    <table class="tool-list">
+      <thead><tr><th scope="col">Tool</th><th scope="col">The question it answers</th><th scope="col">What you give it</th></tr></thead>
+      <tbody>
+      {%- for t in tools[:3] %}
+        <tr><th scope="row"><a href="{{ t.href }}">{{ t.name }}</a></th><td>{{ t.question }}</td><td>{{ t.input }}</td></tr>
+      {%- endfor %}
+      </tbody>
+    </table>
+    </div>
+    <p><a href="/tools/">All free tools</a></p>
+  </section>
+
+  <section class="section" aria-labelledby="faq-h">
+    <h2 id="faq-h">Questions</h2>
+    <details><summary>Is this advice?</summary><p>No. It describes your own past trades. It does not tell you what to trade, how much, or when to exit.</p></details>
+    <details><summary>Where does my trade file go?</summary><p>The file stays in your browser. For the report, your browser sends only stripped trade numbers: open and close times without the date, buy or sell, relative size, the result and a random symbol number. They are not stored. The free tools send nothing at all.</p></details>
+    <details><summary>What does the re-test do?</summary><p>It runs the same report on a newer export of the same account, 30 to 60 days after your first report, so you can compare the two. It is included in the price.</p></details>
+    <details><summary>Refunds?</summary><p>A full refund if you ask by email within {{ prices.rules.trader_refund_days }} days of buying, even after your report has run. <a href="/terms/#traders">Trader terms</a></p></details>
+  </section>
+
+  <section class="section closing" aria-labelledby="close-h">
+    <h2 id="close-h">At a trading firm?</h2>
+    <p>We measure the gap between your traders’ plans and their trades, at a fixed price published before you ask. <a href="/for-firms/">What firms get</a></p>
+  </section>
+  {% include "partials/disclaimer.html" %}
+  </div>
   {%- else %}
   {#- 1. Hero, 7/5: firm copy left, the real free dashboard right. No firm prices on the home page. #}
   <section class="hero" aria-labelledby="hero">
