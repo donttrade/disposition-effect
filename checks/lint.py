@@ -61,8 +61,16 @@ TALLY = re.compile(r"(?<![A-Za-z0-9])tally(?![A-Za-z0-9])", re.IGNORECASE)
 
 def tally_mentions(html, where):
     """B1: Tally is no longer used (the forms are Web3Forms), so the word may not appear anywhere
-    in a page, visible or not, including tally.so links."""
-    return [("tally", where, html[max(0, m.start() - 30):m.end() + 30].replace("\n", " ")) for m in TALLY.finditer(html)]
+    in a page, visible or not, including tally.so links: checked in the raw HTML, in the readable
+    text and in every decoded, percent-decoded URL attribute (NIT 1)."""
+    from urllib.parse import unquote
+    p = _parse(html)
+    found = [m.group(0) for m in TALLY.finditer(html)]
+    for v in p.urls:
+        found += [m.group(0) for m in TALLY.finditer(normalise(unquote(v)))]
+    found += [m.group(0) for m in TALLY.finditer(normalise("".join(p.text) + " " + " ".join(p.attrs)))]
+    found += [m.group(0) for m in TALLY.finditer(meta_text(html))]
+    return [("tally", where, f"“{w}”") for w in dict.fromkeys(found)][:1] if found else []
 
 
 def restore_email_claims(text, where):
@@ -73,33 +81,118 @@ def restore_email_claims(text, where):
     return [("claim:restore_email", where, m.group(0)) for rx in RESTORE_EMAIL for m in rx.finditer(text)]
 
 
+_JS_ESC = re.compile(r"\\(?:x([0-9A-Fa-f]{2})|u\{([0-9A-Fa-f]{1,6})\}|u([0-9A-Fa-f]{4})|(.))", re.S)
+_JS_SIMPLE = {"n": "\n", "t": "\t", "r": "\r", "b": "", "f": "", "v": "", "0": "", "\n": ""}
+
+
+def _js_unescape(body):
+    def one(m):
+        code = m.group(1) or m.group(2) or m.group(3)
+        if code:
+            return chr(int(code, 16))
+        c = m.group(4)
+        return _JS_SIMPLE.get(c, c)
+    return _JS_ESC.sub(one, body)
+
+
 def js_strings(code):
-    """The string literals of a script (comments dropped): the text a script can put on a page."""
+    """The string literals of a script (comments dropped), with JS escapes decoded (\\x65,
+    \\u0065, \\u{65}): the text a script can put on a page. In a template literal a ${'…'} or
+    ${"…"} part is replaced by its text and any other ${…} part is dropped (NIT 1)."""
     out = []
     for m in re.finditer(r"//[^\n]*|/\*.*?\*/|'(?:[^'\\\n]|\\.)*'|\"(?:[^\"\\\n]|\\.)*\"|`(?:[^`\\]|\\.)*`", code, re.S):
         tok = m.group(0)
-        if tok[0] in "'\"`":
-            out.append(tok[1:-1])
-    return "\n".join(out)
+        if tok[0] in "'\"":
+            out.append(_js_unescape(tok[1:-1]))
+        elif tok[0] == "`":
+            body = re.sub(r"\$\{\s*(['\"])((?:(?!\1)[^\\]|\\.)*)\1\s*\}", lambda x: x.group(2), tok[1:-1])
+            body = re.sub(r"\$\{[^}]*\}", "", body)
+            out.append(_js_unescape(body))
+    return normalise("\n".join(out))
+
+
+# ------------------------------------------------------------------ text a person can read (NIT 1)
+# The page is parsed (html.parser decodes every entity), so a banned word cannot hide behind an
+# entity, a tag inside the word (Ta<span>lly</span>, <wbr>, an empty <b></b>, a comment), an
+# invisible character (zero-width, soft hyphen: Unicode Cf, stripped), a compatibility form
+# (full-width letters, NBSP: NFKC), a Cyrillic or Greek look-alike letter (folded to Latin) or
+# a single-quoted attribute. Inline elements join their text; every other element is a break.
+INLINE = frozenset("a abbr b bdi bdo cite code data del dfn em font i ins kbd mark nobr q s samp small span "
+                   "strong sub sup time tt u var wbr".split())
+READ_ATTRS = ("alt", "title", "aria-label", "placeholder", "aria-description")
+META_NAMES = re.compile(r"description|og:[\w:]+|twitter:[\w:]+", re.I)
+CONFUSABLES = str.maketrans("АВЕКМНОРСТХаеорсухіјѕԁԛԝΑΒΕΖΗΙΚΜΝΟΡΤΥΧαοντ",
+                            "ABEKMHOPCTXaeopcyxijsdqwABEZHIKMNOPTYXaovt")
+
+
+def normalise(text):
+    """Cf characters removed, NFKC, Cyrillic/Greek look-alikes folded to Latin."""
+    import unicodedata
+    text = "".join(ch for ch in text if unicodedata.category(ch) != "Cf")
+    return unicodedata.normalize("NFKC", text).translate(CONFUSABLES)
+
+
+def _parse(html):
+    """{text, attrs, meta, ld, urls}: the readable parts of a page, already decoded."""
+    from html.parser import HTMLParser
+
+    class P(HTMLParser):
+        def __init__(self):
+            super().__init__(convert_charrefs=True)
+            self.text, self.attrs, self.meta, self.ld, self.urls = [], [], [], [], []
+            self.skip = None   # inside <script>/<style>: (tag, is_ld)
+
+        def handle_starttag(self, tag, attrs):
+            a = {k.lower(): (v or "") for k, v in attrs}
+            for k, v in a.items():
+                if k in READ_ATTRS:
+                    self.attrs.append(v)
+                if k in ("href", "src", "action", "content", "srcset", "formaction", "data"):
+                    self.urls.append(v)
+            if tag == "meta" and META_NAMES.fullmatch(a.get("name") or a.get("property") or ""):
+                self.meta.append(a.get("content", ""))
+            if tag in ("script", "style"):
+                self.skip = (tag, tag == "script" and a.get("type", "").lower() == "application/ld+json")
+                self._buf = []
+                return
+            if tag not in INLINE:
+                self.text.append(" ")
+
+        handle_startendtag = handle_starttag
+
+        def handle_endtag(self, tag):
+            if self.skip and tag == self.skip[0]:
+                if self.skip[1]:
+                    self.ld.append("".join(self._buf))
+                self.skip = None
+                return
+            if tag not in INLINE:
+                self.text.append(" ")
+
+        def handle_data(self, data):
+            if self.skip:
+                self._buf.append(data)
+            else:
+                self.text.append(data)
+
+    p = P()
+    p.feed(html)
+    p.close()
+    return p
 
 
 def visible_text(html):
-    html = re.sub(r"(?is)<(script|style)\b.*?</\1>", " ", html)
-    html = re.sub(r"(?s)<!--.*?-->", " ", html)
-    # attribute text people read: alt, title, aria-label, placeholder, content of description
-    attrs = " ".join(re.findall(r'(?:alt|title|aria-label|placeholder)="([^"]*)"', html))
-    text = re.sub(r"<[^>]+>", " ", html)
-    import html as _h
-    return _h.unescape(text + " " + attrs)
+    """The page text plus alt/title/aria-label/placeholder, decoded and normalised."""
+    p = _parse(html)
+    return normalise("".join(p.text) + " " + " ".join(p.attrs))
 
 
 def meta_text(html):
     """Text that search engines and link previews show: <meta> description/og/twitter content
-    and every string value in JSON-LD blocks."""
-    import html as _h
-    parts = [m.group(1) for m in re.finditer(r'(?is)<meta\b[^>]*\b(?:name|property)=["\'](?:description|og:[\w:]+|twitter:[\w:]+)["\'][^>]*?\bcontent=["\']([^"\']*)', html)]
-    parts += [m.group(1) for m in re.finditer(r'(?is)<meta\b[^>]*\bcontent=["\']([^"\']*)["\'][^>]*\b(?:name|property)=["\'](?:description|og:[\w:]+|twitter:[\w:]+)["\']', html)]
-    for block in re.findall(r'(?is)<script\b[^>]*type=["\']application/ld\+json["\'][^>]*>(.*?)</script>', html):
+    and every string value in JSON-LD blocks, decoded and normalised."""
+    p = _parse(html)
+    parts = list(p.meta)
+    for block in p.ld:
         try:
             data = json.loads(block)
         except ValueError:
@@ -114,7 +207,8 @@ def meta_text(html):
                 stack.extend(x.values())
             elif isinstance(x, list):
                 stack.extend(x)
-    return _h.unescape("\n".join(parts))
+    import html as _h
+    return normalise(_h.unescape("\n".join(parts)))
 
 
 def readable_text(html):
@@ -170,7 +264,7 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
     """commerce: True when the seller block may appear (build.show_seller); defaults to paid or pilot."""
     commerce = (paid or pilot) if commerce is None else commerce
     french = bool(re.search(r'<html lang="fr', html))
-    out = lint_text(visible_text(html), where, paid, analytics, english=not french)
+    out = lint_text(readable_text(html), where, paid, analytics, english=not french)
     out += tally_mentions(html, where)
     if paid:
         out += not_on_sale_claims(readable_text(html), where)
@@ -199,7 +293,7 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
         if "data-seller-block" in html:
             out.append(("flag:seller_block", where, "seller disclosure markup with every commerce flag off"))
     if french:
-        out += lint_text_fr(visible_text(strip_disclaimers(html)), where)
+        out += lint_text_fr(readable_text(strip_disclaimers(html)), where)
     if analytics is False and "cloudflareinsights" in html:
         out.append(("flag:beacon", where, "analytics beacon with analytics = false"))
     return out
@@ -210,7 +304,7 @@ def passthrough_rules(html, where, analytics, paid=False):
     steps 28–29, which lift the study pages word for word): upload/analytics claims, the old
     regular-price wording and retired amounts, Tally."""
     out = []
-    text = visible_text(html)
+    text = readable_text(html)
     for c in RULES["claims"]["no_upload"]:
         if _phrase_re(c).search(text):
             out.append(("claim:no_upload", where, c))
