@@ -522,3 +522,26 @@ def test_nit7_welcome_without_a_session_shows_no_retry_button(browser, paid_site
     msg = page.inner_text("#w-error")
     ctx.close()
     assert not visible and "No checkout was found" in msg and requests == []
+
+
+# ------------------------------------------------------------------ NIT 3, 4: site.toml shape errors are BUILD FAILED lines
+def _toml_edit(tmp, sub, repl, **flags):
+    from test_legal import toml_with
+    p = toml_with(tmp, "edited.toml", **flags)
+    src = open(p, encoding="utf-8").read()
+    new, n = re.subn(sub, repl, src, flags=re.M)
+    assert n, sub
+    open(p, "w", encoding="utf-8").write(new)
+    return p
+
+
+@pytest.mark.parametrize("sub,repl,flags,expect", [
+    (r"^\[flags\]\n(?:[a-z_]+ = .*\n)+", "", {}, "no [flags] table"),                                     # NIT 3
+    (r'^api_base = .*\n', "", {"paid_report": True, "trader_first_home": True}, "[worker] api_base is missing"),  # NIT 3
+    (r"^show_seller_for_pilot = false", "show_seller_for_pilt = true", {}, "show_seller_for_pilt is not a known key"),  # NIT 4
+    (r"^\[stripe\]\n", "[stripe]\nmdoe = \"live\"\n", {}, "mdoe is not a known key"),
+])
+def test_nit3_nit4_site_toml_shape_errors_fail_cleanly(tmp_path, sub, repl, flags, expect):
+    from test_legal import build
+    r, _ = build(tmp_path, "o", DT_SITE_TOML=_toml_edit(tmp_path, sub, repl, **flags))
+    assert r.returncode == 1 and "BUILD FAILED" in r.stderr and expect in r.stderr and "Traceback" not in r.stderr, r.stderr
