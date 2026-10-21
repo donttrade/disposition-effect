@@ -13,6 +13,7 @@ REPO = os.path.dirname(HERE)
 sys.path.insert(0, os.path.join(REPO, "checks"))
 from a11y import axe_violations, horizontal_overflow  # noqa: E402
 import lint as L  # noqa: E402
+from test_legal import FAKE, FAKE_TEST_LINK, paid_env  # noqa: E402
 
 EXAMPLE = os.path.join(REPO, "site/config/private.example.toml")
 
@@ -43,8 +44,9 @@ class Quiet(http.server.SimpleHTTPRequestHandler):
 @pytest.fixture(scope="module")
 def paid_site(tmp_path_factory):
     tmp = tmp_path_factory.mktemp("commerce")
-    r, out = build(tmp, "on", DT_SITE_TOML=flag_toml(tmp), DT_PRIVATE_TOML=EXAMPLE, DT_ALLOW_PLACEHOLDERS="1")
+    r, out = build(tmp, "on", **paid_env(tmp))  # well-formed fake values: no escape variable (D10)
     assert r.returncode == 0, r.stderr
+    assert "WARNING" not in r.stderr
     srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(Quiet, directory=str(out)))
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     yield {"out": out, "url": f"http://127.0.0.1:{srv.server_address[1]}"}
@@ -64,7 +66,7 @@ def test_before_you_pay_has_every_l1_item(paid_site):
     html = (paid_site["out"] / "pricing/index.html").read_text()
     for item in ["Seller", "Business address", "Phone", "Email", "Technical requirements", "No sales tax is charged",
                  "currency conversion fee", "Card, through Stripe", "Right after payment", "re-test", "20,000 trades",
-                 "Refunds", "$39 USD", "[SELLER — lawyer to confirm]", "[PHONE — pending]"]:
+                 "Refunds", "$39 USD", FAKE["seller_legal_name"], FAKE["phone"]]:
         assert item in html, item
     for pid in ["firms", "copy-leader", "claims-test", "platforms", "traders", "researchers", "payment", "refunds",
                 "history", "questions"]:
@@ -104,21 +106,6 @@ def test_pricing_tabs_axe_and_keyboard(browser, paid_site, color):
     ctx.close()
 
 
-def test_stripe_link_comes_from_prices_json(tmp_path):
-    import json
-    import shutil
-    prices = os.path.join(REPO, "site/config/prices.json")
-    backup = tmp_path / "prices.bak"
-    shutil.copyfile(prices, backup)
-    try:
-        d = json.load(open(prices))
-        for p in d["products"]:
-            if p["id"] == "report39":
-                p["stripe_link_test"] = "https://buy.stripe.com/test_00000000000000"
-        json.dump(d, open(prices, "w"), indent=2)
-        r, out = build(tmp_path, "s", DT_SITE_TOML=flag_toml(tmp_path), DT_PRIVATE_TOML=EXAMPLE, DT_ALLOW_PLACEHOLDERS="1")
-        assert r.returncode == 0, r.stderr
-        html = (out / "pricing/index.html").read_text()
-        assert 'href="https://buy.stripe.com/test_00000000000000"' in html and "Test mode" in html
-    finally:
-        shutil.copyfile(backup, prices)
+def test_stripe_link_comes_from_prices_json(paid_site):
+    html = (paid_site["out"] / "pricing/index.html").read_text()
+    assert f'href="{FAKE_TEST_LINK}"' in html and "Test mode" in html and "Payment link not set yet" not in html

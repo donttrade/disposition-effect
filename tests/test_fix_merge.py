@@ -203,3 +203,60 @@ def test_d8_paid_build_fails_and_writes_nothing_into_csp(tmp_path, api, env):
     r, out = build(tmp_path, "o", DT_SITE_TOML=toml, DT_PRIVATE_TOML=_priv(tmp_path), **env)
     assert r.returncode == 1 and "api_base" in r.stderr, r.stderr
     assert not (out / "report").exists()
+
+
+# ------------------------------------------------------------------ D10: escapes split; a well-formed paid build needs none
+def test_d10_well_formed_paid_build_needs_no_escape(tmp_path):
+    from test_legal import FAKE_API, FAKE_TEST_LINK, paid_env
+    out = tmp_path / "o"
+    env = {k: v for k, v in os.environ.items() if not k.startswith("DT_")}  # no escape from the caller's shell
+    r = subprocess.run([sys.executable, os.path.join(REPO, "site", "build.py")],
+                       env={**env, **paid_env(tmp_path), "DT_OUT": str(out)}, capture_output=True, text=True)
+    assert r.returncode == 0 and "WARNING" not in r.stderr, r.stderr
+    pricing = (out / "pricing" / "index.html").read_text(encoding="utf-8")
+    assert FAKE_TEST_LINK in pricing and "Payment link not set yet" not in pricing
+    assert f'content="{FAKE_API}"' in (out / "report" / "index.html").read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("escape,still_fails_on", [
+    ("DT_ALLOW_PLACEHOLDERS", "api_base"),        # placeholders allowed, the local api is not
+    ("DT_ALLOW_LOCAL_API", "placeholder"),        # the local api allowed, placeholders are not
+    ("DT_ALLOW_NO_STRIPE_LINK", "placeholder"),
+])
+def test_d10_each_escape_opens_one_guard_only(tmp_path, escape, still_fails_on):
+    # repro: before the fix DT_ALLOW_PLACEHOLDERS=1 also allowed http://127.0.0.1 and the missing Stripe link
+    from test_legal import build, toml_with
+    toml = toml_with(tmp_path, paid_report=True, trader_first_home=True)  # committed api_base: http://127.0.0.1:8787
+    priv = os.path.join(REPO, "site", "config", "private.example.toml")   # placeholders
+    r, _ = build(tmp_path, "o", DT_SITE_TOML=toml, DT_PRIVATE_TOML=priv, **{escape: "1"})
+    assert r.returncode == 1 and still_fails_on in r.stderr, r.stderr
+
+
+def test_d10_missing_link_needs_its_own_escape(tmp_path):
+    from test_legal import FAKE_API, build, private_with, toml_with
+    toml = toml_with(tmp_path, api=FAKE_API, paid_report=True, trader_first_home=True)
+    r, _ = build(tmp_path, "o", DT_SITE_TOML=toml, DT_PRIVATE_TOML=private_with(tmp_path), DT_ALLOW_PLACEHOLDERS="1",
+                 DT_ALLOW_LOCAL_API="1")
+    assert r.returncode == 1 and "stripe_link_test" in r.stderr
+    r, out = build(tmp_path, "p", DT_SITE_TOML=toml, DT_PRIVATE_TOML=private_with(tmp_path), DT_ALLOW_NO_STRIPE_LINK="1")
+    assert r.returncode == 0 and "WARNING: DT_ALLOW_NO_STRIPE_LINK=1" in r.stderr, r.stderr
+
+
+@pytest.mark.parametrize("link", ["https://buy.stripe.com/eVq6oGgLl1d04hmfMqdwc00",   # a live link in test mode
+                                  "http://buy.stripe.com/test_abcdefgh", "https://buy.stripe.com.evil.ca/test_abcdefgh",
+                                  "https://buy.stripe.com/test_abc def", "javascript:alert(1)"])
+def test_d10_malformed_test_link_fails(tmp_path, link):
+    from test_legal import build, paid_env, prices_with_test_link
+    env = paid_env(tmp_path)
+    env["DT_PRICES_JSON"] = prices_with_test_link(tmp_path, link)
+    r, _ = build(tmp_path, "o", **env)
+    assert r.returncode == 1 and "Payment Link" in r.stderr, r.stderr
+
+
+def test_d10_escapes_refused_in_live_mode(tmp_path):
+    from test_legal import build, paid_env
+    env = paid_env(tmp_path)
+    src = open(env["DT_SITE_TOML"], encoding="utf-8").read().replace('mode = "test"', 'mode = "live"')
+    open(env["DT_SITE_TOML"], "w", encoding="utf-8").write(src)
+    r, _ = build(tmp_path, "o", **env, DT_ALLOW_PLACEHOLDERS="1")
+    assert r.returncode == 1 and "live" in r.stderr, r.stderr

@@ -18,10 +18,14 @@ Environment:
   DT_DEV=1                 also build site/dev/ (styleguide, sniffer) into _site/dev/
   DT_SITE_TOML=path        use another site.toml (test builds with flags on)
   DT_OUT=path              write somewhere other than site/_site
-  DT_ALLOW_PLACEHOLDERS=1  allow private.toml placeholders (local test mode only)
   DT_BASELINE=path         use another URL baseline (tests plant a missing URL this way)
   DT_PRIVATE_TOML=path     read private.toml from elsewhere (flag-on test builds)
-  DT_ALLOW_LOCAL_API=1     allow a loopback http [worker] api_base in a paid build (local test mode only)
+  DT_PRICES_JSON=path      read prices.json from elsewhere (test builds plant a test link)
+Local-test escapes (ESCAPES): each opens ONE guard, prints a WARNING, and is refused when
+[stripe] mode = "live". A paid build with well-formed values needs none of them.
+  DT_ALLOW_PLACEHOLDERS=1    allow private.toml values that look like placeholders
+  DT_ALLOW_LOCAL_API=1       allow a loopback http [worker] api_base
+  DT_ALLOW_NO_STRIPE_LINK=1  allow a paid build without the report39 Payment Link
 """
 
 import json
@@ -75,7 +79,6 @@ def placeholder_reason(value):
 def check_private(private, on):
     """Seller fields (O. Reg. 17/05 s. 32) must be real text under either commerce flag. The
     placeholder check alone can be skipped with DT_ALLOW_PLACEHOLDERS=1 (local test builds)."""
-    allow = os.environ.get("DT_ALLOW_PLACEHOLDERS") == "1"
     for k in PRIVATE_FIELDS:
         v = private.get(k)
         if not isinstance(v, str) or not INVISIBLE.sub("", v):
@@ -85,7 +88,7 @@ def check_private(private, on):
             why = "a phone number needs at least 7 digits"
         if k == "phone" and not why and not re.fullmatch(r"[0-9+()./ \-]+(?:\s*(?:ext\.?|x)\s*\d+)?", v.strip(), re.IGNORECASE):
             why = "a phone number may hold only digits, spaces and + ( ) - . /"
-        if why and not allow:
+        if why and not escape("DT_ALLOW_PLACEHOLDERS"):
             die(f"private.toml {k} still looks like a placeholder: {why}. Fill it in "
                 "(or set DT_ALLOW_PLACEHOLDERS=1 for a local test build only)")
 
@@ -430,8 +433,7 @@ def check_api_base(api):
     why = api_base_problem(api)
     if why is None:
         return
-    if os.environ.get("DT_ALLOW_LOCAL_API") == "1" and isinstance(api, str) and LOCAL_API_RE.fullmatch(api):
-        warn(f"DT_ALLOW_LOCAL_API=1: api_base {api} is a local test address; this build is not for publishing")
+    if isinstance(api, str) and LOCAL_API_RE.fullmatch(api) and escape("DT_ALLOW_LOCAL_API"):
         return
     die(f"paid_report = true but [worker] api_base is {api!r}: {why} "
         "(a loopback http address only with DT_ALLOW_LOCAL_API=1, for local test builds)")
@@ -441,10 +443,44 @@ def warn(msg):
     print(f"WARNING: {msg}", file=sys.stderr)
 
 
+# D10: each local-test escape opens exactly one guard. None of them is needed for a paid build
+# with well-formed values, and none is accepted in a [stripe] mode = "live" build.
+ESCAPES = {
+    "DT_ALLOW_PLACEHOLDERS": "private.toml values that look like placeholders",
+    "DT_ALLOW_LOCAL_API": "a loopback http [worker] api_base",
+    "DT_ALLOW_NO_STRIPE_LINK": "no Stripe Payment Link for the habit report",
+}
+# Stripe Payment Links: https://buy.stripe.com/<id>; test-mode links carry "test_" (UNVERIFIED
+# beyond the links seen so far; a link that differs fails loudly and this pattern is the place to fix).
+STRIPE_LINK_RE = {"live": re.compile(r"https://buy\.stripe\.com/(?!test_)[A-Za-z0-9]{8,64}"),
+                  "test": re.compile(r"https://buy\.stripe\.com/test_[A-Za-z0-9]{8,64}")}
+
+
+_warned = set()
+
+
+def escape(name):
+    """True when the local-test escape `name` is set; says so once per build on stderr."""
+    on = os.environ.get(name) == "1"
+    if on and name not in _warned:
+        _warned.add(name)
+        warn(f"{name}=1 allows {ESCAPES[name]}: a local test build, not for publishing")
+    return on
+
+
+def check_stripe_link(link, mode, what):
+    if not isinstance(link, str) or not STRIPE_LINK_RE[mode].fullmatch(link):
+        die(f"{what}: {link!r} is not a Stripe {mode}-mode Payment Link (https://buy.stripe.com/"
+            f"{'test_' if mode == 'test' else ''}…)")
+
+
 def load_config():
     toml_path = os.environ.get("DT_SITE_TOML") or os.path.join(SITE, "config", "site.toml")
     cfg = read_toml(toml_path, "site.toml")
-    with open(os.path.join(SITE, "config", "prices.json"), encoding="utf-8") as f:
+    # DT_PRICES_JSON: another prices file (test builds plant a well-formed test link this way,
+    # instead of editing the committed one). It is an input, not an escape: every check applies.
+    prices_path = os.environ.get("DT_PRICES_JSON") or os.path.join(SITE, "config", "prices.json")
+    with open(prices_path, encoding="utf-8") as f:
         prices = json.load(f)
     flags = cfg["flags"]
     check_flags(flags, toml_path)
@@ -453,6 +489,13 @@ def load_config():
             f"paid_report={flags['paid_report']} ({toml_path})")
     if flags["analytics"] and not cfg["analytics"]["cf_beacon_token"]:
         die("analytics = true but [analytics] cf_beacon_token is empty")
+    mode = cfg["stripe"]["mode"]
+    if mode not in ("test", "live"):
+        die(f"[stripe] mode must be test or live, not {mode!r}")
+    if mode == "live":
+        for name in ESCAPES:
+            if os.environ.get(name) == "1":
+                die(f"{name}=1 is for local test builds only; [stripe] mode = \"live\" refuses it")
     private = {}
     on = [f for f in COMMERCE_FLAGS if flags[f]]
     if on:
@@ -465,18 +508,18 @@ def load_config():
         check_private(private, on)
     if flags["paid_report"]:
         check_api_base(cfg["worker"]["api_base"])
+    products = {p["id"]: p for p in prices["products"]}
     if flags["pilot_checkout"]:
-        pilot = next(p for p in prices["products"] if p["id"] == "pilot")
-        if not pilot["stripe_link_live"]:
+        if not products["pilot"]["stripe_link_live"]:
             die("pilot_checkout = true but prices.json has no stripe_link_live for the pilot")
+        check_stripe_link(products["pilot"]["stripe_link_live"], "live", "prices.json pilot stripe_link_live")
     if flags["paid_report"]:
-        mode = cfg["stripe"]["mode"]
-        if mode not in ("test", "live"):
-            die(f"[stripe] mode must be test or live, not {mode!r}")
-        for p in prices["products"]:
-            if p["requires_flag"] == "paid_report" and p["id"] == "report39":
-                if not p["stripe_link_" + mode] and os.environ.get("DT_ALLOW_PLACEHOLDERS") != "1":
-                    die(f"paid_report = true but prices.json has no stripe_link_{mode} for report39")
+        link = products["report39"]["stripe_link_" + mode]
+        if link:
+            check_stripe_link(link, mode, f"prices.json report39 stripe_link_{mode}")
+        elif not escape("DT_ALLOW_NO_STRIPE_LINK"):
+            die(f"paid_report = true but prices.json has no stripe_link_{mode} for report39 "
+                "(DT_ALLOW_NO_STRIPE_LINK=1 for a local test build only)")
     return cfg, prices, private
 
 
