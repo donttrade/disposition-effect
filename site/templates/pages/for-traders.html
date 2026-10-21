@@ -96,7 +96,7 @@
     <details><summary>When does it launch?</summary><p>There is no launch date yet. Everyone on the waitlist gets one email when it does.</p></details>
     <details><summary>Is anything charged when I join?</summary><p>No. Joining is free, and no card is asked for.</p></details>
     {%- endif %}
-    <details><summary>What can I use today?</summary><p>The free trade-stats dashboard reads the same files and runs three real-or-noise checks, in your browser.</p></details>
+    <details><summary>What can I use today?</summary><p>The free trade-stats dashboard reads the same files and {% if flags.free_badges %}runs three real-or-noise checks{% else %}shows the core numbers: win rate, profit factor, drawdown and streaks{% endif %}, in your browser.</p></details>
   </section>
   {% include "partials/disclaimer.html" %}
   <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR and Tradovate are trademarks of their owners. donttrade is not affiliated with any of them.</p>

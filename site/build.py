@@ -260,7 +260,9 @@ PAGES += [
      "crumb": "Trade stats from your own trade file",
      "title": "Free MT5 Report Analyzer: Trade Stats From Your File",
      "description": "Drop your MT5, MT4, IBKR or Tradovate file and get profit factor, expectancy, drawdown and "
-                    "streaks, with a real-or-noise check. Runs in your browser."},
+                    "streaks. Runs in your browser.",
+     "if_badges": {"description": "Drop your MT5, MT4, IBKR or Tradovate file and get profit factor, expectancy, "
+                                  "drawdown and streaks, with a real-or-noise check. Runs in your browser."}},
     {"template": "pages/tool-prop-sim.html", "path": "/tools/prop-challenge-simulator/", "requires_flag": None,
      "modules": ["/static/js/tools/prop-sim.js"], "sample": True, "app": True, "updated": "2026-10-21",
      "crumb": "Prop-firm challenge simulator",
@@ -276,8 +278,10 @@ PAGES += [
     {"template": "pages/tools-index.html", "path": "/tools/", "requires_flag": None, "updated": "2026-10-21",
      "crumb": "Free tools", "itemlist": True,
      "title": "Free Trading Tools That Run in Your Browser",
-     "description": "Free tools for your own trades: trade stats with a real-or-noise check, a prop-firm challenge "
-                    "simulator, a lot size calculator and more. No sign-up."},
+     "description": "Free tools for your own trades: trade stats from your own file, a prop-firm challenge "
+                    "simulator, a lot size calculator and more. No sign-up.",
+     "if_badges": {"description": "Free tools for your own trades: trade stats with a real-or-noise check, a "
+                                  "prop-firm challenge simulator, a lot size calculator and more. No sign-up."}},
 ]
 
 # Audience pages (step 14). Titles ≤ 60 and descriptions ≤ 155 characters (SEO-PLAN §3.1).
@@ -382,7 +386,8 @@ PILOT_FLAG_MARKER = 'data-requires-flag="pilot_checkout"'
 # The /tools/ index rows: tool, the question it answers, input, Open (plan step 12).
 TOOLS = [
     {"name": "Trade stats", "href": "/tools/trade-stats/",
-     "question": "What does my own trade history show, and which numbers are more than noise?",
+     "question": "What does my own trade history show?",
+     "question_if_badges": "What does my own trade history show, and which numbers are more than noise?",
      "input": "Your trade file"},
     {"name": "Prop-firm challenge simulator", "href": "/tools/prop-challenge-simulator/",
      "question": "How would my past trading days have fared under a challenge’s rules?",
@@ -397,6 +402,14 @@ TOOLS = [
      "question": "What are one cohort’s evaluation pass rate and payout rate?",
      "input": "Cohort counts"},
 ]
+
+
+def tools_for(flags):
+    """TOOLS with each row's question for this build (C1: no "more than noise" without free_badges)."""
+    return [{**{k: v for k, v in t.items() if k != "question_if_badges"},
+             "question": t.get("question_if_badges", t["question"]) if flags["free_badges"] else t["question"]}
+            for t in TOOLS]
+
 
 SAMPLE_CSV = os.path.join(SITE, "static", "samples", "demo-trades.csv")
 
@@ -649,8 +662,13 @@ def die(msg):
     raise BuildError(msg)
 
 
-FLAGS = ("paid_report", "analytics", "trader_first_home", "pilot_checkout")
-OPTIONAL_FLAGS = {"pilot_checkout": False}  # older site.toml files may lack the line
+FLAGS = ("paid_report", "analytics", "trader_first_home", "pilot_checkout", "free_badges")
+OPTIONAL_FLAGS = {"pilot_checkout": False, "free_badges": False}  # older site.toml files may lack the line
+# Free-launch condition C1 (21 Oct 2026): free_badges turns on the free tools' "real or noise"
+# badges and their footnote, which the Architect is redesigning. Off (the committed default): the
+# free tools show only the descriptive numbers, static/js/tools/trade-stats-badges.js is left out
+# of the build, and every page's copy drops the check (BADGE_COPY, the if_badges overrides).
+BADGES_JS = os.path.join("js", "tools", "trade-stats-badges.js")
 
 
 def show_seller(cfg):
@@ -1207,7 +1225,8 @@ def build():
             die(f"no-network CSP: {rel} is neither a template page nor a page in docs/")
     # 2. static assets of the new design
     copy_tree_sorted(os.path.join(SITE, "static"), os.path.join(out, "static"),
-                     skip=(None if flags["paid_report"] else (lambda rel: rel.startswith("js" + os.sep + "paid"))))
+                     skip=lambda rel: ((not flags["paid_report"] and rel.startswith("js" + os.sep + "paid"))
+                                       or (not flags["free_badges"] and rel == BADGES_JS)))
     # 3. dev pages, only on request; never bundled
     if os.environ.get("DT_DEV") == "1":
         copy_tree_sorted(os.path.join(SITE, "dev"), os.path.join(out, "dev"))
@@ -1220,7 +1239,7 @@ def build():
     base_ctx = {"site": cfg["site"], "flags": flags, "nav": cfg["nav"], "footer": cfg["footer"],
                 "legal": cfg["legal"], "forms": cfg["forms"], "analytics": cfg["analytics"],
                 "worker": cfg["worker"], "prices": prices, "products": products, "private": private,
-                "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": TOOLS,
+                "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": tools_for(flags),
                 "evidence": evidence(), "footer_privacy": footer_privacy(flags), "show_seller": show_seller(cfg),
                 "business_id_line": Markup(business_id_line(cfg, private, "legal"))}
     built = []
@@ -1231,6 +1250,8 @@ def build():
             page["scripts"] = page["scripts"] + page.get("scripts_if_paid", [])
             page["alternates"] = page.get("alternates_if_paid", page["alternates"])
             page.update(page.get("if_paid", {}))  # R5: title/description that sell instead of "waitlist"
+        if flags["free_badges"]:
+            page.update(page.get("if_badges", {}))  # C1: the copy that names the free check
         extra = {"sample_csv": sample_csv()} if page.get("sample") else {}
         if page.get("lifted"):
             extra["lifted_html"] = Markup(lifted_fragment(page["lifted"]))

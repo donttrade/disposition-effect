@@ -20,6 +20,14 @@ REPO = os.path.dirname(HERE)
 sys.path.insert(0, os.path.join(REPO, "checks"))
 import lint as L  # noqa: E402
 
+# Free-launch condition C1: the badges are off by default (site.toml free_badges = false). These
+# tests are about the badges, so this module runs on the badges build (conftest.badges_site);
+# tests/test_free_badges.py covers the default build.
+@pytest.fixture(scope="session")
+def built_site(badges_site):
+    return badges_site
+
+
 GUARD = json.load(open(os.path.join(HERE, "fixtures", "noise", "guard_vectors.json"), encoding="utf-8"))
 
 # Synthetic Reports with the server's field names (dt-private tests/fixtures/expected/*.report.json).

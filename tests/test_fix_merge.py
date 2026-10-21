@@ -546,7 +546,8 @@ def rows_file(path, trades):
 
 
 @pytest.mark.parametrize("tool,inp,done", [
-    ("/tools/trade-stats/", "#ts-file", "() => !!document.querySelector('#ts-noise table') || !document.getElementById('ts-error').hidden"),
+    # C1: #ts-noise is drawn with the results in both builds (the checks table only with free_badges)
+    ("/tools/trade-stats/", "#ts-file", "() => !!document.querySelector('#ts-noise') || !document.getElementById('ts-error').hidden"),
     ("/tools/prop-challenge-simulator/", "#ps-file", "() => /closed trades? on/.test(document.getElementById('ps-file-status').textContent) || !document.getElementById('ps-file-error').hidden"),
 ])
 def test_d7_100k_rows_keep_the_main_thread_free(browser, built_site, tmp_path, tool, inp, done):
@@ -595,7 +596,7 @@ def test_d7_html_report_still_read_on_the_page(browser, built_site):
     page = ctx.new_page()
     page.goto(built_site["url"] + "/tools/trade-stats/")
     page.set_input_files("#ts-file", os.path.join(REPO, "tests", "fixtures", "mt5", "deals_netting_40.htm"))
-    page.wait_for_selector("#ts-noise table", timeout=90000)
+    page.wait_for_selector("#ts-noise", timeout=90000)
     assert "MetaTrader 5 report" in page.inner_text("#ts-out")
     ctx.close()
 
@@ -628,10 +629,10 @@ def test_nit4_one_trade_one_day_reads_singular(browser, built_site, tmp_path):
 
 
 # ------------------------------------------------------------------ NIT 5: no losses → no "may be noise" streak label
-def test_nit5_no_losing_trades_streak_label(browser, built_site):
+def test_nit5_no_losing_trades_streak_label(browser, badges_site):   # C1: a badge test, badges build
     ctx = browser.new_context()
     page = ctx.new_page()
-    page.goto(built_site["url"] + "/tools/trade-stats/")
+    page.goto(badges_site["url"] + "/tools/trade-stats/")
     page.set_input_files("#ts-file", os.path.join(REPO, "tests", "fixtures", "generic", "no_losses.csv"))
     page.wait_for_selector("#ts-noise table", timeout=90000)
     row = page.inner_text('[data-check="longest_losing_streak"]')
