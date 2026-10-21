@@ -323,7 +323,7 @@ ORACLES["generic_roundtrip/tv2_dst_fall.csv"] = {
     # Same night, round-trip layout: close 01:10 < open 01:50, both in the fall-back night, so the
     # close is the repeated hour (02:10 in naive time): hold 1200 s, long, 4 points. Flagged.
     "trades": [dict(symbol="ES", dir="long", qty=1, pnl=4.0, hold_s=1200)],
-    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_DST": 1},
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_DST": 1, "W_CLOSE_BEFORE_OPEN": 1},  # F-N3: the shift is flagged
     "skipped": {},
 }
 
@@ -409,3 +409,13 @@ for _rel in ("generic/fd3_name_shifted_into_currency.csv", "generic/fd3_three_le
         "warnings": {"W_CURRENCY_IGNORED": 0},
         "skipped": {},
     }
+
+# Tester fix round 2, F-N3 (t_misc2.py): a close 30 min before its open on the EU fall-back night
+# (2026-10-25) is read as the repeated hour (02:10 -> 03:10 naive: long, 1800 s, +1 point), but no
+# longer silently: W_CLOSE_BEFORE_OPEN says it was moved and that swapped columns or a zone without
+# daylight saving would make it wrong.
+ORACLES["generic_roundtrip/fn3_close_before_open_swapped.csv"] = {
+    "trades": [dict(symbol="AAA", dir="long", qty=1, pnl=1.0, hold_s=1800)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_DST": 1, "W_CLOSE_BEFORE_OPEN": 1},
+    "skipped": {},
+}

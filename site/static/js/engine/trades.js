@@ -392,7 +392,7 @@ export function roundtripTrades(rts, startSeq) {
     return { symbol: r.symbol, dir: r.dir, open_ts: r.open_ts, close_ts: r.close_ts,
       hold_s: Math.floor((r.close_ts - r.open_ts) / 1000), qty: r.qty, entry_vwap: r.entry, exit_vwap: r.exit,
       pnl: gross - r.fees, pnl_gross: gross, fees: r.fees, pnl_source: src, pnl_unit: r.unit, fills_n: 2,
-      currency: r.currency, _fx: null, _seq: startSeq + i };
+      currency: r.currency, _fx: null, _seq: startSeq + i, _reordered: r.reordered === true };
   });
 }
 
@@ -506,6 +506,9 @@ export function finish(fmt, verified, res, mode, tzLabel) {
   let dst = 0;
   for (const t of trades) if (spansDstNight(t.open_ts, t.close_ts)) dst++;
   if (dst) warnings.push(warning('W_DST', dst, `${dst} found.`));
+  let reordered = 0;
+  for (const t of trades) if (t._reordered) reordered++;
+  if (reordered) warnings.push(warning('W_CLOSE_BEFORE_OPEN', reordered, `${reordered} found.`));
   trades.sort((a, b) => (a.close_ts - b.close_ts) || (a.open_ts - b.open_ts) || cmpStr(a.symbol, b.symbol) || (a._seq - b._seq));
   if (!trades.length) fail('E_NO_CLOSED_TRADES', noTradesReason(openN, openAtStart, ambiguous, skipped));
   return {
