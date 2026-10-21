@@ -44,6 +44,18 @@ RESTORE_EMAIL = [re.compile(p, re.IGNORECASE) for p in RULES["claims"]["restore_
 RESTORE_EMAIL_ALLOW = [re.compile(re.escape(p), re.IGNORECASE) for p in RULES["claims"]["restore_email_allow"]]
 
 
+NOT_ON_SALE = [_phrase_re(p) for p in RULES["claims"]["not_on_sale"]]
+NOT_ON_SALE_ALLOW = [re.compile(re.escape(p), re.IGNORECASE) for p in RULES["claims"]["not_on_sale_allow"]]
+
+
+def not_on_sale_claims(text, where):
+    """R5: with paid_report on, no page may say the report is not on sale or offer the waitlist."""
+    for a in NOT_ON_SALE_ALLOW:
+        text = a.sub(lambda m: " " * len(m.group(0)), text)
+    return [("claim:not_on_sale", where, text[max(0, m.start() - 40):m.end() + 40].replace("\n", " "))
+            for rx in NOT_ON_SALE for m in rx.finditer(text)]
+
+
 TALLY = re.compile(r"(?<![A-Za-z0-9])tally(?![A-Za-z0-9])", re.IGNORECASE)
 
 
@@ -79,6 +91,36 @@ def visible_text(html):
     text = re.sub(r"<[^>]+>", " ", html)
     import html as _h
     return _h.unescape(text + " " + attrs)
+
+
+def meta_text(html):
+    """Text that search engines and link previews show: <meta> description/og/twitter content
+    and every string value in JSON-LD blocks."""
+    import html as _h
+    parts = [m.group(1) for m in re.finditer(r'(?is)<meta\b[^>]*\b(?:name|property)=["\'](?:description|og:[\w:]+|twitter:[\w:]+)["\'][^>]*?\bcontent=["\']([^"\']*)', html)]
+    parts += [m.group(1) for m in re.finditer(r'(?is)<meta\b[^>]*\bcontent=["\']([^"\']*)["\'][^>]*\b(?:name|property)=["\'](?:description|og:[\w:]+|twitter:[\w:]+)["\']', html)]
+    for block in re.findall(r'(?is)<script\b[^>]*type=["\']application/ld\+json["\'][^>]*>(.*?)</script>', html):
+        try:
+            data = json.loads(block)
+        except ValueError:
+            parts.append(block)  # not JSON: lint it as text rather than skip it
+            continue
+        stack = [data]
+        while stack:
+            x = stack.pop()
+            if isinstance(x, str):
+                parts.append(x)
+            elif isinstance(x, dict):
+                stack.extend(x.values())
+            elif isinstance(x, list):
+                stack.extend(x)
+    return _h.unescape("\n".join(parts))
+
+
+def readable_text(html):
+    """Everything a person or a search result can read on a page: visible text, alt/title/
+    aria-label/placeholder, meta and og descriptions, JSON-LD strings."""
+    return visible_text(html) + "\n" + meta_text(html)
 
 
 FR_WORDS = [(w, re.compile(r"(?<![\w])" + re.escape(w.rstrip("*")) + (r"\w*" if w.endswith("*") else r"(?![\w])"),
@@ -130,6 +172,8 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
     french = bool(re.search(r'<html lang="fr', html))
     out = lint_text(visible_text(html), where, paid, analytics, english=not french)
     out += tally_mentions(html, where)
+    if paid:
+        out += not_on_sale_claims(readable_text(html), where)
     from harvest_prices import amounts_in
     for a in amounts_in(html):
         if a not in allowed_amounts and a != 0:  # "$0" (free) is not a price
@@ -161,7 +205,7 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
     return out
 
 
-def passthrough_rules(html, where, analytics):
+def passthrough_rules(html, where, analytics, paid=False):
     """D9: the rules that must hold on passthrough pages too (the full word list waits for
     steps 28–29, which lift the study pages word for word): upload/analytics claims, the old
     regular-price wording and retired amounts, Tally."""
@@ -175,6 +219,8 @@ def passthrough_rules(html, where, analytics):
             if _phrase_re(c).search(text):
                 out.append(("claim:no_analytics", where, c))
     out += restore_email_claims(text, where)
+    if paid:
+        out += not_on_sale_claims(readable_text(html), where)
     for w in RULES["words"]["trial_cta"]:
         if _phrase_re(w).search(text):
             out.append(("banned:trial_cta", where, w))
@@ -254,9 +300,11 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None):
                 if rx.search(s):
                     problems.append(("secret", rel, rx.pattern))
             if name.endswith(".html") and rel not in owned_rel:
-                problems += passthrough_rules(s, rel, analytics)
+                problems += passthrough_rules(s, rel, analytics, paid)
             if name.endswith(".js"):
                 problems += restore_email_claims(js_strings(s), rel)
+                if paid:  # a script can put text on a paid page too
+                    problems += not_on_sale_claims(js_strings(s), rel)
             if not seller:
                 for v in priv:
                     if v and v in s:

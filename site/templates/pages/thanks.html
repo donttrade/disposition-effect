@@ -4,7 +4,11 @@
 {% block content %}
 <div class="wrap">
   <h1>Got it, thank you.</h1>
+  {%- if flags.paid_report %}
+  <p><strong>Traders:</strong> the habit report is on sale now. <a href="/pricing/#traders">Trader pricing</a></p>
+  {%- else %}
   <p><strong>Traders on the waitlist:</strong> nothing is charged. We email you once, when the trader report launches.</p>
+  {%- endif %}
   <p><strong>Firms, journals and platforms:</strong> you’ll get a reply within 1 business day from <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>. Nothing is owed until you accept a written scope.</p>
   <p class="small muted">No reply after 1 business day? Check your spam folder, then write to us.</p>
   <p><a href="/pricing/">Pricing</a> · <a href="/research/">Research</a> · <a href="/feed.xml">Atom feed</a></p>

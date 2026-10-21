@@ -255,7 +255,10 @@ PAGES += [
      "crumb": "Individual traders", "og_image": "/assets/og/traders.png", "scripts": [FORM_JS],
      "title": "Trader Habit Report: Waitlist and Founding Price",
      "description": "A habit report built from your own MT5, IBKR or Tradovate file, with a real-or-noise check "
-                    "for each habit. Coming soon; join the waitlist."},
+                    "for each habit. Coming soon; join the waitlist.",
+     "if_paid": {"title": "Trader Habit Report: Founding Price",
+                 "description": "A habit report built from your own MT5, IBKR or Tradovate file, with a "
+                                "real-or-noise check for each habit. Founding price, one free re-test."}},
     {"template": "pages/for-firms.html", "path": "/for-firms/", "requires_flag": None, "updated": "2026-10-21",
      "crumb": "Prop firms & brokers", "og_image": "/assets/og/firms.png", "scripts": [FORM_JS],
      "title": "Disposition-Effect Measurement for Prop Firms and Brokers",
@@ -269,7 +272,10 @@ PAGES += [
      "crumb": "Start here", "og_image": "/assets/og/start.png", "scripts": [FORM_JS],
      "title": "Start a Pilot, Apply to Partner or Join the Waitlist",
      "description": "Request a Pilot measurement, apply to partner as a journal or platform, or join the trader "
-                    "waitlist. A short form or an email; no calls."},
+                    "waitlist. A short form or an email; no calls.",
+     "if_paid": {"title": "Start a Pilot, Apply to Partner or Get the Habit Report",
+                 "description": "Request a Pilot measurement, apply to partner as a journal or platform, or get "
+                                "the trader habit report. A short form or an email; no calls."}},
     {"template": "pages/for-platforms.html", "path": "/for-platforms/", "requires_flag": None, "updated": "2026-10-21",
      "crumb": "Journals & platforms", "og_image": "/assets/og/platforms.png", "scripts": [FORM_JS],
      "title": "Behavioural Measurement for Trading Journals and Platforms",
@@ -280,10 +286,13 @@ PAGES += [
      "description": "Your request reached donttrade. You get a reply within 1 business day, Eastern Time, Monday to Friday."},
     {"template": "pages/trader-thanks.html", "path": "/for-traders/thanks/", "requires_flag": None, "noindex": True,
      "crumb": "Thank you", "title": "You are on the waitlist — donttrade",
-     "description": "You joined the donttrade trader waitlist. Nothing is charged; one email when the report launches."},
+     "description": "You joined the donttrade trader waitlist. Nothing is charged; one email when the report launches.",
+     "if_paid": {"title": "Thank you — donttrade",
+                 "description": "Thank you. The donttrade habit report for traders is on sale now."}},
     {"template": "pages/thanks.html", "path": "/thanks/", "requires_flag": None, "noindex": True,
      "crumb": "Thank you", "title": "Thank you — donttrade",
-     "description": "Your message reached donttrade. Firms get a reply within 1 business day; traders get one email at launch."},
+     "description": "Your message reached donttrade. Firms get a reply within 1 business day; traders get one email at launch.",
+     "if_paid": {"description": "Your message reached donttrade. Firms get a reply within 1 business day."}},
 ]
 
 # Legal pages (step 17). The French versions (/fr/…) exist only with paid_report on; the
@@ -443,6 +452,12 @@ def footer_privacy(flags):
     return " ".join(parts)
 
 
+def trader_nav_label(flags):
+    if flags["paid_report"]:
+        return "Individual traders</a>"
+    return 'Individual traders <span class="soon">coming soon</span></a>'
+
+
 # Site-wide chrome on every passthrough page (the old header and footer), fixed at build time
 # until steps 28–29 lift those pages. (old, new(flags), expected count per page; None = at
 # least once). A passthrough page whose chrome no longer matches fails the build loudly.
@@ -454,6 +469,8 @@ PASSTHROUGH_CHROME = [
     ("Firms: start a trial</a>", "Firms: start a Pilot</a>", 2),        # desktop nav + mobile menu
     (">Firms: trial</a>", ">Firms: Pilot</a>", 1),                       # mobile header button
     ('<a href="/start/">Start a trial</a>', '<a href="/start/">Start a Pilot</a>', None),  # footer (+ 404 body)
+    # R5: the old nav says the trader report is "coming soon"; with paid_report on it is sold
+    ('Individual traders <span class="soon">coming soon</span></a>', trader_nav_label, 2),  # desktop nav + mobile menu
 ]
 
 
@@ -975,6 +992,7 @@ def build():
         if flags["paid_report"]:
             page["scripts"] = page["scripts"] + page.get("scripts_if_paid", [])
             page["alternates"] = page.get("alternates_if_paid", page["alternates"])
+            page.update(page.get("if_paid", {}))  # R5: title/description that sell instead of "waitlist"
         extra = {"sample_csv": sample_csv()} if page.get("sample") else {}
         html = env.get_template(page["template"]).render(page=page, csp=csp_for(page, cfg), **base_ctx, **extra)
         if html.count(LD_MARKER) != 1:

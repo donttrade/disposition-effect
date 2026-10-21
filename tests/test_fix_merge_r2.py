@@ -307,3 +307,91 @@ def test_r4_example_placeholders_still_build_with_the_escape(tmp_path):
     r, _ = build(tmp_path, "o", DT_SITE_TOML=toml_with(tmp_path, pilot_checkout=True),
                  DT_PRIVATE_TOML=os.path.join(REPO, "site", "config", "private.example.toml"), DT_ALLOW_PLACEHOLDERS="1")
     assert r.returncode == 0 and "WARNING: DT_ALLOW_PLACEHOLDERS=1" in r.stderr, r.stderr
+
+
+# ------------------------------------------------------------------ R5: a paid build sells; nothing says "not on sale"
+@pytest.fixture(scope="module")
+def paid_site(tmp_path_factory):
+    import functools
+    import http.server
+    import threading
+    from conftest import _Quiet
+    from test_legal import build, paid_env
+    tmp = tmp_path_factory.mktemp("r2-paid")
+    r, out = build(tmp, "on", **paid_env(tmp))
+    assert r.returncode == 0, r.stderr
+    srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(_Quiet, directory=str(out)))
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    yield {"out": out, "url": f"http://127.0.0.1:{srv.server_address[1]}"}
+    srv.shutdown()
+
+
+def _html_files(out):
+    for root, _, files in os.walk(out):
+        for n in files:
+            if n.endswith(".html"):
+                fp = os.path.join(root, n)
+                yield "/" + os.path.relpath(fp, out), open(fp, encoding="utf-8").read()
+
+
+def test_r5_no_page_of_a_paid_build_says_not_on_sale(paid_site):
+    # the Tester's grep: "Not on sale yet\|Coming soon; join the waitlist\|Join the waitlist — $39", widened
+    hits = [(rel, d) for rel, h in _html_files(paid_site["out"]) for _, _, d in L.not_on_sale_claims(L.readable_text(h), rel)]
+    assert hits == []
+
+
+@pytest.mark.parametrize("path", ["/tools/trade-stats/", "/tools/lot-size-calculator/", "/tools/prop-challenge-simulator/",
+                                  "/for-traders/", "/start/", "/for-traders/thanks/"])
+def test_r5_trader_blocks_sell_in_a_paid_build(paid_site, path):
+    h = open(os.path.join(paid_site["out"], path.strip("/"), "index.html"), encoding="utf-8").read()
+    assert 'href="/pricing/#traders">Get the habit report — $39</a>' in h
+    assert 'product" value="waitlist"' not in h and 'id="wl"' not in h   # the waitlist form is gone
+    assert "/for-traders/#waitlist" not in h
+
+
+def test_r5_flag_off_build_keeps_the_waitlist(built_site):
+    for path in ("tools/trade-stats", "tools/lot-size-calculator", "tools/prop-challenge-simulator", "for-traders"):
+        h = open(os.path.join(built_site["out"], path, "index.html"), encoding="utf-8").read()
+        assert "Join the waitlist — $39 founding price" in h and "Not on sale yet" in h, path
+        assert 'data-on-sale="false"' in h or path == "for-traders"
+
+
+def test_r5_passthrough_nav_drops_coming_soon_only_when_paid(paid_site, built_site):
+    for out, soon in ((paid_site["out"], 0), (built_site["out"], 2)):
+        h = open(os.path.join(out, "about", "index.html"), encoding="utf-8").read()
+        assert h.count('Individual traders <span class="soon">coming soon</span></a>') == soon
+        assert h.count('href="/for-traders/">Individual traders') >= 2   # nav + mobile menu (+ footer)
+
+
+def test_r5_paid_metadata_and_faq_jsonld(paid_site):
+    h = open(os.path.join(paid_site["out"], "for-traders", "index.html"), encoding="utf-8").read()
+    meta = L.meta_text(h)
+    assert "waitlist" not in meta.lower() and "launch date" not in meta.lower() and "How do I buy it?" in meta
+
+
+def test_r5_tool_teaser_script_wording_follows_the_offer(browser, paid_site, built_site):
+    texts = {}
+    for name, site in (("paid", paid_site), ("off", built_site)):
+        ctx = browser.new_context()
+        page = ctx.new_page()
+        page.goto(site["url"] + TS)
+        page.click("#ts-sample-btn")
+        page.wait_for_selector("#ts-teaser:not([hidden])", timeout=60000)
+        texts[name] = page.inner_text("#ts-teaser")
+        ctx.close()
+    assert "The habit report tests five habits" in texts["paid"] and "We're building" not in texts["paid"]
+    assert "We're building a habit report" in texts["off"]
+
+
+@pytest.mark.parametrize("plant", ["<p>Not on sale yet.</p>", "<p>Join the wait&#108;ist</p>",
+                                   '<meta name="description" content="Coming soon; join the waitlist.">'])
+def test_r5_lint_fails_a_paid_build_that_says_waitlist(paid_site, tmp_path, plant):
+    import shutil
+    out = tmp_path / "site"
+    shutil.copytree(paid_site["out"], out)
+    for rel in ("tools/trade-stats/index.html", "about/index.html"):   # an owned page and a passthrough page
+        fp = out / rel
+        fp.write_text(fp.read_text(encoding="utf-8").replace("</head>", plant + "</head>", 1).replace("<main", plant + "<main", 1), encoding="utf-8")
+    problems = L.lint_build(str(out), paid=True)
+    where = {w for r, w, _ in problems if r == "claim:not_on_sale"}
+    assert {"/tools/trade-stats/", "/about/index.html"} <= where, problems

@@ -1,21 +1,33 @@
 {% extends "base.html" %}
 {% block content %}
 {%- set r = products["report39"] %}{%- set t = products["tracker79"] %}
+{%- import "partials/trader_offer.html" as offer with context %}
+{%- set sale = flags.paid_report %}
 <div class="wrap">
   <section class="section" aria-labelledby="ft-h">
     <div class="grid">
       <div class="span-7">
+        {%- if sale %}
+        <h1 id="ft-h">A habit report built from your own trade file.</h1>
+        <p class="lede">It measures behaviour in your own past trades, like holding losing trades longer than winning ones, and tests whether each pattern is more than noise. It doesn’t tell you what to trade.</p>
+        {%- else %}
         <h1 id="ft-h">A habit report built from your own trade file. Coming soon.</h1>
         <p class="lede">It will measure behaviour in your own past trades, like holding losing trades longer than winning ones, and test whether each pattern is more than noise. It will not tell you what to trade.</p>
-        <div class="notice"><strong>Not on sale yet</strong><p>There is no launch date and nothing is charged now. Join the waitlist and we email you once, when it launches.</p></div>
-        <p class="btn-row"><a class="btn" href="#waitlist">Join the waitlist — {{ r.price_usd|usd }} founding price</a> <a class="btn btn-secondary" href="/tools/trade-stats/">Try the free trade stats</a></p>
+        {%- endif %}
+        {{- offer.status() }}
+        <p class="btn-row">{{ offer.button() }} <a class="btn btn-secondary" href="/tools/trade-stats/">Try the free trade stats</a></p>
       </div>
     </div>
   </section>
 
   <section class="section" aria-labelledby="measure-h">
+    {%- if sale %}
+    <h2 id="measure-h">What it measures</h2>
+    <p>Five habits, each measured in your own closed trades.</p>
+    {%- else %}
     <h2 id="measure-h">What it is being built to measure</h2>
     <p>Five habits, each measured in your own closed trades. These describe the report as it is being built; the final list is published before anyone pays.</p>
+    {%- endif %}
     <div class="table-wrap" tabindex="0" role="region" aria-label="The five habits">
     <table>
       <thead><tr><th scope="col">Habit</th><th scope="col">The question about your own trades</th></tr></thead>
@@ -36,19 +48,27 @@
     <ul>
       <li><strong>Files:</strong> the MetaTrader 5 or 4 history report, an Interactive Brokers Flex Query, a Tradovate orders export (all three in beta until a real export confirms the columns), or the donttrade CSV template.</li>
       <li><strong>The free tools</strong> open your file in your browser. Those pages block outgoing requests, so the file is not uploaded.</li>
+      {%- if sale %}
+      <li><strong>For the paid report</strong>, your browser sends our server only stripped trade numbers: open and close times, buy or sell, relative size, the realised result and a random symbol number. No name, account number or ticker is sent, and the server does not keep the numbers. What it does keep is listed in the <a href="/privacy/#report">privacy notice</a>.</li>
+      {%- else %}
       <li><strong>For the paid report</strong>, your browser will send our server only stripped trade numbers: open and close times, buy or sell, relative size, the realised result and a random symbol number. No name, account number or ticker is sent, and the numbers are not stored. The exact list is published before launch.</li>
+      {%- endif %}
     </ul>
   </section>
 
   <section class="section" aria-labelledby="founding">
     <h2 id="founding">The founding offer</h2>
     <p>{{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers of the habit report, one time, in US dollars. It includes one re-test of the same account. A yearly habit tracker comes later, at {{ t.price_usd|usd }} a year as its founding price; it is not sold until it exists.</p>
+    {%- if sale %}
+    <p>The price, the seller’s details and the terms are in the “Before you pay” summary, shown before you pay. A full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying. <a href="/terms/#traders">Trader terms</a></p>
+    {%- else %}
     <p>Joining the waitlist is free and commits you to nothing. You see the price, the seller’s details and the terms again before paying anything. When it launches, a full refund is available if you ask within {{ prices.rules.trader_refund_days }} days of buying. <a href="/terms/#traders">Trader terms</a></p>
+    {%- endif %}
   </section>
 
   <section class="section" aria-labelledby="waitlist">
-    <h2 id="waitlist">Join the waitlist</h2>
-    {%- with heading_id = "waitlist" %}{% include "partials/form_waitlist.html" %}{% endwith %}
+    <h2 id="waitlist">{{ offer.signup_heading() }}</h2>
+    {{- offer.signup("waitlist") }}
   </section>
 
   <section class="section" aria-labelledby="free-h">
@@ -68,9 +88,14 @@
 
   <section class="section" aria-labelledby="faq-h">
     <h2 id="faq-h">Questions</h2>
-    <details><summary>Is this investment advice?</summary><p>No. It will describe your own past trades. It does not recommend any security, trade, size or exit, and past results do not predict future results.</p></details>
+    <details><summary>Is this investment advice?</summary><p>No. It {{ "describes" if sale else "will describe" }} your own past trades. It does not recommend any security, trade, size or exit, and past results do not predict future results.</p></details>
+    {%- if sale %}
+    <details><summary>How do I buy it?</summary><p>On the pricing page: read the “Before you pay” summary, then pay {{ r.price_usd|usd }} by card on Stripe’s page. The report opens in your browser right after payment.</p></details>
+    <details><summary>Can I get a refund?</summary><p>Yes. A full refund if you ask by email within {{ prices.rules.trader_refund_days }} days of buying, even if you have already run your report.</p></details>
+    {%- else %}
     <details><summary>When does it launch?</summary><p>There is no launch date yet. Everyone on the waitlist gets one email when it does.</p></details>
     <details><summary>Is anything charged when I join?</summary><p>No. Joining is free, and no card is asked for.</p></details>
+    {%- endif %}
     <details><summary>What can I use today?</summary><p>The free trade-stats dashboard reads the same files and runs three real-or-noise checks, in your browser.</p></details>
   </section>
   {% include "partials/disclaimer.html" %}
