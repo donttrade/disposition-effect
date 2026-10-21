@@ -6,7 +6,8 @@
  *     refused as a count instead of being read as 15; "1,780" and "4 2" get a clear message;
  *   - a box is checked only once it has been typed in or left, or the form is submitted:
  *     nothing is marked wrong on first load;
- *   - each refused box gets its own message next to it, and the summary below the buttons.
+ *   - each refused box gets its own message next to it, and the summary below the buttons;
+ *   - the boxes take whole numbers only, so "1,780" (the page's own example) is 1780 (launch NIT N3).
  * compute() and the results are unchanged, so the worked example gives the same figures.
  */
 (function (root) {
@@ -30,7 +31,7 @@
 
   /* Kept for the v1 API: one count on its own. */
   function parseCount(raw, allowEmpty) {
-    var c = countFrom('The count', N.readForm([raw])[0]);
+    var c = countFrom('The count', N.readForm([raw], { whole: true })[0]);
     if (c.ok && c.value === null) return allowEmpty ? c : { ok: false };
     return c.ok ? c : { ok: false, error: c.msg };
   }
@@ -120,7 +121,7 @@
 
     var update = function () {
       var raws = fields.map(function (id) { return $(id).value; });
-      var read = N.readForm(raws), vals = [], errs = [], complete = true, i;
+      var read = N.readForm(raws, { whole: true }), vals = [], errs = [], complete = true, i;
       for (i = 0; i < fields.length; i++) {
         var c = countFrom(labels[i], read[i]), msg = '';
         if (!c.ok) msg = c.msg;

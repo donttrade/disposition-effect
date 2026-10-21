@@ -11,6 +11,9 @@
  *   - a decimal comma in one input and a decimal point in another → refused.
  * One addition for typed input only: a space inside a number must group thousands ("1 780");
  * "4 2" is refused instead of read as 42. The engine strips such spaces in exported files.
+ * Whole-number boxes (readForm(raws, {whole: true}), launch NIT N3): "1,780" or a lone "1.780"
+ * can only mean 1780 there, since 1.78 is not a count, so it is read as 1780 instead of refused.
+ * The page's own example is written "1,780". The engine has no whole-number-only columns.
  * Nothing here guesses from the browser's language: the engine does not either (its golden
  * tests run under de-DE), and a person's browser language says little about how they type.
  * Pure functions; nothing is stored or sent.
@@ -80,7 +83,8 @@
      parseNumber). raws: array of strings. Returns an array of
      {ok, value, decimalComma} | {ok: false, why}, why one of
      'space', 'ambiguous_comma', 'ambiguous_dot', 'mixed', 'not_number'. */
-  function readForm(raws) {
+  function readForm(raws, opts) {
+    var whole = !!(opts && opts.whole);
     var shapes = [], i, firstComma = -1, firstDot = -1, out = [];
     for (i = 0; i < raws.length; i++) {
       shapes.push(shape(raws[i]));
@@ -96,10 +100,14 @@
       if (mixed && shapes[i] === later) { out.push({ ok: false, why: 'mixed' }); continue; }
       var s = bare(raws[i]);
       if (shapes[i] === 'dot3' || SH_DOTS_THOUSANDS.test(s)) {
-        if (style === null && shapes[i] === 'dot3') { out.push({ ok: false, why: 'ambiguous_dot' }); continue; }
+        if (style === null && shapes[i] === 'dot3') {
+          out.push(whole ? { ok: true, value: Number(s.replace('.', '')), grouped: true } : { ok: false, why: 'ambiguous_dot' });
+          continue;
+        }
         if (style === 'comma') s = s.replace(/\./g, '');
       }
       var p = parseOne(s);
+      if (!p.ok && p.why === 'ambiguous_comma' && whole) p = { ok: true, value: Number(s.replace(',', '')), grouped: true };
       if (p.ok) p.decimalComma = shapes[i] === 'comma';   // only read when the value has decimals
       out.push(p);
     }
