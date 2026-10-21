@@ -182,6 +182,8 @@ const RE_STRIP = new RegExp(WS_CLASS, 'g');
 
 // Returns a finite number, or null for an empty cell. Never guesses: a lone comma
 // followed by exactly three digits ("1,234") could be 1.234 or 1234, so it is an error.
+// Error messages name the row and column but never repeat the cell's text: a shifted
+// row can put an account or name into a number or date column (Tester D5).
 export function parseNumber(raw, row, column) {
   let s = String(raw).replace(RE_STRIP, '').replace(/−/g, '-');
   if (s === '') return null;
@@ -189,19 +191,19 @@ export function parseNumber(raw, row, column) {
   const dots = (s.match(/\./g) || []).length;
   if (commas > 0) {
     if (dots === 0 && commas === 1 && RE_SINGLE_COMMA.test(s)) {
-      if (/,\d{3}$/.test(s)) fail('E_BAD_NUMBER', `"${s}" could mean a decimal comma or a thousands separator`, row, column);
+      if (/,\d{3}$/.test(s)) fail('E_BAD_NUMBER', 'a number like 1,234 could mean a decimal comma or a thousands separator. Export it again without thousands separators.', row, column);
       s = s.replace(',', '.');
     } else if (RE_THOUSANDS_COMMA.test(s)) {
       s = s.replace(/,/g, '');
     } else if (RE_EURO.test(s)) {
       s = s.replace(/\./g, '').replace(',', '.');
     } else {
-      fail('E_BAD_NUMBER', `"${s}" is not a number`, row, column);
+      fail('E_BAD_NUMBER', 'the cell is not a plain number', row, column);
     }
   }
-  if (!RE_PLAIN.test(s)) fail('E_BAD_NUMBER', `"${s}" is not a number`, row, column);
+  if (!RE_PLAIN.test(s)) fail('E_BAD_NUMBER', 'the cell is not a plain number', row, column);
   const v = Number(s);
-  if (!Number.isFinite(v)) fail('E_BAD_NUMBER', `"${s}" is not a number`, row, column);
+  if (!Number.isFinite(v)) fail('E_BAD_NUMBER', 'the cell is not a plain number', row, column);
   return v;
 }
 
@@ -326,5 +328,5 @@ export function parseDate(raw, kind, row, column) {
       m[5] === undefined ? 0 : Number(m[5]), m[6] === undefined ? 0 : Number(m[6]), row, column);
   }
   if (s.indexOf('/') !== -1) fail('E_AMBIGUOUS_DATE', '', row, column);
-  fail('E_BAD_DATE', `"${s}" is not a date this format uses`, row, column);
+  fail('E_BAD_DATE', 'the cell is not a date and time in a form this format uses (for example 2026-09-01 09:30:00)', row, column);
 }
