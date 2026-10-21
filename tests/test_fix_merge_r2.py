@@ -505,8 +505,10 @@ def test_nit1_js_string_evasions_are_caught(expr):
     assert L.restore_email_claims(L.js_strings(f"const _planted = {expr};"), "welcome.js"), expr
 
 
-def test_nit1_clean_builds_still_pass(built_site, paid_site):
+def test_nit1_clean_builds_still_pass(built_site, paid_site, monkeypatch):
     assert L.lint_build(str(built_site["out"])) == []
+    # delta N2: lint is told which private.toml the paid build used (paid_env wrote it beside the build)
+    monkeypatch.setenv("DT_PRIVATE_TOML", str(paid_site["out"].parent / "paid-private.toml"))
     assert L.lint_build(str(paid_site["out"]), paid=True) == []
 
 

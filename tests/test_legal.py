@@ -190,7 +190,8 @@ def test_seller_values_come_from_private_toml(paid):
     assert tracked == ""  # the fixture value lives only in this test
 
 
-def test_flag_on_lint_and_wording(paid):
+def test_flag_on_lint_and_wording(paid, monkeypatch):
+    monkeypatch.setenv("DT_PRIVATE_TOML", str(paid.parent / "paid-private.toml"))   # delta N2: the build's file
     assert L.lint_build(str(paid), paid=True) == []
     for rel, h in all_html(paid).items():
         assert not re.search(r"standard price|after launch:|restore by email</a>|\$49|\$99", h, re.I), rel

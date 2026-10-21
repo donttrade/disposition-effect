@@ -347,16 +347,27 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
         for v in private_values:
             if v and v in rest:
                 out.append(("flag:seller_identity", where, "seller name/address/phone where the seller block is off"))
-        if re.search(r"\[(SELLER|ADDRESS|PHONE) —", html):
-            out.append(("flag:seller_placeholder", where, "seller placeholder where the seller block is off"))
         if "data-seller-block" in html:
             out.append(("flag:seller_block", where, "seller disclosure markup where the seller block is off "
                         "(paid_report off, and pilot_checkout off or [legal] show_seller_for_pilot = false)"))
+    out += placeholder_problems(html, where)
     if french:
         out += lint_text_fr(readable_text(strip_disclaimers(html)), where)
     if analytics is False and "cloudflareinsights" in html:
         out.append(("flag:beacon", where, "analytics beacon with analytics = false"))
     return out
+
+
+PLACEHOLDER = re.compile(r"\[(SELLER|ADDRESS|PHONE) —")
+
+
+def placeholder_problems(html, where):
+    """Tester delta N6: a private.toml placeholder ("[ADDRESS — …]") is never published, whatever the
+    flags (only a DT_ALLOW_PLACEHOLDERS build, local only, can hold one): every page, footer included."""
+    if PLACEHOLDER.search(html):
+        return [("flag:seller_placeholder", where, "a private.toml placeholder is in the page "
+                 "(a DT_ALLOW_PLACEHOLDERS build: local only, never publish it)")]
+    return []
 
 
 def strip_business_line(html):
@@ -412,7 +423,7 @@ def passthrough_rules(html, where, analytics, paid=False):
     for w in RULES["words"]["regular_price"]:
         if _phrase_re(w).search(text):
             out.append(("banned:regular_price", where, w))
-    with open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8") as f:
+    with open(prices_path(), encoding="utf-8") as f:
         retired = set(json.load(f)["retired_amounts"]["amounts"])
     from harvest_prices import amounts_in
     for a in amounts_in(html):
@@ -422,21 +433,39 @@ def passthrough_rules(html, where, analytics, paid=False):
     return out
 
 
+def prices_path():
+    """The prices.json the build reads (DT_PRICES_JSON, else the committed one; Tester delta N3)."""
+    return os.environ.get("DT_PRICES_JSON") or os.path.join(REPO, "site", "config", "prices.json")
+
+
 def allowed_amounts():
     from harvest_prices import allowed_amounts as aa
-    with open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8") as f:
+    with open(prices_path(), encoding="utf-8") as f:
         return aa(json.load(f))
 
 
-def private_values(fields=("seller_legal_name", "premises_address", "phone")):
+def private_toml_path():
+    return os.environ.get("DT_PRIVATE_TOML") or os.path.join(REPO, "site", "config", "private.toml")
+
+
+def read_private():
+    """private.toml as a dict, or None when there is none. Read once per lint run (Tester delta N3).
+    Lint reads it even with every flag off, on purpose: to prove none of its values leaked into a
+    build that must not hold them (the BUILD never opens it with the flags off)."""
+    p = private_toml_path()
+    if not os.path.exists(p):
+        return None
+    with open(p, "rb") as f:
+        return tomllib.load(f)
+
+
+def private_values(fields=("seller_legal_name", "premises_address", "phone"), data=None):
     """The seller values to look for, from the same private.toml the build reads (DT_PRIVATE_TOML,
     else site/config/private.toml; Tester NIT 2), as written and as published (normalised)."""
     import build
-    p = os.environ.get("DT_PRIVATE_TOML") or os.path.join(REPO, "site", "config", "private.toml")
-    if not os.path.exists(p):
+    d = read_private() if data is None else data
+    if not d:
         return []
-    with open(p, "rb") as f:
-        d = tomllib.load(f)
     out = []
     for k in fields:
         v = d.get(k, "")
@@ -468,6 +497,9 @@ def seller_allowed(paid, pilot):
     return build.show_seller({"flags": {"paid_report": paid, "pilot_checkout": pilot}, "legal": cfg["legal"]})
 
 
+WARNINGS = []   # printed by main(): checks lint could not run (Tester delta N2)
+
+
 def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None):
     """seller: whether the seller block may appear; defaults to the committed switch (seller_allowed)."""
     import build
@@ -476,8 +508,13 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None):
     if os.path.isdir(os.path.join(out_dir, "dev")):
         problems.append(("dev_in_build", "/dev/", "dev pages are in the build"))
     amounts = allowed_amounts()
-    priv = private_values()
-    addresses = private_values(("premises_address",))
+    WARNINGS.clear()
+    data = read_private()
+    priv = private_values(data=data or {})
+    addresses = private_values(("premises_address",), data=data or {})
+    if (paid or pilot) and data is None:   # Tester delta N2: say so instead of skipping the check silently
+        WARNINGS.append(f"no private.toml at {private_toml_path()}: the footer line's address was NOT checked "
+                        "against it (set DT_PRIVATE_TOML to the file the build used)")
     owned_rel = {"/" + os.path.relpath(build.out_file(out_dir, p), out_dir) for p in owned_paths(paid, pilot)}
     for path in owned_paths(paid, pilot):
         fp = build.out_file(out_dir, path)
@@ -500,6 +537,7 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None):
                     problems.append(("secret", rel, rx.pattern))
             if name.endswith(".html") and rel not in owned_rel:
                 problems += passthrough_rules(s, rel, analytics, paid)
+                problems += placeholder_problems(s, rel)
             if name.endswith(".js"):
                 problems += restore_email_claims(js_strings(s), rel)
                 problems += waive_dispute_claims(js_strings(s), rel)
@@ -551,6 +589,8 @@ def main(argv):
         print("lint: flags read from the build: " + ", ".join(f"{k}={'on' if v else 'off'}" for k, v in flags.items()))
     paid, analytics = flags["paid"], flags["analytics"]
     problems = lint_build(out_dir, paid, analytics, pilot=flags["pilot"])
+    for w in WARNINGS:
+        print("lint: WARNING: " + w)
     for rule, where, detail in problems:
         print(f"LINT {rule:22} {where}: {detail}")
     print("lint:", "PASS" if not problems else f"{len(problems)} problem(s)")
