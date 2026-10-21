@@ -60,6 +60,34 @@ PAGES += [
      "title": "Prop Firm Challenge Simulator on Your Own Trades",
      "description": "Replay 10,000 challenges built from your own past trading days under the rules you enter. "
                     "Pass, bust and time-out shares, fully explained. Free."},
+    {"template": "pages/tool-lot-size.html", "path": "/tools/lot-size-calculator/", "requires_flag": None,
+     "modules": ["/static/js/tools/lot-size.js"],
+     "title": "Lot Size Calculator: Forex, Gold, Indices and Futures",
+     "description": "Work out position size in lots from your balance, risk amount and stop distance. Shows the "
+                    "formula with your numbers and the loss after rounding. No sign-up."},
+    {"template": "pages/tools-index.html", "path": "/tools/", "requires_flag": None,
+     "title": "Free Trading Tools That Run in Your Browser",
+     "description": "Free tools for your own trades: trade stats with a real-or-noise check, a prop-firm challenge "
+                    "simulator, a lot size calculator and more. No sign-up."},
+]
+
+# The /tools/ index rows: tool, the question it answers, input, Open (plan step 12).
+TOOLS = [
+    {"name": "Trade stats", "href": "/tools/trade-stats/",
+     "question": "What does my own trade history show, and which numbers are more than noise?",
+     "input": "Your trade file"},
+    {"name": "Prop-firm challenge simulator", "href": "/tools/prop-challenge-simulator/",
+     "question": "How would my past trading days have fared under a challenge’s rules?",
+     "input": "Your trade file, or win rate and average win and loss; the rules"},
+    {"name": "Lot size calculator", "href": "/tools/lot-size-calculator/",
+     "question": "How many lots match the amount I chose to risk at this stop?",
+     "input": "Balance, risk amount, stop distance, value per point"},
+    {"name": "Disposition-effect calculator", "href": "/tools/disposition-calculator/",
+     "question": "Were winning positions sold more readily than losing ones?",
+     "input": "Four counts of positions sold and held"},
+    {"name": "Pass-rate calculator (for firm operators)", "href": "/tools/pass-rate-calculator/",
+     "question": "What are one cohort’s evaluation pass rate and payout rate?",
+     "input": "Cohort counts"},
 ]
 
 SAMPLE_CSV = os.path.join(SITE, "static", "samples", "demo-trades.csv")
@@ -269,7 +297,7 @@ def build():
     base_ctx = {"site": cfg["site"], "flags": flags, "nav": cfg["nav"], "footer": cfg["footer"],
                 "legal": cfg["legal"], "forms": cfg["forms"], "analytics": cfg["analytics"],
                 "worker": cfg["worker"], "prices": prices, "products": products, "private": private,
-                "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections}
+                "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": TOOLS}
     for rel, page in sorted(owned.items()):
         page = {"scripts": [], "modules": [], "og_image": "/assets/og/default.png", **page}
         extra = {"sample_csv": sample_csv()} if page.get("sample") else {}

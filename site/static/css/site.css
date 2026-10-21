@@ -311,3 +311,12 @@ input[type="file"]:focus-visible { outline: 2px solid var(--rust); outline-offse
 .field-grid[hidden] { display: none; }
 .field-grid .field { max-width: none; }
 fieldset legend { font-weight: 600; margin-bottom: 4px; padding: 0; }
+.formula { font-family: var(--font-mono); font-size: var(--fs-0); background: var(--surface); border-left: 4px solid var(--plan); padding: var(--s2); overflow-x: auto; max-width: 820px; white-space: pre-wrap; }
+.tool-list th[scope="row"] { min-width: 12rem; font-size: var(--fs-1); }
+.tool-list td a { display: inline-flex; align-items: center; min-height: var(--target); }
+/* A visually-hidden (absolute) child must not escape the scroll container and widen the page. */
+.table-wrap { position: relative; }
+@media (max-width: 600px) {
+  .tool-list th:last-child, .tool-list td:last-child { display: none; } /* the tool name is already the link */
+  .tool-list th[scope="row"] { min-width: 7rem; }
+}
