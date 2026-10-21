@@ -235,7 +235,7 @@ function status(msg, kind = '') {
 }
 
 async function run(file) {
-  if (!token) { status('No access found on this device. Use your restore link, or restore by email on the restore page.', 'error'); return; }
+  if (!token) { status('No access found on this device. Open the restore link or restore file you saved after paying.', 'error'); return; }
   const payload = decodeToken(token);
   if (!payload) { status('This access link is damaged. Use your restore link.', 'error'); return; }
   status('Reading your file in this tab…');
