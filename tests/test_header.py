@@ -146,4 +146,4 @@ def test_header_markup(built_site):
         header = re.search(r"(?s)<header class=\"site-header\">.*?</header>", html).group(0)
         assert header.count("<nav ") == 1 and header.count("<details") == 1, path
         assert 'class="btn' not in header and not re.search(r"Start a Pilot|\$\d", header), path
-        assert '<script src="/static/js/nav.js" defer></script>' in html, path
+        assert re.search(r'<script src="/static/js/nav\.js\?v=[0-9a-f]{8}" defer></script>', html), path  # N5: versioned

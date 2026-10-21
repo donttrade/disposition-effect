@@ -108,7 +108,7 @@ def test_lint_full_rules_outside_the_frozen_body(built_site):
 @pytest.mark.parametrize("path", OLD)
 def test_v2_page_not_old_design(built_site, path):
     html = html_of(built_site, path)
-    assert '<link rel="stylesheet" href="/static/css/site.css">' in html
+    assert re.search(r'<link rel="stylesheet" href="/static/css/site\.css\?v=[0-9a-f]{8}">', html)  # N5: versioned
     assert '<main id="main" class="lifted">' in html
     assert '<header class="site-header">' in html and '<footer class="site-footer">' in html
     for old in ('<header class="site">', '<footer class="site">', "dt-serif", "#FBF8F3", "Who it’s for"):
