@@ -19,6 +19,7 @@ Environment:
   DT_OUT=path              write somewhere other than site/_site
   DT_ALLOW_PLACEHOLDERS=1  allow private.toml placeholders (local test mode only)
   DT_BASELINE=path         use another URL baseline (tests plant a missing URL this way)
+  DT_PRIVATE_TOML=path     read private.toml from elsewhere (flag-on test builds)
 """
 
 import json
@@ -46,6 +47,19 @@ PAGES = [
                     "public script, run on your own systems."},
 ]
 
+PAID_PAGES = [
+    {"template": "pages/welcome.html", "path": "/welcome/", "requires_flag": "paid_report", "connect_worker": True,
+     "modules": ["/static/js/paid/welcome.js"], "title": "Thank you — donttrade",
+     "description": "Your donttrade habit report is unlocked."},
+    {"template": "pages/restore.html", "path": "/restore/", "requires_flag": "paid_report", "connect_worker": True,
+     "modules": ["/static/js/paid/restore.js"], "title": "Restore access — donttrade",
+     "description": "Reopen your donttrade habit report on this browser."},
+    {"template": "pages/report.html", "path": "/report/", "requires_flag": "paid_report", "connect_worker": True,
+     "modules": ["/static/js/paid/report.js"], "title": "Your habit report — donttrade",
+     "description": "Your donttrade habit report, built from your own trade file."},
+]
+PAGES += PAID_PAGES
+
 # Paths that may exist only when paid_report = true.
 PAID_ONLY_PATHS = ["/welcome/", "/restore/", "/report/"]
 
@@ -72,7 +86,7 @@ def load_config():
         die("analytics = true but [analytics] cf_beacon_token is empty")
     private = {}
     if flags["paid_report"]:
-        p = os.path.join(SITE, "config", "private.toml")
+        p = os.environ.get("DT_PRIVATE_TOML") or os.path.join(SITE, "config", "private.toml")
         if not os.path.exists(p):
             die("paid_report = true needs site/config/private.toml (copy private.example.toml)")
         with open(p, "rb") as f:

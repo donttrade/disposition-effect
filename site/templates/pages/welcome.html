@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="wrap" data-requires-flag="paid_report">
+  <h1>Thank you</h1>
+  {% include "partials/disclaimer.html" %}
+  <section id="w-working" data-state><p>Confirming your purchase with Stripe…</p></section>
+  <section id="w-ready" data-state hidden>
+    <div class="notice"><strong>Your report is unlocked</strong><p id="w-saved"></p></div>
+    <p><a class="btn" id="w-report" href="/report/">Open your report</a></p>
+    <h2>Save your restore link</h2>
+    <p>There is no account or password. This link reopens your purchase on any browser; keep it private.</p>
+    <div class="field"><label for="w-link">Restore link</label><input id="w-link" type="text" readonly></div>
+    <p><button class="btn btn-secondary" id="w-download" type="button">Download restore file</button>
+       <button class="btn btn-secondary" id="w-copy" type="button">Copy link</button> <span id="w-copy-msg" role="status"></span></p>
+    <p class="small muted">Lost it? <a href="/restore/">Restore by email</a> with the address you paid with.</p>
+  </section>
+  <section id="w-error" data-state hidden>
+    <div class="notice notice-error" role="alert"><p id="w-error-msg"></p></div>
+    <p><button class="btn" id="w-retry" type="button">Try again</button> <a href="/restore/">Restore by email</a></p>
+  </section>
+</div>
+{% endblock %}

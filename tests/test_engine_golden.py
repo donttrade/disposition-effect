@@ -91,3 +91,20 @@ def test_js_matches_reference(engine_page, rel):
     diff = same(got, comparable(want))
     assert not diff, f"{rel}: {diff}"
     assert "CANARY" not in json.dumps(got), rel
+
+
+@pytest.mark.parametrize("rel", E.fixture_paths(FIX))
+def test_strip_rows_match_reference(engine_page, rel):
+    """Step 22: the browser's StrippedRows equal the reference (fixed salt, identity symbol order)."""
+    with open(os.path.join(FIX, rel), "rb") as f:
+        data = f.read()
+    got = json.loads(engine_page.evaluate("([b, s]) => window.stripFixture(b, s)", [base64.b64encode(data).decode(), "SALT-1"]))
+    want = E.run_fixture(data)
+    if "error" in want:
+        assert got is None
+        return
+    exp = E.strip_rows(want["result"]["trades"], "SALT-1")
+    diff = same(got, exp)
+    assert not diff, diff
+    allowed = {"o", "h", "d", "q", "p", "s", "f"}
+    assert all(set(r) == allowed for r in got["rows"])

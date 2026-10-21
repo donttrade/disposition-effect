@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="wrap" data-requires-flag="paid_report">
+  <h1>Restore your report access</h1>
+  <p id="r-status" role="status">Open your restore link or file, or ask for a new link by email.</p>
+  <p><a class="btn" id="r-open" href="/report/" hidden>Open your report</a></p>
+  <h2>Restore by email</h2>
+  <form id="r-form" novalidate>
+    <div class="field"><label for="r-email">Email you paid with</label>
+      <input id="r-email" name="email" type="email" autocomplete="email" required aria-describedby="r-email-err">
+      <p class="error" id="r-email-err" hidden></p></div>
+    <button class="btn" type="submit">Email me a restore link</button>
+  </form>
+  <p id="r-sent" role="status"></p>
+  <p class="small muted">The email holds only a link that works for 15 minutes. It never holds trade data.</p>
+</div>
+{% endblock %}
