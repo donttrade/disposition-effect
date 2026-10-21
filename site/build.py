@@ -294,6 +294,8 @@ PAGES += PAID_PAGES
 # Traders | Firms tabs (tabs.js) and the printable "Before you pay" block (print.js).
 PAGES.append({"template": "pages/pricing.html", "path": "/pricing/", "requires_flag": None,
               "scripts_if_paid": ["/static/js/tabs.js", "/static/js/print.js"], "product": PRODUCT_TEXT,
+              # Tester D6: the reverse of /fr/avant-de-payer/'s alternates, so the pair counts
+              "alternates_if_paid": [("en", "/pricing/"), ("fr", "/fr/avant-de-payer/"), ("x-default", "/pricing/")],
               "crumb": "Pricing", "updated": "2026-10-21", "og_image": "/assets/og/pricing.png",
               "title": "Pricing: Published Prices for Firms and Traders",
               "description": "Published prices in USD for prop firms, brokers, trading platforms and traders, the "
@@ -711,8 +713,47 @@ def read_baseline():
     return paths, ids
 
 
-def verify(out, flags, seller=None):
+ALT_RE = re.compile(r'<link rel="alternate" hreflang="([^"]+)" href="([^"]+)">')
+
+
+def check_language_pairs(out, base_url):
+    """Tester D6: hreflang only counts when it is reciprocal. Every page that declares
+    alternates must be named back by each of them, and must carry a visible link (with
+    hreflang) to each other-language version."""
+    alts = {}
+    for root, _, files in os.walk(out):
+        for name in sorted(files):
+            if name.endswith(".html"):
+                fp = os.path.join(root, name)
+                with open(fp, encoding="utf-8", errors="replace") as f:
+                    html = f.read()
+                found = ALT_RE.findall(html)
+                if found:
+                    path = "/" + os.path.relpath(fp, out).replace("index.html", "")
+                    alts[path] = (found, html)
+    for path, (found, html) in sorted(alts.items()):
+        own = [h for lang, h in found if lang != "x-default"]
+        if base_url + path not in own:
+            die(f"hreflang: {path} does not list itself among its alternates")
+        for lang, href in found:
+            if lang == "x-default":
+                continue
+            other = href[len(base_url):] if href.startswith(base_url) else href
+            if other == path:
+                continue
+            if other not in alts:
+                die(f"hreflang: {path} names {other} ({lang}), which declares no alternates back")
+            if base_url + path not in [h for _, h in alts[other][0]]:
+                die(f"hreflang: {other} does not name {path} back (the pair is ignored by search engines)")
+            body = html[html.find("<body"):]
+            if not re.search(r'<a href="' + re.escape(other) + r'[#"][^>]*hreflang="' + re.escape(lang) + '"', body):
+                die(f"language link: {path} has no visible link to its {lang} version {other}")
+
+
+def verify(out, flags, seller=None, base_url=None):
     """seller: whether the seller block may appear (show_seller); defaults to any commerce flag."""
+    if base_url:
+        check_language_pairs(out, base_url)
     if seller is None:
         seller = any(flags.get(f) for f in COMMERCE_FLAGS)
     paths, ids = read_baseline()
@@ -822,7 +863,7 @@ def build():
         built.append(page)
     write_sitemap_and_robots(out, cfg, built, flags)
 
-    verify(out, flags, seller=show_seller(cfg))
+    verify(out, flags, seller=show_seller(cfg), base_url=cfg["site"]["base_url"])
     return out
 
 
