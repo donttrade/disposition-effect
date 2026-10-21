@@ -32,6 +32,13 @@
   "limited": false,
   "n_used": 2
  },
+ "pgr_plr": {
+  "coverage_pct": 0.0,
+  "pg": 0,
+  "pl": 0,
+  "rg": 4,
+  "rl": 0
+ },
  "result": {
   "currency_groups": {
    "CAD": 1,

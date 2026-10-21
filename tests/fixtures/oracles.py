@@ -162,6 +162,14 @@ ORACLES["generic/no_losses.csv"] = {
 }
 # 90 generated trades (make_fixtures.many_trades): checked for structure, not per trade.
 ORACLES_COUNT_ONLY = {"generic/ninety_trades.csv": 90}
+# PGR/PLR fixture: its counts are hand-checked in test_engine_ref.test_pgr_plr_hand_oracle.
+# Trades: AAA +50; BBB 15 @ avg 49.333 sold at 47 -> -35; CCC -10; DDD short 30 -> 29 = +10.
+ORACLES["generic/pgr_oracle.csv"] = {
+    "trades": [dict(symbol="AAA", pnl=50.0), dict(symbol="BBB", pnl=-35.0), dict(symbol="CCC", pnl=-10.0),
+               dict(symbol="DDD", dir="short", pnl=10.0)],
+    "warnings": {},
+    "skipped": {},
+}
 
 ERRORS = {
     "errors/empty.csv": ("E_EMPTY", None, None),

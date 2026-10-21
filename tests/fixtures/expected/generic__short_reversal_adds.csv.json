@@ -32,6 +32,13 @@
   "limited": false,
   "n_used": 3
  },
+ "pgr_plr": {
+  "coverage_pct": null,
+  "pg": 0,
+  "pl": 0,
+  "rg": 4,
+  "rl": 0
+ },
  "result": {
   "currency_groups": {
    "points": 3

@@ -88,3 +88,14 @@ def test_dates_are_naive_utc():
         with pytest.raises(E.EngineError) as ei:
             E.parse_date(bad, "generic", 1, "t")
         assert ei.value.code == code
+
+
+def test_pgr_plr_hand_oracle():
+    # tests/fixtures/generic/pgr_oracle.csv, worked by hand:
+    # day 2: AAA sold +5 -> realised gain; BBB (avg 49.33 after the add) marked at 48 -> paper loss;
+    #        CCC did not trade -> unmarked.            (open position-days 2, marked 1)
+    # day 3: BBB sold at 47 < 49.33 -> realised loss; DDD opened short; CCC unmarked; DDD marked at
+    #        its own price -> neither.                  (open position-days 2, marked 1)
+    # day 4: CCC sold 19 < 20 -> realised loss; DDD covered 29 < 30 short -> realised gain.
+    res = E.parse_file(load("generic/pgr_oracle.csv"))
+    assert E.pgr_plr_counts(res["executions"]) == {"rg": 2, "pg": 0, "rl": 2, "pl": 1, "coverage_pct": 50.0}
