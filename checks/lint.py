@@ -9,7 +9,8 @@ Rules (banned.toml): A3 banned words outside allowlisted negations/disclaimer; A
 words; tally.so; "nothing leaves"-type claims when a paid flow exists; "no analytics"
 when analytics is on; $ amounts not from prices.json; flag-gated strings with the paid
 flag off (seller name/placeholders, trader Stripe links, Product JSON-LD, paid markup);
-/dev/ in the build; secret patterns.
+/dev/ in the build; secret patterns; the footer business line on every page exactly
+once while a commerce flag is on (and its address the private.toml one), none while both are off.
 
 Scope: the pages that templates own (new design). Passthrough pages are lifted word
 for word in steps 28–29 and are linted from then on; until then the old pages are
@@ -285,8 +286,11 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
     if not (pilot or paid) and "buy.stripe.com" in html:
         out.append(("flag:stripe_link", where, "a Stripe link with every commerce flag off"))
     if not commerce:
+        # the mailing address may appear in the footer's business line (any commerce flag); the
+        # legal name and phone, and the address anywhere else, only with the seller block
+        rest = strip_business_line(html) if (paid or pilot) else html
         for v in private_values:
-            if v and v in html:
+            if v and v in rest:
                 out.append(("flag:seller_identity", where, "seller name/address/phone where the seller block is off"))
         if re.search(r"\[(SELLER|ADDRESS|PHONE) —", html):
             out.append(("flag:seller_placeholder", where, "seller placeholder where the seller block is off"))
@@ -298,6 +302,35 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
     if analytics is False and "cloudflareinsights" in html:
         out.append(("flag:beacon", where, "analytics beacon with analytics = false"))
     return out
+
+
+def strip_business_line(html):
+    """The page without its footer business-identification line (build.BUSINESS_ID_RE)."""
+    import build
+    return build.BUSINESS_ID_RE.sub(" ", html)
+
+
+BUSINESS_LINE_TEXT = re.compile(r"^donttrade · Ontario, Canada · (?P<address>.+) · (?P<email>[^\s@·]+@[^\s@·]+)$")
+
+
+def business_line_problems(html, where, commerce, private_values=()):
+    """Decision 21 Oct: with any commerce flag on, every page has exactly one business line,
+    "donttrade · Ontario, Canada · <mailing address> · <business email>", whose address is the
+    private.toml one; with every commerce flag off, none."""
+    import build
+    found = build.BUSINESS_ID_RE.findall(html)
+    n = html.count(build.BUSINESS_ID_ATTR)
+    if not commerce:
+        return [("flag:business_line", where, "business line with every commerce flag off")] if n else []
+    if n != 1 or len(found) != 1:
+        return [("business_line", where, f"{n} business-identification line(s), expected exactly 1")]
+    text = " ".join(normalise(re.sub(r"<[^>]+>", " ", __import__("html").unescape(found[0]))).split())
+    m = BUSINESS_LINE_TEXT.fullmatch(text)
+    if not m:
+        return [("business_line", where, f"not in the form 'donttrade · Ontario, Canada · <address> · <email>': {text!r}")]
+    if private_values and m.group("address") not in private_values:
+        return [("business_line", where, "its address is not the private.toml premises_address")]
+    return []
 
 
 def passthrough_rules(html, where, analytics, paid=False):
@@ -338,7 +371,7 @@ def allowed_amounts():
         return aa(json.load(f))
 
 
-def private_values():
+def private_values(fields=("seller_legal_name", "premises_address", "phone")):
     """The seller values to look for, from the same private.toml the build reads (DT_PRIVATE_TOML,
     else site/config/private.toml; Tester NIT 2), as written and as published (normalised)."""
     import build
@@ -348,7 +381,7 @@ def private_values():
     with open(p, "rb") as f:
         d = tomllib.load(f)
     out = []
-    for k in ("seller_legal_name", "premises_address", "phone"):
+    for k in fields:
         v = d.get(k, "")
         if isinstance(v, str) and v.strip():
             out.append(v)
@@ -387,6 +420,7 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None):
         problems.append(("dev_in_build", "/dev/", "dev pages are in the build"))
     amounts = allowed_amounts()
     priv = private_values()
+    addresses = private_values(("premises_address",))
     owned_rel = {"/" + os.path.relpath(build.out_file(out_dir, p), out_dir) for p in owned_paths(paid, pilot)}
     for path in owned_paths(paid, pilot):
         fp = build.out_file(out_dir, path)
@@ -413,9 +447,12 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None):
                 problems += restore_email_claims(js_strings(s), rel)
                 if paid:  # a script can put text on a paid page too
                     problems += not_on_sale_claims(js_strings(s), rel)
+            if name.endswith(".html"):
+                problems += business_line_problems(s, rel, paid or pilot, addresses)
             if not seller:
+                rest = strip_business_line(s) if (paid or pilot) and name.endswith(".html") else s
                 for v in priv:
-                    if v and v in s:
+                    if v and v in rest:
                         problems.append(("flag:seller_identity", rel, "private.toml value in the build, where the seller block is off"))
             if not analytics and "cloudflareinsights" in s:
                 problems.append(("flag:beacon", rel, "analytics beacon"))

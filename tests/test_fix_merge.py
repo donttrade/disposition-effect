@@ -330,8 +330,12 @@ def test_d2_pilot_only_build_shows_no_seller_identity(tmp_path):
     for p in out.rglob("*.html"):
         h = p.read_text(encoding="utf-8")
         assert "data-seller-block" not in h, p
+        # decision 21 Oct: the mailing address is in the footer's business line on every page,
+        # and nowhere else; the legal name and phone stay out
+        rest = B.BUSINESS_ID_RE.sub("", h)
         for v in FAKE.values():
-            assert v not in h, (p, v)
+            assert v not in rest, (p, v)
+        assert FAKE["seller_legal_name"] not in h and FAKE["phone"] not in h, p
     assert L.lint_build(str(out), pilot=True) == []
 
 

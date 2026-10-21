@@ -1,6 +1,9 @@
 # site.toml — the one settings file for the v2 build (committed).
 # Secrets never go here. The seller's legal name, address and phone live only in
-# the gitignored private.toml, and are read only when paid_report = true.
+# the gitignored private.toml, read only while a commerce flag (paid_report or
+# pilot_checkout) is on. Any commerce flag puts the business line (donttrade · Ontario,
+# Canada · mailing address · contact_email) in every footer; the legal name and phone
+# appear only where the seller block shows ([legal] show_seller_for_pilot below).
 
 [site]
 name = "donttrade"

@@ -4,7 +4,9 @@
 # test mode only). Checked after NFKC normalisation; any invisible character fails.
 #   seller_legal_name  two or more words of letters (- and ' inside a word, "Inc." allowed), none
 #                      of them a placeholder word (seller, name, test, TBD, …)
-#   premises_address   "<number> <street>, <city> <PROV> <A1A 1A1>" or "PO Box <n>, <city> <PROV> <A1A 1A1>"
+#   premises_address   the business mailing address, shown in every page footer while any commerce
+#                      flag is on: "<number> <street>, <city> <PROV> <A1A 1A1>" (a mailbox store's
+#                      "123 Street Rd #456, …" works) or "PO Box <n> [STN <name>], <city> <PROV> <A1A 1A1>"
 #   phone              a 10-digit North American number, +1 optional, "ext 12" allowed
 seller_legal_name = "[SELLER — lawyer to confirm]"
 premises_address = "[ADDRESS — virtual mailbox pending]"
