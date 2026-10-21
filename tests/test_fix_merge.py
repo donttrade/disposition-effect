@@ -140,3 +140,32 @@ def test_b2_malformed_private_toml_is_a_build_failure_not_a_traceback(tmp_path):
     bad.write_text('seller_legal_name = "unterminated\n', encoding="utf-8")
     r, _ = build(tmp_path, "o", DT_SITE_TOML=toml_with(tmp_path, pilot_checkout=True), DT_PRIVATE_TOML=str(bad))
     assert r.returncode == 1 and "BUILD FAILED" in r.stderr and "Traceback" not in r.stderr, r.stderr
+
+
+# ------------------------------------------------------------------ D9: flags are real booleans
+def _flag_toml(tmp, line_re, repl):
+    src = open(os.path.join(REPO, "site", "config", "site.toml"), encoding="utf-8").read()
+    src, n = re.subn(line_re, repl, src, flags=re.M)
+    assert n == 1
+    p = tmp / "flags.toml"
+    p.write_text(src, encoding="utf-8")
+    return str(p)
+
+
+@pytest.mark.parametrize("flag,value", [("pilot_checkout", '"false"'), ("pilot_checkout", '"yes"'), ("paid_report", '"false"'),
+                                        ("analytics", "0"), ("trader_first_home", '"true"'), ("pilot_checkout", "1")])
+def test_d9_flag_that_is_not_a_boolean_fails(tmp_path, flag, value):
+    # repro: sed 's/^pilot_checkout = false/pilot_checkout = "false"/' site.toml — read as ON before the fix,
+    # even with a complete private.toml present
+    from test_legal import build
+    toml = _flag_toml(tmp_path, rf"^{flag} = (true|false)", f"{flag} = {value}")
+    r, out = build(tmp_path, "o", DT_SITE_TOML=toml, DT_PRIVATE_TOML=_priv(tmp_path))
+    assert r.returncode == 1 and f"[flags] {flag}" in r.stderr and "boolean" in r.stderr, r.stderr
+    assert not (out / "start" / "pilot-thanks").exists()
+
+
+def test_d9_unknown_flag_fails(tmp_path):
+    from test_legal import build
+    toml = _flag_toml(tmp_path, r"^analytics = false", "analytics = false\npaid_reprot = true")
+    r, _ = build(tmp_path, "o", DT_SITE_TOML=toml)
+    assert r.returncode == 1 and "paid_reprot is not a known flag" in r.stderr, r.stderr
