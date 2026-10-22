@@ -4,6 +4,7 @@
 {%- set firm_ids = ["pilot", "snapshot", "memo", "outcomes"] %}
 {%- set pct = prices.rules.recheck.percent_of_engagement %}
 <div class="wrap">
+  {% include "partials/crumbs.html" %}
   {#- 1. Hero: the current H1 is kept (plan step 14). #}
   <section class="hero" aria-labelledby="ff-h">
     <div class="grid">

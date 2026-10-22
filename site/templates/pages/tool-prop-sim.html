@@ -13,7 +13,7 @@
 <div class="wrap">
   <div class="grid">
     <div class="span-8">
-      <p class="crumb small"><a href="/tools/">Free tools</a></p>
+      {% include "partials/crumbs.html" %}
       <h1>Prop-firm challenge simulator</h1>
       <p class="lede">Most challenge simulators ask for a win rate and an average win and loss, then invent trades from them. This one can start from your own record.</p>
       <p>Drop a trade file and it builds 10,000 simulated challenges by drawing whole trading days from your history at random, so a day with three quick losses stays a day with three quick losses, which is what daily loss limits react to. Enter the rules you face: profit target, daily loss limit, maximum loss as a static or trailing limit, time limit and minimum trading days. The result shows the share of runs that passed, busted or ran out of time, and how many busts came after two or more losses in a row. No file? A manual mode takes the usual summary numbers instead. The random seed is fixed, so the same inputs always give the same answer.</p>

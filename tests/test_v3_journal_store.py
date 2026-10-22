@@ -178,6 +178,19 @@ def test_store_migration_hook_upgrades_v1_in_place(jpage):
     assert r["schema1"] == 1 and r["schema2"] == 2, r
 
 
+def test_store_upgrade_waits_for_an_older_connection_instead_of_failing(jpage):
+    """An older tab's connection that is still open when v2 opens: 'blocked' fires, the open waits (it does not
+    reject), and the upgrade runs as soon as that connection closes."""
+    r = jpage.evaluate(f"""async () => {{ const db = await ({FULL})(); db.close();
+      const old = await new Promise((res) => {{ const q = indexedDB.open(JS.DB_NAME); q.onsuccess = () => res(q.result); }});
+      let blocked = 0, closedAt = 0;
+      setTimeout(() => {{ closedAt = performance.now(); old.close(); }}, 300);   // no versionchange handler: an old tab
+      const db2 = await JS.open(JS.DB_NAME, 2, {STEP2}, () => blocked++);
+      const out = {{v: db2.version, blocked, waited: closedAt > 0, n: (await JS.loadAll(db2)).trades.length}};
+      db2.close(); return out; }}""")
+    assert r == {"v": 2, "blocked": 1, "waited": True, "n": 1140}, r
+
+
 def test_store_missing_migration_step_refuses_and_keeps_v1(jpage):
     r = jpage.evaluate(f"""async () => {{ const db = await ({FULL})(); const n = (await JS.loadAll(db)).trades.length; db.close();
       let err = null; try {{ (await JS.open(JS.DB_NAME, 3, {STEP2})).close(); }} catch (e) {{ err = String(e && e.message || e); }}

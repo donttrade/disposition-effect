@@ -11,6 +11,7 @@
 {%- set pct = prices.rules.recheck.percent_of_engagement %}
 {%- set ex = products[prices.rules.recheck.example_product] %}
 <div class="wrap"><div class="prose">
+  {% include "partials/crumbs.html" %}
   <h1>Terms, refunds and the {{ pilot.name }}</h1>
   <p class="notice">Plain-language terms, version {{ legal.terms_version }}. Where a signed engagement agreement differs, the agreement governs.{% if flags.paid_report %} <a href="/fr/conditions/" hreflang="fr" lang="fr">Version française</a>{% endif %}</p>
 

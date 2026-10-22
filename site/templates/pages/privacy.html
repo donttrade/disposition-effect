@@ -2,6 +2,7 @@
 {% block content %}
 {%- from "partials/seller.html" import seller_rows %}
 <div class="wrap"><div class="prose">
+  {% include "partials/crumbs.html" %}
   <h1>Privacy</h1>
   <p class="notice">Plain-language notice, version {{ legal.terms_version }}. Where a signed engagement agreement differs, the agreement governs.{% if flags.paid_report %} <a href="/fr/confidentialite/" hreflang="fr" lang="fr">Version française</a>{% endif %}</p>
 
