@@ -254,6 +254,161 @@ VT_CSS = "/static/css/vt.css"
 VT_PAGES = MOTION_PAGES | {"/start/"}
 START_JS = "/static/js/start-chooser.js"
 
+# ------------------------------------------------------------------ answer box index (ARCHITECT-V3 §c.5, Q-A1)
+# Built from the RENDERED pages, so a unit's answer is the page's own text, word for word: every FAQ
+# <details>, the /pricing/, /terms/ and /privacy/ sections with ids, the tool pages' FAQs, the glossary
+# and the /start/ "What happens next" steps. Never /research/* (no study figure may sit next to an offer,
+# and an answer can hold a price), thank-you and other noindex pages, flag-off pages or French pages.
+# Shipped as a script (window.DT_ANSWERS = …), not fetched JSON: every page keeps connect-src 'none'.
+ANSWERS_JS = "/static/js/answers-index.js"
+ANSWERS_MAX = 150 * 1024
+ANSWER_MAX_CHARS = 700
+ANSWER_SKIP = ("/research/", "/fr/", "/help/")
+ANSWER_SECTIONS = {"/pricing/": "price", "/terms/": "terms", "/privacy/": "privacy"}
+ANSWER_SECTION_SKIP = {"faq-h", "ladder-h", "history"}
+INLINE_TAGS = frozenset("a abbr b bdi bdo cite code data del dfn em font i ins kbd mark nobr q s samp small span "
+                        "strong sub sup time tt u var wbr".split())   # = checks/lint.py INLINE
+
+
+def plain(fragment):
+    """Readable text of an HTML fragment: inline elements join, every other element is a break
+    (the same rule as checks/lint.py visible_text), whitespace collapsed."""
+    from html.parser import HTMLParser
+
+    class P(HTMLParser):
+        def __init__(self):
+            super().__init__(convert_charrefs=True)
+            self.out, self.skip = [], 0
+
+        def handle_starttag(self, tag, attrs):
+            if tag in ("script", "style"):
+                self.skip += 1
+            elif tag not in INLINE_TAGS:
+                self.out.append(" ")
+
+        def handle_endtag(self, tag):
+            if tag in ("script", "style"):
+                self.skip -= 1
+            elif tag not in INLINE_TAGS:
+                self.out.append(" ")
+
+        def handle_data(self, data):
+            if not self.skip:
+                self.out.append(data)
+    p = P()
+    p.feed(fragment)
+    p.close()
+    return " ".join("".join(p.out).split())
+
+
+def slug(text, n=60):
+    t = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode().lower()
+    return re.sub(r"[^a-z0-9]+", "-", t).strip("-")[:n].strip("-") or "x"
+
+
+FAQ_SECTION_RE = re.compile(r'(?s)(<section[^>]*aria-labelledby="faq-h"[^>]*>)(.*?)(</section>)')
+
+
+def add_faq_ids(html):
+    """Each FAQ <details> gets a stable id (q-<slug of its question>), so an answer can link to it."""
+    m = FAQ_SECTION_RE.search(html)
+    if not m:
+        return html
+    seen = set(re.findall(r'\sid="([^"]+)"', html))
+
+    def one(d):
+        base = "q-" + slug(plain(d.group(1)))
+        i, new = 2, base
+        while new in seen:
+            new, i = f"{base}-{i}", i + 1
+        seen.add(new)
+        return f'<details id="{new}"><summary>{d.group(1)}</summary>'
+    body = re.sub(r"<details><summary>(.*?)</summary>", one, m.group(2))
+    return html[:m.start(2)] + body + html[m.end(2):]
+
+
+def cut_answer(text):
+    """≤ ANSWER_MAX_CHARS, cut after a sentence end, then " …" (the source link carries the rest)."""
+    if len(text) <= ANSWER_MAX_CHARS:
+        return text
+    head = text[:ANSWER_MAX_CHARS]
+    k = max(head.rfind(". "), head.rfind("? "), head.rfind(": "))
+    return (head[:k + 1] if k > 200 else head.rsplit(" ", 1)[0]) + " …"
+
+
+def answer_units(rendered):
+    """[(page, html)] → the index units {id, q, a, url, section, kind, updated}. Dies on a unit whose
+    anchor is not on its page, or whose text holds a finding number from evidence()."""
+    units, ids = [], set()
+    ev = evidence()
+    bad_numbers = [ev["finding"]["pct"], re.search(r"[\d,]{4,}", ev["finding"]["rest"]).group(0)]
+
+    def add(page, kind, q, a, anchor, where):
+        a = cut_answer(a)
+        if not q or not a:
+            return
+        uid = slug(f"{kind}-{page['path'].strip('/') or 'home'}-{q}", 90)
+        while uid in ids:
+            uid += "-2"
+        ids.add(uid)
+        units.append({"id": uid, "q": q, "a": a, "url": page["path"] + "#" + anchor,
+                      "section": where, "kind": kind, "updated": page.get("updated", "")})
+
+    for page, html in rendered:
+        path = page["path"]
+        if (page.get("noindex") or page.get("redirect_to") or path.startswith(ANSWER_SKIP)
+                or page.get("lang", "en") != "en" or path.endswith(".html")):
+            continue
+        main = re.search(r"(?s)<main[^>]*>(.*)</main>", html).group(1)
+        crumb = "Home" if path == "/" else page.get("crumb") or page["title"]
+        m = FAQ_SECTION_RE.search(main)
+        if m:
+            kind = "tool" if path.startswith("/tools/") else "faq"
+            for did, q, a in re.findall(r'(?s)<details id="([^"]+)">\s*<summary>(.*?)</summary>(.*?)</details>', m.group(2)):
+                add(page, kind, plain(q), plain(a), did, f"{crumb}, Questions")
+        if path in ANSWER_SECTIONS:
+            heads = list(re.finditer(r'(?s)<h([23])\b[^>]*\sid="([^"]+)"[^>]*>(.*?)</h\1>', main))
+            for k, h in enumerate(heads):
+                if h.group(2) in ANSWER_SECTION_SKIP or (m and m.start(2) <= h.start() < m.end(2)):
+                    continue
+                end = heads[k + 1].start() if k + 1 < len(heads) else len(main)
+                body = main[h.end():end]
+                body = FAQ_SECTION_RE.sub("", body)
+                q = plain(h.group(3))
+                add(page, ANSWER_SECTIONS[path], q, plain(body), h.group(2), f"{crumb}, {q}")
+        if path == "/glossary/":
+            for did, q, a in re.findall(r'(?s)<dt id="([^"]+)">(.*?)</dt>\s*<dd>(.*?)</dd>', main):
+                add(page, "glossary", plain(q), plain(a), did, f"Glossary, {plain(q)}")
+        if path == "/start/":
+            s = re.search(r'(?s)<section class="choice" id="([a-z]+)".*?<h3>(What happens next)</h3>\s*(<ol.*?</ol>)', main)
+            if s:
+                add(page, "faq", s.group(2), plain(s.group(3)), s.group(1), "Start here, What happens next")
+    for u in units:
+        path, anchor = u["url"].split("#", 1)
+        html = dict((p["path"], h) for p, h in rendered)[path]
+        if not re.search(r'\sid="' + re.escape(anchor) + '"', html):
+            die(f"answer index: {u['url']} has no such anchor on its page")
+        for n in bad_numbers:
+            if n in u["a"] or n in u["q"]:
+                die(f"answer index: unit {u['id']} holds the study figure {n!r} (no finding next to an offer)")
+    return units
+
+
+def answers_index_js(units, cfg):
+    advice = [u["id"] for u in units if u["url"] == "/#q-is-this-advice"]
+    if not advice:
+        die("answer index: the home FAQ 'Is this advice?' (the out-of-scope reply) is missing")
+    data = {"version": 1, "built": cfg["legal"]["terms_version"], "advice": advice[0],
+            "disclaimer": cfg["legal"]["disclaimer_short"], "synonyms": cfg.get("answers", {}).get("synonyms", {}),
+            "units": units}
+    js = ("// answers-index.js: built by site/build.py from the pages' own text (ARCHITECT-V3 §c.5). Data only.\n"
+          "window.DT_ANSWERS = " + json.dumps(data, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+          .replace("</", "<\\/") + ";\n")
+    if len(js.encode("utf-8")) > ANSWERS_MAX:
+        die(f"answer index is {len(js.encode('utf-8'))} bytes, over the {ANSWERS_MAX}-byte budget")
+    return js
+
+
 # Pages owned by templates. path → template, metadata, and the flag that must be on.
 PAGES = [
     {"template": "pages/home.html", "path": "/", "requires_flag": None, "scripts": [MOTION_JS],
@@ -383,6 +538,15 @@ PAGES += [
                     "chiffres épurés pour le rapport payant, et vos droits."},
 ]
 PAID_ONLY_PATHS_FR = ["/fr/avant-de-payer/", "/fr/conditions/", "/fr/confidentialite/"]
+
+# /help/ (ARCHITECT-V3 §c.5, Q-A1): every answer unit, grouped; the answer box's no-JS landing page.
+# Rendered after every other page, from their HTML (build.answer_units).
+PAGES += [
+    {"template": "pages/help.html", "path": "/help/", "requires_flag": None, "updated": "2026-10-21",
+     "crumb": "Questions", "scripts": ["/static/js/answers.js", "/static/js/answer-ui.js"], "title": "Questions: Prices, Refunds, Files and Privacy",
+     "description": "Every answer on donttrade in one place: prices, refunds, what the free tools do with your file, "
+                    "privacy and the terms, each with a link to its page."},
+]
 
 # Hybrid "Start a Pilot" (pilot_checkout, default off): the thank-you page with the Stripe link.
 PAGES += [
@@ -568,6 +732,7 @@ def check_hero_dashboard():
 # the SHA-256 of the file as served>. Module imports (and module-worker URLs) between our own scripts get the
 # same query, and a script's hash covers its rewritten imports, so a change deep in the engine changes the URL of
 # every module above it: a page never mixes old and new modules either.
+# (data-index-src= and data-js-src=, the answer box's lazy scripts, end in src=" and are versioned too)
 ASSET_REF_RE = re.compile(r'((?:src|href)=")(/static/[^"?#]+\.(?:js|css))(")')
 JS_SPEC_RE = re.compile(r"""(\bfrom\s*|\bimport\s*\(?\s*|\bnew URL\(\s*)(['"])(\.{1,2}/[^'"?#\s]+\.js)\2""")
 UNVERSIONED_RE = re.compile(r'(?:src|href)="/static/[^"]+\.(?:js|css)(?:#[^"]*)?"')
@@ -1524,8 +1689,9 @@ def build():
                 "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": tools_for(flags),
                 "evidence": evidence(), "latest": latest(), "footer_privacy": footer_privacy(flags), "show_seller": show_seller(cfg),
                 "business_id_line": Markup(business_id_line(cfg, private, "legal"))}
-    built = []
-    for rel, page in sorted(owned.items()):
+    built, rendered = [], []
+
+    def render(rel, page, **more):
         page = {"scripts": [], "modules": [], "og_image": "/assets/og/default.png", "lang": "en",
                 "alternates": [], **page}
         if flags["paid_report"]:
@@ -1537,7 +1703,9 @@ def build():
         extra = {"sample_csv": sample_csv()} if page.get("sample") else {}
         if page.get("lifted"):
             extra["lifted_html"] = Markup(lifted_fragment(page["lifted"]))
-        html = env.get_template(page["template"]).render(page=page, csp=csp_for(page, cfg), **base_ctx, **extra)
+        html = env.get_template(page["template"]).render(page=page, csp=csp_for(page, cfg), **base_ctx, **extra, **more)
+        if not page.get("lifted"):
+            html = add_faq_ids(html)   # Q-A1: a stable id per FAQ question (lifted pages keep their frozen ids)
         if html.count(LD_MARKER) != 1:
             die(f"{page['template']}: the JSON-LD marker must appear exactly once")
         html = html.replace(LD_MARKER, jsonld(page, cfg, html, flags, products))
@@ -1546,6 +1714,17 @@ def build():
         with open(fp, "w", encoding="utf-8", newline="\n") as f:
             f.write(html)
         built.append(page)
+        rendered.append((page, html))
+
+    later = {rel: page for rel, page in owned.items() if page["path"] == "/help/"}
+    for rel, page in sorted(owned.items()):
+        if rel not in later:
+            render(rel, page)
+    units = answer_units(rendered)
+    with open(os.path.join(out, ANSWERS_JS.lstrip("/")), "w", encoding="utf-8", newline="\n") as f:
+        f.write(answers_index_js(units, cfg))
+    for rel, page in sorted(later.items()):
+        render(rel, page, answer_units=units)
     write_sitemap_and_robots(out, cfg, built, flags)
     version_assets(out, left_out=static_left_out)
 

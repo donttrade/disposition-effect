@@ -8,6 +8,7 @@
     The nav shows no price, % or study number (build.nav_problem); its one offer is the plain text
     link "Start a Pilot" at the foot of the For firms panel (owner decision Q3), never a button. -#}
 {%- import "partials/icons.html" as ic %}
+{%- from "partials/answer_box.html" import answer_box with context %}
 {%- set cur = nav_current(page) %}
 {%- macro item_link(it) %}<a class="nav-item" href="{{ it.href }}"{% if page.path == it.href %} aria-current="page"{% endif %}>{{ ic.icon(it.icon) }}<span class="ni-text"><span class="ni-t">{{ it.label }}</span>{% if it.desc %} <span class="ni-d">{{ it.desc }}</span>{% endif %}</span></a>{% endmacro %}
 {%- macro group_body(g) %}
@@ -55,8 +56,15 @@
       {%- for g in nav if not g["items"] %}
         <li>{{ plain_link(g) }}</li>
       {%- endfor %}
+        <li><a href="/help/#ask"{% if page.path == "/help/" %} aria-current="page"{% endif %}>Ask a question</a></li>
       </ul>
     </div>
   </details></nav>
+  {#- the answer box (ARCHITECT-V3 §c.5): a <details> popover from 900 px (a GET form to /help/ without JS);
+      below 900 px the Menu holds "Ask a question" instead (no room on a 320 px line) -#}
+  <details class="nav-ask" data-ask>
+    <summary aria-label="Ask a question">{{ ic.icon("search", "ask-i") }}<span class="ask-label" aria-hidden="true">Ask</span></summary>
+    <div class="ask-pop">{{ answer_box("hd", button="ask-submit") }}</div>
+  </details>
   <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" hidden><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg><span class="tt-label">Dark mode</span></button>
 </div></header>

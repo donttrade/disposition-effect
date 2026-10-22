@@ -96,7 +96,7 @@ def test_n2_nav_text_has_no_price_and_one_text_offer(built_site):
         assert not re.search(r"\d\s*%|\$", text), rel
         for p in prices["products"]:
             assert B.usd(p["price_usd"]) not in text, rel
-        assert "aria-label" not in head.replace('aria-label="Main"', ""), rel   # no hidden text to check apart from Main
+        assert set(re.findall(r'aria-label="([^"]+)"', head)) == {"Main", "Ask a question"}, rel
         assert 'class="btn' not in head
         assert head.count("Start a Pilot") == 2   # once per list: desktop panel, phone accordion
 

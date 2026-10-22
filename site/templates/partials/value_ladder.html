@@ -1,0 +1,36 @@
+{#- What's free, what's paid, and why (ARCHITECT-V3 §c.4, request #4). Wording describes what each tier
+    measures and why it costs what it costs; it never says a tier will improve results. Every amount
+    from prices.json. Set before including: show_firm_price (false on home: no firm price there;
+    true on /pricing/), ladder_id (the heading id). Never place it next to a study finding.
+    "Free forever" (owner decision Q4, 21 Oct ~18:30) is scoped to the journal's local features and
+    always stated with its reason; lint (claims:free_forever) refuses it in any other sentence. -#}
+{%- import "partials/trader_offer.html" as offer with context %}
+{%- set r = products["report39"] %}{%- set pilot = products["pilot"] %}
+<section class="section ladder" aria-labelledby="{{ ladder_id }}">
+  <h2 id="{{ ladder_id }}">What’s free, what’s paid, and why</h2>
+  <div class="ladder-rows">
+    <div class="ladder-row">
+      <h3>Free tools{% if flags.journal %} and the journal{% endif %}: <span class="num">$0</span></h3>
+      <p>They run on your computer, so serving them costs us almost nothing. No account, no card, no time limit. They show what happened in your trades: totals, {% if flags.journal %}a P&amp;L calendar, {% endif %}streaks and drawdowns, and one disposition figure from four counts you type in.</p>
+      {%- if flags.journal %}
+      <p>The journal is free forever: it runs on your device, so it costs us nothing to run. A paid add-on, if one ever exists, would be separate and optional, and would never take away a feature that was free.</p>
+      {%- endif %}
+      <p><a href="/tools/">All free tools</a></p>
+    </div>
+    <div class="ladder-row">
+      <h3>Habit report: <span class="num">{{ r.price_usd|usd }}</span> founding price for the first {{ prices.rules.founding_limit }} buyers{% if not flags.paid_report %} (waitlist, nothing charged now){% endif %}</h3>
+      <p>The free disposition calculator works from four counts you type in. The report reads every closed trade in your file. It measures five habits, tests four of them against noise, compares trades from the same days, and gives each habit a historical dollar total, plus one re-test 30 to 60 days after your first report. The tests run on our server on stripped trade numbers, and building them honestly is the work you pay for.</p>
+      <p>{{ offer.button() }}</p>
+    </div>
+    <div class="ladder-row">
+      {%- if show_firm_price %}
+      <h3>For firms: a {{ pilot.name }} at <span class="num">{{ pilot.price_usd|usd }}</span> USD, fixed and published</h3>
+      {%- else %}
+      <h3>For firms: a {{ pilot.name }} at a fixed, published price</h3>
+      {%- endif %}
+      <p>A written scope, then one measure on your traders’ records, run by your own staff on your own systems, and a one-page memo. Each engagement is scoped and written up by a person, so it is priced per engagement, the same for every firm.{% if show_firm_price %} Firms also: Snapshot, Memo, Outcomes pack.{% endif %}</p>
+      <p><a href="/pricing/#firms">{% if show_firm_price %}All firm prices{% else %}See Pricing{% endif %}</a></p>
+    </div>
+  </div>
+  <p class="small muted">The free tools and the report describe your past trades. They do not tell you what to trade.</p>
+</section>

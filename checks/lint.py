@@ -316,6 +316,24 @@ def lint_text(text, where="text", paid=False, analytics=False, english=True):
     out += restore_email_claims(text, where)
     out += waive_dispute_claims(text, where)
     out += dated_pricing_claims(text, where)
+    out += free_forever_claims(text, where)
+    return out
+
+
+# Owner decision Q4 (21 Oct ~18:30): "free forever" applies only to the journal's local features, and the
+# page says why (it runs on the visitor's device and costs us nothing to run). Any sentence with the claim
+# must name the journal, and the same text must give the reason.
+FREE_FOREVER = re.compile(r"\bfree[\s-]+forever\b", re.IGNORECASE)
+FREE_FOREVER_REASON = "costs us nothing to run"
+
+
+def free_forever_claims(text, where):
+    out = []
+    for s in sentences(text):
+        if FREE_FOREVER.search(s) and "journal" not in s.lower():
+            out.append(("claim:free_forever", where, f"“free forever” outside the journal: {s.strip()[:120]}"))
+    if FREE_FOREVER.search(text) and FREE_FOREVER_REASON not in text:
+        out.append(("claim:free_forever", where, f"“free forever” without its reason (“{FREE_FOREVER_REASON}”)"))
     return out
 
 
@@ -616,6 +634,8 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, b
             if name.endswith(".html") and rel not in owned_rel:
                 problems += passthrough_rules(s, rel, analytics, paid)
                 problems += placeholder_problems(s, rel)
+            if name == "answers-index.js":   # ARCHITECT-V3 A11: every answer unit passes the page wording rules
+                problems += answer_index_problems(s, rel, paid, analytics)
             if name.endswith(".js"):
                 problems += restore_email_claims(js_strings(s), rel)
                 problems += waive_dispute_claims(js_strings(s), rel)
@@ -638,6 +658,21 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, b
             if not badges and name.endswith((".html", ".js")):
                 problems += free_badge_problems(s, rel)
     return problems
+
+
+def answer_index_problems(js, where, paid=False, analytics=False):
+    """The answer box index (build.answers_index_js): one JSON assignment; each unit's question and
+    answer pass lint_text, and no unit comes from /research/."""
+    m = re.fullmatch(r"(?s)//[^\n]*\nwindow\.DT_ANSWERS = (\{.*\});\n", js)
+    if not m:
+        return [("answers", where, "not a single window.DT_ANSWERS = {...}; assignment")]
+    data = json.loads(m.group(1).replace("<\\/", "</"))
+    out = []
+    for u in data["units"]:
+        out += lint_text(normalise(u["q"] + " " + u["a"]), f"{where}#{u['id']}", paid, analytics)
+        if u["url"].startswith("/research/"):
+            out.append(("answers", where, f"unit {u['id']} comes from /research/"))
+    return out
 
 
 def flags_of_build(out_dir):
