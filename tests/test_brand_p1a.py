@@ -337,8 +337,9 @@ import tomllib  # noqa: E402
 TOML = os.path.join(REPO, "site", "config", "site.toml")
 CHANNELS = [c["url"] for c in tomllib.load(open(TOML, "rb"))["channels"]]
 EXPECTED = ["https://donttrade.substack.com", "https://x.com/donttradestudy", "https://github.com/donttrade",
-            "https://www.tiktok.com/@donttradestudy", "https://www.instagram.com/donttradestudy/"]
-NAMES = ["Substack", "X", "GitHub", "TikTok", "Instagram"]
+            "https://www.tiktok.com/@donttradestudy", "https://www.instagram.com/donttradestudy/",
+            "https://www.youtube.com/@donttradestudy"]
+NAMES = ["Substack", "X", "GitHub", "TikTok", "Instagram", "YouTube"]
 
 
 def follow_links(html):
@@ -364,8 +365,9 @@ def test_soc1_footer_follow_is_exactly_the_official_accounts(built_site):
     about = page(built_site, "/about/").split("<!--frozen:end-->")[1]
     assert ("donttrade.substack.com</a>, <a href=\"https://x.com/donttradestudy\" rel=\"me noopener\">x.com/donttradestudy</a>, "
             "<a href=\"https://github.com/donttrade\" rel=\"me noopener\">github.com/donttrade</a>, "
-            "<a href=\"https://www.tiktok.com/@donttradestudy\" rel=\"me noopener\">tiktok.com/@donttradestudy</a> and "
-            "<a href=\"https://www.instagram.com/donttradestudy/\" rel=\"me noopener\">instagram.com/donttradestudy</a>. ") in about
+            "<a href=\"https://www.tiktok.com/@donttradestudy\" rel=\"me noopener\">tiktok.com/@donttradestudy</a>, "
+            "<a href=\"https://www.instagram.com/donttradestudy/\" rel=\"me noopener\">instagram.com/donttradestudy</a> and "
+            "<a href=\"https://www.youtube.com/@donttradestudy\" rel=\"me noopener\">youtube.com/@donttradestudy</a>. ") in about
 
 
 def test_soc1_every_brand_icon_is_drawn_inline():
