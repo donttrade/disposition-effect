@@ -11,7 +11,7 @@ import { ics, retestLine, RETEST_LINE } from './retest-copy.js';
 import { pgrPlrCounts } from '../engine/pgr.js';
 import { stripRows } from './strip.js';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js';
-import { habitSentences, methodLine, page1Lines, coverageLines } from './wording.js';
+import { habitSentences, methodLine, page1Lines, coverageLines, checkMethod } from './wording.js';
 
 const $ = (id) => document.getElementById(id);
 const MINUS = '−';
@@ -52,7 +52,7 @@ const pct = (x) => (x === null || x === undefined ? '—' : (100 * x).toFixed(1)
 const num = (x, dp = 2) => (x === null || x === undefined ? '—' : x.toFixed(dp));
 const count = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-// The formatters wording.js fills its sentences with (ARCHITECT-STATS-AMENDMENT §7.1: money as now).
+// The formatters wording.js fills its sentences with (ARCHITECT-STATS-AMENDMENT-R2 §9: money as now).
 const wordingFmt = (unit) => ({ money: (x) => money(x, unit), duration, ratio: (x) => num(x), count });
 
 const TESTED = ['hold_gap', 'revenge', 'size_up', 'tilt'];
@@ -61,10 +61,12 @@ const VERDICT = {
   distinguishable: ['badge badge-real', 'distinguishable from noise'],
   not_distinguishable: ['badge badge-noise', 'not distinguishable from noise'],
   too_few: ['badge badge-few', 'not enough trades to tell'],
+  withheld: ['badge badge-few', 'not tested'],
   descriptive: ['badge badge-noise', 'described, not tested'],
 };
 
 function badge(v) {
+  if (!VERDICT[v]) throw new Error(`report: unknown verdict ${v}`);
   const [cls, text] = VERDICT[v];
   return el('span', { class: cls, text });
 }
@@ -83,9 +85,10 @@ function measures(h, unit) {
   }
 }
 
-// The one extra measure a tested habit's §7.1 sentences leave out (hold_gap's ratio, tilt's
-// 3-loss runs), or null.
+// The one extra measure a tested habit's sentences leave out (hold_gap's ratio, tilt's 3-loss runs),
+// or null. Shown only when the habit was tested (not too_few, not withheld).
 function detailLine(h, unit) {
+  if (h.p_raw === null) return null;
   if (h.id === 'hold_gap' || h.id === 'tilt') return measures(h, unit)[2];
   return null;
 }
@@ -147,10 +150,11 @@ function habitSection(h, unit, report) {
   const sec = el('section', { class: 'habit', id: 'habit-' + h.id, 'aria-labelledby': 'h-' + h.id });
   sec.append(el('h3', { id: 'h-' + h.id, text: h.name }), el('p', { class: 'muted', text: h.question }), el('p', {}, badge(h.verdict)));
   if (TESTED.includes(h.id)) {
-    // ARCHITECT-STATS-AMENDMENT §7.1: the measures sentence and the verdict-by-direction
-    // sentence (too_few: the one sentence that replaces both), from wording.js.
+    // ARCHITECT-STATS-AMENDMENT-R2 §9.2: the habit's lines in order (measures, the comparison
+    // shares, the 12-hour count, the verdict; too_few / withheld lines replace the share and the
+    // verdict), from wording.js.
     for (const s of habitSentences(h, report, wordingFmt(unit))) sec.append(el('p', { class: 'habit-sentence', text: s }));
-    const extra = h.verdict === 'too_few' ? null : detailLine(h, unit);
+    const extra = detailLine(h, unit);
     if (extra) sec.append(el('p', { text: extra }));
   } else {
     const ul = el('ul');
@@ -185,10 +189,12 @@ function download(name, type, text) {
 
 export function renderReport(report, out, meta) {
   const unit = report.currency;
+  checkMethod(report);
   out.replaceChildren();
   out.append(el('p', { class: 'disclaimer notice', text: report.disclaimer }));
-  // Page 1 (ARCHITECT-STATS-AMENDMENT §7.1): the headline, the focus habit or why none is
-  // shown first, then the coverage line. All sentences come from wording.js.
+  // Page 1 (ARCHITECT-STATS-AMENDMENT-R2 §9.1): the headline, the focus habit or why none is
+  // shown first (one reason line per distinguishable habit), then the coverage line. All
+  // sentences come from wording.js, which refuses a report of another method version.
   const focus = report.habits.find((h) => h.id === report.focus) || null;
   const p1 = el('section', { class: 'section', id: 'focus', 'aria-labelledby': 'focus-h' });
   p1.append(el('h2', { id: 'focus-h', text: 'Page 1' }));
@@ -258,6 +264,7 @@ export function renderReport(report, out, meta) {
 // ---------------------------------------------------------------- page wiring
 
 let token = null;
+export const REPORT_ERROR = 'This report could not be shown, so nothing from it is displayed. Reply to your Stripe receipt email to tell us.';
 
 function status(msg, kind = '') {
   const s = $('rp-status');
@@ -284,7 +291,14 @@ async function run(file) {
   if (r.status === 0 || r.status >= 500) { status(OUTAGE, 'error'); return; }
   if (!r.ok) { status(r.json && r.json.error ? r.json.error.message : 'The report could not be made.', 'error'); return; }
   $('rp-status').hidden = true;
-  renderReport(r.json.report, $('rp-out'), { limited: stripped.limited, retest: r.json.retest || null, uses_left: r.json.uses_left });
+  try {
+    renderReport(r.json.report, $('rp-out'), { limited: stripped.limited, retest: r.json.retest || null, uses_left: r.json.uses_left });
+  } catch (e) {
+    // wording.js throws rather than print a sentence that is not true of this report (R2-3).
+    $('rp-out').replaceChildren();
+    status(REPORT_ERROR, 'error');
+    return;
+  }
   if (r.json.uses_left !== null) $('rp-uses').textContent = r.json.uses_left === 1 ? 'One re-test left on this purchase.' : r.json.uses_left === 0 ? 'Both runs on this purchase are used.' : '';
 }
 
