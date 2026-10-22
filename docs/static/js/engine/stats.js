@@ -4,7 +4,7 @@
 // Never produces NaN or Infinity: a ratio with nothing to divide by is null, and
 // the profit factor with no losing trades is the words "no losing trades".
 
-import { median } from './noise.js';
+import { median } from './noise.js?v=d0f6a787';
 
 export const NO_LOSSES = 'no losing trades';
 

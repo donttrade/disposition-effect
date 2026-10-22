@@ -13,8 +13,8 @@
 // importers, not from a real export; see tests/fixtures/PROVENANCE.txt.
 // tests/test_alias_parity.py checks this table equals the Python reference's.
 
-import { clean, normHeader } from './csv.js';
-import { fail } from './errors.js';
+import { clean, normHeader } from './csv.js?v=ad87ab8b';
+import { fail } from './errors.js?v=a49d9d6e';
 
 // verified: false = column names not yet confirmed against a real export.
 export const SIGNATURES = {
