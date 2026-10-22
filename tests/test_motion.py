@@ -35,12 +35,14 @@ PHONE = {"width": 375, "height": 812}
 # duration is not motion.js's), whether .rv / data-cu ever appeared, and the hero dd text
 # every 50 ms (it must always be final: the count is drawn by ::after from data-cu).
 INIT = """
-window.__m = {shifts: [], lt: [], loaf: [], rvSeen: false, cuSeen: false, cuValues: [], dd: []};
+window.__m = {shifts: [], lt: [], fp: null, loaf: [], rvSeen: false, cuSeen: false, cuValues: [], dd: []};
+try { new PerformanceObserver(l => l.getEntries().forEach(e => { if (e.name === 'first-paint') __m.fp = e.startTime; }))
+  .observe({type: 'paint', buffered: true}); } catch (e) {}
 try { new PerformanceObserver(l => l.getEntries().forEach(e => { if (!e.hadRecentInput) __m.shifts.push({v: e.value,
   motion: e.sources.some(s => s.node && s.node.nodeType === 1 && !!s.node.closest('[data-reveal], .hero-dash, .btn')),
   src: e.sources.map(s => s.node ? s.node.nodeName + '.' + (s.node.className || '') : '?')}); }))
   .observe({type: 'layout-shift', buffered: true}); } catch (e) {}
-try { new PerformanceObserver(l => l.getEntries().forEach(e => __m.lt.push(Math.round(e.duration))))
+try { new PerformanceObserver(l => l.getEntries().forEach(e => __m.lt.push([Math.round(e.startTime), Math.round(e.duration)])))
   .observe({type: 'longtask', buffered: true}); } catch (e) {}
 try { new PerformanceObserver(l => l.getEntries().forEach(e => (e.scripts || []).forEach(s => {
   if ((s.sourceURL || '').includes('motion.js')) __m.loaf.push(Math.round(s.duration)); })))
@@ -164,7 +166,13 @@ def test_i5_i6_i11_no_motion_layout_shift_no_long_task_no_overflow(browser, buil
         m = pg.evaluate("__m")
         assert [s for s in m["shifts"] if s["motion"]] == [], (path, m["shifts"])
         assert sum(s["v"] for s in m["shifts"]) < 0.01, (path, m["shifts"])  # pre-existing: the nav toggle
-        assert [d for d in m["lt"] if d >= 50] == [], (path, m["lt"])
+        # The document's first style + layout pass is one task that starts before first paint; on this 2-CPU
+        # box it runs 50-70 ms about 1 run in 5 on the pre-brand base cd29313 too, with no script in it
+        # (traced 22 Oct: Layout + UpdateLayoutTree). So only long tasks that start at or after first paint
+        # count here. motion.js can run inside that first frame; its own time there is still held under 50 ms
+        # by the loaf check below. The brand coder's ('/', [58, 57]) was this first-render task.
+        assert m["fp"] is not None, path
+        assert [t for t in m["lt"] if t[1] >= 50 and t[0] >= m["fp"]] == [], (path, m["fp"], m["lt"])
         assert [d for d in m["loaf"] if d >= 50] == [], (path, m["loaf"])
     ctx.close()
 
@@ -331,13 +339,22 @@ def test_i10_hero_follows_the_chosen_theme_not_the_os(browser, built_site, os_sc
     ctx.add_init_script(f"try {{ localStorage.setItem('donttrade-theme', '{saved}') }} catch (e) {{}}")
     pg = ctx.new_page()
     pg.goto(built_site["url"] + "/")
+    # Brand P1a (ARCHITECT-BRAND §2.2, T-BAND): the hero sits in the dark band, which is charcoal in BOTH
+    # themes by design, so the dashboard is no longer white in light. What still follows the chosen theme
+    # (and never the OS) is (a) the page outside the band and (b) which --band-* token block the band uses:
+    # light block band-bg #16181C / band-surface #1E2126, dark block #0E1013 / #16181C. Text is #F2F1EE in both.
     r = pg.evaluate("""() => { const d = document.querySelector('.hero-dash'), p = document.createElement('i');
-      document.body.append(p); p.style.color = 'var(--bg)'; const bg = getComputedStyle(p).color;
-      p.style.color = 'var(--text)'; const tx = getComputedStyle(p).color; p.remove();
-      return {dash: getComputedStyle(d).backgroundColor, line: getComputedStyle(d.querySelector('.line-actual')).stroke, bg, tx}; }""")
+      document.body.append(p); const v = n => { p.style.color = `var(${n})`; return getComputedStyle(p).color; };
+      const o = {page: v('--bg'), pageText: v('--text'), bandBg: v('--band-bg'), bandSurface: v('--band-surface')}; p.remove();
+      return {...o, band: getComputedStyle(d.closest('.band')).backgroundColor, dash: getComputedStyle(d).backgroundColor,
+              line: getComputedStyle(d.querySelector('.line-actual')).stroke}; }""")
     ctx.close()
-    want = {"dark": ("rgb(22, 24, 28)", "rgb(242, 241, 238)"), "light": ("rgb(255, 255, 255)", "rgb(22, 24, 28)")}[saved]
-    assert (r["dash"], r["line"]) == (r["bg"], r["tx"]) == want, r
+    page, band, surface = {"dark": ("rgb(22, 24, 28)", "rgb(14, 16, 19)", "rgb(22, 24, 28)"),
+                           "light": ("rgb(255, 255, 255)", "rgb(22, 24, 28)", "rgb(30, 33, 38)")}[saved]
+    assert r["page"] == page, r                                   # the page follows the chosen theme
+    assert (r["bandBg"], r["bandSurface"]) == (band, surface), r  # the chosen theme's band block
+    assert (r["band"], r["dash"]) == (band, surface), r           # and the hero actually uses it
+    assert r["line"] == "rgb(242, 241, 238)", r                   # band text, the same in both themes
 
 
 def test_i10_no_picture_source_left_in_the_build(built_site):
