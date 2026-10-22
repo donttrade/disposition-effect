@@ -846,6 +846,27 @@ a.choice-link:hover { border-color: var(--rust); background: var(--surface); col
 .site-footer .follow a { gap: 10px; }
 .site-footer .follow svg { flex: none; width: 20px; height: 20px; fill: currentColor; }
 
+/* ------------------------------------------------------------------ trading heatmap (tools batch 2) */
+/* Cell text stays var(--text) on a light tint of gain or loss (never coloured text on colour), and every
+   cell prints its signed total and its trade count, so the shading is never the only signal. */
+.heatmap td.heat { min-width: 6.5rem; text-align: right; font-family: var(--font-mono); font-size: var(--fs-0); font-variant-numeric: tabular-nums; color: var(--text); }
+.heatmap td.heat span { display: block; white-space: nowrap; }
+.heatmap td.heat .heat-n { color: var(--text); font-family: var(--font-sans); }
+.heatmap td.heat-empty { color: var(--muted); text-align: center; }
+.heatmap tbody th[scope="row"] { min-width: 7.5rem; white-space: nowrap; font-family: var(--font-mono); font-size: var(--fs-0); }
+.heat-g1 { background: color-mix(in srgb, var(--gain) 12%, var(--bg)); }
+.heat-g2 { background: color-mix(in srgb, var(--gain) 22%, var(--bg)); }
+.heat-g3 { background: color-mix(in srgb, var(--gain) 32%, var(--bg)); }
+.heat-g4 { background: color-mix(in srgb, var(--gain) 42%, var(--bg)); }
+.heat-l1 { background: color-mix(in srgb, var(--loss) 12%, var(--bg)); }
+.heat-l2 { background: color-mix(in srgb, var(--loss) 22%, var(--bg)); }
+.heat-l3 { background: color-mix(in srgb, var(--loss) 32%, var(--bg)); }
+.heat-l4 { background: color-mix(in srgb, var(--loss) 42%, var(--bg)); }
+.tool-out .table-wrap:has(> .heatmap) { max-width: 100%; }
+.table-wrap.table-narrow { max-width: 32rem; }
+.table-narrow th.num { white-space: normal; } /* the recovery table's long header wraps, so both columns fit at 375 px */
+.tool-out .table-wrap.table-wide { max-width: none; } /* the drawdown list: 10 columns */
+
 /* ------------------------------------------------------------------ motion (ARCHITECT-MOTION-PLAN 2026-10-21)
    Hidden/moving states need .dt-motion (theme.js, pre-paint) or a motion.js class. */
 :root {
