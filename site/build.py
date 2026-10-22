@@ -1025,6 +1025,7 @@ OPTIONAL_FLAGS = {"pilot_checkout": False, "free_badges": False, "journal": Fals
 # free tools show only the descriptive numbers, static/js/tools/trade-stats-badges.js is left out
 # of the build, and every page's copy drops the check (BADGE_COPY, the if_badges overrides).
 BADGES_JS = os.path.join("js", "tools", "trade-stats-badges.js")
+JOURNAL_JS_DIR = os.path.join("js", "journal") + os.sep
 
 
 # ------------------------------------------------------------------ nav (ARCHITECT-V3 §c.2, D1-D3)
@@ -1670,7 +1671,8 @@ def build():
     # 2. static assets of the new design
     def static_left_out(rel):
         return ((not flags["paid_report"] and rel.startswith("js" + os.sep + "paid"))
-                or (not flags["free_badges"] and rel == BADGES_JS))
+                or (not flags["free_badges"] and rel == BADGES_JS)
+                or (not flags["journal"] and rel.startswith(JOURNAL_JS_DIR)))   # ARCHITECT-V3 D7: out of the build until approved
     copy_tree_sorted(os.path.join(SITE, "static"), os.path.join(out, "static"), skip=static_left_out)
     # 3. dev pages, only on request; never bundled
     if os.environ.get("DT_DEV") == "1":
