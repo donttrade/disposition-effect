@@ -52,7 +52,7 @@ export async function commit(db, p, parsed, fileName, keep = []) {
     format: parsed.format, verified_format: parsed.verified_format, imported_at: new Date().toISOString(),
     n_trades_in_file: p.total, n_skipped_dupe: p.dupes, n_possible_dupe_kept: kept.length,
     n_possible_dupe_skipped: p.possible.length - kept.length,
-    warnings: (parsed.warnings || []).map((w) => ({ code: w.code, count: w.count || 1 })),
+    warnings: (parsed.warnings || []).map((w) => ({ code: w.code, count: w.n == null ? 1 : w.n })),
     date_from: iso(parsed.date_from), date_to: iso(parsed.date_to) };
   await addImport(db, { account: p.isNew ? { ...p.account, unit: p.account.unit || parsed.pnl_unit } : null, imp, trades });
   return { imp, added: trades.length };

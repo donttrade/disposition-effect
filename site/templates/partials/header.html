@@ -62,9 +62,11 @@
   </details></nav>
   {#- the answer box (ARCHITECT-V3 §c.5): a <details> popover from 900 px (a GET form to /help/ without JS);
       below 900 px the Menu holds "Ask a question" instead (no room on a 320 px line) -#}
+  {%- if not page.get("no_ask") %}
   <details class="nav-ask" data-ask>
     <summary aria-label="Ask a question">{{ ic.icon("search", "ask-i") }}<span class="ask-label" aria-hidden="true">Ask</span></summary>
     <div class="ask-pop">{{ answer_box("hd", button="ask-submit") }}</div>
   </details>
+  {%- endif %}
   <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" hidden><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg><span class="tt-label">Dark mode</span></button>
 </div></header>

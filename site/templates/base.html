@@ -44,6 +44,9 @@
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/static/css/site.css">
+{%- for s in page.get("styles", []) %}
+<link rel="stylesheet" href="{{ s }}">
+{%- endfor %}
 {%- if page.path in vt_pages %}
 <link rel="stylesheet" href="/static/css/vt.css">
 {%- endif %}
@@ -56,7 +59,7 @@
 {%- for s in page.modules %}
 <script src="{{ s }}" type="module"></script>
 {%- endfor %}
-{%- if flags.analytics %}{% include "partials/analytics.html" %}{% endif %}
+{%- if flags.analytics and not page.get("no_analytics") %}{% include "partials/analytics.html" %}{% endif %}
 <!--jsonld-->
 </head>
 <body>
