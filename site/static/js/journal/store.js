@@ -37,7 +37,12 @@ export const MIGRATIONS = {
 };
 
 // version and steps are parameters only so the tests can exercise a later step on a v1 database.
-export function open(name = DB_NAME, version = VERSION, steps = MIGRATIONS) {
+// 'blocked' is not a failure: it fires while another connection (an older tab, or this tab's own connection
+// whose last transaction is still finishing) has not closed yet. Every connection this file opens closes on
+// versionchange, so the request goes on by itself once they have; rejecting here would report an error for
+// an upgrade that then runs anyway (and leak its connection). onBlocked lets the page say "close the
+// journal in your other tabs" meanwhile.
+export function open(name = DB_NAME, version = VERSION, steps = MIGRATIONS, onBlocked = null) {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(name, version);
     req.onupgradeneeded = (ev) => {
@@ -59,7 +64,7 @@ export function open(name = DB_NAME, version = VERSION, steps = MIGRATIONS) {
       resolve(db);
     };
     req.onerror = () => reject(req.error || new Error('The journal could not be upgraded.'));
-    req.onblocked = () => reject(new Error('The journal is open in an older tab. Close it and reload.'));
+    req.onblocked = () => { if (onBlocked) onBlocked(); };
   });
 }
 

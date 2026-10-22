@@ -47,7 +47,8 @@ def test_n1_prop_sim_one_day(browser, built_site):
 def test_n4_n5_breadcrumb_and_noscript(browser, built_site, path):
     html = (built_site["out"] / path.strip("/") / "index.html").read_text(encoding="utf-8")
     pre = html[:html.index("<!--frozen:start-->")]
-    assert '<p class="crumb small"><a href="/tools/">Free tools</a></p>' in pre
+    assert '<nav class="crumb small" aria-label="Breadcrumb">' in pre and '<a href="/">Home</a>' in pre
+    assert '<a href="/tools/">Free tools</a>' in pre   # Home > Free tools > this calculator (Home link (c))
     assert "<noscript>" in pre and "needs JavaScript turned on" in pre
     ctx = browser.new_context(java_script_enabled=False, viewport={"width": 375, "height": 800})
     pg = ctx.new_page()

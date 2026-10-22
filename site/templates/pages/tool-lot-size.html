@@ -13,7 +13,7 @@
 <div class="wrap">
   <div class="grid">
     <div class="span-8">
-      <p class="crumb small"><a href="/tools/">Free tools</a></p>
+      {% include "partials/crumbs.html" %}
       <h1>Lot size calculator</h1>
       <p class="lede">Enter your account balance, the amount you would lose if the stop is hit (as a percentage or as an amount), your stop distance, and the value of one point for one lot on your instrument.</p>
       <p>The calculator returns the position size in lots, shows the loss at the stop after rounding down to your broker’s lot step, and prints the formula with your own numbers in it so you can redo it by hand. It works for forex pairs, gold, indices and futures, as long as you know the point value your broker uses; the section below shows where to find it. The inputs start blank on purpose. We do not suggest a risk percentage, because that choice is yours. Entries that could be read two ways, such as “1,500” in a field that also accepts decimals, are refused instead of guessed. It runs entirely in your browser and nothing you type is sent anywhere.</p>
