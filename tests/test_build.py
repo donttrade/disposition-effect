@@ -13,6 +13,10 @@ SITE = os.path.join(REPO, "site")
 sys.path.insert(0, SITE)
 import build as B  # noqa: E402
 
+# The last commit whose docs/ is the pre-v2 (old design) site: the parent of the step-30 bundle
+# b613c8b. Checks that are about the OLD pages read them from here, not from today's docs/.
+PRE_BUNDLE = "49f88b581a650343e2c2c22f13dc91ac30d512ba"
+
 
 def run_build(tmp_path, name, **env):
     out = tmp_path / name
@@ -131,15 +135,57 @@ def test_home_and_lifted_pages_are_templates_and_passthrough_still_works(tmp_pat
     assert "/static/css/site.css" in about and '<main id="main" class="lifted">' in about
     assert about.count("<!--frozen:start-->") == 1 and '<header class="site">' not in about
     # a docs/ page that no template owns still passes through: byte for byte, except the
-    # site-wide chrome fixes, which fail loudly when they don't match (pre-bundle docs/)
+    # site-wide chrome fixes, which fail loudly when they don't match.
+    # Since step 30 (b613c8b) docs/ IS the v2 build, so (a) un-owning /about/ now trips the loud
+    # guard (docs/about/ has the v2 chrome, not the old one), and (b) the byte-for-byte rule is
+    # proved on the pre-bundle page from git, planted in a copy of docs/.
     monkeypatch.setattr(B, "PAGES", [p for p in B.PAGES if p["path"] != "/about/"])
     monkeypatch.setenv("DT_OUT", str(tmp_path / "pt"))
+    with pytest.raises(B.BuildError, match="passthrough chrome: about/index.html"):
+        B.build()
+    old = subprocess.run(["git", "show", f"{PRE_BUNDLE}:docs/about/index.html"], cwd=REPO,
+                         capture_output=True, text=True, check=True).stdout
+    assert '<header class="site">' in old  # the pre-v2 page, old chrome
+    docs = tmp_path / "docs"
+    shutil.copytree(os.path.join(REPO, "docs"), docs)
+    (docs / "about" / "index.html").write_text(old, encoding="utf-8")
+    monkeypatch.setattr(B, "DOCS", str(docs))
     B.build()
-    docs = open(os.path.join(REPO, "docs/about/index.html"), encoding="utf-8").read()
     flags = {"paid_report": False, "analytics": False, "pilot_checkout": False, "trader_first_home": False}
-    assert (tmp_path / "pt" / "about" / "index.html").read_text(encoding="utf-8") == B.fix_passthrough_chrome(docs, "about/index.html", flags)
+    assert (tmp_path / "pt" / "about" / "index.html").read_text(encoding="utf-8") == B.fix_passthrough_chrome(old, "about/index.html", flags)
 
 
-def test_harvest_check_passes_on_live_pricing():
-    r = subprocess.run([sys.executable, os.path.join(REPO, "checks", "harvest_prices.py")], capture_output=True, text=True)
+def test_baseline_covers_every_old_url_and_the_published_docs_hold_them():
+    # URLs never move: every file of the pre-bundle docs/ is a baseline path, and the published
+    # docs/ (the v2 bundle since step 30) still serves every baseline path
+    def url(rel):
+        u = "/" + rel
+        return u[: -len("index.html")] if u.endswith("/index.html") else u
+    ls = subprocess.run(["git", "ls-tree", "-r", "--name-only", PRE_BUNDLE, "docs"], cwd=REPO,
+                        capture_output=True, text=True, check=True).stdout.split()
+    old = {url(f[len("docs/"):]) for f in ls}
+    paths, _ = B.read_baseline()
+    assert len(old) > 60 and old <= set(paths), sorted(old - set(paths))
+    for p in paths:
+        f = os.path.join(REPO, "docs", p.lstrip("/"), "index.html") if p.endswith("/") else os.path.join(REPO, "docs", p.lstrip("/"))
+        assert os.path.isfile(f), p
+
+
+def test_harvest_check_passes_on_live_pricing(tmp_path):
+    harvest = [sys.executable, os.path.join(REPO, "checks", "harvest_prices.py")]
+    # the live page (docs/, the v2 bundle since step 30) and a fresh build: prices.json only,
+    # and the retired amounts ($49, $99) are no longer accepted on either
+    r = subprocess.run(harvest, capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout
+    rb, out = run_build(tmp_path, "h")
+    assert rb.returncode == 0, rb.stderr
+    r = subprocess.run(harvest + [str(out / "pricing" / "index.html")], capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout
+    # the pre-bundle page showed the retired amounts: accepted only with --old
+    old = tmp_path / "old-pricing.html"
+    old.write_text(subprocess.run(["git", "show", f"{PRE_BUNDLE}:docs/pricing/index.html"], cwd=REPO,
+                                  capture_output=True, text=True, check=True).stdout, encoding="utf-8")
+    r = subprocess.run(harvest + [str(old)], capture_output=True, text=True)
+    assert r.returncode == 1 and "49.0" in r.stdout and "99.0" in r.stdout, r.stdout
+    r = subprocess.run(harvest + ["--old", str(old)], capture_output=True, text=True)
     assert r.returncode == 0, r.stdout
