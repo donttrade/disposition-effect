@@ -24,10 +24,11 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css">
-<script src="/static/js/theme.js"></script>
-<script src="/static/js/nav.js" defer></script>
-<script src="/static/js/form-ref.js" defer></script>
+<link rel="stylesheet" href="/static/css/site.css?v=10d7bc57">
+<script src="/static/js/theme.js?v=ccbceb07"></script>
+<script src="/static/js/nav.js?v=99138326" defer></script>
+<script src="/static/js/form-ref.js?v=e219eb3b" defer></script>
+<script src="/static/js/motion.js?v=7ce8bd22" defer></script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "name": "Journals & platforms", "position": 2}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No."}, "name": "Do you need access to our systems?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "We receive no user records; only aggregate counts for the study you agree to."}, "name": "Are you a data processor for us?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Continuing is optional; any fee is agreed in writing before renewal."}, "name": "What does it cost after year one?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. It is a measurement. It is not a grade or a badge, and it is not advice."}, "name": "Will you grade our users?"}]}]}</script>
 </head>
 <body>
@@ -69,7 +70,7 @@
     </div></div>
   </section>
 
-  <section class="section" aria-labelledby="first-h">
+  <section class="section" aria-labelledby="first-h" data-reveal>
     <h2 id="first-h">For the first three partners</h2>
     <ul>
       <li>A free 12-month commercial licence to run the script in your product.</li>
@@ -81,14 +82,14 @@
     <p>After 12 months, continuing is optional; any fee is agreed in writing before renewal.</p>
   </section>
 
-  <section class="section" aria-labelledby="ask-h">
+  <section class="section" aria-labelledby="ask-h" data-reveal>
     <h2 id="ask-h">What we ask in return</h2>
     <p>Attribution (“Method: donttrade”, with a link) and the aggregate counts for the co-published study.</p>
     <h3>What the script needs</h3>
     <p>A five-column extract, one row per open position per day. The <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/EXPORT-GUIDE.md">export guide</a> defines it, and <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/make_fixture.py">make_fixture.py</a> writes a synthetic file to test with.</p>
   </section>
 
-  <section class="section" aria-labelledby="faq-h">
+  <section class="section" aria-labelledby="faq-h" data-reveal>
     <h2 id="faq-h">Questions</h2>
     <details><summary>Do you need access to our systems?</summary><p>No.</p></details>
     <details><summary>Are you a data processor for us?</summary><p>We receive no user records; only aggregate counts for the study you agree to.</p></details>
@@ -96,7 +97,7 @@
     <details><summary>Will you grade our users?</summary><p>No. It is a measurement. It is not a grade or a badge, and it is not advice.</p></details>
   </section>
 
-  <section class="section" aria-labelledby="apply">
+  <section class="section" aria-labelledby="apply" data-reveal>
     <h2 id="apply">Apply to partner</h2>
 <form class="request-form" id="fp" method="POST" action="https://api.web3forms.com/submit" aria-labelledby="apply">
   <input type="hidden" name="access_key" value="f8fdba04-71bb-4856-b700-01ac6796c252">

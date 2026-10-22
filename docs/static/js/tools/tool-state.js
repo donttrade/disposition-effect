@@ -17,9 +17,9 @@
 //    blank page or an endless "Reading…" (R2). settled() resolves when no read is in flight,
 //    whichever way the latest one ended, so "Run" can wait for it without hanging (R1).
 
-import { readTradeFile, startProgress, workerError } from './read-file.js';
-import { LIMITS, MESSAGES } from '../engine/errors.js';
-import { el } from './format.js';
+import { readTradeFile, startProgress, workerError } from './read-file.js?v=3abd1fc7';
+import { LIMITS, MESSAGES } from '../engine/errors.js?v=a49d9d6e';
+import { el } from './format.js?v=acb0db51';
 
 // ------------------------------------------------------------------ form errors
 export function clearFieldErrors(ids, summaryBox) {

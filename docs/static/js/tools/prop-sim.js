@@ -6,10 +6,10 @@
 // the worker. Manual mode: four summary numbers. Either way the page's CSP is
 // connect-src 'none', nothing is stored, nothing is logged.
 
-import { createFileSlot, renderReadError, whileBusy, clearFieldErrors, fieldError, showProblems } from './tool-state.js';
-import { RUNS, DEFAULT_SEED, tradingDays } from './prop-sim-core.js';
-import { money, unitNote, pct, intText, el, DASH } from './format.js';
-import { parseStrict, parsePositive, parseWhole, InputError } from './num.js';
+import { createFileSlot, renderReadError, whileBusy, clearFieldErrors, fieldError, showProblems } from './tool-state.js?v=c82d0056';
+import { RUNS, DEFAULT_SEED, tradingDays } from './prop-sim-core.js?v=ef3c575e';
+import { money, unitNote, pct, intText, el, DASH } from './format.js?v=acb0db51';
+import { parseStrict, parsePositive, parseWhole, InputError } from './num.js?v=8df99e34';
 
 const $ = (id) => document.getElementById(id);
 const MIN_STREAK_BUSTS = 30; // fewer busts than this: too few to describe what led up to them
@@ -119,7 +119,7 @@ async function run(ev) {
     st.textContent = 'The simulation could not run in this browser. Press Run to try again.';
     st.hidden = false;
   };
-  worker = new Worker(new URL('./prop-sim-worker.js', import.meta.url), { type: 'module' });
+  worker = new Worker(new URL('./prop-sim-worker.js?v=97f872c9', import.meta.url), { type: 'module' });
   worker.onmessage = (e) => {
     worker.terminate(); worker = null;
     btn.disabled = false;

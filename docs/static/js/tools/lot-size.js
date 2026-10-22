@@ -6,9 +6,9 @@
 //  * nothing on the page proposes, rates or compares a risk level.
 // Strict number input (num.js): anything that reads two ways is refused, never guessed.
 
-import { parsePositive, InputError } from './num.js';
-import { el, plain } from './format.js';
-import { clearFieldErrors, fieldError, showProblems } from './tool-state.js';
+import { parsePositive, InputError } from './num.js?v=8df99e34';
+import { el, plain } from './format.js?v=acb0db51';
+import { clearFieldErrors, fieldError, showProblems } from './tool-state.js?v=c82d0056';
 
 const $ = (id) => document.getElementById(id);
 const LABELS = {
