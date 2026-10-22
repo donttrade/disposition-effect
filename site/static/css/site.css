@@ -266,7 +266,7 @@ details[open] > summary { color: var(--rust); }
 .field { margin-bottom: var(--s3); max-width: 32rem; }
 .field label, .field legend { display: block; font-weight: 600; margin-bottom: 4px; }
 .field .hint { display: block; color: var(--muted); font-size: var(--fs-0); margin-bottom: 4px; }
-input[type="text"], input[type="email"], input[type="number"], input[type="url"], input[type="file"], select, textarea {
+input[type="text"], input[type="email"], input[type="number"], input[type="url"], input[type="search"], input[type="file"], select, textarea {
   width: 100%; min-height: var(--target); padding: 10px 12px;
   background: var(--bg); color: var(--text);
   border: 1px solid var(--field-border); border-radius: var(--radius);
@@ -711,6 +711,35 @@ a.choice-link:hover { border-color: var(--rust); background: var(--surface); col
 .latest-list li { padding: var(--s1) 0; border-top: 1px solid var(--border); max-width: none; }
 .latest-list a { display: inline-flex; align-items: center; min-height: var(--target); }
 .latest .when { display: inline-block; min-width: 7.5rem; font-family: var(--font-mono); font-size: var(--fs-0); color: var(--muted); }
+
+/* ------------------------------------------------------------------ answer box + /help/ (ARCHITECT-V3 §c.5) */
+.ask-form label { display: block; font-weight: 600; margin-bottom: 4px; }
+.ask-row { display: flex; gap: var(--s1); max-width: 40rem; }
+.ask-row input { flex: 1 1 auto; min-width: 0; }
+.ask-row .btn { flex: none; }
+.help-jump ul { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0 var(--s3); }
+.help-jump a { display: inline-flex; align-items: center; min-height: var(--target); }
+.answer-box { display: block; margin: 0 0 var(--s3); max-width: 40rem; }
+.answer-box label { display: block; font-weight: 600; margin-bottom: 4px; }
+.answer-out:not(:empty) { margin-top: var(--s2); padding: var(--s2); background: var(--surface); border-radius: var(--radius); }
+.answer-out > :last-child { margin-bottom: 0; }
+.ans-from { font-weight: 600; }
+.nav-ask { border-bottom: 0; position: relative; }
+.nav-ask > summary { list-style: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: var(--target);
+  min-width: var(--target); padding: 0 10px; border: 1px solid var(--field-border); border-radius: var(--radius); font-weight: 400; color: var(--text); }
+.nav-ask > summary::-webkit-details-marker { display: none; }
+.nav-ask[open] > summary, .nav-ask > summary:hover { background: var(--surface); color: var(--text); }
+.ask-pop { position: absolute; right: 0; top: calc(100% + 10px); z-index: 2; width: min(28rem, calc(100vw - 32px)); padding: var(--s2);
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--lift-shadow); }
+.ask-pop .answer-box { margin: 0; }
+/* the header's search button: the .btn look without the .btn class (the header holds no .btn, no offer) */
+.ask-submit { flex: none; min-height: var(--target); min-width: var(--target); padding: 10px 20px; border: 2px solid var(--rust);
+  border-radius: var(--radius); background: var(--rust); color: var(--on-rust); font: 600 var(--fs-1)/1.2 var(--font-sans); cursor: pointer; }
+.ask-submit:hover { background: var(--rust-hover); border-color: var(--rust-hover); }
+@media (prefers-reduced-motion: no-preference) { .nav-ask[open] > .ask-pop { animation: dt-pop 200ms var(--ease-nav) both; } }
+@media (max-width: 1099.98px) { .ask-label { display: none; } }
+@media (max-width: 899.98px) { .nav-ask { display: none; } }
+.help-group details blockquote, .answer-out blockquote { margin: 0 0 var(--s1); padding-left: var(--s2); border-left: 3px solid var(--border); }
 
 /* ------------------------------------------------------------------ motion (ARCHITECT-MOTION-PLAN 2026-10-21)
    Hidden/moving states need .dt-motion (theme.js, pre-paint) or a motion.js class. */

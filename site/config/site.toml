@@ -184,7 +184,25 @@ heading = "Research"
 links = [["Research", "/research/"], ["The plan gap", "/plan-gap/"], ["Sample & method", "/sample-memo/"], ["Code", "/code/"], ["Glossary", "/glossary/"], ["Corrections", "/corrections/"], ["Atom feed", "/feed.xml"]]
 [[footer]]
 heading = "Trust"
-links = [["Independence", "/independence/"], ["About", "/about/"], ["Researchers & press", "/for-researchers/"]]
+links = [["Independence", "/independence/"], ["About", "/about/"], ["Questions", "/help/"], ["Researchers & press", "/for-researchers/"]]
 [[footer]]
 heading = "Legal"
 links = [["Terms", "/terms/"], ["Privacy", "/privacy/"], ["Cancellations & refunds", "/terms/#cancellation"]]
+
+# Answer box synonyms (ARCHITECT-V3 §c.5): a phrase in a visitor's question → the word the site's pages use.
+# Lower case; tuned on tests/fixtures/answers_queries.json.
+[answers.synonyms]
+"money back" = "refund"
+"refunded" = "refund"
+"metatrader 5" = "mt5"
+"metatrader 4" = "mt4"
+"credit card" = "card"
+"credit cards" = "card"
+"delete my data" = "delete deletion"
+"chargeback" = "dispute"
+"upload" = "uploaded"
+"cancel" = "cancellation"
+"contract" = "contract agreement"
+"how long" = "business days delivery"
+"first year" = "year one"
+"phone number" = "phone"

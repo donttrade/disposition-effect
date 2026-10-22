@@ -36,6 +36,9 @@
     </ul>
     <p class="small">A claims test uses these same engagements: pick one and describe the claim in the form. <a href="/for-firms/#claims-test">How the claims test works</a> · <a href="/pricing/#firms">Firm pricing</a></p>
     <p class="small">Run a trading journal or platform? <a href="#platform">Partner application</a>. Trading your own account? <a href="#trader">The trader {{ offer.short_state() }}</a>.</p>
+    {%- from "partials/answer_box.html" import answer_box with context %}
+    <h3 id="ask-start">Questions before you start?</h3>
+    {{ answer_box("pg") }}
   </section>
 
   {%- for p in firm %}

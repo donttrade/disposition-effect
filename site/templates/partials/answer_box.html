@@ -1,0 +1,14 @@
+{#- The answer box (ARCHITECT-V3 §c.5). Without JS it is a GET form to /help/, which lists every answer.
+    With JS, ask.js loads answers.js and the index on first focus; the answer is quoted from a page, in a
+    polite live region, with its source link. Use: {% from "partials/answer_box.html" import answer_box with context %}
+    {{ answer_box("pg") }} (bid: a unique id prefix on the page). -#}
+{%- macro answer_box(bid, label="Ask about prices, refunds, files, privacy…", button="btn") -%}
+<search class="answer-box" data-answer-box>
+  <form action="/help/" method="get" data-mail="{{ site.contact_email }}" data-index-src="/static/js/answers-index.js" data-js-src="/static/js/answers.js" data-ui-src="/static/js/answer-ui.js">
+    <label for="{{ bid }}-q">{{ label }}</label>
+    <div class="ask-row"><input id="{{ bid }}-q" name="q" type="search" autocomplete="off" maxlength="200"><button class="{{ button }}" type="submit">Ask</button></div>
+  </form>
+  <div class="answer-out" aria-live="polite" data-answer-out></div>
+  <p class="small muted">Answers are quoted from this site’s own pages. Your question is not stored or sent anywhere.</p>
+</search>
+{%- endmacro %}

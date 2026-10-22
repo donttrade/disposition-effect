@@ -125,7 +125,7 @@ def test_home_and_lifted_pages_are_templates_and_passthrough_still_works(tmp_pat
     r, out = run_build(tmp_path, "x")
     assert r.returncode == 0
     home = (out / "index.html").read_text()
-    assert "/static/css/site.css" in home and "Measure the gap between your traders" in home
+    assert "/static/css/site.css" in home and "See what your trades did, free." in home   # v3 home (ARCHITECT-V3 Q2)
     # steps 28–29: /about/ is a lifted template page (v2 head, header and footer; old body frozen)
     about = (out / "about" / "index.html").read_text(encoding="utf-8")
     assert "/static/css/site.css" in about and '<main id="main" class="lifted">' in about
