@@ -121,3 +121,58 @@ def test_nav_text_refuses_the_new_groups(tmp_path):
         r = subprocess.run([sys.executable, os.path.join(REPO, "site", "build.py")], capture_output=True, text=True,
                            env={**os.environ, "DT_OUT": str(tmp_path / "o"), "DT_SITE_TOML": str(tmp_path / "site.toml")})
         assert r.returncode == 1 and "banned word" in r.stderr and word in r.stderr, r.stderr
+
+
+# ------------------------------------------------------------------ the dark band (§2.2–2.4): T-AA, T-BAND, T-RM (static part)
+sys.path.insert(0, os.path.join(REPO, "checks"))
+import contrast as C  # noqa: E402
+
+CSS = open(os.path.join(REPO, "site", "static", "css", "site.css"), encoding="utf-8").read()
+
+
+def test_band_tokens_pass_aa_in_all_three_blocks():
+    light, dark, media = C.blocks(CSS)
+    for block in (light, dark, media):
+        t = C.tokens(block)
+        for fg, bg, need, why in C.BAND_PAIRS:
+            assert C.ratio(t[fg], t[bg]) >= need, (fg, bg, why)
+        assert all(v.upper() != "#9A3B1C" for k, v in t.items() if k.startswith("band-"))
+
+
+def test_contrast_check_refuses_light_rust_on_the_band(tmp_path, monkeypatch):
+    bad = CSS.replace("--band-rust: #E07A52;", "--band-rust: #9A3B1C;", 1)
+    assert bad != CSS
+    light, dark, media = C.blocks(bad)
+    t = C.tokens(light)
+    assert C.ratio(t["band-rust"], t["band-bg"]) < 4.5
+
+
+def test_band_has_no_animation_and_hides_motifs_in_forced_colors_and_print():
+    i = CSS.index("the dark hero band (ARCHITECT-BRAND-AND-WRAPPED")
+    j = CSS.index("/* ------------------------------------------------------------------ motion")
+    band = CSS[i:j]
+    assert not re.search(r"\b(animation|transition)(-[a-z]+)?\s*:", band)
+    assert re.search(r"forced-colors: active\) \{ \.band::before, \.band::after \{ display: none; \}", band)
+    assert re.search(r"(?s)@media print \{.*\.band::before, \.band::after \{ display: none; \}", band)
+
+
+def test_home_hero_is_the_band(built_site):
+    html = page(built_site, "/")
+    m = re.search(r'<section class="band hero motif-grid motif-axis" aria-labelledby="hero" data-band>', html)
+    assert m, "home hero is not the band"
+    assert 'id="hero"' in html[m.end():m.end() + 2000]
+    assert "style=" not in html[m.start():m.start() + 20000].split("</section>")[0]
+
+
+def test_h2_tick_only_on_marketing_pages(built_site):
+    for path in ("/", "/for-firms/", "/for-traders/", "/for-platforms/"):
+        assert '<main id="main" class="mkt">' in page(built_site, path), path
+    for path in ("/about/", "/tools/trade-stats/", "/pricing/"):
+        assert 'class="mkt"' not in page(built_site, path), path
+
+
+def test_one_key_num_per_section():
+    one = '<section><p class="display key-num">61%</p></section><section><p class="key-num">2</p></section>'
+    two = '<section><p class="key-num">61%</p><p class="key-num">2</p></section>'
+    assert "key_num" not in rules(one)
+    assert "key_num" in rules(two)

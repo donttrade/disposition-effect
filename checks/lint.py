@@ -352,6 +352,19 @@ def without_hero_dash(html, where):
     return html.replace(body, " ") if html.count(body) == 1 else html
 
 
+KEY_NUM = re.compile(r'class="[^"]*\bkey-num\b')
+
+
+def key_num_per_section(html, where):
+    """ARCHITECT-BRAND §2.4: rust .key-num is "the finding", one per <section> at most."""
+    out = []
+    for i, sec in enumerate(re.findall(r"(?s)<section\b.*?</section>", html)):
+        n = len(KEY_NUM.findall(sec))
+        if n > 1:
+            out.append(("key_num", where, f"{n} .key-num in one <section> (section {i + 1}); one at most"))
+    return out
+
+
 def lint_html(html, where, paid, analytics, allowed_amounts, private_values, commerce=None, pilot=False):
     """commerce: True when the seller block may appear (build.show_seller); defaults to paid or pilot."""
     commerce = (paid or pilot) if commerce is None else commerce
@@ -359,6 +372,7 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
     out = lint_text(readable_text(html), where, paid, analytics, english=not french)
     out += dated_pricing_claims("", where, html)   # priceValidUntil in JSON-LD (the phrases: lint_text)
     out += tally_mentions(html, where)
+    out += key_num_per_section(html, where)
     if paid:
         out += not_on_sale_claims(readable_text(html), where)
     from harvest_prices import amounts_in

@@ -26,6 +26,22 @@
   --gain: #1F7A52;
   --loss: #A3264F;
   --caution: #8C6A1E;
+  /* the dark hero band (ARCHITECT-BRAND §2.2): charcoal in both themes; never #9A3B1C on it */
+  --band-bg: #16181C;
+  --band-surface: #1E2126;
+  --band-text: #F2F1EE;
+  --band-muted: #A7ABB3;
+  --band-rust: #E07A52;
+  --band-rust-hover: #EC9A78;
+  --band-on-rust: #16181C;
+  --band-gain: #3FB37F;
+  --band-loss: #E86A8E;
+  --band-plan: #6E8BB0;
+  --band-caution: #D9A441;
+  --band-field-border: #8A8F98;
+  --band-border: #3A3E46;
+  --band-grid: rgb(224 122 82 / 0.10);
+  --band-grid-major: rgb(224 122 82 / 0.18);
 
   --font-sans: "Plex Sans", -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: "Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -61,6 +77,21 @@
     --gain: #3FB37F;
     --loss: #E86A8E;
     --caution: #D9A441;
+    --band-bg: #0E1013;   /* deeper than the dark page, so the band still reads as a band */
+    --band-surface: #16181C;
+    --band-text: #F2F1EE;
+    --band-muted: #A7ABB3;
+    --band-rust: #E07A52;
+    --band-rust-hover: #EC9A78;
+    --band-on-rust: #16181C;
+    --band-gain: #3FB37F;
+    --band-loss: #E86A8E;
+    --band-plan: #6E8BB0;
+    --band-caution: #D9A441;
+    --band-field-border: #8A8F98;
+    --band-border: #3A3E46;
+    --band-grid: rgb(224 122 82 / 0.10);
+    --band-grid-major: rgb(224 122 82 / 0.18);
     color-scheme: dark;
   }
 }
@@ -80,6 +111,21 @@
   --gain: #3FB37F;
   --loss: #E86A8E;
   --caution: #D9A441;
+  --band-bg: #0E1013;   /* deeper than the dark page, so the band still reads as a band */
+  --band-surface: #16181C;
+  --band-text: #F2F1EE;
+  --band-muted: #A7ABB3;
+  --band-rust: #E07A52;
+  --band-rust-hover: #EC9A78;
+  --band-on-rust: #16181C;
+  --band-gain: #3FB37F;
+  --band-loss: #E86A8E;
+  --band-plan: #6E8BB0;
+  --band-caution: #D9A441;
+  --band-field-border: #8A8F98;
+  --band-border: #3A3E46;
+  --band-grid: rgb(224 122 82 / 0.10);
+  --band-grid-major: rgb(224 122 82 / 0.18);
   color-scheme: dark;
 }
 
@@ -740,6 +786,57 @@ a.choice-link:hover { border-color: var(--rust); background: var(--surface); col
 @media (max-width: 1099.98px) { .ask-label { display: none; } }
 @media (max-width: 899.98px) { .nav-ask { display: none; } }
 .help-group details blockquote, .answer-out blockquote { margin: 0 0 var(--s1); padding-left: var(--s2); border-left: 3px solid var(--border); }
+
+/* ------------------------------------------------------------------ the dark hero band (ARCHITECT-BRAND-AND-WRAPPED §2.2–2.4)
+   partials/hero_band.html. The band re-scopes the page tokens, so every component inside it (buttons,
+   links, the dashboard, P&L colours, focus ring) turns dark with no per-component rule; checks/contrast.py
+   measures every pair as BAND_PAIRS. Signature: plot paper in rust behind the media side (motif-grid) and
+   the band's bottom edge drawn as a chart x-axis, ticks hanging below it (motif-axis). No animation. */
+.band { --bg: var(--band-bg); --surface: var(--band-surface); --text: var(--band-text); --muted: var(--band-muted);
+  --rust: var(--band-rust); --rust-hover: var(--band-rust-hover); --on-rust: var(--band-on-rust);
+  --gain: var(--band-gain); --loss: var(--band-loss); --plan: var(--band-plan); --caution: var(--band-caution);
+  --field-border: var(--band-field-border); --border: var(--band-border); --lift-shadow: 0 6px 16px -6px rgb(0 0 0 / 0.7);
+  color-scheme: dark; background: var(--bg); color: var(--text); position: relative; isolation: isolate; }
+.band .hero-dash, .band .luck-panel { --bg: var(--band-surface); }
+.band.hero { padding: var(--s5) 0; margin-bottom: 12px; }   /* margin: the hanging ticks */
+.band h1 { font-size: var(--fs-6); line-height: 1.08; letter-spacing: -0.012em; max-width: 15ch; }
+.band .lede { color: var(--text); }
+.band .hero-dash { box-shadow: 0 24px 48px -24px rgb(0 0 0 / 0.6); }
+.band .hero-shot figcaption { margin-top: 12px; }
+@media (max-width: 600px) { .band.hero { padding: var(--s4) 0; } .band h1 { font-size: var(--fs-5); } }
+.band.motif-grid::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--band-grid-major) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--band-grid-major) 1px, transparent 1px),
+    linear-gradient(to right, var(--band-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--band-grid) 1px, transparent 1px);
+  background-size: 160px 160px, 160px 160px, 32px 32px, 32px 32px;
+  background-position: left bottom;            /* the lines meet the axis rule exactly */
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 48%); mask-image: linear-gradient(to right, transparent 0, #000 48%); }
+@media (max-width: 899.98px) { .band.motif-grid::before { -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 55%); mask-image: linear-gradient(to bottom, transparent 0, #000 55%); } }
+/* the axis: a 2 px rule on the band's bottom edge, 6 px ticks every 32 px and 12 px ticks every 160 px,
+   on the grid's lines (both are positioned from the left edge) */
+.band.motif-axis::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 12px; margin-top: -2px; pointer-events: none;
+  background-image: linear-gradient(var(--band-rust), var(--band-rust)),
+    repeating-linear-gradient(to right, var(--band-rust) 0 2px, transparent 2px 160px),
+    repeating-linear-gradient(to right, var(--band-rust) 0 1px, transparent 1px 32px);
+  background-size: 100% 2px, 100% 12px, 100% 6px; background-position: left top; background-repeat: no-repeat; }
+@media (forced-colors: active) { .band::before, .band::after { display: none; } }
+@media print {
+  .band { --bg: #fff; --surface: #fff; --text: #000; --muted: #333; --border: #999; background: none; color: #000; }
+  .band .hero-dash { --bg: #fff; box-shadow: none; }
+  .band::before, .band::after { display: none; }
+}
+
+/* rust = "the finding": one key number per section (checks/lint.py refuses a second) */
+.key-num { color: var(--rust); font-weight: 600; font-variant-numeric: tabular-nums; }
+/* the axis tick above each section heading on the 4 marketing pages (build.MOTION_PAGES; base.html main.mkt) */
+.mkt .section > h2::before { content: ""; display: block; width: 24px; height: 3px; margin-bottom: var(--s2); background: var(--rust); }
+@media (forced-colors: active) { .mkt .section > h2::before { background: CanvasText; } }
+
+/* footer: Follow (site.toml [[channels]]); 20 px marks, 44 px targets (.site-footer li a) */
+.site-footer .follow a { gap: 10px; }
+.site-footer .follow svg { flex: none; width: 20px; height: 20px; fill: currentColor; }
 
 /* ------------------------------------------------------------------ motion (ARCHITECT-MOTION-PLAN 2026-10-21)
    Hidden/moving states need .dt-motion (theme.js, pre-paint) or a motion.js class. */

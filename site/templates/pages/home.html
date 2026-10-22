@@ -2,26 +2,19 @@
 {% block content %}
 {%- set r = products["report39"] %}
 {%- set ev = evidence %}
-<div class="wrap">
+{%- from "partials/hero_band.html" import hero_band with context %}
   {%- if flags.trader_first_home %}
   {#- Trader-first home (paid_report only; Tester D5). Prices from prices.json. No study finding
-      on this page, so none can sit next to an offer. #}
+      on this page, so none can sit next to an offer. The hero is the dark band (ARCHITECT-BRAND §2.5). #}
   <div data-requires-flag="paid_report">
-  <section class="hero" aria-labelledby="hero">
-    <div class="grid">
-      <div class="span-7">
+  {% call hero_band("hero", media="dashboard") %}
         <h1 id="hero">See where your trades leave your plan.</h1>
         <p class="lede">A habit report built from your own trade history. It measures behaviour, like holding losing trades longer than winning ones, and tests whether each pattern is more than noise. It doesn’t tell you what to trade.</p>
         <p class="btn-row"><a class="btn" href="/pricing/#traders">Get the habit report — {{ r.price_usd|usd }}</a> <a class="btn btn-secondary" href="/tools/trade-stats/">Free trade stats</a></p>
         <p class="small">{{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers. One time, in US dollars, with one free re-test 30 to 60 days after your first report. A full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying.</p>
         <p class="small muted">Not investment advice. <a href="/pricing/#before-you-pay">Before you pay</a></p>
-      </div>
-      <figure class="span-5 hero-shot">
-        {% include "partials/hero_dashboard.html" %}
-        <figcaption>The free <a href="/tools/trade-stats/">trade-stats dashboard</a>, run on its synthetic sample file. Sample data, not a real trader.</figcaption>
-      </figure>
-    </div>
-  </section>
+  {% endcall %}
+  <div class="wrap">
 
   <section class="section" aria-labelledby="t-measure-h" data-reveal>
     <h2 id="t-measure-h">What the report measures</h2>
@@ -80,6 +73,7 @@
   </section>
   {% include "partials/disclaimer.html" %}
   </div>
+  </div>
   {%- else %}
   {#- v3 home (ARCHITECT-V3 §c.3; owner decision Q2, 21 Oct ~18:30): traders first, the firm door on the
       same first screen, free tools, research, a no-offer buffer, then the value ladder. No firm price on
@@ -89,10 +83,9 @@
   {%- import "partials/icons.html" as ic %}
   {%- import "partials/trader_offer.html" as offer with context %}
   {%- set tool_icon = {} %}{% for it in nav[0]["items"] %}{% set _ = tool_icon.update({it.href: it.icon}) %}{% endfor %}
-  {#- 1. Hero, 7/5: the trader door, then the firm door, both on the first screen (H1). #}
-  <section class="hero" aria-labelledby="hero">
-    <div class="grid">
-      <div class="span-7">
+  {#- 1. Hero, 7/5, in the dark band (ARCHITECT-BRAND §2.5): the trader door, then the firm door, both on
+      the first screen (H1). The words are unchanged. #}
+  {% call hero_band("hero", media="dashboard") %}
         <h1 id="hero">See what your trades did, free.</h1>
         <p class="lede">Drop your MetaTrader, IBKR or Tradovate export and see your profit factor, expectancy, drawdown and streaks. No account. The page reads the file in your browser and blocks every outgoing request, so the file is not uploaded.</p>
         <p class="btn-row"><a class="btn" href="/tools/trade-stats/">Open trade stats</a> <a href="/tools/">All free tools</a></p>
@@ -101,13 +94,8 @@
           <p><strong>At a prop firm, broker or copy-trading platform?</strong> We measure your traders’ plan gap on your own records, at a fixed published price.</p>
           <p class="btn-row"><a class="btn btn-secondary vt-start" href="/start/?product=pilot#pilot">Start a Pilot</a> <a href="/for-firms/">What firms get</a></p>
         </div>
-      </div>
-      <figure class="span-5 hero-shot">
-        {% include "partials/hero_dashboard.html" %}
-        <figcaption>The free <a href="/tools/trade-stats/">trade-stats dashboard</a>, run on its synthetic sample file. Sample data, not a real trader.</figcaption>
-      </figure>
-    </div>
-  </section>
+  {% endcall %}
+  <div class="wrap">
 
   {#- 2. Free tools as rows: icon, name, the question, what you give it. Text links, no button (H3). #}
   <section class="section" aria-labelledby="tools-h" data-reveal>
@@ -126,7 +114,7 @@
     <h2 id="finding-h">Research, with the code</h2>
     <div class="grid">
       <div class="span-7">
-        <p class="display">{{ ev.finding.pct }}</p>
+        <p class="display key-num">{{ ev.finding.pct }}</p>
         <p class="finding-text">{{ ev.finding.rest }}</p>
       </div>
       <div class="span-5 finding-note">
@@ -199,6 +187,6 @@
     </ul>
   </section>
   {% include "partials/disclaimer.html" %}
+  </div>
   {%- endif %}
-</div>
 {% endblock %}

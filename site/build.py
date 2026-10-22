@@ -1715,7 +1715,7 @@ def build():
     products = {p["id"]: p for p in prices["products"]}
     nav = nav_for(cfg["nav"], flags)
     base_ctx = {"site": cfg["site"], "flags": flags, "nav": nav, "nav_current": lambda pg: nav_current(nav, pg),
-                "footer": cfg["footer"], "vt_pages": VT_PAGES,
+                "footer": cfg["footer"], "vt_pages": VT_PAGES, "mkt_pages": MOTION_PAGES,
                 "legal": cfg["legal"], "forms": cfg["forms"], "analytics": cfg["analytics"],
                 "worker": cfg["worker"], "prices": prices, "products": products, "private": private,
                 "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": tools_for(flags),
