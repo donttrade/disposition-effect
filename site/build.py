@@ -634,6 +634,22 @@ def human_date(iso):
     return f"{d} {MONTHS[m - 1]} {y}"
 
 
+COMMIT_URL = "https://github.com/donttrade/disposition-effect/commit/"
+
+
+def commit_on_remote(sha, repo=None):
+    """True when a remote-tracking branch (refs/remotes/*, as of the last fetch) contains the commit, so
+    the GitHub commit page exists. Read from the local refs only: no network, and the build stays
+    deterministic for one repo state. False when git cannot tell."""
+    import subprocess
+    try:
+        r = subprocess.run(["git", "-C", repo or REPO, "for-each-ref", "--contains", sha, "--format=%(refname)",
+                            "refs/remotes"], capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return r.returncode == 0 and any(x and not x.endswith("/HEAD") for x in r.stdout.split())
+
+
 def latest():
     """ARCHITECT-V3 §c.3 section 8, H7: the home "Latest" band, every date read from its source at build
     time: the newest study (its Article datePublished in the lifted page data), the newest row of the
@@ -663,8 +679,13 @@ def latest():
         r = subprocess.run(["git", "-C", REPO, "log", "-1", "--format=%H %cs"], capture_output=True, text=True, timeout=10)
         if r.returncode == 0 and re.fullmatch(r"[0-9a-f]{40} \d{4}-\d{2}-\d{2}", r.stdout.strip()):
             sha, day = r.stdout.split()
+            # brand Tester D5: link only a commit GitHub has; otherwise the text stays, without the link
+            on_remote = commit_on_remote(sha)
             commit = {"sha": sha, "short": sha[:7], "date": human_date(day),
-                      "url": "https://github.com/donttrade/disposition-effect/commit/" + sha}
+                      "url": COMMIT_URL + sha if on_remote else None}
+            if not on_remote:   # a NOTE, not a WARNING: WARNING means an escape guard was opened (D10)
+                print(f"NOTE: latest: commit {sha[:7]} is on no remote branch, so the home page names it without "
+                      "a link (push it, fetch, and build again to link it)", file=sys.stderr)
     except (OSError, subprocess.SubprocessError):
         commit = None
     return {"study": {"date": human_date(s_date), "title": s_title, "url": s_url},

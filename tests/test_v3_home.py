@@ -122,9 +122,11 @@ def test_h7_latest_dates_equal_their_sources(built_site):
     import datetime as dt
     newest = max(dates, key=lambda x: dt.datetime.strptime(x, "%d %b %Y"))
     assert lt["correction"]["date"] == newest and f'<span class="when">{newest}</span>' in band
-    if lt["commit"]:
+    if lt["commit"] and lt["commit"]["url"]:
         assert re.fullmatch(r"https://github\.com/donttrade/disposition-effect/commit/[0-9a-f]{40}", lt["commit"]["url"])
         assert f'href="{lt["commit"]["url"]}"' in band
+    elif lt["commit"]:   # brand Tester D5: a commit on no remote branch is named, never linked
+        assert "/commit/" not in band and f'<code>{lt["commit"]["short"]}</code>' in band
 
 
 # ------------------------------------------------------------------ H8: no new animation kinds on home
