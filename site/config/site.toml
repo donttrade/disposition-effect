@@ -14,7 +14,6 @@ reply_promise = "We reply within 1 business day (Eastern Time, Monday to Friday)
 # emails us from the address they paid with, and the owner sends a new link by hand, ONLY to the address
 # on the Stripe payment. true: /welcome/, /restore/ and the terms say so. false: "restore by email is not offered".
 manual_restore = true
-same_as = ["https://donttrade.substack.com", "https://github.com/donttrade"]  # Organization JSON-LD: brand accounts only
 
 [flags]
 paid_report = false        # the $39 report, its pages and the trader Stripe links
@@ -172,6 +171,31 @@ href = "/pricing/"
 [[nav]]
 label = "About"
 href = "/about/"
+
+# Official channels (ARCHITECT-BRAND §2.6): the ONE list behind the footer "Follow" column, the /about/
+# "Where to find this" sentence and Organization.sameAs. Only accounts that exist go in.
+[[channels]]
+id = "substack"
+name = "Substack"
+url = "https://donttrade.substack.com"
+text = "donttrade.substack.com"
+icon = "substack"
+rel_me = true
+[[channels]]
+id = "x"
+name = "X"
+url = "https://x.com/donttradestudy"
+text = "x.com/donttradestudy"
+handle = "@donttradestudy"
+icon = "x"
+rel_me = true
+[[channels]]
+id = "github"
+name = "GitHub"
+url = "https://github.com/donttrade"
+text = "github.com/donttrade"
+icon = "github"
+rel_me = true
 
 [[footer]]
 heading = "Traders"

@@ -25,8 +25,10 @@ event handler can run):
   * a <script> element in <main> is moved, unchanged, to site/static/js/legacy/;
   * onsubmit="return false" is removed (lifted.js stops those forms submitting).
 plus the three text fixes in LIFT_FIXES, which the passthrough build already applied
-(PASSTHROUGH_FIXES / PASSTHROUGH_CHROME before steps 28–29). compare.py proves that nothing
-else in the visible text, ids, links, tables or citation meta changed.
+(PASSTHROUGH_FIXES / PASSTHROUGH_CHROME before steps 28–29), and one later removal (21 Oct
+2026: /about/'s "Where to find this", now rendered from site.toml [[channels]] outside the
+frozen body). compare.py proves that nothing else in the visible text, ids, links, tables or
+citation meta changed.
 
 This reads docs/ as it is before the step-30 bundle (old design). Once docs/ is replaced by
 the build, the fragments are the source and this script refuses to run (it finds no old
@@ -114,6 +116,14 @@ LIFT_FIXES = {
     ],
     "/404.html": [
         ('<a href="/start/">Start a trial</a>', '<a href="/start/">Start a Pilot</a>'),
+    ],
+    # ARCHITECT-BRAND-AND-WRAPPED §2.6 (owner item 21 Oct): the official channels come from ONE list,
+    # site.toml [[channels]]. The old sentence (without X) leaves the frozen body; pages/lifted.html
+    # renders partials/official_channels.html in its place, right after <!--frozen:end-->.
+    "/about/": [
+        ('\n  <h2>Where to find this</h2>\n  <p>Published only at <a href="https://donttrade.substack.com">'
+         'donttrade.substack.com</a>, this site and <a href="https://github.com/donttrade">github.com/donttrade</a>. '
+         'Any message from any other channel or handle is not from us.</p>', ""),
     ],
 }
 

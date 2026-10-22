@@ -11,4 +11,5 @@
 <noscript><p class="notice notice-caution">This calculator runs in your browser and needs JavaScript turned on.</p></noscript></div>
 {%- endif %}
 <!--frozen:start-->{{ lifted_html }}<!--frozen:end-->
+{%- if page.get("lifted") == "about" %}{% include "partials/official_channels.html" %}{% endif %}
 {% endblock %}

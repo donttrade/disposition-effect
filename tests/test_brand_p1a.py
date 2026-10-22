@@ -176,3 +176,76 @@ def test_one_key_num_per_section():
     two = '<section><p class="key-num">61%</p><p class="key-num">2</p></section>'
     assert "key_num" not in rules(one)
     assert "key_num" in rules(two)
+
+
+# ------------------------------------------------------------------ social links (§2.6): T-SOC1, T-SOC2
+import tomllib  # noqa: E402
+
+TOML = os.path.join(REPO, "site", "config", "site.toml")
+CHANNELS = [c["url"] for c in tomllib.load(open(TOML, "rb"))["channels"]]
+EXPECTED = ["https://donttrade.substack.com", "https://x.com/donttradestudy", "https://github.com/donttrade"]
+
+
+def follow_links(html):
+    nav = re.search(r'(?s)<nav aria-label="Follow donttrade">.*?</nav>', html).group(0)
+    return re.findall(r'<a href="([^"]+)" rel="([^"]+)">(.*?)</a>', nav)
+
+
+def test_soc1_footer_follow_is_exactly_the_three_accounts(built_site):
+    for path in ("/", "/about/", "/tools/trade-stats/"):
+        links = follow_links(page(built_site, path))
+        assert [h for h, _, _ in links] == EXPECTED == CHANNELS, path
+        for href, rel, inner in links:
+            assert {"me", "noopener"} <= set(rel.split())
+            assert '<svg aria-hidden="true" focusable="false"' in inner
+            name = re.sub(r"<[^>]+>", "", re.sub(r"(?s)<svg.*?</svg>", "", inner))
+            assert name.split()[0] in ("Substack", "X", "GitHub"), name
+    assert "target=" not in re.search(r'(?s)<nav aria-label="Follow donttrade">.*?</nav>', page(built_site, "/")).group(0)
+
+
+def test_soc2_about_sentence_and_same_as_match_the_footer(built_site):
+    about = page(built_site, "/about/")
+    m = re.search(r"(?s)<h2>Where to find this</h2>\s*<p>(.*?)</p>", about)
+    assert m and about.index("<!--frozen:end-->") < m.start()
+    assert re.findall(r'href="([^"]+)" rel="me noopener"', m.group(1)) == [h for h, _, _ in follow_links(about)]
+    import json
+    for blob in re.findall(r'(?s)<script type="application/ld\+json">(.*?)</script>', page(built_site, "/")):
+        for node in json.loads(blob).get("@graph", []):
+            if node.get("@type") == "Organization":
+                assert node["sameAs"] == EXPECTED
+                break
+
+
+def _build_with(tmp_path, src):
+    (tmp_path / "site.toml").write_text(src, encoding="utf-8")
+    return subprocess.run([sys.executable, os.path.join(REPO, "site", "build.py")], capture_output=True, text=True,
+                          env={**os.environ, "DT_OUT": str(tmp_path / "o"), "DT_SITE_TOML": str(tmp_path / "site.toml")})
+
+
+def test_soc2_a_fourth_channel_changes_all_three_places(tmp_path):
+    src = open(TOML, encoding="utf-8").read()
+    extra = ('[[channels]]\nid = "yt"\nname = "YouTube"\nurl = "https://www.youtube.com/@donttradestudy"\n'
+             'text = "youtube.com/@donttradestudy"\nicon = "x"\nrel_me = true\n\n[[footer]]\nheading = "Traders"')
+    r = _build_with(tmp_path, src.replace('[[footer]]\nheading = "Traders"', extra, 1))
+    assert r.returncode == 0, r.stderr
+    out = tmp_path / "o"
+    home = (out / "index.html").read_text(encoding="utf-8")
+    about = (out / "about" / "index.html").read_text(encoding="utf-8")
+    url = "https://www.youtube.com/@donttradestudy"
+    assert [h for h, _, _ in follow_links(home)][-1] == url
+    assert f'<a href="{url}" rel="me noopener">' in about.split("<!--frozen:end-->")[1].split("</p>")[0]
+    assert f'"{url}"' in home.split('"sameAs"')[1].split("]")[0]
+
+
+@pytest.mark.parametrize("old,new,msg", [
+    ('url = "https://x.com/donttradestudy"', 'url = "http://x.com/donttradestudy"', "https://"),
+    ('url = "https://x.com/donttradestudy"', 'url = "https://twitter.com/donttradestudy"', "host"),
+    ('text = "x.com/donttradestudy"', 'text = "TODO"', "placeholder"),
+    ('icon = "x"', 'icon = "mastodon"', "icon"),
+])
+def test_soc2_bad_channels_fail_the_build(tmp_path, old, new, msg):
+    src = open(TOML, encoding="utf-8").read()
+    bad = src.replace(old, new, 1)
+    assert bad != src
+    r = _build_with(tmp_path, bad)
+    assert r.returncode == 1 and msg in r.stderr, r.stderr
