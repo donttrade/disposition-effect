@@ -195,8 +195,14 @@ def test_no_study_finding_next_to_an_offer(built_site, path):
     body = C.frozen_of(html)
     assert not OFFER.search(body), OFFER.search(body).group(0)
     header = re.search(r"(?s)<header class=\"site-header\">.*?</header>", html).group(0)
-    # the old header carried a "Firms: start a Pilot" button above every finding; the v2 one has none
-    assert 'class="btn' not in header and not re.search(r"Start a Pilot|start a trial|\$\d", header, re.I)
+    # the old header carried a "Firms: start a Pilot" button above every finding; the v2 one has none.
+    # v3 (ARCHITECT-V3-PLAN D3, owner decision Q3, Tester N2): the nav's one offer is the plain text link
+    # "Start a Pilot" at the foot of the For firms panel: no price, no button, in each of the nav's two lists
+    # (desktop panel, phone accordion). Exactly that link is taken out; anything else still fails.
+    foot = r'<ul class="nav-foot">\s*<li><a href="/start/\?product=pilot#pilot">Start a Pilot</a></li>\s*</ul>'
+    rest, n = re.subn(foot, "", header)
+    assert n == 2, "the For firms panel's foot is not the one plain Start a Pilot link"
+    assert 'class="btn' not in header and not re.search(r"Start a Pilot|start a trial|\$\d|\d\s*%", rest, re.I)
 
 
 def test_evidence_reads_the_lifted_pages():
