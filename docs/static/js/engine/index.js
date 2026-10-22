@@ -4,16 +4,16 @@
 // cookies or storage, and raw rows are never kept: only whitelisted fields
 // survive into executions and trades.
 
-import { decodeBytes, isHtml, parseCsv, sniffDelimiter, resolveNumberStyle, checkQuoting } from './csv.js';
-import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS, checkCurrencyColumn } from './detect.js';
-import { fail, LIMITS } from './errors.js';
-import { htmlRows, parseMt, isEmptyRow } from './mt.js';
-import { parseGeneric, parseGenericRoundtrip } from './generic.js';
-import { parseIbkr } from './ibkr.js';
-import { parseTradovate } from './tradovate.js';
-import { finish } from './trades.js';
+import { decodeBytes, isHtml, parseCsv, sniffDelimiter, resolveNumberStyle, checkQuoting } from './csv.js?v=ad87ab8b';
+import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS, checkCurrencyColumn } from './detect.js?v=e8bb7c80';
+import { fail, LIMITS } from './errors.js?v=a49d9d6e';
+import { htmlRows, parseMt, isEmptyRow } from './mt.js?v=393f72f5';
+import { parseGeneric, parseGenericRoundtrip } from './generic.js?v=88696a8d';
+import { parseIbkr } from './ibkr.js?v=e6e4e65f';
+import { parseTradovate } from './tradovate.js?v=2c8847b9';
+import { finish } from './trades.js?v=9f8ff039';
 
-export { EngineError } from './errors.js';
+export { EngineError } from './errors.js?v=a49d9d6e';
 
 export const TZ_LABELS = Object.freeze({
   mt5: 'broker server time', mt4: 'broker server time', ibkr_flex: 'as exported',

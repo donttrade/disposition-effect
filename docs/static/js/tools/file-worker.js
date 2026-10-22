@@ -18,9 +18,9 @@
 // Nothing here touches the network, storage or the console. Only what the pages render is
 // sent back: the trades and counts, never the raw rows.
 
-import { runFile } from '../engine/index.js';
-import { decodeBytes, isHtml } from '../engine/csv.js';
-import { noiseChecks } from '../engine/noise.js';
+import { runFile } from '../engine/index.js?v=5a8f5f52';
+import { decodeBytes, isHtml } from '../engine/csv.js?v=ad87ab8b';
+import { noiseChecks } from '../engine/noise.js?v=d0f6a787';
 
 // The pages need a few labels and five fields per trade. Copying 50,000 trade objects to the
 // page costs the main thread ~0.3 s to unpack, so the trades travel as typed-array columns
