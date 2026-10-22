@@ -232,10 +232,15 @@ def test_refund_amount_comes_from_prices_json(tmp_path):
 
 
 def test_refund_clause_is_pilot_checkout_only(builds, built_site):
-    for rel, h in all_html(built_site["out"]).items():
-        assert "within 10 business days of payment" not in h, rel
-    for rel, h in all_html(builds["paid"][0]).items():
-        assert "within 10 business days of payment" not in h, rel
+    # v3 A3 (ARCHITECT-V3-PLAN §c.6) gives each /start/ product its own "what happens next" steps, so the
+    # Snapshot (turnaround 10 business days in prices.json) promises delivery "within 10 business days of
+    # payment and a clean run", the same delivery wording as /for-firms/. That is a delivery time, not the
+    # refund clause, so only that exact continuation is set aside; the clause itself is matched in full.
+    clause = re.compile(r"within 10 business days of payment(?! and a clean run)")
+    for out in (built_site["out"], builds["paid"][0]):
+        for rel, h in all_html(out).items():
+            assert not clause.search(h), rel
+            assert "not confirmed in writing by both of us" not in h and 'id="pilot-refund"' not in h, rel
 
 
 def test_terms_version_was_bumped_for_these_legal_edits(built_site):
