@@ -1,0 +1,17 @@
+{#- The dark hero band (ARCHITECT-BRAND-AND-WRAPPED §2.3). A macro with slots:
+      {% from "partials/hero_band.html" import hero_band with context %}
+      {% call hero_band("hero", media="dashboard") %}…the copy column…{% endcall %}
+    id: the h1 id the section is labelled by. media: partials/hero_media_<media>.html in the 5-column
+    side (dashboard today; luck and calendar later). motifs: CSS classes motif-<name> (site.css "the dark
+    hero band"); a new signature feature adds one media partial and, if it needs one, one motif class.
+    The band re-scopes the colour tokens; checks/contrast.py BAND_PAIRS holds every pair to WCAG AA. -#}
+{% macro hero_band(id, motifs=("grid", "axis"), media=None) -%}
+<section class="band hero{% for m in motifs %} motif-{{ m }}{% endfor %}" aria-labelledby="{{ id }}" data-band>
+  <div class="wrap"><div class="grid">
+    <div class="span-7 band-copy">{{ caller() }}</div>
+    {%- if media %}
+    <div class="span-5 band-media">{% include "partials/hero_media_" ~ media ~ ".html" %}</div>
+    {%- endif %}
+  </div></div>
+</section>
+{%- endmacro %}
