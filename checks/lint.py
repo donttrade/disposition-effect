@@ -588,6 +588,16 @@ def free_badge_problems(s, where):
     return [("flag:free_badges", where, f"{x!r} while free_badges = false") for x in FREE_BADGE_STRINGS if x in s]
 
 
+SIGNATURE_JS = re.compile(r"^/static/js/(?:card/.+|(?:.+/)?(?:luck|ghost|guess)[\w.-]*)\.js$")
+
+
+def signature_script(rel):
+    """ARCHITECT-BRAND-AND-WRAPPED §1.5: scripts whose strings reach the page or a canvas without any
+    HTML (static/js/card/, luck*.js, ghost*.js, guess*.js anywhere under static/js/): their string
+    literals get the full page word list, skill_claims and seal_words included."""
+    return SIGNATURE_JS.match(rel) is not None
+
+
 def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, badges=False, journal=None):
     """seller: whether the seller block may appear; defaults to the committed switch (seller_allowed).
     badges: the build's free_badges flag (C1); off, free_badge_problems applies to every file."""
@@ -644,7 +654,9 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, b
                 problems += dated_pricing_claims(js_strings(s), rel)
                 if paid:  # a script can put text on a paid page too
                     problems += not_on_sale_claims(js_strings(s), rel)
-                if rel.startswith("/static/js/journal/"):   # ARCHITECT-V3 J38: every journal string, as page text
+                if rel.startswith("/static/js/journal/") or signature_script(rel):
+                    # ARCHITECT-V3 J38: every journal string, as page text; ARCHITECT-BRAND §1.5: the same
+                    # for the card, Luck Check, Guess vs Data and Ghost Trader scripts (canvas text has no HTML)
                     problems += lint_text(normalise(js_strings(s)), rel, paid, analytics)
             if name.endswith(".html"):
                 problems += business_line_problems(s, rel, paid or pilot, addresses)

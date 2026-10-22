@@ -127,6 +127,12 @@ TITLE_FIX = {
 DESC_FIX = {
     "/who-pays/": "This page has moved to the donttrade Independence policy: who pays, and what the money does not buy.",
     "/404.html": "Page not found on donttrade. Try Research, Pricing or Start a Pilot, or email us.",
+    # ARCHITECT-BRAND-AND-WRAPPED §1.6: "seal"/"sealed" never in public copy (banned.toml seal_words).
+    # A search result shows the head description, so it is public copy; the frozen bodies keep theirs.
+    "/research/strategy-tests/": "Swing, investing, overnight and day-trading rules, judged net of costs: 50 "
+                                 "strategies, 44 fingerprinted in advance; none passed. Not a strategy or signal.",
+    "/research/swing-trading-strategies/": "Pre-registered, hashed tests of 26 swing-trading rules on ETFs, judged "
+                                           "once on locked holdouts, net of costs. None passed. Not a strategy or a signal.",
 }
 LEGACY_JS = {"/tools/disposition-calculator/": "disposition-calculator.js",
              "/tools/pass-rate-calculator/": "pass-rate-calculator.js"}

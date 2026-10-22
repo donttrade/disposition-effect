@@ -13,7 +13,8 @@
  },
  "citation": [],
  "crumb": "26 swing-trading strategies",
- "description": "Hash-sealed, pre-registered tests of 26 swing-trading rules on ETFs, judged once on locked holdouts, net of costs. None passed. Not a strategy or a signal.",
+ "description": "Pre-registered, hashed tests of 26 swing-trading rules on ETFs, judged once on locked holdouts, net of costs. None passed. Not a strategy or a signal.",
+ "description_was": "Hash-sealed, pre-registered tests of 26 swing-trading rules on ETFs, judged once on locked holdouts, net of costs. None passed. Not a strategy or a signal.",
  "form_action": [
   "https://donttrade.substack.com"
  ],
