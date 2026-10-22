@@ -212,6 +212,14 @@ text = "instagram.com/donttradestudy"
 handle = "@donttradestudy"
 icon = "instagram"
 rel_me = true
+[[channels]]
+id = "youtube"
+name = "YouTube"
+url = "https://www.youtube.com/@donttradestudy"
+text = "youtube.com/@donttradestudy"
+handle = "@donttradestudy"
+icon = "youtube"
+rel_me = true
 
 [[footer]]
 heading = "Traders"
