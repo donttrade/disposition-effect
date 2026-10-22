@@ -55,10 +55,17 @@ def test_compare_zero_differences(built_site):
     assert len(C.baselines()) == 20
 
 
-def test_fragments_are_what_docs_gives():
-    r = subprocess.run([sys.executable, os.path.join(REPO, "checks", "lift_pages.py"), "--check"],
-                       capture_output=True, text=True)
-    assert r.returncode == 0, r.stdout + r.stderr
+def test_fragments_are_what_docs_gives(tmp_path):
+    # Since step 30 (b613c8b) docs/ is the v2 build: lift_pages.py refuses it (no old header),
+    # and the committed fragments are proved against the pre-bundle docs/ exported from git.
+    lift = [sys.executable, os.path.join(REPO, "checks", "lift_pages.py"), "--check"]
+    r = subprocess.run(lift, capture_output=True, text=True)
+    assert r.returncode == 1 and "no old header" in r.stderr, r.stdout + r.stderr
+    from test_build import PRE_BUNDLE
+    arc = subprocess.run(["git", "archive", PRE_BUNDLE, "docs"], cwd=REPO, capture_output=True, check=True).stdout
+    subprocess.run(["tar", "-x", "-C", str(tmp_path)], input=arc, check=True)
+    r = subprocess.run(lift + ["--docs", str(tmp_path / "docs")], capture_output=True, text=True)
+    assert r.returncode == 0 and "lift check: PASS" in r.stdout, r.stdout + r.stderr
 
 
 @pytest.mark.parametrize("change", [

@@ -3,6 +3,7 @@ and the engine Tester's F-D6). One block per finding; repros copied from /home/c
 """
 import os
 import re
+import shutil
 import subprocess
 import sys
 
@@ -96,7 +97,16 @@ def test_b1_passthrough_chrome_mismatch_fails_the_build(tmp_path, monkeypatch):
     monkeypatch.setattr(B, "PAGES", [p for p in B.PAGES if p["path"] != "/about/"])
     monkeypatch.setattr(B, "PASSTHROUGH_CHROME", B.PASSTHROUGH_CHROME + [("no such footer text", "x", 1)])
     monkeypatch.setenv("DT_OUT", str(tmp_path / "o"))
-    with pytest.raises(B.BuildError, match="passthrough chrome"):
+    # since step 30 (b613c8b) docs/about/ is the v2 build, which the old-chrome guard refuses on
+    # its first item; plant the pre-bundle page (git) so it is the planted text that fails
+    from test_build import PRE_BUNDLE
+    docs = tmp_path / "docs"
+    shutil.copytree(os.path.join(REPO, "docs"), docs)
+    (docs / "about" / "index.html").write_text(subprocess.run(
+        ["git", "show", f"{PRE_BUNDLE}:docs/about/index.html"], cwd=REPO, capture_output=True, text=True,
+        check=True).stdout, encoding="utf-8")
+    monkeypatch.setattr(B, "DOCS", str(docs))
+    with pytest.raises(B.BuildError, match="passthrough chrome: about/index.html holds 'no such footer text' 0"):
         B.build()
 
 

@@ -24,10 +24,11 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css">
-<script src="/static/js/theme.js"></script>
-<script src="/static/js/nav.js" defer></script>
-<script src="/static/js/form-ref.js" defer></script>
+<link rel="stylesheet" href="/static/css/site.css?v=10d7bc57">
+<script src="/static/js/theme.js?v=ccbceb07"></script>
+<script src="/static/js/nav.js?v=99138326" defer></script>
+<script src="/static/js/form-ref.js?v=e219eb3b" defer></script>
+<script src="/static/js/motion.js?v=7ce8bd22" defer></script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "name": "Prop firms & brokers", "position": 2}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "One person. The legal contracting party is named in writing, in the engagement agreement, before anything is paid. We provide whatever identity checks your due diligence needs. The pen name is how the research is published, not a contract term."}, "name": "Who will we contract with?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. Your staff run the script inside your systems; we receive only what it prints. We never need access to your systems."}, "name": "Does any account data leave our systems?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Then that is the number. You can keep it private, and we publish nothing from the engagement. The fee is unchanged."}, "name": "What if the number is bad for us?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. You review anything describing your data first and may decline publication outright. We may say only that an engagement took place, without naming you or the figure."}, "name": "Can you publish without our consent?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. It is a measurement with its limits stated. Please don’t describe it as audited, certified or verified."}, "name": "Isn’t this a kind of audit?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No cancellation fees. The Pilot is refundable in full until your staff first run the script on your records, and after that through the reproduction refund. Snapshot, Memo and Outcomes pack are paid 50% on acceptance and 50% within 7 days of delivery; if either side stops, completed work is billed pro rata."}, "name": "What if we stop halfway?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Invoiced in USD; bank transfer, or in Canada the CAD equivalent by Interac e-Transfer. Card payments are accepted through a secure Stripe link, sent only after you accept the scope."}, "name": "How do we pay?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "We work by email only, so every answer is in writing and can go straight to your compliance file."}, "name": "Can we talk on a call?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "There are no paying clients yet. A firm that chooses to publish its result will be listed, with its consent."}, "name": "Why is there no client list?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The licence lets any organisation run it on synthetic or test data for 32 days, and the folder includes a generator that writes a test file. partner/ on GitHub"}, "name": "Can we test it first?"}]}]}</script>
 </head>
 <body>
@@ -82,13 +83,13 @@
     </div>
   </section>
 
-  <ul class="evidence" aria-label="What you can check before you pay">
+  <ul class="evidence" aria-label="What you can check before you pay" data-reveal>
     <li><a href="/research/">6 published studies</a></li>
     <li><a href="/code/">Scripts public for 4 of 6</a></li>
     <li><a href="/corrections/">6 corrections, dated and logged</a></li>
     <li><a href="/independence/">No firm can pay to change a number</a></li>
   </ul>
-  <section class="section" aria-labelledby="who-h">
+  <section class="section" aria-labelledby="who-h" data-reveal>
     <h2 id="who-h">Who it is for</h2>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Who it is for">
     <table>
@@ -102,7 +103,7 @@
     </table>
     </div>
   </section>
-  <section class="section" aria-labelledby="what-it-costs">
+  <section class="section" aria-labelledby="what-it-costs" data-reveal>
     <h2 id="what-it-costs">What it costs</h2>
     <p><strong>Prices in USD, before any applicable sales tax.</strong> The standard engagement measures one thing today: the disposition effect, reported as PGR, PLR, their pooled ratio and a t statistic, with the counts behind them. If the figure you publish is a different one, write anyway; we’ll tell you plainly whether the published script can compute it.</p>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Prices and scope of each engagement">
@@ -126,7 +127,7 @@
     <p>Delivery times are in business days. The clock starts when payment is received and the script’s output comes back without validation errors, and it pauses while a clarifying question is open.</p>
     <p><strong>If you don’t like the number, no one else sees it.</strong> You can decline publication outright, and we publish nothing from the engagement. The fee is the same either way. The method is the same for every firm and for the free research. Paying buys scope and privacy, never a result. <a href="/independence/">Independence policy</a></p>
   </section>
-  <section class="section" aria-labelledby="timeline-h">
+  <section class="section" aria-labelledby="timeline-h" data-reveal>
     <h2 id="timeline-h">From first email to memo</h2>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Timeline">
     <table>
@@ -143,7 +144,7 @@
     </div>
     <p>The legal contracting party is named in writing, in the engagement agreement, before anything is paid. An NDA or DPA is signed on request. A “no measurable effect” answer is a finished job and is invoiced as one.</p>
   </section>
-  <section class="section" aria-labelledby="copy-leader">
+  <section class="section" aria-labelledby="copy-leader" data-reveal>
     <h2 id="copy-leader">Copy-trading platforms: the copy-leader persistence test</h2>
     <p><strong>Sold to platforms only, never to followers.</strong> For copy-trading apps, social trading networks, crypto exchanges with copy features and vault front-ends.</p>
     <p>Does your leader ranking predict what followers actually earn after copying costs and delay? The test answers that out of sample: leaders are ranked on one period and judged on a later period the ranking never saw. It is adjusted for luck, so a ranking counts only if it does better than chance would.</p>
@@ -156,7 +157,7 @@
     <p>Which engagement: the Pilot ($745 USD) covers one ranking rule and one period, one per platform; a Snapshot ($2,500) the same; a Memo ($6,000) every rule and period agreed in the scope; an Outcomes pack ($12,000) adds a re-check on a later period. Payment, delivery and refunds are those of the engagement.</p>
     <p><a class="btn btn-secondary" href="?product=copy-leader#request">Ask about the copy-leader test</a></p>
   </section>
-  <section class="section" aria-labelledby="claims-test">
+  <section class="section" aria-labelledby="claims-test" data-reveal>
     <h2 id="claims-test">Firms that make behaviour claims: the claims substantiation test</h2>
     <p><strong>We report the result whether it supports the claim or not.</strong> For trading journals, education sellers, prop firms and brokers whose marketing says their product changes how traders behave, such as “our journal makes you more disciplined”.</p>
     <p>Before anyone sees data, the claim is written down as a test: which behaviour, which users, which periods, what comparison, and what result would support it. That test is sealed (fingerprinted with a SHA-256 hash) and then run once, as written.</p>
@@ -170,7 +171,7 @@
     <p>Which engagement: the Pilot ($745 USD) covers one claim, one measure and one comparison, one per firm; a Snapshot ($2,500) the same; a Memo ($6,000) every measure and comparison agreed in the scope; an Outcomes pack ($12,000) runs the same sealed test again on a later period.</p>
     <p><a class="btn btn-secondary" href="?product=claims-test#request">Ask about a claims test</a></p>
   </section>
-  <section class="section" aria-labelledby="export-h">
+  <section class="section" aria-labelledby="export-h" data-reveal>
     <h2 id="export-h">What stays on your systems</h2>
     <p>Your trade records and account identifiers. The script runs inside your systems on a five-column extract, one row per open position per day plus a row on the day it closes, with no names. From the <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/EXPORT-GUIDE.md">export guide</a>:</p>
     <pre tabindex="0" role="region" aria-label="Example extract: one position as three rows">account_id,date,position_id,closed,pnl
@@ -270,10 +271,10 @@ HOW TO READ THE AGE-CONTROLLED FIGURES
     </details>
     <p>Retention: we keep the returned aggregates for the life of the engagement record, and never receive the extract.</p>
   </section>
-  <section class="section" aria-labelledby="receive-h">
+  <section class="section" aria-labelledby="receive-h" data-reveal>
     <h2 id="receive-h">What you receive</h2>
     <p>A one-page memo with these fields, every time:</p>
-    <dl class="split">
+    <dl class="split" data-reveal data-reveal-stagger>
       <div><dt>The figure</dt><dd>Pooled PGR, PLR and their ratio, with the counts behind them, and the same comparison holding position age fixed, with its 95% interval</dd></div>
       <div><dt>Precision</dt><dd>The t statistic and the counts behind it</dd></div>
       <div><dt>Denominator and period</dt><dd>Exactly who was counted, who was left out, and the dates the extract covers</dd></div>
@@ -283,7 +284,7 @@ HOW TO READ THE AGE-CONTROLLED FIGURES
     </dl>
     <p><a href="/sample-memo/">See a specimen memo</a></p>
   </section>
-  <section class="section" aria-labelledby="agree-h">
+  <section class="section" aria-labelledby="agree-h" data-reveal>
     <h2 id="agree-h">The agreement, in brief</h2>
     <ul>
       <li><strong>Fixed scope and price,</strong> in writing before any data is seen.</li>
@@ -299,7 +300,7 @@ HOW TO READ THE AGE-CONTROLLED FIGURES
     </ul>
     <p>Industry codes for prop firms now ask for rules that are objective and can be checked from outside (<a href="https://financialcommission.org/prop-firm-certification/code-of-conduct/">an example code of conduct</a>). Some firms already pay for outside reviews of their operations, such as payout times; those reviews cover operations, not how traders behaved. A figure computed with a published method can be re-run by anyone who reads it. Publishing a pass rate? <a href="/tools/pass-rate-calculator/">Check the arithmetic with the free pass-rate calculator</a>.</p>
   </section>
-  <section class="section" aria-labelledby="faq-h">
+  <section class="section" aria-labelledby="faq-h" data-reveal>
     <h2 id="faq-h">For your compliance team</h2>
     <details><summary>Who will we contract with?</summary><p>One person. The legal contracting party is named in writing, in the engagement agreement, before anything is paid. We provide whatever identity checks your due diligence needs. The pen name is how the research is published, not a contract term.</p></details>
     <details><summary>Does any account data leave our systems?</summary><p>No. Your staff run the script inside your systems; we receive only what it prints. We never need access to your systems.</p></details>
@@ -312,11 +313,11 @@ HOW TO READ THE AGE-CONTROLLED FIGURES
     <details><summary>Why is there no client list?</summary><p>There are no paying clients yet. A firm that chooses to publish its result will be listed, with its consent.</p></details>
     <details><summary>Can we test it first?</summary><p>Yes. The licence lets any organisation run it on synthetic or test data for 32 days, and the folder includes a generator that writes a test file. <a href="https://github.com/donttrade/disposition-effect/tree/main/partner">partner/ on GitHub</a></p></details>
   </section>
-  <section class="section" aria-labelledby="press-h">
+  <section class="section" aria-labelledby="press-h" data-reveal>
     <h2 id="press-h">For press and partners</h2>
     <p>donttrade is independent research on how traders handle winning and losing positions. It publishes its studies, scripts and corrections, and measures firms’ own records on their systems under a fixed-scope agreement. Paying buys scope and privacy, never a result. When describing a result, please use the wording under “Use of the name” above. Method and code: <a href="/code/">/code/</a>; corrections: <a href="/corrections/">/corrections/</a>.</p>
   </section>
-  <section class="section" aria-labelledby="request">
+  <section class="section" aria-labelledby="request" data-reveal>
     <h2 id="request">Start a Pilot, or ask a question</h2>
     <p>Tell us which traders and which dates. You get a written scope and a fixed price back, free. Nothing is owed until you accept the scope.</p>
 <form class="request-form" id="ff" method="POST" action="https://api.web3forms.com/submit" aria-labelledby="request">
