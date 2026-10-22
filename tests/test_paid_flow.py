@@ -19,7 +19,10 @@ import pytest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
-PRIVATE = os.path.join(os.path.dirname(REPO), "dt-private")
+# The paid-analysis server checkout. DT_PRIVATE_REPO picks one (the delivery plan's name); the default is
+# ../dt-private. The report page renders only reports of the method its wording describes
+# (wording.js METHOD_VERSION), so the server must be on the same method (R2: dt-private delivery-39).
+PRIVATE = os.environ.get("DT_PRIVATE_REPO") or os.path.join(os.path.dirname(REPO), "dt-private")
 sys.path.insert(0, os.path.join(HERE, "reference"))
 import engine_ref as E  # noqa: E402
 

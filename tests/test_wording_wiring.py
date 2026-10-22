@@ -1,8 +1,9 @@
 """The statistics amendment's wording, wired into the pages (CODER-WIRING-REPORT-2026-10-21).
 
-* /report/: renderReport() (report.js) shows the §7.1 sentences from wording.js: the page-1
-  headline, focus or no-focus line and coverage line; each tested habit's measure and verdict
-  sentences; the method line with the habit's OWN n_perm (it scales with file size, D-4).
+* /report/: renderReport() (report.js) shows the R2 §9.1-9.2 sentences from wording.js
+  (ARCHITECT-STATS-AMENDMENT-R2, method 2026-10-21.stats2): the page-1 headline, the focus line or
+  N0 with one reason line per distinguishable habit, the coverage line; each tested habit's lines;
+  the method line with the habit's OWN n_perm (it scales with file size, D-4).
   No fixed "10,000 shuffles" or "testing four habits" claim is left.
 * /tools/trade-stats/: a guarded expectancy check shows the §7.2 sentence; the D-9 footnote
   is under the three checks; the method text says the mean result is resampled.
@@ -43,8 +44,11 @@ async (cases) => {
   const H = (id, nMed, nSeq, o) => ({ id, name: names[id], question: 'Q ' + id + '?', n_a: 40, n_b: 90,
     measure_a: id === 'hold_gap' ? 5400 : id === 'size_up' ? 1.6 : -12.5, measure_b: id === 'hold_gap' ? 1800 : id === 'size_up' ? 1.0 : 3.25,
     effect: id === 'hold_gap' ? 3 : id === 'size_up' ? 1.6 : -15.75, p_raw: 0.0004, p_holm: 0.0016, verdict: 'distinguishable', direction: 'habit',
-    method: MED.includes(id) ? 'within-day label permutation (studentized median)' : 'within-day sequence shuffle (studentized)',
+    method: id === 'hold_gap' ? 'earlier comparable trades (symbol, holding period, direction, time of day)'
+      : id === 'size_up' ? 'local rank (symbol, holding period, direction, time of day)' : 'within-day sequence shuffle (mean and rank)',
     n_perm: MED.includes(id) ? nMed : nSeq, n_a_compared: MED.includes(id) ? 38 : null, n_b_compared: MED.includes(id) ? 85 : null,
+    ...(id === 'hold_gap' ? { share_a: 0.612, share_b: 0.471, n_long_a: 0, n_long_b: 0, spread_ratio: 1.12, withheld: null } : {}),
+    ...(id === 'size_up' ? { share: 0.583 } : {}), ...(id === 'revenge' || id === 'tilt' ? { p_mean: 0.0004, p_rank: 0.0003 } : {}),
     detail: id === 'tilt' ? { streak3_n: 12, streak3_mean: -20 } : null, research_ref: null,
     dollars: { label: labels[id], amount: -500, n_trades: 40 }, ...o });
   const OVR = { id: 'oversized_loss', name: names.oversized_loss, question: 'Q?', n_a: 10, n_b: null, measure_a: 0.05, measure_b: 0.3,
@@ -54,7 +58,7 @@ async (cases) => {
   const R = (c) => {
     const habits = all.map((id) => H(id, c.nMed, c.nSeq, (c.over || {})[id] || {})).concat([OVR]);
     return { v: 1, currency: 'USD', disclaimer: 'donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.',
-      engine_commit: 'test', rule_library_version: 'test', rule_library: ['Rule one.', 'Rule two.'], method_version: '2026-10-21.stats1',
+      engine_commit: 'test', rule_library_version: 'test', rule_library: ['Rule one.', 'Rule two.'], method_version: '2026-10-21.stats2',
       n_trades: c.n, period_weeks: 10, pgr_plr: null, focus: c.focus,
       n_tested: habits.filter((h) => h.p_raw !== null).length, n_distinguishable: habits.filter((h) => h.verdict === 'distinguishable').length, habits };
   };
@@ -91,6 +95,11 @@ CASES = {
                           "hold_gap": ND, "size_up": ND, "tilt": ND}},
     "none": {"n": 300, "nMed": 10000, "nSeq": 10000, "focus": None,
              "over": {k: ND for k in ("hold_gap", "revenge", "size_up", "tilt")}},
+    # R2 §3.5c: hold_gap withheld by the spread rule
+    "withheld": {"n": 300, "nMed": 10000, "nSeq": 10000, "focus": None,
+                 "over": {"hold_gap": {"verdict": "withheld", "withheld": "spread", "spread_ratio": 2.31, "p_raw": None, "p_holm": None,
+                                       "n_perm": None, "direction": None},
+                          "revenge": ND, "size_up": ND, "tilt": ND}},
 }
 STALE = ["10,000 shuffles", "Holm correction for testing four", "testing four habits", "Permutation test on past data"]
 
@@ -110,9 +119,10 @@ def rendered(browser, repo_server):
 
 def test_method_line_carries_the_scaled_permutation_counts(rendered):
     big = rendered["big_focus"]
-    assert big["method"][0].startswith("Compared within the same days: the labels were reshuffled within each day 5,000 times")
-    assert ("Compared with your other trades from the same days, matched on whether another trade had just closed: the "
-            "results were reshuffled within each day 2,000 times to see how large a gap chance alone produces.") in big["method"][1]
+    assert big["method"][0].startswith("How this is compared: each trade's hold is first ranked against the 20 trades of the same symbol")
+    assert "neighbouring trades 5,000 times to see how large a gap chance alone produces." in big["method"][0]
+    assert ("The results were reshuffled within each day 2,000 times (days with a single trade are grouped with nearby such "
+            "days).") in big["method"][1]
     assert len(big["method"]) == 4
     assert all("after adjusting for the 4 patterns tested (Holm)" in m for m in big["method"])
     mid = rendered["mid_opposite"]["method"]
@@ -120,24 +130,30 @@ def test_method_line_carries_the_scaled_permutation_counts(rendered):
     for case in rendered.values():
         for s in STALE:
             assert s not in case["text"], s
-    # too_few habits have no method line (no test ran)
+    # too_few and withheld habits have no method line (no test ran)
     assert len(rendered["too_few"]["method"]) == 2
+    assert len(rendered["withheld"]["method"]) == 3
 
 
 def test_page_one_uses_the_amendment_lines(rendered):
     p1 = rendered["big_focus"]["page1"]
     assert ("1 of the 4 patterns tested in this file is distinguishable from noise. Each verdict is adjusted for testing 4 "
-            "patterns at once") in p1
+            "patterns at once. In our tests on files built to have no real pattern, at least one pattern showed as "
+            "distinguishable in about 1 report in 20 or fewer.") in p1
     assert ("Shown first: Re-entering soon after a loss. Trades opened within 15 minutes of a losing trade's close totalled "
             "−$500.00 (historical).") in p1
     assert rendered["big_focus"]["coverage"].strip() == "4 of the 4 patterns could be tested. Each one compares two groups of at least 30 trades."
     # the old page said "No pattern ... distinguishable" whenever focus was null: false here
     opp = rendered["mid_opposite"]["page1"]
     assert "No pattern in this file is distinguishable from noise." not in opp
-    assert "The distinguishable gap runs the opposite way to its pattern name, so no pattern is shown first." in opp
-    own = rendered["own_gain"]["page1"]      # pending Architect sign-off (CODER-WIRING-REPORT)
-    assert "The distinguishable gap in this pattern's direction did not total a loss, so no pattern is shown first." in own
-    assert "No pattern in this file is distinguishable" not in own and "opposite way" not in own
+    assert "No pattern is shown first. A pattern is shown first only when its gap is distinguishable from noise" in opp
+    assert ("Trading after a losing streak: trades taken after 2 or more losses in a row did better than your other trades, "
+            "the other way round from the pattern's name.") in opp
+    own = rendered["own_gain"]["page1"]      # R2 §9.1 N-gain (replaces the pending NO_LOSS_ONE)
+    assert ("Re-entering soon after a loss: trades opened within 15 minutes of a losing trade's close did worse than your "
+            "other trades, but its dollar figure (trades opened within 15 minutes of a losing trade's close) totalled +$120.00 "
+            "(historical), which is not a loss.") in own
+    assert "No pattern in this file is distinguishable" not in own and "did not total a loss" not in own
     none = rendered["none"]["page1"]
     assert "No pattern in this file is distinguishable from noise." in none
     assert "That does not show the patterns are absent; it means this file cannot tell them apart from chance." in none
@@ -149,6 +165,9 @@ def test_each_habit_shows_its_sentences(rendered):
     assert "Trades opened within 15 minutes of a losing trade's close averaged −$12.50 per trade; your other trades averaged +$3.25." in h["revenge"]
     assert "This gap is distinguishable from noise, after adjusting for the 4 patterns tested." in h["revenge"]
     assert "Your losing trades were held a median of 1h 30m; your winning trades a median of 30m 0s." in h["hold_gap"]
+    assert ("Compared with similar trades opened just before it, a losing trade's hold came out longer in 61.2% of "
+            "comparisons; a winning trade's in 47.1%.") in h["hold_gap"]
+    assert "the larger size rank in 58.3% of pairs; 50% would mean no difference." in h["size_up"]
     assert "Losers were held 3.00 times as long as winners." in h["hold_gap"]          # the extra measure stays
     assert "After 3 or more losses in a row: 12 trades" in h["tilt"]
     assert "Share of all loss dollars: 30.0%" in h["oversized_loss"]                   # descriptive habit unchanged
@@ -158,9 +177,14 @@ def test_each_habit_shows_its_sentences(rendered):
     tf = rendered["too_few"]["habit"]
     assert ("Not enough trades to tell: this pattern compares two groups of at least 30 trades each, and this file has 12 "
             "and 90.") in tf["revenge"]
-    assert ("Not enough trades to tell: this pattern compares two groups of at least 30 trades each, counted on days that "
-            "have both, and this file has 9 and 85.") in tf["size_up"]
+    assert ("Not enough trades to tell: trades after a loss and trades after a win are compared only within groups of "
+            "comparable trades, and only 9 and 85 of them share a group with the other kind; the test needs at least 30 of "
+            "each.") in tf["size_up"]
     assert "averaged" not in tf["revenge"]                                             # the too_few sentence replaces both
+    w = rendered["withheld"]["habit"]["hold_gap"]
+    assert "not tested" in w and "the middle half of one group covers 2.3× the range of the other's" in w
+    assert "Losers were held" not in w and "reshuffled" not in w                       # no test ran: no ratio line, no method line
+    assert "Not tested: Holding losers longer than winners." in rendered["withheld"]["coverage"]
 
 
 def test_rendered_report_text_passes_the_paid_lint(rendered):
