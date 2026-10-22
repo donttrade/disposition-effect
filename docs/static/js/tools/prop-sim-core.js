@@ -23,7 +23,7 @@
 // fixed (file mode: one draw per day; manual mode: one draw per trade), so a seed gives
 // the same result in every browser.
 
-import { mulberry32 } from '../engine/noise.js';
+import { mulberry32 } from '../engine/noise.js?v=d0f6a787';
 
 export const RUNS = 10000;
 export const DEFAULT_SEED = 20261022;

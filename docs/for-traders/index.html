@@ -24,10 +24,11 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css">
-<script src="/static/js/theme.js"></script>
-<script src="/static/js/nav.js" defer></script>
-<script src="/static/js/form-ref.js" defer></script>
+<link rel="stylesheet" href="/static/css/site.css?v=10d7bc57">
+<script src="/static/js/theme.js?v=ccbceb07"></script>
+<script src="/static/js/nav.js?v=99138326" defer></script>
+<script src="/static/js/form-ref.js?v=e219eb3b" defer></script>
+<script src="/static/js/motion.js?v=7ce8bd22" defer></script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "name": "Individual traders", "position": 2}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. It will describe your own past trades. It does not recommend any security, trade, size or exit, and past results do not predict future results."}, "name": "Is this investment advice?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "There is no launch date yet. Everyone on the waitlist gets one email when it does."}, "name": "When does it launch?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. Joining is free, and no card is asked for."}, "name": "Is anything charged when I join?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "The free trade-stats dashboard reads the same files and shows the core numbers: win rate, profit factor, drawdown and streaks, in your browser."}, "name": "What can I use today?"}]}]}</script>
 </head>
 <body>
@@ -71,7 +72,7 @@
     </div>
   </section>
 
-  <section class="section" aria-labelledby="measure-h">
+  <section class="section" aria-labelledby="measure-h" data-reveal>
     <h2 id="measure-h">What it is being built to measure</h2>
     <p>Five habits, each measured in your own closed trades. These describe the report as it is being built; the final list is published before anyone pays.</p>
     <div class="table-wrap" tabindex="0" role="region" aria-label="The five habits">
@@ -89,7 +90,7 @@
     <p>Each tested habit gets one of three results: “distinguishable from noise”, “not distinguishable from noise”, or “not enough trades to tell” when either of the two groups it compares has fewer than 30 trades. Each test compares trades from the same days with each other. Dollar figures are historical totals from your file, such as “trades matching this pattern totalled −$X”. They describe what happened; they do not show that a habit caused a result.</p>
   </section>
 
-  <section class="section" aria-labelledby="files-h">
+  <section class="section" aria-labelledby="files-h" data-reveal>
     <h2 id="files-h">Your file, and what is sent</h2>
     <ul>
       <li><strong>Files:</strong> the MetaTrader 5 or 4 history report, an Interactive Brokers Flex Query, a Tradovate orders export (all three in beta until a real export confirms the columns), or the donttrade CSV template.</li>
@@ -98,13 +99,13 @@
     </ul>
   </section>
 
-  <section class="section" aria-labelledby="founding">
+  <section class="section" aria-labelledby="founding" data-reveal>
     <h2 id="founding">The founding offer</h2>
     <p>$39 founding price for the first 100 buyers of the habit report, one time, in US dollars. It includes one re-test of the same account. A yearly habit tracker comes later, at $79 a year as its founding price; it is not sold until it exists.</p>
     <p>Joining the waitlist is free and commits you to nothing. You see the price, the seller’s details and the terms again before paying anything. When it launches, a full refund is available if you ask within 14 days of buying. <a href="/terms/#traders">Trader terms</a></p>
   </section>
 
-  <section class="section" aria-labelledby="waitlist">
+  <section class="section" aria-labelledby="waitlist" data-reveal>
     <h2 id="waitlist">Join the waitlist</h2>
 <form class="request-form" id="wl" method="POST" action="https://api.web3forms.com/submit" aria-labelledby="waitlist">
   <input type="hidden" name="access_key" value="54d01baf-5e02-4d93-988c-16cf5487732d">
@@ -134,7 +135,7 @@
 
   </section>
 
-  <section class="section" aria-labelledby="free-h">
+  <section class="section" aria-labelledby="free-h" data-reveal>
     <h2 id="free-h">Free now</h2>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Free tools">
     <table class="tool-list">
@@ -149,7 +150,7 @@
     <p><a href="/tools/">All free tools</a> · <a href="/research/">The research is free</a></p>
   </section>
 
-  <section class="section" aria-labelledby="faq-h">
+  <section class="section" aria-labelledby="faq-h" data-reveal>
     <h2 id="faq-h">Questions</h2>
     <details><summary>Is this investment advice?</summary><p>No. It will describe your own past trades. It does not recommend any security, trade, size or exit, and past results do not predict future results.</p></details>
     <details><summary>When does it launch?</summary><p>There is no launch date yet. Everyone on the waitlist gets one email when it does.</p></details>

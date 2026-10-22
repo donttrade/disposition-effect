@@ -2,7 +2,7 @@
 // responsive (10,000 permutations × up to 20,000 trades). Receives only
 // {pnl, hold_s} per trade: no symbols, no times, nothing identifying.
 
-import { noiseChecks } from './noise.js';
+import { noiseChecks } from './noise.js?v=d0f6a787';
 
 self.onmessage = (ev) => {
   const trades = ev.data && ev.data.trades;

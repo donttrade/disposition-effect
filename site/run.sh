@@ -17,7 +17,8 @@ case "${1:-}" in
   check)
     python3 site/build.py
     python3 checks/contrast.py >/dev/null && echo "contrast: PASS"
-    python3 checks/harvest_prices.py docs/pricing/index.html
+    python3 checks/harvest_prices.py docs/pricing/index.html       # the live page (v2 bundle since step 30)
+    python3 checks/harvest_prices.py site/_site/pricing/index.html # the page this build would publish
     if [ -f checks/lint.py ]; then python3 checks/lint.py site/_site; fi
     python3 -m pytest -q tests/test_build.py tests/test_design_system.py
     ;;
