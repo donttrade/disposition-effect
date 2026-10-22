@@ -419,7 +419,8 @@ def test_manual_restore_sentence_passes_the_restore_email_rule():
 
 # ------------------------------------------------------------------ Manager C4: every tool page blocks outgoing requests
 TOOL_PAGES = ["/tools/trade-stats/", "/tools/prop-challenge-simulator/", "/tools/lot-size-calculator/",
-              "/tools/disposition-calculator/", "/tools/pass-rate-calculator/"]
+              "/tools/disposition-calculator/", "/tools/pass-rate-calculator/",
+              "/tools/risk-reward-calculator/", "/tools/drawdown-calculator/", "/tools/trading-heatmap/"]  # tools batch 2
 
 
 def _csp(html):

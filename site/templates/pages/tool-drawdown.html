@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block content %}
+{%- import "partials/trader_offer.html" as offer with context %}
+<div class="wrap">
+  <div class="grid">
+    <div class="span-8">
+      <p class="crumb small"><a href="/tools/">Free tools</a></p>
+      <h1>Drawdown and recovery calculator</h1>
+      <p class="lede">A drawdown is the fall from an account’s high to its lowest point before a new high. The recovery is never symmetrical: after a 20 percent drawdown it takes a 25 percent gain to get back, and after 50 percent it takes 100 percent.</p>
+      <p>The calculator at the top gives that figure for any drawdown you type, and the table below it lists the common ones. Further down, drop a trade file for the picture of your own record: your largest drawdown in money and, if you enter a starting balance, in percent; your longest drawdown measured in trades and in calendar days; how long each drawdown took to recover; and where you stand now. An underwater chart shows every drawdown at a glance, with a table version for screen readers. It reads MT5 and MT4 HTML reports, IBKR Flex Query trade files and Tradovate order exports (all three in beta), and a plain CSV template. {% if flags.analytics %}Your file’s contents are never sent. The only request this page makes is an anonymous page-view count.{% else %}Everything runs in this browser tab, and the page’s security policy blocks every outgoing network request, so your file is not uploaded anywhere.{% endif %}</p>
+    </div>
+  </div>
+  {% include "partials/disclaimer.html" %}
+
+  <section class="tool" aria-labelledby="dd-q-h">
+    <h2 id="dd-q-h">Gain that recovers a drawdown</h2>
+    <p id="dd-q-js-needed" class="notice notice-caution">This calculator runs in your browser and needs JavaScript turned on. The table below works without it.</p>
+    <form id="dd-q-form" novalidate hidden>
+      <div class="field">
+        <label for="dd-pct">Drawdown, %</label>
+        <span class="hint" id="dd-pct-hint">The fall from the high, as a percentage of the high. For example 20.</span>
+        <input id="dd-pct" type="text" inputmode="decimal" autocomplete="off" aria-describedby="dd-pct-hint dd-pct-err">
+        <p class="error" id="dd-pct-err" hidden></p>
+      </div>
+      <div id="dd-q-errors" class="notice notice-error" role="alert" tabindex="-1" hidden></div>
+      <p><button class="btn" type="submit">Calculate</button></p>
+    </form>
+    <div id="dd-q-out" class="tool-out" hidden></div>
+    <h3 id="table-h">Recovery table</h3>
+    <div class="table-wrap table-narrow" tabindex="0" role="region" aria-label="Recovery table">
+    <table id="dd-table">
+      <caption>Gain = drawdown ÷ (1 − drawdown), before fees, deposits and withdrawals</caption>
+      <thead><tr><th scope="col">Drawdown</th><th scope="col" class="num">Gain that gets back to the high</th></tr></thead>
+      <tbody>
+      {%- for d in [5, 10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 75, 80, 90] %}
+        <tr><th scope="row">{{ d }}%</th><td class="num" data-dd="{{ d }}">{{ "%.1f"|format(100 * d / (100 - d)) }}%</td></tr>
+      {%- endfor %}
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section class="tool" aria-labelledby="dd-tool-h">
+    <h2 id="dd-tool-h">Your own drawdowns, from your trade file</h2>
+    <p id="dd-js-needed" class="notice notice-caution">This part runs in your browser and needs JavaScript turned on.</p>
+    <div id="dd-controls" hidden>
+      <div class="dropzone" id="dd-drop">
+        <p><strong>Drop a trade file here</strong>, or choose one from your computer.</p>
+        <p class="small muted">MT5 or MT4 report (.htm, .html), IBKR Flex Query (.csv), Tradovate Orders (.csv), or the CSV template. Up to 50 MB and 200,000 rows.</p>
+        <div class="file-pick">
+          <label for="dd-file">Your trade file</label>
+          <input id="dd-file" type="file" accept=".csv,.htm,.html,.txt">
+        </div>
+        <p class="btn-row"><span class="muted">No file to hand?</span> <button class="btn btn-secondary" id="dd-sample-btn" type="button">Try a sample file</button></p>
+        <p class="small muted">The sample is synthetic: 160 made-up trades on three fictional symbols, not a real trader. The <a href="/tools/trade-stats/#template">CSV template</a> is described on the trade-stats page.</p>
+      </div>
+      <div class="field">
+        <label for="dd-balance">Starting balance (optional)</label>
+        <span class="hint" id="dd-balance-hint">Only used to show drawdowns as a % of the high and the gain that recovers them. Digits and a decimal point, for example 25000.</span>
+        <input id="dd-balance" type="text" inputmode="decimal" autocomplete="off" aria-describedby="dd-balance-hint dd-balance-err">
+        <p class="error" id="dd-balance-err" hidden></p>
+      </div>
+    </div>
+    <p id="dd-status" class="muted" role="status" hidden></p>
+    <p id="dd-progress" class="progress-line small muted" hidden><progress aria-label="Reading your file"></progress> <span data-elapsed aria-hidden="true"></span></p>
+    <div id="dd-error" class="notice notice-error" role="alert" tabindex="-1" hidden></div>
+  </section>
+
+  <div id="dd-out" class="tool-out" hidden></div>
+
+  <aside id="dd-teaser" class="notice notice-gap teaser" aria-labelledby="dd-teaser-h" {{ offer.on_sale_attr() }}>
+    <strong id="dd-teaser-h">{{ offer.teaser_heading() }}</strong>
+    <p id="dd-teaser-text">{{ offer.lead() }} looks at what you do after a loss and after a run of losses, in your own trade file.</p>
+    {{- offer.teaser() }}
+  </aside>
+
+  <section class="section" aria-labelledby="count-h">
+    <h2 id="count-h">How the numbers are counted</h2>
+    <ul>
+      <li>Equity is the running total of closed-trade results, net of fees when the file has them, starting at 0 before the first trade. A trade runs from flat to flat on each symbol, as on the trade-stats page.</li>
+      <li>A drawdown starts when equity falls below its previous high and ends on the first trade that brings it back to that high or above. Its depth is the largest fall from the high in between.</li>
+      <li>Trades in a drawdown are counted from the trade after the high up to and including the trade that recovered it. Calendar days run from the close of the trade that set the high to the close of the recovering trade. A drawdown that has not recovered is counted to the last trade in the file.</li>
+      <li>With a starting balance, a drawdown’s percentage is its depth divided by the balance plus the equity at the high, and the gain that recovers it is the depth divided by what was left at the low.</li>
+      <li>Times are read exactly as written in the file, so results are the same in every time zone.</li>
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="faq-h">
+    <h2 id="faq-h">Questions</h2>
+    <details><summary>How much gain recovers a drawdown?</summary><p>Divide the drawdown by one minus the drawdown. A 10 percent drawdown takes about an 11.1 percent gain to recover, 20 percent takes 25 percent, 30 percent takes about 42.9 percent, and 50 percent takes 100 percent.</p></details>
+    <details><summary>How is maximum drawdown calculated?</summary><p>Track the running high of the account’s closed balance after each trade, then measure the largest fall from any high to a later low. The tool reports it in money and, with a starting balance, as a percentage of the high.</p></details>
+    <details><summary>Why does my platform show a different maximum drawdown?</summary><p>Platforms often include open-trade equity, which moves between trades. A trade file holds closed trades, so this page measures closed-balance drawdown, which can be smaller.</p></details>
+    <details><summary>How is the length of a drawdown counted?</summary><p>In trades, from the trade after the high up to and including the trade that brought equity back to the high. In calendar days, from the close of the trade that set the high to the close of the trade that recovered it. A drawdown that has not recovered is counted to the last trade in the file.</p></details>
+    <details><summary>Is my file uploaded?</summary><p>{% if flags.analytics %}No. The analysis runs in your browser tab, and your file’s contents are never sent. The only request this page makes is an anonymous page-view count.{% else %}No. The analysis runs in your browser tab, and the page’s security policy blocks it from making network requests. You can watch your browser’s Network tab stay empty while it works.{% endif %}</p></details>
+    <details><summary>Is this investment advice?</summary><p>No. It measures your own past trades and does not recommend any security, trade, size or exit. Past results do not predict future results.</p></details>
+  </section>
+
+  <section class="section" aria-labelledby="more-h">
+    <h2 id="more-h">Related</h2>
+    <ul>
+      <li><a href="/tools/trade-stats/">Trade stats</a>: profit factor, win rate and streaks from your own trade file.</li>
+      <li><a href="/tools/trading-heatmap/">Trading heatmap</a>: your trades by hour and weekday.</li>
+      <li><a href="/tools/prop-challenge-simulator/">Prop-firm challenge simulator</a>: replay a challenge from your own trading days.</li>
+      <li><a href="/tools/risk-reward-calculator/">Risk-reward calculator</a>: R multiple, break-even win rate and expectancy in R.</li>
+      <li><a href="/for-traders/">The habit report for traders</a> ({{ offer.short_state() }}).</li>
+    </ul>
+  </section>
+  <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR and Tradovate are trademarks of their owners. donttrade is not affiliated with any of them.</p>
+</div>
+<script type="text/csv" id="dd-sample">
+{{ sample_csv|safe }}</script>
+{% endblock %}
