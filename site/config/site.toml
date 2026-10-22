@@ -196,6 +196,22 @@ url = "https://github.com/donttrade"
 text = "github.com/donttrade"
 icon = "github"
 rel_me = true
+[[channels]]
+id = "tiktok"
+name = "TikTok"
+url = "https://www.tiktok.com/@donttradestudy"
+text = "tiktok.com/@donttradestudy"
+handle = "@donttradestudy"
+icon = "tiktok"
+rel_me = true
+[[channels]]
+id = "instagram"
+name = "Instagram"
+url = "https://www.instagram.com/donttradestudy/"
+text = "instagram.com/donttradestudy"
+handle = "@donttradestudy"
+icon = "instagram"
+rel_me = true
 
 [[footer]]
 heading = "Traders"

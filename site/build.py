@@ -1355,9 +1355,10 @@ def set_launch_date(legal, toml_path, today=None):
     return d
 
 
-CHANNEL_HOSTS = {"x.com", "github.com", "donttrade.substack.com", "www.linkedin.com", "www.tiktok.com", "www.youtube.com"}
+CHANNEL_HOSTS = {"x.com", "github.com", "donttrade.substack.com", "www.linkedin.com", "www.tiktok.com", "www.youtube.com",
+                 "www.instagram.com"}
 CHANNEL_FIELDS = ("id", "name", "url", "text", "icon", "rel_me")
-BRAND_ICONS = ("x", "github", "substack")
+BRAND_ICONS = ("x", "github", "substack", "tiktok", "instagram", "youtube")
 
 
 def load_channels(cfg, toml_path):

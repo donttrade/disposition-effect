@@ -336,7 +336,9 @@ import tomllib  # noqa: E402
 
 TOML = os.path.join(REPO, "site", "config", "site.toml")
 CHANNELS = [c["url"] for c in tomllib.load(open(TOML, "rb"))["channels"]]
-EXPECTED = ["https://donttrade.substack.com", "https://x.com/donttradestudy", "https://github.com/donttrade"]
+EXPECTED = ["https://donttrade.substack.com", "https://x.com/donttradestudy", "https://github.com/donttrade",
+            "https://www.tiktok.com/@donttradestudy", "https://www.instagram.com/donttradestudy/"]
+NAMES = ["Substack", "X", "GitHub", "TikTok", "Instagram"]
 
 
 def follow_links(html):
@@ -344,7 +346,7 @@ def follow_links(html):
     return re.findall(r'<a href="([^"]+)" rel="([^"]+)">(.*?)</a>', nav)
 
 
-def test_soc1_footer_follow_is_exactly_the_three_accounts(built_site):
+def test_soc1_footer_follow_is_exactly_the_official_accounts(built_site):
     for path in ("/", "/about/", "/tools/trade-stats/"):
         links = follow_links(page(built_site, path))
         assert [h for h, _, _ in links] == EXPECTED == CHANNELS, path
@@ -352,8 +354,26 @@ def test_soc1_footer_follow_is_exactly_the_three_accounts(built_site):
             assert {"me", "noopener"} <= set(rel.split())
             assert '<svg aria-hidden="true" focusable="false"' in inner
             name = re.sub(r"<[^>]+>", "", re.sub(r"(?s)<svg.*?</svg>", "", inner))
-            assert name.split()[0] in ("Substack", "X", "GitHub"), name
-    assert "target=" not in re.search(r'(?s)<nav aria-label="Follow donttrade">.*?</nav>', page(built_site, "/")).group(0)
+            assert name.split()[0] in NAMES, name
+        assert [re.sub(r"<[^>]+>", "", re.sub(r"(?s)<svg.*?</svg>", "", i)).split()[0] for _, _, i in links] == NAMES
+    nav = re.search(r'(?s)<nav aria-label="Follow donttrade">.*?</nav>', page(built_site, "/")).group(0)
+    assert "target=" not in nav
+    # inline SVG only: no third-party script, image, iframe or embed in the Follow column
+    assert not re.search(r"<(?:script|img|iframe|object|embed|link)\b", nav), nav
+    assert "Where to find this" in page(built_site, "/about/")
+    about = page(built_site, "/about/").split("<!--frozen:end-->")[1]
+    assert ("donttrade.substack.com</a>, <a href=\"https://x.com/donttradestudy\" rel=\"me noopener\">x.com/donttradestudy</a>, "
+            "<a href=\"https://github.com/donttrade\" rel=\"me noopener\">github.com/donttrade</a>, "
+            "<a href=\"https://www.tiktok.com/@donttradestudy\" rel=\"me noopener\">tiktok.com/@donttradestudy</a> and "
+            "<a href=\"https://www.instagram.com/donttradestudy/\" rel=\"me noopener\">instagram.com/donttradestudy</a>. ") in about
+
+
+def test_soc1_every_brand_icon_is_drawn_inline():
+    src = open(os.path.join(REPO, "site", "templates", "partials", "icons.html"), encoding="utf-8").read()
+    brand = src[src.index("{%- set BRAND = {"):src.index("{%- macro brand")]
+    for name in B.BRAND_ICONS:
+        assert re.search(r'"%s": \'<path d="[^"]+"/>\',' % name, brand), name
+    assert {c["icon"] for c in tomllib.load(open(TOML, "rb"))["channels"]} <= set(B.BRAND_ICONS)
 
 
 def test_soc2_about_sentence_and_same_as_match_the_footer(built_site):
@@ -362,11 +382,9 @@ def test_soc2_about_sentence_and_same_as_match_the_footer(built_site):
     assert m and about.index("<!--frozen:end-->") < m.start()
     assert re.findall(r'href="([^"]+)" rel="me noopener"', m.group(1)) == [h for h, _, _ in follow_links(about)]
     import json
-    for blob in re.findall(r'(?s)<script type="application/ld\+json">(.*?)</script>', page(built_site, "/")):
-        for node in json.loads(blob).get("@graph", []):
-            if node.get("@type") == "Organization":
-                assert node["sameAs"] == EXPECTED
-                break
+    orgs = [node for blob in re.findall(r'(?s)<script type="application/ld\+json">(.*?)</script>', page(built_site, "/"))
+            for node in json.loads(blob).get("@graph", []) if node.get("@type") == "Organization"]
+    assert orgs and all(o["sameAs"] == EXPECTED for o in orgs), orgs
 
 
 def _build_with(tmp_path, src):
@@ -375,16 +393,17 @@ def _build_with(tmp_path, src):
                           env={**os.environ, "DT_OUT": str(tmp_path / "o"), "DT_SITE_TOML": str(tmp_path / "site.toml")})
 
 
-def test_soc2_a_fourth_channel_changes_all_three_places(tmp_path):
+def test_soc2_another_channel_changes_all_three_places(tmp_path):
+    # a made-up extra account in a temp site.toml only (not an account donttrade has)
     src = open(TOML, encoding="utf-8").read()
-    extra = ('[[channels]]\nid = "yt"\nname = "YouTube"\nurl = "https://www.youtube.com/@donttradestudy"\n'
-             'text = "youtube.com/@donttradestudy"\nicon = "x"\nrel_me = true\n\n[[footer]]\nheading = "Traders"')
+    extra = ('[[channels]]\nid = "li"\nname = "LinkedIn"\nurl = "https://www.linkedin.com/company/dt-made-up-test"\n'
+             'text = "linkedin.com/company/dt-made-up-test"\nicon = "x"\nrel_me = true\n\n[[footer]]\nheading = "Traders"')
     r = _build_with(tmp_path, src.replace('[[footer]]\nheading = "Traders"', extra, 1))
     assert r.returncode == 0, r.stderr
     out = tmp_path / "o"
     home = (out / "index.html").read_text(encoding="utf-8")
     about = (out / "about" / "index.html").read_text(encoding="utf-8")
-    url = "https://www.youtube.com/@donttradestudy"
+    url = "https://www.linkedin.com/company/dt-made-up-test"
     assert [h for h, _, _ in follow_links(home)][-1] == url
     assert f'<a href="{url}" rel="me noopener">' in about.split("<!--frozen:end-->")[1].split("</p>")[0]
     assert f'"{url}"' in home.split('"sameAs"')[1].split("]")[0]
@@ -395,6 +414,8 @@ def test_soc2_a_fourth_channel_changes_all_three_places(tmp_path):
     ('url = "https://x.com/donttradestudy"', 'url = "https://twitter.com/donttradestudy"', "host"),
     ('text = "x.com/donttradestudy"', 'text = "TODO"', "placeholder"),
     ('icon = "x"', 'icon = "mastodon"', "icon"),
+    ('url = "https://www.instagram.com/donttradestudy/"', 'url = "https://instagram.com.attacker.net/donttradestudy/"', "host"),
+    ('url = "https://www.tiktok.com/@donttradestudy"', 'url = "http://www.tiktok.com/@donttradestudy"', "https://"),
 ])
 def test_soc2_bad_channels_fail_the_build(tmp_path, old, new, msg):
     src = open(TOML, encoding="utf-8").read()
