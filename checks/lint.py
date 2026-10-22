@@ -35,11 +35,24 @@ with open(os.path.join(HERE, "banned.toml"), "rb") as _f:
     RULES = tomllib.load(_f)
 
 
+# Brand P1a Tester D1: the rules match the text as a browser shows it. Inside a phrase, a space matches
+# any run of whitespace (line breaks and tabs in a template, double spaces: a browser folds them into one
+# space) and hyphens ("beat-the-market"). An apostrophe matches ' and ’ ("you're", "you’re").
+PHRASE_GAP = r"[\s\-‐‑]+"
+
+
 def _phrase_re(p):
-    # whole-word match on both ends where the phrase starts/ends with a word character
+    """Whole-word match on both ends where the phrase starts/ends with a word character. A word that ends
+    in * matches any ending (Tester D2: "skill*" = skills, skilled, skillset, skilfully...), as in [words_fr]."""
+    parts = []
+    for w in p.split(" "):
+        star = w.endswith("*") and len(w) > 1
+        esc = re.sub(r"['’]", lambda _: "['’]", re.escape(w[:-1] if star else w))
+        parts.append(esc + (r"[^\W\d_]*" if star else ""))
+    body = PHRASE_GAP.join(parts)
     left = r"(?<![A-Za-z0-9])" if re.match(r"\w", p) else ""
-    right = r"(?![A-Za-z0-9])" if re.search(r"\w$", p) else ""
-    return re.compile(left + re.escape(p) + right, re.IGNORECASE)
+    right = r"(?![A-Za-z0-9])" if re.search(r"[\w*]$", p) else ""
+    return re.compile(left + body + right, re.IGNORECASE)
 
 
 WORDS = [(cat, w, _phrase_re(w)) for cat, ws in RULES["words"].items() for w in ws]
@@ -174,9 +187,15 @@ def js_strings(code):
 # invisible character (zero-width, soft hyphen: Unicode Cf, stripped), a compatibility form
 # (full-width letters, NBSP: NFKC), a Cyrillic or Greek look-alike letter (folded to Latin) or
 # a single-quoted attribute. Inline elements join their text; every other element is a break.
+# Brand P1a Tester D3: label, img, svg (and the shapes inside it), picture/source and output are inline
+# by default too, so "s<label>eal</label>", "s<img alt=''>eal" and "se<svg></svg>al" read "seal".
 INLINE = frozenset("a abbr b bdi bdo cite code data del dfn em font i ins kbd mark nobr q s samp small span "
-                   "strong sub sup time tt u var wbr".split())
+                   "strong sub sup time tt u var wbr label img svg g path use circle rect line polyline polygon "
+                   "ellipse picture source output".split())
 READ_ATTRS = ("alt", "title", "aria-label", "placeholder", "aria-description")
+# D3: an <input>'s value is drawn on the page (the label of a button-type input, the text in a text box);
+# not for the types that never show it as text
+INPUT_VALUE_HIDDEN = frozenset("hidden checkbox radio file color range image password".split())
 META_NAMES = re.compile(r"description|og:[\w:]+|twitter:[\w:]+", re.I)
 CONFUSABLES = str.maketrans("АВЕКМНОРСТХаеорсухіјѕԁԛԝΑΒΕΖΗΙΚΜΝΟΡΤΥΧαοντ",
                             "ABEKMHOPCTXaeopcyxijsdqwABEZHIKMNOPTYXaovt")
@@ -206,6 +225,8 @@ def _parse(html):
                     self.attrs.append(v)
                 if k in ("href", "src", "action", "content", "srcset", "formaction", "data"):
                     self.urls.append(v)
+            if tag == "input" and a.get("value") and a.get("type", "text").lower() not in INPUT_VALUE_HIDDEN:
+                self.attrs.append(a["value"])
             if tag == "meta" and META_NAMES.fullmatch(a.get("name") or a.get("property") or ""):
                 self.meta.append(a.get("content", ""))
             if tag in ("script", "style"):
@@ -294,17 +315,53 @@ def lint_text_fr(text, where="text"):
     return out
 
 
-def lint_text(text, where="text", paid=False, analytics=False, english=True):
-    """Wording rules on plain text. Returns a list of (rule, where, detail).
-    english=False (French pages) skips the English word list; lint_text_fr covers those pages."""
+def word_hits(text, where, cats=None):
+    """The [words] list (only the groups in cats, when given), outside the [allow] phrases."""
     out = []
     masked = text
     for a in ALLOW:
         masked = a.sub(lambda m: " " * len(m.group(0)), masked)
-    for cat, w, rx in (WORDS if english else []):
+    for cat, w, rx in WORDS:
+        if cats is not None and cat not in cats:
+            continue
         for m in rx.finditer(masked):
             ctx = text[max(0, m.start() - 40):m.end() + 40].replace("\n", " ")
             out.append((f"banned:{cat}", where, f"“{w}” in …{ctx}…"))
+    return out
+
+
+# ARCHITECT-BRAND §1.5–1.6: the two brand groups. Tester D4: they also hold where a link preview or a
+# feed reader shows the words, outside the frozen STUDY bodies (the only text that keeps "sealed").
+BRAND_GROUPS = ("seal_words", "skill_claims")
+STUDY_PAGE = re.compile(r"^/research/[^/]+/$")
+
+
+def frozen_brand_problems(body, path):
+    """A lifted page that is not a study (About, For researchers, the research index...): its frozen body
+    is still word for word, but "seal" may not be in it (link and teaser text about the studies)."""
+    if STUDY_PAGE.match(path):
+        return []
+    return word_hits(readable_text(body), path, ("seal_words",))
+
+
+def feed_text(xml):
+    """The text a feed reader shows: every element's text and CDATA, entities decoded twice (a summary
+    may hold escaped HTML), tags of that HTML dropped, normalised."""
+    import html as _h
+    t = re.sub(r"(?s)<!\[CDATA\[(.*?)\]\]>", lambda m: _h.escape(m.group(1)), xml)
+    t = re.sub(r"<[^>]+>", "\n", t)
+    t = _h.unescape(_h.unescape(t))
+    return normalise(re.sub(r"<[^>]+>", " ", t))
+
+
+def feed_problems(xml, where):
+    return word_hits(feed_text(xml), where, BRAND_GROUPS) if re.search(r"<(?:feed|rss)\b", xml) else []
+
+
+def lint_text(text, where="text", paid=False, analytics=False, english=True):
+    """Wording rules on plain text. Returns a list of (rule, where, detail).
+    english=False (French pages) skips the English word list; lint_text_fr covers those pages."""
+    out = word_hits(text, where) if english else []
     if True:  # D9: false next to the paid pipeline, so banned on every page, flag or not
         for c in RULES["claims"]["no_upload"]:
             if _phrase_re(c).search(text):
@@ -472,6 +529,7 @@ def lifted_problems(html, where, path, paid, analytics, amounts, priv, seller, p
     rest, body = split_frozen(html)
     out = lint_html(rest, where, paid, analytics, amounts, priv, commerce=seller, pilot=pilot)
     out += passthrough_rules(body, where, analytics, paid)
+    out += frozen_brand_problems(body, path)
     base = compare.baselines().get(path)
     if base is None:
         out.append(("frozen", where, "no checks/lifted-baseline entry for this lifted page"))
@@ -660,6 +718,8 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, b
             if name.endswith(".html") and rel not in owned_rel:
                 problems += passthrough_rules(s, rel, analytics, paid)
                 problems += placeholder_problems(s, rel)
+            if name.endswith(".xml"):   # Tester D4: feed titles and summaries are public copy
+                problems += feed_problems(s, rel)
             if name == "answers-index.js":   # ARCHITECT-V3 A11: every answer unit passes the page wording rules
                 problems += answer_index_problems(s, rel, paid, analytics)
             if name.endswith(".js"):

@@ -1002,6 +1002,33 @@ def fix_passthrough_chrome(text, rel, flags):
 # checks/lift_pages.py, part of the lifted text. The mechanism stays for any page still passed through.
 PASSTHROUGH_FIXES = {}
 
+# The same for non-HTML files that pass through (brand Tester D4, 22 Oct): feed.xml's entry titles are
+# public copy (feed readers show them), so "sealed" goes, as on the lifted pages (checks/lift_pages.py
+# LIFT_FIXES). docs/ stays untouched. Once a bundle has put the new text into docs/, the old text is gone
+# and the fix is already in place; the build fails only if neither text is there exactly once.
+PASSTHROUGH_FILE_FIXES = {
+    "feed.xml": [
+        ("<title>Study: Swing-trading strategies under sealed pre-registration, a negative result (16 Oct 2026)</title>",
+         "<title>Study: Swing-trading strategies under hashed pre-registration, a negative result (16 Oct 2026)</title>"),
+    ],
+}
+
+
+def apply_file_fixes(out):
+    for rel, fixes in PASSTHROUGH_FILE_FIXES.items():
+        fp = os.path.join(out, rel)
+        if not os.path.exists(fp):
+            die(f"passthrough file fix: {rel} is not in the build (not in docs/)")
+        with open(fp, encoding="utf-8") as f:
+            text = f.read()
+        for old, new in fixes:
+            if text.count(old) == 1:
+                text = text.replace(old, new)
+            elif text.count(new) != 1:
+                die(f"passthrough file fix: {rel} holds neither the old nor the new text exactly once: {old!r}")
+        with open(fp, "w", encoding="utf-8", newline="") as f:
+            f.write(text)
+
 
 # Manager C4: /privacy/ (and the home FAQ, /for-traders/) say the free tool pages "block outgoing
 # requests". The template tool pages do (csp_for); the two old calculators, passed through from docs/
@@ -1076,7 +1103,12 @@ def nav_problem(nav):
     """Why the [[nav]] data breaks the nav rules, or None."""
     if not isinstance(nav, list) or not nav:
         return "[[nav]] is empty"
-    banned = [(w, re.compile(r"(?<![\w#])" + re.escape(w) + r"(?!\w)", re.IGNORECASE)) for w in banned_words()]
+    # the matcher checks/lint.py uses, so "seal*" stems, wrapped phrases and hyphens mean the same here
+    # (brand Tester D1/D2, 22 Oct); lint imports this module only inside functions, so no import cycle
+    if os.path.join(REPO, "checks") not in sys.path:
+        sys.path.insert(0, os.path.join(REPO, "checks"))
+    from lint import _phrase_re
+    banned = [(w, _phrase_re(w)) for w in banned_words()]
     for g in nav:
         texts = [g.get("label", "")]
         for it in g.get("items", []) + g.get("foot", []):
@@ -1722,6 +1754,7 @@ def build():
             text = text.replace(old, new)
         with open(fp, "w", encoding="utf-8", newline="") as f:
             f.write(text)
+    apply_file_fixes(out)
     for rel in sorted(set(PASSTHROUGH_FIXES) - set(passthrough_pages(owned))):
         # a template owns it (a lifted page carries its fixes in its fragment) or it is not in docs/
         die(f"passthrough fix: {rel} is not a passthrough page (owned by a template, or not in docs/)")

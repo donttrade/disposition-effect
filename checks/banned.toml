@@ -10,6 +10,9 @@ directive = ["should", "must", "need to", "needs to", "fix", "fixes", "stop doin
 coaching = ["coach", "coaching", "mentor", "mentoring", "signals", "alerts to trade"]
 promises = ["improve your returns", "become profitable", "win more", "edge guaranteed", "real edge", "proven strategy", "guaranteed"]
 cause = ["you lost $", "because of your"]
+# Matching (lint.py _phrase_re): a space inside a phrase also matches line breaks, runs of spaces and
+# hyphens; an apostrophe matches ' and ’; a word ending in * matches any ending ("skill*" = skills,
+# skilled, skillset, skilfully...). Text is matched as a reader sees it (lint.py visible_text).
 # Orchestrator rule (21 Oct): never call donttrade's work, or a firm's figure, any of these.
 assurance = ["certified", "verified", "audited", "certification", "certify", "verification", "audit", "audits"]
 # Trial was renamed Pilot on launch day (plan step 14; [legal] launch_date); only the "formerly" line may name it.
@@ -22,11 +25,14 @@ regular_price = ["standard price", "standard prices", "regular price", "after la
 ai_tells = ["unlock", "unlocks", "unlocked", "elevate", "supercharge", "#1", "trusted by"]
 # ARCHITECT-BRAND-AND-WRAPPED §1.5: describe the past, never judge the trader. No word that calls a
 # result skill or talent (the Luck Check, card and Ghost Trader strings are scanned for these too).
-skill_claims = ["skill", "skilled", "skilful", "skillful", "talent", "talented", "beat the market", "luckier",
-                "unlucky trader", "you are good", "pro trader"]
+# Brand Tester D2 (22 Oct): every word form, via stems: "skill*" also refuses "skillet" and "seal*"
+# "sealant"; neither is in the site's copy, and refusing a word we never need is the safe side.
+skill_claims = ["skill*", "skilful*", "unskill*", "talent*", "untalented", "beat* the market*", "luckier", "luckiest",
+                "unlucky trader*", "you are good", "you're good", "pro trader*"]
 # §1.6: the reproducibility code is "Reproduce this result"; nothing is ever "sealed". The frozen
-# lifted research bodies keep their published "sealed pre-registration" (passthrough rules only).
-seal_words = ["seal", "sealed", "seal of approval"]
+# lifted STUDY bodies (/research/<study>/) keep their published "sealed pre-registration" (passthrough
+# rules only); the other lifted pages' frozen bodies and feed.xml get this group too (Tester D4).
+seal_words = ["seal*", "unseal*", "reseal*", "seal of approval"]
 
 [allow]
 # the one place the old product name may appear: "called “Trial” before <[legal] launch_date>" (Manager C3)
@@ -54,8 +60,12 @@ phrases = [
   "It is not an audit",
   "Not an audit and not an assurance engagement",
   "Isn’t this a kind of audit?",
-  # negation of the seal words (for-firms "No regulatory status, no badge or seal.", terms)
-  "no badge or seal",
+  # negation of the seal words (for-firms "No regulatory status, no badge or seal.", terms); seal* so
+  # that "no badge or seals" stays a negation (Tester note on D2)
+  "no badge or seal*",
+  # the same negations in the frozen bodies of /independence/ and /plan-gap/ (Tester D4 scope)
+  "We issue no badge, seal or certificate.",
+  "not a grade, badge or seal.",
   # skill_claims: a study's description of earlier research about corporate insiders, not a trader
   # (/research/insider-buying-edge/ head description, published 11 Oct 2026)
   "Forty years of research said insiders beat the market.",
