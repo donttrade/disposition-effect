@@ -1,0 +1,5 @@
+{#- The visible breadcrumb (owner-approved Home link (c)): Home > [parent] > this page, from
+    build.crumb_items, the same list as the page's JSON-LD BreadcrumbList. -#}
+<nav class="crumb small" aria-label="Breadcrumb"><ol class="crumbs">
+{%- for n, u in crumb_items(page) %}<li>{% if u %}<a href="{{ u }}">{{ n }}</a><span class="crumb-sep" aria-hidden="true">›</span>{% else %}<span aria-current="page">{{ n }}</span>{% endif %}</li>{% endfor -%}
+</ol></nav>

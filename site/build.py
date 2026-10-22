@@ -547,7 +547,7 @@ JOURNAL_CSS = "/static/css/journal.css"   # only on the journal pages; left out 
 PAGES += [
     {"template": "pages/journal.html", "path": "/journal/", "requires_flag": "journal", "sample": True, "app": True,
      "modules": ["/static/js/journal/main.js"], "styles": [JOURNAL_CSS], "no_forms": True, "no_analytics": True, "no_ask": True,
-     "updated": "2026-10-21", "crumb": "Free trading journal",
+     "updated": "2026-10-21", "crumb": "Free trading journal", "parent": ("Free tools", "/tools/"),
      "title": "Free Trading Journal and P&L Calendar, No Sign-Up",
      "description": "A free trading journal with a P&L calendar for MT5, MT4, IBKR and Tradovate exports. No account: "
                     "your trades stay in this browser, with a backup file you keep."},
@@ -1434,6 +1434,18 @@ def faq_from(html):
             re.findall(r"(?s)<details[^>]*>\s*<summary>(.*?)</summary>(.*?)</details>", m.group(1))]
 
 
+def crumb_items(page):
+    """Home > [parent] > this page, as (name, path or None). The JSON-LD BreadcrumbList and the visible
+    breadcrumb (partials/crumbs.html, owner-approved Home link (c), NN/g "Homepage links") share it."""
+    items = [("Home", "/")]
+    if page.get("parent"):
+        items.append((page["parent"][0], page["parent"][1]))
+    elif page["path"].startswith("/tools/") and page["path"] != "/tools/":
+        items.append(("Free tools", "/tools/"))
+    items.append((page["crumb"], None))
+    return items
+
+
 def jsonld(page, cfg, html, flags, products):
     """One @graph per page. No address, phone, rating or review anywhere (SEO-PLAN §3.2)."""
     base = cfg["site"]["base_url"]
@@ -1445,12 +1457,7 @@ def jsonld(page, cfg, html, flags, products):
         graph.append({"@type": "Organization", "@id": base + "/#org", "name": cfg["site"]["name"],
                       "url": base + "/", "email": cfg["site"]["contact_email"], "sameAs": cfg["site"]["same_as"]})
     else:
-        items = [("Home", base + "/")]
-        if page.get("parent"):
-            items.append((page["parent"][0], base + page["parent"][1]))
-        elif page["path"].startswith("/tools/") and page["path"] != "/tools/":
-            items.append(("Free tools", base + "/tools/"))
-        items.append((page["crumb"], None))
+        items = [(n, base + u if u else None) for n, u in crumb_items(page)]
         graph.append({"@type": "BreadcrumbList", "itemListElement": [
             {"@type": "ListItem", "position": i + 1, "name": n, **({"item": u} if u else {})}
             for i, (n, u) in enumerate(items)]})
@@ -1712,6 +1719,7 @@ def build():
                       autoescape=True, keep_trailing_newline=True)
     env.filters["usd"] = usd
     env.filters["usd_fr"] = usd_fr
+    env.globals["crumb_items"] = crumb_items
     products = {p["id"]: p for p in prices["products"]}
     nav = nav_for(cfg["nav"], flags)
     base_ctx = {"site": cfg["site"], "flags": flags, "nav": nav, "nav_current": lambda pg: nav_current(nav, pg),

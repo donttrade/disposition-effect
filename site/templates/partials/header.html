@@ -53,6 +53,9 @@
       </details>
     {%- endfor %}
       <ul class="nav-links">
+      {%- if page.path != "/" %}
+        <li><a href="/">Home</a></li>
+      {%- endif %}
       {%- for g in nav if not g["items"] %}
         <li>{{ plain_link(g) }}</li>
       {%- endfor %}

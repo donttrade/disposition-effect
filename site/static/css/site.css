@@ -363,6 +363,14 @@ fieldset { border: 0; padding: 0; margin: 0 0 var(--s3); }
 @media (max-width: 600px) { .lede { font-size: var(--fs-1); } }
 .crumb { margin: var(--s3) 0 0; }
 .crumb + h1 { margin-top: var(--s1); }
+.crumb + .hero, .crumb + .section { padding-top: var(--s2); }   /* door pages: keep the crumb next to the H1 */
+/* .crumb .crumbs outranks the lifted pages' list rules (.lifted ol/li), so the crumb looks the same everywhere */
+.crumb .crumbs { list-style: none; margin: 0; padding: 0; max-width: none; display: flex; flex-wrap: wrap; align-items: center; }
+.crumb .crumbs li { display: inline-flex; align-items: center; margin: 0; }
+.crumb-sep { margin: 0 0.4em; color: var(--muted); }
+@media (pointer: coarse), (max-width: 1000px) {   /* 44 px targets on touch screens, as the site's other small links */
+  .crumb .crumbs a { display: inline-flex; align-items: center; min-height: var(--target); padding-block: 0; }
+}
 .btn-row { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s2); align-items: center; }
 .tool { margin: var(--s4) 0; }
 .tool-out { margin-top: var(--s4); }
