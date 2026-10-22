@@ -2,7 +2,7 @@
 // page stays responsive. Receives only numbers (per-day results or the manual summary
 // figures and the rules): no symbols, no times, nothing identifying.
 
-import { simulate } from './prop-sim-core.js';
+import { simulate } from './prop-sim-core.js?v=ef3c575e';
 
 self.onmessage = (ev) => {
   try {

@@ -6,7 +6,7 @@
 //   * dates are read as "naive UTC" with Date.UTC, never with the browser's time zone,
 //     so a file gives the same numbers in Toronto, Kolkata or UTC.
 
-import { fail, LIMITS } from './errors.js';
+import { fail, LIMITS } from './errors.js?v=a49d9d6e';
 
 // Whitespace we strip or collapse: ASCII whitespace, NBSP, the en/em/thin spaces,
 // narrow NBSP, medium mathematical space and the ideographic space.

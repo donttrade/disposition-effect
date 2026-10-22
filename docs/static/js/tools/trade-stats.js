@@ -17,10 +17,10 @@
 // Without it this page shows only the descriptive numbers, no checks are run, and a neutral
 // line says a check is coming.
 
-import { createFileSlot, renderReadError, fieldError } from './tool-state.js';
-import { freeStats, equityCurve, NO_LOSSES } from '../engine/stats.js';
-import { money, unitNote, pct, ratio, duration, day, intText, el, signClass } from './format.js';
-import { parsePositive, InputError } from './num.js';
+import { createFileSlot, renderReadError, fieldError } from './tool-state.js?v=c82d0056';
+import { freeStats, equityCurve, NO_LOSSES } from '../engine/stats.js?v=b2ec2891';
+import { money, unitNote, pct, ratio, duration, day, intText, el, signClass } from './format.js?v=acb0db51';
+import { parsePositive, InputError } from './num.js?v=8df99e34';
 
 const $ = (id) => document.getElementById(id);
 

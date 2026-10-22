@@ -11,6 +11,7 @@ D2   /report/ re-test line and the .ics text say "export the same account from t
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 
@@ -32,7 +33,13 @@ def test_code_page_copy_fixed_in_build_not_in_docs(built_site):
     built = (built_site["out"] / "code" / "index.html").read_text(encoding="utf-8")
     docs = open(os.path.join(REPO, "docs", "code", "index.html"), encoding="utf-8").read()
     assert "nothing leaves" not in built.lower() and "sends nothing anywhere" in built
-    assert "nothing leaves the machine it runs on" in docs  # docs/ is replaced only at step 30
+    # step 30 (b613c8b) replaced docs/ with the build: the live page carries the fix too, and the
+    # old wording is only in the pre-bundle page (git), where the build-time fix came from
+    assert "nothing leaves" not in docs.lower() and "sends nothing anywhere" in docs
+    from test_build import PRE_BUNDLE
+    old = subprocess.run(["git", "show", f"{PRE_BUNDLE}:docs/code/index.html"], cwd=REPO,
+                         capture_output=True, text=True, check=True).stdout
+    assert "nothing leaves the machine it runs on" in old
 
 
 def test_no_upload_claims_on_any_page(built_site):
@@ -64,8 +71,19 @@ def test_passthrough_fix_fails_loudly_when_the_sentence_is_gone(tmp_path, monkey
     monkeypatch.setenv("DT_OUT", str(tmp_path / "o"))
     with pytest.raises(B.BuildError, match="passthrough fix: .* is not a passthrough page"):
         B.build()
-    # a page that does pass through (un-own /about/) whose sentence is gone fails loudly
+    # a page that does pass through (un-own /about/) whose sentence is gone fails loudly.
+    # Since step 30 (b613c8b) docs/about/ is the v2 build, which the chrome guard refuses first;
+    # the old-design page a passthrough fix is meant for comes from git, planted in a docs/ copy.
     monkeypatch.setattr(B, "PAGES", [p for p in B.PAGES if p["path"] != "/about/"])
+    with pytest.raises(B.BuildError, match="passthrough chrome: about/index.html"):
+        B.build()
+    from test_build import PRE_BUNDLE
+    docs = tmp_path / "docs"
+    shutil.copytree(os.path.join(REPO, "docs"), docs)
+    (docs / "about" / "index.html").write_text(subprocess.run(
+        ["git", "show", f"{PRE_BUNDLE}:docs/about/index.html"], cwd=REPO, capture_output=True, text=True,
+        check=True).stdout, encoding="utf-8")
+    monkeypatch.setattr(B, "DOCS", str(docs))
     with pytest.raises(B.BuildError, match="passthrough fix: .* no longer holds"):
         B.build()
 

@@ -3,6 +3,7 @@
 
     python3 checks/lift_pages.py            # (re)write the lifted fragments from docs/
     python3 checks/lift_pages.py --check    # exit 1 if the committed fragments differ from docs/
+    python3 checks/lift_pages.py --check --docs DIR   # ... from a pre-bundle docs/ tree (DIR)
 
 What it writes, per page (slug = the path with / → _, "404" for /404.html):
   site/templates/lifted/<slug>.html   the old page's <main> content, word for word
@@ -29,7 +30,8 @@ else in the visible text, ids, links, tables or citation meta changed.
 
 This reads docs/ as it is before the step-30 bundle (old design). Once docs/ is replaced by
 the build, the fragments are the source and this script refuses to run (it finds no old
-header in docs/).
+header in docs/). Since step 30 (b613c8b) that is today: --check --docs DIR proves the fragments
+against the pre-bundle docs/ exported from git (tests/test_oldpages.py does this).
 """
 import hashlib
 import html as _h
@@ -301,7 +303,10 @@ def lift(write=True):
 
 
 def main(argv):
+    global DOCS
     check = "--check" in argv
+    if "--docs" in argv:
+        DOCS = os.path.abspath(argv[argv.index("--docs") + 1])
     try:
         diffs = lift(write=not check)
     except LiftError as e:
