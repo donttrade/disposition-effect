@@ -1302,6 +1302,37 @@ def set_launch_date(legal, toml_path, today=None):
     return d
 
 
+CHANNEL_HOSTS = {"x.com", "github.com", "donttrade.substack.com", "www.linkedin.com", "www.tiktok.com", "www.youtube.com"}
+CHANNEL_FIELDS = ("id", "name", "url", "text", "icon", "rel_me")
+BRAND_ICONS = ("x", "github", "substack")
+
+
+def load_channels(cfg, toml_path):
+    """ARCHITECT-BRAND §2.6: site.toml [[channels]] is the one list of official accounts."""
+    if "same_as" in cfg["site"]:
+        die(f"[site] same_as is replaced by [[channels]] ({toml_path})")
+    chans = cfg.get("channels") or []
+    if not chans:
+        die(f"site.toml has no [[channels]] entries ({toml_path})")
+    for c in chans:
+        for f in CHANNEL_FIELDS:
+            if f not in c:
+                die(f"[[channels]] {c.get('id', '?')}: missing {f} ({toml_path})")
+        for k, v in c.items():
+            if isinstance(v, str):
+                why = placeholder_reason(v)
+                if why:
+                    die(f"[[channels]] {c['id']}.{k}: {why} ({toml_path})")
+        m = re.fullmatch(r"https://([^/]+)(/[^\s]*)?", c["url"])
+        if not m:
+            die(f"[[channels]] {c['id']}: url must be https:// ({c['url']!r})")
+        if m.group(1) not in CHANNEL_HOSTS:
+            die(f"[[channels]] {c['id']}: host {m.group(1)!r} is not an allowed channel host")
+        if c["icon"] not in BRAND_ICONS:
+            die(f"[[channels]] {c['id']}: icon {c['icon']!r} is not in partials/icons.html BRAND")
+    return chans
+
+
 def load_config():
     toml_path = os.environ.get("DT_SITE_TOML") or os.path.join(SITE, "config", "site.toml")
     cfg = read_toml(toml_path, "site.toml")
@@ -1311,6 +1342,7 @@ def load_config():
     with open(prices_path, encoding="utf-8") as f:
         prices = json.load(f)
     check_schema(cfg, toml_path)
+    load_channels(cfg, toml_path)
     set_launch_date(cfg["legal"], toml_path)
     cfg["site"].setdefault("manual_restore", True)
     if type(cfg["site"]["manual_restore"]) is not bool:
@@ -1443,7 +1475,7 @@ def jsonld(page, cfg, html, flags, products):
         graph.append({"@type": "WebSite", "@id": base + "/#website", "name": cfg["site"]["name"],
                       "url": base + "/", "publisher": org})
         graph.append({"@type": "Organization", "@id": base + "/#org", "name": cfg["site"]["name"],
-                      "url": base + "/", "email": cfg["site"]["contact_email"], "sameAs": cfg["site"]["same_as"]})
+                      "url": base + "/", "email": cfg["site"]["contact_email"], "sameAs": [c["url"] for c in cfg["channels"]]})
     else:
         items = [("Home", base + "/")]
         if page.get("parent"):
@@ -1715,7 +1747,7 @@ def build():
     products = {p["id"]: p for p in prices["products"]}
     nav = nav_for(cfg["nav"], flags)
     base_ctx = {"site": cfg["site"], "flags": flags, "nav": nav, "nav_current": lambda pg: nav_current(nav, pg),
-                "footer": cfg["footer"], "vt_pages": VT_PAGES, "mkt_pages": MOTION_PAGES,
+                "footer": cfg["footer"], "vt_pages": VT_PAGES, "mkt_pages": MOTION_PAGES, "channels": cfg["channels"],
                 "legal": cfg["legal"], "forms": cfg["forms"], "analytics": cfg["analytics"],
                 "worker": cfg["worker"], "prices": prices, "products": products, "private": private,
                 "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": tools_for(flags),

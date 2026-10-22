@@ -1,0 +1,7 @@
+{#- /about/ "Where to find this" (ARCHITECT-BRAND §2.6), from site.toml [[channels]], the list the footer
+    Follow column and Organization.sameAs use. Outside the frozen lifted body. -#}
+{%- set n = channels|length %}
+<div class="wrap"><div class="col lifted">
+  <h2>Where to find this</h2>
+  <p>Published only on this site (donttrade.ca) and at {% for c in channels %}<a href="{{ c.url }}" rel="me noopener">{{ c.text }}</a>{% if loop.index == n - 1 %} and {% elif not loop.last %}, {% endif %}{% endfor %}. Any message from any other channel or handle is not from us.</p>
+</div></div>
