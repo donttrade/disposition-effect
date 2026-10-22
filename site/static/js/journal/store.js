@@ -17,28 +17,48 @@ const TRADE_FIELDS = ['k', 'symbol', 'dir', 'open_ts', 'close_ts', 'hold_s', 'qt
 const CHANNEL = 'donttrade-journal';
 
 // ------------------------------------------------------------------ open / upgrade
-export function open(name = DB_NAME) {
+// One step per database version, keyed by the version it creates. open() runs every step above the
+// browser's current version, in order, inside the one upgrade transaction, so a v1 journal upgrades in
+// place and keeps every record. Then meta.schema records the version the data is now in.
+// Version 2 is planned, not built: Ghost Trader's `plans` store and accounts.clock_offset_min
+// (ARCHITECT-BRAND §6.1b). Its step goes here as MIGRATIONS[2], with VERSION = 2 and STORES + 'plans'.
+export const MIGRATIONS = {
+  1(db) {   // from no database
+    db.createObjectStore('meta');
+    db.createObjectStore('accounts', { keyPath: 'id' });
+    db.createObjectStore('imports', { keyPath: 'id' }).createIndex('account_id', 'account_id');
+    const ch = db.createObjectStore('chunks', { keyPath: 'id' });
+    ch.createIndex('account_id', 'account_id');
+    ch.createIndex('import_id', 'import_id');
+    db.createObjectStore('notes', { keyPath: 'k' }).createIndex('account_id', 'account_id');
+    db.createObjectStore('days', { keyPath: ['account_id', 'date'] });
+    db.createObjectStore('lists', { keyPath: 'kind' });
+  },
+};
+
+// version and steps are parameters only so the tests can exercise a later step on a v1 database.
+export function open(name = DB_NAME, version = VERSION, steps = MIGRATIONS) {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(name, VERSION);
-    req.onupgradeneeded = () => {
+    const req = indexedDB.open(name, version);
+    req.onupgradeneeded = (ev) => {
       const db = req.result;
-      // v1 (from no database). A later version adds its own steps here, keyed on event.oldVersion.
-      db.createObjectStore('meta');
-      db.createObjectStore('accounts', { keyPath: 'id' });
-      db.createObjectStore('imports', { keyPath: 'id' }).createIndex('account_id', 'account_id');
-      const ch = db.createObjectStore('chunks', { keyPath: 'id' });
-      ch.createIndex('account_id', 'account_id');
-      ch.createIndex('import_id', 'import_id');
-      db.createObjectStore('notes', { keyPath: 'k' }).createIndex('account_id', 'account_id');
-      db.createObjectStore('days', { keyPath: ['account_id', 'date'] });
-      db.createObjectStore('lists', { keyPath: 'kind' });
+      const tx = req.transaction;
+      for (let v = ev.oldVersion + 1; v <= version; v++) {
+        if (!steps[v]) { tx.abort(); return; }
+        steps[v](db, tx);
+      }
+      if (ev.oldVersion > 0) {   // a fresh database gets meta on its first write (newMeta)
+        const m = tx.objectStore('meta');
+        const r = m.get('app');
+        r.onsuccess = () => { if (r.result) m.put({ ...r.result, schema: version }, 'app'); };
+      }
     };
     req.onsuccess = () => {
       const db = req.result;
       db.onversionchange = () => db.close();   // a newer page wants to migrate: let it
       resolve(db);
     };
-    req.onerror = () => reject(req.error);
+    req.onerror = () => reject(req.error || new Error('The journal could not be upgraded.'));
     req.onblocked = () => reject(new Error('The journal is open in an older tab. Close it and reload.'));
   });
 }
@@ -123,7 +143,7 @@ export async function addImport(db, { account, imp, trades }) {
 }
 
 export function newMeta() {
-  return { schema: 1, created: new Date().toISOString(), last_backup_at: null, last_backup_trades: 0,
+  return { schema: VERSION, created: new Date().toISOString(), last_backup_at: null, last_backup_trades: 0,
     persist: 'unknown', persist_asked_at: null, reminder_snoozed_until: null };
 }
 
@@ -247,10 +267,15 @@ export function backupName(now = new Date()) {
   return `donttrade-journal-${now.toISOString().slice(0, 10)}.json`;
 }
 
+// Backup files: one step per file version, keyed by the version it produces, run on an older file before
+// it is checked (a v1 file then restores into a later journal). Planned, not built: BACKUP_STEPS[2] adds
+// `plans: []` (ARCHITECT-BRAND §6.1b). The SHA is checked on the file as written, before any step.
+export const BACKUP_STEPS = {};
+
 const isStr = (x) => typeof x === 'string';
 const isNum = (x) => typeof x === 'number' && Number.isFinite(x);
 // Parse + check a backup file's text. {ok, data, problems[], shaOk, newer}. Never throws on bad input.
-export async function validate(text) {
+export async function validate(text, current = BACKUP_VERSION, steps = BACKUP_STEPS) {   // the last two: for the tests
   if (text.length > 100 * 1024 * 1024) return { ok: false, problems: ['This file is larger than 100 MB, so it is not a journal backup.'] };
   let d;
   try { d = JSON.parse(text); } catch (e) {
@@ -259,8 +284,15 @@ export async function validate(text) {
   if (!d || typeof d !== 'object' || d.format !== BACKUP_FORMAT) {
     return { ok: false, problems: ['This file is not a donttrade journal backup.'] };
   }
-  if (!Number.isInteger(d.version) || d.version > BACKUP_VERSION) {
+  if (!Number.isInteger(d.version) || d.version < 1) return { ok: false, problems: ['This backup has no valid version number.'] };
+  if (d.version > current) {
     return { ok: false, newer: true, problems: ['This backup was made by a newer version of this page. Reload the page and try again.'] };
+  }
+  const { sha256: claimed, ...written } = d;
+  const shaOk = isStr(claimed) && claimed === await sha256(canonical(written));
+  for (let v = d.version; v < current; v++) {
+    if (!steps[v + 1]) return { ok: false, problems: ['This backup is from an older version that this page cannot read.'] };
+    d = steps[v + 1](d);
   }
   const p = [];
   for (const k of ['accounts', 'imports', 'trades', 'notes', 'days']) if (!Array.isArray(d[k])) p.push(`“${k}” is missing or not a list.`);
@@ -275,8 +307,6 @@ export async function validate(text) {
   d.days.forEach((x, i) => { if (!isStr(x.account_id) || !/^\d{4}-\d{2}-\d{2}$/.test(x.date || '')) p.push(`Day note ${i + 1} is damaged.`); });
   for (const k of ['setup', 'tag', 'mistake']) if (d.lists[k] && !Array.isArray(d.lists[k])) p.push(`The ${k} list is damaged.`);
   if (p.length) return { ok: false, problems: p.slice(0, 20) };
-  const { sha256: claimed, ...body } = d;
-  const shaOk = isStr(claimed) && claimed === await sha256(canonical(body));
   return { ok: true, data: d, problems: [], shaOk };
 }
 
