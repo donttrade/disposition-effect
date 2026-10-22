@@ -165,6 +165,7 @@ export function putList(db, kind, values) {
   return putIn(db, 'lists', { kind, values });
 }
 export function putAccount(db, account) { return putIn(db, 'accounts', account); }
+export function removeAccount(db, id) { return delIn(db, 'accounts', id); }
 export async function putMeta(db, patch) {
   const tx = db.transaction('meta', 'readwrite');
   const ok = done(tx);

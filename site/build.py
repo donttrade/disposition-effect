@@ -539,6 +539,20 @@ PAGES += [
 ]
 PAID_ONLY_PATHS_FR = ["/fr/avant-de-payer/", "/fr/conditions/", "/fr/confidentialite/"]
 
+# The free Trading Journal (ARCHITECT-V3 §d, J3; [flags] journal). connect-src 'none' (the default),
+# form-action 'none', and no analytics even when the analytics flag is on (D12, journal_problem): the page
+# cannot send anything. No header answer box there either (it is a form).
+JOURNAL_PATHS = ["/journal/"]
+JOURNAL_CSS = "/static/css/journal.css"   # only on the journal pages; left out of a flag-off build
+PAGES += [
+    {"template": "pages/journal.html", "path": "/journal/", "requires_flag": "journal", "sample": True, "app": True,
+     "modules": ["/static/js/journal/main.js"], "styles": [JOURNAL_CSS], "no_forms": True, "no_analytics": True, "no_ask": True,
+     "updated": "2026-10-21", "crumb": "Free trading journal",
+     "title": "Free Trading Journal and P&L Calendar, No Sign-Up",
+     "description": "A free trading journal with a P&L calendar for MT5, MT4, IBKR and Tradovate exports. No account: "
+                    "your trades stay in this browser, with a backup file you keep."},
+]
+
 # /help/ (ARCHITECT-V3 §c.5, Q-A1): every answer unit, grouped; the answer box's no-JS landing page.
 # Rendered after every other page, from their HTML (build.answer_units).
 PAGES += [
@@ -712,6 +726,20 @@ def vt_css_problem(out):
                 with open(os.path.join(root, name), encoding="utf-8") as f:
                     if "@view-transition" in f.read():
                         return f"@view-transition in {name}: only vt.css may opt pages in (C8)"
+    return None
+
+
+def journal_problem(html, path):
+    """D12 / J10: the journal pages load no analytics and keep connect-src and form-action 'none'."""
+    import html as _h
+    if path not in JOURNAL_PATHS:
+        return None
+    if "cloudflareinsights" in html:
+        return f"{path} loads analytics (the journal page never does: ARCHITECT-V3 D12)"
+    csp = re.search(r'http-equiv="Content-Security-Policy" content="([^"]+)"', html)
+    csp = _h.unescape(csp.group(1)) if csp else ""
+    if "connect-src 'none';" not in csp or "form-action 'none';" not in csp:
+        return f"{path}: its CSP must keep connect-src 'none' and form-action 'none'"
     return None
 
 
@@ -1377,13 +1405,15 @@ def csp_for(page, cfg):
     connect = page.get("connect_src", "'none'")
     if page.get("connect_worker"):
         connect = "'self' " + cfg["worker"]["api_base"]
-    if cfg["flags"]["analytics"]:
+    beacon = cfg["flags"]["analytics"] and not page.get("no_analytics")   # D12: never on the journal
+    if beacon:
         connect += " https://cloudflareinsights.com"
-    script = "'self'" + (" https://static.cloudflareinsights.com" if cfg["flags"]["analytics"] else "")
+    script = "'self'" + (" https://static.cloudflareinsights.com" if beacon else "")
+    forms = ("'none'" if page.get("no_forms") else
+             "'self' https://api.web3forms.com" + "".join(" " + a for a in page.get("form_action", [])))
     return ("default-src 'self'; script-src " + script + "; style-src 'self'; img-src 'self' data:; "
             "font-src 'self'; connect-src " + connect + "; worker-src 'self'; "
-            "form-action 'self' https://api.web3forms.com" + "".join(" " + a for a in page.get("form_action", [])) +
-            "; base-uri 'none'; object-src 'none'")
+            "form-action " + forms + "; base-uri 'none'; object-src 'none'")
 
 
 # ------------------------------------------------------------------ SEO (SEO-PLAN §3)
@@ -1605,7 +1635,7 @@ def verify(out, flags, seller=None, base_url=None):
                 with open(fp, encoding="utf-8", errors="replace") as f:
                     text = f.read()
                 url = "/" + os.path.relpath(fp, out).replace(os.sep, "/").replace("index.html", "")
-                why = motion_problem(text, url) or vt_problem(text, url) or unversioned_problem(text)
+                why = motion_problem(text, url) or vt_problem(text, url) or journal_problem(text, url) or unversioned_problem(text)
                 if why:
                     die(why)
     why = vt_css_problem(out)
@@ -1672,7 +1702,7 @@ def build():
     def static_left_out(rel):
         return ((not flags["paid_report"] and rel.startswith("js" + os.sep + "paid"))
                 or (not flags["free_badges"] and rel == BADGES_JS)
-                or (not flags["journal"] and rel.startswith(JOURNAL_JS_DIR)))   # ARCHITECT-V3 D7: out of the build until approved
+                or (not flags["journal"] and (rel.startswith(JOURNAL_JS_DIR) or rel == os.path.join("css", "journal.css"))))   # ARCHITECT-V3 D7: out of the build until approved
     copy_tree_sorted(os.path.join(SITE, "static"), os.path.join(out, "static"), skip=static_left_out)
     # 3. dev pages, only on request; never bundled
     if os.environ.get("DT_DEV") == "1":

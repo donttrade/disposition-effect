@@ -544,9 +544,9 @@ def private_values(fields=("seller_legal_name", "premises_address", "phone"), da
     return out
 
 
-def owned_paths(paid, pilot=False):
+def owned_paths(paid, pilot=False, journal=False):
     import build
-    on = {"paid_report": paid, "pilot_checkout": pilot}
+    on = {"paid_report": paid, "pilot_checkout": pilot, "journal": journal}
     out = []
     for p in build.PAGES:
         if p["requires_flag"] and not on[p["requires_flag"]]:
@@ -588,11 +588,13 @@ def free_badge_problems(s, where):
     return [("flag:free_badges", where, f"{x!r} while free_badges = false") for x in FREE_BADGE_STRINGS if x in s]
 
 
-def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, badges=False):
+def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, badges=False, journal=None):
     """seller: whether the seller block may appear; defaults to the committed switch (seller_allowed).
     badges: the build's free_badges flag (C1); off, free_badge_problems applies to every file."""
     import build
     problems = []
+    if journal is None:   # the journal page is in the build only with [flags] journal (build.PAGES)
+        journal = os.path.exists(build.out_file(out_dir, "/journal/"))
     seller = seller_allowed(paid, pilot) if seller is None else seller
     if os.path.isdir(os.path.join(out_dir, "dev")):
         problems.append(("dev_in_build", "/dev/", "dev pages are in the build"))
@@ -604,9 +606,9 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, b
     if (paid or pilot) and data is None:   # Tester delta N2: say so instead of skipping the check silently
         WARNINGS.append(f"no private.toml at {private_toml_path()}: the footer line's address was NOT checked "
                         "against it (set DT_PRIVATE_TOML to the file the build used)")
-    owned_rel = {"/" + os.path.relpath(build.out_file(out_dir, p), out_dir) for p in owned_paths(paid, pilot)}
+    owned_rel = {"/" + os.path.relpath(build.out_file(out_dir, p), out_dir) for p in owned_paths(paid, pilot, journal)}
     lifted = set(build.LIFTED_PATHS)
-    for path in owned_paths(paid, pilot):
+    for path in owned_paths(paid, pilot, journal):
         fp = build.out_file(out_dir, path)
         if not os.path.exists(fp):
             problems.append(("flags", path, "page missing: is the build made with these flags?"))
@@ -642,6 +644,8 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, b
                 problems += dated_pricing_claims(js_strings(s), rel)
                 if paid:  # a script can put text on a paid page too
                     problems += not_on_sale_claims(js_strings(s), rel)
+                if rel.startswith("/static/js/journal/"):   # ARCHITECT-V3 J38: every journal string, as page text
+                    problems += lint_text(normalise(js_strings(s)), rel, paid, analytics)
             if name.endswith(".html"):
                 problems += business_line_problems(s, rel, paid or pilot, addresses)
                 url = rel[:-len("index.html")] if rel.endswith("/index.html") else rel
