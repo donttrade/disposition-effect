@@ -20,6 +20,13 @@ renamed = ["trial"]
 trial_cta = ["start a trial", "firms: trial", "request a trial", "book a trial", "free trial"]
 regular_price = ["standard price", "standard prices", "regular price", "after launch:"]
 ai_tells = ["unlock", "unlocks", "unlocked", "elevate", "supercharge", "#1", "trusted by"]
+# ARCHITECT-BRAND-AND-WRAPPED §1.5: describe the past, never judge the trader. No word that calls a
+# result skill or talent (the Luck Check, card and Ghost Trader strings are scanned for these too).
+skill_claims = ["skill", "skilled", "skilful", "skillful", "talent", "talented", "beat the market", "luckier",
+                "unlucky trader", "you are good", "pro trader"]
+# §1.6: the reproducibility code is "Reproduce this result"; nothing is ever "sealed". The frozen
+# lifted research bodies keep their published "sealed pre-registration" (passthrough rules only).
+seal_words = ["seal", "sealed", "seal of approval"]
 
 [allow]
 # the one place the old product name may appear: "called “Trial” before <[legal] launch_date>" (Manager C3)
@@ -47,6 +54,11 @@ phrases = [
   "It is not an audit",
   "Not an audit and not an assurance engagement",
   "Isn’t this a kind of audit?",
+  # negation of the seal words (for-firms "No regulatory status, no badge or seal.", terms)
+  "no badge or seal",
+  # skill_claims: a study's description of earlier research about corporate insiders, not a trader
+  # (/research/insider-buying-edge/ head description, published 11 Oct 2026)
+  "Forty years of research said insiders beat the market.",
   # FAQ questions whose answer on the page starts with "No."
   "Is this investment advice?",
   "Is this advice?",
