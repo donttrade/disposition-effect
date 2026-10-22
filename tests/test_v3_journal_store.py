@@ -160,3 +160,39 @@ def test_j33_store_uses_no_localstorage_and_no_network():
                             "store.js"), encoding="utf-8").read()
     for bad in ("localStorage", "sessionStorage", "fetch(", "XMLHttpRequest", "sendBeacon", "document.cookie", "WebSocket"):
         assert bad not in src, bad
+
+
+# ---- store v2 hook (ARCHITECT-BRAND §6.1b): a later version's step runs on a v1 journal and keeps everything
+STEP2 = "{...JS.MIGRATIONS, 2(db) { db.createObjectStore('plans', {keyPath: 'k'}); }}"
+
+
+def test_store_migration_hook_upgrades_v1_in_place(jpage):
+    r = jpage.evaluate(f"""async () => {{ const db = await ({FULL})(); const strip = {STRIP};
+      const before = await JS.loadAll(db); db.close();
+      const db2 = await JS.open(JS.DB_NAME, 2, {STEP2});
+      const after = await JS.loadAll(db2);
+      const out = {{v: db2.version, stores: [...db2.objectStoreNames].sort(), same: strip(before) === strip(after),
+                   schema1: before.meta && before.meta.schema, schema2: after.meta && after.meta.schema}};
+      db2.close(); return out; }}""")
+    assert r["v"] == 2 and "plans" in r["stores"] and r["same"], r
+    assert r["schema1"] == 1 and r["schema2"] == 2, r
+
+
+def test_store_missing_migration_step_refuses_and_keeps_v1(jpage):
+    r = jpage.evaluate(f"""async () => {{ const db = await ({FULL})(); const n = (await JS.loadAll(db)).trades.length; db.close();
+      let err = null; try {{ (await JS.open(JS.DB_NAME, 3, {STEP2})).close(); }} catch (e) {{ err = String(e && e.message || e); }}
+      const db1 = await JS.open(); const out = {{err, v: db1.version, n, n2: (await JS.loadAll(db1)).trades.length}}; db1.close(); return out; }}""")
+    assert r["err"] and r["v"] == 1 and r["n"] == r["n2"] == 1140, r
+
+
+def test_backup_v1_file_restores_through_a_v2_step(jpage):
+    r = jpage.evaluate(f"""async () => {{ const db = await ({FULL})(); const b = await JS.serialize(await JS.loadAll(db));
+      const text = JSON.stringify(b);
+      const v = await JS.validate(text, 2, {{2: (d) => ({{...d, version: 2, plans: []}})}});
+      const gap = await JS.validate(text, 2, {{}});
+      const same = await JS.validate(text);
+      return {{ok: v.ok, sha: v.shaOk, ver: v.data && v.data.version, plans: v.data && v.data.plans, trades: v.data && v.data.trades.length,
+              gap, sameOk: same.ok && same.shaOk && same.data.version === 1}}; }}""")
+    assert r["ok"] and r["sha"] and r["ver"] == 2 and r["plans"] == [] and r["trades"] == 1140, r
+    assert not r["gap"]["ok"] and "older version" in r["gap"]["problems"][0]
+    assert r["sameOk"]

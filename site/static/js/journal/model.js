@@ -4,6 +4,7 @@
 // Engine timestamps are naive UTC (the file's wall clock read as UTC), so the UTC getters give back the
 // time written in the file in every browser time zone; a day is the CLOSE date (D10, J14). Open
 // positions never reach the journal (the engine keeps closed trades only).
+import { dayKey } from '../tools/days.js';
 
 export const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 export const WD_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -11,7 +12,7 @@ export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', '
   'October', 'November', 'December'];
 
 const pad = (n) => String(n).padStart(2, '0');
-export const dayKey = (ts) => new Date(ts).toISOString().slice(0, 10);
+export { dayKey };
 export const monthKey = (ts) => new Date(ts).toISOString().slice(0, 7);
 export function fmtTs(ts) {
   if (typeof ts !== 'number' || !Number.isFinite(ts)) return '—';
@@ -33,20 +34,8 @@ export function longDay(d) {
 }
 export function weekStart(d) { return addDays(d, -weekday(d)); }
 
-// date → {date, net, n, wins, losses, trades[]} for the trades given (already filtered), by close date.
-export function dayTotals(trades) {
-  const m = new Map();
-  for (const t of trades) {
-    const d = dayKey(t.close_ts);
-    let x = m.get(d);
-    if (!x) { x = { date: d, net: 0, n: 0, wins: 0, losses: 0, trades: [] }; m.set(d, x); }
-    x.net += t.pnl;
-    x.n++;
-    if (t.pnl > 0) x.wins++; else if (t.pnl < 0) x.losses++;
-    x.trades.push(t);
-  }
-  return m;
-}
+// Day totals by close date live in tools/days.js (shared with the card, ARCHITECT-BRAND §4.8).
+export { dayTotals } from '../tools/days.js';
 
 // The colour step (1-3) of a day's |net| against the 90th percentile of |net| over all days given.
 export function p90(days) {
