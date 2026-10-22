@@ -182,7 +182,7 @@
       <li><span class="when">{{ latest.study.date }}</span> Newest study: <a href="{{ latest.study.url }}">{{ latest.study.title }}</a></li>
       <li><span class="when">{{ latest.correction.date }}</span> Newest entry in the <a href="{{ latest.correction.url }}">corrections log</a></li>
       {%- if latest.commit %}
-      <li><span class="when">{{ latest.commit.date }}</span> This site was built from commit <a href="{{ latest.commit.url }}"><code>{{ latest.commit.short }}</code></a></li>
+      <li><span class="when">{{ latest.commit.date }}</span> This site was built from commit {% if latest.commit.url %}<a href="{{ latest.commit.url }}"><code>{{ latest.commit.short }}</code></a>{% else %}<code>{{ latest.commit.short }}</code>{% endif %}</li>
       {%- endif %}
     </ul>
   </section>

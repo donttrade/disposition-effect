@@ -242,6 +242,40 @@ def test_d4_feed_fix_survives_a_bundle_and_fails_loudly_when_lost(tmp_path, monk
         B.apply_file_fixes(str(tmp_path))
 
 
+def _git(repo, *a):
+    return subprocess.run(["git", "-C", str(repo), "-c", "user.name=t", "-c", "user.email=t@example.invalid", *a],
+                          capture_output=True, text=True, check=True).stdout.strip()
+
+
+def test_d5_commit_on_remote_reads_the_remote_tracking_refs(tmp_path):
+    _git(tmp_path, "init", "-q")
+    _git(tmp_path, "commit", "-q", "--allow-empty", "-m", "a")
+    a = _git(tmp_path, "rev-parse", "HEAD")
+    assert not B.commit_on_remote(a, repo=str(tmp_path))                 # never pushed
+    _git(tmp_path, "update-ref", "refs/remotes/origin/main", a)
+    assert B.commit_on_remote(a, repo=str(tmp_path))
+    _git(tmp_path, "commit", "-q", "--allow-empty", "-m", "b")
+    assert not B.commit_on_remote(_git(tmp_path, "rev-parse", "HEAD"), repo=str(tmp_path))   # ahead of origin
+    assert not B.commit_on_remote("0" * 40, repo=str(tmp_path))
+
+
+@pytest.mark.parametrize("on_remote", [True, False])
+def test_d5_latest_links_only_a_commit_on_the_remote(monkeypatch, on_remote):
+    monkeypatch.setattr(B, "commit_on_remote", lambda sha, repo=None: on_remote)
+    c = B.latest()["commit"]
+    assert c and re.fullmatch(r"[0-9a-f]{7}", c["short"])
+    assert c["url"] == (B.COMMIT_URL + c["sha"] if on_remote else None)
+
+
+def test_d5_built_home_never_links_an_unpushed_commit(built_site):
+    home = page(built_site, "/")
+    sha = subprocess.run(["git", "-C", REPO, "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+    if B.commit_on_remote(sha):
+        assert f'href="{B.COMMIT_URL}{sha}"' in home
+    else:
+        assert "/commit/" not in home and f"This site was built from commit <code>{sha[:7]}</code>" in home
+
+
 # ------------------------------------------------------------------ the dark band (§2.2–2.4): T-AA, T-BAND, T-RM (static part)
 sys.path.insert(0, os.path.join(REPO, "checks"))
 import contrast as C  # noqa: E402
