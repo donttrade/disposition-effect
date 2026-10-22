@@ -27,7 +27,8 @@ event handler can run):
 plus the three text fixes in LIFT_FIXES, which the passthrough build already applied
 (PASSTHROUGH_FIXES / PASSTHROUGH_CHROME before steps 28–29), and one later removal (21 Oct
 2026: /about/'s "Where to find this", now rendered from site.toml [[channels]] outside the
-frozen body). compare.py proves that nothing else in the visible text, ids, links, tables or
+frozen body) and five rewordings of "sealed" in study link and teaser text on /about/,
+/for-researchers/ and /research/ (22 Oct 2026, brand Tester D4). compare.py proves that nothing else in the visible text, ids, links, tables or
 citation meta changed.
 
 This reads docs/ as it is before the step-30 bundle (old design). Once docs/ is replaced by
@@ -124,6 +125,20 @@ LIFT_FIXES = {
         ('\n  <h2>Where to find this</h2>\n  <p>Published only at <a href="https://donttrade.substack.com">'
          'donttrade.substack.com</a>, this site and <a href="https://github.com/donttrade">github.com/donttrade</a>. '
          'Any message from any other channel or handle is not from us.</p>', ""),
+        # ARCHITECT-BRAND §1.6 + brand Tester D4 (22 Oct): "seal" stays only in the study bodies; the link and
+        # teaser text about a study on About, For researchers and the research index is public copy
+        ("26 rules tested under sealed pre-registration;", "26 rules tested under hashed pre-registration;"),
+    ],
+    "/for-researchers/": [
+        (">Swing-trading strategies under sealed pre-registration, a negative result (16 Oct 2026)</a>",
+         ">Swing-trading strategies under hashed pre-registration, a negative result (16 Oct 2026)</a>"),
+    ],
+    "/research/": [
+        ("each sealed with a hash before any result was computed and judged once",
+         "each fingerprinted with a hash before any result was computed and judged once"),
+        ("each sealed with a hash before any result was computed. 0 of 50",
+         "each fingerprinted with a hash before any result was computed. 0 of 50"),
+        ("0 of 44 under sealed pre-registration.", "0 of 44 under hashed pre-registration."),
     ],
 }
 
