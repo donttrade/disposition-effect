@@ -2172,8 +2172,14 @@ def fingerprint(salt, t):
     return hashlib.sha256(text.encode("utf-8")).hexdigest()[:32]
 
 
+SPAN_KEEP_MS = (520 - 1) * 7 * 86400000   # strip.js SPAN_WEEKS - 1 (delivery plan C-10)
+MAX_HOLD_S = 86400 * 3650
+
+
 def strip_rows(trades, salt, perm=None):
-    used = trades[-20000:] if len(trades) > 20000 else trades
+    max_open = max((t["open_ts"] for t in trades), default=0)
+    in_span = [t for t in trades if t["open_ts"] >= max_open - SPAN_KEEP_MS and t["hold_s"] <= MAX_HOLD_S]
+    used = in_span[-20000:] if len(in_span) > 20000 else in_span
     anchor = week_anchor(min(t["open_ts"] for t in used))
     symbols = sorted({t["symbol"] for t in used})
     p = perm(len(symbols)) if perm else list(range(len(symbols)))
@@ -2182,7 +2188,7 @@ def strip_rows(trades, salt, perm=None):
     rows = [{"o": (t["open_ts"] - anchor) // 60000, "h": t["hold_s"], "d": 1 if t["dir"] == "long" else -1,
              "q": round3(t["qty"] / med[t["symbol"]]), "p": round2(t["pnl"]), "s": index[t["symbol"]],
              "f": fingerprint(salt, t)} for t in used]
-    return {"rows": rows, "limited": len(trades) > 20000, "anchor": anchor}
+    return {"rows": rows, "limited": len(in_span) > 20000, "anchor": anchor, "span_left_out": len(trades) - len(in_span)}
 
 
 # ----------------------------------------------------------------- CLI / expected files
