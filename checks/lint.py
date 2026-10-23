@@ -91,6 +91,16 @@ def waive_dispute_claims(text, where):
 DATED_PRICING = [_phrase_re(p) for p in RULES["claims"]["dated_pricing"]]
 
 
+SCARCITY = [re.compile(p, re.IGNORECASE) for p in RULES["claims"]["scarcity"]]
+
+
+def scarcity_claims(text, where):
+    """Owner decision 23 Oct: no "spots left", "only N left", countdown or urgency wording anywhere (a static
+    "first 100 buyers" line is fine)."""
+    return [("claim:scarcity", where, text[max(0, m.start() - 40):m.end() + 40].replace("\n", " "))
+            for rx in SCARCITY for m in rx.finditer(text)]
+
+
 def dated_pricing_claims(text, where, source=None):
     """Owner decision 21 Oct ~11:00: no "launch pricing" / "valid before <date>" wording, and no
     priceValidUntil in a page's JSON-LD (source: the raw page, when there is one)."""
@@ -316,6 +326,7 @@ def lint_text(text, where="text", paid=False, analytics=False, english=True):
     out += restore_email_claims(text, where)
     out += waive_dispute_claims(text, where)
     out += dated_pricing_claims(text, where)
+    out += scarcity_claims(text, where)
     return out
 
 
@@ -464,6 +475,7 @@ def passthrough_rules(html, where, analytics, paid=False):
     out += restore_email_claims(text, where)
     out += waive_dispute_claims(text, where)
     out += dated_pricing_claims(text, where, html)
+    out += scarcity_claims(text, where)
     if paid:
         out += not_on_sale_claims(readable_text(html), where)
     for w in RULES["words"]["trial_cta"]:
@@ -620,6 +632,7 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, b
                 problems += restore_email_claims(js_strings(s), rel)
                 problems += waive_dispute_claims(js_strings(s), rel)
                 problems += dated_pricing_claims(js_strings(s), rel)
+                problems += scarcity_claims(js_strings(s), rel)
                 if paid:  # a script can put text on a paid page too
                     problems += not_on_sale_claims(js_strings(s), rel)
             if name.endswith(".html"):
