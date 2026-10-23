@@ -167,8 +167,9 @@ def test_5_restore_link_in_a_new_browser_profile(browser, stack):
     ctx = browser.new_context()
     p2 = ctx.new_page()
     p2.goto(stack["pages"]["restore"])
-    p2.wait_for_selector("#r-open", state="visible", timeout=30000)
-    assert "Access restored" in p2.inner_text("#r-status")
+    # wait for the answer itself: #r-open can count as visible before /refresh has answered
+    p2.wait_for_function("() => document.getElementById('r-status').innerText.includes('Access restored')", timeout=30000)
+    assert not p2.eval_on_selector("#r-open", "e => e.hidden")
     p2.click("#r-open")
     p2.wait_for_url("**/report/")
     assert "Access found on this device." in p2.inner_text("#rp-access")
