@@ -11,7 +11,7 @@
     <div class="grid">
       <div class="span-7">
         <h1 id="hero">See where your trades leave your plan.</h1>
-        <p class="lede">A habit report built from your own trade history. It measures behaviour, like holding losing trades longer than winning ones, and tests up to two of these habits against chance. It doesn’t tell you what to trade.</p>
+        <p class="lede">A habit report built from your own trade history. It measures and describes five habits in your own file, like opening a new trade soon after a loss, with the dollar totals of the matching trades, and tests up to two of these habits against chance in this version. It doesn’t tell you what to trade.</p>
         <p class="btn-row"><a class="btn" href="/pricing/#traders">Get the habit report — {{ r.price_usd|usd }}</a> <a class="btn btn-secondary" href="/tools/trade-stats/">Free trade stats</a></p>
         <p class="small">{{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers. One time, in US dollars, with one free re-test 30 to 60 days after your first report. A full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying.</p>
         <p class="small muted">Not investment advice. <a href="/pricing/#before-you-pay">Before you pay</a></p>
@@ -70,7 +70,7 @@
     <h2 id="faq-h">Questions</h2>
     <details><summary>Is this advice?</summary><p>No. It describes your own past trades. It does not tell you what to trade, how much, or when to exit.</p></details>
     <details><summary>Where does my trade file go?</summary><p>The file stays in your browser. For the report: {{ strings.p5.long }} The free tools send nothing at all.</p></details>
-    <details><summary>What does the re-test do?</summary><p>It runs the same report on a newer export of the same account, 30 to 60 days after your first report, so you can compare the two. It is included in the price.</p></details>
+    <details><summary>What does the re-test do?</summary><p>It runs the same report on a newer export of the same account, 30 to 60 days after your first report, so you can compare the two. It is included in the price. Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.</p></details>
     <details><summary>Refunds?</summary><p>A full refund if you ask by email within {{ prices.rules.trader_refund_days }} days of buying, even after your report has run. <a href="/terms/#traders">Trader terms</a></p></details>
   </section>
 

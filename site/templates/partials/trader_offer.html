@@ -29,7 +29,7 @@ Not on sale yet: nothing is charged now. The free tools stay free.
 {%- if flags.paid_report %}{{ r.price_usd|usd }} founding price{% else %}waitlist{% endif -%}
 {%- endmacro %}
 
-{#- How a sentence about the report starts: "… checks whether your size changes after a loss".
+{#- How a sentence about the report starts: "… describes, from your own trade file, your median size after a loss".
     The tool scripts use the same two openings (REPORT_LEAD in trade-stats.js / prop-sim.js). -#}
 {%- macro lead() -%}
 {%- if flags.paid_report %}The habit report{% else %}We’re building a habit report that{% endif -%}

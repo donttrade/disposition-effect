@@ -25,11 +25,13 @@ from test_wording_wiring import STALE_BUILD  # noqa: E402
 STALE_R_D2 = ["tests up to four", "of the 4 patterns", "jusqu’à quatre", "tests four of them",
               "tests whether each pattern is more than noise", "test whether each pattern is more than noise",
               # R-D3 I-3
-              "tests up to three", "test up to three", "of the 3 habits", "jusqu’à trois", "tests each one for noise"]
+              "tests up to three", "test up to three", "of the 3 habits", "jusqu’à trois", "tests each one for noise",
+              # R-D3 I-3b (the lot-size line no longer says the report checks this)
+              "whether your size changes after a loss"]
 ROW = "Did you hold losing trades longer than winning ones? (described, not tested in this version)"
 SIZE_ROW = "Was the trade after a loss larger than the trade after a win? (described, not tested in this version)"
-COUNT = "tests up to two of these habits against chance."
-COUNT_SOON = "test up to two of these habits against chance."
+COUNT = "tests up to two of these habits against chance in this version."
+COUNT_SOON = "test up to two of these habits against chance in this version."
 FR = ("par rapport aux gagnantes (décrite, non testée dans cette version); ",
       "l’augmentation de la taille après des pertes (décrite, non testée dans cette version); ",
       "Il en teste jusqu’à deux par rapport au hasard")
@@ -49,7 +51,8 @@ def text_of(out, rel):
 def test_the_three_stale_strings_are_on_the_stale_build_list():
     for s in ("tests up to four", "of the 4 patterns", "jusqu’à quatre"):
         assert s in STALE_BUILD
-    for s in ("tests up to three", "test up to three", "of the 3 habits", "jusqu’à trois"):   # R-D3 I-3
+    for s in ("tests up to three", "test up to three", "of the 3 habits", "jusqu’à trois",   # R-D3 I-3
+              "whether your size changes after a loss"):                                     # R-D3 I-3b
         assert s in STALE_BUILD
 
 
@@ -98,3 +101,112 @@ def test_sample_report_lead_and_fr_page(builds):
     for s in FR:
         assert s in fr
     assert "quatre" not in visible_text(fr) and "jusqu’à trois" not in visible_text(fr)
+
+
+# ------------------------------------------------------------------ R-D3 I-3b: the offer wording (owner's decision)
+# Each value line states: five habits measured and described in your own file with the dollar totals of the matching
+# trades; up to two tested against chance in this version; one re-test 30 to 60 days after the first report. Where the
+# re-test is described, the version sentence follows, its "corrections page" linked to /corrections/.
+RETEST = ("Your re-test runs on the version of the report that is live when you run it; every change is dated on the "
+          "corrections page.")
+RETEST_HTML = ('Your re-test runs on the version of the report that is live when you run it; every change is dated on the '
+               '<a href="/corrections/">corrections page</a>.')
+HOME_LEDE = ("A habit report built from your own trade history. It measures and describes five habits in your own file, like "
+             "opening a new trade soon after a loss, with the dollar totals of the matching trades, and tests up to two of these "
+             "habits against chance in this version. It doesn’t tell you what to trade.")
+FT_LEDE = ("It measures and describes five habits in your own past trades, like opening a new trade soon after a loss, with the "
+           "dollar totals of the matching trades, and tests up to two of these habits against chance in this version. It "
+           "includes one re-test 30 to 60 days after your first report. It doesn’t tell you what to trade.")
+FT_LEDE_SOON = ("It will measure and describe five habits in your own past trades, like opening a new trade soon after a loss, "
+                "with the dollar totals of the matching trades, and test up to two of these habits against chance in this "
+                "version. It will include one re-test 30 to 60 days after your first report. It will not tell you what to trade.")
+PRODUCT = ("Five habits measured and described in your own trades, with the dollar totals of the matching trades; up to two of "
+           "them tested against chance in this version; plus one re-test 30 to 60 days after your first report.")
+BYP = ("a report on habits in your own past trades, built from a trade file you choose. It measures and describes five "
+       "habits, with the dollar totals of the matching trades, and tests up to two of them against chance in this version. "
+       "It includes one re-test 30 to 60 days after your first report. It describes what happened; it does not tell you "
+       "what to trade.")
+LOT = ("Sizing on paper is one thing. The habit report describes, from your own trade file, your median size after a loss "
+       "and after a win, and what trades after a loss at 1.5 times your usual size or more totalled. It measures and "
+       "describes five habits with the dollar totals of the matching trades, tests up to two of them against chance in this "
+       "version, and includes one re-test 30 to 60 days after your first report.")
+LOT_SOON = ("Sizing on paper is one thing. We’re building a habit report that describes, from your own trade file, your median "
+            "size after a loss and after a win, and what trades after a loss at 1.5 times your usual size or more totalled. It "
+            "will measure and describe five habits with the dollar totals of the matching trades, test up to two of them "
+            "against chance in this version, and include one re-test 30 to 60 days after your first report.")
+FR_FACTS = ("Pour les cinq, il totalise les montants réalisés des transactions en cause. Il en teste jusqu’à deux par rapport au "
+            "hasard dans cette version : pour chacune, il indique si l’écart se distingue du hasard.",
+            "Comprend un nouveau test gratuit, de 30 à 60 jours plus tard.",
+            "Votre nouveau test est fait avec la version du rapport en ligne au moment où vous le lancez; chaque changement est "
+            "daté, en anglais, sur la page des corrections.")
+NO_PROMISE = ["coming soon", "will be tested", "tested later", "later version", "next version", "founding edition"]
+
+
+def raw(out, rel):
+    return open(os.path.join(out, rel), encoding="utf-8").read()
+
+
+def test_i3b_exact_offer_lines_on_each_page(builds):
+    paid, free = builds["paid"], builds["free"]
+    assert HOME_LEDE in text_of(paid, "index.html")
+    assert FT_LEDE in text_of(paid, os.path.join("for-traders", "index.html"))
+    assert FT_LEDE_SOON in text_of(free, os.path.join("for-traders", "index.html"))
+    pr = text_of(paid, os.path.join("pricing", "index.html"))
+    assert PRODUCT in pr and BYP in pr
+    assert LOT in text_of(paid, os.path.join("tools", "lot-size-calculator", "index.html"))
+    assert LOT_SOON in text_of(free, os.path.join("tools", "lot-size-calculator", "index.html"))
+    fr = re.sub(r"\s+", " ", visible_text(raw(paid, os.path.join("fr", "avant-de-payer", "index.html"))))
+    for s in FR_FACTS:
+        assert s in fr, s
+    for s in (HOME_LEDE, FT_LEDE, FT_LEDE_SOON, PRODUCT, BYP, LOT, LOT_SOON, RETEST):
+        assert lint_text(s) == [] and lint_text(s, "i3b", paid=True) == [], s
+
+
+def test_i3b_the_version_sentence_sits_where_the_re_test_is_described_and_links_corrections(builds):
+    paid = builds["paid"]
+    for rel in ("pricing/index.html", "for-traders/index.html", "index.html"):
+        h = re.sub(r"\s+", " ", raw(paid, rel))
+        assert RETEST_HTML in h, rel
+    pr = re.sub(r"\s+", " ", raw(paid, "pricing/index.html"))
+    assert pr.count(RETEST_HTML) == 2, "the pricing note and Before you pay"
+    assert os.path.exists(os.path.join(paid, "corrections", "index.html"))
+    fr = re.sub(r"\s+", " ", raw(paid, "fr/avant-de-payer/index.html"))
+    assert 'daté, en anglais, sur la <a href="/corrections/" hreflang="en">page des corrections</a>.' in fr
+    for out in (paid, builds["free"]):
+        ft = re.sub(r"\s+", " ", raw(out, "for-traders/index.html"))
+        assert RETEST_HTML in ft
+
+
+def test_i3b_product_text_is_the_same_everywhere(builds):
+    sys.path.insert(0, os.path.join(REPO, "site"))
+    import importlib
+    build = importlib.import_module("build")
+    assert build.PRODUCT_TEXT == PRODUCT
+    h = raw(builds["paid"], "pricing/index.html")
+    assert "<td>" + PRODUCT + "</td>" in h
+    ld = [m for m in re.findall(r'<script type="application/ld\+json">(.*?)</script>', h, re.S) if '"Product"' in m]
+    assert ld and all(PRODUCT in m for m in ld)
+    seen = []
+    for root, _, files in os.walk(builds["paid"]):
+        for f in files:
+            if f.endswith((".html", ".json", ".js", ".xml", ".txt")):
+                t = open(os.path.join(root, f), encoding="utf-8", errors="replace").read()
+                if "Five habits measured" in t:
+                    seen.append(os.path.relpath(os.path.join(root, f), builds["paid"]))
+                    assert "Five habits measured in your own trades, with historical dollar figures" not in t
+    assert seen == ["pricing/index.html"], seen
+
+
+@pytest.mark.parametrize("flavour", ["free", "badges", "paid"])
+def test_i3b_no_promise_that_hold_gap_or_size_up_will_be_tested(builds, flavour):
+    out = builds[flavour]
+    for rel in ("index.html", "for-traders/index.html", "pricing/index.html", "tools/lot-size-calculator/index.html",
+                "fr/avant-de-payer/index.html"):
+        p = os.path.join(out, rel)
+        if not os.path.exists(p):
+            continue
+        t = re.sub(r"\s+", " ", visible_text(open(p, encoding="utf-8").read())).lower()
+        for bad in NO_PROMISE:
+            if bad == "coming soon" and flavour != "paid":
+                continue   # off sale, the pages say the report itself is coming soon
+            assert bad not in t, (flavour, rel, bad)
