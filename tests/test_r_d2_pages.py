@@ -27,7 +27,9 @@ STALE_R_D2 = ["tests up to four", "of the 4 patterns", "jusqu’à quatre", "tes
               # R-D3 I-3
               "tests up to three", "test up to three", "of the 3 habits", "jusqu’à trois", "tests each one for noise",
               # R-D3 I-3b (the lot-size line no longer says the report checks this)
-              "whether your size changes after a loss"]
+              "whether your size changes after a loss",
+              # R-D3 addendum I-6 (the report page's old citation prefix)
+              "Published research on this pattern"]
 ROW = "Did you hold losing trades longer than winning ones? (described, not tested in this version)"
 SIZE_ROW = "Was the trade after a loss larger than the trade after a win? (described, not tested in this version)"
 COUNT = "tests up to two of these habits against chance in this version."
