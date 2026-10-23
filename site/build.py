@@ -653,10 +653,13 @@ def footer_privacy(flags):
     if flags["paid_report"]:
         # D4: true once /welcome/ keeps the access key (localStorage and IndexedDB)
         # NIT 13: complete, matching /privacy/#report (the fingerprints kept for the re-test match)
+        # C-14: the server keeps more than fingerprints (a purchase record, hourly counters; /privacy/#report),
+        # so "only" now bounds what is kept OF the trade numbers, not what the server keeps.
         parts.append("It stores your light/dark choice in your own browser and, if you buy the habit report, your "
-                     "access key there too. For that report your browser sends only stripped trade numbers; our "
-                     "server does not keep them, only scrambled fingerprints to check that a re-test is on the same "
-                     "history. Your file itself is not uploaded.")
+                     "access key there too. For that report your browser sends our server only stripped trade "
+                     "numbers. The server does not keep them: of those numbers it keeps only a scrambled fingerprint "
+                     "of each trade row from your first report, to match a re-test to the same history. Your file "
+                     "itself is not uploaded.")
     else:
         parts.append("It stores only your light/dark choice, in your own browser.")
     if flags["paid_report"] or flags["pilot_checkout"]:
@@ -1035,7 +1038,26 @@ def load_config():
         elif not escape("DT_ALLOW_NO_STRIPE_LINK"):
             die(f"paid_report = true but prices.json has no stripe_link_{mode} for report39 "
                 "(DT_ALLOW_NO_STRIPE_LINK=1 for a local test build only)")
+        # C-14 (G16): a separate French Payment Link (its custom text is French). Optional: without one,
+        # /fr/avant-de-payer/ uses the English link with ?locale=fr (report_link_fr).
+        for m in ("live", "test"):
+            fr = products["report39"].get(f"stripe_link_{m}_fr")
+            if fr is not None:
+                check_stripe_link(fr, m, f"prices.json report39 stripe_link_{m}_fr")
     return cfg, prices, private
+
+
+def report_link_fr(product, mode):
+    """The /fr/avant-de-payer/ pay link: stripe_link_<mode>_fr when set, else the English link with
+    locale=fr (a documented Payment Link URL parameter: docs.stripe.com/payment-links/customize, read
+    23 Oct 2026), else None (no link in this mode)."""
+    fr = product.get(f"stripe_link_{mode}_fr")
+    if fr:
+        return fr
+    en = product.get(f"stripe_link_{mode}")
+    if not en:
+        return None
+    return en + ("&" if "?" in en else "?") + "locale=fr"
 
 
 def lift_sections(rel_path):
@@ -1263,7 +1285,10 @@ def check_language_pairs(out, base_url):
 # Delivery plan C-11 (P-5): a page may say the trade numbers are not stored only next to the
 # fingerprint that IS kept (/privacy/ discloses it). Any block element whose text holds one of
 # STORAGE_CLAIMS must also hold one of STORAGE_QUALIFIERS; the build fails otherwise.
-STORAGE_CLAIMS = ("not stored", "not kept", "never stored", "ne sont pas conservés")
+# C-14 (GET-PAID L7): the paid footer's and /privacy/'s "does not keep" and the French "ne conserve pas" /
+# "non conservés" are the same claim, so they are held to the same rule.
+STORAGE_CLAIMS = ("not stored", "not kept", "never stored", "ne sont pas conservés",
+                  "does not keep", "doesn't keep", "ne conserve pas", "non conservé")
 STORAGE_QUALIFIERS = ("fingerprint", "empreinte")
 _BLOCK_TAGS = {"p", "li", "dd", "dt", "td", "th", "summary", "details", "figcaption", "blockquote", "h1", "h2", "h3",
                "h4", "h5", "h6", "div", "section", "article", "aside", "main", "header", "footer", "label", "legend",
@@ -1315,6 +1340,42 @@ def storage_claim_problems(html, where):
         flagged.append(t)
         out.append(f"{where}: <{tag}> says {claims[0]!r} without the fingerprint that is kept: {t[:200]}")
     return out
+
+
+# C-14 (G14, G15): the paid-build legal lines. Each (path, id) must be on its page in a paid_report build,
+# and on none of them in a free build. The ids carry the lines a lawyer reviews (LAWYER in the templates).
+PAID_LEGAL_IDS = [("/privacy/", "buyer-details"), ("/terms/", "chargeback"), ("/terms/", "outage"),
+                  ("/fr/confidentialite/", "donnees-acheteur"), ("/fr/conditions/", "contestation"),
+                  ("/fr/conditions/", "panne")]
+MANUAL_RESTORE_IDS = [("/terms/", "manual-restore"), ("/fr/conditions/", "restauration-manuelle")]
+PROVIDERS_ABROAD = "are mostly in the United States"   # the /privacy/ providers sentence
+
+
+def paid_legal_problems(out, cfg):
+    """[problem] for the C-14 legal lines of this build (an empty list when they are right)."""
+    flags, probs = cfg["flags"], []
+
+    def page(path):
+        fp = out_file(out, path)
+        return open(fp, encoding="utf-8").read() if os.path.exists(fp) else None
+
+    restore = MANUAL_RESTORE_IDS if cfg["site"].get("manual_restore", True) else []
+    for path, i in PAID_LEGAL_IDS + MANUAL_RESTORE_IDS:
+        html = page(path)
+        has = html is not None and re.search(r'\sid="' + re.escape(i) + '"', html) is not None
+        want = flags["paid_report"] and ((path, i) in PAID_LEGAL_IDS or (path, i) in restore)
+        if has != want:
+            probs.append(f"{path}#{i} is {'missing from' if want else 'in'} this build "
+                         f"(paid_report = {str(flags['paid_report']).lower()}"
+                         f"{', manual_restore = ' + str(bool(restore)).lower() if (path, i) in MANUAL_RESTORE_IDS else ''})")
+    priv = page("/privacy/") or ""
+    if flags["paid_report"]:
+        if "pen name" in priv:
+            probs.append("/privacy/ says \"pen name\" in a paid build: the seller is named there (G14)")
+        li = re.findall(r"(?s)<li>((?:(?!</li>).)*" + re.escape(PROVIDERS_ABROAD) + r".*?)</li>", priv)
+        if len(li) != 1 or "Cloudflare" not in li[0]:
+            probs.append("/privacy/ providers sentence does not name Cloudflare in a paid build (the server runs there)")
+    return probs
 
 
 def verify(out, flags, seller=None, base_url=None):
@@ -1460,7 +1521,8 @@ def build():
                 "evidence": evidence(), "footer_privacy": footer_privacy(flags), "show_seller": show_seller(cfg),
                 "business_id_line": Markup(business_id_line(cfg, private, "legal")),
                 "strings": read_toml(os.path.join(SITE, "config", "strings.toml"), "strings.toml"),
-                "paid_method": paid_method()}
+                "paid_method": paid_method(),
+                "report_link_fr": report_link_fr(products["report39"], cfg["stripe"]["mode"])}
     built = []
     for rel, page in sorted(owned.items()):
         page = {"scripts": [], "modules": [], "og_image": "/assets/og/default.png", "lang": "en",
@@ -1487,6 +1549,9 @@ def build():
     version_assets(out, left_out=static_left_out)
 
     verify(out, flags, seller=show_seller(cfg), base_url=cfg["site"]["base_url"])
+    legal = paid_legal_problems(out, cfg)
+    if legal:
+        die("paid legal copy (C-14): " + "; ".join(legal))
     return out
 
 

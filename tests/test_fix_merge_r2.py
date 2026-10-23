@@ -656,7 +656,8 @@ def test_nit8_welcome_does_not_assume_a_stripe_receipt():
 
 def test_nit13_paid_footer_mentions_the_kept_fingerprints(paid_site):
     line = B.footer_privacy({"paid_report": True, "pilot_checkout": False, "analytics": False})
-    assert "does not keep them, only scrambled fingerprints" in line
+    # C-14 (23 Oct): "only" now bounds what is kept of the trade numbers (the server keeps other records too)
+    assert "does not keep them: of those numbers it keeps only a scrambled fingerprint" in line
     privacy = L.visible_text((paid_site["out"] / "privacy" / "index.html").read_text(encoding="utf-8"))
     assert "scrambled fingerprints of the trades in your first report" in privacy   # what the footer now points at
     assert line in (paid_site["out"] / "about" / "index.html").read_text(encoding="utf-8")
