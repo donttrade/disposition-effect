@@ -264,7 +264,15 @@ export function renderReport(report, out, meta) {
 // ---------------------------------------------------------------- page wiring
 
 let token = null;
-export const REPORT_ERROR = 'This report could not be shown, so nothing from it is displayed. Reply to your Stripe receipt email to tell us.';
+// R-D1 D-2: the line shown when wording.js refuses a report. The address is site.toml's contact_email, written into
+// the page at build time (<meta name="dt-contact">), never typed here.
+export const REPORT_ERROR = 'This report could not be shown, so nothing from it is displayed. To tell us, email {contact_email} from the address you paid with.';
+export function reportError(doc = document) {
+  const m = doc.querySelector('meta[name="dt-contact"]');
+  const email = m && m.getAttribute('content');
+  return email ? REPORT_ERROR.replace('{contact_email}', email)
+    : 'This report could not be shown, so nothing from it is displayed. To tell us, email us from the address you paid with.';
+}
 
 function status(msg, kind = '') {
   const s = $('rp-status');
@@ -297,7 +305,7 @@ async function run(file) {
   } catch (e) {
     // wording.js throws rather than print a sentence that is not true of this report (R2-3).
     $('rp-out').replaceChildren();
-    status(REPORT_ERROR, 'error');
+    status(reportError(), 'error');
     return;
   }
   if (r.json.uses_left !== null) $('rp-uses').textContent = r.json.uses_left === 1 ? 'One re-test left on this purchase.' : r.json.uses_left === 0 ? 'Both runs on this purchase are used.' : '';
