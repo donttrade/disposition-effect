@@ -22,7 +22,8 @@ const DAY = 86400000;
 export const SPAN_WEEKS = 520;
 export const MAX_HOLD_S = 86400 * 3650;
 const SPAN_KEEP_MS = (SPAN_WEEKS - 1) * 7 * DAY;
-export const spanLine = (n) => `Only the last 10 years of this file were used (${n} trade${n === 1 ? '' : 's'} left out).`;
+// R-D1 D-4: what was left out, exactly (519 weeks is about 9.95 years, so never "the last 10 years").
+export const spanLine = (n) => `Left out: ${n} trade${n === 1 ? '' : 's'} opened more than 519 weeks (about 10 years) before this file's latest trade, or held longer than 3,650 days.`;
 const roundHalfAway = (x) => Math.floor(Math.abs(x) + 0.5) * (x >= 0 ? 1 : -1);
 export const round3 = (x) => roundHalfAway(x * 1000) / 1000;
 export const round2 = (x) => roundHalfAway(x * 100) / 100;
