@@ -13,7 +13,7 @@
 
   <h2 id="fichier">Votre fichier de transactions</h2>
   <p><strong>Outils gratuits :</strong> votre fichier est ouvert dans votre navigateur et n’est jamais téléversé.</p>
-  <p><strong>Rapport payant :</strong> votre navigateur envoie à notre serveur seulement une liste épurée de chiffres : heures d’ouverture et de fermeture, achat ou vente, taille relative, gain ou perte réalisé, et un numéro de symbole tiré au hasard. Cette liste ne contient ni nom, ni numéro de compte, ni symbole boursier. Notre serveur fonctionne sur Cloudflare et peut se trouver hors du Canada. Il utilise ces chiffres pour produire votre rapport, vous renvoie le rapport et ne conserve pas ces chiffres. La journalisation des requêtes est désactivée.</p>
+  <p><strong>Rapport payant :</strong> votre navigateur envoie à notre serveur seulement une liste épurée de chiffres : heures d’ouverture et de fermeture, achat ou vente, taille relative, gain ou perte réalisé, et un numéro de symbole tiré au hasard. Cette liste ne contient ni nom, ni numéro de compte, ni symbole boursier. Notre serveur fonctionne sur Cloudflare et peut se trouver hors du Canada. Il utilise ces chiffres pour produire votre rapport, vous renvoie le rapport et ne conserve pas ces chiffres : il n’en garde que des empreintes brouillées, celles des transactions de votre premier rapport, décrites ci-dessous.{# TRANSLATOR CHECK (C-14): EN /privacy/#report "…does not keep the numbers: of those numbers it keeps only a scrambled fingerprint of each trade row from your first report, as described below." #} La journalisation des requêtes est désactivée.</p>
   <p><strong>Ce que notre serveur conserve :</strong></p>
   <ul>
     <li>une fiche d’achat sous un code brouillé : le produit, le nombre d’analyses utilisées, les dates et l’état de remboursement, sans votre nom ni votre courriel;</li>
@@ -31,6 +31,8 @@
   <h2 id="fournisseurs">Paiements, formulaires, courriel, infolettre</h2>
   <ul>
     <li><strong>Paiements :</strong> Stripe traite votre nom, votre courriel, votre pays de facturation et les données de votre carte. donttrade ne voit jamais le numéro complet de votre carte. Pour les données de paiement, Stripe agit comme responsable indépendant; sa politique de confidentialité s’applique.</li>
+    {#- C-14 (G14). TRANSLATOR CHECK: EN /privacy/#buyer-details. LAWYER (Q10–Q12): the uses, the dispute evidence, the period. #}
+    <li id="donnees-acheteur"><strong>Si vous achetez le Rapport :</strong> Stripe nous montre le nom et l’adresse courriel que vous indiquez au paiement. Nous les utilisons seulement pour vous envoyer la copie de votre contrat, répondre à vos courriels (un remboursement, un nouveau lien d’accès) et traiter une contestation de paiement. Si vous contestez le paiement auprès de l’émetteur de votre carte, nous pouvons remettre à Stripe, comme preuve, les dates de votre achat et de vos analyses et le nombre d’analyses utilisées. Nos courriels avec vous restent dans notre boîte Gmail, et une liste privée des ventes (le code du paiement, la date, votre nom et votre courriel, et les dates d’envoi de la copie de votre contrat ou d’un remboursement) est gardée sur notre propre ordinateur, pas sur notre serveur. Les deux sont conservés aussi longtemps que les dossiers d’achat (ci-dessous).</li>
     <li><strong>Formulaires :</strong> nos formulaires passent par Web3Forms, qui nous transmet votre message par courriel. Ils demandent seulement ce qui est indiqué sur chaque formulaire.</li>
     <li><strong>Courriel :</strong> notre boîte de réception est hébergée par Google (Gmail).</li>
     <li><strong>Infolettre :</strong> si vous vous y abonnez, elle est envoyée par Substack; sa politique de confidentialité s’applique.</li>
@@ -50,7 +52,8 @@
   <h2 id="conservation">Bases légales et conservation</h2>
   <p><strong>Bases légales (UE et R.-U.) :</strong> l’exécution du contrat pour produire votre rapport et vous répondre; notre intérêt légitime pour limiter les abus et protéger le service.</p>
   <ul>
-    <li>chiffres de transactions envoyés pour l’analyse payante : non conservés;</li>
+    <li>chiffres de transactions envoyés pour l’analyse payante : non conservés; seules des empreintes brouillées des transactions du premier rapport sont gardées, pour le nouveau test;{# TRANSLATOR CHECK (C-14): the deletion dates of /privacy/#fingerprints are still to translate (see above) #}</li>
+    <li>courriels avec les acheteurs et liste privée des ventes : six ans, comme les dossiers d’achat;</li>
     <li>compteurs d’utilisation : environ une heure;</li>
     <li>dossiers d’achat et de facturation : six ans, comme l’exige la loi fiscale canadienne;</li>
     <li>demandes qui ne mènent à aucun achat ni contrat : supprimées dans les 12 mois;</li>

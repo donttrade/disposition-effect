@@ -3,7 +3,8 @@
 {% block content %}
 {%- from "partials/seller.html" import seller_rows %}
 {%- set r = products["report39"] %}
-{%- set link = r["stripe_link_" + stripe_mode] %}
+{#- C-14 (G16): report39 stripe_link_<mode>_fr when set, else the English link with ?locale=fr (build.report_link_fr). #}
+{%- set link = report_link_fr %}
 <div class="wrap" data-requires-flag="paid_report"><div class="prose">
   <p class="small"><a href="/pricing/#before-you-pay" hreflang="en" lang="en">English</a></p>
   <h1>Avant de payer : ce que vous acceptez</h1>
@@ -11,7 +12,7 @@
     <h2 id="adp-h">Rapport d’habitudes</h2>
     <dl class="byp">
       {{ seller_rows(private, site, "fr") }}
-      <dt>Ce que vous achetez</dt><dd><strong>Rapport d’habitudes.</strong> Une mesure ponctuelle de vos propres transactions passées, à partir d’un fichier que vous exportez de votre plateforme (rapport MT4/MT5, requête Flex d’IBKR ou fichier CSV des ordres Tradovate, ces trois formats étant en version bêta, ou notre modèle CSV). Il teste cinq habitudes : la durée pendant laquelle vous gardez vos positions perdantes par rapport aux gagnantes; les reprises de position peu après une perte; l’augmentation de la taille après des pertes; les transactions faites après une série de pertes; les pertes anormalement élevées. Pour chaque habitude, il indique si l’écart se distingue du hasard et totalise les montants réalisés en cause. <strong>Comprend un nouveau test gratuit, de 30 à 60 jours plus tard.</strong></dd>
+      <dt>Ce que vous achetez</dt><dd><strong>Rapport d’habitudes.</strong> Une mesure ponctuelle de vos propres transactions passées, à partir d’un fichier que vous exportez de votre plateforme (rapport MT4/MT5, requête Flex d’IBKR ou fichier CSV des ordres Tradovate, ces trois formats étant en version bêta, ou notre modèle CSV). Il couvre cinq habitudes : la durée pendant laquelle vous gardez vos positions perdantes par rapport aux gagnantes; les reprises de position peu après une perte; l’augmentation de la taille après des pertes; les transactions faites après une série de pertes; les pertes anormalement élevées. Il en teste jusqu’à quatre par rapport au hasard : pour chacune, il indique si l’écart se distingue du hasard et totalise les montants réalisés en cause.{# C-14, R-D1.3(c): "teste cinq habitudes" was not true (four are tested; EN /sample-report/ "covers five habits … tests up to four of them against chance"). TRANSLATOR CHECK. #} <strong>Comprend un nouveau test gratuit, de 30 à 60 jours plus tard.</strong></dd>
       <dt>Exigences techniques</dt><dd>Une version récente de Chrome, Edge, Firefox ou Safari, avec JavaScript activé. Un ordinateur est plus simple; un téléphone convient si vous pouvez y choisir le fichier. Votre fichier est ouvert dans votre navigateur et n’est pas téléversé. Pour l’analyse payante, seuls des chiffres épurés (heures d’ouverture et de fermeture, achat ou vente, taille, gain ou perte réalisé, numéro de symbole aléatoire) sont envoyés à notre serveur : aucun nom, numéro de compte ni symbole boursier. Ces chiffres ne sont pas conservés; nous gardons seulement des empreintes brouillées pour vérifier qu’un nouveau test porte sur le même historique. <a href="/fr/confidentialite/">Confidentialité</a></dd>
       <dt>Prix détaillé</dt><dd>Rapport d’habitudes : {{ r.price_usd|usd_fr }}, paiement unique. Aucuns frais de livraison ni autres frais.</dd>
       <dt>Taxes</dt><dd>Aucune taxe de vente n’est facturée.</dd>
