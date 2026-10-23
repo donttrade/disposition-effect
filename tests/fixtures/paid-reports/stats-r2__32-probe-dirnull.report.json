@@ -161,8 +161,9 @@
    "verdict": "descriptive"
   }
  ],
- "method_version": "2026-10-23.stats2c",
+ "method_version": "2026-10-23.stats2d",
  "n_distinguishable": 0,
+ "n_rows": 120,
  "n_tested": 1,
  "n_trades": 120,
  "period_weeks": 4,
