@@ -100,6 +100,7 @@ function detailLine(h, unit) {
 const testedPhrase = (n) => `the ${n} pattern${n === 1 ? '' : 's'} tested`;
 
 function dollarsLine(h, unit) {
+  if (h.dollars === null) return null;   // R-D3 addendum 2: a coarse-time file's order-based habits have no dollar figure
   return `${h.dollars.label}: ${h.dollars.n_trades} trades, totalling ${money(h.dollars.amount, unit)} (historical).`;
 }
 
@@ -151,6 +152,13 @@ function twoBarChart(h, unit) {
 
 function habitSection(h, unit, report) {
   const sec = el('section', { class: 'habit', id: 'habit-' + h.id, 'aria-labelledby': 'h-' + h.id });
+  if (report.coarse_time && ['revenge', 'tilt', 'size_up'].includes(h.id)) {
+    // R-D3 addendum 2: the badge and the one line, nothing else (no question with its 15-minute figure, no
+    // measure, no dollars, no chart, no research line)
+    sec.append(el('h3', { id: 'h-' + h.id, text: h.name }), el('p', {}, badge(h.verdict)));
+    for (const s of habitSentences(h, report, wordingFmt(unit))) sec.append(el('p', { class: 'habit-sentence', text: s }));
+    return sec;
+  }
   sec.append(el('h3', { id: 'h-' + h.id, text: h.name }), el('p', { class: 'muted', text: h.question }), el('p', {}, badge(h.verdict)));
   if (TESTED.includes(h.id)) {
     // ARCHITECT-STATS-AMENDMENT-R2 §9.2: the habit's lines in order (measures, the comparison
@@ -164,7 +172,8 @@ function habitSection(h, unit, report) {
     for (const line of measures(h, unit)) if (line) ul.append(el('li', { text: line }));
     sec.append(ul);
   }
-  sec.append(el('p', { text: dollarsLine(h, unit) }));
+  const dl = dollarsLine(h, unit);
+  if (dl) sec.append(el('p', { text: dl }));
   // The method line carries the habit's own n_perm (it scales with the file size, D-4).
   const method = methodLine(h, wordingFmt(unit));
   if (method && h.p_raw !== null && h.p_holm !== null) {
@@ -220,7 +229,8 @@ export function renderReport(report, out, meta) {
   const tbody = el('tbody');
   for (const h of report.habits) {
     tbody.append(el('tr', {}, el('th', { scope: 'row' }, el('a', { href: '#habit-' + h.id, text: h.name })),
-      el('td', {}, badge(h.verdict)), el('td', { class: 'num', text: money(h.dollars.amount, unit) }), el('td', { class: 'num', text: String(h.dollars.n_trades) })));
+      el('td', {}, badge(h.verdict)), el('td', { class: 'num', text: h.dollars ? money(h.dollars.amount, unit) : '—' }),
+      el('td', { class: 'num', text: h.dollars ? String(h.dollars.n_trades) : '—' })));
   }
   out.append(el('section', { class: 'section', 'aria-labelledby': 'all-h' }, el('h2', { id: 'all-h', text: 'All habits measured' }),
     el('div', { class: 'table-wrap', tabindex: '0', role: 'region', 'aria-label': 'All habits table' },

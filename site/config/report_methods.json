@@ -3,8 +3,8 @@
  "entries": [
   {
    "date": "2026-10-23",
-   "method": "2026-10-23.stats2d",
-   "text": "First version of the habit report. It tests up to two habits against chance: re-entering soon after a loss, and trading after a losing run. It describes the hold gap, size after a loss and unusually large losses, with the dollar totals of the matching trades, without testing them. Rows in your file that share a symbol, a direction and an open minute (for example, a position closed in parts) count as one trade."
+   "method": "2026-10-23.stats2e",
+   "text": "First version of the habit report. It tests up to two habits against chance: re-entering soon after a loss, and trading after a losing run. It describes the hold gap, size after a loss and unusually large losses, with the dollar totals of the matching trades, without testing them. Rows in your file that share a symbol, a direction and an open minute (for example, a position closed in parts) count as one trade. If a quarter or more of your trades show the same opening time of day (for example, an export with dates but no times), no rows are combined, nothing is tested and size after a loss is not described."
   }
  ]
 }
