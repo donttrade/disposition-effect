@@ -154,7 +154,7 @@ V_LAUNCH = ("Not tested in this version of the report. In our tests on files bui
             "a gap in more than 1 file in 20, the rate it is designed for, when a large win or loss changed how long the next "
             "trades were held. So this pattern is described here without a verdict.")
 HG_LINE = "Holding losers longer than winners is described, not tested, in this version of the report."
-COV3 = "3 of the 3 patterns could be tested. Each one compares two groups of at least 30 trades."
+COV3 = "3 of the 3 habits could be tested. Each one compares two groups of at least 30 trades."
 
 
 def test_w1_every_string_passes_the_lint_plain_and_paid():
@@ -206,9 +206,9 @@ def test_w2_page1_truth_table_prints_exactly_the_ticked_lines():
     for k in [str(i) for i in range(1, 10) if i != 8]:
         page1 = c[k] + cov[k]
         assert page1.count(HG_LINE) == 1 and cov[k][-1] == HG_LINE, k
-        assert cov[k][0].endswith(" of the 3 patterns could be tested. Each one compares two groups of at least 30 trades."), k
+        assert cov[k][0].endswith(" of the 3 habits could be tested. Each one compares two groups of at least 30 trades."), k
     assert cov["1"] == [COV3, HG_LINE]
-    assert cov["9"] == ["1 of the 3 patterns could be tested. Each one compares two groups of at least 30 trades.",
+    assert cov["9"] == ["1 of the 3 habits could be tested. Each one compares two groups of at least 30 trades.",
                         "Not tested: Size after a loss, Trading after a losing streak.", HG_LINE]
 
 
@@ -340,7 +340,7 @@ def test_cross_repo_reports_render_without_a_throw_and_are_method_stats2b():
         assert not any("reshuffled" in s for s in r["habits"]["hold_gap"]), f   # no hold_gap method line
     # random.json's hold_gap was the stats2 focus (case 2); under stats2b nothing is distinguishable (case 1)
     assert real["random.report.json"]["page1"] == H0
-    assert real["random.report.json"]["coverage"] == ["2 of the 3 patterns could be tested. Each one compares two groups of "
+    assert real["random.report.json"]["coverage"] == ["2 of the 3 habits could be tested. Each one compares two groups of "
                                                       "at least 30 trades.", "Not tested: Re-entering soon after a loss.", HG_LINE]
     s4 = real["stats-r2__33-probe-sizeup0.report.json"]
     assert s4["page1"][0] == H1.format(k=1, v="is", n=2)
