@@ -11,4 +11,8 @@
 <noscript><p class="notice notice-caution">This calculator runs in your browser and needs JavaScript turned on.</p></noscript></div>
 {%- endif %}
 <!--frozen:start-->{{ lifted_html }}<!--frozen:end-->
+{%- if page.path == "/corrections/" %}
+{#- The Lead's decision (23 Oct): the habit report's dated method versions, outside the frozen log. #}
+{% include "partials/report_methods.html" %}
+{%- endif %}
 {% endblock %}

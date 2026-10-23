@@ -26,6 +26,7 @@ Environment:
   DT_BASELINE=path         use another URL baseline (tests plant a missing URL this way)
   DT_PRIVATE_TOML=path     read private.toml from elsewhere (flag-on test builds)
   DT_PRICES_JSON=path      read prices.json from elsewhere (test builds plant a test link)
+  DT_REPORT_METHODS_JSON=path  read report_methods.json from elsewhere (tests plant a missing entry)
   DT_REQUIRE_LAUNCH_DATE=1 fail if [legal] launch_date is empty (./site/run.sh bundle sets it)
   DT_PREVIEW=<name>        a preview build (delivery plan C-17; name = the Pages branch, e.g. paid-preview,
                            live-check): every page gets <meta name="robots" content="noindex,nofollow"> and a
@@ -449,6 +450,45 @@ def evidence():
         die("evidence: the finding sentence is no longer on /research/disposition-effect/ word for word")
     return {"studies": len(studies), "corrections": corrections, "scripts_public": int(m.group(1)),
             "finding": {"pct": "76.1%", "rest": sentence[len("76.1% "):], "url": "/research/disposition-effect/"}}
+
+
+REPORT_METHODS_JSON = os.path.join(SITE, "config", "report_methods.json")
+WORDING_JS = os.path.join(SITE, "static", "js", "paid", "wording.js")
+MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+
+def page_method_version():
+    """The METHOD_VERSION the paid report page accepts (wording.js), which must equal the Worker's (smoke D-6)."""
+    with open(WORDING_JS, encoding="utf-8") as f:
+        m = re.search(r"^export const METHOD_VERSION = '([0-9]{4}-[0-9]{2}-[0-9]{2}\.[a-z0-9]+)';$", f.read(), re.M)
+    if not m:
+        die("report methods: no METHOD_VERSION line in site/static/js/paid/wording.js")
+    return m.group(1)
+
+
+def report_methods():
+    """The habit report's dated method versions for /corrections/#report-method (the Lead's decision, 23 Oct:
+    the re-test sentence says every change is dated there). DT_REPORT_METHODS_JSON reads another file (tests).
+    Fails when the page's METHOD_VERSION has no entry, so no build can promise a dated log it does not show."""
+    path = os.environ.get("DT_REPORT_METHODS_JSON") or REPORT_METHODS_JSON
+    with open(path, encoding="utf-8") as f:
+        entries = json.load(f)["entries"]
+    out = []
+    for e in entries:
+        if sorted(e) != ["date", "method", "text"] or not re.fullmatch(r"2[0-9]{3}-[0-9]{2}-[0-9]{2}", e["date"]) \
+                or not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}\.[a-z0-9]+", e["method"]) or not e["text"].strip():
+            die(f"report methods: malformed entry {e!r} ({path})")
+        y, mo, d = (int(x) for x in e["date"].split("-"))
+        out.append({**e, "date_text": f"{d} {MONTHS[mo - 1]} {y}"})
+    if [e["date"] for e in out] != sorted((e["date"] for e in out), reverse=True):
+        die(f"report methods: entries must be newest first ({path})")
+    if len({e["method"] for e in out}) != len(out):
+        die(f"report methods: a method is listed twice ({path})")
+    mv = page_method_version()
+    if mv not in {e["method"] for e in out}:
+        die(f"report methods: the report page's METHOD_VERSION {mv} has no dated entry in {path} "
+            "(the re-test sentence promises one on /corrections/)")
+    return out
 
 
 def sample_csv():
@@ -1589,6 +1629,8 @@ def build():
         extra = {"sample_csv": sample_csv()} if page.get("sample") else {}
         if page.get("lifted"):
             extra["lifted_html"] = Markup(lifted_fragment(page["lifted"]))
+            if page["path"] == "/corrections/":
+                extra["report_methods"] = report_methods()
         html = env.get_template(page["template"]).render(page=page, csp=csp_for(page, cfg), **base_ctx, **extra)
         if html.count(LD_MARKER) != 1:
             die(f"{page['template']}: the JSON-LD marker must appear exactly once")
