@@ -412,9 +412,10 @@ def answers_index_js(units, cfg):
 # Pages owned by templates. path → template, metadata, and the flag that must be on.
 PAGES = [
     {"template": "pages/home.html", "path": "/", "requires_flag": None, "scripts": [MOTION_JS],
-     "title": "donttrade — behavioural measurement for trading firms",
-     "description": "We measure the plan gap: how traders plan to act versus how they act. Fixed price, "
-                    "public script, run on your own systems.", "og_image": "/assets/og/home.png",
+     "title": "donttrade - free trading tools and research on trader habits",
+     "description": "Free in-browser tools: trade stats, prop challenge odds, drawdown and risk-reward. "
+                    "Research on how traders behave. For firms: fixed-price measurement.",
+     "og_image": "/assets/og/home.png",
      "updated": "2026-10-21"},
 ]
 
