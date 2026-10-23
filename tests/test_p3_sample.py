@@ -9,9 +9,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(HERE), "checks"))
 from lint import lint_text, visible_text  # noqa: E402
 
-# R-D1 D-3: the Architect's exact text.
+# R-D2 H-3 (replaces R-D1 D-3's "up to four"): the Architect's exact text.
 LEAD = ("This is a research figure from public data. It is not the trader report: the report covers five habits in "
-        "your own file, tests up to four of them against chance, and shows no percentile.")
+        "your own file, tests up to three of them against chance, and shows no percentile.")
 
 
 def test_sample_report_lead_says_it_is_not_the_trader_report(built_site):
@@ -19,6 +19,7 @@ def test_sample_report_lead_says_it_is_not_the_trader_report(built_site):
     assert LEAD in t
     assert "computed the same way from your own trade export" not in t
     assert "what the coming trader report looks like" not in t
+    assert "tests up to four" not in t
     assert lint_text(LEAD) == [] and lint_text(LEAD, "p3", paid=True) == []
 
 
