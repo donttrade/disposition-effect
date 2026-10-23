@@ -1,6 +1,7 @@
-"""R-D1 D-2: when wording.js refuses a report (here a stats1 report: checkMethod throws), /report/ shows
-exactly the report-error line, with site.toml's contact_email written in at build time, and nothing else
-from the report: no habit name, no number, no "$". The Worker is a Playwright route (no server needed)."""
+"""R-D1 D-2: when wording.js refuses a report (a stats1 or stats2 report: checkMethod throws; R-D2 H-2: a stats2b
+report with a forged hold_gap p_raw or verdict: checkHoldGap throws), /report/ shows exactly the report-error
+line, with site.toml's contact_email written in at build time, and nothing else from the report: no habit name,
+no number, no "$". The Worker is a Playwright route (no server needed)."""
 import functools
 import http.server
 import json
@@ -71,9 +72,28 @@ def test_the_built_page_carries_the_contact_email_from_site_toml(site):
     assert CONTACT not in js  # injected at build time, not typed in the script
 
 
-def test_a_stats1_report_shows_exactly_the_error_line_and_nothing_from_the_report(browser, site):
+def forge(kind):
     rep = json.load(open(os.path.join(HERE, "fixtures", "paid-reports", "random.report.json"), encoding="utf-8"))
-    rep["method_version"] = "2026-10-21.stats1"   # an R1 Worker's report
+    assert rep["method_version"] == "2026-10-23.stats2b"
+    hg = rep["habits"][0]
+    assert hg["id"] == "hold_gap"
+    if kind == "stats1":
+        rep["method_version"] = "2026-10-21.stats1"   # an R1 Worker's report
+    elif kind == "stats2":
+        rep["method_version"] = "2026-10-21.stats2"   # a pre-R-D2 Worker's report
+    elif kind == "forged_p":
+        hg.update(p_raw=0.001, p_holm=0.003, n_perm=10000)
+        rep["n_tested"] += 1
+    elif kind == "forged_distinguishable":
+        hg.update(verdict="distinguishable", withheld=None, direction="habit", p_raw=0.001, p_holm=0.003, n_perm=10000)
+        rep["n_tested"] += 1
+        rep["n_distinguishable"] += 1
+    return rep
+
+
+@pytest.mark.parametrize("kind", ["stats1", "stats2", "forged_p", "forged_distinguishable"])
+def test_a_refused_report_shows_exactly_the_error_line_and_nothing_from_the_report(browser, site, kind):
+    rep = forge(kind)
     ctx = browser.new_context()
     page = ctx.new_page()
     errors = []

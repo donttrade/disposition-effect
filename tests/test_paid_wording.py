@@ -3,7 +3,11 @@
 W-1: every string, filled from synthetic and real (dt-private golden) reports, passes checks/lint.py in
 plain and in paid mode. W-2: page 1 driven through the 9 truth-table cases of section 9.1 prints exactly
 the ticked lines. The per-habit lines, the method lines and the percent format read exactly as 9.2 gives
-them. NO_LOSS_ONE / NO_LOSS_MANY no longer exist (S-B2)."""
+them. NO_LOSS_ONE / NO_LOSS_MANY no longer exist (S-B2).
+
+R-D2 (method 2026-10-23.stats2b): hold_gap is described, not tested. The 9 truth-table cases are re-based on
+revenge, size_up and tilt; hold_gap is always withheld / not_calibrated and prints M1, V-launch and M3; any
+other hold_gap state, a stats2 report, a forged hold_gap p or verdict throws."""
 import glob
 import json
 import os
@@ -25,6 +29,9 @@ const names = { hold_gap: 'Holding losers longer than winners', revenge: 'Re-ent
 const labels = { hold_gap: 'Losing trades held longer than your median winning hold', revenge: "Trades opened within 15 minutes of a losing trade's close",
   size_up: 'Trades after a loss at 1.5 times your usual size or more', tilt: 'Trades taken after 2 or more losses in a row', oversized_loss: 'Losses more than twice your median loss' };
 const MED = ['hold_gap', 'size_up'];
+// stats2b hold_gap (R-D2): withheld / not_calibrated, every test field null
+const LAUNCH = { verdict: 'withheld', withheld: 'not_calibrated', p_raw: null, p_holm: null, n_perm: null, direction: null,
+  share_a: null, share_b: null, n_a_compared: null, n_b_compared: null, spread_ratio: null };
 const H = (id, o) => ({ id, name: names[id], n_a: 40, n_b: 90, measure_a: id === 'hold_gap' ? 5400 : id === 'size_up' ? 1.6 : -12.5,
   measure_b: id === 'hold_gap' ? 1800 : id === 'size_up' ? 1.0 : 3.25, effect: MED.includes(id) ? 1.5 : -15.75,
   p_raw: 0.001, p_holm: 0.004, verdict: 'distinguishable', direction: 'habit', n_perm: 10000,
@@ -34,39 +41,64 @@ const H = (id, o) => ({ id, name: names[id], n_a: 40, n_b: 90, measure_a: id ===
   dollars: { label: labels[id], amount: -500, n_trades: 40 }, ...o });
 const ND = { verdict: 'not_distinguishable', p_raw: 0.4, p_holm: 1 };
 const R = (over, o) => {
-  const habits = W.TESTED.map((id) => H(id, over[id] || ND)).concat([H('oversized_loss', { verdict: 'descriptive', direction: null, p_raw: null, p_holm: null, n_perm: null })]);
+  const habits = [H('hold_gap', { ...LAUNCH, ...(over.hold_gap || {}) })].concat(W.TESTED.map((id) => H(id, over[id] || ND)))
+    .concat([H('oversized_loss', { verdict: 'descriptive', direction: null, p_raw: null, p_holm: null, n_perm: null })]);
   return { method_version: W.METHOD_VERSION, n_tested: habits.filter((h) => h.p_raw !== null).length,
     n_distinguishable: habits.filter((h) => h.verdict === 'distinguishable').length, focus: null, habits, ...o };
 };
 const fmt = { money: (x) => (x < 0 ? '−$' + (-x).toFixed(2) : '$' + x.toFixed(2)), duration: (s) => Math.round(s / 60) + ' min', ratio: (x) => x.toFixed(2), count: (n) => n.toLocaleString('en-US') };
 const run = (f) => { try { return f(); } catch (e) { return 'THROW: ' + e.message; } };
-const out = { cases: {}, habit: {}, method: {}, pct: {}, real: {}, exports: Object.keys(W).sort() };
+const out = { cases: {}, coverage: {}, habit: {}, method: {}, pct: {}, real: {}, exports: Object.keys(W).sort(), tested: W.TESTED, v_launch: W.V_LAUNCH };
 const nodollar = (id) => ({ dollars: { label: labels[id], amount: 0, n_trades: 0 } });
 const gain = (id) => ({ dollars: { label: labels[id], amount: 120, n_trades: 40 } });
 const opp = { direction: 'opposite' };
-// The 9 truth-table cases of section 9.1
-out.cases[1] = run(() => W.page1Lines(R({}), fmt));
-out.cases[2] = run(() => W.page1Lines(R({ revenge: {} }, { focus: 'revenge' }), fmt));
-out.cases[3] = run(() => W.page1Lines(R({ tilt: opp }), fmt));
-out.cases[4] = run(() => W.page1Lines(R({ size_up: nodollar('size_up') }), fmt));
-out.cases[5] = run(() => W.page1Lines(R({ revenge: gain('revenge') }), fmt));
-out.cases[6] = run(() => W.page1Lines(R({ hold_gap: { dollars: { label: labels.hold_gap, amount: -200, n_trades: 9 } }, revenge: {}, tilt: opp }, { focus: 'revenge' }), fmt));
-out.cases[7] = run(() => W.page1Lines(R({ hold_gap: opp, revenge: gain('revenge'), size_up: nodollar('size_up'), tilt: opp }), fmt));
-out.cases[8] = run(() => W.page1Lines(R({ size_up: { direction: null } }), fmt));
+// The 9 truth-table cases of section 9.1, re-based on revenge, size_up and tilt (R-D2); hold_gap is withheld
+const C = {
+  1: [{}],
+  2: [{ revenge: {} }, { focus: 'revenge' }],
+  3: [{ tilt: opp }],
+  4: [{ size_up: nodollar('size_up') }],
+  5: [{ revenge: gain('revenge') }],
+  6: [{ size_up: { dollars: { label: labels.size_up, amount: -200, n_trades: 9 } }, revenge: {}, tilt: opp }, { focus: 'revenge' }],
+  7: [{ revenge: gain('revenge'), size_up: nodollar('size_up'), tilt: opp }],
+  8: [{ size_up: { direction: null } }],
+};
+for (const [k, [over, o]] of Object.entries(C)) {
+  out.cases[k] = run(() => W.page1Lines(R(over, o), fmt));
+  out.coverage[k] = run(() => W.coverageLines(R(over, o)));
+}
 const dirnull = JSON.parse(readFileSync('tests/fixtures/paid-reports/stats-r2__32-probe-dirnull.report.json', 'utf8'));
 out.cases[9] = run(() => W.page1Lines(dirnull, fmt));
-out.case9_hold_gap = dirnull.habits[0].verdict;
+out.coverage[9] = run(() => W.coverageLines(dirnull));
+out.case9_hold_gap = dirnull.habits[0].verdict + '/' + dirnull.habits[0].withheld;
 // guards
 out.guard_inconsistent = run(() => W.page1Lines(R({ revenge: {} }), fmt));
 out.guard_count = run(() => W.page1Lines(R({ revenge: {} }, { focus: 'revenge', n_distinguishable: 2 }), fmt));
 out.guard_method = run(() => W.page1Lines(R({}, { method_version: '2026-10-21.stats1' }), fmt));
-out.guard_habit_dirnull = run(() => W.habitSentences(H('hold_gap', { direction: null }), R({}), fmt));
+out.guard_stats2 = run(() => W.page1Lines(R({}, { method_version: '2026-10-21.stats2' }), fmt));
+out.guard_habit_dirnull = run(() => W.habitSentences(H('size_up', { direction: null }), R({}), fmt));
+// R-D2: a forged hold_gap p or verdict throws on page 1, in the coverage lines and in every habit's lines
+const forged = {
+  p_raw: { p_raw: 0.001, p_holm: 0.003, n_perm: 10000 },
+  distinguishable: { verdict: 'distinguishable', direction: 'habit', withheld: null, p_raw: 0.001, p_holm: 0.003, n_perm: 10000, share_a: 0.6, share_b: 0.4, n_a_compared: 40, n_b_compared: 80 },
+  spread: { withheld: 'spread', spread_ratio: 1.9 },
+  too_few: { verdict: 'too_few', withheld: null },
+};
+out.forged = {};
+for (const [k, o] of Object.entries(forged)) {
+  const rep = R({ hold_gap: o });
+  rep.n_tested = rep.habits.filter((h) => h.p_raw !== null).length;
+  rep.n_distinguishable = rep.habits.filter((h) => h.verdict === 'distinguishable').length;
+  out.forged[k] = [run(() => W.page1Lines(rep, fmt)), run(() => W.coverageLines(rep)), run(() => W.habitSentences(rep.habits[0], rep, fmt)), run(() => W.habitSentences(rep.habits[1], rep, fmt))];
+}
 // per-habit lines
 const r4 = R({});
 const lines = (h) => run(() => W.habitSentences(h, r4, fmt));
+out.habit.hold_launch = lines(H('hold_gap', LAUNCH));
+out.habit.hold_launch_m3 = lines(H('hold_gap', { ...LAUNCH, n_long_a: 3, n_long_b: 5 }));
+out.habit.hold_launch_nomed = lines(H('hold_gap', { ...LAUNCH, measure_b: null }));
+// the stats2 hold_gap lines (Option B) are unreachable under stats2b: each input throws
 out.habit.hold_dist = lines(H('hold_gap', {}));
-out.habit.hold_opp = lines(H('hold_gap', { direction: 'opposite', share_a: 0.45, share_b: 0.52 }));
-out.habit.hold_no = lines(H('hold_gap', { ...ND, n_long_a: 3, n_long_b: 5 }));
 out.habit.hold_spread = lines(H('hold_gap', { verdict: 'withheld', withheld: 'spread', spread_ratio: 1.8974358974358976, p_raw: null, p_holm: null, n_perm: null, direction: null, n_long_a: 2, n_long_b: 0 }));
 out.habit.hold_spread0 = lines(H('hold_gap', { verdict: 'withheld', withheld: 'spread', spread_ratio: null, p_raw: null, p_holm: null, n_perm: null, direction: null }));
 out.habit.hold_few = lines(H('hold_gap', { verdict: 'too_few', p_raw: null, p_holm: null, n_perm: null, direction: null, n_a_compared: 9, n_b_compared: 6, share_a: 0.5, share_b: 0.6 }));
@@ -76,8 +108,8 @@ out.habit.size_few = lines(H('size_up', { verdict: 'too_few', p_raw: null, p_hol
 out.habit.rev_dist = lines(H('revenge', {}));
 out.habit.rev_few = lines(H('revenge', { verdict: 'too_few', p_raw: null, p_holm: null, n_perm: null, n_a: 12 }));
 out.habit.tilt_opp = lines(H('tilt', { direction: 'opposite' }));
-for (const id of W.TESTED) out.method[id] = W.methodLine(H(id, { n_perm: 5000 }), fmt);
-out.method.none = W.methodLine(H('hold_gap', { n_perm: null }), fmt);
+for (const id of W.SENTENCE_HABITS) out.method[id] = W.methodLine(H(id, { n_perm: 5000 }), fmt);
+out.method.none = W.methodLine(H('hold_gap', LAUNCH), fmt);
 // percent format
 out.pct.pair = [W.sharePair(0.5243464052287582, 0.5), W.sharePair(0.52441, 0.52449), W.sharePair(0.524441, 0.524449), W.sharePair(0.5244441, 0.5244449), W.sharePair(0.6, 0.6)];
 out.pct.one = [W.shareOne(0.5), W.shareOne(0.58), W.shareOne(0.5002), W.shareOne(0.50002), W.shareOne(0.499996)];
@@ -85,7 +117,7 @@ out.pct.one = [W.shareOne(0.5), W.shareOne(0.58), W.shareOne(0.5002), W.shareOne
 for (const f of readdirSync('tests/fixtures/paid-reports').filter((x) => x.endsWith('.report.json')).sort()) {
   const rep = JSON.parse(readFileSync('tests/fixtures/paid-reports/' + f, 'utf8'));
   out.real[f] = run(() => ({ method_version: rep.method_version, page1: W.page1Lines(rep, fmt), coverage: W.coverageLines(rep),
-    habits: Object.fromEntries(rep.habits.filter((h) => W.TESTED.includes(h.id)).map((h) => [h.id, [...W.habitSentences(h, rep, fmt), W.methodLine(h, fmt)].filter(Boolean)])) }));
+    habits: Object.fromEntries(rep.habits.filter((h) => W.SENTENCE_HABITS.includes(h.id)).map((h) => [h.id, [...W.habitSentences(h, rep, fmt), W.methodLine(h, fmt)].filter(Boolean)])) }));
 }
 process.stdout.write(JSON.stringify(out));
 """
@@ -108,7 +140,7 @@ def flat(x):
     return []
 
 
-H1 = ("{k} of the 4 patterns tested in this file {v} distinguishable from noise. Each verdict is adjusted for testing 4 "
+H1 = ("{k} of the {n} patterns tested in this file {v} distinguishable from noise. Each verdict is adjusted for testing {n} "
       "patterns at once. In our tests on files built to have no real pattern, at least one pattern showed as "
       "distinguishable in about 1 report in 20 or fewer.")
 H0 = ["No pattern in this file is distinguishable from noise.",
@@ -117,10 +149,19 @@ N0 = ("No pattern is shown first. A pattern is shown first only when its gap is 
       "its name describes, and its dollar figure is a loss.")
 
 
+# R-D2 H-2 exact texts
+V_LAUNCH = ("Not tested in this version of the report. In our tests on files built to have no real pattern, this test reported "
+            "a gap in more than 1 file in 20, the rate it is designed for, when a large win or loss changed how long the next "
+            "trades were held. So this pattern is described here without a verdict.")
+HG_LINE = "Holding losers longer than winners is described, not tested, in this version of the report."
+COV3 = "3 of the 3 patterns could be tested. Each one compares two groups of at least 30 trades."
+
+
 def test_w1_every_string_passes_the_lint_plain_and_paid():
     d = data()
-    texts = [t for t in flat({k: v for k, v in d.items() if k not in ("exports", "case9_hold_gap")})
-             if not t.startswith("THROW:") and not t.startswith("2026-10-21") and not t.endswith(".report.json")]
+    texts = [t for t in flat({k: v for k, v in d.items() if k not in ("exports", "case9_hold_gap", "tested")})
+             if not t.startswith("THROW:") and not t.startswith("2026-10-2") and not t.endswith(".report.json")]
+    assert V_LAUNCH in texts and HG_LINE in texts
     assert len(texts) > 60
     for t in texts:
         assert lint_text(t) == [], (t, lint_text(t))
@@ -129,27 +170,26 @@ def test_w1_every_string_passes_the_lint_plain_and_paid():
 
 def test_w2_page1_truth_table_prints_exactly_the_ticked_lines():
     c = data()["cases"]
+    assert data()["tested"] == ["revenge", "size_up", "tilt"]
     assert c["1"] == H0                                                              # case 1: H0a, H0b
-    assert c["2"] == [H1.format(k=1, v="is"),                                       # case 2: H1, F
+    assert c["2"] == [H1.format(k=1, v="is", n=3),                                  # case 2: H1, F
                       "Shown first: Re-entering soon after a loss. Trades opened within 15 minutes of a losing trade's close "
                       "totalled −$500.00 (historical)."]
-    assert c["3"] == [H1.format(k=1, v="is"), N0,                                   # case 3: H1, N0, N-opp
+    assert c["3"] == [H1.format(k=1, v="is", n=3), N0,                                   # case 3: H1, N0, N-opp
                       "Trading after a losing streak: trades taken after 2 or more losses in a row did better than your other "
                       "trades, the other way round from the pattern's name."]
-    assert c["4"] == [H1.format(k=1, v="is"), N0,                                   # case 4: H1, N0, N-none
+    assert c["4"] == [H1.format(k=1, v="is", n=3), N0,                                   # case 4: H1, N0, N-none
                       "Size after a loss: within groups of comparable trades, size after a loss was larger than size after a "
                       "win, but no trade in this file is in its dollar figure (trades after a loss at 1.5 times your usual "
                       "size or more)."]
-    assert c["5"] == [H1.format(k=1, v="is"), N0,                                   # case 5: H1, N0, N-gain
+    assert c["5"] == [H1.format(k=1, v="is", n=3), N0,                                   # case 5: H1, N0, N-gain
                       "Re-entering soon after a loss: trades opened within 15 minutes of a losing trade's close did worse than "
                       "your other trades, but its dollar figure (trades opened within 15 minutes of a losing trade's close) "
                       "totalled $120.00 (historical), which is not a loss."]
-    assert c["6"] == [H1.format(k=3, v="are"),                                      # case 6: H1, F (the most negative)
+    assert c["6"] == [H1.format(k=3, v="are", n=3),                                 # case 6: H1, F (the most negative)
                       "Shown first: Re-entering soon after a loss. Trades opened within 15 minutes of a losing trade's close "
                       "totalled −$500.00 (historical)."]
-    assert c["7"] == [H1.format(k=4, v="are"), N0,                                  # case 7: one line per habit, fixed order
-                      "Holding losers longer than winners: losing trades were held shorter than winning trades, each compared "
-                      "with similar trades opened just before it, the other way round from the pattern's name.",
+    assert c["7"] == [H1.format(k=3, v="are", n=3), N0,                             # case 7: one line per habit, fixed order
                       "Re-entering soon after a loss: trades opened within 15 minutes of a losing trade's close did worse than "
                       "your other trades, but its dollar figure (trades opened within 15 minutes of a losing trade's close) "
                       "totalled $120.00 (historical), which is not a loss.",
@@ -159,16 +199,38 @@ def test_w2_page1_truth_table_prints_exactly_the_ticked_lines():
                       "Trading after a losing streak: trades taken after 2 or more losses in a row did better than your other "
                       "trades, the other way round from the pattern's name."]
     assert c["8"] == "THROW: page1Lines: size_up is distinguishable with direction null (R2-3)"   # case 8: throw
-    # case 9: the Tester's S-B2 file on R2: hold_gap too_few; page 1 follows cases 1-7 for the others (here case 1)
-    assert data()["case9_hold_gap"] == "too_few" and c["9"] == H0
+    # case 9: the Tester's S-B2 file, now on stats2b: hold_gap withheld; page 1 follows cases 1-7 for the others (case 1)
+    assert data()["case9_hold_gap"] == "withheld/not_calibrated" and c["9"] == H0
+    # every stats2b page 1 carries the fixed hold-gap line exactly once (the coverage block follows the headline)
+    cov = data()["coverage"]
+    for k in [str(i) for i in range(1, 10) if i != 8]:
+        page1 = c[k] + cov[k]
+        assert page1.count(HG_LINE) == 1 and cov[k][-1] == HG_LINE, k
+        assert cov[k][0].endswith(" of the 3 patterns could be tested. Each one compares two groups of at least 30 trades."), k
+    assert cov["1"] == [COV3, HG_LINE]
+    assert cov["9"] == ["1 of the 3 patterns could be tested. Each one compares two groups of at least 30 trades.",
+                        "Not tested: Size after a loss, Trading after a losing streak.", HG_LINE]
 
 
 def test_page1_guards_throw_instead_of_printing():
     d = data()
     assert d["guard_inconsistent"] == "THROW: page1Lines: focus is null but a habit-direction gap totalled a loss"
     assert d["guard_count"].startswith("THROW: page1Lines: n_distinguishable 2 but 1")
-    assert d["guard_method"] == "THROW: wording: report method 2026-10-21.stats1 is not 2026-10-21.stats2"
-    assert d["guard_habit_dirnull"] == "THROW: wording: hold_gap is distinguishable with direction null (R2-3)"
+    assert d["guard_method"] == "THROW: wording: report method 2026-10-21.stats1 is not 2026-10-23.stats2b"
+    assert d["guard_stats2"] == "THROW: wording: report method 2026-10-21.stats2 is not 2026-10-23.stats2b"
+    assert d["guard_habit_dirnull"] == "THROW: wording: size_up is distinguishable with direction null (R2-3)"
+
+
+def test_r_d2_forged_hold_gap_throws_everywhere():
+    """H-2 acceptance 4 (the wording half; the page half is test_report_error_line.py): a stats2b report whose
+    hold_gap has a p, a verdict, or the spread rule's withhold prints nothing."""
+    f = data()["forged"]
+    assert sorted(f) == ["distinguishable", "p_raw", "spread", "too_few"]
+    for k, outs in f.items():
+        assert len(outs) == 4
+        for o in outs:
+            assert isinstance(o, str) and o.startswith("THROW: wording: hold_gap is ") and o.endswith(
+                "but it is not tested in 2026-10-23.stats2b (R-D2)"), (k, o)
 
 
 def test_s_b2_the_pending_sentences_are_gone():
@@ -180,35 +242,23 @@ def test_s_b2_the_pending_sentences_are_gone():
 
 
 M1 = "Your losing trades were held a median of 90 min; your winning trades a median of 30 min."
-VH = "This gap is distinguishable from noise, after adjusting for the 4 patterns tested."
+VH = "This gap is distinguishable from noise, after adjusting for the 3 patterns tested."
 VNO = ("A gap this size is within what chance alone produces in files with no pattern, so this file cannot tell it apart "
        "from noise.")
 
 
-def test_hold_gap_lines_are_the_amendments():
+def test_hold_gap_lines_are_the_ruling_r_d2():
     h = data()["habit"]
-    assert h["hold_dist"] == [M1,
-                              "Compared with similar trades opened just before it, a losing trade's hold came out longer in 61.0% of "
-                              "comparisons; a winning trade's in 47.0%. With no link between hold and outcome, the two figures "
-                              "would be about equal.", VH]
-    assert h["hold_opp"][1].endswith("longer in 45.0% of comparisons; a winning trade's in 52.0%. With no link between hold and "
-                                     "outcome, the two figures would be about equal.")
-    assert h["hold_opp"][2] == VH + " It runs the opposite way to this pattern's name."
-    assert h["hold_no"] == [M1, h["hold_no"][1],
-                            "Held 12 hours or more: 3 of your 40 losing trades and 5 of your 90 winning trades. This count is not "
-                            "part of the test: trades held 12 hours or more are only compared with each other.", VNO]
-    assert h["hold_spread"] == [M1,
-                                "Not tested: the holds of your losing and winning trades are spread very differently (the middle "
-                                "half of one group covers 1.9× the range of the other's), and this test cannot tell a gap in hold "
-                                "apart from that difference.",
-                                "Held 12 hours or more: 2 of your 40 losing trades and 0 of your 90 winning trades. This count is "
-                                "not part of the test: trades held 12 hours or more are only compared with each other."]
-    # spread_ratio null (infinite: a zero spread): its own sentence, never "spread very differently"
-    assert h["hold_spread0"] == [M1, V_SPREAD0]
-    assert h["hold_few"] == [M1,
-                             "Not enough trades to tell: each trade is compared only with similar trades opened just before it, and "
-                             "only 9 losing and 6 winning trades have such a comparison in a group holding both kinds; the test "
-                             "needs at least 30 of each."]
+    # M1, then V-launch, then M3 only when a trade was held 12 hours or more
+    assert h["hold_launch"] == [M1, V_LAUNCH]
+    assert h["hold_launch_m3"] == [M1, V_LAUNCH,
+                                   "Held 12 hours or more: 3 of your 40 losing trades and 5 of your 90 winning trades. This count "
+                                   "is not part of the test: trades held 12 hours or more are only compared with each other."]
+    assert h["hold_launch_nomed"] == [V_LAUNCH]
+    assert data()["v_launch"] == V_LAUNCH
+    # the stats2 lines (M2, the verdict, V-spread, V-spread0, V-few) stay in the code for Option B but are unreachable
+    for k in ("hold_dist", "hold_spread", "hold_spread0", "hold_few"):
+        assert isinstance(h[k], str) and h[k].startswith("THROW: wording: hold_gap is ") and h[k].endswith("(R-D2)"), (k, h[k])
 
 
 def test_size_up_and_sequence_lines_are_the_amendments():
@@ -266,35 +316,37 @@ V_SPREAD0 = ("Not tested: the middle half of your losing trades, or of your winn
              "tell a gap in hold apart from a difference in how spread out the holds are.")
 
 
-def test_d1_v_spread0_on_the_sizeup0_probe_and_v_spread_on_a_finite_ratio():
+def test_r_d2_supersedes_d1_the_sizeup0_probe_renders_v_launch():
+    """R-D2.2: the D-1 item "33-probe-sizeup0 renders V-spread0" is superseded; that fixture now renders V-launch."""
     real = data()["real"]
-    probe = real["stats-r2__33-probe-sizeup0.report.json"]["habits"]["hold_gap"]
-    assert V_SPREAD0 in probe, probe
-    assert not any("spread very differently" in s for s in probe)
-    assert not any("same length" in s for s in probe)
-    finite = real["stats__02-spread-trend_right_skew-200.report.json"]["habits"]["hold_gap"]
-    assert any(s.startswith("Not tested: the holds of your losing and winning trades are spread very differently (the middle half "
-                            "of one group covers 1.9× the range of the other's)") for s in finite), finite
-    assert V_SPREAD0 not in finite
-    for paid in (False, True):
+    for f in ("stats-r2__33-probe-sizeup0.report.json", "stats__02-spread-trend_right_skew-200.report.json"):
+        lines = real[f]["habits"]["hold_gap"]
+        assert V_LAUNCH in lines, (f, lines)
+        assert V_SPREAD0 not in lines and not any("spread very differently" in s for s in lines), (f, lines)
+        assert not any("same length" in s for s in lines)
+    for paid in (False, True):   # V-spread0 stays for Option B and still passes the lint
         assert lint_text(V_SPREAD0, "V-spread0", paid=paid) == []
+        assert lint_text(V_LAUNCH, "V-launch", paid=paid) == [] and lint_text(HG_LINE, "hg-line", paid=paid) == []
 
 
-def test_cross_repo_reports_render_without_a_throw_and_are_method_stats2():
+def test_cross_repo_reports_render_without_a_throw_and_are_method_stats2b():
     real = data()["real"]
     files = sorted(os.path.basename(f) for f in glob.glob(os.path.join(FIX, "*.report.json")))
     assert len(files) >= 3 and sorted(real) == files
     for f, r in real.items():
         assert isinstance(r, dict), (f, r)                     # no throw
-        assert r["method_version"] == "2026-10-21.stats2", f
-    assert real["random.report.json"]["page1"][1].startswith("Shown first: Holding losers longer than winners.")
-    sp = real["stats__02-spread-trend_right_skew-200.report.json"]["habits"]["hold_gap"]
-    assert any(s.startswith("Not tested: the holds of your losing and winning trades are spread very differently (the middle "
-                            "half of one group covers 1.9×") for s in sp)
+        assert r["method_version"] == "2026-10-23.stats2b", f
+        assert r["coverage"].count(HG_LINE) == 1 and r["habits"]["hold_gap"].count(V_LAUNCH) == 1, f
+        assert not any("reshuffled" in s for s in r["habits"]["hold_gap"]), f   # no hold_gap method line
+    # random.json's hold_gap was the stats2 focus (case 2); under stats2b nothing is distinguishable (case 1)
+    assert real["random.report.json"]["page1"] == H0
+    assert real["random.report.json"]["coverage"] == ["2 of the 3 patterns could be tested. Each one compares two groups of "
+                                                      "at least 30 trades.", "Not tested: Re-entering soon after a loss.", HG_LINE]
     s4 = real["stats-r2__33-probe-sizeup0.report.json"]
+    assert s4["page1"][0] == H1.format(k=1, v="is", n=2)
     assert s4["page1"][1] == N0 and s4["page1"][2].startswith("Size after a loss: within groups of comparable trades, size after a "
                                                               "loss was larger than size after a win, but no trade in this file")
-    assert s4["habits"]["hold_gap"][-1] == V_SPREAD0
+    assert s4["habits"]["hold_gap"][-1] == V_LAUNCH
     pr = real["planted_revenge.report.json"]["page1"]
-    assert pr[0] == H1.format(k=2, v="are") and pr[1].startswith("Shown first: Re-entering soon after a loss.")
+    assert pr[0] == H1.format(k=2, v="are", n=3) and pr[1].startswith("Shown first: Re-entering soon after a loss.")
     assert real["stats-r2__32-probe-dirnull.report.json"]["page1"] == H0
