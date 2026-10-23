@@ -12,7 +12,10 @@ other hold_gap state, a stats2 report, a forged hold_gap p or verdict throws.
 R-D3 (method 2026-10-23.stats2c): size_up is described, not tested, too. The truth-table cases are re-based on
 revenge and tilt only; size_up is always withheld / not_calibrated and prints M1 and V-launch-size; every page 1
 carries the hold-gap and size-up coverage lines exactly once each; a stats2b report, a forged size_up p or verdict
-throws."""
+throws.
+
+R-D3 addendum I-5 (method 2026-10-23.stats2d): the report carries n_rows and n_trades; page 1 prints the merged-rows
+line exactly when n_rows > n_trades (W-2 adds a merged and an unmerged case); a report without the counts throws."""
 import glob
 import json
 import os
@@ -52,7 +55,7 @@ const R = (over, o) => {
   const habits = [H('hold_gap', { ...LAUNCH, ...(over.hold_gap || {}) })]
     .concat(['revenge', 'size_up', 'tilt'].map((id) => (id === 'size_up' ? H(id, { ...SU_LAUNCH, ...(over.size_up || {}) }) : H(id, over[id] || ND))))
     .concat([H('oversized_loss', { verdict: 'descriptive', direction: null, p_raw: null, p_holm: null, n_perm: null })]);
-  return { method_version: W.METHOD_VERSION, n_tested: habits.filter((h) => h.p_raw !== null).length,
+  return { method_version: W.METHOD_VERSION, n_rows: 300, n_trades: 300, n_tested: habits.filter((h) => h.p_raw !== null).length,
     n_distinguishable: habits.filter((h) => h.verdict === 'distinguishable').length, focus: null, habits, ...o };
 };
 const fmt = { money: (x) => (x < 0 ? '−$' + (-x).toFixed(2) : '$' + x.toFixed(2)), duration: (s) => Math.round(s / 60) + ' min', ratio: (x) => x.toFixed(2), count: (n) => n.toLocaleString('en-US') };
@@ -89,6 +92,12 @@ out.guard_count = run(() => W.page1Lines(R({ revenge: {} }, { focus: 'revenge', 
 out.guard_method = run(() => W.page1Lines(R({}, { method_version: '2026-10-21.stats1' }), fmt));
 out.guard_stats2 = run(() => W.page1Lines(R({}, { method_version: '2026-10-21.stats2' }), fmt));
 out.guard_habit_dirnull = run(() => W.habitSentences(H('tilt', { direction: null }), R({}), fmt));
+out.guard_stats2c = run(() => W.page1Lines(R({}, { method_version: '2026-10-23.stats2c' }), fmt));
+// R-D3 addendum I-5: the merged-rows line (W-2: a merged and an unmerged case) and the row-count guard
+out.merged = run(() => W.mergedLine(R({}, { n_rows: 4880, n_trades: 2630 }), fmt));
+out.unmerged = run(() => W.mergedLine(R({}), fmt));
+out.guard_rows = [run(() => W.page1Lines(R({}, { n_rows: undefined }), fmt)), run(() => W.coverageLines(R({}, { n_trades: 301 }))),
+  run(() => W.mergedLine(R({}, { n_trades: 0, n_rows: 0 }), fmt))];
 // R-D2: a forged hold_gap p or verdict throws on page 1, in the coverage lines and in every habit's lines
 const forged = {
   p_raw: { p_raw: 0.001, p_holm: 0.003, n_perm: 10000 },
@@ -147,6 +156,7 @@ out.pct.one = [W.shareOne(0.5), W.shareOne(0.58), W.shareOne(0.5002), W.shareOne
 for (const f of readdirSync('tests/fixtures/paid-reports').filter((x) => x.endsWith('.report.json')).sort()) {
   const rep = JSON.parse(readFileSync('tests/fixtures/paid-reports/' + f, 'utf8'));
   out.real[f] = run(() => ({ method_version: rep.method_version, page1: W.page1Lines(rep, fmt), coverage: W.coverageLines(rep),
+    merged: W.mergedLine(rep, fmt), rows: [rep.n_rows, rep.n_trades],
     habits: Object.fromEntries(rep.habits.filter((h) => W.SENTENCE_HABITS.includes(h.id)).map((h) => [h.id, [...W.habitSentences(h, rep, fmt), W.methodLine(h, fmt)].filter(Boolean)])) }));
 }
 process.stdout.write(JSON.stringify(out));
@@ -248,8 +258,29 @@ def test_page1_guards_throw_instead_of_printing():
     d = data()
     assert d["guard_inconsistent"] == "THROW: page1Lines: focus is null but a habit-direction gap totalled a loss"
     assert d["guard_count"].startswith("THROW: page1Lines: n_distinguishable 2 but 1")
-    assert d["guard_method"] == "THROW: wording: report method 2026-10-21.stats1 is not 2026-10-23.stats2c"
-    assert d["guard_stats2"] == "THROW: wording: report method 2026-10-21.stats2 is not 2026-10-23.stats2c"
+    assert d["guard_method"] == "THROW: wording: report method 2026-10-21.stats1 is not 2026-10-23.stats2d"
+    assert d["guard_stats2"] == "THROW: wording: report method 2026-10-21.stats2 is not 2026-10-23.stats2d"
+    assert d["guard_stats2c"] == "THROW: wording: report method 2026-10-23.stats2c is not 2026-10-23.stats2d"
+    for o in d["guard_rows"]:
+        assert o.startswith("THROW: wording: the report has n_rows ") and o.endswith("(R-D3 addendum)"), o
+
+
+MERGED = ("Rows with the same open minute, symbol and direction were counted as one trade (for example, a position "
+          "closed in parts): {r} rows became {t} trades.")
+
+
+def test_i5_merged_rows_line_only_when_rows_were_merged():
+    d = data()
+    assert d["merged"] == MERGED.format(r="4,880", t="2,630")       # W-2, merged case: the line, exactly
+    assert d["unmerged"] is None                                     # W-2, unmerged case: no line
+    for paid in (False, True):
+        assert lint_text(d["merged"], "merged", paid=paid) == []
+    real = d["real"]
+    assert real["stats-r2__34-partial-rows.report.json"]["rows"] == [488, 263]
+    assert real["stats-r2__34-partial-rows.report.json"]["merged"] == MERGED.format(r="488", t="263")
+    for f, r in real.items():
+        if f != "stats-r2__34-partial-rows.report.json":
+            assert r["merged"] is None and r["rows"][0] == r["rows"][1], f
     assert d["guard_habit_dirnull"] == "THROW: wording: tilt is distinguishable with direction null (R2-3)"
 
 
@@ -262,7 +293,7 @@ def test_r_d2_forged_hold_gap_throws_everywhere():
         assert len(outs) == 4
         for o in outs:
             assert isinstance(o, str) and o.startswith("THROW: wording: hold_gap is ") and o.endswith(
-                "but it is not tested in 2026-10-23.stats2c (R-D2)"), (k, o)
+                "but it is not tested in 2026-10-23.stats2d (R-D2)"), (k, o)
 
 
 def test_r_d3_forged_size_up_throws_everywhere():
@@ -274,7 +305,7 @@ def test_r_d3_forged_size_up_throws_everywhere():
         assert len(outs) == 4
         for o in outs:
             assert isinstance(o, str) and o.startswith("THROW: wording: size_up is ") and o.endswith(
-                "but it is not tested in 2026-10-23.stats2c (R-D3)"), (k, o)
+                "but it is not tested in 2026-10-23.stats2d (R-D3)"), (k, o)
 
 
 def test_s_b2_the_pending_sentences_are_gone():
@@ -373,13 +404,13 @@ def test_r_d2_supersedes_d1_the_sizeup0_probe_renders_v_launch():
         assert lint_text(V_LAUNCH_SIZE, "V-launch-size", paid=paid) == [] and lint_text(SU_LINE, "su-line", paid=paid) == []
 
 
-def test_cross_repo_reports_render_without_a_throw_and_are_method_stats2c():
+def test_cross_repo_reports_render_without_a_throw_and_are_method_stats2d():
     real = data()["real"]
     files = sorted(os.path.basename(f) for f in glob.glob(os.path.join(FIX, "*.report.json")))
     assert len(files) >= 3 and sorted(real) == files
     for f, r in real.items():
         assert isinstance(r, dict), (f, r)                     # no throw
-        assert r["method_version"] == "2026-10-23.stats2c", f
+        assert r["method_version"] == "2026-10-23.stats2d", f
         assert r["coverage"].count(HG_LINE) == 1 and r["habits"]["hold_gap"].count(V_LAUNCH) == 1, f
         assert r["coverage"].count(SU_LINE) == 1 and r["habits"]["size_up"].count(V_LAUNCH_SIZE) == 1, f
         assert not any("reshuffled" in s for s in r["habits"]["hold_gap"] + r["habits"]["size_up"]), f   # no method line

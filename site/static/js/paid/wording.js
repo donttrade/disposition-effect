@@ -5,14 +5,16 @@
 // verdict; the V-spread, V-spread0, V-few and M2 hold_gap lines stay for Option B, unreachable under
 // stats2b). Method 2026-10-23.stats2c (Architect ruling R-D3): size_up is described, not tested, too, so it
 // is always withheld / not_calibrated and V-launch-size follows its M1; its M2, verdict and too_few lines
-// stay for a later size method, unreachable under stats2c. No DOM, no I/O: report.js
+// stay for a later size method, unreachable under stats2c. Method 2026-10-23.stats2d (R-D3 addendum I-5): the
+// server merges rows with the same open minute, symbol and direction into one trade; the report carries n_rows
+// and n_trades, and page 1 says so when they differ (mergedLine). No DOM, no I/O: report.js
 // renders them. Every sentence describes the file's past trades only, is printed only when its
 // condition holds, and passes checks/lint.py (tests/test_paid_wording.py, W-1 and W-2).
 //
 // fmt: { money(x), duration(seconds), ratio(x), count(n) } — the page passes its own formatters
 // (money as report.js formats it now); the defaults are plain, for tests.
 
-export const METHOD_VERSION = '2026-10-23.stats2c';
+export const METHOD_VERSION = '2026-10-23.stats2d';
 // V-launch (R-D2 H-2, exact text): hold_gap under stats2b. Replaces M2 and the verdict.
 export const V_LAUNCH = 'Not tested in this version of the report. In our tests on files built to have no real pattern, this test reported a gap in more than 1 file in 20, the rate it is designed for, when a large win or loss changed how long the next trades were held. So this pattern is described here without a verdict.';
 // The fixed page-1 line (R-D2 H-2), on every stats2b and stats2c report.
@@ -68,11 +70,28 @@ export function checkSizeUp(report) {
   }
 }
 
+// R-D3 addendum I-5: a stats2d report counts the rows it received and the trades it analysed.
+export function checkRows(report) {
+  const r = report && report.n_rows, t = report && report.n_trades;
+  if (!Number.isInteger(r) || !Number.isInteger(t) || t < 1 || t > r) {
+    throw new Error(`wording: the report has n_rows ${r} and n_trades ${t} (R-D3 addendum)`);
+  }
+}
+
 // Everything renderReport() needs to be true before it shows anything.
 export function checkReport(report) {
   checkMethod(report);
   checkHoldGap(report);
   checkSizeUp(report);
+  checkRows(report);
+}
+
+// Page 1, only when the server merged rows (R-D3 addendum I-5, exact text); null otherwise.
+export function mergedLine(report, fmt) {
+  checkReport(report);
+  if (report.n_rows === report.n_trades) return null;
+  const f = fmtOf(fmt);
+  return `Rows with the same open minute, symbol and direction were counted as one trade (for example, a position closed in parts): ${f.count(report.n_rows)} rows became ${f.count(report.n_trades)} trades.`;
 }
 
 // ---------------------------------------------------------------- percent format (§9.2)

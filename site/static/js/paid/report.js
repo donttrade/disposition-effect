@@ -11,7 +11,7 @@ import { ics, retestLine, RETEST_LINE } from './retest-copy.js';
 import { pgrPlrCounts } from '../engine/pgr.js';
 import { stripRows, spanLine } from './strip.js';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js';
-import { habitSentences, methodLine, page1Lines, coverageLines, checkReport, SENTENCE_HABITS } from './wording.js';
+import { habitSentences, methodLine, page1Lines, coverageLines, mergedLine, checkReport, SENTENCE_HABITS } from './wording.js';
 
 const $ = (id) => document.getElementById(id);
 const MINUS = '−';
@@ -192,7 +192,7 @@ function download(name, type, text) {
 
 export function renderReport(report, out, meta) {
   const unit = report.currency;
-  checkReport(report);   // method and the stats2c hold_gap and size_up shapes, before anything is drawn
+  checkReport(report);   // method, the hold_gap and size_up shapes and the row counts, before anything is drawn
   out.replaceChildren();
   out.append(el('p', { class: 'disclaimer notice', text: report.disclaimer }));
   // Page 1 (ARCHITECT-STATS-AMENDMENT-R2 §9.1): the headline, the focus habit or why none is
@@ -209,6 +209,8 @@ export function renderReport(report, out, meta) {
   for (const line of coverageLines(report)) cov.append(el('p', { class: 'small', text: line }));
   p1.append(cov);
   p1.append(el('p', { class: 'small muted', text: `${report.n_trades} trades over about ${report.period_weeks} week${report.period_weeks === 1 ? '' : 's'}.${meta && meta.span_left_out ? ' ' + spanLine(meta.span_left_out) : ''}${meta && meta.limited ? ' Only the most recent 20,000 trades were used.' : ''}` }));
+  const merged = mergedLine(report, wordingFmt(unit));   // R-D3 addendum I-5: only when rows were merged
+  if (merged) p1.append(el('p', { class: 'small', id: 'merged-rows', text: merged }));
   out.append(p1);
 
   // Summary table of all habits.

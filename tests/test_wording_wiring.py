@@ -62,7 +62,7 @@ async (cases) => {
   const R = (c) => {
     const habits = all.map((id) => H(id, c.nMed, c.nSeq, (c.over || {})[id] || {})).concat([OVR]);
     return { v: 1, currency: 'USD', disclaimer: 'donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.',
-      engine_commit: 'test', rule_library_version: 'test', rule_library: ['Rule one.', 'Rule two.'], method_version: '2026-10-23.stats2c',
+      engine_commit: 'test', rule_library_version: 'test', rule_library: ['Rule one.', 'Rule two.'], method_version: '2026-10-23.stats2d', n_rows: c.rows || c.n,
       n_trades: c.n, period_weeks: 10, pgr_plr: null, focus: c.focus,
       n_tested: habits.filter((h) => h.p_raw !== null).length, n_distinguishable: habits.filter((h) => h.verdict === 'distinguishable').length, habits };
   };
@@ -101,6 +101,8 @@ CASES = {
     "none": {"n": 300, "nMed": 10000, "nSeq": 10000, "focus": None,
              "over": {k: ND for k in ("revenge", "tilt")}},
     # R-D2: hold_gap described, with trades held 12 hours or more (M3)
+    # R-D3 addendum I-5: the server merged 488 rows into 300 trades (page 1 says so)
+    "merged": {"n": 300, "rows": 488, "nMed": 10000, "nSeq": 10000, "focus": None, "over": {"revenge": ND, "tilt": ND}},
     "launch_m3": {"n": 300, "nMed": 10000, "nSeq": 10000, "focus": None,
                   "over": {"hold_gap": {"n_long_a": 2, "n_long_b": 1}, "revenge": ND, "tilt": ND}},
 }
@@ -208,6 +210,16 @@ def test_each_habit_shows_its_sentences(rendered):
     assert w.index("held a median of") < w.index(V_LAUNCH) < w.index("Held 12 hours or more")   # M1, V-launch, M3
     assert "Losers were held" not in w and "reshuffled" not in w                       # no test ran: no ratio line, no method line
     assert "Not tested: Holding losers" not in rendered["launch_m3"]["coverage"] and HG_LINE in rendered["launch_m3"]["coverage"]
+
+
+def test_i5_page_one_shows_the_merged_rows_line_only_when_rows_were_merged(rendered):
+    line = ("Rows with the same open minute, symbol and direction were counted as one trade (for example, a position "
+            "closed in parts): 488 rows became 300 trades.")
+    assert line in rendered["merged"]["page1"] and "300 trades over about" in rendered["merged"]["page1"]
+    assert rendered["merged"]["page1"].index("300 trades over about") < rendered["merged"]["page1"].index(line)
+    for k, case in rendered.items():
+        if k != "merged":
+            assert "were counted as one trade" not in case["text"], k
 
 
 def test_rendered_report_text_passes_the_paid_lint(rendered):
