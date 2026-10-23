@@ -7,7 +7,7 @@
 #   test-worker  the private paid-analysis server's Node tests (DT_PRIVATE_REPO, default ../dt-private), if present
 #   test-paid-e2e  the paid pages in Chromium against the rehearsal Worker (DT_PRIVATE_REPO, default ../dt-private)
 #   site-tests   the three v1 site test files against a local dir (default site/_site; docs = today's pages)
-#   bundle       replace docs/ on this branch with the build (step 30 only; asks for DT_BUNDLE=yes)
+#   bundle       replace docs/ on this branch with the build (step 30 only; asks for DT_BUNDLE=yes; DT_PREVIEW: C-17)
 #   check-live   --base <origin> [--compare <origin>]: every sitemap URL (+ 404, feed) on a deployed copy (C-15)
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -44,6 +44,14 @@ case "${1:-}" in
   site-tests) python3 site/build.py && python3 checks/tests/run_site_tests.py "${2:-site/_site}" ;;
   bundle)
     if [ "${DT_BUNDLE:-}" != "yes" ]; then echo "bundle replaces docs/ — run with DT_BUNDLE=yes (step 30, after the owner's review)"; exit 1; fi
+    # C-17: a preview bundle (DT_PREVIEW=<name>: noindex, Disallow-all, preview band) lives only on the branch of
+    # that name (paid-preview, live-check), never on main; those two branches take only their own preview bundle.
+    BR=$(git symbolic-ref --short -q HEAD || true)
+    if [ -n "${DT_PREVIEW:-}" ] && [ "$BR" != "$DT_PREVIEW" ]; then
+      echo "DT_PREVIEW=$DT_PREVIEW bundles only on the branch $DT_PREVIEW (this is ${BR:-a detached HEAD})"; exit 1; fi
+    case "$BR" in paid-preview|live-check)
+      if [ "${DT_PREVIEW:-}" != "$BR" ]; then echo "the branch $BR takes only a preview bundle: DT_PREVIEW=$BR"; exit 1; fi ;;
+    esac
     DT_REQUIRE_LAUNCH_DATE=1 python3 site/build.py   # [legal] launch_date must be set to the push day
     rm -rf docs && cp -R site/_site docs && rm -rf docs/dev && printf 'donttrade.ca\n' > docs/CNAME && touch docs/.nojekyll
     echo "docs/ replaced from site/_site" ;;

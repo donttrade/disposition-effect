@@ -27,6 +27,9 @@ Environment:
   DT_PRIVATE_TOML=path     read private.toml from elsewhere (flag-on test builds)
   DT_PRICES_JSON=path      read prices.json from elsewhere (test builds plant a test link)
   DT_REQUIRE_LAUNCH_DATE=1 fail if [legal] launch_date is empty (./site/run.sh bundle sets it)
+  DT_PREVIEW=<name>        a preview build (delivery plan C-17; name = the Pages branch, e.g. paid-preview,
+                           live-check): every page gets <meta name="robots" content="noindex,nofollow"> and a
+                           "Preview, not the live site" band, and robots.txt disallows everything
 Local-test escapes (ESCAPES): each opens ONE guard, prints a WARNING, and is refused when
 [stripe] mode = "live". A paid build with well-formed values needs none of them.
   DT_ALLOW_PLACEHOLDERS=1    allow private.toml values that look like placeholders
@@ -1208,7 +1211,48 @@ def write_sitemap_and_robots(out, cfg, built_pages, flags):
         robots += [f"Disallow: {p}" for p in PAID_APP_PATHS]
     robots.append(f"Sitemap: {base}/sitemap.xml")
     with open(os.path.join(out, "robots.txt"), "w", encoding="utf-8", newline="\n") as f:
-        f.write("\n".join(robots) + "\n")
+        f.write(PREVIEW_ROBOTS_TXT if preview_name() else "\n".join(robots) + "\n")
+
+
+PREVIEW_NAME_RE = re.compile(r"[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?")
+PREVIEW_ROBOTS_META = '<meta name="robots" content="noindex,nofollow">'
+PREVIEW_BAND_ATTR = "data-preview-band"
+PREVIEW_ROBOTS_TXT = "User-agent: *\nDisallow: /\n"
+
+
+def preview_name():
+    """C-17: the DT_PREVIEW name (a Pages branch name: lowercase letters, digits, inner hyphens), or None."""
+    name = os.environ.get("DT_PREVIEW", "")
+    if name == "":
+        return None
+    if not PREVIEW_NAME_RE.fullmatch(name):
+        die(f"DT_PREVIEW={name!r} is not a branch-style name (lowercase letters, digits, inner hyphens, at most 40)")
+    return name
+
+
+def preview_problems(out, preview):
+    """[problem]: a preview build has the robots meta and the band on every page and a Disallow-all robots.txt;
+    any other build has none of them (passthrough pages included: they do not come from base.html)."""
+    probs = []
+    for root, _, files in os.walk(out):
+        for name in sorted(files):
+            if not name.endswith(".html"):
+                continue
+            rel = os.path.relpath(os.path.join(root, name), out)
+            text = open(os.path.join(root, name), encoding="utf-8", errors="replace").read()
+            n_meta, n_band = text.count(PREVIEW_ROBOTS_META), text.count(PREVIEW_BAND_ATTR)
+            robots = len(re.findall(r'<meta name="robots"', text))
+            if preview and (n_meta != 1 or n_band != 1 or robots != 1):
+                probs.append(f"{rel}: preview build needs exactly one noindex,nofollow robots meta (found {n_meta} "
+                             f"of {robots} robots metas) and one preview band (found {n_band})")
+            if not preview and (n_meta or n_band):
+                probs.append(f"{rel}: preview markup in a build without DT_PREVIEW")
+    txt = open(os.path.join(out, "robots.txt"), encoding="utf-8").read()
+    if preview and txt != PREVIEW_ROBOTS_TXT:
+        probs.append("robots.txt of a preview build must disallow everything")
+    if not preview and "Disallow: /\n" in txt:
+        probs.append("robots.txt disallows the whole site in a build without DT_PREVIEW")
+    return probs
 
 
 def out_file(out, path):
@@ -1522,7 +1566,8 @@ def build():
                 "business_id_line": Markup(business_id_line(cfg, private, "legal")),
                 "strings": read_toml(os.path.join(SITE, "config", "strings.toml"), "strings.toml"),
                 "paid_method": paid_method(),
-                "report_link_fr": report_link_fr(products["report39"], cfg["stripe"]["mode"])}
+                "report_link_fr": report_link_fr(products["report39"], cfg["stripe"]["mode"]),
+                "preview": preview_name()}
     built = []
     for rel, page in sorted(owned.items()):
         page = {"scripts": [], "modules": [], "og_image": "/assets/og/default.png", "lang": "en",
@@ -1552,6 +1597,9 @@ def build():
     legal = paid_legal_problems(out, cfg)
     if legal:
         die("paid legal copy (C-14): " + "; ".join(legal))
+    prev = preview_problems(out, preview_name())
+    if prev:
+        die("preview build (C-17): " + "; ".join(prev[:5]) + (f" (and {len(prev) - 5} more)" if len(prev) > 5 else ""))
     return out
 
 
