@@ -4,7 +4,7 @@
 #   serve        serve site/_site at http://127.0.0.1:8765 (local only)
 #   check        build, then every check that exists so far
 #   test-engine  engine tests (Python reference + Chromium golden tests)
-#   test-worker  the private paid-analysis server's Node tests (../dt-private), if present
+#   test-worker  the private paid-analysis server's Node tests (DT_PRIVATE_REPO, default ../dt-private), if present
 #   test-paid-e2e  the paid pages in Chromium against the rehearsal Worker (DT_PRIVATE_REPO, default ../dt-private)
 #   site-tests   the three v1 site test files against a local dir (default site/_site; docs = today's pages)
 #   bundle       replace docs/ on this branch with the build (step 30 only; asks for DT_BUNDLE=yes)
@@ -25,8 +25,17 @@ case "${1:-}" in
     ;;
   test-engine) python3 -m pytest -q tests/test_engine_ref.py tests/test_engine_golden.py tests/test_engine_stats.py tests/test_engine_limits.py tests/test_alias_parity.py tests/test_sniff.py ;;
   test-worker)
-    # DT_PUBLIC_REPO: the server's parity tests (ISO list, vendored noise.js) compare with THIS checkout
-    if [ -d "$REPO/../dt-private" ]; then (cd "$REPO/../dt-private" && DT_PUBLIC_REPO="$REPO" node --test); else echo "dt-private not present: the paid-analysis server is kept out of this repo"; fi ;;
+    # DT_PRIVATE_REPO picks the server checkout (default ../dt-private), as tests/test_paid_flow.py does.
+    # DT_PUBLIC_REPO: the server's parity tests (ISO list, vendored noise.js) compare with THIS checkout.
+    # R-D1 D-6: the server's report method must be the one this site's wording accepts, or nothing runs.
+    PRIV="${DT_PRIVATE_REPO:-$REPO/../dt-private}"
+    if [ ! -d "$PRIV" ]; then echo "dt-private not present at $PRIV: the paid-analysis server is kept out of this repo"; exit 0; fi
+    SITE_M=$(sed -n "s/^export const METHOD_VERSION = '\(.*\)';\$/\1/p" "$REPO/site/static/js/paid/wording.js")
+    PRIV_M=$(sed -n "s/^export const METHOD_VERSION = '\(.*\)';\$/\1/p" "$PRIV/src/core/habits.mjs" 2>/dev/null || true)
+    if [ -z "$SITE_M" ] || [ "$SITE_M" != "$PRIV_M" ]; then
+      echo "method mismatch: server ${PRIV_M:-(none)} at $PRIV, site ${SITE_M:-(none)}: check out dt-private delivery-39 (R-D1.6)"; exit 1
+    fi
+    (cd "$PRIV" && DT_PUBLIC_REPO="$REPO" node --test) ;;
   test-paid-e2e)
     # delivery plan C-4 Part B: dt-private's deploy bundle on workerd + local D1 + mock Stripe (scripts/rehearse.mjs --serve)
     DT_PRIVATE_REPO="${DT_PRIVATE_REPO:-$REPO/../dt-private}" python3 -m pytest -q tests/test_paid_e2e_rehearsal.py ;;
