@@ -45,7 +45,7 @@
     <h2 id="t-how-h">How it works</h2>
     <ol class="steps" data-reveal data-reveal-stagger>
       <li><strong>Export your history.</strong> A MetaTrader 5 or 4 report, an IBKR Flex Query or a Tradovate orders export (all three in beta), or the donttrade CSV template.</li>
-      <li><strong>Your browser reads it.</strong> It removes names, account numbers and symbols, and sends our server only stripped trade numbers, which are not stored.</li>
+      <li><strong>Your browser reads it.</strong> It removes names, account numbers and symbols. {{ strings.p5.short }}</li>
       <li><strong>Read your report.</strong> Run the free re-test on the same account 30 to 60 days after your first report.</li>
     </ol>
     <p><a href="/privacy/#report">Exactly what is sent and kept</a></p>
@@ -69,7 +69,7 @@
   <section class="section" aria-labelledby="faq-h" data-reveal>
     <h2 id="faq-h">Questions</h2>
     <details><summary>Is this advice?</summary><p>No. It describes your own past trades. It does not tell you what to trade, how much, or when to exit.</p></details>
-    <details><summary>Where does my trade file go?</summary><p>The file stays in your browser. For the report, your browser sends only stripped trade numbers: open and close times without the date, buy or sell, relative size, the result and a random symbol number. They are not stored. The free tools send nothing at all.</p></details>
+    <details><summary>Where does my trade file go?</summary><p>The file stays in your browser. For the report: {{ strings.p5.long }} The free tools send nothing at all.</p></details>
     <details><summary>What does the re-test do?</summary><p>It runs the same report on a newer export of the same account, 30 to 60 days after your first report, so you can compare the two. It is included in the price.</p></details>
     <details><summary>Refunds?</summary><p>A full refund if you ask by email within {{ prices.rules.trader_refund_days }} days of buying, even after your report has run. <a href="/terms/#traders">Trader terms</a></p></details>
   </section>

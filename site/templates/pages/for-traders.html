@@ -49,9 +49,9 @@
       <li><strong>Files:</strong> the MetaTrader 5 or 4 history report, an Interactive Brokers Flex Query, a Tradovate orders export (all three in beta until a real export confirms the columns), or the donttrade CSV template.</li>
       <li><strong>The free tools</strong> open your file in your browser. Those pages block outgoing requests, so the file is not uploaded.</li>
       {%- if sale %}
-      <li><strong>For the paid report</strong>, your browser sends our server only stripped trade numbers: open and close times, buy or sell, relative size, the realised result and a random symbol number. No name, account number or ticker is sent, and the server does not keep the numbers. What it does keep is listed in the <a href="/privacy/#report">privacy notice</a>.</li>
+      <li><strong>For the paid report:</strong> {{ strings.p5.long }} <a href="/privacy/#report">Privacy notice</a>.</li>
       {%- else %}
-      <li><strong>For the paid report</strong>, your browser will send our server only stripped trade numbers: open and close times, buy or sell, relative size, the realised result and a random symbol number. No name, account number or ticker is sent, and the numbers are not stored. The exact list is published before launch.</li>
+      <li><strong>For the paid report (not on sale yet):</strong> {{ strings.p5.long }} The exact list is published before launch.</li>
       {%- endif %}
     </ul>
   </section>
