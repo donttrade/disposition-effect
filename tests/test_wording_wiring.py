@@ -53,11 +53,12 @@ async (cases) => {
       share_a: null, share_b: null, n_a_compared: null, n_b_compared: null, spread_ratio: null, n_long_a: 0, n_long_b: 0 } : {}),
     ...(id === 'size_up' ? { verdict: 'withheld', withheld: 'not_calibrated', p_raw: null, p_holm: null, n_perm: null, direction: null,
       share: null, n_a_compared: null, n_b_compared: null } : {}), ...(id === 'revenge' || id === 'tilt' ? { p_mean: 0.0004, p_rank: 0.0003 } : {}),
-    detail: id === 'tilt' ? { streak3_n: 12, streak3_mean: -20 } : null, research_ref: null,
+    detail: id === 'tilt' ? { streak3_n: 12, streak3_mean: -20 } : null,
+    research_ref: { cite: 'Server citation ' + id, url: 'https://example.invalid/' + id },   // I-6: never printed
     dollars: { label: labels[id], amount: -500, n_trades: 40 }, ...o });
   const OVR = { id: 'oversized_loss', name: names.oversized_loss, question: 'Q?', n_a: 10, n_b: null, measure_a: 0.05, measure_b: 0.3,
     effect: -40, p_raw: null, p_holm: null, verdict: 'descriptive', direction: null, method: null, n_perm: null,
-    n_a_compared: null, n_b_compared: null, detail: null, research_ref: null, dollars: { label: labels.oversized_loss, amount: -900, n_trades: 10 } };
+    n_a_compared: null, n_b_compared: null, detail: null, research_ref: { cite: 'Server citation oversized', url: null }, dollars: { label: labels.oversized_loss, amount: -900, n_trades: 10 } };
   const all = ['hold_gap', 'revenge', 'size_up', 'tilt'];
   const R = (c) => {
     const habits = all.map((id) => H(id, c.nMed, c.nSeq, (c.over || {})[id] || {})).concat([OVR]);
@@ -74,7 +75,11 @@ async (cases) => {
     const sec = (id) => (div.querySelector('#' + id) || { innerText: '' }).innerText;
     out[k] = { text: div.innerText, page1: sec('focus'), coverage: sec('coverage'),
       habit: Object.fromEntries(all.concat(['oversized_loss']).map((id) => [id, sec('habit-' + id)])),
-      method: [...div.querySelectorAll('.habit-method')].map((p) => p.textContent) };
+      method: [...div.querySelectorAll('.habit-method')].map((p) => p.textContent),
+      research: Object.fromEntries(all.concat(['oversized_loss']).map((id) => {
+        const ps = [...div.querySelectorAll('#habit-' + id + ' p')].filter((p) => /research/i.test(p.textContent));
+        return [id, ps.map((p) => [p.textContent, p.className, [...p.querySelectorAll('a')].map((a) => [a.getAttribute('href'), a.textContent])])];
+      })) };
     div.remove();
   }
   return out;
@@ -222,6 +227,38 @@ def test_i5_page_one_shows_the_merged_rows_line_only_when_rows_were_merged(rende
             assert "were counted as one trade" not in case["text"], k
 
 
+# R-D3 addendum I-6 (exact lines; the bibliography as Tester T-4 checked it against Crossref)
+PREFIX = "Related research (a different test from this report's): "
+CS = ("Coval and Shumway (2005) found that Chicago Board of Trade traders who lost money in the morning took "
+      "above-average risk in the afternoon")
+ODEAN = ("Odean, T. (1998). Are investors reluctant to realize their losses? Journal of Finance 53(5), 1775–1798.",
+         "https://doi.org/10.1111/0022-1082.00072")
+COVAL = ("Coval, J. D. & Shumway, T. (2005). Do behavioral biases affect prices? Journal of Finance 60(1), 1–34.",
+         "https://doi.org/10.1111/j.1540-6261.2005.00723.x")
+RESEARCH = {
+    "hold_gap": ("Odean (1998) found that investors at a discount brokerage realised gains more readily than losses; that "
+                 "study counted sales, not holding times.", ODEAN),
+    "revenge": (CS + "; this report's 15-minute window is not from that study.", COVAL),
+    "size_up": (CS + ".", COVAL),
+    "tilt": (CS + "; this report's rule of 2 or more losses in a row is not from that study.", COVAL),
+}
+
+
+def test_i6_each_habit_shows_exactly_its_research_line_and_link(rendered):
+    for k, case in rendered.items():
+        r = case["research"]
+        assert r["oversized_loss"] == [], k                                  # no citation line
+        for hid, (line, (cite, url)) in RESEARCH.items():
+            assert r[hid] == [[PREFIX + line + " " + cite, "small research", [[url, cite]]]], (k, hid, r[hid])
+        assert "Published research on this pattern" not in case["text"] and "Server citation" not in case["text"], k
+        assert "Locke" not in case["text"], k
+    for hid, (line, (cite, _)) in RESEARCH.items():
+        for t in (PREFIX + line, cite):
+            assert L.lint_text(t) == [] and L.lint_text(t, "i6", paid=True) == [], t
+    # T-4's verified bibliography: volume(issue), pages
+    assert "53(5), 1775–1798" in ODEAN[0] and "60(1), 1–34" in COVAL[0]
+
+
 def test_rendered_report_text_passes_the_paid_lint(rendered):
     for k, case in rendered.items():
         assert L.lint_text(case["text"], k, paid=True) == [], k
@@ -287,7 +324,8 @@ STALE_BUILD = ["10,000 shuffles", "shuffles your own trades", "Holm correction f
                "random signs", "shuffled copies of your own trades", "share of shuffles", "“may be noise”, or",
                "tests up to four", "of the 4 patterns", "jusqu’à quatre", "tests four of them",
                "tests up to three", "test up to three", "of the 3 habits", "jusqu’à trois",
-               "whether your size changes after a loss"]   # R-D3 I-3b
+               "whether your size changes after a loss",   # R-D3 I-3b
+               "Published research on this pattern"]       # R-D3 addendum I-6
 
 
 def test_no_stale_method_claim_anywhere_in_the_build(built_site):

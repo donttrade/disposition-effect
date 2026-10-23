@@ -94,6 +94,24 @@ export function mergedLine(report, fmt) {
   return `Rows with the same open minute, symbol and direction were counted as one trade (for example, a position closed in parts): ${f.count(report.n_rows)} rows became ${f.count(report.n_trades)} trades.`;
 }
 
+// ---------------------------------------------------------------- related research (R-D3 addendum I-6)
+
+// Each line claims only what the paper's abstract shows (Tester T-4) and says the report's test is a different
+// one. The page renders these, never the report's research_ref; oversized_loss has none. Bibliography as T-4
+// checked it against Crossref (volume, issue, pages, DOI).
+export const RESEARCH_PREFIX = "Related research (a different test from this report's): ";
+const ODEAN = { cite: 'Odean, T. (1998). Are investors reluctant to realize their losses? Journal of Finance 53(5), 1775–1798.',
+  url: 'https://doi.org/10.1111/0022-1082.00072' };
+const COVAL = { cite: 'Coval, J. D. & Shumway, T. (2005). Do behavioral biases affect prices? Journal of Finance 60(1), 1–34.',
+  url: 'https://doi.org/10.1111/j.1540-6261.2005.00723.x' };
+const CS_FOUND = 'Coval and Shumway (2005) found that Chicago Board of Trade traders who lost money in the morning took above-average risk in the afternoon';
+export const RESEARCH = Object.freeze({
+  hold_gap: { line: 'Odean (1998) found that investors at a discount brokerage realised gains more readily than losses; that study counted sales, not holding times.', ...ODEAN },
+  revenge: { line: `${CS_FOUND}; this report's 15-minute window is not from that study.`, ...COVAL },
+  size_up: { line: `${CS_FOUND}.`, ...COVAL },
+  tilt: { line: `${CS_FOUND}; this report's rule of 2 or more losses in a row is not from that study.`, ...COVAL },
+});
+
 // ---------------------------------------------------------------- percent format (§9.2)
 
 const pct = (x, dp) => (100 * x).toFixed(dp);

@@ -11,7 +11,7 @@ import { ics, retestLine, RETEST_LINE } from './retest-copy.js';
 import { pgrPlrCounts } from '../engine/pgr.js';
 import { stripRows, spanLine } from './strip.js';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js';
-import { habitSentences, methodLine, page1Lines, coverageLines, mergedLine, checkReport, SENTENCE_HABITS } from './wording.js';
+import { habitSentences, methodLine, page1Lines, coverageLines, mergedLine, checkReport, SENTENCE_HABITS, RESEARCH, RESEARCH_PREFIX } from './wording.js';
 
 const $ = (id) => document.getElementById(id);
 const MINUS = '−';
@@ -172,9 +172,12 @@ function habitSection(h, unit, report) {
   }
   const chart = twoBarChart(h, unit);
   if (chart) sec.append(chart);
-  if (h.research_ref) {
-    const cite = el('p', { class: 'small' }, 'Published research on this pattern: ');
-    cite.append(h.research_ref.url ? el('a', { href: h.research_ref.url, rel: 'noopener', text: h.research_ref.cite }) : h.research_ref.cite);
+  // R-D3 addendum I-6: the page's own related-research line (wording.js RESEARCH), never the report's
+  // research_ref; oversized_loss has none.
+  const res = Object.prototype.hasOwnProperty.call(RESEARCH, h.id) ? RESEARCH[h.id] : null;
+  if (res) {
+    const cite = el('p', { class: 'small research' }, RESEARCH_PREFIX + res.line + ' ');
+    cite.append(el('a', { href: res.url, rel: 'noopener', text: res.cite }));
     sec.append(cite);
   }
   return sec;
