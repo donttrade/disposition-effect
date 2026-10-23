@@ -19,7 +19,12 @@ import pytest  # noqa: E402
 pytestmark = pytest.mark.skipif(not os.path.isdir(PRIVATE), reason="dt-private (server) not present")
 SPAN = os.path.join(HERE, "fixtures", "paid", "span_11y.csv")
 MAX_O = 60 * 24 * 7 * 520
-SERVER_MSG = "This file spans more than 10 years. Nothing was counted. Export the last 10 years and try again."
+# R-D1 D-4: the exact texts.
+SERVER_MSG = "This file has a trade opened more than 520 weeks (about 10 years) after the start of its first trade's week, or a trade held longer than 3,650 days. Nothing was counted. Export a shorter period and try again."
+LINE_56 = ("Left out: 56 trades opened more than 519 weeks (about 10 years) before this file's latest trade, or held longer "
+           "than 3,650 days.")
+LINE_1 = ("Left out: 1 trade opened more than 519 weeks (about 10 years) before this file's latest trade, or held longer "
+          "than 3,650 days.")
 
 
 def test_reference_trim_keeps_the_last_10_years():
@@ -40,7 +45,7 @@ def test_browser_trims_says_so_before_sending_and_the_report_renders(browser, st
     status = page.text_content("#rp-status")
     text = page.inner_text("#rp-out")
     ctx.close()
-    line = "Only the last 10 years of this file were used (56 trades left out)."
+    line = LINE_56
     assert status.startswith(line + " Sending 364 stripped trade rows"), status    # shown before the request
     assert line in text                                                            # and on page 1
     body = json.loads(sent[-1].post_data)
@@ -51,8 +56,15 @@ def test_browser_trims_says_so_before_sending_and_the_report_renders(browser, st
 
 
 def test_the_new_strings_pass_the_lint():
-    for t in ("Only the last 10 years of this file were used (56 trades left out).",
-              "Only the last 10 years of this file were used (1 trade left out).", SERVER_MSG):
+    for t in (LINE_56, LINE_1, SERVER_MSG):
         assert lint_text(t) == [] and lint_text(t, "span", paid=True) == [], t
     src = open(os.path.join(PRIVATE, "src", "core", "app.mjs"), encoding="utf-8").read()
-    assert f"span_too_long: '{SERVER_MSG}'" in src, "the server's message is the one the plan gives"
+    assert f'span_too_long: "{SERVER_MSG}"' in src, "the server's message is the one R-D1 D-4 gives"
+
+
+def test_span_line_at_1_and_56():
+    js = ("import { spanLine } from './site/static/js/paid/strip.js';"
+          "process.stdout.write(JSON.stringify([spanLine(1), spanLine(56)]));")
+    import subprocess
+    r = subprocess.run(["node", "--input-type=module", "-e", js], cwd=os.path.dirname(HERE), capture_output=True, text=True, check=True)
+    assert json.loads(r.stdout) == [LINE_1, LINE_56]
