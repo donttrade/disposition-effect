@@ -18,9 +18,9 @@
    "measure_b": 1011,
    "method": "earlier comparable trades (symbol, holding period, direction, time of day)",
    "n_a": 127,
-   "n_a_compared": 100,
+   "n_a_compared": null,
    "n_b": 73,
-   "n_b_compared": 58,
+   "n_b_compared": null,
    "n_long_a": 0,
    "n_long_b": 0,
    "n_perm": null,
@@ -32,11 +32,11 @@
     "cite": "Odean, T. (1998). Are investors reluctant to realize their losses? Journal of Finance 53(5), 1775-1798.",
     "url": "https://doi.org/10.1111/0022-1082.00072"
    },
-   "share_a": 0.4986964285714286,
-   "share_b": 0.40586001642036124,
-   "spread_ratio": 1.8974358974358976,
+   "share_a": null,
+   "share_b": null,
+   "spread_ratio": null,
    "verdict": "withheld",
-   "withheld": "spread"
+   "withheld": "not_calibrated"
   },
   {
    "detail": null,
@@ -160,7 +160,7 @@
    "verdict": "descriptive"
   }
  ],
- "method_version": "2026-10-21.stats2",
+ "method_version": "2026-10-23.stats2b",
  "n_distinguishable": 0,
  "n_tested": 3,
  "n_trades": 200,

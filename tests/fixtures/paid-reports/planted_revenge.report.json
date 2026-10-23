@@ -6,7 +6,7 @@
  "habits": [
   {
    "detail": null,
-   "direction": "opposite",
+   "direction": null,
    "dollars": {
     "amount": -450.0,
     "label": "Losing trades held longer than your median winning hold",
@@ -18,25 +18,25 @@
    "measure_b": 1200.0,
    "method": "earlier comparable trades (symbol, holding period, direction, time of day)",
    "n_a": 60,
-   "n_a_compared": 51,
+   "n_a_compared": null,
    "n_b": 60,
-   "n_b_compared": 52,
+   "n_b_compared": null,
    "n_long_a": 0,
    "n_long_b": 0,
-   "n_perm": 10000,
+   "n_perm": null,
    "name": "Holding losers longer than winners",
-   "p_holm": 1.0,
-   "p_raw": 0.8509149085091491,
+   "p_holm": null,
+   "p_raw": null,
    "question": "Do your losing trades stay open longer than your winning trades?",
    "research_ref": {
     "cite": "Odean, T. (1998). Are investors reluctant to realize their losses? Journal of Finance 53(5), 1775-1798.",
     "url": "https://doi.org/10.1111/0022-1082.00072"
    },
-   "share_a": 0.5243464052287582,
-   "share_b": 0.5368589743589743,
-   "spread_ratio": 1.0,
-   "verdict": "not_distinguishable",
-   "withheld": null
+   "share_a": null,
+   "share_b": null,
+   "spread_ratio": null,
+   "verdict": "withheld",
+   "withheld": "not_calibrated"
   },
   {
    "detail": null,
@@ -57,7 +57,7 @@
    "n_b_compared": null,
    "n_perm": 10000,
    "name": "Re-entering soon after a loss",
-   "p_holm": 0.00039996000399960006,
+   "p_holm": 0.00029997000299970003,
    "p_mean": 9.999000099990002e-05,
    "p_rank": 9.999000099990002e-05,
    "p_raw": 9.999000099990002e-05,
@@ -120,7 +120,7 @@
    "n_b_compared": null,
    "n_perm": 10000,
    "name": "Trading after a losing streak",
-   "p_holm": 0.00039996000399960006,
+   "p_holm": 0.00029997000299970003,
    "p_mean": 9.999000099990002e-05,
    "p_rank": 9.999000099990002e-05,
    "p_raw": 9.999000099990002e-05,
@@ -160,9 +160,9 @@
    "verdict": "descriptive"
   }
  ],
- "method_version": "2026-10-21.stats2",
+ "method_version": "2026-10-23.stats2b",
  "n_distinguishable": 2,
- "n_tested": 4,
+ "n_tested": 3,
  "n_trades": 120,
  "period_weeks": 1,
  "pgr_plr": null,

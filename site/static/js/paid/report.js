@@ -11,7 +11,7 @@ import { ics, retestLine, RETEST_LINE } from './retest-copy.js';
 import { pgrPlrCounts } from '../engine/pgr.js';
 import { stripRows, spanLine } from './strip.js';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js';
-import { habitSentences, methodLine, page1Lines, coverageLines, checkMethod } from './wording.js';
+import { habitSentences, methodLine, page1Lines, coverageLines, checkReport, SENTENCE_HABITS } from './wording.js';
 
 const $ = (id) => document.getElementById(id);
 const MINUS = '−';
@@ -55,7 +55,9 @@ const count = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 // The formatters wording.js fills its sentences with (ARCHITECT-STATS-AMENDMENT-R2 §9: money as now).
 const wordingFmt = (unit) => ({ money: (x) => money(x, unit), duration, ratio: (x) => num(x), count });
 
-const TESTED = ['hold_gap', 'revenge', 'size_up', 'tilt'];
+// The habits shown with wording.js sentences (hold_gap: M1, V-launch, M3 under stats2b); the descriptive
+// oversized_loss shows its measures list.
+const TESTED = SENTENCE_HABITS;
 
 const VERDICT = {
   distinguishable: ['badge badge-real', 'distinguishable from noise'],
@@ -93,7 +95,7 @@ function detailLine(h, unit) {
   return null;
 }
 
-// "after adjusting for the 4 patterns tested": the count is the report's own n_tested.
+// "after adjusting for the 3 patterns tested": the count is the report's own n_tested (at most 3 under stats2b).
 const testedPhrase = (n) => `the ${n} pattern${n === 1 ? '' : 's'} tested`;
 
 function dollarsLine(h, unit) {
@@ -189,7 +191,7 @@ function download(name, type, text) {
 
 export function renderReport(report, out, meta) {
   const unit = report.currency;
-  checkMethod(report);
+  checkReport(report);   // method and the stats2b hold_gap shape, before anything is drawn
   out.replaceChildren();
   out.append(el('p', { class: 'disclaimer notice', text: report.disclaimer }));
   // Page 1 (ARCHITECT-STATS-AMENDMENT-R2 §9.1): the headline, the focus habit or why none is

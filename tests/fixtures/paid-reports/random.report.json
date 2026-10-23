@@ -2,11 +2,11 @@
  "currency": "USD",
  "disclaimer": "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.",
  "engine_commit": "dev",
- "focus": "hold_gap",
+ "focus": null,
  "habits": [
   {
    "detail": null,
-   "direction": "habit",
+   "direction": null,
    "dollars": {
     "amount": -6894.05,
     "label": "Losing trades held longer than your median winning hold",
@@ -18,25 +18,25 @@
    "measure_b": 1407.5,
    "method": "earlier comparable trades (symbol, holding period, direction, time of day)",
    "n_a": 184,
-   "n_a_compared": 42,
+   "n_a_compared": null,
    "n_b": 202,
-   "n_b_compared": 42,
+   "n_b_compared": null,
    "n_long_a": 0,
    "n_long_b": 0,
-   "n_perm": 10000,
+   "n_perm": null,
    "name": "Holding losers longer than winners",
-   "p_holm": 0.008399160083991601,
-   "p_raw": 0.0027997200279972004,
+   "p_holm": null,
+   "p_raw": null,
    "question": "Do your losing trades stay open longer than your winning trades?",
    "research_ref": {
     "cite": "Odean, T. (1998). Are investors reluctant to realize their losses? Journal of Finance 53(5), 1775-1798.",
     "url": "https://doi.org/10.1111/0022-1082.00072"
    },
-   "share_a": 0.6716269841269842,
-   "share_b": 0.4166666666666667,
-   "spread_ratio": 1.1995711831916565,
-   "verdict": "distinguishable",
-   "withheld": null
+   "share_a": null,
+   "share_b": null,
+   "spread_ratio": null,
+   "verdict": "withheld",
+   "withheld": "not_calibrated"
   },
   {
    "detail": null,
@@ -160,9 +160,9 @@
    "verdict": "descriptive"
   }
  ],
- "method_version": "2026-10-21.stats2",
- "n_distinguishable": 1,
- "n_tested": 3,
+ "method_version": "2026-10-23.stats2b",
+ "n_distinguishable": 0,
+ "n_tested": 2,
  "n_trades": 400,
  "period_weeks": 5,
  "pgr_plr": null,

@@ -1,13 +1,20 @@
 // wording.js — the paid report's sentences, exactly as ARCHITECT-STATS-AMENDMENT-R2-2026-10-21 §9.1–9.2
 // gives them (page 1, the per-habit lines, the method lines and the percent format), filled from
-// Report / Habit fields of the R2 engine (method 2026-10-21.stats2). No DOM, no I/O: report.js
+// Report / Habit fields of the R2 engine (method 2026-10-23.stats2b: Architect ruling R-D2, hold_gap is
+// described, not tested, so it is always withheld / not_calibrated and V-launch replaces M2 and the
+// verdict; the V-spread, V-spread0, V-few and M2 hold_gap lines stay for Option B, unreachable under
+// stats2b). No DOM, no I/O: report.js
 // renders them. Every sentence describes the file's past trades only, is printed only when its
 // condition holds, and passes checks/lint.py (tests/test_paid_wording.py, W-1 and W-2).
 //
 // fmt: { money(x), duration(seconds), ratio(x), count(n) } — the page passes its own formatters
 // (money as report.js formats it now); the defaults are plain, for tests.
 
-export const METHOD_VERSION = '2026-10-21.stats2';
+export const METHOD_VERSION = '2026-10-23.stats2b';
+// V-launch (R-D2 H-2, exact text): hold_gap under stats2b. Replaces M2 and the verdict.
+export const V_LAUNCH = 'Not tested in this version of the report. In our tests on files built to have no real pattern, this test reported a gap in more than 1 file in 20, the rate it is designed for, when a large win or loss changed how long the next trades were held. So this pattern is described here without a verdict.';
+// The fixed page-1 line (R-D2 H-2), on every stats2b report.
+export const HOLD_GAP_COVERAGE = 'Holding losers longer than winners is described, not tested, in this version of the report.';
 // V-spread0 (R-D1 D-1): hold_gap withheld for spread with spread_ratio null (an infinite ratio). Replaces M2 and the verdict.
 export const V_SPREAD0 = "Not tested: the middle half of your losing trades, or of your winning trades, all sit at the same relative position when each trade's hold is ranked among trades of the same symbol, holding period and direction. This test cannot tell a gap in hold apart from a difference in how spread out the holds are.";
 
@@ -18,7 +25,10 @@ const DEFAULT_FMT = {
   count: (n) => String(n),
 };
 
-export const TESTED = Object.freeze(['hold_gap', 'revenge', 'size_up', 'tilt']);
+// The habits a stats2b report can test (R-D2: hold_gap is not one of them), and the habits shown with
+// sentences under their heading (hold_gap's are M1, V-launch and M3).
+export const TESTED = Object.freeze(['revenge', 'size_up', 'tilt']);
+export const SENTENCE_HABITS = Object.freeze(['hold_gap', 'revenge', 'size_up', 'tilt']);
 
 function fmtOf(fmt) {
   return { ...DEFAULT_FMT, ...(fmt || {}) };
@@ -30,6 +40,22 @@ export function checkMethod(report) {
   if (!report || report.method_version !== METHOD_VERSION) {
     throw new Error(`wording: report method ${report && report.method_version} is not ${METHOD_VERSION}`);
   }
+}
+
+// R-D2: under stats2b hold_gap is never tested. Any other hold_gap state (a p-value, a verdict, the spread
+// rule) means the report is not what these sentences describe, so nothing is printed.
+export function checkHoldGap(report) {
+  const h = report && Array.isArray(report.habits) ? report.habits.find((x) => x.id === 'hold_gap') : null;
+  if (!h) throw new Error('wording: the report has no hold_gap entry');
+  if (h.verdict !== 'withheld' || h.withheld !== 'not_calibrated' || h.p_raw !== null || h.p_holm !== null || h.n_perm !== null) {
+    throw new Error(`wording: hold_gap is ${h.verdict}/${h.withheld} with p_raw ${h.p_raw}, but it is not tested in ${METHOD_VERSION} (R-D2)`);
+  }
+}
+
+// Everything renderReport() needs to be true before it shows anything.
+export function checkReport(report) {
+  checkMethod(report);
+  checkHoldGap(report);
 }
 
 // ---------------------------------------------------------------- percent format (§9.2)
@@ -81,7 +107,9 @@ function holdGapLines(h, report, f) {
   if (h.measure_a !== null && h.measure_b !== null) {
     out.push(`Your losing trades were held a median of ${f.duration(h.measure_a)}; your winning trades a median of ${f.duration(h.measure_b)}.`);   // M1
   }
-  if (h.verdict === 'withheld') {
+  if (h.verdict === 'withheld' && h.withheld === 'not_calibrated') {
+    out.push(V_LAUNCH);   // R-D2 (stats2b): replaces M2 and the verdict
+  } else if (h.verdict === 'withheld') {
     if (h.withheld !== 'spread') throw new Error(`wording: hold_gap withheld for ${h.withheld}`);
     // V-spread (replaces M2 and the verdict). spread_ratio is null when the ratio is infinite: one
     // group's middle half of holds (or both groups') has no spread at all. "Spread very differently"
@@ -133,6 +161,8 @@ function seqLines(h, report, f) {
 
 // Every line of a tested habit as shown under its heading, in order.
 export function habitSentences(h, report, fmt) {
+  checkHoldGap(report);
+  if (h.id === 'hold_gap') checkHoldGap({ habits: [h] });
   const f = fmtOf(fmt);
   switch (h.id) {
     case 'hold_gap': return holdGapLines(h, report, f);
@@ -174,7 +204,7 @@ const lowerFirst = (s) => s.charAt(0).toLowerCase() + s.slice(1);
 // Page 1: the headline lines (H0a/H0b, or H1 then F, or H1, N0 and one reason line per
 // distinguishable habit). Throws on an inconsistent report rather than print a false line.
 export function page1Lines(report, fmt) {
-  checkMethod(report);
+  checkReport(report);
   const f = fmtOf(fmt);
   const D = TESTED.map((id) => report.habits.find((h) => h.id === id)).filter((h) => h && h.verdict === 'distinguishable');
   for (const h of D) if (h.direction !== 'habit' && h.direction !== 'opposite') throw new Error(`page1Lines: ${h.id} is distinguishable with direction ${h.direction} (R2-3)`);
@@ -207,12 +237,14 @@ export function page1Lines(report, fmt) {
   return lines;
 }
 
-// Coverage line (page 1, always; unchanged by R2).
+// Coverage lines (page 1, always). R-D2 H-2: three patterns can be tested; the hold-gap line is fixed.
 export function coverageLines(report) {
-  const lines = [`${report.n_tested} of the 4 patterns could be tested. Each one compares two groups of at least 30 trades.`];
-  if (report.n_tested < 4) {
+  checkReport(report);
+  const lines = [`${report.n_tested} of the 3 patterns could be tested. Each one compares two groups of at least 30 trades.`];
+  if (report.n_tested < 3) {
     const names = report.habits.filter((h) => TESTED.includes(h.id) && h.p_raw === null).map((h) => h.name);
     lines.push(`Not tested: ${names.join(', ')}.`);
   }
+  lines.push(HOLD_GAP_COVERAGE);
   return lines;
 }
