@@ -9,8 +9,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(HERE), "checks"))
 from lint import lint_text, visible_text  # noqa: E402
 
-LEAD = ("This is a research figure from public data. It is not the trader report: the report measures five habits in "
-        "your own file and shows no percentile.")
+# R-D1 D-3: the Architect's exact text.
+LEAD = ("This is a research figure from public data. It is not the trader report: the report covers five habits in "
+        "your own file, tests up to four of them against chance, and shows no percentile.")
 
 
 def test_sample_report_lead_says_it_is_not_the_trader_report(built_site):
