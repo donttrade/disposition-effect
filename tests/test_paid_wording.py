@@ -15,7 +15,11 @@ carries the hold-gap and size-up coverage lines exactly once each; a stats2b rep
 throws.
 
 R-D3 addendum I-5 (method 2026-10-23.stats2d): the report carries n_rows and n_trades; page 1 prints the merged-rows
-line exactly when n_rows > n_trades (W-2 adds a merged and an unmerged case); a report without the counts throws."""
+line exactly when n_rows > n_trades (W-2 adds a merged and an unmerged case); a report without the counts throws.
+
+R-D3 addendum 2 I-8 (method 2026-10-23.stats2e): a coarse-time report prints NONE_TESTED and COARSE_P1 on page 1, V-no-time
+for revenge and tilt, SIZE_NOT_DESCRIBED for size_up; any report with n_tested 0 prints NONE_TESTED instead of H0a/H0b
+(W-2 adds both cases)."""
 import glob
 import json
 import os
@@ -55,7 +59,7 @@ const R = (over, o) => {
   const habits = [H('hold_gap', { ...LAUNCH, ...(over.hold_gap || {}) })]
     .concat(['revenge', 'size_up', 'tilt'].map((id) => (id === 'size_up' ? H(id, { ...SU_LAUNCH, ...(over.size_up || {}) }) : H(id, over[id] || ND))))
     .concat([H('oversized_loss', { verdict: 'descriptive', direction: null, p_raw: null, p_holm: null, n_perm: null })]);
-  return { method_version: W.METHOD_VERSION, n_rows: 300, n_trades: 300, n_tested: habits.filter((h) => h.p_raw !== null).length,
+  return { method_version: W.METHOD_VERSION, n_rows: 300, n_trades: 300, coarse_time: false, n_tested: habits.filter((h) => h.p_raw !== null).length,
     n_distinguishable: habits.filter((h) => h.verdict === 'distinguishable').length, focus: null, habits, ...o };
 };
 const fmt = { money: (x) => (x < 0 ? '−$' + (-x).toFixed(2) : '$' + x.toFixed(2)), duration: (s) => Math.round(s / 60) + ' min', ratio: (x) => x.toFixed(2), count: (n) => n.toLocaleString('en-US') };
@@ -93,6 +97,21 @@ out.guard_method = run(() => W.page1Lines(R({}, { method_version: '2026-10-21.st
 out.guard_stats2 = run(() => W.page1Lines(R({}, { method_version: '2026-10-21.stats2' }), fmt));
 out.guard_habit_dirnull = run(() => W.habitSentences(H('tilt', { direction: null }), R({}), fmt));
 out.guard_stats2c = run(() => W.page1Lines(R({}, { method_version: '2026-10-23.stats2c' }), fmt));
+out.guard_stats2d = run(() => W.page1Lines(R({}, { method_version: '2026-10-23.stats2d' }), fmt));
+// R-D3 addendum 2: W-2's two new cases (a coarse-time report; a timed report with nothing tested) and the guards
+const NOTIME = { verdict: 'withheld', withheld: 'no_time_of_day', p_raw: null, p_holm: null, n_perm: null, direction: null,
+  p_mean: null, p_rank: null, measure_a: null, measure_b: null, effect: null, dollars: null, detail: null };
+const coarse = R({ revenge: NOTIME, tilt: NOTIME, size_up: { measure_a: null, measure_b: null, effect: null, dollars: null } }, { coarse_time: true });
+coarse.n_tested = 0;
+const allFew = R({ revenge: { verdict: 'too_few', p_raw: null, p_holm: null, n_perm: null, n_a: 12 }, tilt: { verdict: 'too_few', p_raw: null, p_holm: null, n_perm: null, n_a: 9 } });
+allFew.n_tested = 0;
+out.coarse = run(() => ({ page1: W.page1Lines(coarse, fmt), coverage: W.coverageLines(coarse), merged: W.mergedLine({ ...coarse }, fmt),
+  revenge: W.habitSentences(coarse.habits[1], coarse, fmt), size_up: W.habitSentences(coarse.habits[2], coarse, fmt), tilt: W.habitSentences(coarse.habits[3], coarse, fmt) }));
+out.all_few = run(() => ({ page1: W.page1Lines(allFew, fmt), coverage: W.coverageLines(allFew) }));
+const bad1 = R({ revenge: NOTIME, tilt: NOTIME }, { coarse_time: true }); bad1.n_tested = 0;   // size_up still described
+const bad2 = R({ revenge: NOTIME });                                                       // no_time_of_day in a timed report
+const bad3 = R({}, { coarse_time: true, n_rows: 301 });
+out.guard_coarse = [run(() => W.page1Lines(bad1, fmt)), run(() => W.page1Lines(bad2, fmt)), run(() => W.coverageLines(bad3)), run(() => W.page1Lines(R({}, { coarse_time: undefined }), fmt))];
 // R-D3 addendum I-5: the merged-rows line (W-2: a merged and an unmerged case) and the row-count guard
 out.merged = run(() => W.mergedLine(R({}, { n_rows: 4880, n_trades: 2630 }), fmt));
 out.unmerged = run(() => W.mergedLine(R({}), fmt));
@@ -156,7 +175,7 @@ out.pct.one = [W.shareOne(0.5), W.shareOne(0.58), W.shareOne(0.5002), W.shareOne
 for (const f of readdirSync('tests/fixtures/paid-reports').filter((x) => x.endsWith('.report.json')).sort()) {
   const rep = JSON.parse(readFileSync('tests/fixtures/paid-reports/' + f, 'utf8'));
   out.real[f] = run(() => ({ method_version: rep.method_version, page1: W.page1Lines(rep, fmt), coverage: W.coverageLines(rep),
-    merged: W.mergedLine(rep, fmt), rows: [rep.n_rows, rep.n_trades],
+    merged: W.mergedLine(rep, fmt), rows: [rep.n_rows, rep.n_trades], coarse: rep.coarse_time,
     habits: Object.fromEntries(rep.habits.filter((h) => W.SENTENCE_HABITS.includes(h.id)).map((h) => [h.id, [...W.habitSentences(h, rep, fmt), W.methodLine(h, fmt)].filter(Boolean)])) }));
 }
 process.stdout.write(JSON.stringify(out));
@@ -258,9 +277,15 @@ def test_page1_guards_throw_instead_of_printing():
     d = data()
     assert d["guard_inconsistent"] == "THROW: page1Lines: focus is null but a habit-direction gap totalled a loss"
     assert d["guard_count"].startswith("THROW: page1Lines: n_distinguishable 2 but 1")
-    assert d["guard_method"] == "THROW: wording: report method 2026-10-21.stats1 is not 2026-10-23.stats2d"
-    assert d["guard_stats2"] == "THROW: wording: report method 2026-10-21.stats2 is not 2026-10-23.stats2d"
-    assert d["guard_stats2c"] == "THROW: wording: report method 2026-10-23.stats2c is not 2026-10-23.stats2d"
+    assert d["guard_method"] == "THROW: wording: report method 2026-10-21.stats1 is not 2026-10-23.stats2e"
+    assert d["guard_stats2"] == "THROW: wording: report method 2026-10-21.stats2 is not 2026-10-23.stats2e"
+    assert d["guard_stats2c"] == "THROW: wording: report method 2026-10-23.stats2c is not 2026-10-23.stats2e"
+    assert d["guard_stats2d"] == "THROW: wording: report method 2026-10-23.stats2d is not 2026-10-23.stats2e"
+    g = d["guard_coarse"]
+    assert g[0] == "THROW: wording: size_up is described in a coarse-time report (R-D3 addendum 2)"
+    assert g[1] == "THROW: wording: revenge is no_time_of_day in a timed report (R-D3 addendum 2)"
+    assert g[2].startswith("THROW: wording: the report has coarse_time true with 301 rows and 300 trades")
+    assert g[3].startswith("THROW: wording: the report has coarse_time undefined")
     for o in d["guard_rows"]:
         assert o.startswith("THROW: wording: the report has n_rows ") and o.endswith("(R-D3 addendum)"), o
 
@@ -281,6 +306,36 @@ def test_i5_merged_rows_line_only_when_rows_were_merged():
     for f, r in real.items():
         if f != "stats-r2__34-partial-rows.report.json":
             assert r["merged"] is None and r["rows"][0] == r["rows"][1], f
+
+
+NONE_TESTED = "None of the patterns could be tested in this file, so this report describes them without a verdict."
+COARSE_P1 = ("Most trades in this file show the same opening time of day (for example, an export with dates but no times), "
+             "so the patterns that depend on the order and timing of trades within a day are not tested.")
+V_NO_TIME = ("Not tested: most trades in this file show the same opening time of day, so the file has no usable times of "
+             "day, and this pattern depends on the order and timing of trades within a day.")
+SIZE_NOT_DESCRIBED = ("Not described: most trades in this file show the same opening time of day, so which trade came "
+                      "after a loss cannot be told.")
+COV0 = ["0 of the 2 habits could be tested. Each one compares two groups of at least 30 trades.",
+        "Not tested: Re-entering soon after a loss, Trading after a losing streak.", HG_LINE, SU_LINE]
+
+
+def test_i8_coarse_time_and_nothing_tested_lines():
+    d = data()
+    c = d["coarse"]
+    assert c["page1"] == [NONE_TESTED, COARSE_P1] and c["coverage"] == COV0 and c["merged"] is None       # W-2 case: coarse
+    assert c["revenge"] == [V_NO_TIME] and c["tilt"] == [V_NO_TIME] and c["size_up"] == [SIZE_NOT_DESCRIBED]
+    assert d["all_few"]["page1"] == [NONE_TESTED] and d["all_few"]["coverage"] == COV0                    # W-2 case: n_tested 0
+    for t in (NONE_TESTED, COARSE_P1, V_NO_TIME, SIZE_NOT_DESCRIBED):
+        assert lint_text(t) == [] and lint_text(t, "i8", paid=True) == [], t
+    real = d["real"]
+    dl = real["stats-r2__21-dateonly.report.json"]
+    assert dl["coarse"] is True and dl["page1"] == [NONE_TESTED, COARSE_P1] and dl["coverage"] == COV0 and dl["merged"] is None
+    assert dl["habits"]["revenge"] == [V_NO_TIME] and dl["habits"]["tilt"] == [V_NO_TIME]
+    assert dl["habits"]["size_up"] == [SIZE_NOT_DESCRIBED]
+    tf = real["too_few.report.json"]
+    assert tf["coarse"] is False and tf["page1"] == [NONE_TESTED]
+    for f, r in real.items():
+        assert H0[0] not in r["page1"] or "0 of the 2" not in r["coverage"][0], f   # H0a never with nothing tested
     assert d["guard_habit_dirnull"] == "THROW: wording: tilt is distinguishable with direction null (R2-3)"
 
 
@@ -293,7 +348,7 @@ def test_r_d2_forged_hold_gap_throws_everywhere():
         assert len(outs) == 4
         for o in outs:
             assert isinstance(o, str) and o.startswith("THROW: wording: hold_gap is ") and o.endswith(
-                "but it is not tested in 2026-10-23.stats2d (R-D2)"), (k, o)
+                "but it is not tested in 2026-10-23.stats2e (R-D2)"), (k, o)
 
 
 def test_r_d3_forged_size_up_throws_everywhere():
@@ -305,7 +360,7 @@ def test_r_d3_forged_size_up_throws_everywhere():
         assert len(outs) == 4
         for o in outs:
             assert isinstance(o, str) and o.startswith("THROW: wording: size_up is ") and o.endswith(
-                "but it is not tested in 2026-10-23.stats2d (R-D3)"), (k, o)
+                "but it is not tested in 2026-10-23.stats2e (R-D3)"), (k, o)
 
 
 def test_s_b2_the_pending_sentences_are_gone():
@@ -404,15 +459,17 @@ def test_r_d2_supersedes_d1_the_sizeup0_probe_renders_v_launch():
         assert lint_text(V_LAUNCH_SIZE, "V-launch-size", paid=paid) == [] and lint_text(SU_LINE, "su-line", paid=paid) == []
 
 
-def test_cross_repo_reports_render_without_a_throw_and_are_method_stats2d():
+def test_cross_repo_reports_render_without_a_throw_and_are_method_stats2e():
     real = data()["real"]
     files = sorted(os.path.basename(f) for f in glob.glob(os.path.join(FIX, "*.report.json")))
     assert len(files) >= 3 and sorted(real) == files
     for f, r in real.items():
         assert isinstance(r, dict), (f, r)                     # no throw
-        assert r["method_version"] == "2026-10-23.stats2d", f
+        assert r["method_version"] == "2026-10-23.stats2e", f
         assert r["coverage"].count(HG_LINE) == 1 and r["habits"]["hold_gap"].count(V_LAUNCH) == 1, f
-        assert r["coverage"].count(SU_LINE) == 1 and r["habits"]["size_up"].count(V_LAUNCH_SIZE) == 1, f
+        assert r["coverage"].count(SU_LINE) == 1, f
+        assert r["habits"]["size_up"] == ([SIZE_NOT_DESCRIBED] if r["coarse"] else r["habits"]["size_up"]), f
+        assert r["habits"]["size_up"].count(V_LAUNCH_SIZE) == (0 if r["coarse"] else 1), f
         assert not any("reshuffled" in s for s in r["habits"]["hold_gap"] + r["habits"]["size_up"]), f   # no method line
         assert not any("size rank" in s for s in r["habits"]["size_up"]), f
     # random.json: revenge too_few, tilt not distinguishable (case 1)
