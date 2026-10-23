@@ -70,7 +70,7 @@
   },
   {
    "detail": null,
-   "direction": "habit",
+   "direction": null,
    "dollars": {
     "amount": -168.90000000000003,
     "label": "Trades after a loss at 1.5 times your usual size or more",
@@ -82,20 +82,21 @@
    "measure_b": 0.949,
    "method": "local rank (symbol, holding period, direction, time of day)",
    "n_a": 126,
-   "n_a_compared": 114,
+   "n_a_compared": null,
    "n_b": 72,
-   "n_b_compared": 69,
-   "n_perm": 10000,
+   "n_b_compared": null,
+   "n_perm": null,
    "name": "Size after a loss",
-   "p_holm": 1.0,
-   "p_raw": 0.8197180281971803,
+   "p_holm": null,
+   "p_raw": null,
    "question": "Is your trade size after a loss different from your size after a win?",
    "research_ref": {
     "cite": "Coval, J. D. & Shumway, T. (2005). Do behavioral biases affect prices? Journal of Finance 60(1), 1-34.",
     "url": null
    },
-   "share": 0.511204481792717,
-   "verdict": "not_distinguishable"
+   "share": null,
+   "verdict": "withheld",
+   "withheld": "not_calibrated"
   },
   {
    "detail": {
@@ -160,9 +161,9 @@
    "verdict": "descriptive"
   }
  ],
- "method_version": "2026-10-23.stats2b",
+ "method_version": "2026-10-23.stats2c",
  "n_distinguishable": 0,
- "n_tested": 3,
+ "n_tested": 2,
  "n_trades": 200,
  "period_weeks": 1,
  "pgr_plr": null,
