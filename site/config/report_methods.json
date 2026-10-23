@@ -1,0 +1,10 @@
+{
+ "_note": "The habit report's method versions, dated (shown on /corrections/#report-method). The Lead's decision, 23 Oct 2026: the re-test sentence (\"every change is dated on the corrections page\") must be true from the first sale, so every METHOD_VERSION the paid page accepts (site/static/js/paid/wording.js) needs an entry here; site/build.py refuses to build without one. Newest first.",
+ "entries": [
+  {
+   "date": "2026-10-23",
+   "method": "2026-10-23.stats2d",
+   "text": "First version of the habit report. It tests up to two habits against chance: re-entering soon after a loss, and trading after a losing run. It describes the hold gap, size after a loss and unusually large losses, with the dollar totals of the matching trades, without testing them. Rows in your file that share a symbol, a direction and an open minute (for example, a position closed in parts) count as one trade."
+  }
+ ]
+}
