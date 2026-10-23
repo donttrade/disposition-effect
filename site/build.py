@@ -1089,6 +1089,12 @@ def usd(n):
     return "${:,}".format(int(n))
 
 
+def isodate(human):
+    """"23 Oct 2026" -> "2026-10-23" (the price-history rows are written in the human form)."""
+    import datetime as dt
+    return dt.datetime.strptime(human, "%d %b %Y").date().isoformat()
+
+
 def usd_fr(n):
     """39,00 $ US — Québec style (FRENCH-LEGAL: amounts written « 79,00 $ US »)."""
     if n != int(n):
@@ -1557,6 +1563,7 @@ def build():
                       autoescape=True, keep_trailing_newline=True)
     env.filters["usd"] = usd
     env.filters["usd_fr"] = usd_fr
+    env.filters["isodate"] = isodate
     products = {p["id"]: p for p in prices["products"]}
     base_ctx = {"site": cfg["site"], "flags": flags, "nav": cfg["nav"], "footer": cfg["footer"],
                 "legal": cfg["legal"], "forms": cfg["forms"], "analytics": cfg["analytics"],

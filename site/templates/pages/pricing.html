@@ -133,7 +133,19 @@
     <table>
       <thead><tr><th scope="col">Date</th><th scope="col">Change</th></tr></thead>
       <tbody>
-        <tr><td>{{ legal.launch_human }}</td><td>The first firm engagement is renamed {{ pilot.name }} (called “{{ pilot.former_name }}” before {{ legal.launch_human }}), at the same price. The trader prices once listed for after the founding offer are withdrawn; nothing had been sold at them. The end date once shown with the firm prices is removed: they have none. No price charged today changed.</td></tr>
+        {#- Rows newest first. The launch row's date is [legal] launch_date, so it sorts against the fixed rows. #}
+        {%- set launch_row %}<tr><td>{{ legal.launch_human }}</td><td>The first firm engagement is renamed {{ pilot.name }} (called “{{ pilot.former_name }}” before {{ legal.launch_human }}), at the same price. The trader prices once listed for after the founding offer are withdrawn; nothing had been sold at them. The end date once shown with the firm prices is removed: they have none. No price charged today changed.</td></tr>{% endset %}
+        {#- Owner decision 23 Oct: the founding offer is the first 100 buyers (Stripe enforces it: the $39 link is
+            limited to founding_limit completed payments). The 16 Oct row below stays as published. #}
+        {%- set founding_date = "23 Oct 2026" %}
+        {%- set founding_row %}<tr id="history-founding"><td>{{ founding_date }}</td><td>The founding price of the {{ r.name|lower }}, {{ r.price_usd|usd }}, is for its first {{ prices.rules.founding_limit }} buyers; people on the waitlist are emailed first when it goes on sale. No price changed.</td></tr>{% endset %}
+        {%- if legal.terms_version > founding_date|isodate %}
+        {{ launch_row }}
+        {{ founding_row }}
+        {%- else %}
+        {{ founding_row }}
+        {{ launch_row }}
+        {%- endif %}
         <tr><td>17 Oct 2026</td><td>Claims substantiation test added, at the existing engagements and prices. No price changed.</td></tr>
         <tr><td>17 Oct 2026</td><td>Copy-leader persistence test for copy-trading platforms added, at the existing engagements and prices. No price changed.</td></tr>
         <tr><td>16 Oct 2026</td><td>Founding price for the first 100 on the trader waitlist added.</td></tr>

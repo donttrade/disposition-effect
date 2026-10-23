@@ -111,7 +111,21 @@ dated_pricing = ["launch pricing", "launch price", "launch prices", "valid befor
                  "signed before", "prices valid until", "price valid until", "pricing valid until", "priceValidUntil",
                  "tarif de lancement", "tarifs de lancement", "prix de lancement", "valable jusqu’au", "valable jusqu'au",
                  "valables jusqu’au", "valables jusqu'au"]
+# Owner decision 23 Oct (founding offer = "first 100 buyers"; OSC rule, Competition Bureau scarcity guidance): a
+# static "first 100 buyers" line is fine, but no page or script shows how many are left, a countdown or urgency.
+# Regexes, case-insensitive, on every page (EN and FR, visible text, meta, JSON-LD strings) and every script's strings.
+scarcity = ['\b(?:spots?|places?|seats?|slots?|spaces?)\s+(?:are\s+)?(?:left|remaining|available)\b',
+            '\bonly\s+(?:\d[\d,]*|a\s+few|few|one|two|three|four|five|ten)\s+(?:\w+\s+)?(?:left|remaining)\b',
+            '\b\d[\d,]*\s*(?:of\s+|/\s*)\d[\d,]*\s+(?:\w+\s+)?(?:sold|taken|claimed|left|remaining|gone)\b',
+            '\b\d[\d,]*\s+(?:founding\s+)?(?:spots?|places?|seats?|slots?|reports?|copies)\s+(?:left|remaining)\b',
+            '\bcount\s*-?\s*down\b', '\bselling\s+fast\b', '\balmost\s+(?:gone|full|sold\s+out)\b',
+            '\bfilling\s+(?:up\s+)?fast\b', '\bhurry\b', '\blast\s+chance\b', '\bact\s+(?:now|fast)\b',
+            '\bends\s+in\s+\d+\s*(?:days?|hours?|minutes?|hrs?|mins?)\b', '\bwhile\s+(?:spots|places|stocks?|supplies)\s+last\b',
+            'places?\s+restantes?', '\bplus\s+que\s+\d[\d\s]*\s*places?\b', 'compte\s+à\s+rebours',
+            'derni[eè]re\s+chance', '\bdépêchez-vous\b']
 not_on_sale_allow = ["Founding price for the first 100 on the trader waitlist added.",
+                     # the 23 Oct price-history row (owner decision: the founding offer is the first 100 buyers)
+                     "The founding price of the habit report, $39, is for its first 100 buyers; people on the waitlist are emailed first when it goes on sale.",
                      "its own research page reads “Coming Soon.”",
                      # C1: the free tools' neutral line names a check, not the report's sale status
                      "‘real or noise’ check for this number is coming soon.",
