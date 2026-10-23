@@ -43,6 +43,8 @@ import shutil
 import sys
 import tomllib
 
+from html.parser import HTMLParser as _HTMLParser
+
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from markupsafe import Markup
 
@@ -1247,8 +1249,74 @@ def check_language_pairs(out, base_url):
                 die(f"language link: {path} has no visible link to its {lang} version {other}")
 
 
+# Delivery plan C-11 (P-5): a page may say the trade numbers are not stored only next to the
+# fingerprint that IS kept (/privacy/ discloses it). Any block element whose text holds one of
+# STORAGE_CLAIMS must also hold one of STORAGE_QUALIFIERS; the build fails otherwise.
+STORAGE_CLAIMS = ("not stored", "not kept", "never stored", "ne sont pas conservés")
+STORAGE_QUALIFIERS = ("fingerprint", "empreinte")
+_BLOCK_TAGS = {"p", "li", "dd", "dt", "td", "th", "summary", "details", "figcaption", "blockquote", "h1", "h2", "h3",
+               "h4", "h5", "h6", "div", "section", "article", "aside", "main", "header", "footer", "label", "legend",
+               "caption", "body", "html"}
+
+
+class _BlockText(_HTMLParser):
+    """The text of every block element (with its descendants), skipping script and style."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.open, self.done, self.skip = [], [], 0
+
+    def handle_starttag(self, tag, attrs):
+        if tag in ("script", "style"):
+            self.skip += 1
+        elif tag in _BLOCK_TAGS:
+            self.open.append([tag, []])
+
+    def handle_endtag(self, tag):
+        if tag in ("script", "style"):
+            self.skip = max(0, self.skip - 1)
+        elif tag in _BLOCK_TAGS:
+            for k in range(len(self.open) - 1, -1, -1):   # close the nearest open element of that tag
+                if self.open[k][0] == tag:
+                    for t, parts in self.open[k:][::-1]:
+                        self.done.append((t, " ".join(parts)))
+                    del self.open[k:]
+                    break
+
+    def handle_data(self, data):
+        if not self.skip:
+            for entry in self.open:
+                entry[1].append(data)
+
+
+def storage_claim_problems(html, where):
+    p = _BlockText()
+    p.feed(html)
+    p.close()
+    out, flagged = [], []
+    for tag, text in p.done + [(t, " ".join(parts)) for t, parts in p.open]:   # inner elements close first
+        t = re.sub(r"\s+", " ", text.replace("\u2019", "'")).lower().strip()
+        claims = [c for c in STORAGE_CLAIMS if c in t]
+        if not claims or any(q in t for q in STORAGE_QUALIFIERS):
+            continue
+        if any(f in t for f in flagged):
+            continue   # an ancestor of an element already reported: report the innermost only
+        flagged.append(t)
+        out.append(f"{where}: <{tag}> says {claims[0]!r} without the fingerprint that is kept: {t[:200]}")
+    return out
+
+
 def verify(out, flags, seller=None, base_url=None):
     """seller: whether the seller block may appear (show_seller); defaults to any commerce flag."""
+    storage = []
+    for root, _, files in os.walk(out):
+        for name in sorted(files):
+            if name.endswith(".html"):
+                fp = os.path.join(root, name)
+                with open(fp, encoding="utf-8", errors="replace") as f:
+                    storage += storage_claim_problems(f.read(), os.path.relpath(fp, out))
+    if storage:
+        die("P-5 storage claim: " + "; ".join(storage[:5]) + (f" (and {len(storage) - 5} more)" if len(storage) > 5 else ""))
     if base_url:
         check_language_pairs(out, base_url)
     if seller is None:
@@ -1379,7 +1447,8 @@ def build():
                 "worker": cfg["worker"], "prices": prices, "products": products, "private": private,
                 "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": tools_for(flags),
                 "evidence": evidence(), "footer_privacy": footer_privacy(flags), "show_seller": show_seller(cfg),
-                "business_id_line": Markup(business_id_line(cfg, private, "legal"))}
+                "business_id_line": Markup(business_id_line(cfg, private, "legal")),
+                "strings": read_toml(os.path.join(SITE, "config", "strings.toml"), "strings.toml")}
     built = []
     for rel, page in sorted(owned.items()):
         page = {"scripts": [], "modules": [], "og_image": "/assets/og/default.png", "lang": "en",
