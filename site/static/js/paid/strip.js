@@ -15,6 +15,14 @@ import { median } from '../engine/noise.js';
 
 export const MAX_ROWS = 20000;
 const DAY = 86400000;
+// The server takes at most 10 years: o <= 520 weeks of minutes from the first trade's week, h <= 3,650
+// days (dt-private validate.mjs MAX_O, MAX_H). Delivery plan C-10: keep the trades opened in the last
+// 519 weeks before the latest open (the week anchor can sit up to 7 days before the first kept open)
+// and held at most 3,650 days, as the 20,000-row cap keeps the latest trades.
+export const SPAN_WEEKS = 520;
+export const MAX_HOLD_S = 86400 * 3650;
+const SPAN_KEEP_MS = (SPAN_WEEKS - 1) * 7 * DAY;
+export const spanLine = (n) => `Only the last 10 years of this file were used (${n} trade${n === 1 ? '' : 's'} left out).`;
 const roundHalfAway = (x) => Math.floor(Math.abs(x) + 0.5) * (x >= 0 ? 1 : -1);
 export const round3 = (x) => roundHalfAway(x * 1000) / 1000;
 export const round2 = (x) => roundHalfAway(x * 100) / 100;
@@ -46,7 +54,10 @@ export function randomPerm(n) {
 
 // trades: ParseResult.trades (close-time order). perm(n) is injectable for tests.
 export async function stripRows(trades, salt, perm = randomPerm) {
-  const used = trades.length > MAX_ROWS ? trades.slice(trades.length - MAX_ROWS) : trades;
+  let maxOpen = -Infinity;
+  for (const t of trades) if (t.open_ts > maxOpen) maxOpen = t.open_ts;
+  const inSpan = trades.filter((t) => t.open_ts >= maxOpen - SPAN_KEEP_MS && t.hold_s <= MAX_HOLD_S);
+  const used = inSpan.length > MAX_ROWS ? inSpan.slice(inSpan.length - MAX_ROWS) : inSpan;
   let minOpen = Infinity;
   for (const t of used) if (t.open_ts < minOpen) minOpen = t.open_ts;
   const anchor = weekAnchor(minOpen);
@@ -65,5 +76,5 @@ export async function stripRows(trades, salt, perm = randomPerm) {
     rows.push({ o: Math.floor((t.open_ts - anchor) / 60000), h: t.hold_s, d: t.dir === 'long' ? 1 : -1,
       q: round3(t.qty / med.get(t.symbol)), p: round2(t.pnl), s: index.get(t.symbol), f: await fingerprint(salt, t) });
   }
-  return { rows, limited: trades.length > MAX_ROWS, anchor };
+  return { rows, limited: inSpan.length > MAX_ROWS, anchor, span_left_out: trades.length - inSpan.length };
 }

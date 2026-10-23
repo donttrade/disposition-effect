@@ -9,7 +9,7 @@
 import { runFile } from '../engine/index.js';
 import { ics, retestLine, RETEST_LINE } from './retest-copy.js';
 import { pgrPlrCounts } from '../engine/pgr.js';
-import { stripRows } from './strip.js';
+import { stripRows, spanLine } from './strip.js';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js';
 import { habitSentences, methodLine, page1Lines, coverageLines, checkMethod } from './wording.js';
 
@@ -205,7 +205,7 @@ export function renderReport(report, out, meta) {
   const cov = el('div', { id: 'coverage' });
   for (const line of coverageLines(report)) cov.append(el('p', { class: 'small', text: line }));
   p1.append(cov);
-  p1.append(el('p', { class: 'small muted', text: `${report.n_trades} trades over about ${report.period_weeks} week${report.period_weeks === 1 ? '' : 's'}.${meta && meta.limited ? ' Only the most recent 20,000 trades were used.' : ''}` }));
+  p1.append(el('p', { class: 'small muted', text: `${report.n_trades} trades over about ${report.period_weeks} week${report.period_weeks === 1 ? '' : 's'}.${meta && meta.span_left_out ? ' ' + spanLine(meta.span_left_out) : ''}${meta && meta.limited ? ' Only the most recent 20,000 trades were used.' : ''}` }));
   out.append(p1);
 
   // Summary table of all habits.
@@ -286,13 +286,14 @@ async function run(file) {
   const firm = $('rp-firm').value.trim();
   const body = { v: 1, token, rows: stripped.rows, currency: trades[0].pnl_unit, pgr_plr: counts,
     firm_name: firm ? firm.slice(0, 80) : null, firm_consent: $('rp-firm-consent').checked };
-  status(`Sending ${stripped.rows.length} stripped trade rows (no names, accounts or symbols)…`);
+  const span = stripped.span_left_out ? spanLine(stripped.span_left_out) + ' ' : '';
+  status(`${span}Sending ${stripped.rows.length} stripped trade rows (no names, accounts or symbols)…`);
   const r = await api('/analyse', body);
   if (r.status === 0 || r.status >= 500) { status(OUTAGE, 'error'); return; }
   if (!r.ok) { status(r.json && r.json.error ? r.json.error.message : 'The report could not be made.', 'error'); return; }
   $('rp-status').hidden = true;
   try {
-    renderReport(r.json.report, $('rp-out'), { limited: stripped.limited, retest: r.json.retest || null, uses_left: r.json.uses_left });
+    renderReport(r.json.report, $('rp-out'), { limited: stripped.limited, span_left_out: stripped.span_left_out, retest: r.json.retest || null, uses_left: r.json.uses_left });
   } catch (e) {
     // wording.js throws rather than print a sentence that is not true of this report (R2-3).
     $('rp-out').replaceChildren();
