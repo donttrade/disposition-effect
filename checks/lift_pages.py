@@ -115,6 +115,15 @@ LIFT_FIXES = {
     "/404.html": [
         ('<a href="/start/">Start a trial</a>', '<a href="/start/">Start a Pilot</a>'),
     ],
+    # Delivery plan C-12 (P-3, now): the page is a research figure, not the $39 report (which tests
+    # habits in the buyer's own file and has no percentile). "measures five habits": four are tested
+    # and one is described, and "tests five habits" is a stale claim the build test refuses.
+    "/sample-report/": [
+        ("This is what the coming trader report looks like, run on one real trader’s history. Your own report would be "
+         "computed the same way from your own trade export.",
+         "This is a research figure from public data. It is not the trader report: the report measures five habits in "
+         "your own file and shows no percentile."),
+    ],
 }
 
 # Head text that breaks the v2 SEO rules (title ≤ 60, description 50–155 characters). Head
