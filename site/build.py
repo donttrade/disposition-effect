@@ -849,6 +849,17 @@ def check_schema(cfg, toml_path):
             die(f"site.toml has no [[{table}]] entries ({toml_path})")
 
 
+# R-D1 D-6: the report method the paid wording accepts, read from the very constant checkMethod() uses, so
+# the build cannot state a different one. The paid pages carry it as <meta name="dt-method">, and
+# dt-private's scripts/smoke.mjs compares it with the Worker's /health method.
+def paid_method():
+    src = open(os.path.join(SITE, "static", "js", "paid", "wording.js"), encoding="utf-8").read()
+    m = re.findall(r"^export const METHOD_VERSION = '([0-9a-z.-]+)';$", src, re.M)
+    if len(m) != 1:
+        raise SystemExit("build: site/static/js/paid/wording.js must define METHOD_VERSION exactly once")
+    return m[0]
+
+
 def read_toml(path, label):
     """tomllib.load, but a syntax error is a BUILD FAILED line, not a traceback (Tester NIT 1)."""
     try:
@@ -1448,7 +1459,8 @@ def build():
                 "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": tools_for(flags),
                 "evidence": evidence(), "footer_privacy": footer_privacy(flags), "show_seller": show_seller(cfg),
                 "business_id_line": Markup(business_id_line(cfg, private, "legal")),
-                "strings": read_toml(os.path.join(SITE, "config", "strings.toml"), "strings.toml")}
+                "strings": read_toml(os.path.join(SITE, "config", "strings.toml"), "strings.toml"),
+                "paid_method": paid_method()}
     built = []
     for rel, page in sorted(owned.items()):
         page = {"scripts": [], "modules": [], "og_image": "/assets/og/default.png", "lang": "en",
