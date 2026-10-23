@@ -55,7 +55,8 @@ const count = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 // The formatters wording.js fills its sentences with (ARCHITECT-STATS-AMENDMENT-R2 §9: money as now).
 const wordingFmt = (unit) => ({ money: (x) => money(x, unit), duration, ratio: (x) => num(x), count });
 
-// The habits shown with wording.js sentences (hold_gap: M1, V-launch, M3 under stats2b); the descriptive
+// The habits shown with wording.js sentences (hold_gap: M1, V-launch, M3 under stats2b; size_up: M1,
+// V-launch-size under stats2c); the descriptive
 // oversized_loss shows its measures list.
 const TESTED = SENTENCE_HABITS;
 
@@ -95,7 +96,7 @@ function detailLine(h, unit) {
   return null;
 }
 
-// "after adjusting for the 3 patterns tested": the count is the report's own n_tested (at most 3 under stats2b).
+// "after adjusting for the N patterns tested": the count is the report's own n_tested (at most 2 under stats2c).
 const testedPhrase = (n) => `the ${n} pattern${n === 1 ? '' : 's'} tested`;
 
 function dollarsLine(h, unit) {
@@ -191,7 +192,7 @@ function download(name, type, text) {
 
 export function renderReport(report, out, meta) {
   const unit = report.currency;
-  checkReport(report);   // method and the stats2b hold_gap shape, before anything is drawn
+  checkReport(report);   // method and the stats2c hold_gap and size_up shapes, before anything is drawn
   out.replaceChildren();
   out.append(el('p', { class: 'disclaimer notice', text: report.disclaimer }));
   // Page 1 (ARCHITECT-STATS-AMENDMENT-R2 §9.1): the headline, the focus habit or why none is

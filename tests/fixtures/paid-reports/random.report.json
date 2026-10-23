@@ -70,7 +70,7 @@
   },
   {
    "detail": null,
-   "direction": "opposite",
+   "direction": null,
    "dollars": {
     "amount": -451.63000000000005,
     "label": "Trades after a loss at 1.5 times your usual size or more",
@@ -82,20 +82,21 @@
    "measure_b": 1.0310000000000001,
    "method": "local rank (symbol, holding period, direction, time of day)",
    "n_a": 187,
-   "n_a_compared": 101,
+   "n_a_compared": null,
    "n_b": 196,
-   "n_b_compared": 109,
-   "n_perm": 10000,
+   "n_b_compared": null,
+   "n_perm": null,
    "name": "Size after a loss",
-   "p_holm": 0.6817318268173183,
-   "p_raw": 0.3408659134086591,
+   "p_holm": null,
+   "p_raw": null,
    "question": "Is your trade size after a loss different from your size after a win?",
    "research_ref": {
     "cite": "Coval, J. D. & Shumway, T. (2005). Do behavioral biases affect prices? Journal of Finance 60(1), 1-34.",
     "url": null
    },
-   "share": 0.4528985507246377,
-   "verdict": "not_distinguishable"
+   "share": null,
+   "verdict": "withheld",
+   "withheld": "not_calibrated"
   },
   {
    "detail": {
@@ -120,7 +121,7 @@
    "n_b_compared": null,
    "n_perm": 10000,
    "name": "Trading after a losing streak",
-   "p_holm": 0.6817318268173183,
+   "p_holm": 0.40685931406859316,
    "p_mean": 0.3912608739126087,
    "p_rank": 0.40685931406859316,
    "p_raw": 0.40685931406859316,
@@ -160,9 +161,9 @@
    "verdict": "descriptive"
   }
  ],
- "method_version": "2026-10-23.stats2b",
+ "method_version": "2026-10-23.stats2c",
  "n_distinguishable": 0,
- "n_tested": 2,
+ "n_tested": 1,
  "n_trades": 400,
  "period_weeks": 5,
  "pgr_plr": null,

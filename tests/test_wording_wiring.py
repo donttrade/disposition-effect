@@ -1,10 +1,11 @@
 """The statistics amendment's wording, wired into the pages (CODER-WIRING-REPORT-2026-10-21).
 
 * /report/: renderReport() (report.js) shows the R2 §9.1-9.2 sentences from wording.js
-  (ARCHITECT-STATS-AMENDMENT-R2; method 2026-10-23.stats2b since ruling R-D2, so hold_gap is always
-  withheld / not_calibrated and shows M1, V-launch and M3): the page-1 headline, the focus line or
-  N0 with one reason line per distinguishable habit, the coverage lines (3 habits, plus the fixed
-  hold-gap line); each tested habit's lines; the method line with the habit's OWN n_perm (D-4).
+  (ARCHITECT-STATS-AMENDMENT-R2; method 2026-10-23.stats2c since ruling R-D3, so hold_gap is always
+  withheld / not_calibrated and shows M1, V-launch and M3, and size_up is always withheld / not_calibrated
+  and shows M1 and V-launch-size): the page-1 headline, the focus line or N0 with one reason line per
+  distinguishable habit, the coverage lines (2 habits, plus the fixed hold-gap and size-up lines); each
+  tested habit's lines; the method line with the habit's OWN n_perm (D-4).
   No fixed "10,000 shuffles" or "testing four habits" claim is left.
 * /tools/trade-stats/: a guarded expectancy check shows the §7.2 sentence; the D-9 footnote
   is under the three checks; the method text says the mean result is resampled.
@@ -50,7 +51,8 @@ async (cases) => {
     n_perm: MED.includes(id) ? nMed : nSeq, n_a_compared: MED.includes(id) ? 38 : null, n_b_compared: MED.includes(id) ? 85 : null,
     ...(id === 'hold_gap' ? { verdict: 'withheld', withheld: 'not_calibrated', p_raw: null, p_holm: null, n_perm: null, direction: null,
       share_a: null, share_b: null, n_a_compared: null, n_b_compared: null, spread_ratio: null, n_long_a: 0, n_long_b: 0 } : {}),
-    ...(id === 'size_up' ? { share: 0.583 } : {}), ...(id === 'revenge' || id === 'tilt' ? { p_mean: 0.0004, p_rank: 0.0003 } : {}),
+    ...(id === 'size_up' ? { verdict: 'withheld', withheld: 'not_calibrated', p_raw: null, p_holm: null, n_perm: null, direction: null,
+      share: null, n_a_compared: null, n_b_compared: null } : {}), ...(id === 'revenge' || id === 'tilt' ? { p_mean: 0.0004, p_rank: 0.0003 } : {}),
     detail: id === 'tilt' ? { streak3_n: 12, streak3_mean: -20 } : null, research_ref: null,
     dollars: { label: labels[id], amount: -500, n_trades: 40 }, ...o });
   const OVR = { id: 'oversized_loss', name: names.oversized_loss, question: 'Q?', n_a: 10, n_b: null, measure_a: 0.05, measure_b: 0.3,
@@ -60,7 +62,7 @@ async (cases) => {
   const R = (c) => {
     const habits = all.map((id) => H(id, c.nMed, c.nSeq, (c.over || {})[id] || {})).concat([OVR]);
     return { v: 1, currency: 'USD', disclaimer: 'donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.',
-      engine_commit: 'test', rule_library_version: 'test', rule_library: ['Rule one.', 'Rule two.'], method_version: '2026-10-23.stats2b',
+      engine_commit: 'test', rule_library_version: 'test', rule_library: ['Rule one.', 'Rule two.'], method_version: '2026-10-23.stats2c',
       n_trades: c.n, period_weeks: 10, pgr_plr: null, focus: c.focus,
       n_tested: habits.filter((h) => h.p_raw !== null).length, n_distinguishable: habits.filter((h) => h.verdict === 'distinguishable').length, habits };
   };
@@ -81,31 +83,35 @@ async (cases) => {
 
 ND = {"verdict": "not_distinguishable", "p_raw": 0.4, "p_holm": 1.0}
 TF = {"verdict": "too_few", "p_raw": None, "p_holm": None, "n_perm": None, "n_a": 12}
-# hold_gap is withheld / not_calibrated in every case (stats2b, R-D2)
+# hold_gap (R-D2) and size_up (R-D3) are withheld / not_calibrated in every case (stats2c)
 CASES = {
     # 20,000 rows: N_MED = 5,000 and N_SEQ = 2,000 (D-4)
     "big_focus": {"n": 20000, "nMed": 5000, "nSeq": 2000, "focus": "revenge",
-                  "over": {"size_up": ND, "tilt": ND}},
+                  "over": {"tilt": ND}},
     # 6,000 rows: N_MED = 10,000, N_SEQ = floor(40,000,000 / 6,000) = 6,666
     "mid_opposite": {"n": 6000, "nMed": 10000, "nSeq": 6666, "focus": None,
-                     "over": {"tilt": {"direction": "opposite", "effect": 4}, "size_up": ND, "revenge": ND}},
+                     "over": {"tilt": {"direction": "opposite", "effect": 4}, "revenge": ND}},
     "too_few": {"n": 300, "nMed": 10000, "nSeq": 10000, "focus": None,
-                "over": {"revenge": TF, "size_up": {**TF, "n_a_compared": 9}, "tilt": ND}},
+                "over": {"revenge": TF, "tilt": ND}},
     # PLAN CONFLICT §7.1: revenge distinguishable in its own direction, but its trades totalled a gain
     "own_gain": {"n": 300, "nMed": 10000, "nSeq": 10000, "focus": None,
                  "over": {"revenge": {"dollars": {"label": "Trades opened within 15 minutes of a losing trade's close",
                                                   "amount": 120, "n_trades": 40}},
-                          "size_up": ND, "tilt": ND}},
+                          "tilt": ND}},
     "none": {"n": 300, "nMed": 10000, "nSeq": 10000, "focus": None,
-             "over": {k: ND for k in ("revenge", "size_up", "tilt")}},
+             "over": {k: ND for k in ("revenge", "tilt")}},
     # R-D2: hold_gap described, with trades held 12 hours or more (M3)
     "launch_m3": {"n": 300, "nMed": 10000, "nSeq": 10000, "focus": None,
-                  "over": {"hold_gap": {"n_long_a": 2, "n_long_b": 1}, "revenge": ND, "size_up": ND, "tilt": ND}},
+                  "over": {"hold_gap": {"n_long_a": 2, "n_long_b": 1}, "revenge": ND, "tilt": ND}},
 }
 V_LAUNCH = ("Not tested in this version of the report. In our tests on files built to have no real pattern, this test reported "
             "a gap in more than 1 file in 20, the rate it is designed for, when a large win or loss changed how long the next "
             "trades were held. So this pattern is described here without a verdict.")
 HG_LINE = "Holding losers longer than winners is described, not tested, in this version of the report."
+V_LAUNCH_SIZE = ("Not tested in this version of the report. In our tests on files built to have no real pattern, this test "
+                 "reported a gap in more than 1 file in 20, the rate it is designed for, in files that mix several symbols whose "
+                 "sizes and results both follow the time of day. So this pattern is described here without a verdict.")
+SU_LINE = "Size after a loss is described, not tested, in this version of the report."
 STALE = ["10,000 shuffles", "Holm correction for testing four", "testing four habits", "Permutation test on past data"]
 
 
@@ -126,32 +132,32 @@ def test_method_line_carries_the_scaled_permutation_counts(rendered):
     big = rendered["big_focus"]
     assert ("The results were reshuffled within each day 2,000 times (days with a single trade are grouped with nearby such "
             "days).") in big["method"][0]
-    assert big["method"][1].startswith("How this is compared: each trade's size is first ranked against the 20 trades of the same symbol")
-    assert "within each group 5,000 times to see how large a gap chance alone produces." in big["method"][1]
-    assert len(big["method"]) == 3          # hold_gap is not tested (R-D2): no method line
-    assert all("after adjusting for the 3 patterns tested (Holm)" in m for m in big["method"])
-    assert not any("each trade's hold is first ranked" in m for case in rendered.values() for m in case["method"])
+    assert big["method"][1].startswith("Compared with your other trades from the same day. The results were reshuffled within each day 2,000 times")
+    assert len(big["method"]) == 2          # hold_gap (R-D2) and size_up (R-D3) are not tested: no method line
+    assert all("after adjusting for the 2 patterns tested (Holm)" in m for m in big["method"])
+    assert not any("each trade's hold is first ranked" in m or "each trade's size is first ranked" in m
+                   for case in rendered.values() for m in case["method"])
     mid = rendered["mid_opposite"]["method"]
-    assert "6,666 times" in mid[0] and "10,000 times" in mid[1]
+    assert "6,666 times" in mid[0] and "6,666 times" in mid[1]
     for case in rendered.values():
         for s in STALE:
             assert s not in case["text"], s
     # too_few and withheld habits have no method line (no test ran)
     assert len(rendered["too_few"]["method"]) == 1
-    assert len(rendered["launch_m3"]["method"]) == 3
+    assert len(rendered["launch_m3"]["method"]) == 2
 
 
 def test_page_one_uses_the_amendment_lines(rendered):
     p1 = rendered["big_focus"]["page1"]
-    assert ("1 of the 3 patterns tested in this file is distinguishable from noise. Each verdict is adjusted for testing 3 "
+    assert ("1 of the 2 patterns tested in this file is distinguishable from noise. Each verdict is adjusted for testing 2 "
             "patterns at once. In our tests on files built to have no real pattern, at least one pattern showed as "
             "distinguishable in about 1 report in 20 or fewer.") in p1
     assert ("Shown first: Re-entering soon after a loss. Trades opened within 15 minutes of a losing trade's close totalled "
             "−$500.00 (historical).") in p1
     assert [x for x in rendered["big_focus"]["coverage"].splitlines() if x.strip()] == [
-        "3 of the 3 habits could be tested. Each one compares two groups of at least 30 trades.", HG_LINE]
-    for k, case in rendered.items():        # every stats2b page 1 carries the fixed hold-gap line exactly once
-        assert case["page1"].count(HG_LINE) == 1, k
+        "2 of the 2 habits could be tested. Each one compares two groups of at least 30 trades.", HG_LINE, SU_LINE]
+    for k, case in rendered.items():        # every stats2c page 1 carries the fixed hold-gap and size-up lines once each
+        assert case["page1"].count(HG_LINE) == 1 and case["page1"].count(SU_LINE) == 1, k
     # the old page said "No pattern ... distinguishable" whenever focus was null: false here
     opp = rendered["mid_opposite"]["page1"]
     assert "No pattern in this file is distinguishable from noise." not in opp
@@ -166,20 +172,26 @@ def test_page_one_uses_the_amendment_lines(rendered):
     none = rendered["none"]["page1"]
     assert "No pattern in this file is distinguishable from noise." in none
     assert "That does not show the patterns are absent; it means this file cannot tell them apart from chance." in none
-    assert "Not tested: Re-entering soon after a loss, Size after a loss." in rendered["too_few"]["coverage"]
-    assert "1 of the 3 habits could be tested." in rendered["too_few"]["coverage"]
+    assert "Not tested: Re-entering soon after a loss." in rendered["too_few"]["coverage"]
+    assert "1 of the 2 habits could be tested." in rendered["too_few"]["coverage"]
+    assert "Size after a loss" not in rendered["too_few"]["coverage"].replace(SU_LINE, "")
 
 
 def test_each_habit_shows_its_sentences(rendered):
     h = rendered["big_focus"]["habit"]
     assert "Trades opened within 15 minutes of a losing trade's close averaged −$12.50 per trade; your other trades averaged +$3.25." in h["revenge"]
-    assert "This gap is distinguishable from noise, after adjusting for the 3 patterns tested." in h["revenge"]
+    assert "This gap is distinguishable from noise, after adjusting for the 2 patterns tested." in h["revenge"]
     assert "Your losing trades were held a median of 1h 30m; your winning trades a median of 30m 0s." in h["hold_gap"]
     assert V_LAUNCH in h["hold_gap"] and "not tested" in h["hold_gap"]                 # badge and V-launch
     assert "Compared with similar trades opened just before it" not in h["hold_gap"]    # no M2 (R-D2)
     assert "distinguishable from noise" not in h["hold_gap"] and "Held 12 hours" not in h["hold_gap"]
     assert "Losing trades held longer than your median winning hold: 40 trades, totalling" in h["hold_gap"]   # dollars stay
-    assert "the larger size rank in 58.3% of pairs; 50% would mean no difference." in h["size_up"]
+    # R-D3: size_up shows M1, the "not tested" badge, V-launch-size and its dollar figure; no M2, no verdict
+    assert "Your median size after a loss was 1.60× your median size after a win." in h["size_up"]
+    assert V_LAUNCH_SIZE in h["size_up"] and "not tested" in h["size_up"]
+    assert h["size_up"].index("median size after a loss was") < h["size_up"].index(V_LAUNCH_SIZE)
+    assert "size rank" not in h["size_up"] and "distinguishable from noise" not in h["size_up"] and "reshuffled" not in h["size_up"]
+    assert "Trades after a loss at 1.5 times your usual size or more: 40 trades, totalling" in h["size_up"]   # dollars stay
     assert "Losers were held 3.00 times as long as winners." not in h["hold_gap"]      # shown only when tested
     assert "After 3 or more losses in a row: 12 trades" in h["tilt"]
     assert "Share of all loss dollars: 30.0%" in h["oversized_loss"]                   # descriptive habit unchanged
@@ -189,9 +201,7 @@ def test_each_habit_shows_its_sentences(rendered):
     tf = rendered["too_few"]["habit"]
     assert ("Not enough trades to tell: this pattern compares two groups of at least 30 trades each, and this file has 12 "
             "and 90.") in tf["revenge"]
-    assert ("Not enough trades to tell: trades after a loss and trades after a win are compared only within groups of "
-            "comparable trades, and only 9 and 85 of them share a group with the other kind; the test needs at least 30 of "
-            "each.") in tf["size_up"]
+    assert "Not enough trades to tell" not in tf["size_up"] and V_LAUNCH_SIZE in tf["size_up"]
     assert "averaged" not in tf["revenge"]                                             # the too_few sentence replaces both
     w = rendered["launch_m3"]["habit"]["hold_gap"]
     assert V_LAUNCH in w and "Held 12 hours or more: 2 of your 40 losing trades and 1 of your 90 winning trades." in w

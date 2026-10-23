@@ -3,18 +3,24 @@
 // Report / Habit fields of the R2 engine (method 2026-10-23.stats2b: Architect ruling R-D2, hold_gap is
 // described, not tested, so it is always withheld / not_calibrated and V-launch replaces M2 and the
 // verdict; the V-spread, V-spread0, V-few and M2 hold_gap lines stay for Option B, unreachable under
-// stats2b). No DOM, no I/O: report.js
+// stats2b). Method 2026-10-23.stats2c (Architect ruling R-D3): size_up is described, not tested, too, so it
+// is always withheld / not_calibrated and V-launch-size follows its M1; its M2, verdict and too_few lines
+// stay for a later size method, unreachable under stats2c. No DOM, no I/O: report.js
 // renders them. Every sentence describes the file's past trades only, is printed only when its
 // condition holds, and passes checks/lint.py (tests/test_paid_wording.py, W-1 and W-2).
 //
 // fmt: { money(x), duration(seconds), ratio(x), count(n) } — the page passes its own formatters
 // (money as report.js formats it now); the defaults are plain, for tests.
 
-export const METHOD_VERSION = '2026-10-23.stats2b';
+export const METHOD_VERSION = '2026-10-23.stats2c';
 // V-launch (R-D2 H-2, exact text): hold_gap under stats2b. Replaces M2 and the verdict.
 export const V_LAUNCH = 'Not tested in this version of the report. In our tests on files built to have no real pattern, this test reported a gap in more than 1 file in 20, the rate it is designed for, when a large win or loss changed how long the next trades were held. So this pattern is described here without a verdict.';
-// The fixed page-1 line (R-D2 H-2), on every stats2b report.
+// The fixed page-1 line (R-D2 H-2), on every stats2b and stats2c report.
 export const HOLD_GAP_COVERAGE = 'Holding losers longer than winners is described, not tested, in this version of the report.';
+// V-launch-size (R-D3.2, exact text): size_up under stats2c. Follows M1; replaces M2 and the verdict.
+export const V_LAUNCH_SIZE = 'Not tested in this version of the report. In our tests on files built to have no real pattern, this test reported a gap in more than 1 file in 20, the rate it is designed for, in files that mix several symbols whose sizes and results both follow the time of day. So this pattern is described here without a verdict.';
+// The fixed page-1 line (R-D3.2), on every stats2c report, after HOLD_GAP_COVERAGE.
+export const SIZE_UP_COVERAGE = 'Size after a loss is described, not tested, in this version of the report.';
 // V-spread0 (R-D1 D-1): hold_gap withheld for spread with spread_ratio null (an infinite ratio). Replaces M2 and the verdict.
 export const V_SPREAD0 = "Not tested: the middle half of your losing trades, or of your winning trades, all sit at the same relative position when each trade's hold is ranked among trades of the same symbol, holding period and direction. This test cannot tell a gap in hold apart from a difference in how spread out the holds are.";
 
@@ -25,9 +31,10 @@ const DEFAULT_FMT = {
   count: (n) => String(n),
 };
 
-// The habits a stats2b report can test (R-D2: hold_gap is not one of them), and the habits shown with
-// sentences under their heading (hold_gap's are M1, V-launch and M3).
-export const TESTED = Object.freeze(['revenge', 'size_up', 'tilt']);
+// The habits a stats2c report can test (R-D2: hold_gap is not one of them; R-D3: nor is size_up), and the
+// habits shown with sentences under their heading (hold_gap's are M1, V-launch and M3; size_up's M1 and
+// V-launch-size).
+export const TESTED = Object.freeze(['revenge', 'tilt']);
 export const SENTENCE_HABITS = Object.freeze(['hold_gap', 'revenge', 'size_up', 'tilt']);
 
 function fmtOf(fmt) {
@@ -52,10 +59,20 @@ export function checkHoldGap(report) {
   }
 }
 
+// R-D3: under stats2c size_up is never tested either; any other size_up state means nothing is printed.
+export function checkSizeUp(report) {
+  const h = report && Array.isArray(report.habits) ? report.habits.find((x) => x.id === 'size_up') : null;
+  if (!h) throw new Error('wording: the report has no size_up entry');
+  if (h.verdict !== 'withheld' || h.withheld !== 'not_calibrated' || h.p_raw !== null || h.p_holm !== null || h.n_perm !== null) {
+    throw new Error(`wording: size_up is ${h.verdict}/${h.withheld} with p_raw ${h.p_raw}, but it is not tested in ${METHOD_VERSION} (R-D3)`);
+  }
+}
+
 // Everything renderReport() needs to be true before it shows anything.
 export function checkReport(report) {
   checkMethod(report);
   checkHoldGap(report);
+  checkSizeUp(report);
 }
 
 // ---------------------------------------------------------------- percent format (§9.2)
@@ -138,6 +155,10 @@ function holdGapLines(h, report, f) {
 function sizeUpLines(h, report, f) {
   const out = [];
   if (h.effect !== null) out.push(`Your median size after a loss was ${f.ratio(h.effect)}× your median size after a win.`);   // M1
+  if (h.verdict === 'withheld' && h.withheld === 'not_calibrated') {
+    out.push(V_LAUNCH_SIZE);   // R-D3 (stats2c): replaces M2 and the verdict
+    return out;
+  }
   if (h.verdict === 'too_few') {
     needCounts(h);
     out.push(`Not enough trades to tell: trades after a loss and trades after a win are compared only within groups of comparable trades, and only ${h.n_a_compared} and ${h.n_b_compared} of them share a group with the other kind; the test needs at least 30 of each.`);   // V-few
@@ -162,7 +183,9 @@ function seqLines(h, report, f) {
 // Every line of a tested habit as shown under its heading, in order.
 export function habitSentences(h, report, fmt) {
   checkHoldGap(report);
+  checkSizeUp(report);
   if (h.id === 'hold_gap') checkHoldGap({ habits: [h] });
+  if (h.id === 'size_up') checkSizeUp({ habits: [h] });
   const f = fmtOf(fmt);
   switch (h.id) {
     case 'hold_gap': return holdGapLines(h, report, f);
@@ -237,14 +260,15 @@ export function page1Lines(report, fmt) {
   return lines;
 }
 
-// Coverage lines (page 1, always). R-D2 H-2: three habits can be tested; the hold-gap line is fixed.
+// Coverage lines (page 1, always). R-D3: two habits can be tested (revenge, tilt); the hold-gap and
+// size-up lines are fixed.
 export function coverageLines(report) {
   checkReport(report);
-  const lines = [`${report.n_tested} of the 3 habits could be tested. Each one compares two groups of at least 30 trades.`];
-  if (report.n_tested < 3) {
+  const lines = [`${report.n_tested} of the 2 habits could be tested. Each one compares two groups of at least 30 trades.`];
+  if (report.n_tested < 2) {
     const names = report.habits.filter((h) => TESTED.includes(h.id) && h.p_raw === null).map((h) => h.name);
     lines.push(`Not tested: ${names.join(', ')}.`);
   }
-  lines.push(HOLD_GAP_COVERAGE);
+  lines.push(HOLD_GAP_COVERAGE, SIZE_UP_COVERAGE);
   return lines;
 }

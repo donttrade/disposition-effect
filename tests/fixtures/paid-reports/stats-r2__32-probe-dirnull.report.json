@@ -82,9 +82,9 @@
    "measure_b": 1.0,
    "method": "local rank (symbol, holding period, direction, time of day)",
    "n_a": 95,
-   "n_a_compared": 7,
+   "n_a_compared": null,
    "n_b": 24,
-   "n_b_compared": 7,
+   "n_b_compared": null,
    "n_perm": null,
    "name": "Size after a loss",
    "p_holm": null,
@@ -94,8 +94,9 @@
     "cite": "Coval, J. D. & Shumway, T. (2005). Do behavioral biases affect prices? Journal of Finance 60(1), 1-34.",
     "url": null
    },
-   "share": 0.5,
-   "verdict": "too_few"
+   "share": null,
+   "verdict": "withheld",
+   "withheld": "not_calibrated"
   },
   {
    "detail": {
@@ -160,7 +161,7 @@
    "verdict": "descriptive"
   }
  ],
- "method_version": "2026-10-23.stats2b",
+ "method_version": "2026-10-23.stats2c",
  "n_distinguishable": 0,
  "n_tested": 1,
  "n_trades": 120,
