@@ -56,7 +56,7 @@ def norm(t):
     return re.sub(r"\s+", " ", t.replace("’", "'")).strip()
 
 
-def _build(tmp, name, paid=True, manual_restore=True, fr_link=None, analytics=False):
+def _build(tmp, name, paid=True, manual_restore=True, fr_link=None, analytics=False, extra_env=None):
     src = open(SITE_TOML, encoding="utf-8").read()
     if paid:
         src = re.sub(r"(?m)^paid_report = false", "paid_report = true", src)
@@ -81,6 +81,7 @@ def _build(tmp, name, paid=True, manual_restore=True, fr_link=None, analytics=Fa
            "DT_OUT": str(out), "DT_DEV": ""}
     for k in ("DT_ALLOW_PLACEHOLDERS", "DT_ALLOW_LOCAL_API", "DT_ALLOW_NO_STRIPE_LINK", "DT_PREVIEW"):
         env.pop(k, None)
+    env.update(extra_env or {})
     r = subprocess.run([sys.executable, os.path.join(REPO, "site", "build.py")], env=env, capture_output=True, text=True)
     return r, out
 

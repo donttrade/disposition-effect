@@ -21,7 +21,9 @@
 {%- for lang, href in page.alternates %}
 <link rel="alternate" hreflang="{{ lang }}" href="{{ site.base_url }}{{ href }}">
 {%- endfor %}
-{%- if page.get("noindex") %}
+{%- if preview %}
+<meta name="robots" content="noindex,nofollow">
+{%- elif page.get("noindex") %}
 <meta name="robots" content="noindex">
 {%- endif %}
 <meta property="og:type" content="website">
@@ -59,6 +61,9 @@
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
+{%- if preview %}
+<p class="notice notice-caution" role="note" data-preview-band><strong>Preview, not the live site.</strong> This copy ({{ preview }}) is for testing; the live site is {{ site.base_url }}.</p>
+{%- endif %}
 {% include "partials/header.html" %}
 <main id="main"{% if page.get("main_class") %} class="{{ page.main_class }}"{% endif %}>
 {% block content %}{% endblock %}
