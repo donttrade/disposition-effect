@@ -204,10 +204,7 @@ def test_hold_gap_lines_are_the_amendments():
                                 "Held 12 hours or more: 2 of your 40 losing trades and 0 of your 90 winning trades. This count is "
                                 "not part of the test: trades held 12 hours or more are only compared with each other."]
     # spread_ratio null (infinite: a zero spread): its own sentence, never "spread very differently"
-    assert h["hold_spread0"] == [M1,
-                                 "Not tested: among comparable trades, the middle half of your losing trades' holds or of your "
-                                 "winning trades' holds are all the same length, and this test cannot tell a gap in hold apart from "
-                                 "a difference in how spread out the holds are."]
+    assert h["hold_spread0"] == [M1, V_SPREAD0]
     assert h["hold_few"] == [M1,
                              "Not enough trades to tell: each trade is compared only with similar trades opened just before it, and "
                              "only 9 losing and 6 winning trades have such a comparison in a group holding both kinds; the test "
@@ -263,6 +260,26 @@ def test_percent_format():
     assert p["one"] == ["50%", "58.0%", "50.02%", "50.002%", "50.000%"]
 
 
+# R-D1 D-1: the exact V-spread0 text (the rank position, not hold lengths).
+V_SPREAD0 = ("Not tested: the middle half of your losing trades, or of your winning trades, all sit at the same relative position "
+             "when each trade's hold is ranked among trades of the same symbol, holding period and direction. This test cannot "
+             "tell a gap in hold apart from a difference in how spread out the holds are.")
+
+
+def test_d1_v_spread0_on_the_sizeup0_probe_and_v_spread_on_a_finite_ratio():
+    real = data()["real"]
+    probe = real["stats-r2__33-probe-sizeup0.report.json"]["habits"]["hold_gap"]
+    assert V_SPREAD0 in probe, probe
+    assert not any("spread very differently" in s for s in probe)
+    assert not any("same length" in s for s in probe)
+    finite = real["stats__02-spread-trend_right_skew-200.report.json"]["habits"]["hold_gap"]
+    assert any(s.startswith("Not tested: the holds of your losing and winning trades are spread very differently (the middle half "
+                            "of one group covers 1.9× the range of the other's)") for s in finite), finite
+    assert V_SPREAD0 not in finite
+    for paid in (False, True):
+        assert lint_text(V_SPREAD0, "V-spread0", paid=paid) == []
+
+
 def test_cross_repo_reports_render_without_a_throw_and_are_method_stats2():
     real = data()["real"]
     files = sorted(os.path.basename(f) for f in glob.glob(os.path.join(FIX, "*.report.json")))
@@ -277,7 +294,7 @@ def test_cross_repo_reports_render_without_a_throw_and_are_method_stats2():
     s4 = real["stats-r2__33-probe-sizeup0.report.json"]
     assert s4["page1"][1] == N0 and s4["page1"][2].startswith("Size after a loss: within groups of comparable trades, size after a "
                                                               "loss was larger than size after a win, but no trade in this file")
-    assert s4["habits"]["hold_gap"][-1].startswith("Not tested: among comparable trades")
+    assert s4["habits"]["hold_gap"][-1] == V_SPREAD0
     pr = real["planted_revenge.report.json"]["page1"]
     assert pr[0] == H1.format(k=2, v="are") and pr[1].startswith("Shown first: Re-entering soon after a loss.")
     assert real["stats-r2__32-probe-dirnull.report.json"]["page1"] == H0

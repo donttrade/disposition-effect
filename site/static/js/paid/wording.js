@@ -8,6 +8,8 @@
 // (money as report.js formats it now); the defaults are plain, for tests.
 
 export const METHOD_VERSION = '2026-10-21.stats2';
+// V-spread0 (R-D1 D-1): hold_gap withheld for spread with spread_ratio null (an infinite ratio). Replaces M2 and the verdict.
+export const V_SPREAD0 = "Not tested: the middle half of your losing trades, or of your winning trades, all sit at the same relative position when each trade's hold is ranked among trades of the same symbol, holding period and direction. This test cannot tell a gap in hold apart from a difference in how spread out the holds are.";
 
 const DEFAULT_FMT = {
   money: (x) => String(x),
@@ -83,10 +85,11 @@ function holdGapLines(h, report, f) {
     if (h.withheld !== 'spread') throw new Error(`wording: hold_gap withheld for ${h.withheld}`);
     // V-spread (replaces M2 and the verdict). spread_ratio is null when the ratio is infinite: one
     // group's middle half of holds (or both groups') has no spread at all. "Spread very differently"
-    // would then be false when both have none, so that case has its own sentence (V-spread0, pending
-    // the Architect's ruling on §3.5c: CODER-39-DELIVERY-REPORT, C-1 finding).
+    // would then be false when both have none, so that case has its own sentence (V-spread0, text fixed by
+    // the Architect's ruling R-D1.1 / D-1: the spread is of each hold's rank inside its symbol x holding
+    // period x direction group, so the sentence speaks of that rank, never of equal hold lengths).
     if (h.spread_ratio === null) {
-      out.push('Not tested: among comparable trades, the middle half of your losing trades\' holds or of your winning trades\' holds are all the same length, and this test cannot tell a gap in hold apart from a difference in how spread out the holds are.');
+      out.push(V_SPREAD0);
     } else {
       out.push(`Not tested: the holds of your losing and winning trades are spread very differently (the middle half of one group covers ${h.spread_ratio.toFixed(1)}× the range of the other's), and this test cannot tell a gap in hold apart from that difference.`);
     }
