@@ -32,6 +32,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="{{ page.title }}">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:description" content="{{ page.description }}">
 {%- for name, content in page.get("citation", []) %}
 <meta name="{{ name }}" content="{{ content }}">
 {%- endfor %}
