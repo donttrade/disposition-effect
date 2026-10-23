@@ -8,7 +8,9 @@
   <dl class="byp">
     {{ seller_rows(private, site, "en") }}
     <dt>What you buy</dt><dd>{{ r.name }}: a report on habits in your own past trades, built from a trade file you choose.
-      It describes what happened; it does not tell you what to trade.</dd>
+      It measures and describes five habits, with the dollar totals of the matching trades, and tests up to two of them
+      against chance in this version. It includes one re-test 30 to 60 days after your first report. It describes what
+      happened; it does not tell you what to trade.</dd>
     <dt>Technical requirements</dt><dd>A current version of Chrome, Edge, Firefox or Safari. Files: MetaTrader 5 or 4 HTML report,
       Interactive Brokers Flex Query CSV or Tradovate Orders CSV (all three in beta until a real export confirms the
       columns), or the donttrade CSV template. Your browser reads the file. {{ strings.p5.long }}</dd>
@@ -17,6 +19,7 @@
       charge a currency conversion fee.</dd>
     <dt>Payment</dt><dd>Card, through Stripe's checkout page.</dd>
     <dt>When you get it</dt><dd>Right after payment, in your browser. One re-test is included, to run 30 to 60 days after your first report.
+      Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.
       Access lasts 90 days after purchase, or until 75 days after your first report if that is later.</dd>
     <dt>Restrictions</dt><dd>Two runs: the report and one re-test of the same account (the re-test file has to share at least
       half of the first file's trades). At most 20,000 trades per file. A habit with fewer than 30 trades in either group is
