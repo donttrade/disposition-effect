@@ -11,7 +11,7 @@
     <div class="grid">
       <div class="span-7">
         <h1 id="hero">See where your trades leave your plan.</h1>
-        <p class="lede">A habit report built from your own trade history. It measures behaviour, like holding losing trades longer than winning ones, and tests up to three of these habits against chance. It doesn’t tell you what to trade.</p>
+        <p class="lede">A habit report built from your own trade history. It measures behaviour, like holding losing trades longer than winning ones, and tests up to two of these habits against chance. It doesn’t tell you what to trade.</p>
         <p class="btn-row"><a class="btn" href="/pricing/#traders">Get the habit report — {{ r.price_usd|usd }}</a> <a class="btn btn-secondary" href="/tools/trade-stats/">Free trade stats</a></p>
         <p class="small">{{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers. One time, in US dollars, with one free re-test 30 to 60 days after your first report. A full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying.</p>
         <p class="small muted">Not investment advice. <a href="/pricing/#before-you-pay">Before you pay</a></p>
@@ -32,7 +32,7 @@
       <tbody>
         <tr><th scope="row">Hold gap</th><td>Did you hold losing trades longer than winning ones? (described, not tested in this version)</td></tr>
         <tr><th scope="row">Re-entry after a loss</th><td>Did trades opened within 15 minutes of a loss turn out differently from the rest?</td></tr>
-        <tr><th scope="row">Size after a loss</th><td>Was the trade after a loss larger than the trade after a win?</td></tr>
+        <tr><th scope="row">Size after a loss</th><td>Was the trade after a loss larger than the trade after a win? (described, not tested in this version)</td></tr>
         <tr><th scope="row">Trading after a losing run</th><td>Did trades after two or more losses in a row turn out differently?</td></tr>
         <tr><th scope="row">Unusually large losses</th><td>How many losses were more than twice your typical loss, and what share of your losses they made up (described, not tested)</td></tr>
       </tbody>

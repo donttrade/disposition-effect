@@ -270,9 +270,11 @@ def test_free_page_without_a_guard_has_the_footnote_only(browser, built_site):
 # ------------------------------------------------------------------ the build as a whole
 
 # R-D2 H-3: the "four tested" claims are stale too (hold_gap is described, not tested, under stats2b).
+# R-D3 I-3: so are the "three tested" claims (size_up is described, not tested, under stats2c).
 STALE_BUILD = ["10,000 shuffles", "shuffles your own trades", "Holm correction for testing four", "tests five habits",
                "random signs", "shuffled copies of your own trades", "share of shuffles", "“may be noise”, or",
-               "tests up to four", "of the 4 patterns", "jusqu’à quatre", "tests four of them"]
+               "tests up to four", "of the 4 patterns", "jusqu’à quatre", "tests four of them",
+               "tests up to three", "test up to three", "of the 3 habits", "jusqu’à trois"]
 
 
 def test_no_stale_method_claim_anywhere_in_the_build(built_site):

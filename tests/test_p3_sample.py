@@ -11,7 +11,7 @@ from lint import lint_text, visible_text  # noqa: E402
 
 # R-D2 H-3 (replaces R-D1 D-3's "up to four"): the Architect's exact text.
 LEAD = ("This is a research figure from public data. It is not the trader report: the report covers five habits in "
-        "your own file, tests up to three of them against chance, and shows no percentile.")
+        "your own file, tests up to two of them against chance, and shows no percentile.")
 
 
 def test_sample_report_lead_says_it_is_not_the_trader_report(built_site):
