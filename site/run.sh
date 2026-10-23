@@ -5,6 +5,7 @@
 #   check        build, then every check that exists so far
 #   test-engine  engine tests (Python reference + Chromium golden tests)
 #   test-worker  the private paid-analysis server's Node tests (../dt-private), if present
+#   test-paid-e2e  the paid pages in Chromium against the rehearsal Worker (DT_PRIVATE_REPO, default ../dt-private)
 #   site-tests   the three v1 site test files against a local dir (default site/_site; docs = today's pages)
 #   bundle       replace docs/ on this branch with the build (step 30 only; asks for DT_BUNDLE=yes)
 set -eu
@@ -26,11 +27,14 @@ case "${1:-}" in
   test-worker)
     # DT_PUBLIC_REPO: the server's parity tests (ISO list, vendored noise.js) compare with THIS checkout
     if [ -d "$REPO/../dt-private" ]; then (cd "$REPO/../dt-private" && DT_PUBLIC_REPO="$REPO" node --test); else echo "dt-private not present: the paid-analysis server is kept out of this repo"; fi ;;
+  test-paid-e2e)
+    # delivery plan C-4 Part B: dt-private's deploy bundle on workerd + local D1 + mock Stripe (scripts/rehearse.mjs --serve)
+    DT_PRIVATE_REPO="${DT_PRIVATE_REPO:-$REPO/../dt-private}" python3 -m pytest -q tests/test_paid_e2e_rehearsal.py ;;
   site-tests) python3 site/build.py && python3 checks/tests/run_site_tests.py "${2:-site/_site}" ;;
   bundle)
     if [ "${DT_BUNDLE:-}" != "yes" ]; then echo "bundle replaces docs/ — run with DT_BUNDLE=yes (step 30, after the owner's review)"; exit 1; fi
     DT_REQUIRE_LAUNCH_DATE=1 python3 site/build.py   # [legal] launch_date must be set to the push day
     rm -rf docs && cp -R site/_site docs && rm -rf docs/dev && printf 'donttrade.ca\n' > docs/CNAME && touch docs/.nojekyll
     echo "docs/ replaced from site/_site" ;;
-  *) sed -n '2,10p' "$0"; exit 1 ;;
+  *) sed -n '2,11p' "$0"; exit 1 ;;
 esac
