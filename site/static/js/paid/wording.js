@@ -237,10 +237,10 @@ export function page1Lines(report, fmt) {
   return lines;
 }
 
-// Coverage lines (page 1, always). R-D2 H-2: three patterns can be tested; the hold-gap line is fixed.
+// Coverage lines (page 1, always). R-D2 H-2: three habits can be tested; the hold-gap line is fixed.
 export function coverageLines(report) {
   checkReport(report);
-  const lines = [`${report.n_tested} of the 3 patterns could be tested. Each one compares two groups of at least 30 trades.`];
+  const lines = [`${report.n_tested} of the 3 habits could be tested. Each one compares two groups of at least 30 trades.`];
   if (report.n_tested < 3) {
     const names = report.habits.filter((h) => TESTED.includes(h.id) && h.p_raw === null).map((h) => h.name);
     lines.push(`Not tested: ${names.join(', ')}.`);

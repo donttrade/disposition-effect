@@ -20,7 +20,7 @@ from test_wording_wiring import STALE_BUILD  # noqa: E402
 STALE_R_D2 = ["tests up to four", "of the 4 patterns", "jusqu’à quatre", "tests four of them",
               "tests whether each pattern is more than noise", "test whether each pattern is more than noise"]
 ROW = "Did you hold losing trades longer than winning ones? (described, not tested in this version)"
-LEDE = "like holding losing trades longer than winning ones, and tests up to three patterns against noise."
+LEDE = "like holding losing trades longer than winning ones, and tests up to three of these habits against chance."
 FR = ("par rapport aux gagnantes (décrite, non testée dans cette version); ", "Il en teste jusqu’à trois par rapport au hasard")
 
 
@@ -68,7 +68,7 @@ def test_habit_tables_and_ledes(builds, flavour):
         assert t.count("(described, not tested in this version)") == 1, (flavour, rel)
         assert "(described, not tested)" in t, (flavour, rel)   # the oversized-loss row, in parallel
     ft = text_of(out, os.path.join("for-traders", "index.html"))
-    assert LEDE in ft or "like holding losing trades longer than winning ones, and test up to three patterns against noise." in ft
+    assert LEDE in ft or "like holding losing trades longer than winning ones, and test up to three of these habits against chance." in ft
     if flavour == "paid":
         assert LEDE in text_of(out, "index.html")
     for s in (ROW, LEDE):

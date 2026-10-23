@@ -3,7 +3,7 @@
 * /report/: renderReport() (report.js) shows the R2 §9.1-9.2 sentences from wording.js
   (ARCHITECT-STATS-AMENDMENT-R2; method 2026-10-23.stats2b since ruling R-D2, so hold_gap is always
   withheld / not_calibrated and shows M1, V-launch and M3): the page-1 headline, the focus line or
-  N0 with one reason line per distinguishable habit, the coverage lines (3 patterns, plus the fixed
+  N0 with one reason line per distinguishable habit, the coverage lines (3 habits, plus the fixed
   hold-gap line); each tested habit's lines; the method line with the habit's OWN n_perm (D-4).
   No fixed "10,000 shuffles" or "testing four habits" claim is left.
 * /tools/trade-stats/: a guarded expectancy check shows the §7.2 sentence; the D-9 footnote
@@ -149,7 +149,7 @@ def test_page_one_uses_the_amendment_lines(rendered):
     assert ("Shown first: Re-entering soon after a loss. Trades opened within 15 minutes of a losing trade's close totalled "
             "−$500.00 (historical).") in p1
     assert [x for x in rendered["big_focus"]["coverage"].splitlines() if x.strip()] == [
-        "3 of the 3 patterns could be tested. Each one compares two groups of at least 30 trades.", HG_LINE]
+        "3 of the 3 habits could be tested. Each one compares two groups of at least 30 trades.", HG_LINE]
     for k, case in rendered.items():        # every stats2b page 1 carries the fixed hold-gap line exactly once
         assert case["page1"].count(HG_LINE) == 1, k
     # the old page said "No pattern ... distinguishable" whenever focus was null: false here
@@ -167,7 +167,7 @@ def test_page_one_uses_the_amendment_lines(rendered):
     assert "No pattern in this file is distinguishable from noise." in none
     assert "That does not show the patterns are absent; it means this file cannot tell them apart from chance." in none
     assert "Not tested: Re-entering soon after a loss, Size after a loss." in rendered["too_few"]["coverage"]
-    assert "1 of the 3 patterns could be tested." in rendered["too_few"]["coverage"]
+    assert "1 of the 3 habits could be tested." in rendered["too_few"]["coverage"]
 
 
 def test_each_habit_shows_its_sentences(rendered):
