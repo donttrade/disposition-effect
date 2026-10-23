@@ -2,7 +2,12 @@
 no built page, EN or FR, in the free, badges or paid build, still says four habits can be tested; the hold-gap row
 of the home and /for-traders/ habits tables says so; /sample-report/'s lead says "up to three"; /fr/avant-de-payer/
 says "jusqu’à trois" and marks the hold gap "(décrite, non testée dans cette version)". The ledes no longer say each
-pattern is tested (their own example, the hold gap, is not)."""
+pattern is tested (their own example, the hold gap, is not).
+
+R-D3 (23 Oct), I-3: under method 2026-10-23.stats2c size after a loss is described, not tested, too, so no built page
+says three can be tested ("tests up to three", "test up to three", "of the 3 habits", "jusqu’à trois"); the ledes and
+/sample-report/ say "up to two"; the size-after-a-loss row says "(described, not tested in this version)"; the FR page
+says "jusqu’à deux" and marks both items "(décrite, non testée dans cette version)"."""
 import os
 import re
 import sys
@@ -18,10 +23,16 @@ from test_c14_legal_copy import _build  # noqa: E402
 from test_wording_wiring import STALE_BUILD  # noqa: E402
 
 STALE_R_D2 = ["tests up to four", "of the 4 patterns", "jusqu’à quatre", "tests four of them",
-              "tests whether each pattern is more than noise", "test whether each pattern is more than noise"]
+              "tests whether each pattern is more than noise", "test whether each pattern is more than noise",
+              # R-D3 I-3
+              "tests up to three", "test up to three", "of the 3 habits", "jusqu’à trois", "tests each one for noise"]
 ROW = "Did you hold losing trades longer than winning ones? (described, not tested in this version)"
-LEDE = "like holding losing trades longer than winning ones, and tests up to three of these habits against chance."
-FR = ("par rapport aux gagnantes (décrite, non testée dans cette version); ", "Il en teste jusqu’à trois par rapport au hasard")
+SIZE_ROW = "Was the trade after a loss larger than the trade after a win? (described, not tested in this version)"
+COUNT = "tests up to two of these habits against chance."
+COUNT_SOON = "test up to two of these habits against chance."
+FR = ("par rapport aux gagnantes (décrite, non testée dans cette version); ",
+      "l’augmentation de la taille après des pertes (décrite, non testée dans cette version); ",
+      "Il en teste jusqu’à deux par rapport au hasard")
 
 
 @pytest.fixture(scope="module")
@@ -37,6 +48,8 @@ def text_of(out, rel):
 
 def test_the_three_stale_strings_are_on_the_stale_build_list():
     for s in ("tests up to four", "of the 4 patterns", "jusqu’à quatre"):
+        assert s in STALE_BUILD
+    for s in ("tests up to three", "test up to three", "of the 3 habits", "jusqu’à trois"):   # R-D3 I-3
         assert s in STALE_BUILD
 
 
@@ -65,22 +78,23 @@ def test_habit_tables_and_ledes(builds, flavour):
         if rel == "index.html" and flavour == "free":
             continue   # the flag-off home is not the trader home
         assert "Hold gap " + ROW in t, (flavour, rel)
-        assert t.count("(described, not tested in this version)") == 1, (flavour, rel)
+        assert "Size after a loss " + SIZE_ROW in t, (flavour, rel)   # R-D3
+        assert t.count("(described, not tested in this version)") == 2, (flavour, rel)
         assert "(described, not tested)" in t, (flavour, rel)   # the oversized-loss row, in parallel
     ft = text_of(out, os.path.join("for-traders", "index.html"))
-    assert LEDE in ft or "like holding losing trades longer than winning ones, and test up to three of these habits against chance." in ft
+    assert COUNT in ft or COUNT_SOON in ft
     if flavour == "paid":
-        assert LEDE in text_of(out, "index.html")
-    for s in (ROW, LEDE):
+        assert COUNT in text_of(out, "index.html") and COUNT in ft
+    for s in (ROW, SIZE_ROW, COUNT, COUNT_SOON):
         assert lint_text(s) == [] and lint_text(s, "rd2", paid=True) == []
 
 
 def test_sample_report_lead_and_fr_page(builds):
     lead = ("This is a research figure from public data. It is not the trader report: the report covers five habits in "
-            "your own file, tests up to three of them against chance, and shows no percentile.")
+            "your own file, tests up to two of them against chance, and shows no percentile.")
     for flavour in ("free", "paid"):
         assert lead in text_of(builds[flavour], os.path.join("sample-report", "index.html")), flavour
     fr = open(os.path.join(builds["paid"], "fr", "avant-de-payer", "index.html"), encoding="utf-8").read()
     for s in FR:
         assert s in fr
-    assert "quatre" not in visible_text(fr)
+    assert "quatre" not in visible_text(fr) and "jusqu’à trois" not in visible_text(fr)

@@ -9,10 +9,10 @@
       <div class="span-7">
         {%- if sale %}
         <h1 id="ft-h">A habit report built from your own trade file.</h1>
-        <p class="lede">It measures behaviour in your own past trades, like holding losing trades longer than winning ones, and tests up to three of these habits against chance. It doesn’t tell you what to trade.</p>
+        <p class="lede">It measures behaviour in your own past trades, like holding losing trades longer than winning ones, and tests up to two of these habits against chance. It doesn’t tell you what to trade.</p>
         {%- else %}
         <h1 id="ft-h">A habit report built from your own trade file. Coming soon.</h1>
-        <p class="lede">It will measure behaviour in your own past trades, like holding losing trades longer than winning ones, and test up to three of these habits against chance. It will not tell you what to trade.</p>
+        <p class="lede">It will measure behaviour in your own past trades, like holding losing trades longer than winning ones, and test up to two of these habits against chance. It will not tell you what to trade.</p>
         {%- endif %}
         {{- offer.status() }}
         <p class="btn-row">{{ offer.button() }} <a class="btn btn-secondary" href="/tools/trade-stats/">Try the free trade stats</a></p>
@@ -34,7 +34,7 @@
       <tbody>
         <tr><th scope="row">Hold gap</th><td>Did you hold losing trades longer than winning ones? (described, not tested in this version)</td></tr>
         <tr><th scope="row">Re-entry after a loss</th><td>Did trades opened within 15 minutes of a loss turn out differently from the rest?</td></tr>
-        <tr><th scope="row">Size after a loss</th><td>Was the trade after a loss larger than the trade after a win?</td></tr>
+        <tr><th scope="row">Size after a loss</th><td>Was the trade after a loss larger than the trade after a win? (described, not tested in this version)</td></tr>
         <tr><th scope="row">Trading after a losing run</th><td>Did trades after two or more losses in a row turn out differently?</td></tr>
         <tr><th scope="row">Unusually large losses</th><td>How many losses were more than twice your typical loss, and what share of your losses they made up (described, not tested)</td></tr>
       </tbody>

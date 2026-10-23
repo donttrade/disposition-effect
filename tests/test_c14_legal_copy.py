@@ -132,8 +132,8 @@ def test_paid_french_lines(paid):
     assert "nous vous remboursons sur demande, en entier." in c
     assert "il n’en garde que des empreintes brouillées" in p
     assert "non conservés; seules des empreintes brouillées" in p
-    # R-D1.3(c): not all five habits are tested; R-D2 H-3: up to three (the hold gap is described, not tested)
-    assert "Il teste cinq habitudes" not in a and "Il couvre cinq habitudes" in a and "Il en teste jusqu’à trois" in a
+    # R-D1.3(c): not all five habits are tested; R-D3 I-3: up to two (the hold gap and size after a loss are described)
+    assert "Il teste cinq habitudes" not in a and "Il couvre cinq habitudes" in a and "Il en teste jusqu’à deux" in a
     assert "jusqu’à quatre" not in a and "aux gagnantes (décrite, non testée dans cette version); " in a
 
 

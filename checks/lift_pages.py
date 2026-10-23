@@ -116,14 +116,15 @@ LIFT_FIXES = {
         ('<a href="/start/">Start a trial</a>', '<a href="/start/">Start a Pilot</a>'),
     ],
     # Delivery plan C-12 (P-3, now), text by the Architect's ruling R-D1.3(c) / D-3: the page is a research
-    # figure, not the $39 report. Every report holds five habit entries; since R-D2 (stats2b) three can be tested
-    # against chance (a habit with an empty group is not; the hold gap is described, not tested), and "tests five
-    # habits" and "tests up to four" stay stale claims the build test refuses.
+    # figure, not the $39 report. Every report holds five habit entries; since R-D3 (stats2c) two can be tested
+    # against chance (a habit with an empty group is not; the hold gap and size after a loss are described, not
+    # tested), and "tests five habits", "tests up to four" and "tests up to three" stay stale claims the build test
+    # refuses.
     "/sample-report/": [
         ("This is what the coming trader report looks like, run on one real trader’s history. Your own report would be "
          "computed the same way from your own trade export.",
          "This is a research figure from public data. It is not the trader report: the report covers five habits in "
-         "your own file, tests up to three of them against chance, and shows no percentile."),
+         "your own file, tests up to two of them against chance, and shows no percentile."),
     ],
 }
 
