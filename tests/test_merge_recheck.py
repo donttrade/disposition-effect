@@ -96,3 +96,13 @@ def test_mr5_a_swap_that_no_longer_matches_fails_the_build():
     with pytest.raises(B.BuildError, match="paid lifted swap"):
         B.paid_lifted("/code/", "<p>changed text</p>", True)
     assert B.paid_lifted("/code/", "<p>changed text</p>", False) == "<p>changed text</p>"
+
+
+# ------------------------------------------------------------------ MR-2
+def test_mr2_nav_code_line_matches_what_code_lists(builds):
+    for out in builds.values():
+        h = raw(out, "index.html")
+        assert "Every script, public" not in h
+        assert "Study scripts, and which are still to come" in h
+        # /code/ lists the published study scripts and those still to follow ("To be published with the study")
+        assert "To be published with the study" in text_of(out, "code/index.html")
