@@ -271,6 +271,33 @@ def test_axe_and_overflow_with_every_message_showing(browser, built_site, path, 
     ctx.close()
 
 
+def test_pct_never_rounds_to_100_or_0_unless_exact():
+    """Tester §12 (v1 test_pass_rate_never_rounds_to_100_when_some_failed): 19,999 passed of 20,000
+    finished showed "100.0%"; 1 of 20,000 showed "0.0%"."""
+    r = subprocess.run(["node", "-e", """
+        global.dtNumbers = require(process.argv[1]); const p = require(process.argv[2]);
+        const show = a => { const r = p.compute(...a); return [p.pct(r.passRateFinished), p.pct(r.rangeLow), p.pct(r.rangeHigh)]; };
+        console.log(JSON.stringify([show([20000, 0, 19999, 0]), show([20000, 0, 1, 0]), show([1, 0, 0, 0]),
+                                    show([1, 0, 1, 1]), show([1000, 150, 170, 40]), show([20000, 1, 19999, 0])]));""",
+                        NUMBERS, os.path.join(REPO, "site/static/js/legacy/pass-rate-calculator.js")],
+                       capture_output=True, text=True, timeout=30)
+    assert r.returncode == 0, r.stderr
+    a, b, c, d, e, f = json.loads(r.stdout)
+    assert a == ["over 99.9%", "over 99.9%", "over 99.9%"]
+    assert b == ["under 0.1%", "under 0.1%", "under 0.1%"]
+    assert c == ["0.0%", "0.0%", "0.0%"] and d == ["100.0%", "100.0%", "100.0%"]    # exact: 0 of 1, 1 of 1
+    assert e == ["20.0%", "17.0%", "32.0%"]                                           # the worked example
+    assert f == ["100.0%", "over 99.9%", "100.0%"]           # 19,999 of 19,999 finished; the open one may fail
+
+
+def test_pass_rate_19999_of_20000_in_the_page(page):
+    page.goto(page.base + PR)
+    for sel, v in zip(PR_IDS, ["20000", "0", "19999", "0", ""]):
+        page.fill(sel, v)
+    assert page.inner_text("#pr-rate") == "over 99.9%"
+    assert page.inner_text("#pr-range") == "over 99.9% to over 99.9%"
+
+
 def test_the_example_as_the_page_writes_it(page):
     """The fine print says "(420, 1,780, 260, 2,240)": typed that way it gives the example's figures."""
     page.goto(page.base + DC)
