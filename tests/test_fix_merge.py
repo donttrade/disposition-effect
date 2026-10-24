@@ -711,7 +711,8 @@ def test_nit7_hashchange_switches_the_pricing_tab(browser, paid_site):
 def test_nit11_privacy_processor_list(built_site, paid_site):
     off = L.visible_text((built_site["out"] / "privacy" / "index.html").read_text(encoding="utf-8"))
     on = L.visible_text((paid_site["out"] / "privacy" / "index.html").read_text(encoding="utf-8"))
-    assert "Web3Forms, Google, GitHub, Stripe and Substack are mostly in the United States" in off
+    # T0: Cloudflare Pages hosts every build since 24 Oct, so the free list names Cloudflare too
+    assert "Web3Forms, Google, GitHub, Stripe, Substack and Cloudflare are mostly in the United States" in off
     assert "Web3Forms, Google, GitHub, Stripe, Substack and Cloudflare are mostly in the United States" in on
 
 
