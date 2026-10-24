@@ -11,7 +11,7 @@ import { ics, retestLine, RETEST_LINE } from './retest-copy.js';
 import { pgrPlrCounts } from '../engine/pgr.js';
 import { stripRows, spanLine } from './strip.js';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js';
-import { habitSentences, methodLine, page1Lines, coverageLines, mergedLine, checkReport, SENTENCE_HABITS, RESEARCH, RESEARCH_PREFIX } from './wording.js';
+import { habitSentences, methodLine, page1Lines, coverageLines, mergedLine, checkReport, SENTENCE_HABITS, RESEARCH, RESEARCH_PREFIX, holdDays } from './wording.js';
 
 const $ = (id) => document.getElementById(id);
 const MINUS = '−';
@@ -105,10 +105,11 @@ function dollarsLine(h, unit) {
 }
 
 // Two bars from zero with direct labels; the table below it holds the same numbers.
-function twoBarChart(h, unit) {
+function twoBarChart(h, unit, report) {
   if (h.measure_a === null || h.measure_b === null || h.id === 'oversized_loss') return null;
   const isMoney = h.id === 'revenge' || h.id === 'tilt';
-  const fmt = (v) => (h.id === 'hold_gap' ? duration(v) : isMoney ? money(v, unit) : num(v));
+  // T-3 T3-C: a dates-only file's holds are counted from dates: days, never minutes
+  const fmt = (v) => (h.id === 'hold_gap' ? (report && report.dates_only ? holdDays(v) : duration(v)) : isMoney ? money(v, unit) : num(v));
   const labels = { hold_gap: ['Losing trades', 'Winning trades'], revenge: ['Soon after a loss', 'Other trades'],
     size_up: ['After a loss', 'After a win'], tilt: ['After 2+ losses', 'Other trades'] }[h.id];
   const vals = [h.measure_a, h.measure_b];
@@ -179,7 +180,7 @@ function habitSection(h, unit, report) {
   if (method && h.p_raw !== null && h.p_holm !== null) {
     sec.append(el('p', { class: 'small muted habit-method', text: `${method} On past data: p = ${h.p_raw.toPrecision(3)}, or ${h.p_holm.toPrecision(3)} after adjusting for ${testedPhrase(report.n_tested)} (Holm).` }));
   }
-  const chart = twoBarChart(h, unit);
+  const chart = twoBarChart(h, unit, report);
   if (chart) sec.append(chart);
   // R-D3 addendum I-6: the page's own related-research line (wording.js RESEARCH), never the report's
   // research_ref; oversized_loss has none.

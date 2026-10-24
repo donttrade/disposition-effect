@@ -198,10 +198,23 @@ function needCounts(h) {
   if (!Number.isInteger(h.n_a_compared) || !Number.isInteger(h.n_b_compared)) throw new Error(`wording: ${h.id} ${h.verdict} without compared counts`);
 }
 
+// T-3 T3-C: in a dates-only file, holds are counted from dates (a trade opened and closed on the same date has
+// h = 0, not a known 0-minute hold), so they are shown in days with that said, never as minutes.
+export function holdDays(s) {
+  const d = s / 86400;
+  const t = Number.isInteger(d) ? String(d) : d.toFixed(1);
+  return t === '1' ? '1 day' : `${t} days`;
+}
+export const SAME_DATE_LINE = 'In this file, a trade with dates but no times that opened and closed on the same date counts as 0 days.';
+
 function holdGapLines(h, report, f) {
   const out = [];
   if (h.measure_a !== null && h.measure_b !== null) {
-    out.push(`Your losing trades were held a median of ${f.duration(h.measure_a)}; your winning trades a median of ${f.duration(h.measure_b)}.`);   // M1
+    if (report.dates_only) {
+      out.push(`Your losing trades were held a median of ${holdDays(h.measure_a)}; your winning trades a median of ${holdDays(h.measure_b)}. ${SAME_DATE_LINE}`);   // M1, T3-C
+    } else {
+      out.push(`Your losing trades were held a median of ${f.duration(h.measure_a)}; your winning trades a median of ${f.duration(h.measure_b)}.`);   // M1
+    }
   }
   if (h.verdict === 'withheld' && h.withheld === 'not_calibrated') {
     out.push(V_LAUNCH);   // R-D2 (stats2b): replaces M2 and the verdict
@@ -225,7 +238,7 @@ function holdGapLines(h, report, f) {
     out.push(`Compared with similar trades opened just before it, a losing trade's hold came out longer in ${a} of comparisons; a winning trade's in ${b}. With no link between hold and outcome, the two figures would be about equal.`);   // M2
   }
   if (h.n_long_a + h.n_long_b >= 1) {
-    out.push(`Held 12 hours or more: ${h.n_long_a} of your ${h.n_a} losing trades and ${h.n_long_b} of your ${h.n_b} winning trades. This count is not part of the test: trades held 12 hours or more are only compared with each other.`);   // M3
+    out.push(`${report.dates_only ? 'Held 12 hours or more, or closed on a later date' : 'Held 12 hours or more'}: ${h.n_long_a} of your ${h.n_a} losing trades and ${h.n_long_b} of your ${h.n_b} winning trades. This count is not part of the test: trades held 12 hours or more are only compared with each other.`);   // M3
   }
   if (h.verdict === 'distinguishable' || h.verdict === 'not_distinguishable') out.push(verdictLine(h, report));
   return out;

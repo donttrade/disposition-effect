@@ -413,6 +413,8 @@ def test_i9_dates_only_page_shows_exactly_the_ruled_lines(rendered_real, name, T
         assert cells["#habit-" + hid] == ["—", "—"], (hid, cells["#habit-" + hid])
     for hid in ("hold_gap", "oversized_loss"):
         assert cells["#habit-" + hid][0] != "—" and any("totalling" in p for p in c["habits"][hid]), hid   # kept
+    hg = " ".join(c["habits"]["hold_gap"])   # T-3 T3-C: days, never minutes (sentences and the chart's table)
+    assert " days" in hg and " min" not in hg and "0m" not in hg and "0s" not in hg, hg
     assert L.lint_text(c["text"], "dates", paid=True) == []
 
 
