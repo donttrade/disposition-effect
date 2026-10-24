@@ -1,6 +1,6 @@
 {
- "coarse_time": false,
  "currency": "USD",
+ "dates_only": false,
  "disclaimer": "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.",
  "engine_commit": "dev",
  "focus": null,
@@ -162,7 +162,8 @@
    "verdict": "descriptive"
   }
  ],
- "method_version": "2026-10-23.stats2e",
+ "method_version": "2026-10-23.stats2f",
+ "n_date_only_rows": 0,
  "n_distinguishable": 0,
  "n_rows": 20,
  "n_tested": 0,

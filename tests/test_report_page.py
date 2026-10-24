@@ -63,11 +63,12 @@ def test_rule_library_order_identical_across_reports(three_reports):
 
 
 def test_focus_page_one(three_reports):
-    # the 40-trade MT5 file opens 10 trades at each of 09:00, 09:05, 09:10 and 09:15: 25% at one minute of the day,
-    # so under stats2e (R-D3 addendum 2) it is coarse-time and nothing is tested
+    # the 40-trade MT5 file has groups under 30, so nothing is tested (R-D3 addendum 3: the None line replaces H0a/H0b).
+    # Its opens are 10 each at 09:00, 09:05, 09:10 and 09:15: it is NOT dates-only (stats2f), so no dates line.
     t = three_reports[FILES[0]]["text"]
-    assert "None of the patterns could be tested in this file, so this report describes them without a verdict." in t and "Most trades in this file show the same opening time of day" in t
-    assert "No pattern in this file is distinguishable from noise." not in t
+    assert "None of the patterns could be tested in this file. Some are described below without a verdict." in t
+    assert "open at exactly 00:00" not in t and "No pattern in this file is distinguishable from noise." not in t
+    assert "Size after a loss is described, not tested, in this version of the report." in t
     assert three_reports[FILES[0]]["text"].lstrip().startswith("donttrade measures your own past trades.")
 
 

@@ -7,10 +7,13 @@
 // is always withheld / not_calibrated and V-launch-size follows its M1; its M2, verdict and too_few lines
 // stay for a later size method, unreachable under stats2c. Method 2026-10-23.stats2d (R-D3 addendum I-5): the
 // server merges rows with the same open minute, symbol and direction into one trade; the report carries n_rows
-// and n_trades, and page 1 says so when they differ (mergedLine). Method 2026-10-23.stats2e (R-D3 addendum 2
-// I-8): a coarse-time file (most trades show the same opening time of day) is not merged and its order-based
-// habits carry no figure: revenge and tilt print V-no-time, size_up prints SIZE_NOT_DESCRIBED, and page 1
-// replaces H0a/H0b with NONE_TESTED and COARSE_P1. NONE_TESTED also replaces them whenever n_tested is 0.
+// and n_trades, and page 1 says so when they differ (mergedLine). Method 2026-10-23.stats2f (R-D3 addendum 3
+// I-9, replacing addendum 2's stats2e): a dates-only file (5% or more of its rows open at 00:00 and are held
+// whole days) is not merged and its order-based habits carry no figure: revenge and tilt print vDatesOnly,
+// size_up prints sizeNotDescribed, page 1 prints NONE_TESTED and datesP1, and the size-up coverage line becomes
+// SIZE_UP_NONE. NONE_TESTED also replaces H0a/H0b whenever n_tested is 0. {T} is "All {n} trades in this
+// file" when every row is date-only and "{k} of the {n} trades in this file" otherwise, so each line stays
+// true for a file whose other rows have times.
 // No DOM, no I/O: report.js
 // renders them. Every sentence describes the file's past trades only, is printed only when its
 // condition holds, and passes checks/lint.py (tests/test_paid_wording.py, W-1 and W-2).
@@ -18,18 +21,25 @@
 // fmt: { money(x), duration(seconds), ratio(x), count(n) } — the page passes its own formatters
 // (money as report.js formats it now); the defaults are plain, for tests.
 
-export const METHOD_VERSION = '2026-10-23.stats2e';
+export const METHOD_VERSION = '2026-10-23.stats2f';
 // V-launch (R-D2 H-2, exact text): hold_gap under stats2b. Replaces M2 and the verdict.
 export const V_LAUNCH = 'Not tested in this version of the report. In our tests on files built to have no real pattern, this test reported a gap in more than 1 file in 20, the rate it is designed for, when a large win or loss changed how long the next trades were held. So this pattern is described here without a verdict.';
 // The fixed page-1 line (R-D2 H-2), on every stats2b and stats2c report.
 export const HOLD_GAP_COVERAGE = 'Holding losers longer than winners is described, not tested, in this version of the report.';
 // V-launch-size (R-D3.2, exact text): size_up under stats2c. Follows M1; replaces M2 and the verdict.
 export const V_LAUNCH_SIZE = 'Not tested in this version of the report. In our tests on files built to have no real pattern, this test reported a gap in more than 1 file in 20, the rate it is designed for, in files that mix several symbols whose sizes and results both follow the time of day. So this pattern is described here without a verdict.';
-// R-D3 addendum 2 I-8, exact texts.
-export const V_NO_TIME = 'Not tested: most trades in this file show the same opening time of day, so the file has no usable times of day, and this pattern depends on the order and timing of trades within a day.';
-export const SIZE_NOT_DESCRIBED = 'Not described: most trades in this file show the same opening time of day, so which trade came after a loss cannot be told.';
-export const NONE_TESTED = 'None of the patterns could be tested in this file, so this report describes them without a verdict.';
-export const COARSE_P1 = 'Most trades in this file show the same opening time of day (for example, an export with dates but no times), so the patterns that depend on the order and timing of trades within a day are not tested.';
+// R-D3 addendum 3 I-9, exact texts ({T}: datesSubject).
+export const NONE_TESTED = 'None of the patterns could be tested in this file. Some are described below without a verdict.';
+export const SIZE_UP_NONE = 'Size after a loss is not described or tested for this file.';
+export function datesSubject(report, fmt) {
+  const f = fmtOf(fmt);
+  return report.n_date_only_rows === report.n_rows ? `All ${f.count(report.n_rows)} trades in this file`
+    : `${f.count(report.n_date_only_rows)} of the ${f.count(report.n_rows)} trades in this file`;
+}
+const DATED = 'open at exactly 00:00 and were held a whole number of days, as in exports with dates but no times';
+export const vDatesOnly = (T) => `Not tested: ${T} ${DATED}; this pattern depends on the timing of trades within a day, so it is not tested on files like that.`;
+export const sizeNotDescribed = (T) => `Not described: ${T} ${DATED}; this pattern depends on which trade came after a loss, so it is not described for files like that.`;
+export const datesP1 = (T) => `${T} ${DATED}, so the patterns that depend on the order and timing of trades within a day are not tested, and size after a loss is not described.`;
 // The fixed page-1 line (R-D3.2), on every stats2c report, after HOLD_GAP_COVERAGE.
 export const SIZE_UP_COVERAGE = 'Size after a loss is described, not tested, in this version of the report.';
 // V-spread0 (R-D1 D-1): hold_gap withheld for spread with spread_ratio null (an infinite ratio). Replaces M2 and the verdict.
@@ -85,26 +95,28 @@ export function checkRows(report) {
   if (!Number.isInteger(r) || !Number.isInteger(t) || t < 1 || t > r) {
     throw new Error(`wording: the report has n_rows ${r} and n_trades ${t} (R-D3 addendum)`);
   }
-  if (typeof report.coarse_time !== 'boolean' || (report.coarse_time && r !== t)) {
-    throw new Error(`wording: the report has coarse_time ${report.coarse_time} with ${r} rows and ${t} trades (R-D3 addendum 2)`);
+  const k = report.n_date_only_rows;
+  if (typeof report.dates_only !== 'boolean' || !Number.isInteger(k) || k < 0 || k > r || (report.dates_only && (r !== t || 20 * k < r))
+    || (!report.dates_only && 20 * k >= r)) {
+    throw new Error(`wording: the report has dates_only ${report.dates_only}, ${k} date-only rows, ${r} rows and ${t} trades (R-D3 addendum 3)`);
   }
 }
 
-// R-D3 addendum 2: a coarse-time report carries no figure for revenge, tilt or size_up and tests nothing; any
-// other report has no "no_time_of_day" habit.
+// R-D3 addendum 3: a dates-only report carries no figure for revenge, tilt or size_up and tests nothing; any
+// other report has no "dates_only" habit.
 export function checkCoarse(report) {
   for (const h of report.habits) {
-    const blankSeq = h.verdict === 'withheld' && h.withheld === 'no_time_of_day' && h.p_raw === null && h.p_holm === null
+    const blankSeq = h.verdict === 'withheld' && h.withheld === 'dates_only' && h.p_raw === null && h.p_holm === null
       && h.measure_a === null && h.measure_b === null && h.effect === null && h.dollars === null;
-    if (report.coarse_time && (h.id === 'revenge' || h.id === 'tilt') && !blankSeq) {
-      throw new Error(`wording: ${h.id} has a figure in a coarse-time report (R-D3 addendum 2)`);
+    if (report.dates_only && (h.id === 'revenge' || h.id === 'tilt') && !blankSeq) {
+      throw new Error(`wording: ${h.id} has a figure in a dates-only report (R-D3 addendum 3)`);
     }
-    if (report.coarse_time && h.id === 'size_up' && (h.measure_a !== null || h.measure_b !== null || h.effect !== null || h.dollars !== null)) {
-      throw new Error('wording: size_up is described in a coarse-time report (R-D3 addendum 2)');
+    if (report.dates_only && h.id === 'size_up' && (h.measure_a !== null || h.measure_b !== null || h.effect !== null || h.dollars !== null)) {
+      throw new Error('wording: size_up is described in a dates-only report (R-D3 addendum 3)');
     }
-    if (!report.coarse_time && h.withheld === 'no_time_of_day') throw new Error(`wording: ${h.id} is no_time_of_day in a timed report (R-D3 addendum 2)`);
+    if (!report.dates_only && h.withheld === 'dates_only') throw new Error(`wording: ${h.id} is dates_only in a report that is not (R-D3 addendum 3)`);
   }
-  if (report.coarse_time && (report.n_tested !== 0 || report.focus !== null)) throw new Error('wording: a coarse-time report with a test or a focus (R-D3 addendum 2)');
+  if (report.dates_only && (report.n_tested !== 0 || report.focus !== null)) throw new Error('wording: a dates-only report with a test or a focus (R-D3 addendum 3)');
 }
 
 // Everything renderReport() needs to be true before it shows anything.
@@ -119,7 +131,7 @@ export function checkReport(report) {
 // Page 1, only when the server merged rows (R-D3 addendum I-5, exact text); null otherwise.
 export function mergedLine(report, fmt) {
   checkReport(report);
-  if (report.coarse_time || report.n_rows === report.n_trades) return null;
+  if (report.dates_only || report.n_rows === report.n_trades) return null;
   const f = fmtOf(fmt);
   return `Rows with the same open minute, symbol and direction were counted as one trade (for example, a position closed in parts): ${f.count(report.n_rows)} rows became ${f.count(report.n_trades)} trades.`;
 }
@@ -221,7 +233,7 @@ function holdGapLines(h, report, f) {
 
 function sizeUpLines(h, report, f) {
   const out = [];
-  if (report.coarse_time) return [SIZE_NOT_DESCRIBED];   // R-D3 addendum 2: replaces M1 and V-launch-size
+  if (report.dates_only) return [sizeNotDescribed(datesSubject(report, f))];   // R-D3 addendum 3: replaces M1 and V-launch-size
   if (h.effect !== null) out.push(`Your median size after a loss was ${f.ratio(h.effect)}× your median size after a win.`);   // M1
   if (h.verdict === 'withheld' && h.withheld === 'not_calibrated') {
     out.push(V_LAUNCH_SIZE);   // R-D3 (stats2c): replaces M2 and the verdict
@@ -241,7 +253,7 @@ function sizeUpLines(h, report, f) {
 
 // revenge and tilt keep R1's sentences (§9.2).
 function seqLines(h, report, f) {
-  if (h.verdict === 'withheld' && h.withheld === 'no_time_of_day') return [V_NO_TIME];   // R-D3 addendum 2
+  if (h.verdict === 'withheld' && h.withheld === 'dates_only') return [vDatesOnly(datesSubject(report, f))];   // R-D3 addendum 3
   if (h.verdict === 'too_few') return [`Not enough trades to tell: this pattern compares two groups of at least 30 trades each, and this file has ${h.n_a} and ${h.n_b}.`];
   const m = h.id === 'revenge'
     ? `Trades opened within 15 minutes of a losing trade's close averaged ${f.money(h.measure_a)} per trade; your other trades averaged ${f.money(h.measure_b)}.`
@@ -305,7 +317,7 @@ export function page1Lines(report, fmt) {
   if (k === 0) {
     if (report.focus !== null) throw new Error('page1Lines: a focus with no distinguishable habit');
     // R-D3 addendum 2: when nothing was tested, "no pattern is distinguishable" is not a fair summary
-    if (n === 0) return report.coarse_time ? [NONE_TESTED, COARSE_P1] : [NONE_TESTED];
+    if (n === 0) return report.dates_only ? [NONE_TESTED, datesP1(datesSubject(report, f))] : [NONE_TESTED];
     return ['No pattern in this file is distinguishable from noise.',                                                  // H0a
       'That does not show the patterns are absent; it means this file cannot tell them apart from chance.'];     // H0b
   }
@@ -340,6 +352,6 @@ export function coverageLines(report) {
     const names = report.habits.filter((h) => TESTED.includes(h.id) && h.p_raw === null).map((h) => h.name);
     lines.push(`Not tested: ${names.join(', ')}.`);
   }
-  lines.push(HOLD_GAP_COVERAGE, SIZE_UP_COVERAGE);
+  lines.push(HOLD_GAP_COVERAGE, report.dates_only ? SIZE_UP_NONE : SIZE_UP_COVERAGE);   // R-D3 addendum 3
   return lines;
 }

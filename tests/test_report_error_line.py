@@ -75,7 +75,7 @@ def test_the_built_page_carries_the_contact_email_from_site_toml(site):
 
 def forge(kind):
     rep = json.load(open(os.path.join(HERE, "fixtures", "paid-reports", "random.report.json"), encoding="utf-8"))
-    assert rep["method_version"] == "2026-10-23.stats2e"
+    assert rep["method_version"] == "2026-10-23.stats2f"
     hg, su = rep["habits"][0], rep["habits"][2]
     assert hg["id"] == "hold_gap" and su["id"] == "size_up"
     if kind == "stats1":
@@ -84,9 +84,13 @@ def forge(kind):
         rep["method_version"] = "2026-10-21.stats2"   # a pre-R-D2 Worker's report
     elif kind == "stats2b":
         rep["method_version"] = "2026-10-23.stats2b"   # a pre-R-D3 Worker's report (R-D3 I-2 acceptance 4)
+    elif kind == "stats2e":
+        rep["method_version"] = "2026-10-23.stats2e"   # the replaced I-8 Worker's report (R-D3 addendum 3)
+        del rep["dates_only"]; del rep["n_date_only_rows"]
+        rep["coarse_time"] = False
     elif kind == "stats2d":
         rep["method_version"] = "2026-10-23.stats2d"   # a pre-I-8 Worker's report (R-D3 addendum 2)
-        del rep["coarse_time"]
+        del rep["dates_only"]; del rep["n_date_only_rows"]
     elif kind == "stats2c":
         rep["method_version"] = "2026-10-23.stats2c"   # a pre-I-5 Worker's report (R-D3 addendum)
         del rep["n_rows"]
@@ -107,7 +111,7 @@ def forge(kind):
     return rep
 
 
-@pytest.mark.parametrize("kind", ["stats1", "stats2", "stats2b", "stats2c", "stats2d", "forged_p", "forged_distinguishable", "forged_size_p",
+@pytest.mark.parametrize("kind", ["stats1", "stats2", "stats2b", "stats2c", "stats2d", "stats2e", "forged_p", "forged_distinguishable", "forged_size_p",
                                   "forged_size_distinguishable"])
 def test_a_refused_report_shows_exactly_the_error_line_and_nothing_from_the_report(browser, site, kind):
     rep = forge(kind)

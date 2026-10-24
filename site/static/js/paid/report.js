@@ -100,7 +100,7 @@ function detailLine(h, unit) {
 const testedPhrase = (n) => `the ${n} pattern${n === 1 ? '' : 's'} tested`;
 
 function dollarsLine(h, unit) {
-  if (h.dollars === null) return null;   // R-D3 addendum 2: a coarse-time file's order-based habits have no dollar figure
+  if (h.dollars === null) return null;   // R-D3 addendum 3: a dates-only file's order-based habits have no dollar figure
   return `${h.dollars.label}: ${h.dollars.n_trades} trades, totalling ${money(h.dollars.amount, unit)} (historical).`;
 }
 
@@ -152,8 +152,8 @@ function twoBarChart(h, unit) {
 
 function habitSection(h, unit, report) {
   const sec = el('section', { class: 'habit', id: 'habit-' + h.id, 'aria-labelledby': 'h-' + h.id });
-  if (report.coarse_time && ['revenge', 'tilt', 'size_up'].includes(h.id)) {
-    // R-D3 addendum 2: the badge and the one line, nothing else (no question with its 15-minute figure, no
+  if (report.dates_only && ['revenge', 'tilt', 'size_up'].includes(h.id)) {
+    // R-D3 addendum 3: the badge and the one line, nothing else (no question with its 15-minute figure, no
     // measure, no dollars, no chart, no research line)
     sec.append(el('h3', { id: 'h-' + h.id, text: h.name }), el('p', {}, badge(h.verdict)));
     for (const s of habitSentences(h, report, wordingFmt(unit))) sec.append(el('p', { class: 'habit-sentence', text: s }));
