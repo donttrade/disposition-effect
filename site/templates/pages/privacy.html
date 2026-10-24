@@ -30,7 +30,7 @@
   {%- if flags.paid_report %}
 
   <h2 id="report">The paid habit report</h2>
-  <p>Your browser sends our server only a stripped list of numbers: open and close times, buy or sell, relative size, the realised result and a random symbol number. It contains no name, account number or ticker. The server runs on Cloudflare and may be outside Canada. It uses the numbers to build your report, sends the report back, and does not keep the numbers: of those numbers it keeps only a scrambled fingerprint of each trade row from your first report, as described below. Request logging is off.</p>
+  <p>Your browser sends our server only a stripped list of numbers: open and close times, buy or sell, relative size, the realised result, a random symbol number and a scrambled fingerprint of each row. It contains no name, account number or ticker. The server runs on Cloudflare and may be outside Canada. It uses the numbers to build your report, sends the report back, and does not keep the numbers: of those numbers it keeps only a scrambled fingerprint of each trade row from your first report, as described below. Request logging is off.</p>
   <p>What the server keeps:</p>
   <ul>
     <li>a purchase record under a scrambled code: the product, the number of analyses used, the dates and the refund status, without your name or email;</li>
