@@ -308,7 +308,7 @@ function teaser(noise) {
   const text = $('ts-teaser-text');
   if (noise) text.textContent = B.teaserText(noise, s, reportLead());
   else if (s.hold_ratio !== null) {
-    text.textContent = `In this file, losing trades were held ${ratio(s.hold_ratio)} as long as winning trades (median ${duration(s.hold_median_loss_s)} against ${duration(s.hold_median_win_s)}). ${reportLead()} measures five habits like this one and shows what the matching trades totalled in your file.`;
+    text.textContent = `In this file, losing trades were held ${ratio(s.hold_ratio)} as long as winning trades (median ${duration(s.hold_median_loss_s)} against ${duration(s.hold_median_win_s)}). ${reportLead()} measures up to five habits like this one and shows what the matching trades totalled in your file.`;
   } else {
     text.textContent = `${reportLead()} looks for patterns in what you do after a loss.`;
   }

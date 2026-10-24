@@ -9,10 +9,10 @@
       <div class="span-7">
         {%- if sale %}
         <h1 id="ft-h">A habit report built from your own trade file.</h1>
-        <p class="lede">It measures and describes five habits in your own past trades, like opening a new trade soon after a loss, with the dollar totals of the matching trades, and tests up to two of these habits against chance in this version. It includes one re-test 30 to 60 days after your first report. It doesn’t tell you what to trade.</p>
+        <p class="lede">It measures and describes up to five habits in your own past trades, like opening a new trade soon after a loss, with the dollar totals of the matching trades, and tests up to two of these habits against chance in this version. It includes one re-test 30 to 60 days after your first report. It doesn’t tell you what to trade.</p>
         {%- else %}
         <h1 id="ft-h">A habit report built from your own trade file. Coming soon.</h1>
-        <p class="lede">It will measure and describe five habits in your own past trades, like opening a new trade soon after a loss, with the dollar totals of the matching trades, and test up to two of these habits against chance in this version. It will include one re-test 30 to 60 days after your first report. It will not tell you what to trade.</p>
+        <p class="lede">It will measure and describe up to five habits in your own past trades, like opening a new trade soon after a loss, with the dollar totals of the matching trades, and test up to two of these habits against chance in this version. It will include one re-test 30 to 60 days after your first report. It will not tell you what to trade.</p>
         {%- endif %}
         {{- offer.status() }}
         <p class="btn-row">{{ offer.button() }} <a class="btn btn-secondary" href="/tools/trade-stats/">Try the free trade stats</a></p>
@@ -23,10 +23,10 @@
   <section class="section" aria-labelledby="measure-h" data-reveal>
     {%- if sale %}
     <h2 id="measure-h">What it measures</h2>
-    <p>Five habits, each measured in your own closed trades.</p>
+    <p>Five habits, measured in your own closed trades as far as your file allows.</p>
     {%- else %}
     <h2 id="measure-h">What it is being built to measure</h2>
-    <p>Five habits, each measured in your own closed trades. These describe the report as it is being built; the final list is published before anyone pays.</p>
+    <p>Five habits, measured in your own closed trades as far as your file allows. These describe the report as it is being built; the final list is published before anyone pays.</p>
     {%- endif %}
     <div class="table-wrap" tabindex="0" role="region" aria-label="The five habits">
     <table>

@@ -113,34 +113,37 @@ RETEST = ("Your re-test runs on the version of the report that is live when you 
           "corrections page.")
 RETEST_HTML = ('Your re-test runs on the version of the report that is live when you run it; every change is dated on the '
                '<a href="/corrections/">corrections page</a>.')
-HOME_LEDE = ("A habit report built from your own trade history. It measures and describes five habits in your own file, like "
+HOME_LEDE = ("A habit report built from your own trade history. It measures and describes up to five habits in your own file, like "
              "opening a new trade soon after a loss, with the dollar totals of the matching trades, and tests up to two of these "
              "habits against chance in this version. It doesn’t tell you what to trade.")
-FT_LEDE = ("It measures and describes five habits in your own past trades, like opening a new trade soon after a loss, with the "
+FT_LEDE = ("It measures and describes up to five habits in your own past trades, like opening a new trade soon after a loss, with the "
            "dollar totals of the matching trades, and tests up to two of these habits against chance in this version. It "
            "includes one re-test 30 to 60 days after your first report. It doesn’t tell you what to trade.")
-FT_LEDE_SOON = ("It will measure and describe five habits in your own past trades, like opening a new trade soon after a loss, "
+FT_LEDE_SOON = ("It will measure and describe up to five habits in your own past trades, like opening a new trade soon after a loss, "
                 "with the dollar totals of the matching trades, and test up to two of these habits against chance in this "
                 "version. It will include one re-test 30 to 60 days after your first report. It will not tell you what to trade.")
-PRODUCT = ("Five habits measured and described in your own trades, with the dollar totals of the matching trades; up to two of "
+PRODUCT = ("Up to five habits measured and described in your own trades, with the dollar totals of the matching trades; up to two of "
            "them tested against chance in this version; plus one re-test 30 to 60 days after your first report.")
-BYP = ("a report on habits in your own past trades, built from a trade file you choose. It measures and describes five "
+BYP = ("a report on habits in your own past trades, built from a trade file you choose. It measures and describes up to five "
        "habits, with the dollar totals of the matching trades, and tests up to two of them against chance in this version. "
        "It includes one re-test 30 to 60 days after your first report. It describes what happened; it does not tell you "
        "what to trade.")
-LOT = ("Sizing on paper is one thing. The habit report describes, from your own trade file, your median size after a loss "
+LOT = ("Sizing on paper is one thing. The habit report describes, from your own trade file when it has times of day, your median size after a loss "
        "and after a win, and what trades after a loss at 1.5 times your usual size or more totalled. It measures and "
-       "describes five habits with the dollar totals of the matching trades, tests up to two of them against chance in this "
+       "describes up to five habits with the dollar totals of the matching trades, tests up to two of them against chance in this "
        "version, and includes one re-test 30 to 60 days after your first report.")
-LOT_SOON = ("Sizing on paper is one thing. We’re building a habit report that describes, from your own trade file, your median "
+LOT_SOON = ("Sizing on paper is one thing. We’re building a habit report that describes, from your own trade file when it has times of day, your median "
             "size after a loss and after a win, and what trades after a loss at 1.5 times your usual size or more totalled. It "
-            "will measure and describe five habits with the dollar totals of the matching trades, test up to two of them "
+            "will measure and describe up to five habits with the dollar totals of the matching trades, test up to two of them "
             "against chance in this version, and include one re-test 30 to 60 days after your first report.")
-FR_FACTS = ("Pour les cinq, il totalise les montants réalisés des transactions en cause. Il en teste jusqu’à deux par rapport au "
+FR_FACTS = ("Pour chacune, quand le fichier le permet, il totalise les montants réalisés des transactions en cause. Il en teste jusqu’à deux par rapport au "
             "hasard dans cette version : pour chacune, il indique si l’écart se distingue du hasard.",
             "Comprend un nouveau test gratuit, de 30 à 60 jours plus tard.",
             "Votre nouveau test est fait avec la version du rapport en ligne au moment où vous le lancez; chaque changement est "
             "daté, en anglais, sur la page des corrections.")
+DATES_RESTRICTION = ("If 5% or more of a file's rows open at exactly 00:00 and are held a whole number of days, as in exports "
+                     "with dates but no times, no habit is tested, and the habits that depend on the order of trades within a "
+                     "day (re-entering soon after a loss, size after a loss, trading after a losing run) are not described.")
 NO_PROMISE = ["coming soon", "will be tested", "tested later", "later version", "next version", "founding edition"]
 
 
@@ -155,6 +158,8 @@ def test_i3b_exact_offer_lines_on_each_page(builds):
     assert FT_LEDE_SOON in text_of(free, os.path.join("for-traders", "index.html"))
     pr = text_of(paid, os.path.join("pricing", "index.html"))
     assert PRODUCT in pr and BYP in pr
+    assert DATES_RESTRICTION in pr and "A tested habit with fewer than 30 trades in either group" in pr   # T-3 T3-A, T3-B
+    assert lint_text(DATES_RESTRICTION) == [] and lint_text(DATES_RESTRICTION, "t3a", paid=True) == []
     assert LOT in text_of(paid, os.path.join("tools", "lot-size-calculator", "index.html"))
     assert LOT_SOON in text_of(free, os.path.join("tools", "lot-size-calculator", "index.html"))
     fr = re.sub(r"\s+", " ", visible_text(raw(paid, os.path.join("fr", "avant-de-payer", "index.html"))))
@@ -193,7 +198,7 @@ def test_i3b_product_text_is_the_same_everywhere(builds):
         for f in files:
             if f.endswith((".html", ".json", ".js", ".xml", ".txt")):
                 t = open(os.path.join(root, f), encoding="utf-8", errors="replace").read()
-                if "Five habits measured" in t:
+                if "five habits measured and described" in t.lower():
                     seen.append(os.path.relpath(os.path.join(root, f), builds["paid"]))
                     assert "Five habits measured in your own trades, with historical dollar figures" not in t
     assert seen == ["pricing/index.html"], seen

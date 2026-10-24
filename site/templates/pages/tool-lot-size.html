@@ -46,7 +46,7 @@
 
   <aside class="notice notice-gap teaser" aria-labelledby="ls-teaser-h" {{ offer.on_sale_attr() }}>
     <strong id="ls-teaser-h">{{ offer.teaser_heading() }}</strong>
-    <p>Sizing on paper is one thing. {{ offer.lead() }} describes, from your own trade file, your median size after a loss and after a win, and what trades after a loss at 1.5 times your usual size or more totalled. {% if flags.paid_report %}It measures and describes five habits with the dollar totals of the matching trades, tests up to two of them against chance in this version, and includes one re-test 30 to 60 days after your first report.{% else %}It will measure and describe five habits with the dollar totals of the matching trades, test up to two of them against chance in this version, and include one re-test 30 to 60 days after your first report.{% endif %}</p>
+    <p>Sizing on paper is one thing. {{ offer.lead() }} describes, from your own trade file when it has times of day, your median size after a loss and after a win, and what trades after a loss at 1.5 times your usual size or more totalled. {% if flags.paid_report %}It measures and describes up to five habits with the dollar totals of the matching trades, tests up to two of them against chance in this version, and includes one re-test 30 to 60 days after your first report.{% else %}It will measure and describe up to five habits with the dollar totals of the matching trades, test up to two of them against chance in this version, and include one re-test 30 to 60 days after your first report.{% endif %}</p>
     {{- offer.teaser() }}
   </aside>
 
