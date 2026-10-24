@@ -401,9 +401,9 @@ def test_i9_dates_only_page_shows_exactly_the_ruled_lines(rendered_real, name, T
     assert "No pattern in this file is distinguishable" not in c["text"] and "were counted as one trade" not in c["text"]
     assert "Size after a loss is described" not in c["text"] and "Size after a loss is not described or tested for this file." in c["coverage"]
     for hid in ("revenge", "tilt"):
-        assert c["habits"][hid] == ["not tested", "Not tested: " + T + " " + DATED + "; this pattern depends on the timing of "
+        assert c["habits"][hid] == ["not tested", "Not tested: " + T[0].lower() + T[1:] + " " + DATED + "; this pattern depends on the timing of "
                                     "trades within a day, so it is not tested on files like that."], (hid, c["habits"][hid])
-    assert c["habits"]["size_up"] == ["not tested", "Not described: " + T + " " + DATED + "; this pattern depends on which "
+    assert c["habits"]["size_up"] == ["not tested", "Not described: " + T[0].lower() + T[1:] + " " + DATED + "; this pattern depends on which "
                                       "trade came after a loss, so it is not described for files like that."]
     for hid in ("revenge", "tilt", "size_up"):
         joined = " ".join(c["habits"][hid])

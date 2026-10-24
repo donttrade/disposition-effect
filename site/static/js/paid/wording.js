@@ -37,8 +37,9 @@ export function datesSubject(report, fmt) {
     : `${f.count(report.n_date_only_rows)} of the ${f.count(report.n_rows)} trades in this file`;
 }
 const DATED = 'open at exactly 00:00 and were held a whole number of days, as in exports with dates but no times';
-export const vDatesOnly = (T) => `Not tested: ${T} ${DATED}; this pattern depends on the timing of trades within a day, so it is not tested on files like that.`;
-export const sizeNotDescribed = (T) => `Not described: ${T} ${DATED}; this pattern depends on which trade came after a loss, so it is not described for files like that.`;
+// House style: lower case after a colon ("Not tested: the holds ..."), so {T} starts lower case there.
+export const vDatesOnly = (T) => `Not tested: ${lowerFirst(T)} ${DATED}; this pattern depends on the timing of trades within a day, so it is not tested on files like that.`;
+export const sizeNotDescribed = (T) => `Not described: ${lowerFirst(T)} ${DATED}; this pattern depends on which trade came after a loss, so it is not described for files like that.`;
 export const datesP1 = (T) => `${T} ${DATED}, so the patterns that depend on the order and timing of trades within a day are not tested, and size after a loss is not described.`;
 // The fixed page-1 line (R-D3.2), on every stats2c report, after HOLD_GAP_COVERAGE.
 export const SIZE_UP_COVERAGE = 'Size after a loss is described, not tested, in this version of the report.';
