@@ -7,7 +7,8 @@ brand · nav row · theme toggle. Checked on template pages and lifted pages, li
   * keyboard: Tab reaches Menu, Enter/Space opens it, Tab enters the links, Escape closes it and
     focus returns to Menu; a click outside closes it; the expanded state is exposed;
   * axe: 0 serious/critical with the menu open; every target at least 44 px;
-  * the toggle keeps its name "Dark mode" (aria-pressed), the header holds no button or offer.
+  * the toggle keeps its name "Dark mode" (aria-pressed), the header holds no button and one plain
+    text offer link ("Start a Pilot", For firms panel; ARCHITECT-V3 Q3). v3 nav tests: test_v3_nav.py.
 """
 import os
 import re
@@ -31,7 +32,7 @@ def _ctx(browser, width, scheme="light", js=True):
 
 
 @pytest.mark.parametrize("scheme", ["light", "dark"])
-@pytest.mark.parametrize("width", [320, 375, 768, 1024, 1280, 1440])
+@pytest.mark.parametrize("width", [320, 375, 768, 900, 1024, 1280, 1440])
 def test_header_is_one_line_at_every_width(browser, built_site, width, scheme):
     ctx = _ctx(browser, width, scheme)
     pg = ctx.new_page()
@@ -77,12 +78,18 @@ def test_menu_keyboard_escape_and_click_outside(browser, built_site, width):
     pg.keyboard.press("Enter")
     pg.wait_for_timeout(100)   # the accessibility tree updates after the toggle event
     assert pg.is_visible(".nav-panel") and _expanded(cdp) is True
-    pg.keyboard.press("Tab")
-    assert pg.evaluate("document.activeElement.textContent") == "For firms"
-    links = pg.eval_on_selector_all(".nav-panel a", "as => as.map(a => [a.textContent, a.getAttribute('aria-current'), a.getBoundingClientRect().height])")
-    assert [t for t, _, _ in links] == ["For firms", "For traders", "Free tools", "Pricing", "Research", "About"]
-    assert dict((t, c) for t, c, _ in links)["Research"] == "true"     # a study is in the Research section
-    assert all(h >= 44 for _, _, h in links)
+    pg.keyboard.press("Tab")   # v3 (ARCHITECT-V3 §c.2): the menu holds 3 accordion groups, then Pricing and About
+    assert pg.evaluate("document.activeElement.matches('.nav-acc > summary')")
+    assert pg.evaluate("document.activeElement.textContent") == "Free tools"
+    groups = pg.eval_on_selector_all(".nav-panel .nav-acc > summary", "ss => ss.map(s => [s.textContent, s.classList.contains('is-current'), s.getBoundingClientRect().height])")
+    assert [t for t, _, _ in groups] == ["Free tools", "Research, current section", "For firms"]
+    assert [t for t, c, _ in groups if c] == ["Research, current section"]   # a study is in the Research section
+    links = pg.eval_on_selector_all(".nav-panel .nav-links a", "as => as.map(a => [a.textContent, a.getBoundingClientRect().height])")
+    assert [t for t, _ in links] == ["Home", "Pricing", "About", "Ask a question"]   # Home link (a): first in .nav-links off the homepage
+    assert all(h >= 44 for _, _, h in groups) and all(h >= 44 for _, h in links)
+    pg.click(".nav-acc:nth-of-type(2) > summary")
+    items = pg.eval_on_selector_all(".nav-acc[open] a", "as => as.map(a => a.getBoundingClientRect().height)")
+    assert len(items) == 6 and all(h >= 48 for h in items)
     assert axe_violations(pg) == []
     pg.keyboard.press("Escape")
     assert not pg.is_visible(".nav-panel")
@@ -144,6 +151,9 @@ def test_header_markup(built_site):
         f = built_site["out"] / (os.path.join(path.strip("/"), "index.html") if path.endswith("/") else path.strip("/"))
         html = f.read_text(encoding="utf-8")
         header = re.search(r"(?s)<header class=\"site-header\">.*?</header>", html).group(0)
-        assert header.count("<nav ") == 1 and header.count("<details") == 1, path
-        assert 'class="btn' not in header and not re.search(r"Start a Pilot|\$\d", header), path
+        # v3: 3 drop-downs + the phone Menu + its 3 accordion groups; one offer, the plain text link
+        # "Start a Pilot" at the foot of For firms, once in each list (CSS shows one list at a time)
+        assert header.count("<nav ") == 1 and header.count("<details") == 8, path   # + the "Ask" popover (§c.5)
+        assert 'class="btn' not in header and not re.search(r"\$\d", header), path
+        assert header.count("Start a Pilot") == 2 == header.count('<li><a href="/start/?product=pilot#pilot">Start a Pilot</a></li>'), path
         assert re.search(r'<script src="/static/js/nav\.js\?v=[0-9a-f]{8}" defer></script>', html), path  # N5: versioned

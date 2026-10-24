@@ -254,13 +254,174 @@ def check_private(private, on):
 # only; verify() refuses it anywhere else, and refuses motion markup on a page without it.
 MOTION_JS = "/static/js/motion.js"
 MOTION_PAGES = {"/", "/for-firms/", "/for-traders/", "/for-platforms/"}
+# ARCHITECT-V3 B6, C8: the cross-document view transition (vt.css) on the motion pages and /start/ only;
+# verify() refuses vt.css on any other page and @view-transition in any other stylesheet.
+VT_CSS = "/static/css/vt.css"
+VT_PAGES = MOTION_PAGES | {"/start/"}
+START_JS = "/static/js/start-chooser.js"
+
+# ------------------------------------------------------------------ answer box index (ARCHITECT-V3 §c.5, Q-A1)
+# Built from the RENDERED pages, so a unit's answer is the page's own text, word for word: every FAQ
+# <details>, the /pricing/, /terms/ and /privacy/ sections with ids, the tool pages' FAQs, the glossary
+# and the /start/ "What happens next" steps. Never /research/* (no study figure may sit next to an offer,
+# and an answer can hold a price), thank-you and other noindex pages, flag-off pages or French pages.
+# Shipped as a script (window.DT_ANSWERS = …), not fetched JSON: every page keeps connect-src 'none'.
+ANSWERS_JS = "/static/js/answers-index.js"
+ANSWERS_MAX = 150 * 1024
+ANSWER_MAX_CHARS = 700
+ANSWER_SKIP = ("/research/", "/fr/", "/help/")
+ANSWER_SECTIONS = {"/pricing/": "price", "/terms/": "terms", "/privacy/": "privacy"}
+ANSWER_SECTION_SKIP = {"faq-h", "ladder-h", "history"}
+INLINE_TAGS = frozenset("a abbr b bdi bdo cite code data del dfn em font i ins kbd mark nobr q s samp small span "
+                        "strong sub sup time tt u var wbr".split())   # = checks/lint.py INLINE
+
+
+def plain(fragment):
+    """Readable text of an HTML fragment: inline elements join, every other element is a break
+    (the same rule as checks/lint.py visible_text), whitespace collapsed."""
+    from html.parser import HTMLParser
+
+    class P(HTMLParser):
+        def __init__(self):
+            super().__init__(convert_charrefs=True)
+            self.out, self.skip = [], 0
+
+        def handle_starttag(self, tag, attrs):
+            if tag in ("script", "style"):
+                self.skip += 1
+            elif tag not in INLINE_TAGS:
+                self.out.append(" ")
+
+        def handle_endtag(self, tag):
+            if tag in ("script", "style"):
+                self.skip -= 1
+            elif tag not in INLINE_TAGS:
+                self.out.append(" ")
+
+        def handle_data(self, data):
+            if not self.skip:
+                self.out.append(data)
+    p = P()
+    p.feed(fragment)
+    p.close()
+    return " ".join("".join(p.out).split())
+
+
+def slug(text, n=60):
+    t = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode().lower()
+    return re.sub(r"[^a-z0-9]+", "-", t).strip("-")[:n].strip("-") or "x"
+
+
+FAQ_SECTION_RE = re.compile(r'(?s)(<section[^>]*aria-labelledby="faq-h"[^>]*>)(.*?)(</section>)')
+
+
+def add_faq_ids(html):
+    """Each FAQ <details> gets a stable id (q-<slug of its question>), so an answer can link to it."""
+    m = FAQ_SECTION_RE.search(html)
+    if not m:
+        return html
+    seen = set(re.findall(r'\sid="([^"]+)"', html))
+
+    def one(d):
+        base = "q-" + slug(plain(d.group(1)))
+        i, new = 2, base
+        while new in seen:
+            new, i = f"{base}-{i}", i + 1
+        seen.add(new)
+        return f'<details id="{new}"><summary>{d.group(1)}</summary>'
+    body = re.sub(r"<details><summary>(.*?)</summary>", one, m.group(2))
+    return html[:m.start(2)] + body + html[m.end(2):]
+
+
+def cut_answer(text):
+    """≤ ANSWER_MAX_CHARS, cut after a sentence end, then " …" (the source link carries the rest)."""
+    if len(text) <= ANSWER_MAX_CHARS:
+        return text
+    head = text[:ANSWER_MAX_CHARS]
+    k = max(head.rfind(". "), head.rfind("? "), head.rfind(": "))
+    return (head[:k + 1] if k > 200 else head.rsplit(" ", 1)[0]) + " …"
+
+
+def answer_units(rendered):
+    """[(page, html)] → the index units {id, q, a, url, section, kind, updated}. Dies on a unit whose
+    anchor is not on its page, or whose text holds a finding number from evidence()."""
+    units, ids = [], set()
+    ev = evidence()
+    bad_numbers = [ev["finding"]["pct"], re.search(r"[\d,]{4,}", ev["finding"]["rest"]).group(0)]
+
+    def add(page, kind, q, a, anchor, where):
+        a = cut_answer(a)
+        if not q or not a:
+            return
+        uid = slug(f"{kind}-{page['path'].strip('/') or 'home'}-{q}", 90)
+        while uid in ids:
+            uid += "-2"
+        ids.add(uid)
+        units.append({"id": uid, "q": q, "a": a, "url": page["path"] + "#" + anchor,
+                      "section": where, "kind": kind, "updated": page.get("updated", "")})
+
+    for page, html in rendered:
+        path = page["path"]
+        if (page.get("noindex") or page.get("redirect_to") or path.startswith(ANSWER_SKIP)
+                or page.get("lang", "en") != "en" or path.endswith(".html")):
+            continue
+        main = re.search(r"(?s)<main[^>]*>(.*)</main>", html).group(1)
+        crumb = "Home" if path == "/" else page.get("crumb") or page["title"]
+        m = FAQ_SECTION_RE.search(main)
+        if m:
+            kind = "tool" if path.startswith("/tools/") else "faq"
+            for did, q, a in re.findall(r'(?s)<details id="([^"]+)">\s*<summary>(.*?)</summary>(.*?)</details>', m.group(2)):
+                add(page, kind, plain(q), plain(a), did, f"{crumb}, Questions")
+        if path in ANSWER_SECTIONS:
+            heads = list(re.finditer(r'(?s)<h([23])\b[^>]*\sid="([^"]+)"[^>]*>(.*?)</h\1>', main))
+            for k, h in enumerate(heads):
+                if h.group(2) in ANSWER_SECTION_SKIP or (m and m.start(2) <= h.start() < m.end(2)):
+                    continue
+                end = heads[k + 1].start() if k + 1 < len(heads) else len(main)
+                body = main[h.end():end]
+                body = FAQ_SECTION_RE.sub("", body)
+                q = plain(h.group(3))
+                add(page, ANSWER_SECTIONS[path], q, plain(body), h.group(2), f"{crumb}, {q}")
+        if path == "/glossary/":
+            for did, q, a in re.findall(r'(?s)<dt id="([^"]+)">(.*?)</dt>\s*<dd>(.*?)</dd>', main):
+                add(page, "glossary", plain(q), plain(a), did, f"Glossary, {plain(q)}")
+        if path == "/start/":
+            s = re.search(r'(?s)<section class="choice" id="([a-z]+)".*?<h3>(What happens next)</h3>\s*(<ol.*?</ol>)', main)
+            if s:
+                add(page, "faq", s.group(2), plain(s.group(3)), s.group(1), "Start here, What happens next")
+    for u in units:
+        path, anchor = u["url"].split("#", 1)
+        html = dict((p["path"], h) for p, h in rendered)[path]
+        if not re.search(r'\sid="' + re.escape(anchor) + '"', html):
+            die(f"answer index: {u['url']} has no such anchor on its page")
+        for n in bad_numbers:
+            if n in u["a"] or n in u["q"]:
+                die(f"answer index: unit {u['id']} holds the study figure {n!r} (no finding next to an offer)")
+    return units
+
+
+def answers_index_js(units, cfg):
+    advice = [u["id"] for u in units if u["url"] == "/#q-is-this-advice"]
+    if not advice:
+        die("answer index: the home FAQ 'Is this advice?' (the out-of-scope reply) is missing")
+    data = {"version": 1, "built": cfg["legal"]["terms_version"], "advice": advice[0],
+            "disclaimer": cfg["legal"]["disclaimer_short"], "synonyms": cfg.get("answers", {}).get("synonyms", {}),
+            "units": units}
+    js = ("// answers-index.js: built by site/build.py from the pages' own text (ARCHITECT-V3 §c.5). Data only.\n"
+          "window.DT_ANSWERS = " + json.dumps(data, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+          .replace("</", "<\\/") + ";\n")
+    if len(js.encode("utf-8")) > ANSWERS_MAX:
+        die(f"answer index is {len(js.encode('utf-8'))} bytes, over the {ANSWERS_MAX}-byte budget")
+    return js
+
 
 # Pages owned by templates. path → template, metadata, and the flag that must be on.
 PAGES = [
     {"template": "pages/home.html", "path": "/", "requires_flag": None, "scripts": [MOTION_JS],
-     "title": "donttrade — behavioural measurement for trading firms",
-     "description": "We measure the plan gap: how traders plan to act versus how they act. Fixed price, "
-                    "public script, run on your own systems.", "og_image": "/assets/og/home.png",
+     "title": "donttrade - free trading tools and research on trader habits",
+     "description": "Free in-browser tools: trade stats, prop challenge odds, drawdown and risk-reward. "
+                    "Research on how traders behave. For firms: fixed-price measurement.",
+     "og_image": "/assets/og/home.png",
      "updated": "2026-10-21"},
 ]
 
@@ -287,6 +448,26 @@ PAGES += [
      "title": "Lot Size Calculator: Forex, Gold, Indices and Futures",
      "description": "Work out position size in lots from your balance, risk amount and stop distance. Shows the "
                     "formula with your numbers and the loss after rounding."},
+    # Batch 2 (V2-BUILD-PLAN free-tools list; SEO-PLAN T4, T5, T9). Descriptive only in every build:
+    # no "real or noise" check runs on these pages, so they carry no if_badges copy.
+    {"template": "pages/tool-risk-reward.html", "path": "/tools/risk-reward-calculator/", "requires_flag": None,
+     "modules": ["/static/js/tools/risk-reward.js"], "app": True, "updated": "2026-10-21",
+     "crumb": "Risk-reward calculator",
+     "title": "Risk-Reward Calculator With Break-Even Win Rate",
+     "description": "Enter entry, stop and target to get your R multiple, the win rate that breaks even, and the "
+                    "expectancy per trade in R, with every formula shown. Free."},
+    {"template": "pages/tool-drawdown.html", "path": "/tools/drawdown-calculator/", "requires_flag": None,
+     "modules": ["/static/js/tools/drawdown.js"], "sample": True, "app": True, "updated": "2026-10-21",
+     "crumb": "Drawdown and recovery calculator",
+     "title": "Drawdown Recovery Calculator and Max Drawdown Report",
+     "description": "How much gain recovers a drawdown, plus your own largest drawdown, longest drawdown and "
+                    "recovery times from your trade file. Free, in your browser."},
+    {"template": "pages/tool-heatmap.html", "path": "/tools/trading-heatmap/", "requires_flag": None,
+     "modules": ["/static/js/tools/heatmap.js"], "sample": True, "app": True, "updated": "2026-10-21",
+     "crumb": "Your trades by hour and weekday",
+     "title": "Trading Heatmap of Your Trades by Hour and Weekday",
+     "description": "See your own results, win rate and trade count by the hour and weekday each trade opened, "
+                    "from your trade file, in the time zone you choose. Free."},
     {"template": "pages/tools-index.html", "path": "/tools/", "requires_flag": None, "updated": "2026-10-21",
      "crumb": "Free tools", "itemlist": True,
      "title": "Free Trading Tools That Run in Your Browser",
@@ -321,7 +502,7 @@ PAGES += [
 # Forms and the pages around them (step 16). Thank-you pages are noindex and stay out of the sitemap.
 PAGES += [
     {"template": "pages/start.html", "path": "/start/", "requires_flag": None, "updated": "2026-10-21",
-     "crumb": "Start here", "og_image": "/assets/og/start.png", "scripts": [FORM_JS],
+     "crumb": "Start here", "og_image": "/assets/og/start.png", "scripts": [FORM_JS, START_JS],
      "title": "Start a Pilot, Apply to Partner or Join the Waitlist",
      "description": "Request a Pilot measurement, apply to partner as a journal or platform, or join the trader "
                     "waitlist. A short form or an email; no calls.",
@@ -386,6 +567,29 @@ PAGES += [
 ]
 PAID_ONLY_PATHS_FR = ["/fr/avant-de-payer/", "/fr/conditions/", "/fr/confidentialite/"]
 
+# The free Trading Journal (ARCHITECT-V3 §d, J3; [flags] journal). connect-src 'none' (the default),
+# form-action 'none', and no analytics even when the analytics flag is on (D12, journal_problem): the page
+# cannot send anything. No header answer box there either (it is a form).
+JOURNAL_PATHS = ["/journal/"]
+JOURNAL_CSS = "/static/css/journal.css"   # only on the journal pages; left out of a flag-off build
+PAGES += [
+    {"template": "pages/journal.html", "path": "/journal/", "requires_flag": "journal", "sample": True, "app": True,
+     "modules": ["/static/js/journal/main.js"], "styles": [JOURNAL_CSS], "no_forms": True, "no_analytics": True, "no_ask": True,
+     "updated": "2026-10-21", "crumb": "Free trading journal", "parent": ("Free tools", "/tools/"),
+     "title": "Free Trading Journal and P&L Calendar, No Sign-Up",
+     "description": "A free trading journal with a P&L calendar for MT5, MT4, IBKR and Tradovate exports. No account: "
+                    "your trades stay in this browser, with a backup file you keep."},
+]
+
+# /help/ (ARCHITECT-V3 §c.5, Q-A1): every answer unit, grouped; the answer box's no-JS landing page.
+# Rendered after every other page, from their HTML (build.answer_units).
+PAGES += [
+    {"template": "pages/help.html", "path": "/help/", "requires_flag": None, "updated": "2026-10-21",
+     "crumb": "Questions", "scripts": ["/static/js/answers.js", "/static/js/answer-ui.js"], "title": "Questions: Prices, Refunds, Files and Privacy",
+     "description": "Every answer on donttrade in one place: prices, refunds, what the free tools do with your file, "
+                    "privacy and the terms, each with a link to its page."},
+]
+
 # Hybrid "Start a Pilot" (pilot_checkout, default off): the thank-you page with the Stripe link.
 PAGES += [
     {"template": "pages/pilot-thanks.html", "path": "/start/pilot-thanks/", "requires_flag": "pilot_checkout",
@@ -402,12 +606,21 @@ TOOLS = [
      "question": "What does my own trade history show?",
      "question_if_badges": "What does my own trade history show, and which numbers are more than noise?",
      "input": "Your trade file"},
+    {"name": "Trading heatmap", "href": "/tools/trading-heatmap/",
+     "question": "How did my own trades turn out by the hour and weekday they opened?",
+     "input": "Your trade file"},
+    {"name": "Drawdown and recovery calculator", "href": "/tools/drawdown-calculator/",
+     "question": "What gain recovers a drawdown, and how deep and long were mine?",
+     "input": "A drawdown in percent, or your trade file"},
     {"name": "Prop-firm challenge simulator", "href": "/tools/prop-challenge-simulator/",
      "question": "How would my past trading days have fared under a challenge’s rules?",
      "input": "Your trade file, or win rate and average win and loss; the rules"},
     {"name": "Lot size calculator", "href": "/tools/lot-size-calculator/",
      "question": "How many lots match the amount I chose to risk at this stop?",
      "input": "Balance, risk amount, stop distance, value per point"},
+    {"name": "Risk-reward calculator", "href": "/tools/risk-reward-calculator/",
+     "question": "At what win rate does this reward-to-risk ratio break even, and what is the expectancy in R?",
+     "input": "Entry, stop and target, or the ratio; optionally a win rate"},
     {"name": "Disposition-effect calculator", "href": "/tools/disposition-calculator/",
      "question": "Were winning positions sold more readily than losing ones?",
      "input": "Four counts of positions sold and held"},
@@ -489,6 +702,68 @@ def report_methods():
         die(f"report methods: the report page's METHOD_VERSION {mv} has no dated entry in {path} "
             "(the re-test sentence promises one on /corrections/)")
     return out
+def human_date(iso):
+    """2026-10-17 → 17 Oct 2026."""
+    y, m, d = (int(x) for x in iso.split("-"))
+    return f"{d} {MONTHS[m - 1]} {y}"
+
+
+COMMIT_URL = "https://github.com/donttrade/disposition-effect/commit/"
+
+
+def commit_on_remote(sha, repo=None):
+    """True when a remote-tracking branch (refs/remotes/*, as of the last fetch) contains the commit, so
+    the GitHub commit page exists. Read from the local refs only: no network, and the build stays
+    deterministic for one repo state. False when git cannot tell."""
+    import subprocess
+    try:
+        r = subprocess.run(["git", "-C", repo or REPO, "for-each-ref", "--contains", sha, "--format=%(refname)",
+                            "refs/remotes"], capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return r.returncode == 0 and any(x and not x.endswith("/HEAD") for x in r.stdout.split())
+
+
+def latest():
+    """ARCHITECT-V3 §c.3 section 8, H7: the home "Latest" band, every date read from its source at build
+    time: the newest study (its Article datePublished in the lifted page data), the newest row of the
+    /corrections/ table, and the commit the site was built from (omitted when git is unavailable).
+    The commit date, not the build date, so two builds of one commit stay byte-identical."""
+    import subprocess
+    studies = []
+    for name in sorted(os.listdir(LIFTED_DIR)):
+        if name.startswith("research_") and name.endswith(".json"):
+            with open(os.path.join(LIFTED_DIR, name), encoding="utf-8") as f:
+                m = json.load(f)
+            if m.get("article", {}).get("datePublished"):
+                studies.append((m["article"]["datePublished"], m["article"].get("headline") or m["crumb"], m["path"]))
+    if not studies:
+        die("latest: no study with a datePublished in site/templates/lifted/research_*.json")
+    s_date, s_title, s_url = max(studies)
+    t = re.search(r"(?s)<table.*?<tbody>(.*?)</tbody>", lifted_fragment("corrections"))
+    rows = [re.match(r"(?s)\s*<td>(\d{1,2} [A-Z][a-z]{2} \d{4})</td>", r) for r in re.findall(r"(?s)<tr\b[^>]*>(.*?)</tr>", t.group(1))]
+    if not rows or not all(rows):
+        die("latest: a /corrections/ row does not start with a 'D Mon YYYY' date cell")
+    def key(h):
+        d, mon, y = h.split(" ")
+        return (int(y), MONTHS.index(mon), int(d))
+    c_date = max((r.group(1) for r in rows), key=key)
+    commit = None
+    try:
+        r = subprocess.run(["git", "-C", REPO, "log", "-1", "--format=%H %cs"], capture_output=True, text=True, timeout=10)
+        if r.returncode == 0 and re.fullmatch(r"[0-9a-f]{40} \d{4}-\d{2}-\d{2}", r.stdout.strip()):
+            sha, day = r.stdout.split()
+            # brand Tester D5: link only a commit GitHub has; otherwise the text stays, without the link
+            on_remote = commit_on_remote(sha)
+            commit = {"sha": sha, "short": sha[:7], "date": human_date(day),
+                      "url": COMMIT_URL + sha if on_remote else None}
+            if not on_remote:   # a NOTE, not a WARNING: WARNING means an escape guard was opened (D10)
+                print(f"NOTE: latest: commit {sha[:7]} is on no remote branch, so the home page names it without "
+                      "a link (push it, fetch, and build again to link it)", file=sys.stderr)
+    except (OSError, subprocess.SubprocessError):
+        commit = None
+    return {"study": {"date": human_date(s_date), "title": s_title, "url": s_url},
+            "correction": {"date": c_date, "url": "/corrections/"}, "commit": commit}
 
 
 def sample_csv():
@@ -529,6 +804,40 @@ def motion_problem(html, path):
     return None
 
 
+def vt_problem(html, path):
+    """C8: vt.css only on VT_PAGES; the view-transition name only where vt.css is loaded."""
+    has = re.search(f'<link rel="stylesheet" href="{re.escape(VT_CSS)}(?:\\?v=[0-9a-f]{{8}})?">', html) is not None
+    if has and path not in VT_PAGES:
+        return f"vt.css on {path}, which is not one of VT_PAGES"
+    if "vt-start" in html and not has:
+        return f"{path} names a view transition (vt-start) without vt.css"
+    return None
+
+
+def vt_css_problem(out):
+    for root, _, files in os.walk(os.path.join(out, "static")):
+        for name in sorted(files):
+            if name.endswith(".css") and name != "vt.css":
+                with open(os.path.join(root, name), encoding="utf-8") as f:
+                    if "@view-transition" in f.read():
+                        return f"@view-transition in {name}: only vt.css may opt pages in (C8)"
+    return None
+
+
+def journal_problem(html, path):
+    """D12 / J10: the journal pages load no analytics and keep connect-src and form-action 'none'."""
+    import html as _h
+    if path not in JOURNAL_PATHS:
+        return None
+    if "cloudflareinsights" in html:
+        return f"{path} loads analytics (the journal page never does: ARCHITECT-V3 D12)"
+    csp = re.search(r'http-equiv="Content-Security-Policy" content="([^"]+)"', html)
+    csp = _h.unescape(csp.group(1)) if csp else ""
+    if "connect-src 'none';" not in csp or "form-action 'none';" not in csp:
+        return f"{path}: its CSP must keep connect-src 'none' and form-action 'none'"
+    return None
+
+
 def check_hero_dashboard():
     with open(HERO_DASH, encoding="utf-8") as f:
         m = re.search(r"sample-sha256: ([0-9a-f]{64})\b", f.read())
@@ -546,6 +855,7 @@ def check_hero_dashboard():
 # the SHA-256 of the file as served>. Module imports (and module-worker URLs) between our own scripts get the
 # same query, and a script's hash covers its rewritten imports, so a change deep in the engine changes the URL of
 # every module above it: a page never mixes old and new modules either.
+# (data-index-src= and data-js-src=, the answer box's lazy scripts, end in src=" and are versioned too)
 ASSET_REF_RE = re.compile(r'((?:src|href)=")(/static/[^"?#]+\.(?:js|css))(")')
 JS_SPEC_RE = re.compile(r"""(\bfrom\s*|\bimport\s*\(?\s*|\bnew URL\(\s*)(['"])(\.{1,2}/[^'"?#\s]+\.js)\2""")
 UNVERSIONED_RE = re.compile(r'(?:src|href)="/static/[^"]+\.(?:js|css)(?:#[^"]*)?"')
@@ -817,6 +1127,33 @@ def fix_passthrough_chrome(text, rel, flags):
 # checks/lift_pages.py, part of the lifted text. The mechanism stays for any page still passed through.
 PASSTHROUGH_FIXES = {}
 
+# The same for non-HTML files that pass through (brand Tester D4, 22 Oct): feed.xml's entry titles are
+# public copy (feed readers show them), so "sealed" goes, as on the lifted pages (checks/lift_pages.py
+# LIFT_FIXES). docs/ stays untouched. Once a bundle has put the new text into docs/, the old text is gone
+# and the fix is already in place; the build fails only if neither text is there exactly once.
+PASSTHROUGH_FILE_FIXES = {
+    "feed.xml": [
+        ("<title>Study: Swing-trading strategies under sealed pre-registration, a negative result (16 Oct 2026)</title>",
+         "<title>Study: Swing-trading strategies under hashed pre-registration, a negative result (16 Oct 2026)</title>"),
+    ],
+}
+
+
+def apply_file_fixes(out):
+    for rel, fixes in PASSTHROUGH_FILE_FIXES.items():
+        fp = os.path.join(out, rel)
+        if not os.path.exists(fp):
+            die(f"passthrough file fix: {rel} is not in the build (not in docs/)")
+        with open(fp, encoding="utf-8") as f:
+            text = f.read()
+        for old, new in fixes:
+            if text.count(old) == 1:
+                text = text.replace(old, new)
+            elif text.count(new) != 1:
+                die(f"passthrough file fix: {rel} holds neither the old nor the new text exactly once: {old!r}")
+        with open(fp, "w", encoding="utf-8", newline="") as f:
+            f.write(text)
+
 
 # Manager C4: /privacy/ (and the home FAQ, /for-traders/) say the free tool pages "block outgoing
 # requests". The template tool pages do (csp_for); the two old calculators, passed through from docs/
@@ -861,13 +1198,87 @@ def die(msg):
     raise BuildError(msg)
 
 
-FLAGS = ("paid_report", "analytics", "trader_first_home", "pilot_checkout", "free_badges")
-OPTIONAL_FLAGS = {"pilot_checkout": False, "free_badges": False}  # older site.toml files may lack the line
+FLAGS = ("paid_report", "analytics", "trader_first_home", "pilot_checkout", "free_badges", "journal")
+OPTIONAL_FLAGS = {"pilot_checkout": False, "free_badges": False, "journal": False}  # older site.toml files may lack the line
 # Free-launch condition C1 (21 Oct 2026): free_badges turns on the free tools' "real or noise"
 # badges and their footnote, which the Architect is redesigning. Off (the committed default): the
 # free tools show only the descriptive numbers, static/js/tools/trade-stats-badges.js is left out
 # of the build, and every page's copy drops the check (BADGE_COPY, the if_badges overrides).
 BADGES_JS = os.path.join("js", "tools", "trade-stats-badges.js")
+JOURNAL_JS_DIR = os.path.join("js", "journal") + os.sep
+
+
+# ------------------------------------------------------------------ nav (ARCHITECT-V3 §c.2, D1-D3)
+# site.toml [[nav]]: a group with [[nav.items]] is a drop-down, one without is a plain link. The nav never
+# shows a price, a % or a study number (D3): every label and description is refused here if it holds a
+# digit, "$", "%" or a banned.toml word, so the header can never sit a finding next to an offer.
+BANNED_TOML = os.path.join(REPO, "checks", "banned.toml")
+NAV_TEXT_BAD = re.compile(r"[0-9$%]")
+NAV_ICONS = ("journal", "stats", "flag", "scale", "hourglass", "list", "split", "doc", "code", "check", "bookmark",
+             "building", "swap", "windows", "percent", "shield")
+
+
+def banned_words():
+    with open(BANNED_TOML, "rb") as f:
+        words = tomllib.load(f)["words"]
+    return [w for ws in words.values() for w in ws]
+
+
+def nav_problem(nav):
+    """Why the [[nav]] data breaks the nav rules, or None."""
+    if not isinstance(nav, list) or not nav:
+        return "[[nav]] is empty"
+    # the matcher checks/lint.py uses, so "seal*" stems, wrapped phrases and hyphens mean the same here
+    # (brand Tester D1/D2, 22 Oct); lint imports this module only inside functions, so no import cycle
+    if os.path.join(REPO, "checks") not in sys.path:
+        sys.path.insert(0, os.path.join(REPO, "checks"))
+    from lint import _phrase_re
+    banned = [(w, _phrase_re(w)) for w in banned_words()]
+    for g in nav:
+        texts = [g.get("label", "")]
+        for it in g.get("items", []) + g.get("foot", []):
+            for k in ("label", "href"):
+                if not isinstance(it.get(k), str) or not it[k]:
+                    return f"nav item {it!r} has no {k}"
+            texts += [it["label"], it.get("desc", ""), it.get("label_if_paid", "")]
+            if it.get("requires_flag") and it["requires_flag"] not in FLAGS:
+                return f"nav item {it['label']!r}: requires_flag {it['requires_flag']!r} is not a flag"
+            if "items" in g and it in g["items"] and it.get("icon") not in NAV_ICONS:
+                return f"nav item {it['label']!r}: icon {it.get('icon')!r} is not in partials/icons.html"
+        for t in texts:
+            if NAV_TEXT_BAD.search(t):
+                return f"nav text {t!r} holds a digit, '$' or '%' (the nav never shows a price, % or number)"
+            for w, rx in banned:
+                if rx.search(t):
+                    return f"nav text {t!r} holds the banned word {w!r} (checks/banned.toml)"
+    return None
+
+
+def nav_for(nav, flags):
+    """[[nav]] as this build renders it: items behind an off flag dropped, label_if_paid applied."""
+    def keep(it):
+        return not it.get("requires_flag") or flags[it["requires_flag"]]
+
+    def label(it):
+        return {**it, "label": it.get("label_if_paid", it["label"]) if flags["paid_report"] else it["label"]}
+    return [{**g, "items": [label(i) for i in g.get("items", []) if keep(i)],
+             "foot": [label(i) for i in g.get("foot", []) if keep(i)]} for g in nav]
+
+
+def nav_current(nav, page):
+    """The label of the nav group the page belongs to: the group listing the page itself, else the
+    group whose section is the page's (lifted pages' "section"), else the group whose href starts the path."""
+    path = page["path"]
+    for g in nav:
+        if any(i["href"] == path for i in g["items"] + g["foot"]) or g["href"] == path:
+            return g["label"]
+    for g in nav:
+        if page.get("section") and g["href"] == page.get("section"):
+            return g["label"]
+    for g in nav:
+        if g["href"] != "/" and path.startswith(g["href"]):
+            return g["label"]
+    return None
 
 
 def show_seller(cfg):
@@ -921,6 +1332,9 @@ def check_schema(cfg, toml_path):
     for table in ("nav", "footer"):
         if not isinstance(cfg.get(table), list):
             die(f"site.toml has no [[{table}]] entries ({toml_path})")
+    why = nav_problem(cfg["nav"])
+    if why:
+        die(f"{why} ({toml_path})")
 
 
 # R-D1 D-6: the report method the paid wording accepts, read from the very constant checkMethod() uses, so
@@ -1056,6 +1470,38 @@ def set_launch_date(legal, toml_path, today=None):
     return d
 
 
+CHANNEL_HOSTS = {"x.com", "github.com", "donttrade.substack.com", "www.linkedin.com", "www.tiktok.com", "www.youtube.com",
+                 "www.instagram.com"}
+CHANNEL_FIELDS = ("id", "name", "url", "text", "icon", "rel_me")
+BRAND_ICONS = ("x", "github", "substack", "tiktok", "instagram", "youtube")
+
+
+def load_channels(cfg, toml_path):
+    """ARCHITECT-BRAND §2.6: site.toml [[channels]] is the one list of official accounts."""
+    if "same_as" in cfg["site"]:
+        die(f"[site] same_as is replaced by [[channels]] ({toml_path})")
+    chans = cfg.get("channels") or []
+    if not chans:
+        die(f"site.toml has no [[channels]] entries ({toml_path})")
+    for c in chans:
+        for f in CHANNEL_FIELDS:
+            if f not in c:
+                die(f"[[channels]] {c.get('id', '?')}: missing {f} ({toml_path})")
+        for k, v in c.items():
+            if isinstance(v, str):
+                why = placeholder_reason(v)
+                if why:
+                    die(f"[[channels]] {c['id']}.{k}: {why} ({toml_path})")
+        m = re.fullmatch(r"https://([^/]+)(/[^\s]*)?", c["url"])
+        if not m:
+            die(f"[[channels]] {c['id']}: url must be https:// ({c['url']!r})")
+        if m.group(1) not in CHANNEL_HOSTS:
+            die(f"[[channels]] {c['id']}: host {m.group(1)!r} is not an allowed channel host")
+        if c["icon"] not in BRAND_ICONS:
+            die(f"[[channels]] {c['id']}: icon {c['icon']!r} is not in partials/icons.html BRAND")
+    return chans
+
+
 def load_config():
     toml_path = os.environ.get("DT_SITE_TOML") or os.path.join(SITE, "config", "site.toml")
     cfg = read_toml(toml_path, "site.toml")
@@ -1065,6 +1511,7 @@ def load_config():
     with open(prices_path, encoding="utf-8") as f:
         prices = json.load(f)
     check_schema(cfg, toml_path)
+    load_channels(cfg, toml_path)
     set_launch_date(cfg["legal"], toml_path)
     cfg["site"].setdefault("manual_restore", True)
     if type(cfg["site"]["manual_restore"]) is not bool:
@@ -1184,13 +1631,15 @@ def csp_for(page, cfg):
     connect = page.get("connect_src", "'none'")
     if page.get("connect_worker"):
         connect = "'self' " + cfg["worker"]["api_base"]
-    if cfg["flags"]["analytics"]:
+    beacon = cfg["flags"]["analytics"] and not page.get("no_analytics")   # D12: never on the journal
+    if beacon:
         connect += " https://cloudflareinsights.com"
-    script = "'self'" + (" https://static.cloudflareinsights.com" if cfg["flags"]["analytics"] else "")
+    script = "'self'" + (" https://static.cloudflareinsights.com" if beacon else "")
+    forms = ("'none'" if page.get("no_forms") else
+             "'self' https://api.web3forms.com" + "".join(" " + a for a in page.get("form_action", [])))
     return ("default-src 'self'; script-src " + script + "; style-src 'self'; img-src 'self' data:; "
             "font-src 'self'; connect-src " + connect + "; worker-src 'self'; "
-            "form-action 'self' https://api.web3forms.com" + "".join(" " + a for a in page.get("form_action", [])) +
-            "; base-uri 'none'; object-src 'none'")
+            "form-action " + forms + "; base-uri 'none'; object-src 'none'")
 
 
 # ------------------------------------------------------------------ SEO (SEO-PLAN §3)
@@ -1211,6 +1660,18 @@ def faq_from(html):
             re.findall(r"(?s)<details[^>]*>\s*<summary>(.*?)</summary>(.*?)</details>", m.group(1))]
 
 
+def crumb_items(page):
+    """Home > [parent] > this page, as (name, path or None). The JSON-LD BreadcrumbList and the visible
+    breadcrumb (partials/crumbs.html, owner-approved Home link (c), NN/g "Homepage links") share it."""
+    items = [("Home", "/")]
+    if page.get("parent"):
+        items.append((page["parent"][0], page["parent"][1]))
+    elif page["path"].startswith("/tools/") and page["path"] != "/tools/":
+        items.append(("Free tools", "/tools/"))
+    items.append((page["crumb"], None))
+    return items
+
+
 def jsonld(page, cfg, html, flags, products):
     """One @graph per page. No address, phone, rating or review anywhere (SEO-PLAN §3.2)."""
     base = cfg["site"]["base_url"]
@@ -1220,14 +1681,9 @@ def jsonld(page, cfg, html, flags, products):
         graph.append({"@type": "WebSite", "@id": base + "/#website", "name": cfg["site"]["name"],
                       "url": base + "/", "publisher": org})
         graph.append({"@type": "Organization", "@id": base + "/#org", "name": cfg["site"]["name"],
-                      "url": base + "/", "email": cfg["site"]["contact_email"], "sameAs": cfg["site"]["same_as"]})
+                      "url": base + "/", "email": cfg["site"]["contact_email"], "sameAs": [c["url"] for c in cfg["channels"]]})
     else:
-        items = [("Home", base + "/")]
-        if page.get("parent"):
-            items.append((page["parent"][0], base + page["parent"][1]))
-        elif page["path"].startswith("/tools/") and page["path"] != "/tools/":
-            items.append(("Free tools", base + "/tools/"))
-        items.append((page["crumb"], None))
+        items = [(n, base + u if u else None) for n, u in crumb_items(page)]
         graph.append({"@type": "BreadcrumbList", "itemListElement": [
             {"@type": "ListItem", "position": i + 1, "name": n, **({"item": u} if u else {})}
             for i, (n, u) in enumerate(items)]})
@@ -1557,10 +2013,13 @@ def verify(out, flags, seller=None, base_url=None):
                 fp = os.path.join(root, name)
                 with open(fp, encoding="utf-8", errors="replace") as f:
                     text = f.read()
-                why = (motion_problem(text, "/" + os.path.relpath(fp, out).replace(os.sep, "/").replace("index.html", ""))
-                       or unversioned_problem(text))
+                url = "/" + os.path.relpath(fp, out).replace(os.sep, "/").replace("index.html", "")
+                why = motion_problem(text, url) or vt_problem(text, url) or journal_problem(text, url) or unversioned_problem(text)
                 if why:
                     die(why)
+    why = vt_css_problem(out)
+    if why:
+        die(why)
     # Decision 21 Oct: the footer business line, on every page exactly once under any commerce flag
     commerce = any(flags.get(f) for f in COMMERCE_FLAGS)
     for root, _, files in os.walk(out):
@@ -1612,6 +2071,7 @@ def build():
             text = text.replace(old, new)
         with open(fp, "w", encoding="utf-8", newline="") as f:
             f.write(text)
+    apply_file_fixes(out)
     for rel in sorted(set(PASSTHROUGH_FIXES) - set(passthrough_pages(owned))):
         # a template owns it (a lifted page carries its fixes in its fragment) or it is not in docs/
         die(f"passthrough fix: {rel} is not a passthrough page (owned by a template, or not in docs/)")
@@ -1623,7 +2083,8 @@ def build():
     # 2. static assets of the new design
     def static_left_out(rel):
         return ((not flags["paid_report"] and rel.startswith("js" + os.sep + "paid"))
-                or (not flags["free_badges"] and rel == BADGES_JS))
+                or (not flags["free_badges"] and rel == BADGES_JS)
+                or (not flags["journal"] and (rel.startswith(JOURNAL_JS_DIR) or rel == os.path.join("css", "journal.css"))))   # ARCHITECT-V3 D7: out of the build until approved
     copy_tree_sorted(os.path.join(SITE, "static"), os.path.join(out, "static"), skip=static_left_out)
     # 3. dev pages, only on request; never bundled
     if os.environ.get("DT_DEV") == "1":
@@ -1634,19 +2095,23 @@ def build():
     env.filters["usd"] = usd
     env.filters["usd_fr"] = usd_fr
     env.filters["isodate"] = isodate
+    env.globals["crumb_items"] = crumb_items
     products = {p["id"]: p for p in prices["products"]}
-    base_ctx = {"site": cfg["site"], "flags": flags, "nav": cfg["nav"], "footer": cfg["footer"],
+    nav = nav_for(cfg["nav"], flags)
+    base_ctx = {"site": cfg["site"], "flags": flags, "nav": nav, "nav_current": lambda pg: nav_current(nav, pg),
+                "footer": cfg["footer"], "vt_pages": VT_PAGES, "mkt_pages": MOTION_PAGES, "channels": cfg["channels"],
                 "legal": cfg["legal"], "forms": cfg["forms"], "analytics": cfg["analytics"],
                 "worker": cfg["worker"], "prices": prices, "products": products, "private": private,
                 "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": tools_for(flags),
-                "evidence": evidence(), "footer_privacy": footer_privacy(flags), "show_seller": show_seller(cfg),
+                "evidence": evidence(), "latest": latest(), "footer_privacy": footer_privacy(flags), "show_seller": show_seller(cfg),
                 "business_id_line": Markup(business_id_line(cfg, private, "legal")),
                 "strings": read_toml(os.path.join(SITE, "config", "strings.toml"), "strings.toml"),
                 "paid_method": paid_method(),
                 "report_link_fr": report_link_fr(products["report39"], cfg["stripe"]["mode"]),
                 "preview": preview_name()}
-    built = []
-    for rel, page in sorted(owned.items()):
+    built, rendered = [], []
+
+    def render(rel, page, **more):
         page = {"scripts": [], "modules": [], "og_image": "/assets/og/default.png", "lang": "en",
                 "alternates": [], **page}
         if flags["paid_report"]:
@@ -1664,7 +2129,9 @@ def build():
             extra["lifted_html"] = Markup(lifted_fragment(page["lifted"]))
             if page["path"] == "/corrections/":
                 extra["report_methods"] = report_methods()
-        html = env.get_template(page["template"]).render(page=page, csp=csp_for(page, cfg), **base_ctx, **extra)
+        html = env.get_template(page["template"]).render(page=page, csp=csp_for(page, cfg), **base_ctx, **extra, **more)
+        if not page.get("lifted"):
+            html = add_faq_ids(html)   # Q-A1: a stable id per FAQ question (lifted pages keep their frozen ids)
         if html.count(LD_MARKER) != 1:
             die(f"{page['template']}: the JSON-LD marker must appear exactly once")
         html = html.replace(LD_MARKER, jsonld(page, cfg, html, flags, products))
@@ -1673,6 +2140,17 @@ def build():
         with open(fp, "w", encoding="utf-8", newline="\n") as f:
             f.write(html)
         built.append(page)
+        rendered.append((page, html))
+
+    later = {rel: page for rel, page in owned.items() if page["path"] == "/help/"}
+    for rel, page in sorted(owned.items()):
+        if rel not in later:
+            render(rel, page)
+    units = answer_units(rendered)
+    with open(os.path.join(out, ANSWERS_JS.lstrip("/")), "w", encoding="utf-8", newline="\n") as f:
+        f.write(answers_index_js(units, cfg))
+    for rel, page in sorted(later.items()):
+        render(rel, page, answer_units=units)
     write_sitemap_and_robots(out, cfg, built, flags)
     version_assets(out, left_out=static_left_out)
 

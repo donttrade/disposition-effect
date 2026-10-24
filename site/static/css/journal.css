@@ -1,0 +1,50 @@
+/* journal.css: the free Trading Journal (/journal/, ARCHITECT-V3 §d.5). Loaded only on the journal pages
+   (build.JOURNAL_CSS). Colours come from the site.css tokens, so both themes and the contrast check apply;
+   the calendar's tints are tokens there too (--gain-t1…3, --loss-t1…3). Nothing here animates. */
+
+.journal { margin: var(--s3) 0 var(--s5); }
+.j-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--s1) var(--s2); padding: var(--s2) 0;
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.j-bar[hidden], .j-tabs li[hidden], .j-view[hidden], .j-import[hidden], .j-toast[hidden] { display: none; }
+.j-field { display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-size: var(--fs-0); min-width: 0; }
+.j-field select, .j-field input { width: auto; max-width: 100%; font-weight: 400; }
+.j-chip { margin: 0 0 0 auto; padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); max-width: none; }
+@media (max-width: 600px) { .j-chip { margin-left: 0; } }
+.j-toggle { display: inline-flex; align-items: center; gap: var(--s1); min-height: var(--target); font-size: var(--fs-0); font-weight: 600; }
+.j-toggle input { width: 24px; height: 24px; margin: 0; accent-color: var(--rust); }
+
+.j-tabs ul { list-style: none; margin: 0 0 var(--s3); padding: 0; display: flex; flex-wrap: wrap; gap: 0 var(--s1);
+  border-bottom: 1px solid var(--field-border); }
+.j-tabs a { display: inline-flex; align-items: center; min-height: var(--target); padding: 0 var(--s2); color: var(--text);
+  text-decoration: none; font-weight: 600; border-bottom: 3px solid transparent; }
+.j-tabs a[aria-current="page"] { border-bottom-color: var(--rust); color: var(--rust); }
+.j-tabs a:hover { color: var(--rust-hover); }
+.journal.is-empty .j-tabs { display: none; }
+
+.j-import { padding: var(--s2) 0 var(--s3); }
+.j-import h2 { margin-top: var(--s2); }
+.j-toast { max-width: 46rem; }
+.j-toast p { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s2); }
+.j-counts { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s1) var(--s3); }
+.j-checks { list-style: none; padding: 0; }
+.j-checks .check label { font-weight: 400; }
+.j-confirm-q { font-weight: 600; }
+.j-confirming { display: block; }
+
+/* trades table + detail panel: the panel sits beside the table from 1100 px, below it on a phone */
+.j-split.has-detail { display: grid; gap: var(--s3); }
+@media (min-width: 1100px) { .j-split.has-detail { grid-template-columns: minmax(0, 1fr) 22rem; align-items: start; } }
+.j-split-main { min-width: 0; }
+.j-trades th, .j-trades td { padding: 6px 8px; }
+.j-trades tr.is-open { background: var(--surface); }
+.j-sort, .j-rowbtn { min-height: var(--target); padding: 0 4px; background: transparent; border: 0; color: var(--rust);
+  font: 600 var(--fs-0) var(--font-sans); cursor: pointer; text-align: left; white-space: nowrap; }
+.j-rowbtn { font-family: var(--font-mono); font-weight: 400; text-decoration: underline; text-underline-offset: 3px; }
+.j-sort:hover, .j-rowbtn:hover { color: var(--rust-hover); }
+.j-pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s1); margin-top: var(--s2); }
+.j-pager p { margin: 0; }
+.j-detail { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: var(--s2) var(--s3); min-width: 0; }
+.j-detail h3 { font-size: var(--fs-2); margin-top: 0; }
+.j-dl { display: grid; grid-template-columns: auto 1fr; gap: 2px var(--s2); font-size: var(--fs-0); }
+.j-dl dt { color: var(--muted); }
+.j-dl dd { margin: 0; text-align: right; }

@@ -31,7 +31,7 @@
     </div>
     <p class="small muted">{{ pilot.name }} (called “{{ pilot.former_name }}” before {{ legal.launch_human }}). The disposition effect is selling winning positions more readily than losing ones; PGR and PLR are the shares of winning and losing positions that were sold. <a href="/glossary/">Glossary</a></p>
     <p><strong>Quarterly re-check:</strong> the same measurement on a fresh extract, at {{ pct }}% of the price of the engagement being repeated (for example {{ (ex.price_usd * pct / 100)|usd }} for a {{ ex.name }}), payable in advance, delivered in {{ prices.rules.recheck.turnaround_days }} business days.</p>
-    <p class="btn-row"><a class="btn" href="/start/?product=pilot#firm">Start a {{ pilot.name }} — {{ pilot.price_usd|usd }} USD</a> <a class="btn btn-secondary" href="/for-firms/#what-it-costs">Full detail for firms</a></p>
+    <p class="btn-row"><a class="btn" href="/start/?product=pilot#pilot">Start a {{ pilot.name }} — {{ pilot.price_usd|usd }} USD</a> <a class="btn btn-secondary" href="/for-firms/#what-it-costs">Full detail for firms</a></p>
   </section>
   <section class="section" aria-labelledby="copy-leader">
     <h2 id="copy-leader">Copy-trading platforms</h2>
@@ -40,7 +40,7 @@
   </section>
   <section class="section" aria-labelledby="claims-test">
     <h2 id="claims-test">Firms that make behaviour claims</h2>
-    <p>The claims substantiation test: your marketing says your product changes how traders behave, and a sealed, pre-registered test checks whether that claim holds on your own users’ records. We report the result whether it supports the claim or not. It is a test with stated limits; it is not an audit. It uses the engagements above, at the same prices: the {{ pilot.name }} for one claim, one measure and one comparison (one per firm), a Snapshot for the same, a Memo for every measure and comparison agreed in the scope, and an Outcomes pack running the same sealed test again on a later period.</p>
+    <p>The claims substantiation test: your marketing says your product changes how traders behave, and a pre-registered test, fingerprinted before any data is seen, checks whether that claim holds on your own users’ records. We report the result whether it supports the claim or not. It is a test with stated limits; it is not an audit. It uses the engagements above, at the same prices: the {{ pilot.name }} for one claim, one measure and one comparison (one per firm), a Snapshot for the same, a Memo for every measure and comparison agreed in the scope, and an Outcomes pack running the same pre-registered test again on a later period.</p>
     <p><a href="/for-firms/#claims-test">How the claims test works</a></p>
   </section>
   <section class="section" aria-labelledby="platforms">
@@ -79,12 +79,15 @@
 {%- endmacro %}
 
 <div class="wrap">
+  {% include "partials/crumbs.html" %}
   <h1>Pricing</h1>
   <p class="lede">Published prices in USD, the same for everyone, fixed in writing before anyone sees data. Every price on this site comes from one list.</p>
   {%- if flags.paid_report %}
   <p class="small"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Version française : Avant de payer</a></p>
   {%- endif %}
   <p><strong>Firm prices are in US dollars (USD), before any applicable sales tax.</strong></p>
+  {#- v3 (ARCHITECT-V3 §c.4, H6): the value ladder, here with the firm price #}
+  {%- with show_firm_price = true, ladder_id = "ladder-h" %}{% include "partials/value_ladder.html" %}{% endwith %}
   {%- if flags.paid_report %}
   <div data-requires-flag="paid_report">
     <div role="tablist" aria-label="Who is buying">
@@ -157,6 +160,8 @@
 
   <section class="section" aria-labelledby="faq-h">
     <h2 id="questions"><span id="faq-h">Questions about price</span></h2>
+    {%- from "partials/answer_box.html" import answer_box with context %}
+    {{ answer_box("pg") }}
     <details><summary>Why publish prices?</summary><p>So you know the cost before you write, and every firm pays the same.</p></details>
     <details><summary>Do you take card payments?</summary><p>Yes. {% include "partials/card_timing.html" %} Bank transfer, or Interac e-Transfer in Canada, also work.</p></details>
     <details><summary>What is the difference between the {{ pilot.name }}, a Snapshot and a Memo?</summary><p>The {{ pilot.name }} is your first Snapshot at an introductory price, one per firm. A Snapshot is one figure for one population and period. A Memo adds your ratio set beside the public study’s, with the differences explained in writing.</p></details>

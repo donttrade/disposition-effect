@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{#- /help/ "Questions" (ARCHITECT-V3 §c.5, Q-A1). Every answer unit of the answer box, grouped by kind, each
+    word for word from its page with a link back (build.answer_units). The #ask form is a plain GET to this
+    page: without JavaScript a static page cannot search, so it simply lists everything. No study figure
+    is in the index, so none appears here. -#}
+{% block content %}
+{%- set groups = [
+  ("faq", "Common questions"), ("price", "Prices and payment"), ("terms", "Terms and refunds"),
+  ("privacy", "Privacy"), ("tool", "The free tools"), ("glossary", "Words the studies use"),
+] %}
+<div class="wrap">
+  {% include "partials/crumbs.html" %}
+  <h1>Questions</h1>
+  <p class="lede">Every answer on this site in one place. Each one is quoted from its page, with a link to it.</p>
+  <section class="ask" id="ask" aria-labelledby="ask-h">
+    <h2 id="ask-h">Ask about prices, refunds, files or privacy</h2>
+    {%- from "partials/answer_box.html" import answer_box with context %}
+    {{ answer_box("ask") }}
+    <p class="small muted">Without JavaScript this page cannot search: every answer is listed below.</p>
+  </section>
+  <nav class="help-jump" aria-label="Groups"><ul>
+  {%- for kind, label in groups if answer_units|selectattr("kind", "equalto", kind)|list %}
+    <li><a href="#g-{{ kind }}">{{ label }}</a></li>
+  {%- endfor %}
+  </ul></nav>
+  {%- for kind, label in groups %}
+  {%- set us = answer_units|selectattr("kind", "equalto", kind)|list %}
+  {%- if us %}
+  <section class="section help-group" aria-labelledby="g-{{ kind }}">
+    <h2 id="g-{{ kind }}">{{ label }}</h2>
+    {%- for u in us %}
+    <details id="u-{{ u.id }}"><summary>{{ u.q }}</summary>
+      <blockquote cite="{{ site.base_url }}{{ u.url }}"><p>{{ u.a }}</p></blockquote>
+      <p class="small">From: <a href="{{ u.url }}">{{ u.section }}</a></p>
+    </details>
+    {%- endfor %}
+  </section>
+  {%- endif %}
+  {%- endfor %}
+  {% include "partials/disclaimer.html" %}
+</div>
+{% endblock %}

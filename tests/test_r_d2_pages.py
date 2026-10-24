@@ -176,7 +176,8 @@ def test_i3b_the_version_sentence_sits_where_the_re_test_is_described_and_links_
         h = re.sub(r"\s+", " ", raw(paid, rel))
         assert RETEST_HTML in h, rel
     pr = re.sub(r"\s+", " ", raw(paid, "pricing/index.html"))
-    assert pr.count(RETEST_HTML) == 2, "the pricing note and Before you pay"
+    # merge into delivery-39 (24 Oct): the v3 value ladder describes the re-test too, so it carries the sentence
+    assert pr.count(RETEST_HTML) == 3, "the pricing note, Before you pay and the value ladder"
     assert os.path.exists(os.path.join(paid, "corrections", "index.html"))
     fr = re.sub(r"\s+", " ", raw(paid, "fr/avant-de-payer/index.html"))
     assert 'daté, en anglais, sur la <a href="/corrections/" hreflang="en">page des corrections</a>.' in fr
@@ -202,7 +203,8 @@ def test_i3b_product_text_is_the_same_everywhere(builds):
                 if "five habits measured and described" in t.lower():
                     seen.append(os.path.relpath(os.path.join(root, f), builds["paid"]))
                     assert "Five habits measured in your own trades, with historical dollar figures" not in t
-    assert seen == ["pricing/index.html"], seen
+    # merge into delivery-39 (24 Oct): v3's /help/ page and its answers index quote /pricing/ word for word
+    assert sorted(seen) == ["help/index.html", "pricing/index.html", "static/js/answers-index.js"], seen
 
 
 @pytest.mark.parametrize("flavour", ["free", "badges", "paid"])

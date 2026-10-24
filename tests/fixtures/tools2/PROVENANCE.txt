@@ -1,0 +1,3 @@
+Hand-written fixtures for tests/test_tools_batch2.py (drawdown and heatmap pages). Synthetic, one
+symbol, quantity 1, no fees, so each trade's result is its exit price minus its entry price. The
+expected values are worked out by hand in the test file's comments.

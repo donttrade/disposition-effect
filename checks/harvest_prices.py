@@ -19,6 +19,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 def allowed_amounts(prices, include_retired=False):
     """Amounts a page may show. include_retired is for the harvest of today's OLD page only."""
     out = set(prices["retired_amounts"]["amounts"]) if include_retired else set()
+    out.add(0)   # the free tier's "$0" (v3 value ladder): no price, so nothing in prices.json can drift from it
     for p in prices["products"]:
         out.add(p["price_usd"])
     pct = prices["rules"]["recheck"]["percent_of_engagement"]
