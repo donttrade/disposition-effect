@@ -317,6 +317,50 @@ def test_c3_bundle_requires_the_launch_date():
     assert "DT_REQUIRE_LAUNCH_DATE=1 python3 site/build.py" in sh[sh.index("bundle)"):]
 
 
+# ------------------------------------------------------------------ T0 (QUICKWINS §2): hosting is Cloudflare Pages
+def _toml_hosting(tmp, value):
+    src = open(os.path.join(REPO, "site", "config", "site.toml"), encoding="utf-8").read()
+    src, n = re.subn(r'(?m)^cloudflare_pages_since = "[^"]*"', f'cloudflare_pages_since = "{value}"', src)
+    assert n == 1
+    p = tmp / f"hosting-{value or 'empty'}.toml"
+    p.write_text(src, encoding="utf-8")
+    return str(p)
+
+
+def test_t0_privacy_pages_say_cloudflare_pages_since_the_move(tmp_path):
+    from test_legal import build, paid_env
+    r, out = build(tmp_path, "paid", **paid_env(tmp_path))
+    assert r.returncode == 0, r.stderr
+    en, fr = _visible(out, "/privacy/"), _visible(out, "/fr/confidentialite/")
+    assert "The site is hosted on Cloudflare Pages; before 24 Oct 2026 it was hosted on GitHub Pages." in en
+    assert "Cloudflare receives visitors’ IP addresses to deliver the pages and protect the site" in en
+    assert "le site est hébergé sur Cloudflare Pages; avant le 24 octobre 2026, il l’était sur GitHub Pages." in fr
+    for page in (en, fr):
+        assert "is hosted on GitHub Pages" not in page and "hébergé sur GitHub Pages" not in page
+    for h in ((out / "privacy" / "index.html").read_text(encoding="utf-8"),
+              (out / "fr" / "confidentialite" / "index.html").read_text(encoding="utf-8")):
+        assert 'href="https://www.cloudflare.com/privacypolicy/"' in h
+        assert "github-general-privacy-statement" not in h
+    assert "Substack and Cloudflare are mostly in the United States" in en
+    r, off = build(tmp_path, "off")
+    assert r.returncode == 0, r.stderr
+    p = _visible(off, "/privacy/")
+    assert "The site is hosted on Cloudflare Pages; before 24 Oct 2026 it was hosted on GitHub Pages." in p
+    assert "Substack and Cloudflare are mostly in the United States" in p
+
+
+@pytest.mark.parametrize("value,msg", [
+    ("", "not empty"),
+    ("2099-01-01", "after the build date"),
+    ("2026-02-30", "not a real date"),
+    ("24 Oct 2026", "not YYYY-MM-DD"),
+])
+def test_t0_an_empty_future_or_bad_hosting_date_fails_the_build(tmp_path, value, msg):
+    from test_legal import build
+    r, _ = build(tmp_path, "bad", DT_SITE_TOML=_toml_hosting(tmp_path, value))
+    assert r.returncode == 1 and "cloudflare_pages_since" in r.stderr and msg in r.stderr, r.stderr
+
+
 # ------------------------------------------------------------------ Owner 21 Oct ~11:00: no dated / launch pricing
 @pytest.mark.parametrize("bad", [
     "Launch pricing, valid for engagements signed before 31 March 2027.",

@@ -186,7 +186,7 @@ def test_free_build_has_none_of_the_paid_lines(free):
     p = page(free, "/privacy/")
     assert "pen name" in p                                     # unchanged while nothing is sold
     li = [x for x in re.findall(r"(?s)<li>(.*?)</li>", p) if B.PROVIDERS_ABROAD in x]
-    assert len(li) == 1 and "Cloudflare" not in li[0]
+    assert len(li) == 1 and "Cloudflare" in li[0]           # T0: Cloudflare Pages hosts every build since 24 Oct
     assert B.paid_legal_problems(str(free), {"flags": {"paid_report": False}, "site": {"manual_restore": True}}) == []
 
 

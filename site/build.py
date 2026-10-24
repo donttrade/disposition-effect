@@ -1348,8 +1348,9 @@ SITE_SCHEMA = {
     "stripe": ({"mode"}, {"mode"}),
     "forms": ({"endpoint", "firm_key", "trader_key", "redirect_firm", "redirect_trader"}, None),
     "worker": ({"api_base"}, {"api_base"}),
-    "legal": ({"launch_date", "disclaimer_short", "disclaimer_long"},
-              {"launch_date", "disclaimer_short", "disclaimer_long", "show_seller_for_pilot"}),
+    "legal": ({"launch_date", "cloudflare_pages_since", "disclaimer_short", "disclaimer_long"},
+              {"launch_date", "cloudflare_pages_since", "disclaimer_short", "disclaimer_long",
+               "show_seller_for_pilot"}),
 }  # table: (required keys, every allowed key or None when the table is open)
 
 
@@ -1504,6 +1505,35 @@ def set_launch_date(legal, toml_path, today=None):
     return d
 
 
+MONTHS_FR = ("janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre",
+             "novembre", "décembre")
+
+
+def set_hosting_date(legal, toml_path, today=None):
+    """T0 (ARCHITECT-SAAS-QUICKWINS §2): [legal] cloudflare_pages_since (YYYY-MM-DD, required, never
+    empty) is the day the site moved from GitHub Pages to Cloudflare Pages, stated on /privacy/ and
+    /fr/confidentialite/. Sets legal.cloudflare_pages_since_human ("24 Oct 2026") and
+    legal.cloudflare_pages_since_fr ("24 octobre 2026"). A future date fails, as for launch_date."""
+    import datetime as dt
+    today = today or dt.date.today()
+    raw = legal.get("cloudflare_pages_since")
+    if not isinstance(raw, str) or raw == "":
+        die(f"[legal] cloudflare_pages_since must be the day the site moved to Cloudflare Pages, YYYY-MM-DD, "
+            f"not empty ({toml_path})")
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", raw):
+        die(f"[legal] cloudflare_pages_since {raw!r} is not YYYY-MM-DD ({toml_path})")
+    try:
+        d = dt.date.fromisoformat(raw)
+    except ValueError:
+        die(f"[legal] cloudflare_pages_since {raw!r} is not a real date ({toml_path})")
+    if d > today:
+        die(f"[legal] cloudflare_pages_since {raw} is after the build date {today.isoformat()}: the privacy "
+            f"pages would state a date that has not come yet ({toml_path})")
+    legal["cloudflare_pages_since_human"] = f"{d.day} {MONTHS[d.month - 1]} {d.year}"
+    legal["cloudflare_pages_since_fr"] = f"{d.day} {MONTHS_FR[d.month - 1]} {d.year}"
+    return d
+
+
 CHANNEL_HOSTS = {"x.com", "github.com", "donttrade.substack.com", "www.linkedin.com", "www.tiktok.com", "www.youtube.com",
                  "www.instagram.com"}
 CHANNEL_FIELDS = ("id", "name", "url", "text", "icon", "rel_me")
@@ -1547,6 +1577,7 @@ def load_config():
     check_schema(cfg, toml_path)
     load_channels(cfg, toml_path)
     set_launch_date(cfg["legal"], toml_path)
+    set_hosting_date(cfg["legal"], toml_path)
     cfg["site"].setdefault("manual_restore", True)
     if type(cfg["site"]["manual_restore"]) is not bool:
         die(f"[site] manual_restore must be true or false, not {cfg['site']['manual_restore']!r} ({toml_path})")
