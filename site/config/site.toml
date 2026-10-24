@@ -55,7 +55,7 @@ show_seller_for_pilot = false
 launch_date = "2026-10-21"
 # T0: the day the site moved from GitHub Pages to Cloudflare Pages (the zone became Active, runbook
 # step 83), YYYY-MM-DD. Stated on /privacy/ and /fr/confidentialite/. Required: empty or a date after
-# the build date fails the build.
+# the build date fails the build. The privacy notice's version is the later of this and launch_date.
 cloudflare_pages_since = "2026-10-24"
 # Verbatim from NON-ADVISER-DESIGN-AND-AUTORENEW A3 (the only approved wording).
 disclaimer_short = "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results."

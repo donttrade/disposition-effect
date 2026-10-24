@@ -1513,7 +1513,10 @@ def set_hosting_date(legal, toml_path, today=None):
     """T0 (ARCHITECT-SAAS-QUICKWINS §2): [legal] cloudflare_pages_since (YYYY-MM-DD, required, never
     empty) is the day the site moved from GitHub Pages to Cloudflare Pages, stated on /privacy/ and
     /fr/confidentialite/. Sets legal.cloudflare_pages_since_human ("24 Oct 2026") and
-    legal.cloudflare_pages_since_fr ("24 octobre 2026"). A future date fails, as for launch_date."""
+    legal.cloudflare_pages_since_fr ("24 octobre 2026"). A future date fails, as for launch_date.
+    Also sets legal.privacy_version, the version of /privacy/ and /fr/confidentialite/: the later of the
+    terms version (launch_date) and this date, because the hosting sentence changed the privacy notice
+    only (the terms keep launch_date). Call it after set_launch_date."""
     import datetime as dt
     today = today or dt.date.today()
     raw = legal.get("cloudflare_pages_since")
@@ -1531,6 +1534,7 @@ def set_hosting_date(legal, toml_path, today=None):
             f"pages would state a date that has not come yet ({toml_path})")
     legal["cloudflare_pages_since_human"] = f"{d.day} {MONTHS[d.month - 1]} {d.year}"
     legal["cloudflare_pages_since_fr"] = f"{d.day} {MONTHS_FR[d.month - 1]} {d.year}"
+    legal["privacy_version"] = max(legal["terms_version"], d.isoformat())
     return d
 
 

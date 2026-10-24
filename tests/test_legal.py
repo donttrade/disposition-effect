@@ -33,6 +33,11 @@ SITE_TOML = os.path.join(REPO, "site", "config", "site.toml")
 # [legal] launch_date (Manager C3): the terms version and every launch-dated statement; empty = the build date
 _LAUNCH = B.set_launch_date(dict(__import__("tomllib").load(open(SITE_TOML, "rb"))["legal"]), SITE_TOML)
 TERMS_VERSION = _LAUNCH.isoformat()
+# T0: /privacy/ and /fr/confidentialite/ carry the later of launch_date and [legal] cloudflare_pages_since
+_LEGAL = dict(__import__("tomllib").load(open(SITE_TOML, "rb"))["legal"])
+B.set_launch_date(_LEGAL, SITE_TOML)
+B.set_hosting_date(_LEGAL, SITE_TOML)
+PRIVACY_VERSION = _LEGAL["privacy_version"]
 LAUNCH_HUMAN = f"{_LAUNCH.day} {B.MONTHS[_LAUNCH.month - 1]} {_LAUNCH.year}"
 
 
@@ -136,7 +141,8 @@ def test_flag_off_legal_pages(built_site):
         html = (built_site["out"] / path.strip("/") / "index.html").read_text(encoding="utf-8")
         for i in ids:
             assert f'id="{i}"' in html, (path, i)
-        assert "tally" not in html.lower() and f"Version {TERMS_VERSION}" in html
+        v = PRIVACY_VERSION if path == "/privacy/" else TERMS_VERSION
+        assert "tally" not in html.lower() and f"Version {v}" in html
         assert not re.search(r"standard price|after launch|\$49|\$99|restore by email", html, re.I)
     privacy = (built_site["out"] / "privacy" / "index.html").read_text(encoding="utf-8")
     assert "Web3Forms" in privacy and "pen name" in privacy and "runs no analytics" in privacy
