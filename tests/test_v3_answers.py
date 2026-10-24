@@ -107,7 +107,8 @@ def test_a4_help_lists_every_unit_and_the_get_form_lands_there(browser, built_si
     pg.fill("#ask-q", "can I get my money back?")
     pg.click("#ask button[type=submit]")
     pg.wait_for_load_state()
-    assert "/help/?q=can+I+get+my+money+back" in pg.url
+    # Tester MR-4 (24 Oct): the field has no name, so the GET lands on /help/ without the question in it
+    assert re.search(r"/help/\??$", pg.url) and "q=" not in pg.url and "money" not in pg.url, pg.url
     assert pg.locator("details[id^='u-']").count() == len(data["units"])
     ctx.close()
     sitemap = (built_site["out"] / "sitemap.xml").read_text(encoding="utf-8")
