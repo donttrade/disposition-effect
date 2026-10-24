@@ -28,7 +28,9 @@ plus the three text fixes in LIFT_FIXES, which the passthrough build already app
 (PASSTHROUGH_FIXES / PASSTHROUGH_CHROME before steps 28–29), and one later removal (21 Oct
 2026: /about/'s "Where to find this", now rendered from site.toml [[channels]] outside the
 frozen body) and five rewordings of "sealed" in study link and teaser text on /about/,
-/for-researchers/ and /research/ (22 Oct 2026, brand Tester D4). compare.py proves that nothing else in the visible text, ids, links, tables or
+/for-researchers/ and /research/ (22 Oct 2026, brand Tester D4) and two rewordings of "verified"
+to "confirmed" in the correction promise on /corrections/ and /for-researchers/ (24 Oct 2026,
+Tester §12). compare.py proves that nothing else in the visible text, ids, links, tables or
 citation meta changed.
 
 This reads docs/ as it is before the step-30 bundle (old design). Once docs/ is replaced by
@@ -143,6 +145,14 @@ LIFT_FIXES = {
     "/for-researchers/": [
         (">Swing-trading strategies under sealed pre-registration, a negative result (16 Oct 2026)</a>",
          ">Swing-trading strategies under hashed pre-registration, a negative result (16 Oct 2026)</a>"),
+        # Tester §12 (24 Oct): "verified" is a banned claim word (v1 test_banned_words_only_in_negations);
+        # these two are our own correction promise, not a quotation, so they say "confirmed"
+        ("Verified errors are corrected within 30 days and logged permanently.",
+         "Confirmed errors are corrected within 30 days and logged permanently."),
+    ],
+    "/corrections/": [
+        ("Corrections are made within 30 days of a verified factual error and logged here permanently.",
+         "Corrections are made within 30 days of a confirmed factual error and logged here permanently."),
     ],
     "/research/": [
         ("each sealed with a hash before any result was computed and judged once",
