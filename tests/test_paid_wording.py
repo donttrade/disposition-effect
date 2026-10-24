@@ -351,6 +351,13 @@ def test_i9_dates_only_and_nothing_tested_lines():
         r, L_ = real[f], dates_lines(T)
         assert r["dates"] is True and r["page1"] == [NONE_TESTED, L_["p1"]] and r["coverage"] == COV0_DATES and r["merged"] is None, f
         assert r["habits"]["revenge"] == [L_["seq"]] and r["habits"]["tilt"] == [L_["seq"]] and r["habits"]["size_up"] == [L_["size"]], f
+    # T-3 T3-C: a dates-only report gives holds in days and says how a same-date trade counts; never minutes
+    hg = real["stats-r2__21-dateonly.report.json"]["habits"]["hold_gap"]
+    assert hg[0] == ("Your losing trades were held a median of 2 days; your winning trades a median of 0 days. In this file, a "
+                     "trade with dates but no times that opened and closed on the same date counts as 0 days.")
+    assert hg[-1].startswith("Held 12 hours or more, or closed on a later date: 97 of your 97 losing trades")
+    for f in ("stats-r2__21-dateonly.report.json", "stats-r2__35-dates-mixed.report.json"):
+        assert not any(" min" in x or "0m" in x for x in real[f]["habits"]["hold_gap"]), f
     few = real["stats-r2__36-dates-few.report.json"]
     assert few["dates"] is False and few["coverage"][-1] == SU_LINE and few["merged"] is None
     tf = real["too_few.report.json"]
