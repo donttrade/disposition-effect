@@ -121,6 +121,7 @@ out.guard_dates = [run(() => W.page1Lines(bad1, fmt)), run(() => W.page1Lines(ba
   run(() => W.page1Lines(R({}, { dates_only: undefined }), fmt)), run(() => W.page1Lines(R({}, { coarse_time: false, dates_only: undefined, n_date_only_rows: undefined }), fmt))];
 // R-D3 addendum I-5: the merged-rows line (W-2: a merged and an unmerged case) and the row-count guard
 out.merged = run(() => W.mergedLine(R({}, { n_rows: 4880, n_trades: 2630 }), fmt));
+out.merged_kept = run(() => W.mergedLine(R({}, { n_rows: 4880, n_trades: 2630, n_date_only_rows: 40 }), fmt));   // T-3 T3-F
 out.unmerged = run(() => W.mergedLine(R({}), fmt));
 out.guard_rows = [run(() => W.page1Lines(R({}, { n_rows: undefined }), fmt)), run(() => W.coverageLines(R({}, { n_trades: 301 }))),
   run(() => W.mergedLine(R({}, { n_trades: 0, n_rows: 0 }), fmt))];
@@ -305,6 +306,10 @@ def test_i5_merged_rows_line_only_when_rows_were_merged():
     d = data()
     assert d["merged"] == MERGED.format(r="4,880", t="2,630")       # W-2, merged case: the line, exactly
     assert d["unmerged"] is None                                     # W-2, unmerged case: no line
+    assert d["merged_kept"] == ("Rows with the same open minute, symbol and direction were counted as one trade (for example, "
+                                "a position closed in parts; rows that open at 00:00 with whole-day holds are kept separate): "
+                                "4,880 rows became 2,630 trades.")   # T-3 T3-F
+    assert lint_text(d["merged_kept"]) == [] and lint_text(d["merged_kept"], "kept", paid=True) == []
     for paid in (False, True):
         assert lint_text(d["merged"], "merged", paid=paid) == []
     real = d["real"]
