@@ -122,7 +122,7 @@ icon = "doc"
 [[nav.items]]
 label = "Code"
 href = "/code/"
-desc = "Every script, public"
+desc = "Study scripts, and which are still to come"
 icon = "code"
 [[nav.items]]
 label = "Corrections"
