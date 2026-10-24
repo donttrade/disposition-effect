@@ -964,6 +964,38 @@ LIFTED_DIR = os.path.join(SITE, "templates", "lifted")
 LIFTED_JS = "/static/js/lifted.js"
 
 
+# Tester merge re-check MR-5 (24 Oct): a paid build names the seller (Before you pay, the terms and the privacy
+# notice, s. 32), so the frozen "no name" lines of /about/ and /code/ are not true there. In a paid_report build
+# only, each (old, new) pair replaces old (exactly once) in the page's frozen body; a free build keeps the old
+# page word for word. checks/compare.py and lint undo the same pairs before comparing a paid build with
+# checks/lifted-baseline/, so these are the only frozen-body differences a paid build may have. No other name
+# is added: the author stays unnamed.
+_SELLER_WHERE = ('the seller’s legal name is given for buyers in <a href="/pricing/#before-you-pay">Before you pay</a>, '
+                 'the terms and the privacy notice')
+PAID_LIFTED_SWAPS = {
+    "/about/": [("There’s no name on it on purpose: every study",
+                 "No author name is published here, on purpose (" + _SELLER_WHERE + "): every study")],
+    "/code/": [("There is no name on this site; the scripts are what you check instead.",
+                "No author name is published on this site (" + _SELLER_WHERE + "); the scripts are what you check "
+                "instead.")],
+}
+PAID_LIFTED_DESCRIPTIONS = {   # the same, for the page description (head only, outside the frozen body)
+    "/about/": "Who writes donttrade, what the plan gap is and how it is measured, why no author name is published, "
+               "and what this is not.",
+}
+
+
+def paid_lifted(path, html, paid):
+    """The lifted fragment for this build: PAID_LIFTED_SWAPS applied in a paid_report build."""
+    if not paid:
+        return html
+    for old, new in PAID_LIFTED_SWAPS.get(path, []):
+        if html.count(old) != 1:
+            die(f"paid lifted swap: {path} no longer holds this sentence exactly once: {old!r}")
+        html = html.replace(old, new)
+    return html
+
+
 def lifted_pages():
     pages = []
     for name in sorted(os.listdir(LIFTED_DIR)) if os.path.isdir(LIFTED_DIR) else []:
@@ -979,6 +1011,8 @@ def lifted_pages():
         for k in ("updated", "noindex", "redirect_to", "article", "form_action", "parent", "section"):
             if m.get(k):
                 page[k] = m[k]
+        if m["path"] in PAID_LIFTED_DESCRIPTIONS:
+            page["if_paid"] = {"description": PAID_LIFTED_DESCRIPTIONS[m["path"]]}
         pages.append(page)
     return pages
 
@@ -2126,7 +2160,7 @@ def build():
             extra["sample_report"] = rep_
             extra["sample_report_json"] = Markup(json.dumps(rep_, sort_keys=True, ensure_ascii=False).replace("</", "<\\/"))
         if page.get("lifted"):
-            extra["lifted_html"] = Markup(lifted_fragment(page["lifted"]))
+            extra["lifted_html"] = Markup(paid_lifted(page["path"], lifted_fragment(page["lifted"]), flags["paid_report"]))
             if page["path"] == "/corrections/":
                 extra["report_methods"] = report_methods()
         html = env.get_template(page["template"]).render(page=page, csp=csp_for(page, cfg), **base_ctx, **extra, **more)

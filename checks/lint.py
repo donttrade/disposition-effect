@@ -545,7 +545,7 @@ def lifted_problems(html, where, path, paid, analytics, amounts, priv, seller, p
     if base is None:
         out.append(("frozen", where, "no checks/lifted-baseline entry for this lifted page"))
     else:
-        out += [("frozen:" + what, where, detail) for what, detail in compare.diff_page(base, html)]
+        out += [("frozen:" + what, where, detail) for what, detail in compare.diff_page(base, html, paid)]
     return out
 
 
