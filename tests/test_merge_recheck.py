@@ -106,3 +106,20 @@ def test_mr2_nav_code_line_matches_what_code_lists(builds):
         assert "Study scripts, and which are still to come" in h
         # /code/ lists the published study scripts and those still to follow ("To be published with the study")
         assert "To be published with the study" in text_of(out, "code/index.html")
+
+
+# ------------------------------------------------------------------ MR-3
+LIMITS = ("the closed trades in your file: the latest 20,000 rows at most, leaving out trades opened more than about 10 "
+          "years before your latest trade or held longer than 3,650 days.")
+
+
+def test_mr3_ladder_states_both_file_limits(builds):
+    for name, out in builds.items():
+        lead = "The report reads " if name == "paid" else "The report will read "
+        for rel in ("for-traders/index.html", "pricing/index.html"):
+            t = text_of(out, rel)
+            assert lead + LIMITS in t and "every closed trade" not in t, (name, rel)
+    # the numbers are the browser's own (paid/strip.js)
+    js = open(os.path.join(REPO, "site", "static", "js", "paid", "strip.js"), encoding="utf-8").read()
+    assert "MAX_ROWS = 20000;" in js and "MAX_HOLD_S = 86400 * 3650;" in js and "519 weeks (about 10 years)" in js
+    assert L.lint_text(lead + LIMITS) == [] and L.lint_text("The report reads " + LIMITS, "mr3", paid=True) == []
