@@ -65,18 +65,18 @@ def serve_dir(port, directory):
 
 
 class Worker:
+    """Tester E16: the shared harness (tests/rehearsal_worker.py) runs it in its own process group, stops it when the
+    test ends (or this process dies: --exit-with-stdin) and checks no workerd child is left."""
     def __init__(self, origins, omit=()):
-        cmd = ["node", "--no-warnings", "scripts/rehearse.mjs", "--serve", "--origins", ",".join(origins)]
-        for o in omit:
-            cmd += ["--omit", o]
-        self.p = subprocess.Popen(cmd, cwd=PRIVATE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        line = self.p.stdout.readline()
-        assert line.startswith("{"), line + self.p.stderr.read()
-        self.api = json.loads(line)["api"]
+        import sys
+        sys.path.insert(0, HERE)
+        from rehearsal_worker import ServeWorker
+        self.w = ServeWorker(PRIVATE, origins, omit)
+        self.api = self.w.api
 
     def stop(self):
-        self.p.terminate()
-        self.p.wait(timeout=30)
+        left = self.w.stop()
+        assert left == [], f"workerd children left running: {left}"
 
 
 def smoke(api, site, mode="test", flag="on", private=None):
@@ -184,3 +184,16 @@ def test_run_sh_test_worker_refuses_a_stats1_server_and_runs_a_stats2_one(tmp_pa
     r2 = run(fake_private(tmp_path, WORDING_METHOD))
     assert r2.returncode == 0, r2.stdout + r2.stderr
     assert "# pass 1" in r2.stdout
+
+
+@needs_private
+def test_e16_a_stopped_worker_leaves_no_node_or_workerd_process():
+    """Tester E16: after stop(), neither the serve process nor its workerd child is alive."""
+    import sys
+    sys.path.insert(0, HERE)
+    from rehearsal_worker import ServeWorker, _alive
+    w = ServeWorker(PRIVATE, ["http://127.0.0.1:9"])
+    pid, kids = w.p.pid, list(w.children)
+    assert kids, "workerd runs as a child of the serve process"
+    assert w.stop() == []
+    assert not _alive(pid) and not any(_alive(k) for k in kids)
