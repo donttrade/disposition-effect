@@ -409,9 +409,10 @@ def test_hold_gap_lines_are_the_ruling_r_d2():
     # M1, then V-launch, then M3 only when a trade was held 12 hours or more
     assert h["hold_launch"] == [M1, V_LAUNCH]
     assert h["hold_launch_m3"] == [M1, V_LAUNCH,
-                                   "Held 12 hours or more: 3 of your 40 losing trades and 5 of your 90 winning trades. This count "
-                                   "is not part of the test: trades held 12 hours or more are only compared with each other."]
+                                   "Held 12 hours or more: 3 of your 40 losing trades and 5 of your 90 winning trades."]   # T3-D
     assert h["hold_launch_nomed"] == [V_LAUNCH]
+    for d in data()["real"].values():   # T-3 T3-D: no hold-gap test runs, so nothing is "compared with each other"
+        assert not any("not part of the test" in x or "compared with each other" in x for x in d["habits"]["hold_gap"])
     assert data()["v_launch"] == V_LAUNCH
     # the stats2 lines (M2, the verdict, V-spread, V-spread0, V-few) stay in the code for Option B but are unreachable
     for k in ("hold_dist", "hold_spread", "hold_spread0", "hold_few"):

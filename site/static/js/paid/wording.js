@@ -238,7 +238,7 @@ function holdGapLines(h, report, f) {
     out.push(`Compared with similar trades opened just before it, a losing trade's hold came out longer in ${a} of comparisons; a winning trade's in ${b}. With no link between hold and outcome, the two figures would be about equal.`);   // M2
   }
   if (h.n_long_a + h.n_long_b >= 1) {
-    out.push(`${report.dates_only ? 'Held 12 hours or more, or closed on a later date' : 'Held 12 hours or more'}: ${h.n_long_a} of your ${h.n_a} losing trades and ${h.n_long_b} of your ${h.n_b} winning trades. This count is not part of the test: trades held 12 hours or more are only compared with each other.`);   // M3
+    out.push(`${report.dates_only ? 'Held 12 hours or more, or closed on a later date' : 'Held 12 hours or more'}: ${h.n_long_a} of your ${h.n_a} losing trades and ${h.n_long_b} of your ${h.n_b} winning trades.`);   // M3 (T-3 T3-D: no hold-gap test runs, so the old "not part of the test" clause is dropped)
   }
   if (h.verdict === 'distinguishable' || h.verdict === 'not_distinguishable') out.push(verdictLine(h, report));
   return out;
