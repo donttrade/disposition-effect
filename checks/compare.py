@@ -115,8 +115,22 @@ def _first_diff(a, b):
     return f"at {n}: old …{a[max(0, n - 60):n + 60]!r}… new …{b[max(0, n - 60):n + 60]!r}…"
 
 
-def diff_page(base, html):
-    """[(what, detail)] — empty when the built page matches its baseline."""
+def undo_paid_swaps(path, html):
+    """A paid build's page with build.PAID_LIFTED_SWAPS undone (MR-5), so its frozen body can be held to the
+    old page. A swap that is not there exactly once is left alone, and the text diff then names it."""
+    sys.path.insert(0, os.path.join(REPO, "site"))
+    import build
+    for old, new in build.PAID_LIFTED_SWAPS.get(path, []):
+        if html.count(new) == 1:
+            html = html.replace(new, old)
+    return html
+
+
+def diff_page(base, html, paid=False):
+    """[(what, detail)] — empty when the built page matches its baseline. paid: a paid_report build, whose
+    documented swaps (build.PAID_LIFTED_SWAPS) are undone first."""
+    if paid:
+        html = undo_paid_swaps(base["path"], html)
     body = frozen_of(html)
     if body is None:
         return [("frozen", "no single <!--frozen:start-->…<!--frozen:end--> region")]
@@ -157,7 +171,7 @@ def compare_site(site):
             problems.append((path, "missing", "page not in the build"))
             continue
         with open(fp, encoding="utf-8") as f:
-            for what, detail in diff_page(base, f.read()):
+            for what, detail in diff_page(base, f.read(), paid):
                 problems.append((path, what, detail))
     return problems
 
