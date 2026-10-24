@@ -4,7 +4,7 @@
 <div class="wrap"><div class="prose">
   {% include "partials/crumbs.html" %}
   <h1>Privacy</h1>
-  <p class="notice">Plain-language notice, version {{ legal.terms_version }}. Where a signed engagement agreement differs, the agreement governs.{% if flags.paid_report %} <a href="/fr/confidentialite/" hreflang="fr" lang="fr">Version française</a>{% endif %}</p>
+  <p class="notice">Plain-language notice, version {{ legal.privacy_version }}. Where a signed engagement agreement differs, the agreement governs.{% if flags.paid_report %} <a href="/fr/confidentialite/" hreflang="fr" lang="fr">Version française</a>{% endif %}</p>
 
   <h2 id="who">Who we are</h2>
   {%- if show_seller %}
@@ -83,6 +83,6 @@
 
   <h2 id="rights">Your rights</h2>
   <p>You can ask by email to see, correct or delete your information, or for a copy in a common format. We reply within 30 days. You can also complain to the <a href="https://www.priv.gc.ca/en/">Office of the Privacy Commissioner of Canada</a>{% if flags.paid_report %}, in Quebec to the Commission d’accès à l’information, in the EU to your country’s data protection authority, and in the UK to the Information Commissioner’s Office{% endif %}.{% if flags.paid_report %} If a privacy breach creates a real risk of significant harm to you, we tell you.{% endif %}</p>
-  <p class="small muted">Version {{ legal.terms_version }}.</p>
+  <p class="small muted">Version {{ legal.privacy_version }}.</p>
 </div></div>
 {% endblock %}

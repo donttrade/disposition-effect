@@ -277,8 +277,8 @@ def test_c3_launch_date_dates_every_launch_statement(tmp_path):
     for path in LAUNCH_PAGES:
         assert "called “Trial” before 20 Oct 2026" in _visible(out, path), path
     assert "<td>20 Oct 2026</td>" in (out / "pricing" / "index.html").read_text(encoding="utf-8")
-    for path in ("/terms/", "/privacy/"):
-        assert "Version 2026-10-20." in _visible(out, path), path
+    assert "Version 2026-10-20." in _visible(out, "/terms/")
+    assert "Version 2026-10-24." in _visible(out, "/privacy/")  # T0: the hosting date is later
     for t in ("for-firms", "start", "pricing", "terms"):
         src = open(os.path.join(REPO, "site", "templates", "pages", t + ".html"), encoding="utf-8").read()
         assert "22 Oct 2026" not in src and "2026-10-2" not in src, t
@@ -342,6 +342,10 @@ def test_t0_privacy_pages_say_cloudflare_pages_since_the_move(tmp_path):
         assert 'href="https://www.cloudflare.com/privacypolicy/"' in h
         assert "github-general-privacy-statement" not in h
     assert "Substack and Cloudflare are mostly in the United States" in en
+    # Lead (Tester LOW): the privacy notice's version is the hosting date; the terms keep launch_date
+    assert en.count("version 2026-10-24.") + en.count("Version 2026-10-24.") == 2
+    assert "Version du 2026-10-24." in fr
+    assert "Version 2026-10-21." in _visible(out, "/terms/") and "Version du 2026-10-21." in _visible(out, "/fr/conditions/")
     r, off = build(tmp_path, "off")
     assert r.returncode == 0, r.stderr
     p = _visible(off, "/privacy/")
