@@ -599,7 +599,7 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, b
         WARNINGS.append(f"no private.toml at {private_toml_path()}: the footer line's address was NOT checked "
                         "against it (set DT_PRIVATE_TOML to the file the build used)")
     owned_rel = {"/" + os.path.relpath(build.out_file(out_dir, p), out_dir) for p in owned_paths(paid, pilot)}
-    lifted = set(build.LIFTED_PATHS)
+    lifted = set(build.lifted_paths_for(paid))   # C-12 final: a paid build's /sample-report/ is a template page
     for path in owned_paths(paid, pilot):
         fp = build.out_file(out_dir, path)
         if not os.path.exists(fp):

@@ -682,6 +682,33 @@ LIFTED = lifted_pages()
 PAGES += LIFTED
 LIFTED_PATHS = [p["path"] for p in LIFTED]
 
+# Delivery plan C-12 final (Tester T-3 T3-E): with paid_report on, /sample-report/ is no longer the lifted research
+# figure but a real habit report: dt-private's analyse() on a committed synthetic file
+# (site/config/sample-report.report.json, made by tests/fixtures/paid/make_sample_report.py), rendered by the real
+# report.js. The lifted page stays in flag-off builds, where its lead already says it is not the trader report.
+PAID_REPLACES_LIFTED = ("/sample-report/",)
+SAMPLE_REPORT_JSON = os.path.join(SITE, "config", "sample-report.report.json")
+SAMPLE_PAGE = {"template": "pages/sample-report.html", "path": "/sample-report/", "requires_flag": None,
+               "modules": ["/static/js/paid/sample.js"], "crumb": "Sample habit report", "og_image": "/assets/og/sample-report.png",
+               "title": "Sample habit report, from a made-up trade file — donttrade", "sample_report": True,
+               "description": "A sample of the paid habit report: the report's own engine and page run on a trade file made up "
+                              "for this page. Not a real trader. Not advice.", "updated": "2026-10-23"}
+
+
+def lifted_paths_for(paid):
+    """The lifted pages of a build with this paid flag (lint and compare.py use it)."""
+    return [p for p in LIFTED_PATHS if not (paid and p in PAID_REPLACES_LIFTED)]
+
+
+def sample_report():
+    """The sample page's report, refused unless its method is the one the report page accepts."""
+    with open(SAMPLE_REPORT_JSON, encoding="utf-8") as f:
+        rep = json.load(f)
+    if rep.get("method_version") != page_method_version():
+        die(f"sample report: {SAMPLE_REPORT_JSON} is method {rep.get('method_version')}, the report page accepts "
+            f"{page_method_version()}: rerun tests/fixtures/paid/make_sample_report.py --report")
+    return rep
+
 # Paths that may exist only when paid_report = true.
 PAID_APP_PATHS = ["/welcome/", "/restore/", "/report/"]  # noindex, and disallowed in robots.txt
 PAID_ONLY_PATHS = PAID_APP_PATHS + PAID_ONLY_PATHS_FR
@@ -1562,6 +1589,8 @@ def build():
     for page in PAGES:
         if page["requires_flag"] and not flags[page["requires_flag"]]:
             continue
+        if flags["paid_report"] and page.get("lifted") and page["path"] in PAID_REPLACES_LIFTED:
+            page = SAMPLE_PAGE   # C-12 final: the real sample report replaces the lifted research figure
         owned[os.path.relpath(out_file(out, page["path"]), out)] = page
 
     check_hero_dashboard()
@@ -1627,6 +1656,10 @@ def build():
         if flags["free_badges"]:
             page.update(page.get("if_badges", {}))  # C1: the copy that names the free check
         extra = {"sample_csv": sample_csv()} if page.get("sample") else {}
+        if page.get("sample_report"):
+            rep_ = sample_report()
+            extra["sample_report"] = rep_
+            extra["sample_report_json"] = Markup(json.dumps(rep_, sort_keys=True, ensure_ascii=False).replace("</", "<\\/"))
         if page.get("lifted"):
             extra["lifted_html"] = Markup(lifted_fragment(page["lifted"]))
             if page["path"] == "/corrections/":

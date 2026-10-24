@@ -263,6 +263,11 @@ export function renderReport(report, out, meta) {
 
   // Delta D1: the re-test line and the .ics come from the window the server returned with the
   // first report (to the second). The re-test's own report has no window and shows neither (N8).
+  // C-12 final: the sample page shows the report only (no re-test line, reminder, print or firm buttons).
+  if (meta && meta.sample) {
+    out.append(el('p', { class: 'small muted', text: `Engine ${report.engine_commit} · rule library ${report.rule_library_version}.` }));
+    return;
+  }
   const win = meta && meta.retest ? meta.retest : null;
   const firstReport = !!win || (meta && meta.uses_left === 1);
   let ics_ = null;
