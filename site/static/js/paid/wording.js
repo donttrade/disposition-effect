@@ -133,7 +133,9 @@ export function mergedLine(report, fmt) {
   checkReport(report);
   if (report.dates_only || report.n_rows === report.n_trades) return null;
   const f = fmtOf(fmt);
-  return `Rows with the same open minute, symbol and direction were counted as one trade (for example, a position closed in parts): ${f.count(report.n_rows)} rows became ${f.count(report.n_trades)} trades.`;
+  // T-3 T3-F: date-only rows are never merged; say so when the file has any
+  const kept = report.n_date_only_rows > 0 ? '; rows that open at 00:00 with whole-day holds are kept separate' : '';
+  return `Rows with the same open minute, symbol and direction were counted as one trade (for example, a position closed in parts${kept}): ${f.count(report.n_rows)} rows became ${f.count(report.n_trades)} trades.`;
 }
 
 // ---------------------------------------------------------------- related research (R-D3 addendum I-6)
