@@ -331,9 +331,9 @@ COV0_DATES = COV0[:3] + [SIZE_NONE]
 def dates_lines(T):
     return {"p1": T + " " + DATED + ", so the patterns that depend on the order and timing of trades within a day are not "
                   "tested, and size after a loss is not described.",
-            "seq": "Not tested: " + T + " " + DATED + "; this pattern depends on the timing of trades within a day, so it is "
+            "seq": "Not tested: " + T[0].lower() + T[1:] + " " + DATED + "; this pattern depends on the timing of trades within a day, so it is "
                    "not tested on files like that.",
-            "size": "Not described: " + T + " " + DATED + "; this pattern depends on which trade came after a loss, so it is "
+            "size": "Not described: " + T[0].lower() + T[1:] + " " + DATED + "; this pattern depends on which trade came after a loss, so it is "
                     "not described for files like that."}
 
 
@@ -344,6 +344,7 @@ def test_i9_dates_only_and_nothing_tested_lines():
         assert c["page1"] == [NONE_TESTED, L_["p1"]] and c["coverage"] == COV0_DATES and c["merged"] is None, key   # W-2
         assert c["revenge"] == [L_["seq"]] and c["tilt"] == [L_["seq"]] and c["size_up"] == [L_["size"]], key
         assert not any("Size after a loss is described" in x for x in c["page1"] + c["coverage"]), key           # issue 1
+        assert "Not tested: all 300" in c["revenge"][0] or "Not tested: 15 of" in c["revenge"][0]                  # house style
         for t in [*c["page1"], *c["coverage"], *c["revenge"], *c["size_up"]]:
             assert lint_text(t) == [] and lint_text(t, "i9", paid=True) == [], t
     assert d["all_few"]["page1"] == [NONE_TESTED] and d["all_few"]["coverage"] == COV0                         # timed, n_tested 0
