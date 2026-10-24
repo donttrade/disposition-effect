@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{%- macro field(id, label, hint) %}
+      <div class="field">
+        <label for="{{ id }}">{{ label }}</label>
+        <span class="hint" id="{{ id }}-hint">{{ hint }}</span>
+        <input id="{{ id }}" type="text" inputmode="decimal" autocomplete="off" aria-describedby="{{ id }}-hint {{ id }}-err">
+        <p class="error" id="{{ id }}-err" hidden></p>
+      </div>
+{%- endmacro %}
+{% block content %}
+{%- import "partials/trader_offer.html" as offer with context %}
+<div class="wrap">
+  <div class="grid">
+    <div class="span-8">
+      <p class="crumb small"><a href="/tools/">Free tools</a></p>
+      <h1>Risk-reward calculator</h1>
+      <p class="lede">Enter an entry price, a stop and a target, or type the reward-to-risk ratio directly, and the calculator returns three numbers that belong together: the R multiple, the win rate at which that ratio breaks even, and the expectancy per trade in R at any win rate you enter.</p>
+      <p>The break-even win rate is 1 divided by 1 plus R, so a 2-to-1 setup breaks even at about 33 percent before costs. The page shows every formula with your numbers in it, so you can redo it by hand. The inputs start blank on purpose: the page does not propose a ratio or a win rate. Entries that could be read two ways, such as “1,500”, are refused instead of guessed. It runs entirely in your browser and nothing you type is sent anywhere.</p>
+    </div>
+  </div>
+  {% include "partials/disclaimer.html" %}
+
+  <section class="tool" aria-labelledby="rr-tool-h">
+    <h2 id="rr-tool-h">Your numbers</h2>
+    <p id="rr-js-needed" class="notice notice-caution">This calculator runs in your browser and needs JavaScript turned on.</p>
+    <form id="rr-form" novalidate hidden>
+      <fieldset>
+        <legend>What you enter</legend>
+        <div class="check"><input type="radio" id="rr-mode-prices" name="rr-mode" value="prices" checked><label for="rr-mode-prices">Entry, stop and target prices</label></div>
+        <div class="check"><input type="radio" id="rr-mode-ratio" name="rr-mode" value="ratio"><label for="rr-mode-ratio">The reward-to-risk ratio itself</label></div>
+      </fieldset>
+      <div class="field-grid" id="rr-prices">
+        {{ field("rr-entry", "Entry price", "The price the trade opens at, for example 100.") }}
+        {{ field("rr-stop", "Stop price", "Below the entry for a long trade, above it for a short one.") }}
+        {{ field("rr-target", "Target price", "On the other side of the entry from the stop.") }}
+      </div>
+      <div class="field-grid" id="rr-ratio-box" hidden>
+        {{ field("rr-ratio", "Reward-to-risk ratio (R)", "The reward as a multiple of the risk, for example 2 for a 2-to-1 setup.") }}
+      </div>
+      <div class="field-grid">
+        {{ field("rr-winrate", "Win rate, % (optional)", "For the expectancy in R. There is no default: the number is yours.") }}
+      </div>
+      <div id="rr-errors" class="notice notice-error" role="alert" tabindex="-1" hidden></div>
+      <p><button class="btn" type="submit">Calculate</button></p>
+    </form>
+  </section>
+
+  <div id="rr-out" class="tool-out" hidden></div>
+
+  <aside class="notice notice-gap teaser" aria-labelledby="rr-teaser-h" {{ offer.on_sale_attr() }}>
+    <strong id="rr-teaser-h">{{ offer.teaser_heading() }}</strong>
+    <p>A planned ratio is one number; what your trades did after a loss is another. {{ offer.lead() }} checks, from your own trade file when it has times of day, whether your results change after a losing trade.</p>
+    {{- offer.teaser() }}
+  </aside>
+
+  <section class="section" aria-labelledby="formula-h">
+    <h2 id="formula-h">The three formulas</h2>
+    <ul>
+      <li><strong>R multiple</strong> = the distance from entry to target ÷ the distance from entry to stop. Entry 100, stop 98, target 106: 6 ÷ 2 = 3R.</li>
+      <li><strong>Break-even win rate</strong> = 1 ÷ (1 + R). At 3R: 1 ÷ 4 = 25 percent. Costs are not included, so the real figure is a little higher.</li>
+      <li><strong>Expectancy in R</strong> = win rate × R − loss rate × 1R. At 3R and a 40 percent win rate: 0.40 × 3 − 0.60 × 1 = +0.60R per trade. At the break-even win rate it is exactly 0.</li>
+    </ul>
+    <p>The calculator counts every win as exactly the R multiple and every loss as exactly 1R. Real trades rarely close exactly at the stop or the target. To see the average win and average loss your own past trades produced, use <a href="/tools/trade-stats/">trade stats</a>.</p>
+  </section>
+
+  <section class="section" aria-labelledby="faq-h">
+    <h2 id="faq-h">Questions</h2>
+    <details><summary>How do you calculate risk-reward ratio?</summary><p>Divide the distance from entry to target by the distance from entry to stop. An entry at 100, stop at 98 and target at 106 risks 2 to make 6, which is 3R.</p></details>
+    <details><summary>At what win rate does a ratio break even?</summary><p>Break-even win rate equals 1 divided by 1 plus the reward-to-risk ratio, before costs. At 1R it is 50 percent, at 2R about 33 percent, and at 3R 25 percent.</p></details>
+    <details><summary>What is expectancy in R?</summary><p>Expectancy is the average result per trade measured in units of risk. It equals win rate times average win in R, minus loss rate times average loss in R. This calculator counts every win as the R multiple and every loss as 1R. A positive figure means trades with those numbers make more than they lose on average.</p></details>
+    <details><summary>Why is a realised ratio often lower than the planned one?</summary><p>Exits rarely happen exactly at the stop or target. Early exits, partial closes, slippage and fees all move the realised figure. The trade stats page shows the average win and average loss your own trade file actually produced.</p></details>
+    <details><summary>Is a higher risk-reward ratio always better?</summary><p>Not on its own. A higher ratio usually comes with a lower win rate, and what matters is the combination. This page shows the arithmetic and does not recommend any ratio.</p></details>
+    <details><summary>Is this investment advice?</summary><p>No. It is arithmetic on the numbers you enter and does not recommend any security, trade, size or exit. Past results do not predict future results.</p></details>
+  </section>
+
+  <section class="section" aria-labelledby="more-h">
+    <h2 id="more-h">Related</h2>
+    <ul>
+      <li><a href="/tools/lot-size-calculator/">Lot size calculator</a>: the size in lots from balance, risk amount and stop distance.</li>
+      <li><a href="/tools/trade-stats/">Trade stats</a>: win rate, average win and average loss from your own trade file.</li>
+      <li><a href="/tools/drawdown-calculator/">Drawdown and recovery calculator</a>: the gain that recovers a drawdown, and your own drawdowns.</li>
+      <li><a href="/for-traders/">The habit report for traders</a> ({{ offer.short_state() }}).</li>
+    </ul>
+  </section>
+</div>
+{% endblock %}

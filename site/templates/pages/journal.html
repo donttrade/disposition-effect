@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{#- /journal/ (ARCHITECT-V3 §d, steps J3-J8; [flags] journal). The free Trading Journal and P&L Calendar:
+    an app that runs in this tab and keeps its data in IndexedDB on this device. The page's CSP has
+    connect-src 'none' and form-action 'none', and it never loads analytics, even with the analytics flag
+    on (build guard: build.journal_problem), so "this page cannot send your trades anywhere" is checkable.
+    Without JavaScript the page explains itself and offers the CSV template. No supplied setup, tag or
+    mistake vocabulary: the trader's own lists start empty (§d.7). No competitor names. -#}
+{% block content %}
+<div class="wrap">
+  {% include "partials/crumbs.html" %}
+  <h1>Free trading journal</h1>
+  <p class="lede">Every trade from your platform’s export, on a P&amp;L calendar, with your own setups, tags, mistakes and notes. No account and no sign-up: the journal is saved in this browser, on this device.</p>
+  <p class="small">The journal is free forever: it runs on your device, so it costs us nothing to run. A paid add-on, if one ever exists, would be separate and optional, and would never take away a feature that was free.</p>
+
+  <p id="j-nojs" class="notice notice-caution">The journal needs JavaScript, because it runs in your browser. Without it you can still read how it works below and <a href="/static/samples/demo-trades.csv" download>download the CSV template</a>.</p>
+
+  <div id="j-app" class="journal" hidden>
+    <div class="j-bar" id="j-bar">
+      <label class="j-field" for="j-account"><span>Account</span><select id="j-account"></select></label>
+      <p class="j-chip small" id="j-status"></p>
+      <button class="btn btn-secondary" type="button" id="j-import-btn" aria-expanded="false" aria-controls="j-import">Import a file</button>
+    </div>
+    <nav class="j-tabs" id="j-tabs" aria-label="Journal views"><ul>
+      <li><a href="#calendar" data-view="calendar">Calendar</a></li>
+      <li><a href="#trades" data-view="trades">Trades</a></li>
+      <li><a href="#stats" data-view="stats">Stats</a></li>
+      <li><a href="#imports" data-view="imports">Imports</a></li>
+      <li><a href="#backup" data-view="backup">Backup</a></li>
+    </ul></nav>
+
+    <section class="j-import" id="j-import" aria-labelledby="j-import-h" hidden>
+      <h2 id="j-import-h">Import trades</h2>
+      <div class="dropzone" id="j-drop">
+        <p><strong>Drop a trade file here</strong>, or choose one from your computer.</p>
+        <div class="file-pick"><label for="j-file">Your trade file</label>
+          <input id="j-file" type="file" accept=".csv,.htm,.html,.txt"></div>
+        <p class="btn-row"><span class="muted">No file to hand?</span> <button class="btn btn-secondary" id="j-sample-btn" type="button">Try it with sample trades</button></p>
+        <p class="small muted">The sample goes into its own account, “Sample (synthetic trades)”, which you can remove from Imports.</p>
+      </div>
+      <p id="j-progress" class="small muted" role="status" hidden></p>
+      <div id="j-error" class="notice notice-error" role="alert" tabindex="-1" hidden></div>
+      <div id="j-preview" hidden></div>
+    </section>
+
+    <div id="j-toast" class="notice j-toast" role="status" tabindex="-1" hidden></div>
+    <div id="j-banner" hidden></div>
+
+    <section class="j-view" id="j-view-calendar" data-view-panel="calendar" aria-labelledby="j-cal-h" hidden><h2 id="j-cal-h">Calendar</h2><div data-body></div></section>
+    <section class="j-view" id="j-view-trades" data-view-panel="trades" aria-labelledby="j-trades-h" hidden><h2 id="j-trades-h">Trades</h2><div data-body></div></section>
+    <section class="j-view" id="j-view-stats" data-view-panel="stats" aria-labelledby="j-stats-h" hidden><h2 id="j-stats-h">Stats</h2><div data-body></div></section>
+    <section class="j-view" id="j-view-imports" data-view-panel="imports" aria-labelledby="j-imports-h" hidden><h2 id="j-imports-h">Imports</h2><div data-body></div></section>
+    <section class="j-view" id="j-view-backup" data-view-panel="backup" aria-labelledby="j-backup-h" hidden><h2 id="j-backup-h">Backup</h2><div data-body></div></section>
+    <p class="small muted" id="j-requests"></p>
+  </div>
+
+  <section class="section" aria-labelledby="j-what-h">
+    <h2 id="j-what-h">What it does</h2>
+    <p>Import the trade history your platform already exports. The journal lists every closed trade, puts each day’s result on a P&amp;L calendar, and lets you mark each trade with a setup, tags, mistakes and a note, all in words you choose. Filters and totals show what happened in the trades you pick. Importing the same export twice adds nothing: trades already in the journal are recognised and skipped, and any import can be undone.</p>
+    <p>A day’s result counts the trades that closed that day, in the time written in your file. Open positions are not counted until they close.</p>
+  </section>
+
+  <section class="section" aria-labelledby="j-files-h">
+    <h2 id="j-files-h">Which files it reads</h2>
+    <p>MetaTrader 5 and 4 history reports (HTML), MetaTrader 5 deals (CSV), IBKR Flex Query trade files, Tradovate order exports (all in beta), and the donttrade CSV template: one row per fill, or one row per round trip. The same reader as the free <a href="/tools/trade-stats/">trade-stats</a> tool.</p>
+  </section>
+
+  <section class="section" aria-labelledby="j-privacy-h">
+    <h2 id="j-privacy-h">Where your journal is kept</h2>
+    <p>The journal saves your trades and notes in this browser, on this device only. They are not uploaded: this page is built so it cannot make network requests (you can check in your browser’s network panel). Clearing this site’s data in your browser deletes the journal, so keep a backup file. We cannot recover it.</p>
+    <p>Safari deletes a site’s saved data if you don’t open the site for 7 days of browsing. Keep a backup file. On iPhone or iPad, adding the journal to your Home Screen keeps it out of that rule.</p>
+  </section>
+
+  <section class="section" aria-labelledby="faq-h">
+    <h2 id="faq-h">Questions</h2>
+    <details><summary>Is the journal really free?</summary><p>Yes, with no account and no card. It runs on your device, so it costs us nothing to run, and it stays free. A paid add-on, if one ever exists, would be separate and optional.</p></details>
+    <details><summary>Where are my trades stored?</summary><p>In this browser, on this device. The page cannot send them anywhere: its security policy blocks every network request. To move the journal to another computer or browser, save a backup file and restore it there.</p></details>
+    <details><summary>What happens if I import the same file twice?</summary><p>Nothing is added the second time. Each trade gets a key made from what it is (symbol, side, times, size, prices and result), so a trade already in the journal is skipped. A trade with the same symbol, side and times but other numbers is shown as a possible duplicate for you to decide on.</p></details>
+    <details><summary>Is a trade counted on the day it opened or closed?</summary><p>On the day it closed, in the time written in your file. Open positions are not counted.</p></details>
+    <details><summary>Does it tell me what to trade?</summary><p>No. It shows what happened in your own past trades. It does not suggest setups, sizes or trades.</p></details>
+  </section>
+  {% include "partials/disclaimer.html" %}
+</div>
+<script type="text/csv" id="j-sample">
+{{ sample_csv|safe }}</script>
+{% endblock %}

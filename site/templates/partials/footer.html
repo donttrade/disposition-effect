@@ -5,6 +5,10 @@
     {%- for label, href in col.links %}<li><a href="{{ href }}">{{ label }}</a></li>{% endfor %}
     </ul></nav>
   {%- endfor %}
+  {%- import "partials/icons.html" as fic %}
+    <nav aria-label="Follow donttrade"><h2>Follow</h2><ul class="follow">
+    {%- for c in channels %}<li><a href="{{ c.url }}" rel="me noopener">{{ fic.brand(c.icon) }}<span>{{ c.name }}</span>{% if c.get("handle") %}<span class="visually-hidden"> {{ c.handle }}</span>{% endif %}</a></li>{% endfor %}
+    </ul></nav>
   </div>
   <p class="legal">Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>. {{ site.reply_promise }}</p>
   {%- if business_id_line %}{# any commerce flag on: build.business_id_line (name, region, mailing address, email) #}

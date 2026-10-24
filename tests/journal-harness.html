@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Journal harness</title>
+<!-- Test-only page (not in the site build): loads the journal modules so Playwright can drive them. --></head>
+<body><p id="status">loading</p>
+<script type="module">
+import * as store from '/site/static/js/journal/store.js';
+import * as keys from '/site/static/js/journal/keys.js';
+import * as imp from '/site/static/js/journal/import.js';
+import { runFile } from '/site/static/js/engine/index.js';
+window.JS = store; window.JK = keys; window.JI = imp;
+// a fixture file (path under the repo) → forJournal(), parsed on the page (the HTML path) or in the worker
+window.parseFixture = async (path) => {
+  const bytes = new Uint8Array(await (await fetch('/' + path)).arrayBuffer());
+  const r = runFile(bytes);
+  return r.error ? { error: r.error } : keys.forJournal(r.result);
+};
+window.parseInWorker = async (path) => {
+  const bytes = new Uint8Array(await (await fetch('/' + path)).arrayBuffer());
+  const w = new Worker('/site/static/js/journal/journal-worker.js', { type: 'module' });
+  return new Promise((resolve) => { w.onmessage = (e) => { w.terminate(); resolve(e.data); }; w.postMessage({ id: 1, bytes }); });
+};
+// import a fixture into the named account (created on first use); returns the plan's counts and the add
+window.importFixture = async (path, accountName, keep) => {
+  const db = await store.open(); const st = await store.loadAll(db);
+  const parsed = await parseFixture(path);
+  if (parsed.error) return { error: parsed.error };
+  const acc = st.accounts.find((a) => a.name === accountName) || imp.newAccount(parsed, accountName);
+  const p = imp.plan(st, parsed, acc);
+  if (p.problem) return { problem: p.problem };
+  const res = await imp.commit(db, p, parsed, path.split('/').pop(), keep || []);
+  return { total: p.total, fresh: p.fresh.length, dupes: p.dupes, possible: p.possible.length, added: res.added, imp: res.imp.id };
+};
+document.getElementById('status').textContent = 'ready';
+</script>
+</body></html>

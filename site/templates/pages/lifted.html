@@ -4,15 +4,16 @@
     Edit the body only with a dated correction, and update checks/lifted-baseline/ with it. -#}
 {% extends "base.html" %}
 {% block content %}
+<div class="wrap lifted-pre">{% include "partials/crumbs.html" %}
 {%- if page.get("section") == "/tools/" %}
 {#- Launch NITs N4 + N5: the old calculators get the Free tools breadcrumb the new tools have, and
     say so when JavaScript is off. Both sit outside the frozen body, which stays word for word. #}
-<div class="wrap lifted-pre"><p class="crumb small"><a href="/tools/">Free tools</a></p>
-<noscript><p class="notice notice-caution">This calculator runs in your browser and needs JavaScript turned on.</p></noscript></div>
-{%- endif %}
+<noscript><p class="notice notice-caution">This calculator runs in your browser and needs JavaScript turned on.</p></noscript>
+{%- endif %}</div>
 <!--frozen:start-->{{ lifted_html }}<!--frozen:end-->
 {%- if page.path == "/corrections/" %}
 {#- The Lead's decision (23 Oct): the habit report's dated method versions, outside the frozen log. #}
 {% include "partials/report_methods.html" %}
 {%- endif %}
+{%- if page.get("lifted") == "about" %}{% include "partials/official_channels.html" %}{% endif %}
 {% endblock %}

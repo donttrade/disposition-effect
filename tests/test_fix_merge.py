@@ -305,8 +305,11 @@ def test_d1_partner_form_ignores_product_in_url(browser, built_site, path, form)
 
 
 def test_d1_firm_form_still_takes_product_but_not_platform(browser, built_site):
-    assert _post(browser, built_site["url"] + "/start/?product=memo#firm", "#sf")["product"] == "memo"
-    assert _post(browser, built_site["url"] + "/start/?product=platform#firm", "#sf")["product"] == "pilot"
+    # v3 (ARCHITECT-V3 B7, C3): each /start/ product section has its own form with a FIXED product;
+    # ?product= only picks the section, so a URL can never relabel a form (stronger than D1)
+    assert _post(browser, built_site["url"] + "/start/?product=memo#memo", "#sf-memo")["product"] == "memo"
+    assert _post(browser, built_site["url"] + "/start/?product=platform#pilot", "#sf-pilot")["product"] == "pilot"
+    assert _post(browser, built_site["url"] + "/start/?product=pilot#snapshot", "#sf-snapshot")["product"] == "snapshot"
 
 
 def test_nit8_partner_mailto_subject(built_site):
@@ -318,11 +321,22 @@ def test_nit9_general_enquiry_form_is_not_tagged_snapshot(tmp_path):
     from test_legal import build, private_with, toml_with
     r, out = build(tmp_path, "p", DT_SITE_TOML=toml_with(tmp_path, pilot_checkout=True), DT_PRIVATE_TOML=private_with(tmp_path))
     assert r.returncode == 0, r.stderr
-    for page, fid in (("start", "sf"), ("for-firms", "ff")):
-        html = (out / page / "index.html").read_text(encoding="utf-8")
-        form = html[html.index(f'id="{fid}"'):]
-        form = form[:form.index("</form>")]
-        assert 'name="product" value="enquiry"' in form, page
+    html = (out / "for-firms" / "index.html").read_text(encoding="utf-8")
+    form = html[html.index('id="ff"'):]
+    form = form[:form.index("</form>")]
+    assert 'name="product" value="enquiry"' in form
+    # v3 A3 (ARCHITECT-V3-PLAN §c.6, C1-C2): /start/ no longer has a general firm form (#sf). It is a chooser
+    # with one form per product, each with its product fixed (no data-from-query), so no form there can tag
+    # a general enquiry "snapshot": only the Snapshot's own form carries that value.
+    html = (out / "start" / "index.html").read_text(encoding="utf-8")
+    forms = re.findall(r'(?s)<form class="request-form" id="([^"]+)".*?</form>', html)
+    assert forms == ["pc", "sf-snapshot", "sf-memo", "sf-outcomes", "sp", "wl"], forms
+    for fid in forms:
+        form = re.search(r'(?s)<form class="request-form" id="' + fid + '".*?</form>', html).group(0)
+        tags = re.findall(r'<input[^>]*name="product"[^>]*>', form)
+        values = [re.search(r'value="([^"]*)"', t).group(1) for t in tags]
+        want = {"pc": "pilot", "sp": "platform", "wl": "waitlist"}.get(fid, fid[3:])
+        assert values == [want] and "data-from-query" not in tags[0], (fid, tags)
 
 
 # ------------------------------------------------------------------ D2: seller block only with paid_report (one switch)
@@ -715,7 +729,7 @@ def test_nit14_15_pilot_thanks_links_and_direct_visit_note(tmp_path):
     assert r.returncode == 0, r.stderr
     h = (out / "start" / "pilot-thanks" / "index.html").read_text(encoding="utf-8")
     assert 'href="/terms/#pilot-card"' in h and 'href="/terms/#trial"' not in h
-    assert "Reached this page without sending the Pilot form?" in h and 'href="/start/?product=pilot#firm"' in h
+    assert "Reached this page without sending the Pilot form?" in h and 'href="/start/?product=pilot#pilot"' in h
 
 
 # ------------------------------------------------------------------ NIT 2: lint reads the build's flags

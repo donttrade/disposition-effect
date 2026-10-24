@@ -21,6 +21,10 @@ def axe_violations(page, impacts=("serious", "critical")):
     with open(AXE, encoding="utf-8") as f:
         src = f.read()
     page.add_script_tag(content=src)
+    # merge into delivery-39 (24 Oct): measure the page at rest. A v3 nav panel opened just before the check
+    # is still in its 200 ms dt-pop fade, and axe then reads half-transparent text as low contrast (the 1280 px
+    # failures that came and went between runs). Finite animations jump to their end; infinite ones are left.
+    page.evaluate("() => document.getAnimations().forEach(a => { try { a.finish(); } catch (e) {} })")
     res = page.evaluate("async () => (await axe.run(document, {resultTypes: ['violations']})).violations"
                         ".map(v => ({id: v.id, impact: v.impact, help: v.help,"
                         " nodes: v.nodes.map(n => n.target.join(' ')).slice(0, 5)}))")

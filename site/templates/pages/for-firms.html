@@ -4,6 +4,7 @@
 {%- set firm_ids = ["pilot", "snapshot", "memo", "outcomes"] %}
 {%- set pct = prices.rules.recheck.percent_of_engagement %}
 <div class="wrap">
+  {% include "partials/crumbs.html" %}
   {#- 1. Hero: the current H1 is kept (plan step 14). #}
   <section class="hero" aria-labelledby="ff-h">
     <div class="grid">
@@ -103,7 +104,7 @@
     <p><strong>Sold to platforms only, never to followers.</strong> For copy-trading apps, social trading networks, crypto exchanges with copy features and vault front-ends.</p>
     <p>Does your leader ranking predict what followers actually earn after copying costs and delay? The test answers that out of sample: leaders are ranked on one period and judged on a later period the ranking never saw. It is adjusted for luck, so a ranking counts only if it does better than chance would.</p>
     <ul>
-      <li><strong>A sealed method.</strong> The ranking rule, the periods, the cost and delay assumptions and the pass mark are fixed in writing before anyone sees data, and they don’t change afterwards.</li>
+      <li><strong>A method fixed in advance.</strong> The ranking rule, the periods, the cost and delay assumptions and the pass mark are fixed in writing before anyone sees data, and they don’t change afterwards.</li>
       <li><strong>Run on your systems.</strong> Your engineers run a script we send with the scope, and can read every line of it first. Only aggregate results come back. We hold no follower, leader or account record.</li>
       <li><strong>About your ranking, not about people.</strong> The result names no leader and scores no one.</li>
       <li><strong>Not advice.</strong> It does not recommend any trader or leader, to you or to your followers, and makes no promise about future results. It is not an audit: please don’t call any leader or ranking audited, certified or verified.</li>
@@ -116,7 +117,7 @@
   <section class="section" aria-labelledby="claims-test" data-reveal>
     <h2 id="claims-test">Firms that make behaviour claims: the claims substantiation test</h2>
     <p><strong>We report the result whether it supports the claim or not.</strong> For trading journals, education sellers, prop firms and brokers whose marketing says their product changes how traders behave, such as “our journal makes you more disciplined”.</p>
-    <p>Before anyone sees data, the claim is written down as a test: which behaviour, which users, which periods, what comparison, and what result would support it. That test is sealed (fingerprinted with a SHA-256 hash) and then run once, as written.</p>
+    <p>Before anyone sees data, the claim is written down as a test: which behaviour, which users, which periods, what comparison, and what result would support it. That test is fingerprinted with a SHA-256 hash, recorded, and then run once, as written.</p>
     <ul>
       <li><strong>Run on your systems.</strong> Your engineers run a script we send with the scope; only aggregate results come back.</li>
       <li><strong>Either answer is a finished result.</strong> The fee is the same either way, and you decide whether anything is published.</li>
@@ -124,7 +125,7 @@
       <li><strong>A test, with its result and its limits.</strong> It is not an audit. Please don’t call the claim or the product certified, verified or audited.</li>
     </ul>
     <p><strong>The law, in neutral terms (not legal advice).</strong> In Canada, the Competition Act treats as reviewable conduct a representation to the public, made to promote a product or a business interest, in the form of “a statement, warranty or guarantee of the performance, efficacy or length of life of a product that is not based on an adequate and proper test thereof, the proof of which lies on the person making the representation” (<a href="https://laws-lois.justice.gc.ca/eng/acts/C-34/section-74.01.html">s. 74.01(1)(b)</a>). Whether a particular test is adequate and proper for a particular claim is for you and your legal advisers to judge. We give no legal advice, and we don’t say that our test meets that standard.</p>
-    <p>Which engagement: the {{ pilot.name }} ({{ pilot.price_usd|usd }} USD) covers one claim, one measure and one comparison, one per firm; a Snapshot ({{ products.snapshot.price_usd|usd }}) the same; a Memo ({{ products.memo.price_usd|usd }}) every measure and comparison agreed in the scope; an Outcomes pack ({{ products.outcomes.price_usd|usd }}) runs the same sealed test again on a later period.</p>
+    <p>Which engagement: the {{ pilot.name }} ({{ pilot.price_usd|usd }} USD) covers one claim, one measure and one comparison, one per firm; a Snapshot ({{ products.snapshot.price_usd|usd }}) the same; a Memo ({{ products.memo.price_usd|usd }}) every measure and comparison agreed in the scope; an Outcomes pack ({{ products.outcomes.price_usd|usd }}) runs the same pre-registered test again on a later period.</p>
     <p><a class="btn btn-secondary" href="?product=claims-test#request">Ask about a claims test</a></p>
   </section>
 

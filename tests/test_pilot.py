@@ -29,6 +29,12 @@ FIRM_KEY = "f8fdba04-71bb-4856-b700-01ac6796c252"
 PRICES = json.load(open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8"))
 PILOT = next(p for p in PRICES["products"] if p["id"] == "pilot")
 PILOT_PAGES = ["/start/", "/for-firms/"]
+# v3 A3 (ARCHITECT-V3-PLAN §c.6, C2): /start/ is a chooser; the Pilot block sits in its #pilot section, which
+# shows when #pilot is the target (the nav and home link to /start/?product=pilot#pilot). Plain /start/ shows
+# the chooser and no product form, so the browser tests open the Pilot the way a visitor reaches it.
+AT = {"/start/": "#pilot"}
+# §c.6's recap line ("5 business days · 100% on acceptance", from prices.json) is a payment term, not a finding
+TERMS = sorted({p["payment_terms"] for p in PRICES["products"] if p.get("payment_terms")}, key=len, reverse=True)
 
 
 class _Q(http.server.SimpleHTTPRequestHandler):
@@ -41,11 +47,12 @@ class _Q(http.server.SimpleHTTPRequestHandler):
 @pytest.fixture(scope="module")
 def pilot_site(tmp_path_factory):
     tmp = tmp_path_factory.mktemp("pilot")
-    r, out = build(tmp, "on", DT_SITE_TOML=toml_with(tmp, pilot_checkout=True), DT_PRIVATE_TOML=private_with(tmp))
+    private = private_with(tmp)
+    r, out = build(tmp, "on", DT_SITE_TOML=toml_with(tmp, pilot_checkout=True), DT_PRIVATE_TOML=private)
     assert r.returncode == 0, r.stderr
     srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(_Q, directory=str(out)))
     threading.Thread(target=srv.serve_forever, daemon=True).start()
-    yield {"out": out, "url": f"http://127.0.0.1:{srv.server_address[1]}"}
+    yield {"out": out, "url": f"http://127.0.0.1:{srv.server_address[1]}", "private": private}
     srv.shutdown()
 
 
@@ -60,7 +67,10 @@ def test_flag_off_has_no_pilot_checkout(built_site):
     assert not (built_site["out"] / "start" / "pilot-thanks").exists()
 
 
-def test_flag_on_build_lints_clean(pilot_site):
+def test_flag_on_build_lints_clean(pilot_site, monkeypatch):
+    # lint checks the footer's business line against the private.toml the BUILD used (lint.py: "set
+    # DT_PRIVATE_TOML to the file the build used"); without it, a local site/config/private.toml is read
+    monkeypatch.setenv("DT_PRIVATE_TOML", pilot_site["private"])
     assert L.lint_build(str(pilot_site["out"]), pilot=True) == []
 
 
@@ -85,7 +95,9 @@ def test_no_study_finding_next_to_the_offer(pilot_site, path):
     sections = re.findall(r"(?s)<section\b.*?</section>", h)
     i = next(k for k, s in enumerate(sections) if 'id="pc"' in s)
     near = " ".join(sections[max(0, i - 1):i + 2])
-    text = re.sub(r"<[^>]+>", " ", near)
+    text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", near))
+    for t in TERMS:
+        text = text.replace(t, " ")
     assert not re.search(r"\d+(\.\d+)?\s?%|PGR|PLR|4,659|76\.1", text), text[:300]
 
 
@@ -99,7 +111,7 @@ def test_posts_with_javascript_off_only_when_box_ticked(browser, pilot_site, pat
         posted.append(route.request.post_data or "")
         route.fulfill(status=200, body="ok")
     pg.route("https://api.web3forms.com/**", handle)
-    pg.goto(pilot_site["url"] + path + "?ref=x1")
+    pg.goto(pilot_site["url"] + path + "?ref=x1" + AT.get(path, ""))
     pg.fill("#pc-email", "test-ignore@example.com")
     pg.fill("#pc-firm", "TEST - ignore")
     pg.click("#pc button[type=submit]")  # box unticked: the browser blocks the submit
@@ -140,7 +152,7 @@ def test_axe_keyboard(browser, pilot_site, path):
     for scheme in ("light", "dark"):
         ctx = browser.new_context(viewport={"width": 375, "height": 900}, color_scheme=scheme, bypass_csp=True)
         pg = ctx.new_page()
-        pg.goto(pilot_site["url"] + path)
+        pg.goto(pilot_site["url"] + path + AT.get(path, ""))
         pg.evaluate("document.querySelectorAll('details').forEach(d => d.open = true)")
         assert horizontal_overflow(pg) == []
         assert axe_violations(pg) == []
@@ -148,7 +160,7 @@ def test_axe_keyboard(browser, pilot_site, path):
     if path != "/start/pilot-thanks/":
         ctx = browser.new_context(viewport={"width": 1280, "height": 900})
         pg = ctx.new_page()
-        pg.goto(pilot_site["url"] + path)
+        pg.goto(pilot_site["url"] + path + AT.get(path, ""))
         pg.focus("#pc-email")
         seen = []
         for _ in range(12):

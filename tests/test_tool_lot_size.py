@@ -2,7 +2,7 @@
 
 Plan checks: output matches hand arithmetic on 3 cases; zero or negative inputs give named
 errors; no default risk % (every input starts blank); ambiguous separators refused; never
-NaN; lint clean. The /tools/ index lists all 5 tools as rows.
+NaN; lint clean. The /tools/ index lists every tool as a row (8 since tools batch 2).
 """
 import os
 import re
@@ -129,12 +129,14 @@ def test_axe_and_overflow(browser, built_site, scheme, width):
 
 
 @pytest.mark.parametrize("width", [375, 1280])
-def test_tools_index_lists_five_tools(browser, built_site, width):
+def test_tools_index_lists_eight_tools(browser, built_site, width):
+    # tools batch 2 added the heatmap, the drawdown calculator and the risk-reward calculator
     ctx, pg, _ = open_tool(browser, built_site, width=width, path="/tools/", bypass_csp=True)
     rows = pg.locator("table.tool-list tbody tr")
-    assert rows.count() == 5
-    hrefs = [rows.nth(i).locator("th a").get_attribute("href") for i in range(5)]
-    assert hrefs == ["/tools/trade-stats/", "/tools/prop-challenge-simulator/", "/tools/lot-size-calculator/",
+    assert rows.count() == 8
+    hrefs = [rows.nth(i).locator("th a").get_attribute("href") for i in range(8)]
+    assert hrefs == ["/tools/trade-stats/", "/tools/trading-heatmap/", "/tools/drawdown-calculator/",
+                     "/tools/prop-challenge-simulator/", "/tools/lot-size-calculator/", "/tools/risk-reward-calculator/",
                      "/tools/disposition-calculator/", "/tools/pass-rate-calculator/"]
     for h in hrefs:
         assert (built_site["out"] / h.strip("/") / "index.html").exists(), h

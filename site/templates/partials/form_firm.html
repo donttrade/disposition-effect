@@ -4,8 +4,11 @@
     partner = true for the journal/platform partner form.
     form-ref.js, when it runs, copies ?ref= from the URL into the hidden ref field, and ?product=
     into the product field of the FIRM form only. The partner form's product is fixed (Tester D1):
-    a partner application is always product=platform, whatever the URL says. -#}
+    a partner application is always product=platform, whatever the URL says. v3 (/start/ chooser):
+    fixed = true makes the product fixed too (C3: ?product= picks a section, never relabels a form);
+    placeholder sets the product-specific example in "What do you want measured?". -#}
 {%- set is_partner = partner is defined and partner %}
+{%- set is_fixed = is_partner or (fixed is defined and fixed) %}
 {#- NIT 9: the "Snapshot, Memo…" enquiry form (product = "enquiry", shown with pilot_checkout on)
     never takes ?product=pilot: Pilots go through the card form above it. -#}
 {%- set no_pilot = product == "enquiry" %}
@@ -14,7 +17,7 @@
   <input type="hidden" name="subject" value="{{ 'donttrade: partner application' if is_partner else 'donttrade: firm request' }}">
   <input type="hidden" name="from_name" value="donttrade site">
   <input type="hidden" name="redirect" value="{{ forms.redirect_firm }}">
-  <input type="hidden" name="product" value="{{ product }}"{% if not is_partner %} data-from-query="product"{% endif %}{% if no_pilot %} data-refuse="pilot"{% endif %}>
+  <input type="hidden" name="product" value="{{ product }}"{% if not is_fixed %} data-from-query="product"{% endif %}{% if no_pilot %} data-refuse="pilot"{% endif %}>
   <input type="hidden" name="page" value="{{ page.path }}">
   <input type="hidden" name="ref" value="" data-from-query="ref">
   <input type="checkbox" name="botcheck" class="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" hidden>
@@ -25,8 +28,8 @@
   <div class="field"><label for="{{ fid }}-role">Your role <span class="opt">(optional)</span></label>
     <input id="{{ fid }}-role" name="role" type="text" autocomplete="organization-title" placeholder="e.g. Head of Risk"></div>
   <div class="field"><label for="{{ fid }}-what">What do you want measured? <span class="opt">(optional)</span></label>
-    <textarea id="{{ fid }}-what" name="message" rows="3" placeholder="e.g. whether funded traders close winning positions sooner than losing ones"></textarea></div>
+    <textarea id="{{ fid }}-what" name="message" rows="3" placeholder="{{ placeholder if placeholder is defined else 'e.g. whether funded traders close winning positions sooner than losing ones' }}"></textarea></div>
   <p><button class="btn" type="submit">Send the request</button></p>
   <p class="small muted">We use these details only to reply. {{ site.reply_promise }} <a href="/privacy/">Privacy notice</a></p>
 </form>
-<p class="mailto-line">Prefer email? Write to <a href="mailto:{{ site.contact_email }}?subject={{ ('Partner application — [your platform]' if is_partner else 'Pilot request — [your firm]')|urlencode }}">{{ site.contact_email }}</a>.</p>
+<p class="mailto-line">Prefer email? Write to <a href="mailto:{{ site.contact_email }}?subject={{ (mail_subject if mail_subject is defined else ('Partner application — [your platform]' if is_partner else 'Pilot request — [your firm]'))|urlencode }}">{{ site.contact_email }}</a>.</p>

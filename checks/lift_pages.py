@@ -25,8 +25,11 @@ event handler can run):
   * a <script> element in <main> is moved, unchanged, to site/static/js/legacy/;
   * onsubmit="return false" is removed (lifted.js stops those forms submitting).
 plus the three text fixes in LIFT_FIXES, which the passthrough build already applied
-(PASSTHROUGH_FIXES / PASSTHROUGH_CHROME before steps 28–29). compare.py proves that nothing
-else in the visible text, ids, links, tables or citation meta changed.
+(PASSTHROUGH_FIXES / PASSTHROUGH_CHROME before steps 28–29), and one later removal (21 Oct
+2026: /about/'s "Where to find this", now rendered from site.toml [[channels]] outside the
+frozen body) and five rewordings of "sealed" in study link and teaser text on /about/,
+/for-researchers/ and /research/ (22 Oct 2026, brand Tester D4). compare.py proves that nothing else in the visible text, ids, links, tables or
+citation meta changed.
 
 This reads docs/ as it is before the step-30 bundle (old design). Once docs/ is replaced by
 the build, the fragments are the source and this script refuses to run (it finds no old
@@ -126,6 +129,28 @@ LIFT_FIXES = {
          "This is a research figure from public data. It is not the trader report: the report covers five habits in "
          "your own file, tests up to two of them against chance, and shows no percentile."),
     ],
+    # ARCHITECT-BRAND-AND-WRAPPED §2.6 (owner item 21 Oct): the official channels come from ONE list,
+    # site.toml [[channels]]. The old sentence (without X) leaves the frozen body; pages/lifted.html
+    # renders partials/official_channels.html in its place, right after <!--frozen:end-->.
+    "/about/": [
+        ('\n  <h2>Where to find this</h2>\n  <p>Published only at <a href="https://donttrade.substack.com">'
+         'donttrade.substack.com</a>, this site and <a href="https://github.com/donttrade">github.com/donttrade</a>. '
+         'Any message from any other channel or handle is not from us.</p>', ""),
+        # ARCHITECT-BRAND §1.6 + brand Tester D4 (22 Oct): "seal" stays only in the study bodies; the link and
+        # teaser text about a study on About, For researchers and the research index is public copy
+        ("26 rules tested under sealed pre-registration;", "26 rules tested under hashed pre-registration;"),
+    ],
+    "/for-researchers/": [
+        (">Swing-trading strategies under sealed pre-registration, a negative result (16 Oct 2026)</a>",
+         ">Swing-trading strategies under hashed pre-registration, a negative result (16 Oct 2026)</a>"),
+    ],
+    "/research/": [
+        ("each sealed with a hash before any result was computed and judged once",
+         "each fingerprinted with a hash before any result was computed and judged once"),
+        ("each sealed with a hash before any result was computed. 0 of 50",
+         "each fingerprinted with a hash before any result was computed. 0 of 50"),
+        ("0 of 44 under sealed pre-registration.", "0 of 44 under hashed pre-registration."),
+    ],
 }
 
 # Head text that breaks the v2 SEO rules (title ≤ 60, description 50–155 characters). Head
@@ -138,6 +163,12 @@ TITLE_FIX = {
 DESC_FIX = {
     "/who-pays/": "This page has moved to the donttrade Independence policy: who pays, and what the money does not buy.",
     "/404.html": "Page not found on donttrade. Try Research, Pricing or Start a Pilot, or email us.",
+    # ARCHITECT-BRAND-AND-WRAPPED §1.6: "seal"/"sealed" never in public copy (banned.toml seal_words).
+    # A search result shows the head description, so it is public copy; the frozen bodies keep theirs.
+    "/research/strategy-tests/": "Swing, investing, overnight and day-trading rules, judged net of costs: 50 "
+                                 "strategies, 44 fingerprinted in advance; none passed. Not a strategy or signal.",
+    "/research/swing-trading-strategies/": "Pre-registered, hashed tests of 26 swing-trading rules on ETFs, judged "
+                                           "once on locked holdouts, net of costs. None passed. Not a strategy or a signal.",
 }
 LEGACY_JS = {"/tools/disposition-calculator/": "disposition-calculator.js",
              "/tools/pass-rate-calculator/": "pass-rate-calculator.js"}

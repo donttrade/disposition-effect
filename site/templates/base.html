@@ -36,6 +36,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="{{ page.title }}">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:description" content="{{ page.description }}">
 {%- for name, content in page.get("citation", []) %}
 <meta name="{{ name }}" content="{{ content }}">
 {%- endfor %}
@@ -48,15 +49,22 @@
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/static/css/site.css">
+{%- for s in page.get("styles", []) %}
+<link rel="stylesheet" href="{{ s }}">
+{%- endfor %}
+{%- if page.path in vt_pages %}
+<link rel="stylesheet" href="/static/css/vt.css">
+{%- endif %}
 <script src="/static/js/theme.js"></script>
 <script src="/static/js/nav.js" defer></script>
+<script src="/static/js/ask.js" defer></script>
 {%- for s in page.scripts %}
 <script src="{{ s }}" defer></script>
 {%- endfor %}
 {%- for s in page.modules %}
 <script src="{{ s }}" type="module"></script>
 {%- endfor %}
-{%- if flags.analytics %}{% include "partials/analytics.html" %}{% endif %}
+{%- if flags.analytics and not page.get("no_analytics") %}{% include "partials/analytics.html" %}{% endif %}
 <!--jsonld-->
 </head>
 <body>
@@ -65,7 +73,8 @@
 <p class="notice notice-caution" role="note" data-preview-band><strong>Preview, not the live site.</strong> This copy ({{ preview }}) is for testing; the live site is {{ site.base_url }}.</p>
 {%- endif %}
 {% include "partials/header.html" %}
-<main id="main"{% if page.get("main_class") %} class="{{ page.main_class }}"{% endif %}>
+{%- set main_cls = page.get("main_class") or ("mkt" if page.path in mkt_pages else "") %}
+<main id="main"{% if main_cls %} class="{{ main_cls }}"{% endif %}>
 {% block content %}{% endblock %}
 </main>
 {% include "partials/footer.html" %}

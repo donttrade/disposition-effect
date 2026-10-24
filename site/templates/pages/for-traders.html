@@ -4,6 +4,7 @@
 {%- import "partials/trader_offer.html" as offer with context %}
 {%- set sale = flags.paid_report %}
 <div class="wrap">
+  {% include "partials/crumbs.html" %}
   <section class="section" aria-labelledby="ft-h">
     <div class="grid">
       <div class="span-7">
@@ -84,6 +85,25 @@
     </table>
     </div>
     <p><a href="/tools/">All free tools</a> · <a href="/research/">The research is free</a></p>
+  </section>
+
+  {#- v3 (ARCHITECT-V3 §c.4): the value ladder, and the journal comparison moved here from the home page
+      (owner decision Q4: the "logs your trades" row follows [flags] journal, H10). No brands named. #}
+  {%- with show_firm_price = false, ladder_id = "ladder-h" %}{% include "partials/value_ladder.html" %}{% endwith %}
+  <section class="section" aria-labelledby="cmp-h" data-reveal>
+    <h2 id="cmp-h">How donttrade compares with a typical trading journal</h2>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Comparison with a typical trading journal">
+    <table>
+      <thead><tr><th scope="col"><span class="visually-hidden">Question</span></th><th scope="col">Most trading journals</th><th scope="col">donttrade</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Logs your trades</th><td>Yes</td><td>{% if flags.journal %}Yes: the free journal keeps them in your browser, on your device{% else %}No: it reads the export your platform already makes{% endif %}</td></tr>
+        <tr><th scope="row">Needs an account</th><td>Usually</td><td>No account or login</td></tr>
+        <tr><th scope="row">Tests whether a habit is more than chance</th><td>Varies</td><td>{% if flags.paid_report %}Yes, in the habit report{% else %}The habit report will{% endif %}: up to two habits in this version, with a stated statistical check, and “not enough trades to tell” when either group of a tested habit has fewer than 30 trades</td></tr>
+        <tr><th scope="row">Shows the method and the code</th><td>Rarely</td><td>Yes</td></tr>
+        <tr><th scope="row">Tells you what to buy or sell</th><td>Some do</td><td>No</td></tr>
+      </tbody>
+    </table>
+    </div>
   </section>
 
   <section class="section" aria-labelledby="faq-h" data-reveal>
