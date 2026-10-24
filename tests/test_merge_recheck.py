@@ -123,3 +123,38 @@ def test_mr3_ladder_states_both_file_limits(builds):
     js = open(os.path.join(REPO, "site", "static", "js", "paid", "strip.js"), encoding="utf-8").read()
     assert "MAX_ROWS = 20000;" in js and "MAX_HOLD_S = 86400 * 3650;" in js and "519 weeks (about 10 years)" in js
     assert L.lint_text(lead + LIMITS) == [] and L.lint_text("The report reads " + LIMITS, "mr3", paid=True) == []
+
+
+# ------------------------------------------------------------------ MR-4
+ASK_LINE = ("Answers are quoted from this site’s own pages. Your question is never sent anywhere: it is matched in your "
+            "browser, and without JavaScript, Ask opens the list of every answer instead.")
+
+
+def test_mr4_no_answer_box_field_has_a_name_and_the_line_says_so(builds):
+    for out in builds.values():
+        for rel in ("index.html", "help/index.html", "tools/trade-stats/index.html", "pricing/index.html"):
+            h = raw(out, rel)
+            for box in re.findall(r"(?s)<search class=\"answer-box\".*?</search>", h):
+                assert "name=" not in re.sub(r'<meta[^>]*>', "", box), rel
+            assert ASK_LINE in text_of(out, rel), rel
+    assert L.lint_text(ASK_LINE) == []
+
+
+@pytest.mark.parametrize("mode", ["no-js", "engine-blocked", "js"])
+def test_mr4_the_typed_question_never_leaves_the_browser(browser, built_site, mode):
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900}, java_script_enabled=(mode != "no-js"))
+    pg = ctx.new_page()
+    urls = []
+    pg.on("request", lambda r: urls.append(r.url))
+    if mode == "engine-blocked":   # answers.js fails to load: ask.js falls back to form.submit()
+        pg.route("**/static/js/answers.js*", lambda route: route.abort())
+    pg.goto(built_site["url"] + "/help/#ask")
+    pg.wait_for_load_state("networkidle")
+    pg.fill("#ask-q", "zqxsecret question")
+    pg.click("#ask button[type=submit]")
+    pg.wait_for_timeout(800)
+    pg.wait_for_load_state()
+    assert not [u for u in urls if "zqxsecret" in u or "q=" in u], urls
+    if mode != "js":
+        assert re.search(r"/help/\??(#.*)?$", pg.url), pg.url
+    ctx.close()
