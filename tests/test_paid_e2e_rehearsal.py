@@ -62,11 +62,10 @@ def stack(tmp_path_factory):
     from test_legal import prices_with_test_link, private_with
     site_port = free_port()
     site = f"http://127.0.0.1:{site_port}"
-    worker = subprocess.Popen(["node", "--no-warnings", "scripts/rehearse.mjs", "--serve", "--origins", site], cwd=PRIVATE,
-                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    line = worker.stdout.readline()
-    assert line.startswith("{"), line + worker.stderr.read()
-    info = json.loads(line)
+    sys.path.insert(0, HERE)
+    from rehearsal_worker import ServeWorker   # Tester E16: own process group, stops with the test, no workerd left
+    worker = ServeWorker(PRIVATE, [site])
+    info = worker.info
     api = info["api"]
     tmp = tmp_path_factory.mktemp("partb")
     toml = open(os.path.join(REPO, "site/config/site.toml"), encoding="utf-8").read()
@@ -83,10 +82,9 @@ def stack(tmp_path_factory):
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     st = {"site": site, "api": api, "worker": worker, "versions": info["versions"], "pages": {}}
     yield st
-    if worker.poll() is None:
-        worker.terminate()
-        worker.wait(timeout=30)
+    left = worker.stop()
     srv.shutdown()
+    assert left == [], f"workerd children left running: {left}"
 
 
 @pytest.fixture(scope="module")
@@ -220,8 +218,7 @@ def test_8_worker_stopped_report_and_welcome_show_the_outage_text(browser, buyer
     page = ctx.new_page()
     page.goto(stack["site"] + "/welcome/?session_id=" + sid)
     page.wait_for_selector("#w-ready", state="visible", timeout=30000)
-    stack["worker"].terminate()
-    stack["worker"].wait(timeout=30)
+    assert stack["worker"].stop() == []   # Tester E16: no workerd left behind
     page.goto(stack["site"] + "/report/")
     upload(page, UPLOAD)
     text = wait_status(page, OUTAGE_START)
