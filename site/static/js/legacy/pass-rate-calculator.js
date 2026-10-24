@@ -9,6 +9,7 @@
  *   - each refused box gets its own message next to it, and the summary below the buttons;
  *   - the boxes take whole numbers only, so "1,780" (the page's own example) is 1780 (launch NIT N3).
  * compute() and the results are unchanged, so the worked example gives the same figures.
+ * 24 Oct 2026: pct() never rounds a rate below 1 to "100.0%" or a rate above 0 to "0.0%".
  */
 (function (root) {
   'use strict';
@@ -81,7 +82,16 @@
     return r;
   }
 
-  function pct(x) { return x === null ? 'not defined' : (x * 100).toFixed(1) + '%'; }
+  /* Tester §12 (v1 test_pass_rate_never_rounds_to_100_when_some_failed): one decimal rounded 19,999
+   * passed of 20,000 to "100.0%" and 1 of 20,000 to "0.0%". A rate that is not exactly 1 or 0 never
+   * shows as 100.0% or 0.0%: it reads "over 99.9%" or "under 0.1%". */
+  function pct(x) {
+    if (x === null) return 'not defined';
+    var s = (x * 100).toFixed(1);
+    if (s === '100.0' && x < 1) return 'over 99.9%';
+    if (s === '0.0' && x > 0) return 'under 0.1%';
+    return s + '%';
+  }
   function num(x, d) { return x === null ? 'not defined' : x.toFixed(d); }
 
   var api = { parseCount: parseCount, countFrom: countFrom, compute: compute, pct: pct, num: num };
