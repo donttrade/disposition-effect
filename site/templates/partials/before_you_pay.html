@@ -8,7 +8,7 @@
   <dl class="byp">
     {{ seller_rows(private, site, "en") }}
     <dt>What you buy</dt><dd>{{ r.name }}: a report on habits in your own past trades, built from a trade file you choose.
-      It measures and describes five habits, with the dollar totals of the matching trades, and tests up to two of them
+      It measures and describes up to five habits, with the dollar totals of the matching trades, and tests up to two of them
       against chance in this version. It includes one re-test 30 to 60 days after your first report. It describes what
       happened; it does not tell you what to trade.</dd>
     <dt>Technical requirements</dt><dd>A current version of Chrome, Edge, Firefox or Safari. Files: MetaTrader 5 or 4 HTML report,
@@ -23,7 +23,10 @@
       Access lasts 90 days after purchase, or until 75 days after your first report if that is later.</dd>
     <dt>Restrictions</dt><dd>Two runs: the report and one re-test of the same account (the re-test file has to share at least
       half of the first file's trades). At most 20,000 rows per file. A tested habit with fewer than 30 trades in either group
-      is shown as "not enough trades to tell".</dd>
+      is shown as "not enough trades to tell". If 5% or more of a file's rows open at exactly 00:00 and are held a whole
+      number of days, as in exports with dates but no times, no habit is tested, and the habits that depend on the order
+      of trades within a day (re-entering soon after a loss, size after a loss, trading after a losing run) are not
+      described.</dd>
     <dt>Refunds</dt><dd>Full refund if you ask within 14 days of buying: <a href="/terms/#cancellation">cancellation and refund terms</a>.</dd>
   </dl>
   <p class="small">{{ legal.disclaimer_short }}</p>

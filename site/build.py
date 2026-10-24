@@ -301,7 +301,7 @@ PAGES += [
 FORM_JS = "/static/js/form-ref.js"
 # The Product JSON-LD description (paid_report only): the same words as the pricing table row.
 # R-D3 I-3b: the same text as the /pricing/ row (the JSON-LD Product description; tests/test_r_d2_pages.py checks both)
-PRODUCT_TEXT = "Five habits measured and described in your own trades, with the dollar totals of the matching trades; up to two of them tested against chance in this version; plus one re-test 30 to 60 days after your first report."
+PRODUCT_TEXT = "Up to five habits measured and described in your own trades, with the dollar totals of the matching trades; up to two of them tested against chance in this version; plus one re-test 30 to 60 days after your first report."
 PAGES += [
     {"template": "pages/for-traders.html", "path": "/for-traders/", "requires_flag": None, "updated": "2026-10-21",
      "crumb": "Individual traders", "og_image": "/assets/og/traders.png", "scripts": [FORM_JS, MOTION_JS],

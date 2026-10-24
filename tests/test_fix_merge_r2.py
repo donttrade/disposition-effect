@@ -384,7 +384,7 @@ def test_r5_tool_teaser_script_wording_follows_the_offer(browser, paid_site, bui
         ctx.close()
     # one of the five habits is described, not tested (CODER-WIRING-REPORT-2026-10-21)
     # C1: without free_badges the teaser names no check ("tests four of them" is on the badges build)
-    assert "The habit report measures five habits like this one" in texts["paid"] and "We're building" not in texts["paid"]
+    assert "The habit report measures up to five habits like this one" in texts["paid"] and "We're building" not in texts["paid"]
     assert "We're building a habit report" in texts["off"]
 
 

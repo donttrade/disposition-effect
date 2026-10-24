@@ -59,7 +59,7 @@
       <thead><tr><th scope="col">Product</th><th scope="col">What you get</th><th scope="col" class="num">Price (USD)</th><th scope="col"><span class="visually-hidden">Action</span></th></tr></thead>
       <tbody>
         <tr><th scope="row">Free tools</th><td>{% if flags.free_badges %}Trade stats with a real-or-noise check, and calculators{% else %}Trade stats from your own file, and calculators{% endif %}. No account.</td><td class="num">$0</td><td><a href="/tools/">Open the tools</a></td></tr>
-        <tr><th scope="row">{{ r.name }}</th><td>Five habits measured and described in your own trades, with the dollar totals of the matching trades; up to two of them tested against chance in this version; plus one re-test 30 to 60 days after your first report.</td>
+        <tr><th scope="row">{{ r.name }}</th><td>Up to five habits measured and described in your own trades, with the dollar totals of the matching trades; up to two of them tested against chance in this version; plus one re-test 30 to 60 days after your first report.</td>
           <td class="num">{{ r.price_usd|usd }} one time</td>
           <td>{% set link = r["stripe_link_" + stripe_mode] %}{% if link %}<a class="btn" href="{{ link }}" rel="noopener">Get the report — {{ r.price_usd|usd }}</a>{% else %}<span class="muted">Payment link not set yet</span>{% endif %}</td></tr>
         <tr><th scope="row">{{ t.name }}</th><td>Comes later. It is not sold until it exists.</td><td class="num">—</td><td></td></tr>
