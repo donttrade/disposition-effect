@@ -97,8 +97,9 @@ def test_habit_tables_and_ledes(builds, flavour):
 def test_sample_report_lead_and_fr_page(builds):
     lead = ("This is a research figure from public data. It is not the trader report: the report covers five habits in "
             "your own file, tests up to two of them against chance, and shows no percentile.")
-    for flavour in ("free", "paid"):
-        assert lead in text_of(builds[flavour], os.path.join("sample-report", "index.html")), flavour
+    assert lead in text_of(builds["free"], os.path.join("sample-report", "index.html"))
+    # C-12 final (T-3 T3-E): the paid build's /sample-report/ is a real sample report (tests/test_sample_report_page.py)
+    assert "A sample habit report, from a made-up trade file" in text_of(builds["paid"], os.path.join("sample-report", "index.html"))
     fr = open(os.path.join(builds["paid"], "fr", "avant-de-payer", "index.html"), encoding="utf-8").read()
     for s in FR:
         assert s in fr

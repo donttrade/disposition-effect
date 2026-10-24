@@ -142,9 +142,16 @@ def out_file(site, path):
     return os.path.join(site, rel)
 
 
+# Delivery plan C-12 final: a paid build (it has /welcome/) replaces these lifted pages with template pages.
+PAID_REPLACES_LIFTED = ("/sample-report/",)
+
+
 def compare_site(site):
     problems = []
+    paid = os.path.exists(out_file(site, "/welcome/"))
     for path, base in baselines().items():
+        if paid and path in PAID_REPLACES_LIFTED:
+            continue
         fp = out_file(site, path)
         if not os.path.exists(fp):
             problems.append((path, "missing", "page not in the build"))
