@@ -63,7 +63,7 @@ async (cases) => {
   const R = (c) => {
     const habits = all.map((id) => H(id, c.nMed, c.nSeq, (c.over || {})[id] || {})).concat([OVR]);
     return { v: 1, currency: 'USD', disclaimer: 'donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.',
-      engine_commit: 'test', rule_library_version: 'test', rule_library: ['Rule one.', 'Rule two.'], method_version: '2026-10-23.stats2e', n_rows: c.rows || c.n, coarse_time: false,
+      engine_commit: 'test', rule_library_version: 'test', rule_library: ['Rule one.', 'Rule two.'], method_version: '2026-10-23.stats2f', n_rows: c.rows || c.n, dates_only: false, n_date_only_rows: 0,
       n_trades: c.n, period_weeks: 10, pgr_plr: null, focus: c.focus,
       n_tested: habits.filter((h) => h.p_raw !== null).length, n_distinguishable: habits.filter((h) => h.verdict === 'distinguishable').length, habits };
   };
@@ -325,7 +325,8 @@ STALE_BUILD = ["10,000 shuffles", "shuffles your own trades", "Holm correction f
                "tests up to four", "of the 4 patterns", "jusqu’à quatre", "tests four of them",
                "tests up to three", "test up to three", "of the 3 habits", "jusqu’à trois",
                "whether your size changes after a loss",   # R-D3 I-3b
-               "Published research on this pattern"]       # R-D3 addendum I-6
+               "Published research on this pattern",       # R-D3 addendum I-6
+               "show the same opening time of day"]        # R-D3 addendum 3: addendum 2's retired wording
 
 
 def test_no_stale_method_claim_anywhere_in_the_build(built_site):
@@ -352,7 +353,7 @@ def test_trade_stats_faq_jsonld_matches_the_new_method_text(built_site):
     assert "a few very large trades make up most of a short file" in a
 
 
-# ------------------------------------------------------------------ R-D3 addendum 2 I-8: the coarse-time page
+# ------------------------------------------------------------------ R-D3 addendum 3 I-9: the dates-only page
 RENDER_REAL_JS = r"""
 async (reps) => {
   const { renderReport } = await import('/site/static/js/paid/report.js');
@@ -372,19 +373,14 @@ async (reps) => {
   return out;
 }
 """
-NONE_TESTED = "None of the patterns could be tested in this file, so this report describes them without a verdict."
-COARSE_P1 = ("Most trades in this file show the same opening time of day (for example, an export with dates but no times), "
-             "so the patterns that depend on the order and timing of trades within a day are not tested.")
-V_NO_TIME = ("Not tested: most trades in this file show the same opening time of day, so the file has no usable times of "
-             "day, and this pattern depends on the order and timing of trades within a day.")
-SIZE_NOT_DESCRIBED = ("Not described: most trades in this file show the same opening time of day, so which trade came "
-                      "after a loss cannot be told.")
+NONE_TESTED = "None of the patterns could be tested in this file. Some are described below without a verdict."
+DATED = "open at exactly 00:00 and were held a whole number of days, as in exports with dates but no times"
 
 
 @pytest.fixture(scope="module")
 def rendered_real(browser, repo_server):
     reps = {k: json.load(open(os.path.join(HERE, "fixtures", "paid-reports", k + ".report.json"), encoding="utf-8"))
-            for k in ("stats-r2__21-dateonly", "too_few")}
+            for k in ("stats-r2__21-dateonly", "stats-r2__35-dates-mixed", "too_few")}
     ctx = browser.new_context()
     page = ctx.new_page()
     errors = []
@@ -396,13 +392,19 @@ def rendered_real(browser, repo_server):
     return out
 
 
-def test_i8_coarse_page_shows_exactly_the_ruled_lines(rendered_real):
-    c = rendered_real["stats-r2__21-dateonly"]
-    assert c["page1"] == [NONE_TESTED, COARSE_P1]
+@pytest.mark.parametrize("name,T", [("stats-r2__21-dateonly", "All 200 trades in this file"),
+                                    ("stats-r2__35-dates-mixed", "12 of the 200 trades in this file")])
+def test_i9_dates_only_page_shows_exactly_the_ruled_lines(rendered_real, name, T):
+    c = rendered_real[name]
+    assert c["page1"] == [NONE_TESTED, T + " " + DATED + ", so the patterns that depend on the order and timing of trades "
+                          "within a day are not tested, and size after a loss is not described."]
     assert "No pattern in this file is distinguishable" not in c["text"] and "were counted as one trade" not in c["text"]
+    assert "Size after a loss is described" not in c["text"] and "Size after a loss is not described or tested for this file." in c["coverage"]
     for hid in ("revenge", "tilt"):
-        assert c["habits"][hid] == ["not tested", V_NO_TIME], (hid, c["habits"][hid])
-    assert c["habits"]["size_up"] == ["not tested", SIZE_NOT_DESCRIBED], c["habits"]["size_up"]
+        assert c["habits"][hid] == ["not tested", "Not tested: " + T + " " + DATED + "; this pattern depends on the timing of "
+                                    "trades within a day, so it is not tested on files like that."], (hid, c["habits"][hid])
+    assert c["habits"]["size_up"] == ["not tested", "Not described: " + T + " " + DATED + "; this pattern depends on which "
+                                      "trade came after a loss, so it is not described for files like that."]
     for hid in ("revenge", "tilt", "size_up"):
         joined = " ".join(c["habits"][hid])
         assert "15 minutes" not in joined and "averaged" not in joined and "totalling" not in joined and "$" not in joined, hid
@@ -410,11 +412,12 @@ def test_i8_coarse_page_shows_exactly_the_ruled_lines(rendered_real):
     for hid in ("revenge", "tilt", "size_up"):
         assert cells["#habit-" + hid] == ["—", "—"], (hid, cells["#habit-" + hid])
     for hid in ("hold_gap", "oversized_loss"):
-        assert cells["#habit-" + hid][0] != "—" and any("totalling" in p for p in c["habits"][hid]), hid   # unchanged
-    assert L.lint_text(c["text"], "coarse", paid=True) == []
+        assert cells["#habit-" + hid][0] != "—" and any("totalling" in p for p in c["habits"][hid]), hid   # kept
+    assert L.lint_text(c["text"], "dates", paid=True) == []
 
 
-def test_i8_a_timed_report_with_nothing_tested_says_so(rendered_real):
+def test_i9_a_timed_report_with_nothing_tested_says_so(rendered_real):
     t = rendered_real["too_few"]
     assert t["page1"] == [NONE_TESTED]
-    assert "No pattern in this file is distinguishable" not in t["text"] and COARSE_P1 not in t["text"]
+    assert "No pattern in this file is distinguishable" not in t["text"] and DATED not in t["text"]
+    assert "Size after a loss is described, not tested, in this version of the report." in t["coverage"]

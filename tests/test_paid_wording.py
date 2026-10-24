@@ -17,9 +17,10 @@ throws.
 R-D3 addendum I-5 (method 2026-10-23.stats2d): the report carries n_rows and n_trades; page 1 prints the merged-rows
 line exactly when n_rows > n_trades (W-2 adds a merged and an unmerged case); a report without the counts throws.
 
-R-D3 addendum 2 I-8 (method 2026-10-23.stats2e): a coarse-time report prints NONE_TESTED and COARSE_P1 on page 1, V-no-time
-for revenge and tilt, SIZE_NOT_DESCRIBED for size_up; any report with n_tested 0 prints NONE_TESTED instead of H0a/H0b
-(W-2 adds both cases)."""
+R-D3 addendum 3 I-9 (method 2026-10-23.stats2f; replaces addendum 2's stats2e and its wording): a dates-only report
+prints NONE_TESTED and the dates line on page 1, the dates-only lines for revenge, tilt and size_up, and "Size after a loss
+is not described or tested for this file." in place of SIZE_UP_COVERAGE; {T} is "All {n} trades in this file" or "{k} of
+the {n} trades in this file"; any report with n_tested 0 prints NONE_TESTED instead of H0a/H0b (W-2 adds the cases)."""
 import glob
 import json
 import os
@@ -59,7 +60,7 @@ const R = (over, o) => {
   const habits = [H('hold_gap', { ...LAUNCH, ...(over.hold_gap || {}) })]
     .concat(['revenge', 'size_up', 'tilt'].map((id) => (id === 'size_up' ? H(id, { ...SU_LAUNCH, ...(over.size_up || {}) }) : H(id, over[id] || ND))))
     .concat([H('oversized_loss', { verdict: 'descriptive', direction: null, p_raw: null, p_holm: null, n_perm: null })]);
-  return { method_version: W.METHOD_VERSION, n_rows: 300, n_trades: 300, coarse_time: false, n_tested: habits.filter((h) => h.p_raw !== null).length,
+  return { method_version: W.METHOD_VERSION, n_rows: 300, n_trades: 300, dates_only: false, n_date_only_rows: 0, n_tested: habits.filter((h) => h.p_raw !== null).length,
     n_distinguishable: habits.filter((h) => h.verdict === 'distinguishable').length, focus: null, habits, ...o };
 };
 const fmt = { money: (x) => (x < 0 ? '−$' + (-x).toFixed(2) : '$' + x.toFixed(2)), duration: (s) => Math.round(s / 60) + ' min', ratio: (x) => x.toFixed(2), count: (n) => n.toLocaleString('en-US') };
@@ -98,20 +99,26 @@ out.guard_stats2 = run(() => W.page1Lines(R({}, { method_version: '2026-10-21.st
 out.guard_habit_dirnull = run(() => W.habitSentences(H('tilt', { direction: null }), R({}), fmt));
 out.guard_stats2c = run(() => W.page1Lines(R({}, { method_version: '2026-10-23.stats2c' }), fmt));
 out.guard_stats2d = run(() => W.page1Lines(R({}, { method_version: '2026-10-23.stats2d' }), fmt));
-// R-D3 addendum 2: W-2's two new cases (a coarse-time report; a timed report with nothing tested) and the guards
-const NOTIME = { verdict: 'withheld', withheld: 'no_time_of_day', p_raw: null, p_holm: null, n_perm: null, direction: null,
+// R-D3 addendum 3: W-2's new cases (dates-only, all rows and k < n; a timed report with nothing tested; a timed report
+// with a few date-only rows) and the guards
+const DATED = { verdict: 'withheld', withheld: 'dates_only', p_raw: null, p_holm: null, n_perm: null, direction: null,
   p_mean: null, p_rank: null, measure_a: null, measure_b: null, effect: null, dollars: null, detail: null };
-const coarse = R({ revenge: NOTIME, tilt: NOTIME, size_up: { measure_a: null, measure_b: null, effect: null, dollars: null } }, { coarse_time: true });
-coarse.n_tested = 0;
+const dated = (k) => { const r = R({ revenge: DATED, tilt: DATED, size_up: { measure_a: null, measure_b: null, effect: null, dollars: null } },
+  { dates_only: true, n_date_only_rows: k }); r.n_tested = 0; return r; };
+const pageOf = (r) => run(() => ({ page1: W.page1Lines(r, fmt), coverage: W.coverageLines(r), merged: W.mergedLine({ ...r }, fmt),
+  revenge: W.habitSentences(r.habits[1], r, fmt), size_up: W.habitSentences(r.habits[2], r, fmt), tilt: W.habitSentences(r.habits[3], r, fmt) }));
+out.dates_all = pageOf(dated(300));
+out.dates_some = pageOf(dated(15));
 const allFew = R({ revenge: { verdict: 'too_few', p_raw: null, p_holm: null, n_perm: null, n_a: 12 }, tilt: { verdict: 'too_few', p_raw: null, p_holm: null, n_perm: null, n_a: 9 } });
 allFew.n_tested = 0;
-out.coarse = run(() => ({ page1: W.page1Lines(coarse, fmt), coverage: W.coverageLines(coarse), merged: W.mergedLine({ ...coarse }, fmt),
-  revenge: W.habitSentences(coarse.habits[1], coarse, fmt), size_up: W.habitSentences(coarse.habits[2], coarse, fmt), tilt: W.habitSentences(coarse.habits[3], coarse, fmt) }));
 out.all_few = run(() => ({ page1: W.page1Lines(allFew, fmt), coverage: W.coverageLines(allFew) }));
-const bad1 = R({ revenge: NOTIME, tilt: NOTIME }, { coarse_time: true }); bad1.n_tested = 0;   // size_up still described
-const bad2 = R({ revenge: NOTIME });                                                       // no_time_of_day in a timed report
-const bad3 = R({}, { coarse_time: true, n_rows: 301 });
-out.guard_coarse = [run(() => W.page1Lines(bad1, fmt)), run(() => W.page1Lines(bad2, fmt)), run(() => W.coverageLines(bad3)), run(() => W.page1Lines(R({}, { coarse_time: undefined }), fmt))];
+out.few_dated = pageOf(R({ revenge: {} }, { focus: 'revenge', n_date_only_rows: 14 }));   // 14 of 300 (4.7%): a timed report
+const bad1 = R({ revenge: DATED, tilt: DATED }, { dates_only: true, n_date_only_rows: 300 }); bad1.n_tested = 0;   // size_up still described
+const bad2 = R({ revenge: DATED });                                                                             // dates_only habit, timed report
+out.guard_dates = [run(() => W.page1Lines(bad1, fmt)), run(() => W.page1Lines(bad2, fmt)),
+  run(() => W.coverageLines(R({}, { dates_only: true, n_date_only_rows: 14 }))),    // under 5% but flagged
+  run(() => W.coverageLines(R({}, { dates_only: false, n_date_only_rows: 15 }))),   // 5% but not flagged
+  run(() => W.page1Lines(R({}, { dates_only: undefined }), fmt)), run(() => W.page1Lines(R({}, { coarse_time: false, dates_only: undefined, n_date_only_rows: undefined }), fmt))];
 // R-D3 addendum I-5: the merged-rows line (W-2: a merged and an unmerged case) and the row-count guard
 out.merged = run(() => W.mergedLine(R({}, { n_rows: 4880, n_trades: 2630 }), fmt));
 out.unmerged = run(() => W.mergedLine(R({}), fmt));
@@ -175,7 +182,7 @@ out.pct.one = [W.shareOne(0.5), W.shareOne(0.58), W.shareOne(0.5002), W.shareOne
 for (const f of readdirSync('tests/fixtures/paid-reports').filter((x) => x.endsWith('.report.json')).sort()) {
   const rep = JSON.parse(readFileSync('tests/fixtures/paid-reports/' + f, 'utf8'));
   out.real[f] = run(() => ({ method_version: rep.method_version, page1: W.page1Lines(rep, fmt), coverage: W.coverageLines(rep),
-    merged: W.mergedLine(rep, fmt), rows: [rep.n_rows, rep.n_trades], coarse: rep.coarse_time,
+    merged: W.mergedLine(rep, fmt), rows: [rep.n_rows, rep.n_trades], dates: rep.dates_only,
     habits: Object.fromEntries(rep.habits.filter((h) => W.SENTENCE_HABITS.includes(h.id)).map((h) => [h.id, [...W.habitSentences(h, rep, fmt), W.methodLine(h, fmt)].filter(Boolean)])) }));
 }
 process.stdout.write(JSON.stringify(out));
@@ -277,15 +284,15 @@ def test_page1_guards_throw_instead_of_printing():
     d = data()
     assert d["guard_inconsistent"] == "THROW: page1Lines: focus is null but a habit-direction gap totalled a loss"
     assert d["guard_count"].startswith("THROW: page1Lines: n_distinguishable 2 but 1")
-    assert d["guard_method"] == "THROW: wording: report method 2026-10-21.stats1 is not 2026-10-23.stats2e"
-    assert d["guard_stats2"] == "THROW: wording: report method 2026-10-21.stats2 is not 2026-10-23.stats2e"
-    assert d["guard_stats2c"] == "THROW: wording: report method 2026-10-23.stats2c is not 2026-10-23.stats2e"
-    assert d["guard_stats2d"] == "THROW: wording: report method 2026-10-23.stats2d is not 2026-10-23.stats2e"
-    g = d["guard_coarse"]
-    assert g[0] == "THROW: wording: size_up is described in a coarse-time report (R-D3 addendum 2)"
-    assert g[1] == "THROW: wording: revenge is no_time_of_day in a timed report (R-D3 addendum 2)"
-    assert g[2].startswith("THROW: wording: the report has coarse_time true with 301 rows and 300 trades")
-    assert g[3].startswith("THROW: wording: the report has coarse_time undefined")
+    assert d["guard_method"] == "THROW: wording: report method 2026-10-21.stats1 is not 2026-10-23.stats2f"
+    assert d["guard_stats2"] == "THROW: wording: report method 2026-10-21.stats2 is not 2026-10-23.stats2f"
+    assert d["guard_stats2c"] == "THROW: wording: report method 2026-10-23.stats2c is not 2026-10-23.stats2f"
+    assert d["guard_stats2d"] == "THROW: wording: report method 2026-10-23.stats2d is not 2026-10-23.stats2f"
+    g = d["guard_dates"]
+    assert g[0] == "THROW: wording: size_up is described in a dates-only report (R-D3 addendum 3)"
+    assert g[1] == "THROW: wording: revenge is dates_only in a report that is not (R-D3 addendum 3)"
+    for o in g[2:]:
+        assert o.startswith("THROW: wording: the report has dates_only ") and o.endswith("(R-D3 addendum 3)"), o
     for o in d["guard_rows"]:
         assert o.startswith("THROW: wording: the report has n_rows ") and o.endswith("(R-D3 addendum)"), o
 
@@ -308,35 +315,48 @@ def test_i5_merged_rows_line_only_when_rows_were_merged():
             assert r["merged"] is None and r["rows"][0] == r["rows"][1], f
 
 
-NONE_TESTED = "None of the patterns could be tested in this file, so this report describes them without a verdict."
-COARSE_P1 = ("Most trades in this file show the same opening time of day (for example, an export with dates but no times), "
-             "so the patterns that depend on the order and timing of trades within a day are not tested.")
-V_NO_TIME = ("Not tested: most trades in this file show the same opening time of day, so the file has no usable times of "
-             "day, and this pattern depends on the order and timing of trades within a day.")
-SIZE_NOT_DESCRIBED = ("Not described: most trades in this file show the same opening time of day, so which trade came "
-                      "after a loss cannot be told.")
+NONE_TESTED = "None of the patterns could be tested in this file. Some are described below without a verdict."
+DATED = ("open at exactly 00:00 and were held a whole number of days, as in exports with dates but no times")
+SIZE_NONE = "Size after a loss is not described or tested for this file."
 COV0 = ["0 of the 2 habits could be tested. Each one compares two groups of at least 30 trades.",
         "Not tested: Re-entering soon after a loss, Trading after a losing streak.", HG_LINE, SU_LINE]
+COV0_DATES = COV0[:3] + [SIZE_NONE]
 
 
-def test_i8_coarse_time_and_nothing_tested_lines():
+def dates_lines(T):
+    return {"p1": T + " " + DATED + ", so the patterns that depend on the order and timing of trades within a day are not "
+                  "tested, and size after a loss is not described.",
+            "seq": "Not tested: " + T + " " + DATED + "; this pattern depends on the timing of trades within a day, so it is "
+                   "not tested on files like that.",
+            "size": "Not described: " + T + " " + DATED + "; this pattern depends on which trade came after a loss, so it is "
+                    "not described for files like that."}
+
+
+def test_i9_dates_only_and_nothing_tested_lines():
     d = data()
-    c = d["coarse"]
-    assert c["page1"] == [NONE_TESTED, COARSE_P1] and c["coverage"] == COV0 and c["merged"] is None       # W-2 case: coarse
-    assert c["revenge"] == [V_NO_TIME] and c["tilt"] == [V_NO_TIME] and c["size_up"] == [SIZE_NOT_DESCRIBED]
-    assert d["all_few"]["page1"] == [NONE_TESTED] and d["all_few"]["coverage"] == COV0                    # W-2 case: n_tested 0
-    for t in (NONE_TESTED, COARSE_P1, V_NO_TIME, SIZE_NOT_DESCRIBED):
-        assert lint_text(t) == [] and lint_text(t, "i8", paid=True) == [], t
+    for key, T in (("dates_all", "All 300 trades in this file"), ("dates_some", "15 of the 300 trades in this file")):
+        c, L_ = d[key], dates_lines(T)
+        assert c["page1"] == [NONE_TESTED, L_["p1"]] and c["coverage"] == COV0_DATES and c["merged"] is None, key   # W-2
+        assert c["revenge"] == [L_["seq"]] and c["tilt"] == [L_["seq"]] and c["size_up"] == [L_["size"]], key
+        assert not any("Size after a loss is described" in x for x in c["page1"] + c["coverage"]), key           # issue 1
+        for t in [*c["page1"], *c["coverage"], *c["revenge"], *c["size_up"]]:
+            assert lint_text(t) == [] and lint_text(t, "i9", paid=True) == [], t
+    assert d["all_few"]["page1"] == [NONE_TESTED] and d["all_few"]["coverage"] == COV0                         # timed, n_tested 0
+    fd = d["few_dated"]                                                                                         # 4.7% date-only: timed
+    assert fd["page1"][0].startswith("1 of the 2 patterns tested") and fd["coverage"][-1] == SU_LINE
+    assert not any(DATED in x for x in fd["page1"] + fd["coverage"] + fd["revenge"] + fd["tilt"] + fd["size_up"])
     real = d["real"]
-    dl = real["stats-r2__21-dateonly.report.json"]
-    assert dl["coarse"] is True and dl["page1"] == [NONE_TESTED, COARSE_P1] and dl["coverage"] == COV0 and dl["merged"] is None
-    assert dl["habits"]["revenge"] == [V_NO_TIME] and dl["habits"]["tilt"] == [V_NO_TIME]
-    assert dl["habits"]["size_up"] == [SIZE_NOT_DESCRIBED]
+    for f, T in (("stats-r2__21-dateonly.report.json", "All 200 trades in this file"),
+                 ("stats-r2__35-dates-mixed.report.json", "12 of the 200 trades in this file")):
+        r, L_ = real[f], dates_lines(T)
+        assert r["dates"] is True and r["page1"] == [NONE_TESTED, L_["p1"]] and r["coverage"] == COV0_DATES and r["merged"] is None, f
+        assert r["habits"]["revenge"] == [L_["seq"]] and r["habits"]["tilt"] == [L_["seq"]] and r["habits"]["size_up"] == [L_["size"]], f
+    few = real["stats-r2__36-dates-few.report.json"]
+    assert few["dates"] is False and few["coverage"][-1] == SU_LINE and few["merged"] is None
     tf = real["too_few.report.json"]
-    assert tf["coarse"] is False and tf["page1"] == [NONE_TESTED]
+    assert tf["dates"] is False and tf["page1"] == [NONE_TESTED]
     for f, r in real.items():
-        assert H0[0] not in r["page1"] or "0 of the 2" not in r["coverage"][0], f   # H0a never with nothing tested
-    assert d["guard_habit_dirnull"] == "THROW: wording: tilt is distinguishable with direction null (R2-3)"
+        assert not ("0 of the 2" in r["coverage"][0] and H0[0] in r["page1"]), f   # H0a never with nothing tested
 
 
 def test_r_d2_forged_hold_gap_throws_everywhere():
@@ -348,7 +368,7 @@ def test_r_d2_forged_hold_gap_throws_everywhere():
         assert len(outs) == 4
         for o in outs:
             assert isinstance(o, str) and o.startswith("THROW: wording: hold_gap is ") and o.endswith(
-                "but it is not tested in 2026-10-23.stats2e (R-D2)"), (k, o)
+                "but it is not tested in 2026-10-23.stats2f (R-D2)"), (k, o)
 
 
 def test_r_d3_forged_size_up_throws_everywhere():
@@ -360,7 +380,7 @@ def test_r_d3_forged_size_up_throws_everywhere():
         assert len(outs) == 4
         for o in outs:
             assert isinstance(o, str) and o.startswith("THROW: wording: size_up is ") and o.endswith(
-                "but it is not tested in 2026-10-23.stats2e (R-D3)"), (k, o)
+                "but it is not tested in 2026-10-23.stats2f (R-D3)"), (k, o)
 
 
 def test_s_b2_the_pending_sentences_are_gone():
@@ -459,17 +479,16 @@ def test_r_d2_supersedes_d1_the_sizeup0_probe_renders_v_launch():
         assert lint_text(V_LAUNCH_SIZE, "V-launch-size", paid=paid) == [] and lint_text(SU_LINE, "su-line", paid=paid) == []
 
 
-def test_cross_repo_reports_render_without_a_throw_and_are_method_stats2e():
+def test_cross_repo_reports_render_without_a_throw_and_are_method_stats2f():
     real = data()["real"]
     files = sorted(os.path.basename(f) for f in glob.glob(os.path.join(FIX, "*.report.json")))
     assert len(files) >= 3 and sorted(real) == files
     for f, r in real.items():
         assert isinstance(r, dict), (f, r)                     # no throw
-        assert r["method_version"] == "2026-10-23.stats2e", f
+        assert r["method_version"] == "2026-10-23.stats2f", f
         assert r["coverage"].count(HG_LINE) == 1 and r["habits"]["hold_gap"].count(V_LAUNCH) == 1, f
-        assert r["coverage"].count(SU_LINE) == 1, f
-        assert r["habits"]["size_up"] == ([SIZE_NOT_DESCRIBED] if r["coarse"] else r["habits"]["size_up"]), f
-        assert r["habits"]["size_up"].count(V_LAUNCH_SIZE) == (0 if r["coarse"] else 1), f
+        assert r["coverage"].count(SU_LINE) == (0 if r["dates"] else 1) and r["coverage"].count(SIZE_NONE) == (1 if r["dates"] else 0), f
+        assert r["habits"]["size_up"].count(V_LAUNCH_SIZE) == (0 if r["dates"] else 1), f
         assert not any("reshuffled" in s for s in r["habits"]["hold_gap"] + r["habits"]["size_up"]), f   # no method line
         assert not any("size rank" in s for s in r["habits"]["size_up"]), f
     # random.json: revenge too_few, tilt not distinguishable (case 1)

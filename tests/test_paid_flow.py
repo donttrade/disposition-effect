@@ -115,8 +115,10 @@ def test_full_flow_sends_only_stripped_rows(browser, stack):
         assert r.url.startswith(stack["site"]) or r.url.startswith(stack["api"]), r.url
         assert "CANARY" not in (r.post_data or "") and "CANARY" not in r.url
     assert "CANARY" not in page.content()
-    # the 40-trade MT5 file is coarse-time under stats2e (25% of its opens at one minute of the day): nothing tested
-    assert "None of the patterns could be tested in this file, so this report describes them without a verdict." in page.inner_text("#focus")
+    # the 40-trade MT5 file: groups under 30, nothing tested; not dates-only under stats2f (R-D3 addendum 3)
+    focus = page.inner_text("#focus")
+    assert "None of the patterns could be tested in this file. Some are described below without a verdict." in focus
+    assert "open at exactly 00:00" not in focus
     db = page.request.get(stack["api"] + "/__test/db").text()
     for s in SYMBOLS + ["CANARY"]:
         assert s not in db
