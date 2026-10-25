@@ -442,6 +442,10 @@ def without_showcase(html):
 
 
 SAMPLE_OUT_RE = re.compile(r"(?s)<!--sample-out-->.*?<!--/sample-out-->")
+# Tester M3 (sweep 1): only the pages that carry the previews, and only the two preview elements
+SAMPLE_OUT_PATHS = frozenset({"/", "/tools/", "/tools/trade-stats/"})
+SAMPLE_OUT_ELEMENT = re.compile(r'(?s)^<!--sample-out-->(?:<span class="tp tp-stats" aria-hidden="true">|'
+                                r'<div class="shot-card">\s*<table class="mini-shot">)')
 
 
 def tool_preview_amounts():
@@ -453,12 +457,15 @@ def tool_preview_amounts():
     return {round(a, 2) for a in amounts_in(text.replace("−", "-"))}
 
 
-def without_tool_previews(html):
+def without_tool_previews(html, where=None):
     """25 Oct sweep: the tool cards and the tools-page mock show the free tools' own output on the synthetic
     sample file, between <!--sample-out--> and <!--/sample-out-->. Such a block is left out of the price
     check only when every dollar amount in it is one the tools printed on the sample file
-    (site/config/tool_previews.json); a block with any other figure, or a price, is checked as usual."""
-    blocks = SAMPLE_OUT_RE.findall(html)
+    (site/config/tool_previews.json); a block with any other figure, or a price, is checked as usual. Only on
+    SAMPLE_OUT_PATHS, and only when the block is one of the two preview elements (SAMPLE_OUT_ELEMENT)."""
+    if where not in SAMPLE_OUT_PATHS:
+        return html
+    blocks = [b for b in SAMPLE_OUT_RE.findall(html) if SAMPLE_OUT_ELEMENT.match(b)]
     if not blocks:
         return html
     from harvest_prices import amounts_in
@@ -494,7 +501,7 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
     if paid:
         out += not_on_sale_claims(readable_text(html), where)
     from harvest_prices import amounts_in
-    for a in amounts_in(without_tool_previews(without_hero_dash(html, where))):
+    for a in amounts_in(without_tool_previews(without_hero_dash(html, where), where)):
         if a not in allowed_amounts and a != 0:  # "$0" (free) is not a price
             out.append(("price_literal", where, f"${a:g} is not in prices.json"))
     for rx in SECRETS:

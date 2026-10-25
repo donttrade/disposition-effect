@@ -34,7 +34,23 @@ def test_home_cards_show_the_previews_as_one_link_each(built_site):
 
 
 def test_lint_exempts_only_the_sample_figures():
-    ok = f'<p>x</p><!--sample-out--><b>{TP["trade_stats"]["net"]}</b><!--/sample-out-->'
-    assert "$" not in L.without_tool_previews(ok).replace("<p>x</p>", "")
-    bad = '<!--sample-out--><b>+$12.34</b><!--/sample-out-->'
-    assert L.without_tool_previews(bad) == bad
+    net = TP["trade_stats"]["net"]
+    ok = f'<p>x</p><!--sample-out--><span class="tp tp-stats" aria-hidden="true"><b>{net}</b></span><!--/sample-out-->'
+    assert "$" not in L.without_tool_previews(ok, "/").replace("<p>x</p>", "")
+    bad = '<!--sample-out--><span class="tp tp-stats" aria-hidden="true"><b>+$12.34</b></span><!--/sample-out-->'
+    assert L.without_tool_previews(bad, "/") == bad
+    other = f'<!--sample-out--><b>{net}</b><!--/sample-out-->'   # not a preview element
+    assert L.without_tool_previews(other, "/") == other
+
+
+def test_a_tool_amount_planted_on_pricing_fails_the_lint(built_site, tmp_path):
+    # Tester M3 (sweep 1): the exemption is for the preview pages only
+    import shutil
+    out = tmp_path / "site"
+    shutil.copytree(built_site["out"], out)
+    page = out / "pricing" / "index.html"
+    dd = TP["drawdown"]["largest"]
+    planted = f'<!--sample-out--><span class="tp tp-stats" aria-hidden="true"><b>{dd}</b></span><!--/sample-out-->'
+    page.write_text(page.read_text(encoding="utf-8").replace("</main>", planted + "</main>"), encoding="utf-8")
+    probs = [p for p in L.lint_build(str(out)) if p[0] == "price_literal" and p[1] == "/pricing/"]
+    assert probs, "a sample figure on /pricing/ must fail the price check"
