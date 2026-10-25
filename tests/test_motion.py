@@ -339,22 +339,17 @@ def test_i10_hero_follows_the_chosen_theme_not_the_os(browser, built_site, os_sc
     ctx.add_init_script(f"try {{ localStorage.setItem('donttrade-theme', '{saved}') }} catch (e) {{}}")
     pg = ctx.new_page()
     pg.goto(built_site["url"] + "/")
-    # Brand P1a (ARCHITECT-BRAND §2.2, T-BAND): the hero sits in the dark band, which is charcoal in BOTH
-    # themes by design, so the dashboard is no longer white in light. What still follows the chosen theme
-    # (and never the OS) is (a) the page outside the band and (b) which --band-* token block the band uses:
-    # light block band-bg #16181C / band-surface #1E2126, dark block #0E1013 / #16181C. Text is #F2F1EE in both.
-    r = pg.evaluate("""() => { const d = document.querySelector('.hero-dash'), p = document.createElement('i');
-      document.body.append(p); const v = n => { p.style.color = `var(${n})`; return getComputedStyle(p).color; };
-      const o = {page: v('--bg'), pageText: v('--text'), bandBg: v('--band-bg'), bandSurface: v('--band-surface')}; p.remove();
-      return {...o, band: getComputedStyle(d.closest('.band')).backgroundColor, dash: getComputedStyle(d).backgroundColor,
-              line: getComputedStyle(d.querySelector('.line-actual')).stroke}; }""")
+    # Owner, 25 Oct: the hero band follows the chosen theme (never the OS). Light: the band keeps the light
+    # page tokens (white, charcoal text). Dark: the charcoal --band-* set, #0E1013 / #16181C, text #F2F1EE.
+    r = pg.evaluate("""() => { const d = document.querySelector('.hero-dash');
+      return {page: getComputedStyle(document.body).backgroundColor, band: getComputedStyle(d.closest('.band')).backgroundColor,
+              dash: getComputedStyle(d).backgroundColor, line: getComputedStyle(d.querySelector('.line-actual')).stroke}; }""")
     ctx.close()
-    page, band, surface = {"dark": ("rgb(22, 24, 28)", "rgb(14, 16, 19)", "rgb(22, 24, 28)"),
-                           "light": ("rgb(255, 255, 255)", "rgb(22, 24, 28)", "rgb(30, 33, 38)")}[saved]
+    page, band, surface, line = {"dark": ("rgb(22, 24, 28)", "rgb(14, 16, 19)", "rgb(22, 24, 28)", "rgb(242, 241, 238)"),
+                                 "light": ("rgb(255, 255, 255)", "rgb(255, 255, 255)", "rgb(255, 255, 255)", "rgb(22, 24, 28)")}[saved]
     assert r["page"] == page, r                                   # the page follows the chosen theme
-    assert (r["bandBg"], r["bandSurface"]) == (band, surface), r  # the chosen theme's band block
-    assert (r["band"], r["dash"]) == (band, surface), r           # and the hero actually uses it
-    assert r["line"] == "rgb(242, 241, 238)", r                   # band text, the same in both themes
+    assert (r["band"], r["dash"]) == (band, surface), r           # and so does the hero band
+    assert r["line"] == line, r
 
 
 def test_i10_no_picture_source_left_in_the_build(built_site):
