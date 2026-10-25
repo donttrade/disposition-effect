@@ -85,7 +85,7 @@ def test_menu_keyboard_escape_and_click_outside(browser, built_site, width):
     assert [t for t, _, _ in groups] == ["Free tools", "Research, current section", "For firms"]
     assert [t for t, c, _ in groups if c] == ["Research, current section"]   # a study is in the Research section
     links = pg.eval_on_selector_all(".nav-panel .nav-links a", "as => as.map(a => [a.textContent, a.getBoundingClientRect().height])")
-    assert [t for t, _ in links] == ["Home", "Pricing", "About"]   # Home link (a): first in .nav-links off the homepage; no "Ask a question" with ask_box = false (launch, 25 Oct)
+    assert [t for t, _ in links] == ["Home", "For traders", "Pricing", "About"]   # Home link (a): first in .nav-links off the homepage; no "Ask a question" with ask_box = false; For traders (QA 25 Oct)
     assert all(h >= 44 for _, _, h in groups) and all(h >= 44 for _, h in links)
     pg.click(".nav-acc:nth-of-type(2) > summary")
     items = pg.eval_on_selector_all(".nav-acc[open] a", "as => as.map(a => a.getBoundingClientRect().height)")

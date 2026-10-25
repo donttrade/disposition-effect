@@ -217,12 +217,12 @@ def test_n5_escape_returns_focus_and_tabbing_out_closes(browser, built_site):
     pg.keyboard.press("Escape")
     assert pg.evaluate(OPEN) == [False, False, False]
     assert pg.evaluate("document.activeElement.matches('.nav-dd-li:nth-child(2) summary')")
-    # Tab out of the last link of For firms (to Pricing, still in the nav: stays open), then out of the nav
+    # Tab out of the last link of For firms (to For traders, still in the nav: stays open), then out of the nav
     pg.focus(".nav-dd-li:nth-child(3) summary")
     pg.keyboard.press(" ")
     pg.focus(".nav-dd-li:nth-child(3) .nav-foot a")
     pg.keyboard.press("Tab")
-    assert pg.evaluate("document.activeElement.getAttribute('href')") == "/pricing/"
+    assert pg.evaluate("document.activeElement.getAttribute('href')") == "/for-traders/"
     pg.focus(".nav-dd-li:nth-child(3) .nav-foot a")
     assert pg.evaluate(OPEN)[2] is True
     pg.focus("[data-theme-toggle]")   # focus leaves nav.site-nav
