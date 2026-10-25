@@ -869,7 +869,7 @@ svg.tp { padding: 8px 10px; }
 /* home: How it works as three pictures */
 .how-steps { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s3); grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .how-step { margin: 0; max-width: none; display: flex; flex-direction: column; }
-.how-shot { order: -1; height: 156px; box-sizing: border-box; overflow: hidden; display: flex; flex-wrap: wrap; align-content: center; gap: 6px; padding: var(--s2);
+.how-shot { order: -1; height: 200px; box-sizing: border-box; overflow: hidden; display: flex; flex-wrap: wrap; align-content: center; gap: 6px; padding: var(--s2);
   background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: var(--s2); }
 .how-step h3 { font-size: var(--fs-2); margin: 0 0 4px; display: flex; align-items: center; gap: 10px; }
 .how-n { display: inline-flex; align-items: center; justify-content: center; width: 1.6rem; height: 1.6rem; border-radius: 50%;
@@ -931,6 +931,13 @@ svg.tp { padding: 8px 10px; }
 .rc-note { font-size: 0.78rem; color: var(--muted); }
 .rc .rc-more { margin-top: var(--s2); padding-top: var(--s2); border-top: 1px solid var(--border); font-size: var(--fs-0); }
 .tools-home .how { margin-top: var(--s2); }
+/* Tester H1/M2 (sweep 1): every preview says it is sample data */
+.tp-wrap { position: relative; display: block; }
+.tp-tag { position: absolute; top: 6px; right: 6px; padding: 1px 7px; border-radius: 999px; font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 0.04em; color: var(--muted); background: var(--bg); border: 1px solid var(--border); }
+.tp-note { font-size: var(--fs-0); color: var(--muted); margin: 0 0 var(--s2); }
+.tools-home .hero-dash dd.gain { color: var(--text); }   /* sample figures in neutral colour (Tester H1) */
+.how-shot-tagged { position: relative; padding-top: calc(var(--s2) + 18px); }
 .report-steps { margin: var(--s3) 0; }
 .report-steps .how-step { padding: var(--s2); background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
 .report-steps .rs-h { font-size: var(--fs-2); margin: 0 0 var(--s1); display: flex; align-items: center; gap: 10px; }

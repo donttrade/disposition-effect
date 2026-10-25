@@ -8,7 +8,7 @@
 {%- macro preview(t) -%}
 {%- set tp = tool_previews %}
 {%- if t.preview == "stats" %}
-<!--sample-out--><span class="tp tp-stats" aria-hidden="true"><span class="tp-tile"><b>{{ tp.trade_stats.trades }}</b>trades</span><span class="tp-tile"><b class="gain">{{ tp.trade_stats.net }}</b>net</span><span class="tp-tile"><b>{{ tp.trade_stats.win_rate }}</b>won</span></span><!--/sample-out-->
+<!--sample-out--><span class="tp tp-stats" aria-hidden="true"><span class="tp-tile"><b>{{ tp.trade_stats.trades }}</b>trades</span><span class="tp-tile"><b>{{ tp.trade_stats.net }}</b>net</span><span class="tp-tile"><b>{{ tp.trade_stats.win_rate }}</b>won</span></span><!--/sample-out-->
 {%- elif t.preview == "heat" %}
 {%- set hm = tp.heatmap %}
 <svg class="tp tp-heat" aria-hidden="true" focusable="false" viewBox="0 0 {{ 16 + hm.cols|length * 30 }} {{ 12 + hm.rows|length * 18 }}">
@@ -35,7 +35,10 @@
 {%- macro tool_cards(items, h="h3", cls="") -%}
 <ul class="tool-cards{{ ' ' ~ cls if cls }}"{% if page.path in mkt_pages %} data-reveal data-reveal-stagger{% endif %}>
 {%- for t in items %}
-  <li class="tool-card"><a class="tool-card-link" href="{{ t.href }}">{{ preview(t) }}<{{ h }} class="tc-name">{{ t.name }}</{{ h }}><span class="tc-line">{{ t.short }}</span></a></li>
+  <li class="tool-card"><a class="tool-card-link" href="{{ t.href }}"><span class="tp-wrap">{{ preview(t) }}{% if t.preview %}<span class="tp-tag" aria-hidden="true">Sample</span>{% endif %}</span><{{ h }} class="tc-name">{{ t.name }}</{{ h }}><span class="tc-line">{{ t.short }}{% if t.preview %}<span class="visually-hidden"> Preview: the tool's output on a made-up sample file, not a real trader.</span>{% endif %}</span></a></li>
 {%- endfor %}
 </ul>
+{%- if items | selectattr("preview") | list %}
+<p class="tp-note">Previews: each tool on our made-up sample file, not a real trader.</p>
+{%- endif %}
 {%- endmacro %}
