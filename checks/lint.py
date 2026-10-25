@@ -418,7 +418,27 @@ def without_hero_dash(html, where):
         return html
     with open(HERO_DASH, encoding="utf-8") as f:
         body = f.read().split("#}", 1)[1].strip()
-    return html.replace(body, " ") if html.count(body) == 1 else html
+    html = html.replace(body, " ") if html.count(body) == 1 else html
+    return without_showcase(html)
+
+
+SHOWCASE_RE = re.compile(r'(?s)<table class="shot-table">.*?</table>')
+
+
+def without_showcase(html):
+    """The home showcase (25 Oct) shows the sample report's own dollar totals (site/config/sample-report.report.json,
+    a made-up file). The table is left out of the price check only when it is the one table on / and every amount in
+    it is one of the sample's dollar totals, so any other figure, or a price, put there is still checked."""
+    tables = SHOWCASE_RE.findall(html)
+    if len(tables) != 1:
+        return html
+    with open(os.path.join(REPO, "site", "config", "sample-report.report.json"), encoding="utf-8") as f:
+        sample = {round(abs(h["dollars"]["amount"]), 2) for h in json.load(f)["habits"] if h.get("dollars")}
+    from harvest_prices import amounts_in
+    found = amounts_in(tables[0])
+    if not found or any(round(a, 2) not in sample for a in found):
+        return html
+    return html.replace(tables[0], " ")
 
 
 KEY_NUM = re.compile(r'class="[^"]*\bkey-num\b')

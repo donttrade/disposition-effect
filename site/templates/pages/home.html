@@ -11,22 +11,56 @@
         <h1 id="hero">See where your trades leave your plan.</h1>
         <p class="lede">Your plan is how you meant to handle wins and losses. A habit report built from your own trade history. It measures and describes up to five habits in your own file, like opening a new trade soon after a loss, with the dollar totals of the matching trades, and tests up to two of these habits against chance (could the pattern be luck?) in this version. It doesn’t tell you what to trade.</p>
         <p class="btn-row"><a class="btn" href="/pricing/#last-step">Get the habit report — {{ r.price_usd|usd }}</a> <a class="btn btn-secondary" href="/tools/trade-stats/">Free trade stats</a> <a href="/sample-report/">See a sample report</a></p>
-        <p class="small">{{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers. One time, in US dollars, with one free re-test 30 to 60 days after your first report. A full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying.</p>
+        <p class="small">{{ r.price_usd|usd }}, one time, in US dollars, with one free re-test 30 to 60 days after your first report. A full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying.</p>
         <p class="small muted">Not investment advice. <a href="/pricing/#before-you-pay">Before you pay</a></p>
   {% endcall %}
   <div class="wrap">
 
-  <section class="section" aria-labelledby="t-measure-h" data-reveal>
-    <h2 id="t-measure-h">What the report measures</h2>
-    <p>Five habits, measured in your own closed trades as far as your file allows.</p>
-    <dl class="split">
-      <div><dt>Hold gap</dt><dd>Did you hold losing trades longer than winning ones? (described, not tested in this version)</dd></div>
-      <div><dt>Re-entry after a loss</dt><dd>Did trades opened within 15 minutes of a loss turn out differently from the rest?</dd></div>
-      <div><dt>Size after a loss</dt><dd>Was the trade after a loss larger than the trade after a win? (described, not tested in this version)</dd></div>
-      <div><dt>Trading after a losing run</dt><dd>Did trades after two or more losses in a row turn out differently?</dd></div>
-      <div><dt>Unusually large losses</dt><dd>How many losses were more than twice your typical loss, and what share of your losses they made up (described, not tested)</dd></div>
-    </dl>
-    <p>Each tested habit gets one of three results: “distinguishable from noise”, “not distinguishable from noise”, or “not enough trades to tell” when either of the two groups it compares has fewer than 30 trades. Each test compares trades from the same days with each other. Dollar figures are historical totals from your file, such as “trades matching this pattern totalled −$X”. They describe what happened; they do not show that a habit caused a result.</p>
+  {#- 25 Oct (owner): show the report instead of describing it. The panel is the sample report's own
+      numbers (site/config/sample-report.report.json, a made-up file), labelled as such; no buy button
+      sits in this section. The method sentences moved into "How the results work". -#}
+  {%- set sr = sample_report %}
+  {%- set short = {"hold_gap": "Held losers longer", "revenge": "Re-entry after a loss", "size_up": "Size after a loss",
+                   "tilt": "After a losing run", "oversized_loss": "Unusually large losses"} %}
+  {%- set pill = {"distinguishable": ("pill pill-hit", "Distinguishable from noise"),
+                  "not_distinguishable": ("pill", "Not distinguishable"),
+                  "few": ("pill pill-few", "Not enough trades")} %}
+  <section class="section showcase" aria-labelledby="t-measure-h" data-reveal>
+    <div class="showcase-copy">
+      <p class="kicker">The habit report</p>
+      <h2 id="t-measure-h">Five habits, checked in your own trades.</h2>
+      <ul class="ticks">
+        <li>Reads MetaTrader, IBKR, Tradovate or a simple CSV</li>
+        <li>Up to two habits tested against chance</li>
+        <li>Dollar totals straight from your file</li>
+        <li>Runs in your browser</li>
+      </ul>
+      <p><a class="more" href="/sample-report/">See the full sample report <span aria-hidden="true">→</span></a></p>
+    </div>
+    <figure class="showcase-shot" aria-label="Part of a sample habit report, from a made-up trade file">
+      <div class="shot-card">
+        <table class="shot-table">
+          <thead><tr><th scope="col">Habit</th><th scope="col" class="num">Trades</th><th scope="col" class="num">Total</th><th scope="col">Result</th></tr></thead>
+          <tbody>
+          {%- for h in sr.habits %}
+            {%- set d = h.dollars or {} %}
+            {%- set pc = pill.get(h.verdict, ("pill pill-muted", "Described")) %}
+            <tr><th scope="row">{{ short.get(h.id, h.name) }}</th>
+              <td class="num">{{ d.n_trades if d else "–" }}</td>
+              <td class="num {{ 'loss' if d and d.amount < 0 else 'gain' }}">{% if d %}{{ "−" if d.amount < 0 else "" }}${{ "{:,.2f}".format(d.amount|abs) }}{% else %}–{% endif %}</td>
+              <td><span class="{{ pc[0] }}">{{ pc[1] }}</span></td></tr>
+          {%- endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="toast toast-a"><span class="toast-k">File read</span> {{ sr.n_trades }} trades · {{ sr.period_weeks }} weeks</p>
+      <p class="toast toast-b"><span class="toast-k">Tested against chance</span> {{ sr.n_distinguishable }} of {{ sr.n_tested }} distinguishable from noise</p>
+      <figcaption>Sample report on a made-up trade file. Not a real trader.</figcaption>
+    </figure>
+    <details class="how">
+      <summary>How the results work</summary>
+      <p>Each tested habit gets one of three results: “distinguishable from noise”, “not distinguishable from noise”, or “not enough trades to tell” when either of the two groups it compares has fewer than 30 trades. Each test compares trades from the same days with each other. Dollar figures are historical totals from your file. They describe what happened; they do not show that a habit caused a result.</p>
+    </details>
   </section>
 
   <section class="section" aria-labelledby="t-how-h" data-reveal>

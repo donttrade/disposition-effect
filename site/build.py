@@ -1109,8 +1109,8 @@ BUSINESS_ID_ATTR = "data-business-id"
 BUSINESS_ID_RE = re.compile(r"(?s)<p\b[^>]*\bdata-business-id\b[^>]*>.*?</p>")
 BUSINESS_REGION = "Ontario, Canada"
 ADDRESS_LINE_PATHS = frozenset({
-    "/pricing/", "/for-traders/", "/terms/", "/privacy/", "/about/", "/start/", "/welcome/", "/report/",
-    "/restore/", "/for-traders/thanks/", "/start/pilot-thanks/",
+    # 25 Oct (owner): only where a buyer pays or reads the terms and privacy notice
+    "/pricing/", "/terms/", "/privacy/",
     "/fr/avant-de-payer/", "/fr/conditions/", "/fr/confidentialite/"})
 # The short line's link to the seller block: id="seller" in the terms' Contact section (the seller rows
 # whenever show_seller; the full footer line is on that page in any commerce build). French pages exist
@@ -2251,7 +2251,7 @@ def build():
         if not flags["ask_box"]:
             page["scripts"] = [s for s in page["scripts"] if s not in ASK_SCRIPTS]
         extra = {"sample_csv": sample_csv()} if page.get("sample") else {}
-        if page.get("sample_report"):
+        if page.get("sample_report") or (page["path"] == "/" and flags["paid_report"]):  # 25 Oct: the home showcase
             rep_ = sample_report()
             extra["sample_report"] = rep_
             extra["sample_report_json"] = Markup(json.dumps(rep_, sort_keys=True, ensure_ascii=False).replace("</", "<\\/"))

@@ -18,7 +18,7 @@
       <p><a href="/tools/">All free tools</a></p>
     </div>
     <div class="ladder-row">
-      <h3>Habit report: <span class="num">{{ r.price_usd|usd }}</span> founding price for the first {{ prices.rules.founding_limit }} buyers{% if not flags.paid_report %} (waitlist, nothing charged now){% endif %}</h3>
+      <h3>Habit report: <span class="num">{{ r.price_usd|usd }}</span>{% if not flags.paid_report %} (waitlist, nothing charged now){% endif %}</h3>
       {#- Merge into delivery-39 (24 Oct): the offer wording of R-D3 I-3b (up to five habits, up to two tested against
           chance, one re-test, the version sentence), not the v3 draft's "tests four of them". #}
       {%- if flags.paid_report %}
