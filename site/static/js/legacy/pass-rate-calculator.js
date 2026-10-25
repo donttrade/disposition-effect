@@ -158,6 +158,13 @@
       r.notes.forEach(function (n) { var li = document.createElement('li'); li.textContent = n; ul.appendChild(li); });
     };
     var touchAll = function () { fields.forEach(function (id) { touched[id] = true; }); };
+    // QA 25 Oct: after the example or Enter, bring the result into view (no smooth scroll under reduced motion)
+    var reveal = function () {
+      var box = $('pr-results');
+      if (!box || box.hidden || !box.scrollIntoView) return;
+      var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      box.scrollIntoView({ block: 'nearest', behavior: still ? 'auto' : 'smooth' });
+    };
     var init = function () {
       if (!$('pr-started') || !N) return;
       fields.forEach(function (id) {
@@ -168,11 +175,11 @@
       // submit it (and lifted.js stops a submit anyway); Enter checks every box instead.
       $('pr-form').addEventListener('submit', function () { touchAll(); update(); });
       $('pr-form').addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' && e.target && e.target.tagName === 'INPUT') { e.preventDefault(); touchAll(); update(); }
+        if (e.key === 'Enter' && e.target && e.target.tagName === 'INPUT') { e.preventDefault(); touchAll(); update(); reveal(); }
       });
       $('pr-example').addEventListener('click', function () {
         $('pr-started').value = '1000'; $('pr-open').value = '150'; $('pr-passed').value = '170'; $('pr-paid').value = '40'; $('pr-traders').value = '800';
-        touchAll(); update();
+        touchAll(); update(); reveal();
       });
       $('pr-clear').addEventListener('click', function () { fields.forEach(function (id) { $(id).value = ''; }); touched = {}; update(); });
       update();
