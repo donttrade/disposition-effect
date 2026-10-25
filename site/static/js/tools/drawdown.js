@@ -12,7 +12,7 @@
 import { recoveryGain, drawdowns, openedAfterLoss } from './drawdown-core.js';
 import { money, pct, plain, day, intText, el } from './format.js';
 import { parsePositive, InputError } from './num.js';
-import { clearFieldErrors, fieldError, showProblems } from './tool-state.js';
+import { clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js';
 import { wireFileTool, readSection, tableWrap, rowsTable, plural, reportLead, SAMPLE_LABEL } from './file-tool.js';
 
 const $ = (id) => document.getElementById(id);
@@ -42,7 +42,7 @@ function quick(ev) {
       text: `Gain = d ÷ (1 − d) = ${plain(d / 100, dp + 2)} ÷ (1 − ${plain(d / 100, dp + 2)}) = ${plain(g, 4)} = ${pct(g, 2)}` }),
     el('p', { class: 'small muted', text: 'Arithmetic on the number you entered: the gain, on what is left after the fall, that brings the account back to its previous high. Fees, deposits and withdrawals are not included.' }));
   $('dd-q-out').hidden = false;
-  $('dd-q-out-h').focus();
+  revealResult($('dd-q-out-h'));
 }
 
 // ------------------------------------------------------------------ 2. the report from a file
@@ -113,7 +113,7 @@ function render(focus = true) {
     out.append(episodesTable(d, trades, bal));
   }
   out.hidden = false;
-  if (focus) $('dd-out-h').focus();
+  if (focus) revealResult($('dd-out-h'));
   teaser(d);
 }
 
