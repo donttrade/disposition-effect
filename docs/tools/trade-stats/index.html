@@ -25,7 +25,7 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=ded0758d">
+<link rel="stylesheet" href="/static/css/site.css?v=5bcea5fa">
 <script src="/static/js/theme.js?v=74363ef7"></script>
 <script src="/static/js/nav.js?v=cd8f3405" defer></script>
 <script src="/static/js/tools/trade-stats.js?v=ca8a40e0" type="module"></script>
@@ -94,14 +94,33 @@
 <main id="main">
 
 <div class="wrap">
-  <div class="grid">
-    <div class="span-8">
-      <nav class="crumb small" aria-label="Breadcrumb"><ol class="crumbs"><li><a href="/">Home</a><span class="crumb-sep" aria-hidden="true">›</span></li><li><a href="/tools/">Free tools</a><span class="crumb-sep" aria-hidden="true">›</span></li><li><span aria-current="page">Trade stats from your own trade file</span></li></ol></nav>
-
+  <nav class="crumb small" aria-label="Breadcrumb"><ol class="crumbs"><li><a href="/">Home</a><span class="crumb-sep" aria-hidden="true">›</span></li><li><a href="/tools/">Free tools</a><span class="crumb-sep" aria-hidden="true">›</span></li><li><span aria-current="page">Trade stats from your own trade file</span></li></ol></nav>
+<div class="tool-hero">
+    <div>
       <h1>Trade stats from your own trade file</h1>
-      <p class="lede">Drop the trade file your platform already exports and get the core numbers in seconds: net result, win rate, average win and loss, profit factor, mean result per trade, largest drawdown, and your longest winning and losing streaks. It reads MT5 and MT4 HTML reports, IBKR Flex Query trade files and Tradovate order exports (all three in beta), and a plain CSV template.</p>
-      <p>Everything is calculated inside this browser tab. The page’s security policy blocks every outgoing network request, so your file is not uploaded anywhere; you can watch your browser’s network tab to check. No sign-up, no cookies, no ads.</p>
+      <p class="lede">Drop your MT5, MT4, IBKR or Tradovate export. Get your win rate, profit factor, drawdown and streaks in seconds.</p>
+      <p class="small muted">No account. Your file is read in this tab and not uploaded.</p>
     </div>
+    
+<figure class="showcase-shot ts-mock" aria-label="Trade stats on the synthetic sample file">
+  <!--sample-out--><div class="shot-card">
+    <table class="mini-shot">
+      <caption class="visually-hidden">Trade stats on the synthetic sample file</caption>
+      <tbody>
+        <tr><th scope="row">Closed trades</th><td class="num">160</td></tr>
+        <tr><th scope="row">Net result</th><td class="num gain">+$277.95</td></tr>
+        <tr><th scope="row">Win rate</th><td class="num">51.9%</td></tr>
+        <tr><th scope="row">Profit factor</th><td class="num">1.14</td></tr>
+        <tr><th scope="row">Largest drawdown</th><td class="num loss">−$341.20</td></tr>
+        <tr><th scope="row">Losers held vs winners</th><td class="num">3.55× longer</td></tr>
+      </tbody>
+    </table>
+  </div><!--/sample-out-->
+  <p class="toast toast-a"><span class="toast-k">File read</span> 160 trades from 320 fills</p>
+  <p class="toast toast-b"><span class="toast-k">Read in this tab</span> Your file is not uploaded</p>
+  <figcaption>Sample file, made up. Not a real trader.</figcaption>
+</figure>
+
   </div>
   
 
@@ -139,8 +158,10 @@
 </aside>
 
 
-  <section class="section" aria-labelledby="files-h">
-    <h2 id="files-h">Which files it reads</h2>
+  <section class="section" aria-labelledby="how-h">
+    <h2 id="how-h">How it works</h2>
+    <details class="how-group"><summary>Files it reads, the CSV template, and how trades are counted</summary>
+    <h3 id="files-h">Which files it reads</h3>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Supported files">
     <table>
       <thead><tr><th scope="col">Platform</th><th scope="col">What to export</th><th scope="col">Status</th></tr></thead>
@@ -154,18 +175,17 @@
     </table>
     </div>
     <p class="small muted">Beta: built from each platform’s public documentation, not yet checked against a real export. The page says so on the results, and you can check a few trades by hand.</p>
-    <h3 id="template">The CSV template</h3>
+    <h4 id="template">The CSV template</h4>
     <p>One row per fill, with these columns in any order: <code>Date</code> (yyyy-mm-dd), <code>Time</code> (hh:mm:ss), <code>Symbol</code>, <code>Side</code> (Buy or Sell), <code>Quantity</code>, <code>Price</code>. Optional: <code>Currency</code> and <code>Fees</code>. A file with one row per round trip (open time, close time, symbol, direction, volume, open and close price) is read too.</p>
-  </section>
-
-  <section class="section" aria-labelledby="count-h">
-    <h2 id="count-h">How the numbers are counted</h2>
+    <h3 id="count-h">How the numbers are counted</h3>
     <ul>
       <li>A trade runs from flat to flat on each symbol: it opens when your position leaves zero and closes when it returns to zero. A fill that crosses zero closes one trade and opens the opposite one.</li>
       <li>Results are net of fees when the file has them. Positions still open at the end of the file are left out, and the page says how many.</li>
       <li>Times are read exactly as written in the file, so results are the same in every time zone.</li>
       <li>Drawdown is measured on closed-trade equity: the largest fall from a previous high after any trade closed.</li>
     </ul>
+
+    </details>
   </section>
 
   <section class="section" aria-labelledby="faq-h">
@@ -177,14 +197,6 @@
     <details id="q-is-this-investment-advice"><summary>Is this investment advice?</summary><p>No. It measures your own past trades and does not recommend any security, trade, size or exit. Past results do not predict future results.</p></details>
   </section>
 
-  <section class="section" aria-labelledby="more-h">
-    <h2 id="more-h">Related</h2>
-    <ul>
-      <li><a href="/tools/prop-challenge-simulator/">Prop-firm challenge simulator</a>: replay a challenge from your own trading days.</li>
-      <li><a href="/tools/lot-size-calculator/">Lot size calculator</a>: the arithmetic from balance, risk amount and stop distance.</li>
-      <li><a href="/tools/disposition-calculator/">Disposition-effect calculator</a>: do you sell winners sooner than losers?</li>
-    </ul>
-  </section>
   <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR and Tradovate are trademarks of their owners. donttrade is not affiliated with any of them.</p>
 </div>
 <script type="text/csv" id="ts-sample">
