@@ -82,7 +82,7 @@ def test_a1_no_research_no_finding_and_every_anchor_resolves(built_site):
             assert n not in u["a"] and n not in u["q"], u["id"]
     kinds = {u["kind"] for u in units}
     assert kinds == {"faq", "price", "terms", "privacy", "tool", "glossary"}
-    assert data["advice"] == "faq-home-is-this-advice" and data["disclaimer"] == B.load_config()[0]["legal"]["disclaimer_short"]
+    assert data["advice"] == "faq-pricing-is-this-investment-advice" and data["disclaimer"] == B.load_config()[0]["legal"]["disclaimer_short"]
 
 
 def test_a1_build_refuses_a_unit_with_a_finding_number(monkeypatch):
@@ -153,16 +153,16 @@ def test_a4_help_lists_every_unit_and_the_get_form_lands_there(browser, built_si
 def test_a11_index_text_passes_lint(built_site):
     _, js = _index(built_site)
     assert L.answer_index_problems(js, "/static/js/answers-index.js") == []
-    bad = js.replace("Is this advice?", "Our best advice?", 1)
+    bad = js.replace("Is this investment advice?", "Our best advice?", 1)   # 25 Oct sweep: the reply is on /pricing/
     assert L.answer_index_problems(bad, "x")
 
 
 def test_faq_ids_are_stable_and_unique(built_site):
-    for path in ("/", "/pricing/", "/for-firms/", "/tools/trade-stats/"):
+    for path in ("/pricing/", "/for-firms/", "/tools/trade-stats/"):   # 25 Oct sweep: no FAQ on the home page
         html = _page(built_site, path)
         ids = re.findall(r'<details id="(q-[^"]+)"><summary>', html)
         assert ids and len(ids) == len(set(ids)), path
-    assert 'id="q-is-this-advice"' in _page(built_site, "/")
+    assert 'id="q-is-this-investment-advice"' in _page(built_site, "/pricing/")
 
 
 # ------------------------------------------------------------------ A5, A9: fixture accuracy and the contract

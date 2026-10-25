@@ -690,21 +690,12 @@ def test_nit6_tiny_risk_is_not_rounded_to_zero(browser, built_site):
 
 
 # ------------------------------------------------------------------ NIT 7: pricing tabs follow same-page hash changes
-def test_nit7_hashchange_switches_the_pricing_tab(browser, paid_site):
+def test_nit7_hash_opens_the_pay_panel(browser, built_site):
+    # 25 Oct sweep: no Traders | Firms tabs any more; a hash inside the "Last step" <details> still opens it
     ctx = browser.new_context()
     page = ctx.new_page()
-    page.goto(paid_site["url"] + "/pricing/")
-    assert page.get_attribute("#tab-traders", "aria-selected") == "true"
-    page.evaluate("location.hash = 'firms'")
-    page.wait_for_function("() => document.getElementById('tab-firms').getAttribute('aria-selected') === 'true'")
-    page.evaluate("location.hash = 'copy-leader'")  # an id inside the Firms panel keeps Firms
-    assert page.get_attribute("#tab-firms", "aria-selected") == "true"
-    page.go_back()
-    page.go_back()
-    page.wait_for_function("() => document.getElementById('tab-traders').getAttribute('aria-selected') === 'true'")
-    page.evaluate("location.hash = 'traders'")
-    assert page.is_visible("#traders")
-    page.evaluate("location.hash = 'before-you-pay'")   # 25 Oct: in the "Last step" <details>; the hash opens it
+    page.goto(built_site["url"] + "/pricing/")
+    page.evaluate("location.hash = 'before-you-pay'")
     page.wait_for_function("() => document.getElementById('last-step').open")
     assert page.is_visible("#before-you-pay")
     ctx.close()

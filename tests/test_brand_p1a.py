@@ -73,8 +73,7 @@ def test_reworded_firm_copy_and_the_build_lint_clean(built_site):
     assert "That test is fingerprinted with a SHA-256 hash, recorded, and then run once, as written." in ff
     assert "runs the same pre-registered test again on a later period." in ff
     pr = L.readable_text(page(built_site, "/pricing/"))
-    assert "a pre-registered test, fingerprinted before any data is seen, checks" in pr
-    assert "running the same pre-registered test again on a later period." in pr
+    assert "pre-registered" not in pr   # 25 Oct sweep: /pricing/ is for traders; the firm tests are on /for-firms/
     probs = [p for p in L.lint_build(str(built_site["out"])) if p[0] in ("banned:seal_words", "banned:skill_claims")]
     assert probs == []
 

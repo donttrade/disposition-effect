@@ -410,9 +410,10 @@ def answer_units(rendered, private=None):
 
 
 def answers_index_js(units, cfg):
-    advice = [u["id"] for u in units if u["url"] == "/#q-is-this-advice"]
+    # 25 Oct sweep: the home page has no FAQ any more; the out-of-scope reply is the pricing page's
+    advice = [u["id"] for u in units if u["url"] in ("/#q-is-this-advice", "/pricing/#q-is-this-investment-advice")]
     if not advice:
-        die("answer index: the home FAQ 'Is this advice?' (the out-of-scope reply) is missing")
+        die("answer index: the FAQ 'Is this investment advice?' on /pricing/ (the out-of-scope reply) is missing")
     data = {"version": 1, "built": cfg["legal"]["terms_version"], "advice": advice[0],
             "disclaimer": cfg["legal"]["disclaimer_short"], "synonyms": cfg.get("answers", {}).get("synonyms", {}),
             "units": units}
@@ -974,9 +975,9 @@ PAID_PAGES = [
 ]
 PAGES += PAID_PAGES
 # /pricing/ (step 15): one template. Flag off: sections stacked, firms first. Flag on:
-# Traders | Firms tabs (tabs.js) and the printable "Before you pay" block (print.js).
+# The printable "Before you pay" block (print.js). 25 Oct sweep: traders only, no Traders | Firms tabs.
 PAGES.append({"template": "pages/pricing.html", "path": "/pricing/", "requires_flag": None,
-              "scripts_if_paid": ["/static/js/tabs.js", "/static/js/print.js"], "product": PRODUCT_TEXT,
+              "scripts_if_paid": ["/static/js/print.js"], "product": PRODUCT_TEXT,
               # Tester D6: the reverse of /fr/avant-de-payer/'s alternates, so the pair counts
               "alternates_if_paid": [("en", "/pricing/"), ("fr", "/fr/avant-de-payer/"), ("x-default", "/pricing/")],
               "crumb": "Pricing", "updated": "2026-10-21", "og_image": "/assets/og/pricing.png",

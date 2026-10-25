@@ -96,8 +96,10 @@ def test_the_pages_render_the_source_strings_paid_build(paid_build):
     long_, short = norm(S["long"]), norm(S["short"])
     assert page_text(paid_build, "for-traders/index.html").count(long_) == 1
     home = page_text(paid_build, "index.html")
-    assert home.count(short) == 1 and home.count(long_) == 1           # list item + FAQ answer
-    assert page_text(paid_build, "index.html", readable_text).count(long_) == 2   # and the FAQPage JSON-LD answer
+    # 25 Oct sweep: no FAQ on the home page; the short line sits under "What we keep" in How it works,
+    # and the long text is on /pricing/ ("Where does my file go?") and in Before you pay
+    assert home.count(short) == 1 and home.count(long_) == 0
+    assert page_text(paid_build, "pricing/index.html").count(long_) == 2
     assert page_text(paid_build, "report/index.html").count(long_) == 1
     pricing = open(os.path.join(paid_build, "pricing", "index.html"), encoding="utf-8").read()
     byp = pricing[pricing.index('id="before-you-pay"'):]

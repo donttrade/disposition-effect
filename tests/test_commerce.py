@@ -85,24 +85,22 @@ def test_flag_off_outputs_have_no_commerce(tmp_path):
 
 
 @pytest.mark.parametrize("color", ["light", "dark"])
-def test_pricing_tabs_axe_and_keyboard(browser, paid_site, color):
+def test_pricing_traders_only_axe_and_pay_panel(browser, built_site, color):
+    # 25 Oct sweep (owner): /pricing/ is for traders only; firm prices are on /for-firms/, and every old firm
+    # anchor lands on the one line that links there. The pay panel and its disclosure are unchanged.
     ctx = browser.new_context(color_scheme=color, viewport={"width": 375, "height": 900}, bypass_csp=True)
     page = ctx.new_page()
-    page.goto(paid_site["url"] + "/pricing/")
-    assert page.get_attribute("#tab-traders", "aria-selected") == "true"
-    assert page.is_hidden("#before-you-pay") and page.is_hidden("#panel-firms")   # 25 Oct: in the "Last step" panel
+    page.goto(built_site["url"] + "/pricing/")
+    assert page.locator('[role="tab"]').count() == 0 and page.locator("#panel-firms").count() == 0
+    assert page.is_hidden("#before-you-pay")   # in the "Last step" panel
     page.click("#last-step > summary")
-    assert page.is_visible("#before-you-pay") and page.is_visible("#last-step a[href*='buy.stripe.com']")
-    page.focus("#tab-traders")
-    page.keyboard.press("ArrowRight")
-    assert page.get_attribute("#tab-firms", "aria-selected") == "true" and page.is_visible("#firms")
+    assert page.is_visible("#before-you-pay") and page.locator("#last-step a[href*='buy.stripe.com']").count() == 2
     assert horizontal_overflow(page) == []
     assert axe_violations(page) == []
-    page.goto(paid_site["url"] + "/pricing/#firms")
-    assert page.get_attribute("#tab-firms", "aria-selected") == "true"
-    page.goto(paid_site["url"] + "/pricing/#copy-leader")
-    assert page.get_attribute("#tab-firms", "aria-selected") == "true"
-    page.goto(paid_site["url"] + "/")
+    for anchor in ("firms", "copy-leader", "claims-test", "platforms", "researchers", "payment"):
+        assert page.locator(f"#firms #{anchor}, p#{anchor}").count() == 1, anchor
+    assert page.get_attribute("#firms a", "href") == "/for-firms/#what-it-costs"
+    page.goto(built_site["url"] + "/")
     assert "See where your trades leave your plan." in page.inner_text("h1")
     assert axe_violations(page) == []
     ctx.close()
