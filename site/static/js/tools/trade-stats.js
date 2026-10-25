@@ -17,7 +17,7 @@
 // Without it this page shows only the descriptive numbers, no checks are run, and a neutral
 // line says a check is coming.
 
-import { createFileSlot, renderReadError, fieldError } from './tool-state.js';
+import { createFileSlot, renderReadError, fieldError, revealResult } from './tool-state.js';
 import { freeStats, equityCurve, NO_LOSSES } from '../engine/stats.js';
 import { money, unitNote, pct, ratio, duration, day, intText, el, signClass } from './format.js';
 import { parsePositive, InputError } from './num.js';
@@ -205,7 +205,7 @@ async function render(focus = true) {
   if (B) out.append(B.section());
 
   out.hidden = false;
-  if (focus) $('ts-out-h').focus();
+  if (focus) revealResult($('ts-out-h'));
 }
 
 // ------------------------------------------------------------------ chart

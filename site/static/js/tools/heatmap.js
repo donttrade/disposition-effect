@@ -11,6 +11,7 @@
 
 import { heatmap, level, WEEKDAYS, MIN_CELL, blockLabel } from './heatmap-core.js';
 import { money, pct, intText, el, signClass, MINUS } from './format.js';
+import { revealResult } from './tool-state.js';
 import { wireFileTool, readSection, tableWrap, rowsTable, plural, reportLead, SAMPLE_LABEL } from './file-tool.js';
 
 const $ = (id) => document.getElementById(id);
@@ -39,7 +40,7 @@ function render(focus = true) {
     `Open times ${shiftText(o.shiftHours)}: first trade opened ${stamp(h.first_open)}, last opened ${stamp(h.last_open)}. If these do not match what you remember, change the shift above.`));
   out.append(grid(h), noteSection(h), marginals(h), allCells(h));
   out.hidden = false;
-  if (focus) $('hm-out-h').focus();
+  if (focus) revealResult($('hm-out-h'));
   teaser(h);
 }
 

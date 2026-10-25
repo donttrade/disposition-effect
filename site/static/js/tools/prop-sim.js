@@ -6,7 +6,7 @@
 // the worker. Manual mode: four summary numbers. Either way the page's CSP is
 // connect-src 'none', nothing is stored, nothing is logged.
 
-import { createFileSlot, renderReadError, whileBusy, clearFieldErrors, fieldError, showProblems } from './tool-state.js';
+import { createFileSlot, renderReadError, whileBusy, clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js';
 import { RUNS, DEFAULT_SEED, tradingDays } from './prop-sim-core.js';
 import { money, unitNote, pct, intText, el, DASH } from './format.js';
 import { parseStrict, parsePositive, parseWhole, InputError } from './num.js';
@@ -200,7 +200,7 @@ function render(p, res) {
     el('p', { id: 'ps-streak', 'data-busts': String(res.bust), text: streakLine(res) }),
     el('p', { class: 'small muted', text: `Rules used: ${rulesText}` })].filter(Boolean)); // no empty slot becomes the text "null"
   out.hidden = false;
-  $('ps-out-h').focus();
+  revealResult($('ps-out-h'));
   if (!$('ps-teaser')) return; // paid_report on: partials/tool_next_step.html is the one offer
   $('ps-teaser-text').textContent = teaser(res);
   $('ps-teaser').hidden = false;
