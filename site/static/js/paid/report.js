@@ -68,7 +68,10 @@ const VERDICT = {
   descriptive: ['badge badge-noise', 'described, not tested'],
 };
 
-function badge(v) {
+function badge(v, h) {
+  // QA 25 Oct: one label for the not-tested state. A habit withheld as not calibrated is still
+  // described (V-launch / V-launch-size), so it carries the descriptive label.
+  if (v === 'withheld' && h && h.withheld === 'not_calibrated') v = 'descriptive';
   if (!VERDICT[v]) throw new Error(`report: unknown verdict ${v}`);
   const [cls, text] = VERDICT[v];
   return el('span', { class: cls, text });
@@ -156,11 +159,11 @@ function habitSection(h, unit, report) {
   if (report.dates_only && ['revenge', 'tilt', 'size_up'].includes(h.id)) {
     // R-D3 addendum 3: the badge and the one line, nothing else (no question with its 15-minute figure, no
     // measure, no dollars, no chart, no research line)
-    sec.append(el('h3', { id: 'h-' + h.id, text: h.name }), el('p', {}, badge(h.verdict)));
+    sec.append(el('h3', { id: 'h-' + h.id, text: h.name }), el('p', {}, badge(h.verdict, h)));
     for (const s of habitSentences(h, report, wordingFmt(unit))) sec.append(el('p', { class: 'habit-sentence', text: s }));
     return sec;
   }
-  sec.append(el('h3', { id: 'h-' + h.id, text: h.name }), el('p', { class: 'muted', text: h.question }), el('p', {}, badge(h.verdict)));
+  sec.append(el('h3', { id: 'h-' + h.id, text: h.name }), el('p', { class: 'muted', text: h.question }), el('p', {}, badge(h.verdict, h)));
   if (TESTED.includes(h.id)) {
     // ARCHITECT-STATS-AMENDMENT-R2 §9.2: the habit's lines in order (measures, the comparison
     // shares, the 12-hour count, the verdict; too_few / withheld lines replace the share and the
@@ -216,7 +219,7 @@ export function renderReport(report, out, meta) {
   p1.append(el('h2', { id: 'focus-h', text: 'Page 1' }));
   const head = el('div', { class: focus ? 'notice notice-gap' : 'notice', id: 'focus-lines' });
   for (const line of page1Lines(report, wordingFmt(unit))) head.append(el('p', { text: line }));
-  if (focus) head.append(el('p', { class: 'muted', text: focus.question }), el('p', {}, badge(focus.verdict)));
+  if (focus) head.append(el('p', { class: 'muted', text: focus.question }), el('p', {}, badge(focus.verdict, focus)));
   p1.append(head);
   const cov = el('div', { id: 'coverage' });
   for (const line of coverageLines(report)) cov.append(el('p', { class: 'small', text: line }));
@@ -230,7 +233,7 @@ export function renderReport(report, out, meta) {
   const tbody = el('tbody');
   for (const h of report.habits) {
     tbody.append(el('tr', {}, el('th', { scope: 'row' }, el('a', { href: '#habit-' + h.id, text: h.name })),
-      el('td', {}, badge(h.verdict)), el('td', { class: 'num', text: h.dollars ? money(h.dollars.amount, unit) : '—' }),
+      el('td', {}, badge(h.verdict, h)), el('td', { class: 'num', text: h.dollars ? money(h.dollars.amount, unit) : '—' }),
       el('td', { class: 'num', text: h.dollars ? String(h.dollars.n_trades) : '—' })));
   }
   out.append(el('section', { class: 'section', 'aria-labelledby': 'all-h' }, el('h2', { id: 'all-h', text: 'All habits measured' }),
