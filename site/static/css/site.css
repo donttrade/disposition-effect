@@ -918,6 +918,21 @@ svg.tp { padding: 8px 10px; }
 .tp-icon { height: 56px; }
 .how-group summary { font-weight: 600; } .how-group h3 { margin-top: var(--s3); font-size: var(--fs-2); } .how-group h4 { margin-top: var(--s2); }
 
+/* home hero card (sweep 2): the sample report's first page, no dollar figure */
+.report-card .rc { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: var(--s3); box-shadow: 0 24px 48px -24px rgb(22 24 28 / 0.25); }
+.rc p { margin: 0; }
+.rc .rc-top { display: flex; justify-content: space-between; align-items: center; gap: var(--s1); font-size: var(--fs-0); color: var(--muted); padding-bottom: var(--s2); border-bottom: 1px solid var(--border); margin-bottom: var(--s2); }
+.rc-k { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.rc .rc-h { font-size: var(--fs-3); font-weight: 600; line-height: 1.2; margin: 4px 0 var(--s1); }
+.rc-gloss { font-size: var(--fs-0); color: var(--muted); }
+.rc-bars { display: block; width: 100%; height: auto; margin: var(--s2) 0 4px; }
+.rc-ax { font: 12px var(--font-sans); fill: var(--muted); }
+.rc-bar { fill: var(--loss); } .rc-bar-b { fill: color-mix(in srgb, var(--loss) 45%, var(--bg)); }
+.rc-note { font-size: 0.78rem; color: var(--muted); }
+.rc .rc-more { margin-top: var(--s2); padding-top: var(--s2); border-top: 1px solid var(--border); font-size: var(--fs-0); }
+.tools-home .how { margin-top: var(--s2); }
+@media (max-width: 600px) { .tools-home .hero-dash .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
 /* ------------------------------------------------------------------ the dark hero band (ARCHITECT-BRAND-AND-WRAPPED §2.2–2.4)
    partials/hero_band.html. It follows the theme (owner, 25 Oct): in light it keeps the light page tokens;
    in dark it re-scopes them to the charcoal --band-* set, so every component inside it (buttons, links,
