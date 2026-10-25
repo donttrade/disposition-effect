@@ -29,18 +29,13 @@
     <h2 id="measure-h">What it is being built to measure</h2>
     <p>Five habits, measured in your own closed trades as far as your file allows. These describe the report as it is being built; the final list is published before anyone pays.</p>
     {%- endif %}
-    <div class="table-wrap" tabindex="0" role="region" aria-label="The five habits">
-    <table>
-      <thead><tr><th scope="col">Habit</th><th scope="col">The question about your own trades</th></tr></thead>
-      <tbody>
-        <tr><th scope="row">Hold gap</th><td>Did you hold losing trades longer than winning ones? (described, not tested in this version)</td></tr>
-        <tr><th scope="row">Re-entry after a loss</th><td>Did trades opened within 15 minutes of a loss turn out differently from the rest?</td></tr>
-        <tr><th scope="row">Size after a loss</th><td>Was the trade after a loss larger than the trade after a win? (described, not tested in this version)</td></tr>
-        <tr><th scope="row">Trading after a losing run</th><td>Did trades after two or more losses in a row turn out differently?</td></tr>
-        <tr><th scope="row">Unusually large losses</th><td>How many losses were more than twice your typical loss, and what share of your losses they made up (described, not tested)</td></tr>
-      </tbody>
-    </table>
-    </div>
+    <dl class="split">
+      <div><dt>Hold gap</dt><dd>Did you hold losing trades longer than winning ones? (described, not tested in this version)</dd></div>
+      <div><dt>Re-entry after a loss</dt><dd>Did trades opened within 15 minutes of a loss turn out differently from the rest?</dd></div>
+      <div><dt>Size after a loss</dt><dd>Was the trade after a loss larger than the trade after a win? (described, not tested in this version)</dd></div>
+      <div><dt>Trading after a losing run</dt><dd>Did trades after two or more losses in a row turn out differently?</dd></div>
+      <div><dt>Unusually large losses</dt><dd>How many losses were more than twice your typical loss, and what share of your losses they made up (described, not tested)</dd></div>
+    </dl>
     <p>Each tested habit gets one of three results: “distinguishable from noise”, “not distinguishable from noise”, or “not enough trades to tell” when either of the two groups it compares has fewer than 30 trades. Each test compares trades from the same days with each other. Dollar figures are historical totals from your file, such as “trades matching this pattern totalled −$X”. They describe what happened; they do not show that a habit caused a result.</p>
   </section>
 
