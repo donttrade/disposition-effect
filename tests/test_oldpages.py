@@ -201,7 +201,7 @@ def test_no_study_finding_next_to_an_offer(built_site, path):
     # (desktop panel, phone accordion). Exactly that link is taken out; anything else still fails.
     foot = r'<ul class="nav-foot">\s*<li><a href="/start/\?product=pilot#pilot">Start a Pilot</a></li>\s*</ul>'
     rest, n = re.subn(foot, "", header)
-    assert n == 2, "the For firms panel's foot is not the one plain Start a Pilot link"
+    assert n == 0, "25 Oct sweep: the nav holds no offer (no For firms panel, no Start a Pilot)"
     assert 'class="btn' not in header and not re.search(r"Start a Pilot|start a trial|\$\d|\d\s*%", rest, re.I)
 
 

@@ -111,7 +111,7 @@ def test_every_page_has_the_business_line_once(builds, combo):
         # inside the footer, right under the contact line
         foot = h[h.rindex("<footer"):]
         assert found[0] in foot, rel
-        assert foot.index(found[0]) < foot.index("Firms pay for fixed-scope measurements"), rel
+        assert foot.index(found[0]) < foot.index("donttrade measures your own past trades."), rel   # 25 Oct sweep: before the disclaimer
 
 
 @pytest.mark.parametrize("combo", ["pilot", "paid", "both"])
