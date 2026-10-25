@@ -5,9 +5,10 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="wrap page-head">
-  <p class="kicker">SAMPLE HABIT REPORT · MADE-UP TRADE FILE</p>
-  <h1>A sample habit report, from a made-up trade file</h1>
-  <p class="lede">This page runs the habit report’s own engine and page on a trade file made up for it: one invented trader, two invented symbols, {{ sample_report.n_trades }} trades over about {{ sample_report.period_weeks }} weeks. It is not a real trader and not a donttrade customer. The file was built with a re-entry habit in it on purpose, so the sample has a result to show. A report on your own file is made the same way, and it shows no percentile.</p>
+  {#- sweep 2 (25 Oct): the lead in two short lines -#}
+  <h1>Sample habit report</h1>
+  <p class="lede">Our real report engine, run on a made-up trade file: {{ sample_report.n_trades }} trades over about {{ sample_report.period_weeks }} weeks.</p>
+  <p>We built a re-entry habit into the file, so there is a result to show. It is not a real trader.</p>
   <p class="small muted">Engine method {{ sample_report.method_version }}, the version listed on the <a href="/corrections/#report-method">corrections page</a>. Not investment advice.</p>
 </div>
 <div class="wrap">

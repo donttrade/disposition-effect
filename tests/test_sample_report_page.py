@@ -66,7 +66,7 @@ def test_the_page_embeds_the_golden_and_its_method_is_the_pages(paid):
     t = re.sub(r"\s+", " ", visible_text(html))
     for bad in ("percentile among", "2,262", "SAMPLE TRADER REPORT", "sample trader report", "SP1000074", "real public data"):
         assert bad not in t, bad
-    assert "A sample habit report, from a made-up trade file" in t and "not a real trader" in t
+    assert "Sample habit report" in t and "made-up trade file" in t and "not a real trader" in t   # sweep 2 lead
     assert lint_text(t) == [] and lint_text(t, "sample", paid=True) == []
 
 
@@ -117,7 +117,7 @@ def test_chromium_draws_the_sample_with_the_report_pages_own_sentences(paid, bro
     page.goto(paid["origin"] + "/sample-report/")
     page.wait_for_selector("#sample-out #focus-lines")
     p1 = [p.strip() for p in page.locator("#focus-lines p").all_inner_texts()]
-    cov = [p.strip() for p in page.locator("#coverage p").all_inner_texts()]
+    cov = [p.strip() for p in page.locator("#coverage p").all_text_contents()]   # sweep 2: folded under one tap
     text = page.inner_text("#sample-out")
     ctx.close()
     assert errors == []
