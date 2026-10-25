@@ -931,6 +931,10 @@ svg.tp { padding: 8px 10px; }
 .rc-note { font-size: 0.78rem; color: var(--muted); }
 .rc .rc-more { margin-top: var(--s2); padding-top: var(--s2); border-top: 1px solid var(--border); font-size: var(--fs-0); }
 .tools-home .how { margin-top: var(--s2); }
+.ft-hero { margin-top: 0; }
+.ft-hero h1 { font-size: var(--fs-5); line-height: 1.1; letter-spacing: -0.02em; margin: 0 0 var(--s2); }
+.habit-rows th[scope="row"] { white-space: nowrap; } .habit-rows td:nth-child(2) { color: var(--muted); }
+.ft-sent { max-width: 34rem; margin: var(--s2) 0; border: 1px solid var(--border); }
 @media (max-width: 600px) { .tools-home .hero-dash .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 /* ------------------------------------------------------------------ the dark hero band (ARCHITECT-BRAND-AND-WRAPPED §2.2–2.4)

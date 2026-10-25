@@ -82,6 +82,10 @@ def test_habit_tables_and_ledes(builds, flavour):
         t = text_of(out, rel)
         if rel == "index.html" and flavour == "free":
             continue   # the flag-off home is not the trader home
+        if 'class="habit-rows"' in raw(out, rel):   # sweep 2: the paid /for-traders/ shows the habits as table rows
+            assert t.count("Described, not tested") == 3 and t.count("Tested against chance") == 2, (flavour, rel)
+            assert "(described, not tested in this version)" not in t, (flavour, rel)
+            continue
         assert "Hold gap " + ROW in t, (flavour, rel)
         assert "Size after a loss " + SIZE_ROW in t, (flavour, rel)   # R-D3
         assert t.count("(described, not tested in this version)") == 2, (flavour, rel)

@@ -3,6 +3,86 @@
 {%- set r = products["report39"] %}{%- set t = products["tracker79"] %}
 {%- import "partials/trader_offer.html" as offer with context %}
 {%- set sale = flags.paid_report %}
+{%- if sale %}
+{#- sweep 2 (25 Oct, owner: show, don't tell): the depth page for readers who want more, as pictures and
+    short lines. The habits as rows with the report's own result labels, what stays and what is sent as a
+    table, the journal comparison table; method, the re-test version sentence and the full sent-list behind
+    one tap each. The waitlist, value ladder and "Free now" blocks are for the flag-off build only. -#}
+{%- set sr = sample_report %}
+<div class="wrap">
+  {% include "partials/crumbs.html" %}
+  <section class="section" aria-labelledby="ft-h">
+    <div class="showcase ft-hero">
+      <div class="showcase-copy">
+        <h1 id="ft-h">A habit report from your own trade file</h1>
+        <p class="lede">Up to five habits in your past trades, with the dollar total of each. It tests up to two of these habits against chance in this version.</p>
+        <p class="btn-row">{{ offer.button() }} <a href="/sample-report/">See a sample</a></p>
+        <p class="small">{{ r.price_usd|usd }} once · one re-test · {{ prices.rules.trader_refund_days }}-day refund</p>
+      </div>
+      {% include "partials/hero_media_report.html" %}
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="measure-h" data-reveal>
+    <h2 id="measure-h">What it measures</h2>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="The five habits">
+    <table class="habit-rows">
+      <thead><tr><th scope="col">Habit</th><th scope="col">The question</th><th scope="col">Result</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Holding losers longer</th><td>Do losing trades stay open longer than winners?</td><td><span class="pill pill-muted">Described, not tested</span></td></tr>
+        <tr><th scope="row">Re-entry after a loss</th><td>Do trades opened soon after a loss go differently?</td><td><span class="pill">Tested against chance</span></td></tr>
+        <tr><th scope="row">Size after a loss</th><td>Do you trade bigger after a loss?</td><td><span class="pill pill-muted">Described, not tested</span></td></tr>
+        <tr><th scope="row">After a losing run</th><td>Do trades after 2+ losses in a row go differently?</td><td><span class="pill">Tested against chance</span></td></tr>
+        <tr><th scope="row">Unusually large losses</th><td>How much of your losses came from a few big ones?</td><td><span class="pill pill-muted">Described, not tested</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <details class="how-more"><summary>What the results mean</summary>
+      <p>Each tested habit gets one of three results: “distinguishable from noise” (unlikely to be luck), “not distinguishable from noise” (could be luck), or “not enough trades to tell” when either of the two groups it compares has fewer than 30 trades. Each test compares trades from the same days with each other. Dollar figures are historical totals from your file, such as “trades matching this pattern totalled −$X”. They describe what happened; they do not show that a habit caused a result.</p>
+    </details>
+  </section>
+
+  <section class="section" aria-labelledby="files-h" data-reveal>
+    <h2 id="files-h">Your file, and what is sent</h2>
+    <p>MetaTrader 5 or 4, IBKR or Tradovate (all in beta), or our CSV template.</p>
+    <table class="mini-table ft-sent">
+      <thead><tr><th scope="col">Stays in your browser</th><th scope="col">Sent, stripped</th></tr></thead>
+      <tbody><tr><td>Your file</td><td>Times</td></tr><tr><td>Names</td><td>Buy or sell</td></tr><tr><td>Account numbers</td><td>Relative size</td></tr><tr><td>Tickers</td><td>Result</td></tr></tbody>
+    </table>
+    <details class="how-more"><summary>Exactly what is sent and kept</summary><p>{{ strings.p5.long }} <a href="/privacy/#report">Privacy notice</a>.</p></details>
+  </section>
+
+  {%- if flags.journal %}{# the journal's "free forever" line lives in the ladder (H10) #}
+  {%- with show_firm_price = false, ladder_id = "ladder-h" %}{% include "partials/value_ladder.html" %}{% endwith %}
+  {%- endif %}
+  <section class="section" aria-labelledby="cmp-h" data-reveal>
+    <h2 id="cmp-h">How it compares with a trading journal</h2>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Comparison with a typical trading journal">
+    <table>
+      <thead><tr><th scope="col"><span class="visually-hidden">Question</span></th><th scope="col">Most trading journals</th><th scope="col">donttrade</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Logs your trades</th><td>Yes</td><td>{% if flags.journal %}Yes: the free journal keeps them in your browser, on your device{% else %}No: it reads the export your platform already makes{% endif %}</td></tr>
+        <tr><th scope="row">Needs an account</th><td>Usually</td><td>No account or login</td></tr>
+        <tr><th scope="row">Tests whether a habit is more than chance</th><td>Varies</td><td>Yes, in the habit report: up to two habits in this version, with a stated statistical check, and “not enough trades to tell” when either group of a tested habit has fewer than 30 trades</td></tr>
+        <tr><th scope="row">Shows its method and code</th><td>Rarely</td><td>The method, yes. The scripts behind {{ evidence.scripts_public }} of the {{ evidence.studies }} studies are public (<a href="/code/">Methods and code</a>); the habit report’s own engine is not</td></tr>
+        <tr><th scope="row">Tells you what to buy or sell</th><td>Some do</td><td>No</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="faq-h" data-reveal>
+    <h2 id="faq-h"><span id="founding">Questions</span></h2>
+    <details><summary>Is this investment advice?</summary><p>No. It describes your own past trades. It does not recommend any security, trade, size or exit, and past results do not predict future results.</p></details>
+    <details><summary>What does the re-test do?</summary><p>It runs the same report on a newer export of the same account, 30 to 60 days after your first report. Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.</p></details>
+    <details><summary>How do I buy it?</summary><p>On the pricing page: read the “Before you pay” summary, then pay {{ r.price_usd|usd }} by card on Stripe’s page. The report opens in your browser right after payment.</p></details>
+    <details><summary>Can I get a refund?</summary><p>Yes. A full refund if you ask by email within {{ prices.rules.trader_refund_days }} days of buying, even if you have already run your report. <a href="/terms/#traders">Trader terms</a></p></details>
+    <details><summary>What can I use today for free?</summary><p>The free <a href="/tools/trade-stats/">trade-stats dashboard</a> reads the same files and shows the core numbers: win rate, profit factor, drawdown and streaks, in your browser.</p></details>
+  </section>
+  {% include "partials/disclaimer.html" %}
+  <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR and Tradovate are trademarks of their owners. donttrade is not affiliated with any of them.</p>
+</div>
+{%- else %}
 <div class="wrap">
   {% include "partials/crumbs.html" %}
   <section class="section" aria-labelledby="ft-h">
@@ -108,4 +188,5 @@
   {% include "partials/disclaimer.html" %}
   <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR and Tradovate are trademarks of their owners. donttrade is not affiliated with any of them.</p>
 </div>
+{%- endif %}
 {% endblock %}

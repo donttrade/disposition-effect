@@ -25,13 +25,13 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=69024ee3">
+<link rel="stylesheet" href="/static/css/site.css?v=db807f3b">
 <link rel="stylesheet" href="/static/css/vt.css?v=af8673c7">
 <script src="/static/js/theme.js?v=74363ef7"></script>
 <script src="/static/js/nav.js?v=cd8f3405" defer></script>
 <script src="/static/js/form-ref.js?v=3681a2b4" defer></script>
 <script src="/static/js/motion.js?v=7ce8bd22" defer></script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "name": "Individual traders", "position": 2}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. It describes your own past trades. It does not recommend any security, trade, size or exit, and past results do not predict future results."}, "name": "Is this investment advice?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "On the pricing page: read the “Before you pay” summary, then pay $39 by card on Stripe’s page. The report opens in your browser right after payment."}, "name": "How do I buy it?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Yes. A full refund if you ask by email within 14 days of buying, even if you have already run your report."}, "name": "Can I get a refund?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "The free trade-stats dashboard reads the same files and shows the core numbers: win rate, profit factor, drawdown and streaks, in your browser."}, "name": "What can I use today?"}]}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "name": "Individual traders", "position": 2}]}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. It describes your own past trades. It does not recommend any security, trade, size or exit, and past results do not predict future results."}, "name": "Is this investment advice?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "It runs the same report on a newer export of the same account, 30 to 60 days after your first report. Your re-test runs on the version of the report that is live when you run it; every change is dated on the corrections page ."}, "name": "What does the re-test do?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "On the pricing page: read the “Before you pay” summary, then pay $39 by card on Stripe’s page. The report opens in your browser right after payment."}, "name": "How do I buy it?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Yes. A full refund if you ask by email within 14 days of buying, even if you have already run your report. Trader terms"}, "name": "Can I get a refund?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "The free trade-stats dashboard reads the same files and shows the core numbers: win rate, profit factor, drawdown and streaks, in your browser."}, "name": "What can I use today for free?"}]}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -99,92 +99,63 @@
   <nav class="crumb small" aria-label="Breadcrumb"><ol class="crumbs"><li><a href="/">Home</a><span class="crumb-sep" aria-hidden="true">›</span></li><li><span aria-current="page">Individual traders</span></li></ol></nav>
 
   <section class="section" aria-labelledby="ft-h">
-    <div class="grid">
-      <div class="span-7">
-        <h1 id="ft-h">A habit report built from your own trade file.</h1>
-        <p class="lede">It measures and describes up to five habits in your own past trades, like opening a new trade soon after a loss, with the dollar totals of the matching trades, and tests up to two of these habits against chance in this version. It includes one re-test 30 to 60 days after your first report. It doesn’t tell you what to trade.</p>
-        <p class="small">$39, one time, in US dollars, with one free re-test 30 to 60 days after your first report. A full refund if you ask within 14 days of buying.</p>
-        <p class="small muted">Not investment advice. <a href="/pricing/#before-you-pay">Before you pay</a></p>
-        <p class="btn-row"><a class="btn" href="/pricing/#last-step">Get the habit report — $39</a> <a class="btn btn-secondary" href="/tools/trade-stats/">Try the free trade stats</a> <a href="/sample-report/">See a sample report</a></p>
+    <div class="showcase ft-hero">
+      <div class="showcase-copy">
+        <h1 id="ft-h">A habit report from your own trade file</h1>
+        <p class="lede">Up to five habits in your past trades, with the dollar total of each. It tests up to two of these habits against chance in this version.</p>
+        <p class="btn-row"><a class="btn" href="/pricing/#last-step">Get the habit report — $39</a> <a href="/sample-report/">See a sample</a></p>
+        <p class="small">$39 once · one re-test · 14-day refund</p>
       </div>
+      
+<figure class="hero-shot report-card" aria-labelledby="rc-cap">
+  <div class="rc">
+    <p class="rc-top"><span>Sample report · Summary</span><span class="pill pill-muted">Made-up file</span></p>
+    <p class="rc-k">Shown first</p>
+    <p class="rc-h">Re-entering soon after a loss</p>
+    <p class="rc-pill"><span class="pill pill-hit">Distinguishable from noise</span> <span class="rc-gloss">unlikely to be luck</span></p>
+    <svg class="rc-bars" viewBox="0 0 300 64" aria-hidden="true" focusable="false">
+      <text class="rc-ax" x="0" y="16">After a loss</text><rect class="rc-bar" x="110" y="5" width="188.0" height="16" rx="3"/>
+      <text class="rc-ax" x="0" y="50">Other trades</text><rect class="rc-bar rc-bar-b" x="110" y="39" width="12.4" height="16" rx="3"/>
+    </svg>
+    <p class="rc-note">Average loss per trade. Longer bar, bigger loss.</p>
+    <p class="rc-more">2 habits tested against chance · 3 described</p>
+  </div>
+  <figcaption id="rc-cap">Page 1 of a sample report, on a made-up trade file. Not a real trader.</figcaption>
+</figure>
+
     </div>
   </section>
 
   <section class="section" aria-labelledby="measure-h" data-reveal>
     <h2 id="measure-h">What it measures</h2>
-    <p>Five habits, measured in your own closed trades as far as your file allows.</p>
-    <dl class="split">
-      <div><dt>Hold gap</dt><dd>Did you hold losing trades longer than winning ones? (described, not tested in this version)</dd></div>
-      <div><dt>Re-entry after a loss</dt><dd>Did trades opened within 15 minutes of a loss turn out differently from the rest?</dd></div>
-      <div><dt>Size after a loss</dt><dd>Was the trade after a loss larger than the trade after a win? (described, not tested in this version)</dd></div>
-      <div><dt>Trading after a losing run</dt><dd>Did trades after two or more losses in a row turn out differently?</dd></div>
-      <div><dt>Unusually large losses</dt><dd>How many losses were more than twice your typical loss, and what share of your losses they made up (described, not tested)</dd></div>
-    </dl>
-    <p>Each tested habit gets one of three results: “distinguishable from noise”, “not distinguishable from noise”, or “not enough trades to tell” when either of the two groups it compares has fewer than 30 trades. Each test compares trades from the same days with each other. Dollar figures are historical totals from your file, such as “trades matching this pattern totalled −$X”. They describe what happened; they do not show that a habit caused a result.</p>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="The five habits">
+    <table class="habit-rows">
+      <thead><tr><th scope="col">Habit</th><th scope="col">The question</th><th scope="col">Result</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Holding losers longer</th><td>Do losing trades stay open longer than winners?</td><td><span class="pill pill-muted">Described, not tested</span></td></tr>
+        <tr><th scope="row">Re-entry after a loss</th><td>Do trades opened soon after a loss go differently?</td><td><span class="pill">Tested against chance</span></td></tr>
+        <tr><th scope="row">Size after a loss</th><td>Do you trade bigger after a loss?</td><td><span class="pill pill-muted">Described, not tested</span></td></tr>
+        <tr><th scope="row">After a losing run</th><td>Do trades after 2+ losses in a row go differently?</td><td><span class="pill">Tested against chance</span></td></tr>
+        <tr><th scope="row">Unusually large losses</th><td>How much of your losses came from a few big ones?</td><td><span class="pill pill-muted">Described, not tested</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+    <details class="how-more"><summary>What the results mean</summary>
+      <p>Each tested habit gets one of three results: “distinguishable from noise” (unlikely to be luck), “not distinguishable from noise” (could be luck), or “not enough trades to tell” when either of the two groups it compares has fewer than 30 trades. Each test compares trades from the same days with each other. Dollar figures are historical totals from your file, such as “trades matching this pattern totalled −$X”. They describe what happened; they do not show that a habit caused a result.</p>
+    </details>
   </section>
 
   <section class="section" aria-labelledby="files-h" data-reveal>
     <h2 id="files-h">Your file, and what is sent</h2>
-    <ul>
-      <li><strong>Files:</strong> the MetaTrader 5 or 4 history report, an Interactive Brokers Flex Query, a Tradovate orders export (all three in beta until a real export confirms the columns), or the donttrade CSV template.</li>
-      <li><strong>The free tools</strong> open your file in your browser. Those pages block outgoing requests, so the file is not uploaded.</li>
-      <li><strong>For the paid report:</strong> Your browser sends our server only stripped trade numbers: open and close times, buy or sell, relative size, the realised result, a random symbol number and a scrambled fingerprint of each row. No name, account number or ticker is sent. The numbers are not kept; we keep only a scrambled fingerprint of each trade row from your first report, so a re-test can be matched to the same history, and we delete it on the dates in our privacy notice. <a href="/privacy/#report">Privacy notice</a>.</li>
-    </ul>
+    <p>MetaTrader 5 or 4, IBKR or Tradovate (all in beta), or our CSV template.</p>
+    <table class="mini-table ft-sent">
+      <thead><tr><th scope="col">Stays in your browser</th><th scope="col">Sent, stripped</th></tr></thead>
+      <tbody><tr><td>Your file</td><td>Times</td></tr><tr><td>Names</td><td>Buy or sell</td></tr><tr><td>Account numbers</td><td>Relative size</td></tr><tr><td>Tickers</td><td>Result</td></tr></tbody>
+    </table>
+    <details class="how-more"><summary>Exactly what is sent and kept</summary><p>Your browser sends our server only stripped trade numbers: open and close times, buy or sell, relative size, the realised result, a random symbol number and a scrambled fingerprint of each row. No name, account number or ticker is sent. The numbers are not kept; we keep only a scrambled fingerprint of each trade row from your first report, so a re-test can be matched to the same history, and we delete it on the dates in our privacy notice. <a href="/privacy/#report">Privacy notice</a>.</p></details>
   </section>
-
-  <section class="section" aria-labelledby="founding" data-reveal>
-    <h2 id="founding">The founding offer</h2>
-    <p>The habit report is $39, one time, in US dollars. It includes one re-test of the same account. Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>. A yearly habit tracker comes later, at $79 a year as its founding price; it is not sold until it exists.</p>
-    <p>The price, the seller’s details and the terms are in the “Before you pay” summary, shown before you pay. A full refund if you ask within 14 days of buying. <a href="/terms/#traders">Trader terms</a></p>
-  </section>
-
-  <section class="section" aria-labelledby="waitlist" data-reveal>
-    <h2 id="waitlist">Get the habit report</h2>
-    <p>Read the “Before you pay” summary on the pricing page, then pay by card on Stripe’s page. A full refund if you ask within 14 days of buying.</p>
-    <p><a class="btn" href="/pricing/#last-step">Get the habit report — $39</a></p>
-  </section>
-
-  <section class="section" aria-labelledby="free-h" data-reveal>
-    <h2 id="free-h">Free now</h2>
-    <ul class="tool-cards" data-reveal data-reveal-stagger>
-  <li class="tool-card"><a class="tool-card-link" href="/tools/trade-stats/">
-<!--sample-out--><span class="tp tp-stats" aria-hidden="true"><span class="tp-tile"><b>160</b>trades</span><span class="tp-tile"><b class="gain">+$277.95</b>net</span><span class="tp-tile"><b>51.9%</b>won</span></span><!--/sample-out--><h3 class="tc-name">Trade stats</h3><span class="tc-line">Your trade file → win rate, net result and streaks.</span></a></li>
-  <li class="tool-card"><a class="tool-card-link" href="/tools/trading-heatmap/">
-<svg class="tp tp-heat" aria-hidden="true" focusable="false" viewBox="0 0 166 84"><text class="tp-ax" x="30" y="8" text-anchor="middle">M</text><text class="tp-ax" x="60" y="8" text-anchor="middle">T</text><text class="tp-ax" x="90" y="8" text-anchor="middle">W</text><text class="tp-ax" x="120" y="8" text-anchor="middle">T</text><text class="tp-ax" x="150" y="8" text-anchor="middle">F</text><text class="tp-ax" x="0" y="23">09</text><rect x="16" y="12" width="28" height="16" rx="3" class="hp1"/><rect x="46" y="12" width="28" height="16" rx="3" class="hn1"/><rect x="76" y="12" width="28" height="16" rx="3" class="hp1"/><rect x="106" y="12" width="28" height="16" rx="3" class="hp4"/><rect x="136" y="12" width="28" height="16" rx="3" class="hp4"/><text class="tp-ax" x="0" y="41">10</text><rect x="16" y="30" width="28" height="16" rx="3" class="hn3"/><rect x="46" y="30" width="28" height="16" rx="3" class="hp2"/><rect x="76" y="30" width="28" height="16" rx="3" class="hn2"/><rect x="106" y="30" width="28" height="16" rx="3" class="hn1"/><rect x="136" y="30" width="28" height="16" rx="3" class="hp2"/><text class="tp-ax" x="0" y="59">11</text><rect x="16" y="48" width="28" height="16" rx="3" class="hp1"/><rect x="46" y="48" width="28" height="16" rx="3" class="hp1"/><rect x="76" y="48" width="28" height="16" rx="3" class="hn1"/><rect x="106" y="48" width="28" height="16" rx="3" class="hp2"/><rect x="136" y="48" width="28" height="16" rx="3" class="hn1"/><text class="tp-ax" x="0" y="77">12</text><rect x="16" y="66" width="28" height="16" rx="3" class="hn1"/><rect x="46" y="66" width="28" height="16" rx="3" class="hn2"/><rect x="76" y="66" width="28" height="16" rx="3" class="hn1"/><rect x="106" y="66" width="28" height="16" rx="3" class="h0"/><rect x="136" y="66" width="28" height="16" rx="3" class="hn1"/>
-</svg><h3 class="tc-name">Trading heatmap</h3><span class="tc-line">Your trade file → your results by hour and weekday.</span></a></li>
-  <li class="tool-card"><a class="tool-card-link" href="/tools/drawdown-calculator/">
-<svg class="tp tp-dd" aria-hidden="true" focusable="false" viewBox="0 0 200 60" preserveAspectRatio="none">
-  <line class="tp-base" x1="0" x2="200" y1="2" y2="2"/>
-  <polygon class="tp-dd-area" points="0,2 0.0,2.0 1.3,3.3 3.8,6.1 6.3,2.0 8.8,3.4 11.3,2.0 13.8,2.0 16.4,2.0 18.9,2.0 21.4,2.0 23.9,4.0 26.4,6.4 28.9,2.0 31.5,2.0 34.0,2.0 36.5,2.0 39.0,2.3 41.5,11.5 44.0,7.0 46.5,11.3 49.1,2.1 51.6,10.3 54.1,4.5 56.6,3.3 59.1,7.0 61.6,20.5 64.2,26.4 66.7,26.5 69.2,38.6 71.7,38.0 74.2,42.7 76.7,34.5 79.2,36.5 81.8,33.9 84.3,36.1 86.8,47.3 89.3,53.0 91.8,39.6 94.3,44.2 96.8,28.8 99.4,34.1 101.9,42.0 104.4,41.0 106.9,37.1 109.4,41.7 111.9,37.2 114.5,20.7 117.0,17.7 119.5,12.7 122.0,30.1 124.5,34.1 127.0,37.6 129.5,42.5 132.1,44.1 134.6,34.0 137.1,39.5 139.6,49.1 142.2,49.9 144.7,43.9 147.2,40.8 149.7,43.9 152.2,40.8 154.7,32.3 157.2,33.3 159.8,35.8 162.3,42.0 164.8,36.6 167.3,32.8 169.8,17.7 172.3,23.5 174.8,38.9 177.4,37.6 179.9,37.8 182.4,30.8 184.9,35.1 187.4,34.6 189.9,17.2 192.5,28.6 195.0,32.8 197.5,33.9 200.0,29.5 200.0,2.0 200,2"/>
-  <polyline class="tp-dd-line" points="0.0,2.0 1.3,3.3 3.8,6.1 6.3,2.0 8.8,3.4 11.3,2.0 13.8,2.0 16.4,2.0 18.9,2.0 21.4,2.0 23.9,4.0 26.4,6.4 28.9,2.0 31.5,2.0 34.0,2.0 36.5,2.0 39.0,2.3 41.5,11.5 44.0,7.0 46.5,11.3 49.1,2.1 51.6,10.3 54.1,4.5 56.6,3.3 59.1,7.0 61.6,20.5 64.2,26.4 66.7,26.5 69.2,38.6 71.7,38.0 74.2,42.7 76.7,34.5 79.2,36.5 81.8,33.9 84.3,36.1 86.8,47.3 89.3,53.0 91.8,39.6 94.3,44.2 96.8,28.8 99.4,34.1 101.9,42.0 104.4,41.0 106.9,37.1 109.4,41.7 111.9,37.2 114.5,20.7 117.0,17.7 119.5,12.7 122.0,30.1 124.5,34.1 127.0,37.6 129.5,42.5 132.1,44.1 134.6,34.0 137.1,39.5 139.6,49.1 142.2,49.9 144.7,43.9 147.2,40.8 149.7,43.9 152.2,40.8 154.7,32.3 157.2,33.3 159.8,35.8 162.3,42.0 164.8,36.6 167.3,32.8 169.8,17.7 172.3,23.5 174.8,38.9 177.4,37.6 179.9,37.8 182.4,30.8 184.9,35.1 187.4,34.6 189.9,17.2 192.5,28.6 195.0,32.8 197.5,33.9 200.0,29.5 200.0,2.0"/>
-</svg><h3 class="tc-name">Drawdown and recovery calculator</h3><span class="tc-line">A drawdown or your file → how deep and how long.</span></a></li>
-</ul>
-    <p><a href="/tools/">All free tools</a> · <a href="/research/">The research is free</a></p>
-  </section>
-<section class="section ladder" aria-labelledby="ladder-h">
-  <h2 id="ladder-h">What’s free, what’s paid, and why</h2>
-  <div class="ladder-rows">
-    <div class="ladder-row">
-      <h3>Free tools: <span class="num">$0</span></h3>
-      <p>They run on your computer, so serving them costs us almost nothing. No account, no card, no time limit. They show what happened in your trades: totals, streaks and drawdowns, and one disposition figure from four counts you type in.</p>
-      <p><a href="/tools/">All free tools</a></p>
-    </div>
-    <div class="ladder-row">
-      <h3>Habit report: <span class="num">$39</span></h3>
-      <p>The report reads the closed trades in your file: the latest 20,000 rows at most, leaving out trades opened more than about 10 years before your latest trade or held longer than 3,650 days. It measures and describes up to five habits, with the dollar totals of the matching trades, and tests up to two of them against chance in this version, comparing trades from the same days. It includes one re-test 30 to 60 days after your first report. Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>. The tests run on our server on stripped trade numbers.</p>
-      <p><a class="btn" href="/pricing/#last-step">Get the habit report — $39</a></p>
-    </div>
-    <div class="ladder-row">
-      <h3>For firms: a Pilot at a fixed, published price</h3>
-      <p>A written scope, then one measure on your traders’ records, run by your own staff on your own systems, and a one-page memo. Each engagement is scoped and written up by a person, so it is priced per engagement, the same for every firm.</p>
-      <p><a href="/pricing/#firms">See Pricing</a></p>
-    </div>
-  </div>
-  <p class="small muted">The free tools and the report describe your past trades. They do not tell you what to trade.</p>
-</section>
-
   <section class="section" aria-labelledby="cmp-h" data-reveal>
-    <h2 id="cmp-h">How donttrade compares with a typical trading journal</h2>
+    <h2 id="cmp-h">How it compares with a trading journal</h2>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Comparison with a typical trading journal">
     <table>
       <thead><tr><th scope="col"><span class="visually-hidden">Question</span></th><th scope="col">Most trading journals</th><th scope="col">donttrade</th></tr></thead>
@@ -200,11 +171,12 @@
   </section>
 
   <section class="section" aria-labelledby="faq-h" data-reveal>
-    <h2 id="faq-h">Questions</h2>
+    <h2 id="faq-h"><span id="founding">Questions</span></h2>
     <details id="q-is-this-investment-advice"><summary>Is this investment advice?</summary><p>No. It describes your own past trades. It does not recommend any security, trade, size or exit, and past results do not predict future results.</p></details>
+    <details id="q-what-does-the-re-test-do"><summary>What does the re-test do?</summary><p>It runs the same report on a newer export of the same account, 30 to 60 days after your first report. Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.</p></details>
     <details id="q-how-do-i-buy-it"><summary>How do I buy it?</summary><p>On the pricing page: read the “Before you pay” summary, then pay $39 by card on Stripe’s page. The report opens in your browser right after payment.</p></details>
-    <details id="q-can-i-get-a-refund"><summary>Can I get a refund?</summary><p>Yes. A full refund if you ask by email within 14 days of buying, even if you have already run your report.</p></details>
-    <details id="q-what-can-i-use-today"><summary>What can I use today?</summary><p>The free trade-stats dashboard reads the same files and shows the core numbers: win rate, profit factor, drawdown and streaks, in your browser.</p></details>
+    <details id="q-can-i-get-a-refund"><summary>Can I get a refund?</summary><p>Yes. A full refund if you ask by email within 14 days of buying, even if you have already run your report. <a href="/terms/#traders">Trader terms</a></p></details>
+    <details id="q-what-can-i-use-today-for-free"><summary>What can I use today for free?</summary><p>The free <a href="/tools/trade-stats/">trade-stats dashboard</a> reads the same files and shows the core numbers: win rate, profit factor, drawdown and streaks, in your browser.</p></details>
   </section>
   
   <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR and Tradovate are trademarks of their owners. donttrade is not affiliated with any of them.</p>
