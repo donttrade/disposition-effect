@@ -1,0 +1,10 @@
+{#- Tool cards (declutter, 25 Oct): the tool name as a link, one line from the TOOLS data
+    ("{question} From {input}."), and an Open button. Replaces the Tool | question | input tables.
+    Use: {% from "partials/tool_cards.html" import tool_cards %} {{ tool_cards(tools[:3], h="h3") }} -#}
+{%- macro tool_cards(items, h="h3") -%}
+<ul class="tool-cards">
+{%- for t in items %}
+  <li class="tool-card"><{{ h }}><a href="{{ t.href }}">{{ t.name }}</a></{{ h }}><p>{{ t.question }} From {{ t.input[0]|lower ~ t.input[1:] }}.</p><a class="btn btn-secondary" href="{{ t.href }}" aria-label="Open {{ t.name }}">Open</a></li>
+{%- endfor %}
+</ul>
+{%- endmacro %}
