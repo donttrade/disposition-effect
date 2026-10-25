@@ -26,6 +26,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 BASE_DIR = os.path.join(HERE, "lifted-baseline")
 FROZEN_RE = re.compile(r"(?s)<!--frozen:start-->(.*)<!--frozen:end-->")
+# An island inside the frozen body is new markup the build places there on purpose (QA 25 Oct: the paid
+# next-step card under the two old calculators' results). It is not part of the old page, so it is left
+# out of the comparison; lint holds it to the full page rules instead (lint.split_frozen).
+ISLAND_RE = re.compile(r"(?s)<!--island:start-->.*?<!--island:end-->")
 READ_ATTRS = ("alt", "title", "aria-label", "placeholder", "value")
 LINK_ATTRS = ("href", "src", "action", "data")
 
@@ -92,7 +96,7 @@ def frozen_of(html):
     """The frozen body of a built page, or None. Exactly one region is allowed."""
     if html.count("<!--frozen:start-->") != 1 or html.count("<!--frozen:end-->") != 1:
         return None
-    return FROZEN_RE.search(html).group(1)
+    return ISLAND_RE.sub("", FROZEN_RE.search(html).group(1))
 
 
 def citation_of(html):

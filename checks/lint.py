@@ -544,7 +544,9 @@ def split_frozen(html):
     m = FROZEN_RE.search(html)
     if not m:
         return html, None
-    return html[:m.start()] + " " + html[m.end():], m.group(1)
+    import compare   # islands (compare.ISLAND_RE) are new markup: full rules, not the frozen ones
+    islands = " ".join(compare.ISLAND_RE.findall(m.group(1)))
+    return html[:m.start()] + " " + islands + " " + html[m.end():], compare.ISLAND_RE.sub("", m.group(1))
 
 
 def lifted_problems(html, where, path, paid, analytics, amounts, priv, seller, pilot):
