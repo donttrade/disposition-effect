@@ -5,7 +5,8 @@ Reads the tokens straight from site/static/css/site.css:
   light = the first `:root {` block; dark = `:root[data-theme="dark"]`, which must
   equal the prefers-color-scheme block. Text pairs need >= 4.5:1, UI pairs >= 3:1.
 Also fails if the light rust #9A3B1C appears in a dark token block or in any --band-* token.
-The dark hero band's tokens (--band-*, all three blocks) are measured as BAND_PAIRS.
+The dark hero band's tokens (--band-*, both dark blocks) are measured as BAND_PAIRS; in light the band
+uses the page tokens (owner, 25 Oct), which PAIRS already measure.
 Exit code 0 = pass. Prints one line per pair.
 """
 import os
@@ -33,7 +34,8 @@ PAIRS = [
 
 # The dark hero band (ARCHITECT-BRAND-AND-WRAPPED §2.2). The band re-scopes --bg, --text, --rust, ...
 # to these, so every component inside it is measured here: every foreground on both band
-# backgrounds (the band itself and the cards inside it), in both themes.
+# backgrounds (the band itself and the cards inside it), in the dark theme. In light the band keeps
+# the page tokens (owner, 25 Oct), so PAIRS cover it.
 BAND_BGS = ("band-bg", "band-surface")
 BAND_TEXT = (("band-text", "band text"), ("band-muted", "muted text in the band"),
              ("band-rust", "links, focus ring, key numbers in the band"), ("band-rust-hover", "hovered links in the band"),
@@ -84,12 +86,12 @@ def main():
     for name, block in (("light", light), ("dark (media)", media), ("dark (toggle)", dark)):
         t = tokens(block)
         missing = [k for k in BAND_TOKENS if k not in t]
-        if missing:
+        if missing and name != "light":
             failures.append(f"{name} block lacks band token(s): {', '.join(missing)}")
         if any(v == "#9A3B1C" for k, v in t.items() if k.startswith("band-")):
             failures.append(f"#9A3B1C (light rust) used in a --band-* token ({name} block): 2.55:1 on charcoal")
     for theme, t in themes.items():
-        for fg, bg, need, why in PAIRS + BAND_PAIRS:
+        for fg, bg, need, why in PAIRS + (BAND_PAIRS if theme == "dark" else []):
             r = ratio(t[fg], t[bg])
             ok = r >= need
             print(f"{'PASS' if ok else 'FAIL'}  {theme:5}  {fg:13} on {bg:10} {r:5.2f}:1 (need {need}) {why}")

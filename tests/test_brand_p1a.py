@@ -283,9 +283,11 @@ import contrast as C  # noqa: E402
 CSS = open(os.path.join(REPO, "site", "static", "css", "site.css"), encoding="utf-8").read()
 
 
-def test_band_tokens_pass_aa_in_all_three_blocks():
+def test_band_tokens_pass_aa_in_both_dark_blocks():
+    # owner, 25 Oct: in light the band keeps the page tokens (C.PAIRS measure them); the charcoal set is dark-only
     light, dark, media = C.blocks(CSS)
-    for block in (light, dark, media):
+    assert not [k for k in C.tokens(light) if k.startswith("band-")]
+    for block in (dark, media):
         t = C.tokens(block)
         for fg, bg, need, why in C.BAND_PAIRS:
             assert C.ratio(t[fg], t[bg]) >= need, (fg, bg, why)
@@ -295,8 +297,8 @@ def test_band_tokens_pass_aa_in_all_three_blocks():
 def test_contrast_check_refuses_light_rust_on_the_band(tmp_path, monkeypatch):
     bad = CSS.replace("--band-rust: #E07A52;", "--band-rust: #9A3B1C;", 1)
     assert bad != CSS
-    light, dark, media = C.blocks(bad)
-    t = C.tokens(light)
+    light, media, dark = C.blocks(bad)
+    t = C.tokens(media)
     assert C.ratio(t["band-rust"], t["band-bg"]) < 4.5
 
 
