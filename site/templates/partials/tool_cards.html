@@ -1,10 +1,41 @@
-{#- Tool cards (declutter, 25 Oct): the tool name as a link, one line from the TOOLS data
-    ("{question} From {input}."), and an Open button. Replaces the Tool | question | input tables.
-    Use: {% from "partials/tool_cards.html" import tool_cards %} {{ tool_cards(tools[:3], h="h3") }} -#}
-{%- macro tool_cards(items, h="h3") -%}
-<ul class="tool-cards">
+{#- Tool cards (25 Oct sweep, owner: "show it rather than say it"). Each card is ONE link: a small preview
+    of that tool's real output on the synthetic sample file (site/config/tool_previews.json, written by
+    checks/make_tool_previews.py from the tools' own results), the tool name, and one short line. The
+    preview is aria-hidden: the card's name and line carry the meaning, so nothing is said only in a picture.
+    Tools without a file preview (the calculators) show their nav icon.
+    Use: {% from "partials/tool_cards.html" import tool_cards with context %} {{ tool_cards(tools[:3], h="h3") }} -#}
+{%- import "partials/icons.html" as tci %}
+{%- macro preview(t) -%}
+{%- set tp = tool_previews %}
+{%- if t.preview == "stats" %}
+<!--sample-out--><span class="tp tp-stats" aria-hidden="true"><span class="tp-tile"><b>{{ tp.trade_stats.trades }}</b>trades</span><span class="tp-tile"><b class="gain">{{ tp.trade_stats.net }}</b>net</span><span class="tp-tile"><b>{{ tp.trade_stats.win_rate }}</b>won</span></span><!--/sample-out-->
+{%- elif t.preview == "heat" %}
+{%- set hm = tp.heatmap %}
+<svg class="tp tp-heat" aria-hidden="true" focusable="false" viewBox="0 0 {{ 16 + hm.cols|length * 30 }} {{ 12 + hm.rows|length * 18 }}">
+  {%- for c in hm.cols %}<text class="tp-ax" x="{{ 16 + loop.index0 * 30 + 14 }}" y="8" text-anchor="middle">{{ c[0] }}</text>{% endfor %}
+  {%- for r in hm.rows %}{% set y = 12 + loop.index0 * 18 %}<text class="tp-ax" x="0" y="{{ y + 11 }}">{{ r.hour }}</text>
+    {%- for l in r.levels %}{% set k = 0 if l is none else [1, (l|abs * 4)|round(0, 'ceil')|int]|max %}<rect x="{{ 16 + loop.index0 * 30 }}" y="{{ y }}" width="28" height="16" rx="3" class="{{ 'h0' if l is none else ('hp' if l >= 0 else 'hn') ~ k }}"/>{% endfor %}
+  {%- endfor %}
+</svg>
+{%- elif t.preview == "dd" %}
+<svg class="tp tp-dd" aria-hidden="true" focusable="false" viewBox="0 0 200 60" preserveAspectRatio="none">
+  <line class="tp-base" x1="0" x2="200" y1="2" y2="2"/>
+  <polygon class="tp-dd-area" points="0,2 {{ tp.drawdown.points }} 200,2"/>
+  <polyline class="tp-dd-line" points="{{ tp.drawdown.points }}"/>
+</svg>
+{%- elif t.preview == "prop" %}
+{%- set ps = tool_previews.prop_sim %}
+{%- set p1 = ps.passed[:-1]|float %}{% set p2 = ps.busted[:-1]|float %}
+<span class="tp tp-prop" aria-hidden="true"><svg viewBox="0 0 200 14" preserveAspectRatio="none" focusable="false"><rect class="tp-pass" x="0" y="0" width="{{ p1 * 2 }}" height="14"/><rect class="tp-bust" x="{{ p1 * 2 }}" y="0" width="{{ p2 * 2 }}" height="14"/><rect class="tp-time" x="{{ (p1 + p2) * 2 }}" y="0" width="{{ 200 - (p1 + p2) * 2 }}" height="14"/></svg>
+<span class="tp-legend"><span><i class="tp-pass"></i>{{ ps.passed }} passed</span><span><i class="tp-bust"></i>{{ ps.busted }} bust</span><span><i class="tp-time"></i>{{ ps.timed_out }} out of time</span></span></span>
+{%- else %}
+<span class="tp tp-icon" aria-hidden="true">{{ tci.icon(t.icon or "stats") }}</span>
+{%- endif %}
+{%- endmacro %}
+{%- macro tool_cards(items, h="h3", cls="") -%}
+<ul class="tool-cards{{ ' ' ~ cls if cls }}"{% if page.path in mkt_pages %} data-reveal data-reveal-stagger{% endif %}>
 {%- for t in items %}
-  <li class="tool-card"><{{ h }}><a href="{{ t.href }}">{{ t.name }}</a></{{ h }}><p>{{ t.question }} From {{ t.input[0]|lower ~ t.input[1:] }}.</p><a class="btn btn-secondary" href="{{ t.href }}" aria-label="Open {{ t.name }}">Open</a></li>
+  <li class="tool-card"><a class="tool-card-link" href="{{ t.href }}">{{ preview(t) }}<{{ h }} class="tc-name">{{ t.name }}</{{ h }}><span class="tc-line">{{ t.short }}</span></a></li>
 {%- endfor %}
 </ul>
 {%- endmacro %}

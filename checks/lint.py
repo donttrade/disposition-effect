@@ -441,6 +441,35 @@ def without_showcase(html):
     return html.replace(tables[0], " ")
 
 
+SAMPLE_OUT_RE = re.compile(r"(?s)<!--sample-out-->.*?<!--/sample-out-->")
+
+
+def tool_preview_amounts():
+    """Every dollar figure the tools printed on the synthetic sample file, as captured by
+    checks/make_tool_previews.py into site/config/tool_previews.json."""
+    with open(os.path.join(REPO, "site", "config", "tool_previews.json"), encoding="utf-8") as f:
+        text = json.dumps(json.load(f), ensure_ascii=False)
+    from harvest_prices import amounts_in
+    return {round(a, 2) for a in amounts_in(text.replace("−", "-"))}
+
+
+def without_tool_previews(html):
+    """25 Oct sweep: the tool cards and the tools-page mock show the free tools' own output on the synthetic
+    sample file, between <!--sample-out--> and <!--/sample-out-->. Such a block is left out of the price
+    check only when every dollar amount in it is one the tools printed on the sample file
+    (site/config/tool_previews.json); a block with any other figure, or a price, is checked as usual."""
+    blocks = SAMPLE_OUT_RE.findall(html)
+    if not blocks:
+        return html
+    from harvest_prices import amounts_in
+    allowed = tool_preview_amounts()
+    for b in blocks:
+        found = amounts_in(b)
+        if all(round(a, 2) in allowed for a in found):
+            html = html.replace(b, " ", 1)
+    return html
+
+
 KEY_NUM = re.compile(r'class="[^"]*\bkey-num\b')
 
 
@@ -465,7 +494,7 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
     if paid:
         out += not_on_sale_claims(readable_text(html), where)
     from harvest_prices import amounts_in
-    for a in amounts_in(without_hero_dash(html, where)):
+    for a in amounts_in(without_tool_previews(without_hero_dash(html, where))):
         if a not in allowed_amounts and a != 0:  # "$0" (free) is not a price
             out.append(("price_literal", where, f"${a:g} is not in prices.json"))
     for rx in SECRETS:

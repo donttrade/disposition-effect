@@ -25,7 +25,7 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=253085d6">
+<link rel="stylesheet" href="/static/css/site.css?v=35c9e50a">
 <link rel="stylesheet" href="/static/css/vt.css?v=af8673c7">
 <script src="/static/js/theme.js?v=74363ef7"></script>
 <script src="/static/js/nav.js?v=cd8f3405" defer></script>
@@ -158,29 +158,53 @@
       <figcaption>Sample report on a made-up trade file. Not a real trader.</figcaption>
     </figure>
     <details class="how">
-      <summary>How the results work</summary>
-      <p>Each tested habit gets one of three results: “distinguishable from noise”, “not distinguishable from noise”, or “not enough trades to tell” when either of the two groups it compares has fewer than 30 trades. Each test compares trades from the same days with each other. Dollar figures are historical totals from your file. They describe what happened; they do not show that a habit caused a result.</p>
+      <summary>What the results mean</summary>
+      <p>In plain words: the pattern is unlikely to be luck. “Not distinguishable” means it could be luck. Each tested habit gets one of three results: “distinguishable from noise”, “not distinguishable from noise”, or “not enough trades to tell” when either of the two groups it compares has fewer than 30 trades. Each test compares trades from the same days with each other. Dollar figures are historical totals from your file. They describe what happened; they do not show that a habit caused a result.</p>
     </details>
-  </section>
-
-  <section class="section" aria-labelledby="t-how-h" data-reveal>
+  </section><section class="section" aria-labelledby="t-how-h" data-reveal>
     <h2 id="t-how-h">How it works</h2>
-    <ol class="steps" data-reveal data-reveal-stagger>
-      <li><strong>Export your history.</strong> A MetaTrader 5 or 4 report, an IBKR Flex Query or a Tradovate orders export (all three in beta), or the donttrade CSV template.</li>
-      <li><strong>Your browser reads it.</strong> It removes names, account numbers and symbols. It sends our server only stripped trade numbers. Those are not kept; only a scrambled fingerprint of each trade is kept, for the re-test.</li>
-      <li><strong>Read your report.</strong> Run the free re-test on the same account 30 to 60 days after your first report.</li>
+    <ol class="how-steps" data-reveal-stagger>
+      <li class="how-step">
+        <div class="how-shot" aria-hidden="true"><span class="pill">MT5</span> <span class="pill">MT4</span> <span class="pill">IBKR</span> <span class="pill">Tradovate</span> <span class="pill">CSV</span></div>
+        <h3><span class="how-n">1</span> Export your trades</h3>
+        <p>From MetaTrader, IBKR or Tradovate. Or use our CSV template.</p>
+      </li>
+      <li class="how-step">
+        <div class="how-shot">
+          <table class="mini-table">
+            <thead><tr><th scope="col">Stays in your browser</th><th scope="col">Sent, stripped</th></tr></thead>
+            <tbody><tr><td>Your file</td><td>Times</td></tr><tr><td>Names</td><td>Buy or sell</td></tr><tr><td>Account numbers</td><td>Relative size</td></tr><tr><td>Tickers</td><td>Result</td></tr></tbody>
+          </table>
+        </div>
+        <h3><span class="how-n">2</span> Drop the file in</h3>
+        <details class="how-more"><summary>What we keep</summary><p>It sends our server only stripped trade numbers. Those are not kept; only a scrambled fingerprint of each trade is kept, for the re-test. <a href="/privacy/#report">Exactly what is sent and kept</a></p></details>
+      </li>
+      <li class="how-step">
+        <div class="how-shot" aria-hidden="true"><p class="how-row"><span>Re-entry after a loss</span> <span class="pill pill-hit">Distinguishable from noise</span></p><p class="how-row"><span>After a losing run</span> <span class="pill">Not distinguishable</span></p>
+        </div>
+        <h3><span class="how-n">3</span> See your habits</h3>
+        <p>Plus one free re-test, 30 to 60 days later.</p>
+        <details class="how-more"><summary>About the re-test</summary><p>Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.</p></details>
+      </li>
     </ol>
-    <p><a href="/privacy/#report">Exactly what is sent and kept</a></p>
   </section>
 
   <section class="section" aria-labelledby="tools-h" data-reveal>
-    <h2 id="tools-h">Free tools. No account.</h2>
-    <ul class="tool-cards">
-  <li class="tool-card"><h3><a href="/tools/trade-stats/">Trade stats</a></h3><p>What does my own trade history show? From your trade file.</p><a class="btn btn-secondary" href="/tools/trade-stats/" aria-label="Open Trade stats">Open</a></li>
-  <li class="tool-card"><h3><a href="/tools/trading-heatmap/">Trading heatmap</a></h3><p>How did my own trades turn out by the hour and weekday they opened? From your trade file.</p><a class="btn btn-secondary" href="/tools/trading-heatmap/" aria-label="Open Trading heatmap">Open</a></li>
-  <li class="tool-card"><h3><a href="/tools/drawdown-calculator/">Drawdown and recovery calculator</a></h3><p>What gain recovers a drawdown, and how deep and long were mine? From a drawdown in percent, or your trade file.</p><a class="btn btn-secondary" href="/tools/drawdown-calculator/" aria-label="Open Drawdown and recovery calculator">Open</a></li>
+    <h2 id="tools-h">Try the free tools first</h2>
+    <ul class="tool-cards" data-reveal data-reveal-stagger>
+  <li class="tool-card"><a class="tool-card-link" href="/tools/trade-stats/">
+<!--sample-out--><span class="tp tp-stats" aria-hidden="true"><span class="tp-tile"><b>160</b>trades</span><span class="tp-tile"><b class="gain">+$277.95</b>net</span><span class="tp-tile"><b>51.9%</b>won</span></span><!--/sample-out--><h3 class="tc-name">Trade stats</h3><span class="tc-line">Your trade file → win rate, net result and streaks.</span></a></li>
+  <li class="tool-card"><a class="tool-card-link" href="/tools/trading-heatmap/">
+<svg class="tp tp-heat" aria-hidden="true" focusable="false" viewBox="0 0 166 84"><text class="tp-ax" x="30" y="8" text-anchor="middle">M</text><text class="tp-ax" x="60" y="8" text-anchor="middle">T</text><text class="tp-ax" x="90" y="8" text-anchor="middle">W</text><text class="tp-ax" x="120" y="8" text-anchor="middle">T</text><text class="tp-ax" x="150" y="8" text-anchor="middle">F</text><text class="tp-ax" x="0" y="23">09</text><rect x="16" y="12" width="28" height="16" rx="3" class="hp1"/><rect x="46" y="12" width="28" height="16" rx="3" class="hn1"/><rect x="76" y="12" width="28" height="16" rx="3" class="hp1"/><rect x="106" y="12" width="28" height="16" rx="3" class="hp4"/><rect x="136" y="12" width="28" height="16" rx="3" class="hp4"/><text class="tp-ax" x="0" y="41">10</text><rect x="16" y="30" width="28" height="16" rx="3" class="hn3"/><rect x="46" y="30" width="28" height="16" rx="3" class="hp2"/><rect x="76" y="30" width="28" height="16" rx="3" class="hn2"/><rect x="106" y="30" width="28" height="16" rx="3" class="hn1"/><rect x="136" y="30" width="28" height="16" rx="3" class="hp2"/><text class="tp-ax" x="0" y="59">11</text><rect x="16" y="48" width="28" height="16" rx="3" class="hp1"/><rect x="46" y="48" width="28" height="16" rx="3" class="hp1"/><rect x="76" y="48" width="28" height="16" rx="3" class="hn1"/><rect x="106" y="48" width="28" height="16" rx="3" class="hp2"/><rect x="136" y="48" width="28" height="16" rx="3" class="hn1"/><text class="tp-ax" x="0" y="77">12</text><rect x="16" y="66" width="28" height="16" rx="3" class="hn1"/><rect x="46" y="66" width="28" height="16" rx="3" class="hn2"/><rect x="76" y="66" width="28" height="16" rx="3" class="hn1"/><rect x="106" y="66" width="28" height="16" rx="3" class="h0"/><rect x="136" y="66" width="28" height="16" rx="3" class="hn1"/>
+</svg><h3 class="tc-name">Trading heatmap</h3><span class="tc-line">Your trade file → your results by hour and weekday.</span></a></li>
+  <li class="tool-card"><a class="tool-card-link" href="/tools/drawdown-calculator/">
+<svg class="tp tp-dd" aria-hidden="true" focusable="false" viewBox="0 0 200 60" preserveAspectRatio="none">
+  <line class="tp-base" x1="0" x2="200" y1="2" y2="2"/>
+  <polygon class="tp-dd-area" points="0,2 0.0,2.0 1.3,3.3 3.8,6.1 6.3,2.0 8.8,3.4 11.3,2.0 13.8,2.0 16.4,2.0 18.9,2.0 21.4,2.0 23.9,4.0 26.4,6.4 28.9,2.0 31.5,2.0 34.0,2.0 36.5,2.0 39.0,2.3 41.5,11.5 44.0,7.0 46.5,11.3 49.1,2.1 51.6,10.3 54.1,4.5 56.6,3.3 59.1,7.0 61.6,20.5 64.2,26.4 66.7,26.5 69.2,38.6 71.7,38.0 74.2,42.7 76.7,34.5 79.2,36.5 81.8,33.9 84.3,36.1 86.8,47.3 89.3,53.0 91.8,39.6 94.3,44.2 96.8,28.8 99.4,34.1 101.9,42.0 104.4,41.0 106.9,37.1 109.4,41.7 111.9,37.2 114.5,20.7 117.0,17.7 119.5,12.7 122.0,30.1 124.5,34.1 127.0,37.6 129.5,42.5 132.1,44.1 134.6,34.0 137.1,39.5 139.6,49.1 142.2,49.9 144.7,43.9 147.2,40.8 149.7,43.9 152.2,40.8 154.7,32.3 157.2,33.3 159.8,35.8 162.3,42.0 164.8,36.6 167.3,32.8 169.8,17.7 172.3,23.5 174.8,38.9 177.4,37.6 179.9,37.8 182.4,30.8 184.9,35.1 187.4,34.6 189.9,17.2 192.5,28.6 195.0,32.8 197.5,33.9 200.0,29.5 200.0,2.0 200,2"/>
+  <polyline class="tp-dd-line" points="0.0,2.0 1.3,3.3 3.8,6.1 6.3,2.0 8.8,3.4 11.3,2.0 13.8,2.0 16.4,2.0 18.9,2.0 21.4,2.0 23.9,4.0 26.4,6.4 28.9,2.0 31.5,2.0 34.0,2.0 36.5,2.0 39.0,2.3 41.5,11.5 44.0,7.0 46.5,11.3 49.1,2.1 51.6,10.3 54.1,4.5 56.6,3.3 59.1,7.0 61.6,20.5 64.2,26.4 66.7,26.5 69.2,38.6 71.7,38.0 74.2,42.7 76.7,34.5 79.2,36.5 81.8,33.9 84.3,36.1 86.8,47.3 89.3,53.0 91.8,39.6 94.3,44.2 96.8,28.8 99.4,34.1 101.9,42.0 104.4,41.0 106.9,37.1 109.4,41.7 111.9,37.2 114.5,20.7 117.0,17.7 119.5,12.7 122.0,30.1 124.5,34.1 127.0,37.6 129.5,42.5 132.1,44.1 134.6,34.0 137.1,39.5 139.6,49.1 142.2,49.9 144.7,43.9 147.2,40.8 149.7,43.9 152.2,40.8 154.7,32.3 157.2,33.3 159.8,35.8 162.3,42.0 164.8,36.6 167.3,32.8 169.8,17.7 172.3,23.5 174.8,38.9 177.4,37.6 179.9,37.8 182.4,30.8 184.9,35.1 187.4,34.6 189.9,17.2 192.5,28.6 195.0,32.8 197.5,33.9 200.0,29.5 200.0,2.0"/>
+</svg><h3 class="tc-name">Drawdown and recovery calculator</h3><span class="tc-line">A drawdown or your file → how deep and how long.</span></a></li>
 </ul>
-    <p><a href="/tools/">All free tools</a></p>
+    <p><a class="more" href="/tools/">See all free tools <span aria-hidden="true">→</span></a></p>
   </section>
 
   <section class="section" aria-labelledby="faq-h" data-reveal>
@@ -191,10 +215,7 @@
     <details id="q-refunds"><summary>Refunds?</summary><p>A full refund if you ask by email within 14 days of buying, even after your report has run. <a href="/terms/#traders">Trader terms</a></p></details>
   </section>
 
-  <section class="section closing" aria-labelledby="close-h" data-reveal>
-    <h2 id="close-h">At a trading firm?</h2>
-    <p>We measure the gap between your traders’ plans and their trades, at a fixed price published before you ask. <a href="/for-firms/">What firms get</a></p>
-  </section>
+  <p class="firm-line">Run a prop firm or broker? <a href="/for-firms/">See what firms get</a></p>
   
   </div>
   </div>
