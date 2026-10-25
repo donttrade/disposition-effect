@@ -23,6 +23,7 @@ pilot_checkout = false     # "Start a Pilot" block + thanks page with the live S
 # R-D2 (23 Oct): the hold-gap check is excluded from any free_badges switch-on until Option B passes
 # (ARCHITECT-STATS-AMENDMENT-R2 §10 item 8; the free hold-gap badge is the paid hold_gap method, R2-8).
 free_badges = false        # free tools' "real or noise" badges + footnote (off: free-launch condition C1, being redesigned)
+ask_box = false            # hidden until the answer engine passes a real-question test
 journal = false            # the free Trading Journal + P&L Calendar (/journal/, /tools/pnl-calendar/ and their nav row): off until the Tester passes J1-J38 and the owner approves
 
 [analytics]

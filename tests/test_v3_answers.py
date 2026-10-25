@@ -19,6 +19,39 @@ import build as B  # noqa: E402
 import lint as L  # noqa: E402
 
 
+@pytest.fixture(scope="module")
+def built_site(ask_site):
+    """These tests are of the box itself: the ask_box = true build (it is off by default for launch)."""
+    return ask_site
+
+
+ASK_MARKERS = ("nav-ask", "data-answer-box", "/static/js/ask.js", "/static/js/answers.js", "/static/js/answer-ui.js",
+               "Ask a question")
+
+
+def test_ask_box_off_by_default_no_control_and_no_script(tmp_path_factory):
+    """[flags] ask_box = false (launch): no header Ask, no box on any page, no ask.js/answers*.js loaded;
+    /help/ still lists every answer."""
+    import subprocess
+    out = tmp_path_factory.mktemp("askoff") / "_site"
+    env = {**os.environ, "DT_OUT": str(out)}
+    env.pop("DT_DEV", None)
+    r = subprocess.run([sys.executable, os.path.join(REPO, "site", "build.py")], env=env, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    n = 0
+    for root, _, files in os.walk(out):
+        for f in files:
+            if f.endswith(".html"):
+                h = open(os.path.join(root, f), encoding="utf-8").read()
+                n += 1
+                for m in ASK_MARKERS:
+                    assert m not in h, (os.path.join(root, f), m)
+    assert n > 20
+    data, _ = _index({"out": out})
+    help_html = (out / "help" / "index.html").read_text(encoding="utf-8")
+    assert all(f'id="u-{u["id"]}"' in help_html for u in data["units"])
+
+
 def _index(site):
     js = (site["out"] / "static" / "js" / "answers-index.js").read_text(encoding="utf-8")
     m = re.fullmatch(r"(?s)//[^\n]*\nwindow\.DT_ANSWERS = (\{.*\});\n", js)

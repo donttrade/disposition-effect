@@ -268,6 +268,8 @@ START_JS = "/static/js/start-chooser.js"
 # and an answer can hold a price), thank-you and other noindex pages, flag-off pages or French pages.
 # Shipped as a script (window.DT_ANSWERS = …), not fetched JSON: every page keeps connect-src 'none'.
 ANSWERS_JS = "/static/js/answers-index.js"
+# [flags] ask_box = false (launch, 25 Oct): no page loads these; /help/ still lists every unit.
+ASK_SCRIPTS = ("/static/js/ask.js", "/static/js/answers.js", "/static/js/answer-ui.js")
 ANSWERS_MAX = 150 * 1024
 ANSWER_MAX_CHARS = 700
 ANSWER_SKIP = ("/research/", "/fr/", "/help/")
@@ -1271,8 +1273,8 @@ def die(msg):
     raise BuildError(msg)
 
 
-FLAGS = ("paid_report", "analytics", "trader_first_home", "pilot_checkout", "free_badges", "journal")
-OPTIONAL_FLAGS = {"pilot_checkout": False, "free_badges": False, "journal": False}  # older site.toml files may lack the line
+FLAGS = ("paid_report", "analytics", "trader_first_home", "pilot_checkout", "free_badges", "journal", "ask_box")
+OPTIONAL_FLAGS = {"pilot_checkout": False, "free_badges": False, "journal": False, "ask_box": False}  # older site.toml files may lack the line
 # Free-launch condition C1 (21 Oct 2026): free_badges turns on the free tools' "real or noise"
 # badges and their footnote, which the Architect is redesigning. Off (the committed default): the
 # free tools show only the descriptive numbers, static/js/tools/trade-stats-badges.js is left out
@@ -2240,6 +2242,8 @@ def build():
             page.update(page.get("if_paid", {}))  # R5: title/description that sell instead of "waitlist"
         if flags["free_badges"]:
             page.update(page.get("if_badges", {}))  # C1: the copy that names the free check
+        if not flags["ask_box"]:
+            page["scripts"] = [s for s in page["scripts"] if s not in ASK_SCRIPTS]
         extra = {"sample_csv": sample_csv()} if page.get("sample") else {}
         if page.get("sample_report"):
             rep_ = sample_report()
