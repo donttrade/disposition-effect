@@ -15,8 +15,9 @@
       Interactive Brokers Flex Query CSV or Tradovate Orders CSV (all three in beta until a real export confirms the
       columns), or the donttrade CSV template. Your browser reads the file. {{ strings.p5.long }}</dd>
     <dt>Price</dt><dd>{{ r.price_usd|usd }} USD, one time. No sales tax is charged. Total: {{ r.price_usd|usd }} USD.</dd>
-    <dt>Currency and fees</dt><dd>Charged in US dollars. Stripe may show an amount in your own currency, and your card issuer may
-      charge a currency conversion fee.</dd>
+    <dt>Currency and fees</dt><dd>Priced in US dollars. Stripe’s payment page may offer to charge you in your own currency instead, at
+      Stripe’s exchange rate, which includes a conversion fee of 2–4%. If you pay in US dollars, your card issuer may
+      charge its own conversion fee. donttrade receives neither fee.</dd>
     <dt>Payment</dt><dd>Card, through Stripe's checkout page.</dd>
     <dt>When you get it</dt><dd>Right after payment, in your browser. One re-test is included, to run 30 to 60 days after your first report.
       Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.
