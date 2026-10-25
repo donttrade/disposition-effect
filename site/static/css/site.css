@@ -120,6 +120,8 @@
 /* ------------------------------------------------------------------ base */
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
+/* QA 25 Oct: an anchor target (#last-step, #firms, …) lands with room above it, not flush to the edge */
+[id] { scroll-margin-top: var(--s3); }
 body {
   margin: 0;
   background: var(--bg);
@@ -340,6 +342,7 @@ fieldset { border: 0; padding: 0; margin: 0 0 var(--s3); }
 .notice > :last-child { margin-bottom: 0; }
 .notice-caution { border-left-color: var(--caution); }
 .notice-error { border-left-color: var(--loss); }
+.field-err { color: var(--loss); margin: 4px 0 0; }
 .notice-gap { border-left-color: var(--rust); }
 .notice strong:first-child { display: block; }
 
@@ -425,6 +428,16 @@ fieldset { border: 0; padding: 0; margin: 0 0 var(--s3); }
 .tool-out .soon-list { margin-top: var(--s4); }   /* C1: the neutral lines where the badges were */
 .teaser { margin-top: var(--s4); }
 .next-step { margin-top: var(--s4); }
+/* QA 25 Oct: a short label table (the /pricing/ trader rows) stacks on a phone: one row per card */
+@media (max-width: 600px) {
+  .stack-table, .stack-table tbody, .stack-table tr, .stack-table th, .stack-table td { display: block; width: auto; }
+  .stack-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .stack-table tr { padding: var(--s2) 0; border-bottom: 1px solid var(--border); }
+  .stack-table th, .stack-table td { border: 0; padding: 4px 0; text-align: left; }
+  .stack-table td:empty { display: none; }
+  .stack-table td.num { white-space: normal; }
+  .stack-table .btn { white-space: normal; }
+}
 .next-step h2 { font-size: var(--fs-2); margin: 0 0 var(--s1); }
 .disclaimer { font-size: var(--fs-0); color: var(--muted); max-width: var(--prose); border-top: 1px solid var(--border); padding-top: var(--s1); }
 /* Numbers read best close to their labels: results tables and the equity chart are
@@ -734,6 +747,9 @@ a.choice-link:hover { border-color: var(--rust); background: var(--surface); col
 .choice { display: none; max-width: 46rem; }
 .choice:target { display: block; }
 .start-flow:has(> .choice:target) > .chooser { display: none; }
+/* QA 25 Oct: the partner and trader sections show only when asked for (#platform, #trader or their
+   ?product=); a browser without :has() shows them, as before */
+.start-extra:not(:has(:target)) { display: none; }
 .choice-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 var(--s2); }
 .choice-head h2 { margin-top: 0; }
 .choice-back { display: inline-flex; align-items: center; min-height: var(--target); }

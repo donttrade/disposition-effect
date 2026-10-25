@@ -32,6 +32,6 @@
   });
   if (!location.hash) {
     var m = /[?&]product=([a-z]+)/.exec(location.search);
-    if (m && ids.indexOf(m[1]) !== -1) location.replace('#' + m[1]);
+    if (m && (ids.indexOf(m[1]) !== -1 || m[1] === 'platform' || m[1] === 'trader')) location.replace('#' + m[1]);
   }
 })();

@@ -1,0 +1,15 @@
+{#- The Pilot refund sentences, word for word from /terms/#trial and #refunds (the contract), so /for-firms/
+    and /pricing/ quote them instead of paraphrasing (QA 25 Oct). /terms/ renders these same macros.
+    Use: {% import "partials/pilot_terms.html" as pt with context %} {{ pt.extract() }} … -#}
+{%- macro extract() -%}
+if your extract can’t be made to run with the script, even with our help by email, the fee is refunded in full.
+{%- endmacro %}
+{%- macro reproduction() -%}
+if your own re-run of the same published script version on the same export (same file hash) does not reproduce the figure, the fee is refunded in full, by the original payment method, within 10 business days.
+{%- endmacro %}
+{%- macro both() -%}
+<strong>Extract refund:</strong> {{ extract() }} <strong>Reproduction refund:</strong> {{ reproduction() }}
+{%- endmacro %}
+{%- macro kickoff(pilot, above=" above") -%}
+The {{ pilot.name }} is refundable in full until data kick-off, the day your staff first run the script on your records. After that, it is refunded if your extract can’t be made to run, or through the reproduction refund{{ above }}.
+{%- endmacro %}
