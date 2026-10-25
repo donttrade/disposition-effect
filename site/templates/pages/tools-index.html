@@ -1,12 +1,34 @@
 {% extends "base.html" %}
 {% block content %}
+{#- 25 Oct sweep (owner: "show it rather than say it"): the trade-stats output on the sample file first, then
+    the tools as cards with a preview of their own output; the calculators as cards with their icon. -#}
+{%- from "partials/tool_cards.html" import tool_cards with context %}
+{%- set by = {} %}{% for t in tools %}{% set _ = by.update({t.href: t}) %}{% endfor %}
 <div class="wrap">
   {% include "partials/crumbs.html" %}
-  <h1>Free trading tools</h1>
-  <p class="lede">Tools for your own trades that run entirely in your browser. No sign-up, no cookies, and nothing you enter or drop on these pages is sent anywhere.</p>
-  {%- from "partials/tool_cards.html" import tool_cards with context %}
-  {{ tool_cards(tools, h="h2") }}
-  <p class="small muted">The trade-file tools read MT5 and MT4 reports, IBKR Flex Query files and Tradovate order exports (all in beta), and a plain CSV template. They measure your own past trades and describe what happened; they do not tell you what to trade, what size to use or when to exit.</p>
+  <section class="showcase tools-show" aria-labelledby="tools-h1">
+    <div class="showcase-copy">
+      <h1 id="tools-h1">Free trading tools</h1>
+      <ul class="ticks">
+        <li>Drop your trade file, see your numbers</li>
+        <li>MT5, MT4, IBKR, Tradovate or CSV</li>
+        <li>No account. Your file is not uploaded.</li>
+      </ul>
+      <p><a class="btn" href="/tools/trade-stats/">Try trade stats free</a></p>
+    </div>
+    {% include "partials/ts_mock.html" %}
+  </section>
+
+  <section class="section" aria-labelledby="file-h">
+    <h2 id="file-h">From your trade file</h2>
+    {{ tool_cards([by["/tools/trade-stats/"], by["/tools/trading-heatmap/"], by["/tools/drawdown-calculator/"], by["/tools/prop-challenge-simulator/"]], h="h3", cls="tool-cards-4") }}
+  </section>
+
+  <section class="section" aria-labelledby="calc-h">
+    <h2 id="calc-h">Calculators</h2>
+    {{ tool_cards([by["/tools/lot-size-calculator/"], by["/tools/risk-reward-calculator/"], by["/tools/disposition-calculator/"]], h="h3") }}
+    <p class="firm-line">Run a prop firm? <a href="/tools/pass-rate-calculator/">Pass-rate calculator</a></p>
+  </section>
   {% include "partials/disclaimer.html" %}
 </div>
 {% endblock %}

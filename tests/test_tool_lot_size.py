@@ -132,9 +132,10 @@ def test_axe_and_overflow(browser, built_site, scheme, width):
 def test_tools_index_lists_eight_tools(browser, built_site, width):
     # tools batch 2 added the heatmap, the drawdown calculator and the risk-reward calculator
     ctx, pg, _ = open_tool(browser, built_site, width=width, path="/tools/", bypass_csp=True)
-    links = pg.locator("ul.tool-cards > li > a.tool-card-link")   # 25 Oct sweep: one link per card
-    assert links.count() == 8
-    hrefs = [links.nth(i).get_attribute("href") for i in range(8)]
+    # 25 Oct sweep: one link per card (file tools, then calculators); the firm pass-rate tool is a text link
+    links = pg.locator("ul.tool-cards > li > a.tool-card-link")
+    assert links.count() == 7
+    hrefs = [links.nth(i).get_attribute("href") for i in range(7)] + [pg.get_attribute("main .firm-line a", "href")]
     assert hrefs == ["/tools/trade-stats/", "/tools/trading-heatmap/", "/tools/drawdown-calculator/",
                      "/tools/prop-challenge-simulator/", "/tools/lot-size-calculator/", "/tools/risk-reward-calculator/",
                      "/tools/disposition-calculator/", "/tools/pass-rate-calculator/"]
