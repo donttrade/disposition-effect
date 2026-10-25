@@ -67,12 +67,15 @@
   </section>
 
   <div id="dd-out" class="tool-out" hidden></div>
+  {%- with source = "typed", firm_line = false %}{% include "partials/tool_next_step.html" %}{% endwith %}
 
+  {%- if not flags.paid_report %}
   <aside id="dd-teaser" class="notice notice-gap teaser" aria-labelledby="dd-teaser-h" {{ offer.on_sale_attr() }}>
     <strong id="dd-teaser-h">{{ offer.teaser_heading() }}</strong>
     <p id="dd-teaser-text">{{ offer.lead() }} looks at what you do after a loss and after a run of losses, in your own trade file.</p>
     {{- offer.teaser() }}
   </aside>
+  {%- endif %}
 
   <section class="section" aria-labelledby="count-h">
     <h2 id="count-h">How the numbers are counted</h2>

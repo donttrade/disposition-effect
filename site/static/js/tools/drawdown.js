@@ -189,6 +189,8 @@ function chart(d) {
 // ------------------------------------------------------------------ teaser (true figures only)
 function teaser(d) {
   const box = $('dd-teaser');
+  // paid_report on: no teaser box (partials/tool_next_step.html is the one offer, never next to a result)
+  if (!box) return;
   const lead = reportLead(box);
   const text = $('dd-teaser-text');
   if (d && d.deepest && d.n >= 30) {

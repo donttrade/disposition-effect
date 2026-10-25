@@ -98,6 +98,8 @@ function allCells(h) {
 // ------------------------------------------------------------------ teaser (true figures only)
 function teaser(h) {
   const box = $('hm-teaser');
+  // paid_report on: no teaser box (partials/tool_next_step.html is the one offer, never next to a result)
+  if (!box) return;
   const lead = reportLead(box);
   const text = $('hm-teaser-text');
   if (h && h.lowest) {

@@ -54,12 +54,15 @@
   </section>
 
   <div id="hm-out" class="tool-out" hidden></div>
+  {%- with source = "file", firm_line = false %}{% include "partials/tool_next_step.html" %}{% endwith %}
 
+  {%- if not flags.paid_report %}
   <aside id="hm-teaser" class="notice notice-gap teaser" aria-labelledby="hm-teaser-h" {{ offer.on_sale_attr() }}>
     <strong id="hm-teaser-h">{{ offer.teaser_heading() }}</strong>
     <p id="hm-teaser-text">{{ offer.lead() }} looks at what you do after a loss rather than at the clock.</p>
     {{- offer.teaser() }}
   </aside>
+  {%- endif %}
 
   <section class="section" aria-labelledby="count-h">
     <h2 id="count-h">How the numbers are counted</h2>

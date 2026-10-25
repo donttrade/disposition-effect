@@ -72,12 +72,15 @@
   </section>
 
   <div id="ps-out" class="tool-out" hidden></div>
+  {%- with source = "file", firm_line = true %}{% include "partials/tool_next_step.html" %}{% endwith %}
 
+  {%- if not flags.paid_report %}
   <aside id="ps-teaser" class="notice notice-gap teaser" aria-labelledby="ps-teaser-h" hidden {{ offer.on_sale_attr() }}>
     <strong id="ps-teaser-h">{{ offer.teaser_heading() }}</strong>
     <p id="ps-teaser-text"></p>
     {{- offer.teaser() }}
   </aside>
+  {%- endif %}
 
   <section class="section" aria-labelledby="how-h">
     <h2 id="how-h">How each run works</h2>
