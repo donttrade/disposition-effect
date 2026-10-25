@@ -502,6 +502,16 @@ fieldset legend { font-weight: 600; margin-bottom: 4px; padding: 0; }
 .mailto-line { margin-top: var(--s2); }
 .price-table td:nth-child(2) { min-width: 16rem; }
 .price-table td:nth-child(3), .price-table td:nth-child(4) { min-width: 8rem; }
+/* QA3 25 Oct: on a phone the five-column firm price table was clipped mid-word inside its scroll box.
+   Below 40rem each engagement becomes a stacked card with its own labels. */
+@media (max-width: 40rem) {
+  .price-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .price-table, .price-table tbody, .price-table tr, .price-table th, .price-table td { display: block; width: auto; }
+  .price-table tr { border: 1px solid var(--border); border-radius: var(--radius); padding: var(--s2); margin-bottom: var(--s2); }
+  .price-table th[scope="row"] { font-size: var(--fs-2); padding: 0 0 var(--s1); border: 0; }
+  .price-table td, .price-table td:nth-child(2), .price-table td:nth-child(3), .price-table td:nth-child(4) { min-width: 0; padding: var(--s1) 0 0; border: 0; text-align: left; }
+  .price-table td[data-label]::before { content: attr(data-label); display: block; font-size: var(--fs-0); color: var(--muted); font-weight: 600; }
+}
 pre { font-family: var(--font-mono); font-size: var(--fs-0); background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); padding: var(--s2); overflow-x: auto; max-width: 100%; }
 .jump { padding-left: 1.25rem; }

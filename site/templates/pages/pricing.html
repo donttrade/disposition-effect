@@ -25,7 +25,7 @@
         "outcomes": "Everything in a Memo for your whole book, plus each split you agree in the scope.",
       } %}
       {%- for id in firm_ids %}{% set p = products[id] %}
-        <tr><th scope="row">{{ p.name }}</th><td>{{ what[id] }}</td><td>{{ p.turnaround_days }} business days</td><td>{{ p.payment_terms }}</td><td class="num">{{ p.price_usd|usd }}</td></tr>
+        <tr><th scope="row">{{ p.name }}</th><td data-label="What you get">{{ what[id] }}</td><td data-label="Delivery">{{ p.turnaround_days }} business days</td><td data-label="Payment">{{ p.payment_terms }}</td><td class="num" data-label="Price (USD)">{{ p.price_usd|usd }}</td></tr>
       {%- endfor %}
       </tbody>
     </table>
@@ -114,7 +114,12 @@
     <ul>
       <li>Every firm engagement is invoiced by email, in USD. International clients pay by bank transfer; clients in Canada may pay the CAD equivalent by Interac e-Transfer, at the Bank of Canada daily rate on the invoice date. Transfer and bank fees are paid by the sender.</li>
       <li>The engagement agreement is sent with the scope, before you pay. A blank template is available on request.</li>
+      {%- if flags.paid_report %}
+      <li>The {{ r.name|lower }} is paid by card on Stripe’s own page, from the “Pay {{ r.price_usd|usd }} on Stripe” button in the <a href="#last-step">last step</a> above.</li>
+      <li>For firm engagements: {% include "partials/card_timing.html" %}</li>
+      {%- else %}
       <li>{% include "partials/card_timing.html" %}</li>
+      {%- endif %}
       <li>We never ask for card details by email.</li>
     </ul>
   </section>
