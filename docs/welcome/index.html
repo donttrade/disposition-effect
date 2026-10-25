@@ -29,7 +29,7 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=db807f3b">
+<link rel="stylesheet" href="/static/css/site.css?v=8ea551c3">
 <script src="/static/js/theme.js?v=74363ef7"></script>
 <script src="/static/js/nav.js?v=cd8f3405" defer></script>
 <script src="/static/js/paid/welcome.js?v=1fd167a5" type="module"></script>
@@ -97,15 +97,31 @@
 
 <main id="main">
 
-<div class="wrap" data-requires-flag="paid_report">
-  <h1>Thank you</h1>
-  
+<div class="wrap" data-requires-flag="paid_report"><h1>Thank you</h1>
   <section id="w-working" data-state><p>Confirming your purchase with Stripe…</p></section>
   <section id="w-ready" data-state hidden>
     <div class="notice"><strong>Your report is ready</strong><p id="w-saved"></p></div>
     <p><a class="btn" id="w-report" href="/report/">Open your report</a></p>
+    <ol class="how-steps report-steps">
+  <li class="how-step">
+    <h2 class="rs-h"><span class="how-n">1</span> Export your full history</h2>
+    <details class="how-more"><summary>MetaTrader 5</summary><p>History tab, right-click, choose All History, then Report and save it as HTML.</p></details>
+    <details class="how-more"><summary>MetaTrader 4</summary><p>Account History tab, right-click, choose All History, then Save as Detailed Report.</p></details>
+    <details class="how-more"><summary>IBKR</summary><p>A Flex Query with the Trades section at execution level, as CSV, over the longest period it offers.</p></details>
+    <details class="how-more"><summary>Tradovate</summary><p>The Orders export as CSV, with the date range set to cover all your trades.</p></details>
+  </li>
+  <li class="how-step">
+    <h2 class="rs-h"><span class="how-n">2</span> Drop the file in</h2>
+    <p>Your browser strips names, account numbers and tickers first.</p>
+  </li>
+  <li class="how-step">
+    <h2 class="rs-h"><span class="how-n">3</span> Read your report</h2>
+    <p>Up to five habits, in this tab. One free re-test in 30 to 60 days.</p>
+  </li>
+</ol>
+
     <h2>Save your restore link</h2>
-    <p>There is no account or password. This link reopens your purchase on any browser; keep it private.</p>
+    <p>No account. This link reopens your report on any browser. Keep it private.</p>
     <div class="field"><label for="w-link">Restore link</label><input id="w-link" type="text" readonly></div>
     <p><button class="btn btn-secondary" id="w-download" type="button">Download restore file</button>
        <button class="btn btn-secondary" id="w-copy" type="button">Copy link</button> <span id="w-copy-msg" role="status"></span></p>
@@ -116,6 +132,7 @@
     <p id="w-retry-row"><button class="btn" id="w-retry" type="button">Try again</button></p>
     <p class="small">Email <a href="mailto:donttrade.research@gmail.com?subject=Habit%20report%20access">donttrade.research@gmail.com</a>. We reply within 1 business day (Eastern Time, Monday to Friday).</p>
   </section>
+  
 </div>
 
 </main>

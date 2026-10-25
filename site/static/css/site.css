@@ -931,6 +931,11 @@ svg.tp { padding: 8px 10px; }
 .rc-note { font-size: 0.78rem; color: var(--muted); }
 .rc .rc-more { margin-top: var(--s2); padding-top: var(--s2); border-top: 1px solid var(--border); font-size: var(--fs-0); }
 .tools-home .how { margin-top: var(--s2); }
+.report-steps { margin: var(--s3) 0; }
+.report-steps .how-step { padding: var(--s2); background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+.report-steps .rs-h { font-size: var(--fs-2); margin: 0 0 var(--s1); display: flex; align-items: center; gap: 10px; }
+.report-steps .rs-h::before { display: none; }
+.report-steps .how-more summary { min-height: 36px; }
 .ft-hero { margin-top: 0; }
 .ft-hero h1 { font-size: var(--fs-5); line-height: 1.1; letter-spacing: -0.02em; margin: 0 0 var(--s2); }
 .habit-rows th[scope="row"] { white-space: nowrap; } .habit-rows td:nth-child(2) { color: var(--muted); }

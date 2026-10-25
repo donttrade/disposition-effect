@@ -29,7 +29,7 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=db807f3b">
+<link rel="stylesheet" href="/static/css/site.css?v=8ea551c3">
 <script src="/static/js/theme.js?v=74363ef7"></script>
 <script src="/static/js/nav.js?v=cd8f3405" defer></script>
 <script src="/static/js/paid/report.js?v=c57072a7" type="module"></script>
@@ -97,29 +97,44 @@
 
 <main id="main">
 
-<div class="wrap" data-requires-flag="paid_report">
-  <h1>Your habit report</h1>
-  <div class="no-print"></div>
-  <div class="notice no-print">
-    <strong>What leaves your computer</strong>
-    <p>Your browser reads the file in this tab and removes names, account numbers and symbols. Your browser sends our server only stripped trade numbers: open and close times, buy or sell, relative size, the realised result, a random symbol number and a scrambled fingerprint of each row. No name, account number or ticker is sent. The numbers are not kept; we keep only a scrambled fingerprint of each trade row from your first report, so a re-test can be matched to the same history, and we delete it on the dates in our privacy notice.</p>
-  </div>
+<div class="wrap" data-requires-flag="paid_report"><h1>Your habit report</h1>
+  <div class="no-print"><ol class="how-steps report-steps">
+  <li class="how-step">
+    <h2 class="rs-h"><span class="how-n">1</span> Export your full history</h2>
+    <details class="how-more"><summary>MetaTrader 5</summary><p>History tab, right-click, choose All History, then Report and save it as HTML.</p></details>
+    <details class="how-more"><summary>MetaTrader 4</summary><p>Account History tab, right-click, choose All History, then Save as Detailed Report.</p></details>
+    <details class="how-more"><summary>IBKR</summary><p>A Flex Query with the Trades section at execution level, as CSV, over the longest period it offers.</p></details>
+    <details class="how-more"><summary>Tradovate</summary><p>The Orders export as CSV, with the date range set to cover all your trades.</p></details>
+  </li>
+  <li class="how-step">
+    <h2 class="rs-h"><span class="how-n">2</span> Drop the file in</h2>
+    <p>Your browser strips names, account numbers and tickers first.</p>
+  </li>
+  <li class="how-step">
+    <h2 class="rs-h"><span class="how-n">3</span> Read your report</h2>
+    <p>Up to five habits, in this tab. One free re-test in 30 to 60 days.</p>
+  </li>
+</ol>
+</div>
   <section class="no-print" aria-labelledby="pick-h">
     <h2 id="pick-h">Choose your trade file</h2>
     <p id="rp-access" class="muted"></p>
-    <div class="field"><label for="rp-firm">Which firm do you trade with? (optional)</label>
-      <input id="rp-firm" type="text" maxlength="80" autocomplete="organization"></div>
-    <div class="field"><div class="check"><input id="rp-firm-consent" type="checkbox">
-      <label for="rp-firm-consent">Count my firm's name. Only a count per firm is kept, never linked to me.</label></div></div>
     <div class="dropzone" id="rp-drop">
       <p><strong>Drop your trade file here</strong>, or choose it:</p>
       <label for="rp-file">Trade file (MT5/MT4 report, IBKR Flex, Tradovate Orders, or the CSV template)</label>
       <input id="rp-file" type="file" accept=".csv,.htm,.html,.txt">
     </div>
+    <p class="small">Names, account numbers and symbols are removed in this tab before anything is sent.</p>
+    <details class="how-more"><summary>What is sent</summary><p>Your browser sends our server only stripped trade numbers: open and close times, buy or sell, relative size, the realised result, a random symbol number and a scrambled fingerprint of each row. No name, account number or ticker is sent. The numbers are not kept; we keep only a scrambled fingerprint of each trade row from your first report, so a re-test can be matched to the same history, and we delete it on the dates in our privacy notice.</p></details>
+    <div class="field"><label for="rp-firm">Which firm do you trade with? (optional)</label>
+      <input id="rp-firm" type="text" maxlength="80" autocomplete="organization"></div>
+    <div class="field"><div class="check"><input id="rp-firm-consent" type="checkbox">
+      <label for="rp-firm-consent">Count my firm's name. Only a count per firm is kept, never linked to me.</label></div></div>
     <p><button class="btn btn-secondary" id="rp-restore-file" type="button">Download restore file</button> <span id="rp-uses" role="status"></span></p>
   </section>
   <div id="rp-status" class="notice" role="status" hidden></div>
   <div id="rp-out"></div>
+  <div class="no-print"></div>
 </div>
 
 </main>
