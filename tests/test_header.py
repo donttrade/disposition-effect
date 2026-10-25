@@ -89,7 +89,7 @@ def test_menu_keyboard_escape_and_click_outside(browser, built_site, width):
     assert all(h >= 44 for _, _, h in groups) and all(h >= 44 for _, h in links)
     pg.click(".nav-acc:nth-of-type(2) > summary")
     items = pg.eval_on_selector_all(".nav-acc[open] a", "as => as.map(a => a.getBoundingClientRect().height)")
-    assert len(items) == 6 and all(h >= 48 for h in items)
+    assert len(items) == 4 and all(h >= 48 for h in items)   # 25 Oct: Code, Corrections moved to the footer
     assert axe_violations(pg) == []
     pg.keyboard.press("Escape")
     assert not pg.is_visible(".nav-panel")

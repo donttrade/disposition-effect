@@ -103,7 +103,9 @@ def test_mr2_nav_code_line_matches_what_code_lists(builds):
     for out in builds.values():
         h = raw(out, "index.html")
         assert "Every script, public" not in h
-        assert "Study scripts, and which are still to come" in h
+        # 25 Oct: Code left the header menu for the footer's Transparency group
+        assert "Study scripts, and which are still to come" not in h
+        assert re.search(r'aria-label="Transparency"><h2>Transparency</h2><ul>.*?href="/code/"', h, re.S)
         # /code/ lists the published study scripts and those still to follow ("To be published with the study")
         assert "To be published with the study" in text_of(out, "code/index.html")
 

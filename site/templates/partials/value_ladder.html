@@ -26,7 +26,23 @@
       {%- else %}
       <p>The free disposition calculator works from four counts you type in. The report will read the closed trades in your file: the latest 20,000 rows at most, leaving out trades opened more than about 10 years before your latest trade or held longer than 3,650 days. It will measure and describe up to five habits, with the dollar totals of the matching trades, and test up to two of them against chance in this version, comparing trades from the same days. It will include one re-test 30 to 60 days after your first report. Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>. The tests will run on our server on stripped trade numbers, and building them honestly is the work you pay for.</p>
       {%- endif %}
+      {%- if show_firm_price and flags.paid_report %}
+      {#- 25 Oct: on /pricing/ the button opens the last step right here (a <details>, works without JS):
+          the "Before you pay" disclosure with the Stripe link above and below it, the only Stripe link on
+          the page, so the buyer sees the disclosure first. nav.js opens it when the URL names an id inside. #}
+      {%- set link = r["stripe_link_" + stripe_mode] %}
+      <details class="pay-step" id="last-step">
+        <summary class="btn">Get the habit report — {{ r.price_usd|usd }}</summary>
+        <div class="pay-panel" role="group" aria-labelledby="last-step-h">
+          <h3 id="last-step-h">Last step</h3>
+          <p class="no-print">{% if link %}<a class="btn" href="{{ link }}" rel="noopener">Pay {{ r.price_usd|usd }} on Stripe</a>{% else %}<span class="muted">Payment link not set yet</span>{% endif %}</p>
+          {% include "partials/before_you_pay.html" %}
+          <p class="no-print">{% if link %}<a class="btn" href="{{ link }}" rel="noopener">Pay {{ r.price_usd|usd }} on Stripe</a>{% endif %}</p>
+        </div>
+      </details>
+      {%- else %}
       <p>{{ offer.button() }}</p>
+      {%- endif %}
     </div>
     <div class="ladder-row">
       {%- if show_firm_price %}
