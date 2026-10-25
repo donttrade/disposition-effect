@@ -24,7 +24,7 @@ def test_n1_trade_stats_one_closed_trade(browser, built_site):
     page = ctx.new_page()
     page.goto(built_site["url"] + "/tools/trade-stats/")
     page.set_input_files("#ts-file", os.path.join(FIX, "mt5", "deals_hedging.htm"))
-    page.wait_for_selector("#ts-noise", timeout=60000)
+    page.wait_for_selector("#ts-out:not([hidden])", timeout=60000)
     text = page.inner_text("#ts-out")
     ctx.close()
     assert "1 closed trade from 4 fills" in text and "1 closed trades" not in text, text[:400]

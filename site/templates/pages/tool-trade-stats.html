@@ -8,7 +8,7 @@
       {% include "partials/crumbs.html" %}
       <h1>Trade stats from your own trade file</h1>
       <p class="lede">Drop the trade file your platform already exports and get the core numbers in seconds: net result, win rate, average win and loss, profit factor, mean result per trade, largest drawdown, and your longest winning and losing streaks. It reads MT5 and MT4 HTML reports, IBKR Flex Query trade files and Tradovate order exports (all three in beta), and a plain CSV template.</p>
-      <p>Everything is calculated inside this browser tab. The page’s security policy blocks every outgoing network request, so your file is not uploaded anywhere; you can watch your browser’s network tab to check. {% if flags.free_badges %}Three of the numbers get a real-or-noise check. With fewer than 30 trades it says there are not enough trades to tell, because a figure from 12 trades can swing a long way on one result. {% else %}A ‘real or noise’ check for three of the numbers is coming soon. {% endif %}No sign-up, no cookies, no ads.</p>
+      <p>Everything is calculated inside this browser tab. The page’s security policy blocks every outgoing network request, so your file is not uploaded anywhere; you can watch your browser’s network tab to check. {% if flags.free_badges %}Three of the numbers get a real-or-noise check. With fewer than 30 trades it says there are not enough trades to tell, because a figure from 12 trades can swing a long way on one result. {% endif %}No sign-up, no cookies, no ads.</p>
     </div>
   </div>
   {% include "partials/disclaimer.html" %}

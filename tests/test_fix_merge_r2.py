@@ -187,7 +187,7 @@ def test_r3_slow_first_file_never_replaces_the_second(browser, built_site, big_f
     page.set_input_files(f"#{tool}-file", T30)
     page.wait_for_timeout(4000)
     if tool == "ts":
-        page.wait_for_selector("#ts-noise", timeout=30000)   # C1: the table only with free_badges
+        page.wait_for_selector("#ts-out:not([hidden])", timeout=30000)   # C1: the table only with free_badges
     shown = page.inner_text("#ts-out" if tool == "ts" else "#ps-file-status")
     made, live = page.evaluate("() => [window.__made, window.__live]")
     ctx.close()

@@ -570,8 +570,8 @@ def rows_file(path, trades):
 
 
 @pytest.mark.parametrize("tool,inp,done", [
-    # C1: #ts-noise is drawn with the results in both builds (the checks table only with free_badges)
-    ("/tools/trade-stats/", "#ts-file", "() => !!document.querySelector('#ts-noise') || !document.getElementById('ts-error').hidden"),
+    # C1: the results are drawn in both builds (#ts-noise, the checks, only with free_badges; QA 25 Oct)
+    ("/tools/trade-stats/", "#ts-file", "() => !document.getElementById('ts-out').hidden || !document.getElementById('ts-error').hidden"),
     ("/tools/prop-challenge-simulator/", "#ps-file", "() => /closed trades? on/.test(document.getElementById('ps-file-status').textContent) || !document.getElementById('ps-file-error').hidden"),
 ])
 def test_d7_100k_rows_keep_the_main_thread_free(browser, built_site, tmp_path, tool, inp, done):
@@ -620,7 +620,7 @@ def test_d7_html_report_still_read_on_the_page(browser, built_site):
     page = ctx.new_page()
     page.goto(built_site["url"] + "/tools/trade-stats/")
     page.set_input_files("#ts-file", os.path.join(REPO, "tests", "fixtures", "mt5", "deals_netting_40.htm"))
-    page.wait_for_selector("#ts-noise", timeout=90000)
+    page.wait_for_selector("#ts-out:not([hidden])", timeout=90000)
     assert "MetaTrader 5 report" in page.inner_text("#ts-out")
     ctx.close()
 
