@@ -152,6 +152,10 @@ def raw(out, rel):
     return open(os.path.join(out, rel), encoding="utf-8").read()
 
 
+NEXT_TYPED = ("Want to go one level deeper? The habit report reads your trade file and looks for up to five habits in your "
+              "own trades, testing two of them against chance. $39, one re-test included, refund within 14 days.")
+
+
 def test_i3b_exact_offer_lines_on_each_page(builds):
     paid, free = builds["paid"], builds["free"]
     assert HOME_LEDE in text_of(paid, "index.html")
@@ -161,12 +165,14 @@ def test_i3b_exact_offer_lines_on_each_page(builds):
     assert PRODUCT in pr and BYP in pr
     assert DATES_RESTRICTION in pr and "A tested habit with fewer than 30 trades in either group" in pr   # T-3 T3-A, T3-B
     assert lint_text(DATES_RESTRICTION) == [] and lint_text(DATES_RESTRICTION, "t3a", paid=True) == []
-    assert LOT in text_of(paid, os.path.join("tools", "lot-size-calculator", "index.html"))
+    # owner, 25 Oct: a paid tool page's one offer is partials/tool_next_step.html; its teaser box is left out
+    lot_paid = text_of(paid, os.path.join("tools", "lot-size-calculator", "index.html"))
+    assert LOT not in lot_paid and NEXT_TYPED in lot_paid
     assert LOT_SOON in text_of(free, os.path.join("tools", "lot-size-calculator", "index.html"))
     fr = re.sub(r"\s+", " ", visible_text(raw(paid, os.path.join("fr", "avant-de-payer", "index.html"))))
     for s in FR_FACTS:
         assert s in fr, s
-    for s in (HOME_LEDE, FT_LEDE, FT_LEDE_SOON, PRODUCT, BYP, LOT, LOT_SOON, RETEST):
+    for s in (HOME_LEDE, FT_LEDE, FT_LEDE_SOON, PRODUCT, BYP, LOT, LOT_SOON, RETEST, NEXT_TYPED):
         assert lint_text(s) == [] and lint_text(s, "i3b", paid=True) == [], s
 
 
