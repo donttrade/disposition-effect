@@ -68,6 +68,11 @@ disclaimer_long = "donttrade measures your own past trades. It is not investment
 # "$", "%" or a banned.toml word in any nav text), icon (partials/icons.html) and optional
 # requires_flag. [[nav.foot]] = text links under the panel's rule; label_if_paid replaces label
 # with paid_report on. The nav never shows a price, a % or a study number (D3).
+# 25 Oct sweep (owner): four items. Research, About and For traders are in the footer.
+[[nav]]
+label = "Sample report"
+href = "/sample-report/"
+
 [[nav]]
 label = "Free tools"
 href = "/tools/"
@@ -127,72 +132,12 @@ label_if_paid = "For traders: the habit report"
 href = "/for-traders/"
 
 [[nav]]
-label = "Research"
-href = "/research/"
-[[nav.items]]
-label = "All research"
-href = "/research/"
-desc = "Studies with their data and scripts"
-icon = "list"
-[[nav.items]]
-label = "The plan gap"
-href = "/plan-gap/"
-desc = "What we measure and why"
-icon = "split"
-[[nav.items]]
-label = "Sample memo & method"
-href = "/sample-memo/"
-desc = "What a firm receives"
-icon = "doc"
-[[nav.items]]
-label = "Glossary"
-href = "/glossary/"
-desc = "Terms, defined"
-icon = "bookmark"
+label = "Pricing"
+href = "/pricing/"
 
 [[nav]]
 label = "For firms"
 href = "/for-firms/"
-[[nav.items]]
-label = "For firms overview"
-href = "/for-firms/"
-desc = "Measure your traders’ plan gap"
-icon = "building"
-[[nav.items]]
-label = "Copy-trading platforms"
-href = "/for-firms/#copy-leader"
-desc = "A leader-ranking test, not yet available"
-icon = "swap"
-[[nav.items]]
-label = "Journals & platforms"
-href = "/for-platforms/"
-desc = "Partner with us"
-icon = "windows"
-[[nav.items]]
-label = "Pass-rate calculator"
-href = "/tools/pass-rate-calculator/"
-desc = "One cohort’s pass and payout rate"
-icon = "percent"
-[[nav.items]]
-label = "Independence"
-href = "/independence/"
-desc = "Why no firm can pay to change a number"
-icon = "shield"
-[[nav.foot]]
-label = "Start a Pilot"
-href = "/start/?product=pilot#pilot"
-
-# QA 25 Oct: the trader page as its own top-level link (desktop row and phone Menu)
-[[nav]]
-label = "For traders"
-href = "/for-traders/"
-
-[[nav]]
-label = "Pricing"
-href = "/pricing/"
-[[nav]]
-label = "About"
-href = "/about/"
 
 # Official channels (ARCHITECT-BRAND §2.6): the ONE list behind the footer "Follow" column, the /about/
 # "Where to find this" sentence and Organization.sameAs. Only accounts that exist go in.
@@ -243,21 +188,19 @@ handle = "@donttradestudy"
 icon = "youtube"
 rel_me = true
 
+# 25 Oct sweep (owner: "way too much writing"): four short columns
 [[footer]]
 heading = "Traders"
-links = [["Free tools", "/tools/"], ["Trade stats", "/tools/trade-stats/"], ["Individual traders", "/for-traders/"]]
+links = [["Sample report", "/sample-report/"], ["Pricing", "/pricing/"], ["Free tools", "/tools/"], ["For traders", "/for-traders/"]]
 [[footer]]
 heading = "Firms"
-links = [["Prop firms & brokers", "/for-firms/"], ["Journals & platforms", "/for-platforms/"], ["Copy-trading platforms", "/for-firms/#copy-leader"], ["Firms making behaviour claims", "/for-firms/#claims-test"], ["Pricing", "/pricing/"], ["Start a Pilot", "/start/?product=pilot#pilot"]]
+links = [["For firms", "/for-firms/"], ["Journals & platforms", "/for-platforms/"], ["Sample memo", "/sample-memo/"]]
 [[footer]]
 heading = "Research"
-links = [["Research", "/research/"], ["The plan gap", "/plan-gap/"], ["Sample & method", "/sample-memo/"], ["Glossary", "/glossary/"], ["Atom feed", "/feed.xml"]]
+links = [["Research", "/research/"], ["The plan gap", "/plan-gap/"], ["Glossary", "/glossary/"]]
 [[footer]]
-heading = "Trust"
-links = [["About", "/about/"], ["Questions", "/help/"]]
-[[footer]]
-heading = "Legal"
-links = [["Terms", "/terms/"], ["Privacy", "/privacy/"], ["Cancellations & refunds", "/terms/#cancellation"]]
+heading = "About"
+links = [["About", "/about/"], ["Questions", "/help/"], ["Terms", "/terms/"], ["Privacy", "/privacy/"], ["Refunds", "/terms/#cancellation"]]
 
 # Answer box synonyms (ARCHITECT-V3 §c.5): a phrase in a visitor's question → the word the site's pages use.
 # Lower case; tuned on tests/fixtures/answers_queries.json.

@@ -1,21 +1,26 @@
 <footer class="site-footer"><div class="wrap">
+  {#- 25 Oct sweep (owner: "way too much writing"): four short columns, the social row as icons, the
+      business line and the disclaimer (both required, always visible), and the full privacy sentences
+      (footer_privacy, the one wording /privacy/ matches) folded under one short line. -#}
   <div class="cols">
   {%- for col in footer %}
     <nav aria-label="{{ col.heading }}"><h2>{{ col.heading }}</h2><ul>
     {%- for label, href in col.links %}<li><a href="{{ href }}">{{ label }}</a></li>{% endfor %}
     </ul></nav>
   {%- endfor %}
-  {%- import "partials/icons.html" as fic %}
-    <nav aria-label="Follow donttrade"><h2>Follow</h2><ul class="follow">
-    {%- for c in channels %}<li><a href="{{ c.url }}" rel="me noopener">{{ fic.brand(c.icon) }}<span>{{ c.name }}</span>{% if c.get("handle") %}<span class="visually-hidden"> {{ c.handle }}</span>{% endif %}</a></li>{% endfor %}
-    </ul></nav>
   </div>
-  <p class="legal">Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>. {{ site.reply_promise }}</p>
+  {%- import "partials/icons.html" as fic %}
+  <div class="follow-row"><nav aria-label="Follow donttrade"><ul class="follow">
+  {%- for c in channels %}<li><a href="{{ c.url }}" rel="me noopener">{{ fic.brand(c.icon) }}<span class="visually-hidden">{{ c.name }}{% if c.get("handle") %} {{ c.handle }}{% endif %}</span></a></li>{% endfor %}
+  </ul></nav></div>
   {%- if business_id_line %}{# any commerce flag on: build.business_id_line (name, region, email; the mailing address only on build.ADDRESS_LINE_PATHS) #}
   {{ business_id_line }}
+  {%- else %}
+  <p class="legal">Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>.</p>
   {%- endif %}
-  <p class="legal"><strong>Firms pay for fixed-scope measurements of their own data. Readers pay nothing. No firm can pay to change a number.</strong> <a href="/independence/">Independence policy</a></p>
   <p class="legal">{{ legal.disclaimer_short }}</p>
-  <p class="legal">{{ footer_privacy }} <a href="/privacy/">Privacy</a></p>
-  <p class="legal">&copy; 2026 donttrade. Text and charts <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>; numbers are facts, quote them with a link.</p>
+  <details class="legal legal-more"><summary>No cookies. What this site stores and sends</summary>
+    <p>{{ footer_privacy }} <a href="/privacy/">Privacy</a></p>
+  </details>
+  <p class="legal">&copy; 2026 donttrade · <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
 </div></footer>

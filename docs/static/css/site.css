@@ -256,9 +256,10 @@ details.nav-menu[open] > summary { color: var(--text); background: var(--surface
   .site-header .wrap { gap: var(--s1); }
   .site-nav .nav-row { display: none; }
   .nav-menu { display: block; }
-  .site-header .theme-toggle { justify-content: center; padding: 0; width: var(--target); }
-  .site-header .theme-toggle .tt-label { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 }
+/* 25 Oct sweep: the theme toggle is an icon button at every width; its name stays for screen readers */
+.site-header .theme-toggle { justify-content: center; padding: 0; width: var(--target); }
+.site-header .theme-toggle .tt-label { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 .site-footer { border-top: 1px solid var(--border); background: var(--surface); padding: var(--s5) 0 var(--s4); margin-top: var(--s6); font-size: var(--fs-0); }
 .site-footer .cols { display: grid; gap: var(--s3); grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
 .site-footer h2 { font-size: var(--fs-1); margin: 0 0 var(--s1); }
@@ -887,6 +888,15 @@ a.choice-link:hover { border-color: var(--rust); background: var(--surface); col
 /* footer: Follow (site.toml [[channels]]); 20 px marks, 44 px targets (.site-footer li a) */
 .site-footer .follow a { gap: 10px; }
 .site-footer .follow svg { flex: none; width: 20px; height: 20px; fill: currentColor; }
+/* 25 Oct sweep: one row of icons under the columns; the privacy sentences fold under one line */
+.site-footer .follow-row { margin-top: var(--s3); }
+.site-footer .follow { display: flex; flex-wrap: wrap; gap: 0 var(--s1); }
+.site-footer .follow a { justify-content: center; min-width: var(--target); color: var(--muted); }
+.site-footer .follow a:hover { color: var(--rust); }
+.site-footer .legal-more { border: 0; }
+.site-footer .legal-more summary { font-weight: 400; color: var(--muted); padding: 0; text-decoration: underline dotted; text-underline-offset: 3px; }
+.site-footer .legal-more[open] summary { color: var(--rust); }
+.site-footer .legal-more p { margin: 0 0 var(--s1); }
 
 /* ------------------------------------------------------------------ trading heatmap (tools batch 2) */
 /* Cell text stays var(--text) on a light tint of gain or loss (never coloured text on colour), and every

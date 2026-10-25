@@ -35,7 +35,7 @@
     {%- if g["items"] %}
     <li class="nav-dd-li"><details name="nav" class="nav-dd" data-nav-dd>
       <summary{% if cur == g.label %} class="is-current"{% endif %}>{{ summary_text(g) }}</summary>
-      <div class="nav-pop{% if g.get("columns") == 2 %} nav-pop-2{% endif %}{% if loop.index0 >= 2 %} nav-pop-end{% endif %}">
+      <div class="nav-pop{% if g.get("columns") == 2 %} nav-pop-2{% endif %}{% if loop.index0 >= 1 %} nav-pop-end{% endif %}">
       {{- group_body(g) }}
       </div>
     </details></li>
