@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src &#39;self&#39;; script-src &#39;self&#39;; style-src &#39;self&#39;; img-src &#39;self&#39; data:; font-src &#39;self&#39;; connect-src &#39;none&#39;; worker-src &#39;self&#39;; form-action &#39;self&#39; https://api.web3forms.com; base-uri &#39;none&#39;; object-src &#39;none&#39;">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16181C" media="(prefers-color-scheme: dark)">
+<title>Trading Heatmap of Your Trades by Hour and Weekday</title>
+<meta name="description" content="See your own results, win rate and trade count by the hour and weekday each trade opened, from your trade file, in the time zone you choose. Free.">
+<link rel="canonical" href="https://donttrade.ca/tools/trading-heatmap/">
+<meta name="robots" content="noindex,nofollow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="donttrade">
+<meta property="og:title" content="Trading Heatmap of Your Trades by Hour and Weekday">
+<meta property="og:description" content="See your own results, win rate and trade count by the hour and weekday each trade opened, from your trade file, in the time zone you choose. Free.">
+<meta property="og:url" content="https://donttrade.ca/tools/trading-heatmap/">
+<meta property="og:image" content="https://donttrade.ca/assets/og/default.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Trading Heatmap of Your Trades by Hour and Weekday">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:description" content="See your own results, win rate and trade count by the hour and weekday each trade opened, from your trade file, in the time zone you choose. Free.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/static/css/site.css?v=b265641e">
+<script src="/static/js/theme.js?v=ccbceb07"></script>
+<script src="/static/js/nav.js?v=cd8f3405" defer></script>
+<script src="/static/js/ask.js?v=dae8287b" defer></script>
+<script src="/static/js/tools/heatmap.js?v=363c8095" type="module"></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "item": "https://donttrade.ca/tools/", "name": "Free tools", "position": 2}, {"@type": "ListItem", "name": "Your trades by hour and weekday", "position": 3}]}, {"@id": "https://donttrade.ca/tools/trading-heatmap/#app", "@type": "WebApplication", "applicationCategory": "FinanceApplication", "browserRequirements": "Requires JavaScript", "description": "See your own results, win rate and trade count by the hour and weekday each trade opened, from your trade file, in the time zone you choose. Free.", "isAccessibleForFree": true, "name": "Your trades by hour and weekday", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "operatingSystem": "Any (runs in a web browser)", "publisher": {"@id": "https://donttrade.ca/#org"}, "url": "https://donttrade.ca/tools/trading-heatmap/"}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Trades spread over up to 168 weekday and hour cells, and many hours simply have few. Choose two-, three- or four-hour blocks to put more trades in each cell."}, "name": "Why do some cells hold so few trades?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "When you compare many cells at once, some will look unusual by luck alone. The top or bottom cell of a large grid is often one of those lucky cells, so this page describes every cell and picks none of them out."}, "name": "Why does the page not mark the best and worst hours?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "MT5 and MT4 reports use the broker’s server time, which is often two or three hours ahead of UTC and can shift with daylight saving. The page reads times exactly as written in the file; the shift moves them by whole hours, and the page shows the first and last open times so you can check them against what you remember."}, "name": "Which time zone are my trades in?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. It describes when your own past trades did better or worse. A cell that looks good or bad is a description of your history, not a forecast, and this page does not recommend when to trade."}, "name": "Does this tell me the best time to trade?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. The analysis runs in your browser tab, and the page’s security policy blocks it from making network requests. You can watch your browser’s Network tab stay empty while it works."}, "name": "Is my file uploaded?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. It measures your own past trades and does not recommend any security, trade, size or exit. Past results do not predict future results."}, "name": "Is this investment advice?"}]}]}</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<p class="notice notice-caution" role="note" data-preview-band><strong>Preview, not the live site.</strong> This copy (live-check) is for testing; the live site is https://donttrade.ca.</p>
+
+<header class="site-header"><div class="wrap">
+  <a class="brand" href="/">donttrade</a>
+  <nav class="site-nav" aria-label="Main"><ul class="nav-row">
+    <li class="nav-dd-li"><details name="nav" class="nav-dd" data-nav-dd>
+      <summary class="is-current">Free tools<span class="visually-hidden">, current section</span><svg class="chev" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg></summary>
+      <div class="nav-pop nav-pop-2">
+      <ul class="nav-items">
+        <li><a class="nav-item" href="/tools/trade-stats/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-9l5 6-5 6h9"/></svg><span class="ni-text"><span class="ni-t">Trade stats</span> <span class="ni-d">Totals from your trade file</span></span></a></li>
+        <li><a class="nav-item" href="/tools/prop-challenge-simulator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18V3"/><path d="M5 4h10l-2.5 3.5L15 11H5"/></svg><span class="ni-text"><span class="ni-t">Prop challenge simulator</span> <span class="ni-d">Your past days under a challenge’s rules</span></span></a></li>
+        <li><a class="nav-item" href="/tools/lot-size-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v14M6 17h8M4 6h12"/><path d="M4 6l-2 5h4zM16 6l-2 5h4z"/></svg><span class="ni-text"><span class="ni-t">Lot size calculator</span> <span class="ni-d">Lots for the risk you chose</span></span></a></li>
+        <li><a class="nav-item" href="/tools/disposition-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h10M5 17h10"/><path d="M6.5 3v2.5L13.5 14.5V17M13.5 3v2.5L6.5 14.5V17"/></svg><span class="ni-text"><span class="ni-t">Disposition calculator</span> <span class="ni-d">Winners vs losers sold, from four counts</span></span></a></li>
+      </ul>
+      <ul class="nav-foot">
+        <li><a href="/tools/">All free tools</a></li>
+        <li><a href="/for-traders/">For traders: the habit report</a></li>
+      </ul>
+      </div>
+    </details></li>
+    <li class="nav-dd-li"><details name="nav" class="nav-dd" data-nav-dd>
+      <summary>Research<svg class="chev" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg></summary>
+      <div class="nav-pop">
+      <ul class="nav-items">
+        <li><a class="nav-item" href="/research/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h12M4 10h12M4 15h8"/></svg><span class="ni-text"><span class="ni-t">All research</span> <span class="ni-d">Studies with their data and scripts</span></span></a></li>
+        <li><a class="nav-item" href="/plan-gap/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h14v12H3z"/><path d="M10 4v12"/></svg><span class="ni-text"><span class="ni-t">The plan gap</span> <span class="ni-d">What we measure and why</span></span></a></li>
+        <li><a class="nav-item" href="/sample-memo/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2.5h6.5l3.5 3.5v11.5H5z"/><path d="M11.5 2.5V6H15M7.5 10h5M7.5 13h5"/></svg><span class="ni-text"><span class="ni-t">Sample memo &amp; method</span> <span class="ni-d">What a firm receives</span></span></a></li>
+        <li><a class="nav-item" href="/code/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 6l-4 4 4 4M13 6l4 4-4 4M11.5 4l-3 12"/></svg><span class="ni-text"><span class="ni-t">Code</span> <span class="ni-d">Study scripts, and which are still to come</span></span></a></li>
+        <li><a class="nav-item" href="/corrections/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg><span class="ni-text"><span class="ni-t">Corrections</span> <span class="ni-d">Every change, dated</span></span></a></li>
+        <li><a class="nav-item" href="/glossary/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8v14l-4-3-4 3z"/></svg><span class="ni-text"><span class="ni-t">Glossary</span> <span class="ni-d">Terms, defined</span></span></a></li>
+      </ul>
+      </div>
+    </details></li>
+    <li class="nav-dd-li"><details name="nav" class="nav-dd" data-nav-dd>
+      <summary>For firms<svg class="chev" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg></summary>
+      <div class="nav-pop nav-pop-end">
+      <ul class="nav-items">
+        <li><a class="nav-item" href="/for-firms/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V4h8v13M12 8h4v9M3 17h14"/><path d="M7 7h2M7 10h2M7 13h2"/></svg><span class="ni-text"><span class="ni-t">For firms overview</span> <span class="ni-d">Measure your traders’ plan gap</span></span></a></li>
+        <li><a class="nav-item" href="/for-firms/#copy-leader"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h12l-3-3M16 13H4l3 3"/></svg><span class="ni-text"><span class="ni-t">Copy-trading platforms</span> <span class="ni-d">A leader-ranking test, not yet available</span></span></a></li>
+        <li><a class="nav-item" href="/for-platforms/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h10v10H3z"/><path d="M7 13v4h10V7h-4"/></svg><span class="ni-text"><span class="ni-t">Journals &amp; platforms</span> <span class="ni-d">Partner with us</span></span></a></li>
+        <li><a class="nav-item" href="/tools/pass-rate-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15L15 5"/><circle cx="6" cy="6" r="1.75"/><circle cx="14" cy="14" r="1.75"/></svg><span class="ni-text"><span class="ni-t">Pass-rate calculator</span> <span class="ni-d">One cohort’s pass and payout rate</span></span></a></li>
+        <li><a class="nav-item" href="/independence/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5l6 2.5v5c0 3.8-2.6 6-6 7.5-3.4-1.5-6-3.7-6-7.5V5z"/></svg><span class="ni-text"><span class="ni-t">Independence</span> <span class="ni-d">Why no firm can pay to change a number</span></span></a></li>
+      </ul>
+      <ul class="nav-foot">
+        <li><a href="/start/?product=pilot#pilot">Start a Pilot</a></li>
+      </ul>
+      </div>
+    </details></li>
+    <li><a href="/pricing/">Pricing</a></li>
+    <li><a href="/about/">About</a></li>
+  </ul>
+  <details class="nav-menu" data-nav-menu>
+    <summary><svg class="i-menu" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg><svg class="i-close" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>Menu</summary>
+    <div class="nav-panel">
+      <details name="m" class="nav-acc">
+        <summary class="is-current">Free tools<span class="visually-hidden">, current section</span><svg class="chev" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg></summary>
+      <ul class="nav-items">
+        <li><a class="nav-item" href="/tools/trade-stats/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-9l5 6-5 6h9"/></svg><span class="ni-text"><span class="ni-t">Trade stats</span> <span class="ni-d">Totals from your trade file</span></span></a></li>
+        <li><a class="nav-item" href="/tools/prop-challenge-simulator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18V3"/><path d="M5 4h10l-2.5 3.5L15 11H5"/></svg><span class="ni-text"><span class="ni-t">Prop challenge simulator</span> <span class="ni-d">Your past days under a challenge’s rules</span></span></a></li>
+        <li><a class="nav-item" href="/tools/lot-size-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v14M6 17h8M4 6h12"/><path d="M4 6l-2 5h4zM16 6l-2 5h4z"/></svg><span class="ni-text"><span class="ni-t">Lot size calculator</span> <span class="ni-d">Lots for the risk you chose</span></span></a></li>
+        <li><a class="nav-item" href="/tools/disposition-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h10M5 17h10"/><path d="M6.5 3v2.5L13.5 14.5V17M13.5 3v2.5L6.5 14.5V17"/></svg><span class="ni-text"><span class="ni-t">Disposition calculator</span> <span class="ni-d">Winners vs losers sold, from four counts</span></span></a></li>
+      </ul>
+      <ul class="nav-foot">
+        <li><a href="/tools/">All free tools</a></li>
+        <li><a href="/for-traders/">For traders: the habit report</a></li>
+      </ul>
+      </details>
+      <details name="m" class="nav-acc">
+        <summary>Research<svg class="chev" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg></summary>
+      <ul class="nav-items">
+        <li><a class="nav-item" href="/research/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h12M4 10h12M4 15h8"/></svg><span class="ni-text"><span class="ni-t">All research</span> <span class="ni-d">Studies with their data and scripts</span></span></a></li>
+        <li><a class="nav-item" href="/plan-gap/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h14v12H3z"/><path d="M10 4v12"/></svg><span class="ni-text"><span class="ni-t">The plan gap</span> <span class="ni-d">What we measure and why</span></span></a></li>
+        <li><a class="nav-item" href="/sample-memo/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2.5h6.5l3.5 3.5v11.5H5z"/><path d="M11.5 2.5V6H15M7.5 10h5M7.5 13h5"/></svg><span class="ni-text"><span class="ni-t">Sample memo &amp; method</span> <span class="ni-d">What a firm receives</span></span></a></li>
+        <li><a class="nav-item" href="/code/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 6l-4 4 4 4M13 6l4 4-4 4M11.5 4l-3 12"/></svg><span class="ni-text"><span class="ni-t">Code</span> <span class="ni-d">Study scripts, and which are still to come</span></span></a></li>
+        <li><a class="nav-item" href="/corrections/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg><span class="ni-text"><span class="ni-t">Corrections</span> <span class="ni-d">Every change, dated</span></span></a></li>
+        <li><a class="nav-item" href="/glossary/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8v14l-4-3-4 3z"/></svg><span class="ni-text"><span class="ni-t">Glossary</span> <span class="ni-d">Terms, defined</span></span></a></li>
+      </ul>
+      </details>
+      <details name="m" class="nav-acc">
+        <summary>For firms<svg class="chev" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg></summary>
+      <ul class="nav-items">
+        <li><a class="nav-item" href="/for-firms/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V4h8v13M12 8h4v9M3 17h14"/><path d="M7 7h2M7 10h2M7 13h2"/></svg><span class="ni-text"><span class="ni-t">For firms overview</span> <span class="ni-d">Measure your traders’ plan gap</span></span></a></li>
+        <li><a class="nav-item" href="/for-firms/#copy-leader"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h12l-3-3M16 13H4l3 3"/></svg><span class="ni-text"><span class="ni-t">Copy-trading platforms</span> <span class="ni-d">A leader-ranking test, not yet available</span></span></a></li>
+        <li><a class="nav-item" href="/for-platforms/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h10v10H3z"/><path d="M7 13v4h10V7h-4"/></svg><span class="ni-text"><span class="ni-t">Journals &amp; platforms</span> <span class="ni-d">Partner with us</span></span></a></li>
+        <li><a class="nav-item" href="/tools/pass-rate-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15L15 5"/><circle cx="6" cy="6" r="1.75"/><circle cx="14" cy="14" r="1.75"/></svg><span class="ni-text"><span class="ni-t">Pass-rate calculator</span> <span class="ni-d">One cohort’s pass and payout rate</span></span></a></li>
+        <li><a class="nav-item" href="/independence/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5l6 2.5v5c0 3.8-2.6 6-6 7.5-3.4-1.5-6-3.7-6-7.5V5z"/></svg><span class="ni-text"><span class="ni-t">Independence</span> <span class="ni-d">Why no firm can pay to change a number</span></span></a></li>
+      </ul>
+      <ul class="nav-foot">
+        <li><a href="/start/?product=pilot#pilot">Start a Pilot</a></li>
+      </ul>
+      </details>
+      <ul class="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/pricing/">Pricing</a></li>
+        <li><a href="/about/">About</a></li>
+        <li><a href="/help/#ask">Ask a question</a></li>
+      </ul>
+    </div>
+  </details></nav>
+  <details class="nav-ask" data-ask>
+    <summary aria-label="Ask a question"><svg class="ask-i" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="5"/><path d="M12.2 12.2L17 17"/></svg><span class="ask-label" aria-hidden="true">Ask</span></summary>
+    <div class="ask-pop"><search class="answer-box" data-answer-box>
+  <form action="/help/" method="get" data-mail="donttrade.research@gmail.com" data-index-src="/static/js/answers-index.js?v=e76c03fb" data-js-src="/static/js/answers.js?v=70c79990" data-ui-src="/static/js/answer-ui.js?v=a4dfada1">
+    <label for="hd-q">Ask about prices, refunds, files, privacy…</label>
+    <div class="ask-row"><input id="hd-q" type="search" autocomplete="off" maxlength="200"><button class="ask-submit" type="submit">Ask</button></div>
+  </form>
+  <div class="answer-out" aria-live="polite" data-answer-out></div>
+  <p class="small muted">Answers are quoted from this site’s own pages. Your question is never sent anywhere: it is matched in your browser, and without JavaScript, Ask opens the list of every answer instead.</p>
+</search></div>
+  </details>
+  <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" hidden><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg><span class="tt-label">Dark mode</span></button>
+</div></header>
+
+<main id="main">
+
+<div class="wrap">
+  <div class="grid">
+    <div class="span-8">
+      <p class="crumb small"><a href="/tools/">Free tools</a></p>
+      <h1>Your trades by hour and weekday</h1>
+      <p class="lede">Drop a trade file and see your results laid out by the hour and the day of the week each trade opened: the number of trades, the total and average result, and the win rate in each cell, with a shift for the time zone your file uses.</p>
+      <p>Most heatmaps stop there, and that is where they can mislead. A grid of 24 hours by 5 weekdays is 120 comparisons at once, so a few cells will look unusually good or bad by chance alone. This page says so next to the grid, shows how many cells hold fewer than 30 trades, and does not test, rank or name any cell as a pattern. It reads MT5 and MT4 HTML reports, IBKR Flex Query trade files and Tradovate order exports (all three in beta), and a plain CSV template. Everything runs in this browser tab, and the page’s security policy blocks every outgoing network request, so your file is not uploaded anywhere. The map describes your own past trades. It does not tell anyone when to trade.</p>
+    </div>
+  </div>
+  <p class="disclaimer">donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.</p>
+
+
+  <section class="tool" aria-labelledby="hm-tool-h">
+    <h2 id="hm-tool-h">Your file</h2>
+    <p id="hm-js-needed" class="notice notice-caution">This tool runs in your browser and needs JavaScript turned on.</p>
+    <div id="hm-controls" hidden>
+      <div class="dropzone" id="hm-drop">
+        <p><strong>Drop a trade file here</strong>, or choose one from your computer.</p>
+        <p class="small muted">MT5 or MT4 report (.htm, .html), IBKR Flex Query (.csv), Tradovate Orders (.csv), or the CSV template. Up to 50 MB and 200,000 rows.</p>
+        <div class="file-pick">
+          <label for="hm-file">Your trade file</label>
+          <input id="hm-file" type="file" accept=".csv,.htm,.html,.txt">
+        </div>
+        <p class="btn-row"><span class="muted">No file to hand?</span> <button class="btn btn-secondary" id="hm-sample-btn" type="button">Try a sample file</button></p>
+        <p class="small muted">The sample is synthetic: 160 made-up trades on three fictional symbols, not a real trader. The <a href="/tools/trade-stats/#template">CSV template</a> is described on the trade-stats page.</p>
+      </div>
+      <div class="field-grid">
+        <div class="field">
+          <label for="hm-shift">Time shift</label>
+          <span class="hint" id="hm-shift-hint">Times are read as written in the file. MT5 and MT4 reports use the broker’s server time; choose a shift to see the hours in another zone.</span>
+          <select id="hm-shift" aria-describedby="hm-shift-hint">
+            <option value="-12">−12 hours</option>
+            <option value="-11">−11 hours</option>
+            <option value="-10">−10 hours</option>
+            <option value="-9">−9 hours</option>
+            <option value="-8">−8 hours</option>
+            <option value="-7">−7 hours</option>
+            <option value="-6">−6 hours</option>
+            <option value="-5">−5 hours</option>
+            <option value="-4">−4 hours</option>
+            <option value="-3">−3 hours</option>
+            <option value="-2">−2 hours</option>
+            <option value="-1">−1 hours</option>
+            <option value="0" selected>None (as in the file)</option>
+            <option value="1">+1 hours</option>
+            <option value="2">+2 hours</option>
+            <option value="3">+3 hours</option>
+            <option value="4">+4 hours</option>
+            <option value="5">+5 hours</option>
+            <option value="6">+6 hours</option>
+            <option value="7">+7 hours</option>
+            <option value="8">+8 hours</option>
+            <option value="9">+9 hours</option>
+            <option value="10">+10 hours</option>
+            <option value="11">+11 hours</option>
+            <option value="12">+12 hours</option>
+            <option value="13">+13 hours</option>
+            <option value="14">+14 hours</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="hm-block">Hours per column</label>
+          <span class="hint" id="hm-block-hint">Wider blocks put more trades in each cell.</span>
+          <select id="hm-block" aria-describedby="hm-block-hint">
+            <option value="1" selected>1 hour</option>
+            <option value="2">2 hours</option>
+            <option value="3">3 hours</option>
+            <option value="4">4 hours</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <p id="hm-status" class="muted" role="status" hidden></p>
+    <p id="hm-progress" class="progress-line small muted" hidden><progress aria-label="Reading your file"></progress> <span data-elapsed aria-hidden="true"></span></p>
+    <div id="hm-error" class="notice notice-error" role="alert" tabindex="-1" hidden></div>
+  </section>
+
+  <div id="hm-out" class="tool-out" hidden></div>
+
+  <aside id="hm-teaser" class="notice notice-gap teaser" aria-labelledby="hm-teaser-h" data-on-sale="true">
+    <strong id="hm-teaser-h">What the habit report adds</strong>
+    <p id="hm-teaser-text">The habit report looks at what you do after a loss rather than at the clock.</p>
+    <p><a class="btn" href="/pricing/#traders">Get the habit report — $39</a></p>
+    <p class="small">$39 founding price for the first 100 buyers. One time, in US dollars, with one free re-test 30 to 60 days after your first report. A full refund if you ask within 14 days of buying. <a href="/pricing/#before-you-pay">Before you pay</a></p>
+  </aside>
+
+  <section class="section" aria-labelledby="count-h">
+    <h2 id="count-h">How the numbers are counted</h2>
+    <ul>
+      <li>Each closed trade goes in the cell of the weekday and hour it opened, after the time shift you choose. A trade runs from flat to flat on each symbol, as on the trade-stats page, and its result is net of fees when the file has them.</li>
+      <li>The open time is the close time minus the time the trade was held, in whole seconds, which is exact for every supported file format.</li>
+      <li>Win rate leaves out break-even trades. Saturday and Sunday appear only when the file has trades on them.</li>
+      <li>Nothing is tested. With many cells, some look unusual by chance alone, and a cell with few trades can swing a long way on one result.</li>
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="faq-h">
+    <h2 id="faq-h">Questions</h2>
+    <details id="q-why-do-some-cells-hold-so-few-trades"><summary>Why do some cells hold so few trades?</summary><p>Trades spread over up to 168 weekday and hour cells, and many hours simply have few. Choose two-, three- or four-hour blocks to put more trades in each cell.</p></details>
+    <details id="q-why-does-the-page-not-mark-the-best-and-worst-hours"><summary>Why does the page not mark the best and worst hours?</summary><p>When you compare many cells at once, some will look unusual by luck alone. The top or bottom cell of a large grid is often one of those lucky cells, so this page describes every cell and picks none of them out.</p></details>
+    <details id="q-which-time-zone-are-my-trades-in"><summary>Which time zone are my trades in?</summary><p>MT5 and MT4 reports use the broker’s server time, which is often two or three hours ahead of UTC and can shift with daylight saving. The page reads times exactly as written in the file; the shift moves them by whole hours, and the page shows the first and last open times so you can check them against what you remember.</p></details>
+    <details id="q-does-this-tell-me-the-best-time-to-trade"><summary>Does this tell me the best time to trade?</summary><p>No. It describes when your own past trades did better or worse. A cell that looks good or bad is a description of your history, not a forecast, and this page does not recommend when to trade.</p></details>
+    <details id="q-is-my-file-uploaded"><summary>Is my file uploaded?</summary><p>No. The analysis runs in your browser tab, and the page’s security policy blocks it from making network requests. You can watch your browser’s Network tab stay empty while it works.</p></details>
+    <details id="q-is-this-investment-advice"><summary>Is this investment advice?</summary><p>No. It measures your own past trades and does not recommend any security, trade, size or exit. Past results do not predict future results.</p></details>
+  </section>
+
+  <section class="section" aria-labelledby="more-h">
+    <h2 id="more-h">Related</h2>
+    <ul>
+      <li><a href="/tools/trade-stats/">Trade stats</a>: profit factor, win rate and streaks from your own trade file.</li>
+      <li><a href="/tools/drawdown-calculator/">Drawdown and recovery calculator</a>: your own drawdowns and how long they lasted.</li>
+      <li><a href="/tools/prop-challenge-simulator/">Prop-firm challenge simulator</a>: replay a challenge from your own trading days.</li>
+      <li><a href="/for-traders/">The habit report for traders</a> ($39 founding price).</li>
+    </ul>
+  </section>
+  <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR and Tradovate are trademarks of their owners. donttrade is not affiliated with any of them.</p>
+</div>
+<script type="text/csv" id="hm-sample">
+Date,Time,Symbol,Side,Quantity,Price,Currency,Fees
+2026-06-01,10:09:00,DEMO-C,Sell,20,23.50,USD,1.00
+2026-06-01,10:29:25,DEMO-C,Buy,20,23.16,USD,1.00
+2026-06-01,10:53:25,DEMO-A,Sell,20,48.00,USD,1.00
+2026-06-01,11:33:51,DEMO-A,Buy,20,48.33,USD,1.00
+2026-06-02,09:51:00,DEMO-A,Buy,25,48.17,USD,1.00
+2026-06-02,10:30:03,DEMO-A,Sell,25,47.85,USD,1.00
+2026-06-03,09:45:00,DEMO-C,Sell,20,23.06,USD,1.00
+2026-06-03,11:21:09,DEMO-C,Buy,20,23.36,USD,1.00
+2026-06-03,12:00:09,DEMO-A,Buy,20,47.94,USD,1.00
+2026-06-03,12:49:33,DEMO-A,Sell,20,47.12,USD,1.00
+2026-06-04,09:35:00,DEMO-B,Sell,50,112.00,USD,1.00
+2026-06-04,10:20:51,DEMO-B,Buy,50,110.12,USD,1.00
+2026-06-05,10:08:00,DEMO-C,Buy,50,23.28,USD,1.00
+2026-06-05,10:25:17,DEMO-C,Sell,50,23.44,USD,1.00
+2026-06-08,10:08:00,DEMO-C,Buy,20,23.52,USD,1.00
+2026-06-08,11:45:13,DEMO-C,Sell,20,23.17,USD,1.00
+2026-06-08,11:55:13,DEMO-C,Buy,40,23.08,USD,1.00
+2026-06-08,12:34:10,DEMO-C,Sell,40,23.56,USD,1.00
+2026-06-09,09:57:00,DEMO-C,Sell,30,23.62,USD,1.00
+2026-06-09,10:17:32,DEMO-C,Buy,30,23.27,USD,1.00
+2026-06-10,09:38:00,DEMO-B,Sell,25,109.75,USD,1.00
+2026-06-10,10:07:45,DEMO-B,Buy,25,108.21,USD,1.00
+2026-06-11,09:55:00,DEMO-C,Buy,25,23.25,USD,1.00
+2026-06-11,10:17:00,DEMO-C,Sell,25,23.61,USD,1.00
+2026-06-12,10:15:00,DEMO-C,Buy,25,23.66,USD,1.00
+2026-06-12,10:25:52,DEMO-C,Sell,25,24.10,USD,1.00
+2026-06-15,10:01:00,DEMO-C,Buy,50,24.11,USD,1.00
+2026-06-15,10:40:58,DEMO-C,Sell,50,24.37,USD,1.00
+2026-06-15,10:57:58,DEMO-A,Sell,30,47.09,USD,1.00
+2026-06-15,12:12:56,DEMO-A,Buy,30,47.68,USD,1.00
+2026-06-16,09:50:00,DEMO-B,Sell,50,107.85,USD,1.00
+2026-06-16,10:03:00,DEMO-B,Buy,50,106.96,USD,1.00
+2026-06-17,09:45:00,DEMO-C,Buy,30,24.33,USD,1.00
+2026-06-17,09:54:27,DEMO-C,Sell,30,24.80,USD,1.00
+2026-06-18,10:15:00,DEMO-B,Buy,25,107.21,USD,1.00
+2026-06-18,11:00:21,DEMO-B,Sell,25,108.95,USD,1.00
+2026-06-18,11:19:21,DEMO-C,Sell,40,24.75,USD,1.00
+2026-06-18,11:54:45,DEMO-C,Buy,40,24.50,USD,1.00
+2026-06-19,09:39:00,DEMO-C,Buy,30,24.47,USD,1.00
+2026-06-19,11:00:55,DEMO-C,Sell,30,24.11,USD,1.00
+2026-06-22,09:42:00,DEMO-C,Buy,20,24.13,USD,1.00
+2026-06-22,10:23:36,DEMO-C,Sell,20,24.63,USD,1.00
+2026-06-23,10:08:00,DEMO-C,Buy,50,24.55,USD,1.00
+2026-06-23,10:40:07,DEMO-C,Sell,50,24.11,USD,1.00
+2026-06-24,09:52:00,DEMO-B,Buy,30,108.61,USD,1.00
+2026-06-24,10:15:32,DEMO-B,Sell,30,110.40,USD,1.00
+2026-06-25,09:49:00,DEMO-A,Sell,30,47.76,USD,1.00
+2026-06-25,10:26:28,DEMO-A,Buy,30,47.29,USD,1.00
+2026-06-25,11:14:28,DEMO-C,Buy,30,24.13,USD,1.00
+2026-06-25,11:31:54,DEMO-C,Sell,30,24.40,USD,1.00
+2026-06-26,09:41:00,DEMO-C,Buy,30,24.31,USD,1.00
+2026-06-26,10:09:25,DEMO-C,Sell,30,24.53,USD,1.00
+2026-06-29,09:59:00,DEMO-B,Sell,40,110.56,USD,1.00
+2026-06-29,10:06:09,DEMO-B,Buy,40,108.61,USD,1.00
+2026-06-29,10:52:09,DEMO-A,Buy,50,47.42,USD,1.00
+2026-06-29,11:33:14,DEMO-A,Sell,50,48.36,USD,1.00
+2026-06-30,10:12:00,DEMO-C,Sell,30,24.62,USD,1.00
+2026-06-30,10:25:21,DEMO-C,Buy,30,24.43,USD,1.00
+2026-06-30,10:46:21,DEMO-B,Sell,50,108.89,USD,1.00
+2026-06-30,11:22:34,DEMO-B,Buy,50,107.87,USD,1.00
+2026-07-01,10:00:00,DEMO-C,Buy,50,24.39,USD,1.00
+2026-07-01,12:23:13,DEMO-C,Sell,50,24.06,USD,1.00
+2026-07-02,09:57:00,DEMO-C,Buy,40,23.99,USD,1.00
+2026-07-02,10:07:10,DEMO-C,Sell,40,24.45,USD,1.00
+2026-07-03,09:46:00,DEMO-A,Buy,40,48.19,USD,1.00
+2026-07-03,10:30:06,DEMO-A,Sell,40,47.37,USD,1.00
+2026-07-03,10:56:06,DEMO-A,Buy,40,47.47,USD,1.00
+2026-07-03,11:36:34,DEMO-A,Sell,40,46.89,USD,1.00
+2026-07-06,09:35:00,DEMO-C,Buy,25,24.35,USD,1.00
+2026-07-06,09:59:28,DEMO-C,Sell,25,24.89,USD,1.00
+2026-07-07,10:10:00,DEMO-C,Buy,40,24.90,USD,1.00
+2026-07-07,10:55:05,DEMO-C,Sell,40,25.40,USD,1.00
+2026-07-07,11:25:05,DEMO-A,Buy,25,46.80,USD,1.00
+2026-07-07,14:04:40,DEMO-A,Sell,25,46.40,USD,1.00
+2026-07-08,10:14:00,DEMO-C,Buy,50,25.32,USD,1.00
+2026-07-08,12:44:17,DEMO-C,Sell,50,25.03,USD,1.00
+2026-07-09,09:53:00,DEMO-A,Buy,50,46.23,USD,1.00
+2026-07-09,10:55:31,DEMO-A,Sell,50,45.85,USD,1.00
+2026-07-09,11:16:31,DEMO-B,Buy,50,108.26,USD,1.00
+2026-07-09,11:35:28,DEMO-B,Sell,50,109.93,USD,1.00
+2026-07-10,10:02:00,DEMO-B,Buy,40,109.81,USD,1.00
+2026-07-10,10:52:05,DEMO-B,Sell,40,109.12,USD,1.00
+2026-07-10,11:23:05,DEMO-A,Buy,50,46.02,USD,1.00
+2026-07-10,13:10:52,DEMO-A,Sell,50,45.58,USD,1.00
+2026-07-13,09:52:00,DEMO-A,Sell,25,45.75,USD,1.00
+2026-07-13,12:09:33,DEMO-A,Buy,25,46.23,USD,1.00
+2026-07-13,12:45:33,DEMO-A,Buy,50,46.33,USD,1.00
+2026-07-13,12:52:31,DEMO-A,Sell,50,47.40,USD,1.00
+2026-07-14,09:39:00,DEMO-A,Buy,50,47.50,USD,1.00
+2026-07-14,10:18:58,DEMO-A,Sell,50,48.21,USD,1.00
+2026-07-14,10:56:58,DEMO-C,Sell,40,25.12,USD,1.00
+2026-07-14,11:48:02,DEMO-C,Buy,40,25.28,USD,1.00
+2026-07-15,10:03:00,DEMO-B,Sell,25,108.74,USD,1.00
+2026-07-15,12:41:26,DEMO-B,Buy,25,110.05,USD,1.00
+2026-07-16,10:14:00,DEMO-A,Sell,25,48.14,USD,1.00
+2026-07-16,10:53:00,DEMO-A,Buy,25,47.65,USD,1.00
+2026-07-17,09:45:00,DEMO-B,Sell,50,109.80,USD,1.00
+2026-07-17,11:49:34,DEMO-B,Buy,50,111.12,USD,1.00
+2026-07-17,12:28:34,DEMO-A,Buy,20,47.73,USD,1.00
+2026-07-17,13:26:52,DEMO-A,Sell,20,46.79,USD,1.00
+2026-07-20,09:42:00,DEMO-A,Buy,40,46.69,USD,1.00
+2026-07-20,10:29:24,DEMO-A,Sell,40,46.04,USD,1.00
+2026-07-20,10:44:24,DEMO-A,Buy,20,45.89,USD,1.00
+2026-07-20,13:05:00,DEMO-A,Sell,20,45.47,USD,1.00
+2026-07-21,10:06:00,DEMO-C,Buy,25,25.36,USD,1.00
+2026-07-21,10:52:20,DEMO-C,Sell,25,25.03,USD,1.00
+2026-07-21,11:08:20,DEMO-C,Sell,20,25.00,USD,1.00
+2026-07-21,11:51:08,DEMO-C,Buy,20,24.44,USD,1.00
+2026-07-22,09:54:00,DEMO-B,Sell,40,111.23,USD,1.00
+2026-07-22,12:04:52,DEMO-B,Buy,40,113.37,USD,1.00
+2026-07-23,09:53:00,DEMO-C,Sell,40,24.37,USD,1.00
+2026-07-23,10:35:03,DEMO-C,Buy,40,24.11,USD,1.00
+2026-07-23,10:49:03,DEMO-A,Buy,30,45.39,USD,1.00
+2026-07-23,11:20:08,DEMO-A,Sell,30,45.91,USD,1.00
+2026-07-24,09:47:00,DEMO-A,Sell,30,45.75,USD,1.00
+2026-07-24,11:17:41,DEMO-A,Buy,30,45.99,USD,1.00
+2026-07-27,09:49:00,DEMO-A,Buy,25,45.98,USD,1.00
+2026-07-27,12:26:33,DEMO-A,Sell,25,45.29,USD,1.00
+2026-07-28,09:37:00,DEMO-C,Sell,40,24.09,USD,1.00
+2026-07-28,11:11:38,DEMO-C,Buy,40,24.34,USD,1.00
+2026-07-29,09:54:00,DEMO-B,Buy,50,113.51,USD,1.00
+2026-07-29,10:38:59,DEMO-B,Sell,50,115.24,USD,1.00
+2026-07-29,11:01:59,DEMO-B,Buy,25,115.29,USD,1.00
+2026-07-29,12:12:45,DEMO-B,Sell,25,114.16,USD,1.00
+2026-07-30,09:57:00,DEMO-C,Buy,50,24.37,USD,1.00
+2026-07-30,10:35:01,DEMO-C,Sell,50,24.75,USD,1.00
+2026-07-30,10:58:01,DEMO-B,Sell,25,113.85,USD,1.00
+2026-07-30,12:02:16,DEMO-B,Buy,25,114.98,USD,1.00
+2026-07-31,09:35:00,DEMO-C,Sell,20,24.84,USD,1.00
+2026-07-31,09:44:14,DEMO-C,Buy,20,24.61,USD,1.00
+2026-07-31,09:56:14,DEMO-C,Sell,50,24.57,USD,1.00
+2026-07-31,10:18:47,DEMO-C,Buy,50,24.24,USD,1.00
+2026-08-03,10:13:00,DEMO-A,Buy,25,45.41,USD,1.00
+2026-08-03,11:31:06,DEMO-A,Sell,25,44.57,USD,1.00
+2026-08-04,10:01:00,DEMO-C,Buy,30,24.28,USD,1.00
+2026-08-04,10:45:08,DEMO-C,Sell,30,24.63,USD,1.00
+2026-08-04,11:34:08,DEMO-B,Buy,30,114.77,USD,1.00
+2026-08-04,14:10:13,DEMO-B,Sell,30,113.26,USD,1.00
+2026-08-05,09:46:00,DEMO-A,Sell,30,44.65,USD,1.00
+2026-08-05,12:17:47,DEMO-A,Buy,30,45.46,USD,1.00
+2026-08-05,12:36:47,DEMO-B,Buy,25,113.44,USD,1.00
+2026-08-05,15:00:22,DEMO-B,Sell,25,111.76,USD,1.00
+2026-08-06,09:35:00,DEMO-C,Buy,40,24.58,USD,1.00
+2026-08-06,09:41:14,DEMO-C,Sell,40,24.79,USD,1.00
+2026-08-07,09:40:00,DEMO-B,Sell,40,112.13,USD,1.00
+2026-08-07,10:01:28,DEMO-B,Buy,40,109.97,USD,1.00
+2026-08-07,10:44:28,DEMO-C,Buy,20,24.70,USD,1.00
+2026-08-07,10:58:45,DEMO-C,Sell,20,24.99,USD,1.00
+2026-08-10,09:36:00,DEMO-B,Sell,20,109.78,USD,1.00
+2026-08-10,10:37:04,DEMO-B,Buy,20,111.78,USD,1.00
+2026-08-10,11:19:04,DEMO-C,Buy,50,25.00,USD,1.00
+2026-08-10,11:48:46,DEMO-C,Sell,50,25.27,USD,1.00
+2026-08-11,09:54:00,DEMO-B,Buy,25,111.56,USD,1.00
+2026-08-11,10:39:25,DEMO-B,Sell,25,114.24,USD,1.00
+2026-08-11,11:04:25,DEMO-B,Sell,25,114.31,USD,1.00
+2026-08-11,11:30:35,DEMO-B,Buy,25,112.79,USD,1.00
+2026-08-12,09:53:00,DEMO-C,Buy,30,25.35,USD,1.00
+2026-08-12,10:29:46,DEMO-C,Sell,30,25.69,USD,1.00
+2026-08-12,11:15:46,DEMO-B,Sell,20,113.16,USD,1.00
+2026-08-12,13:51:17,DEMO-B,Buy,20,115.19,USD,1.00
+2026-08-13,09:41:00,DEMO-C,Sell,30,25.63,USD,1.00
+2026-08-13,12:05:46,DEMO-C,Buy,30,25.91,USD,1.00
+2026-08-14,09:59:00,DEMO-B,Buy,20,115.12,USD,1.00
+2026-08-14,10:52:53,DEMO-B,Sell,20,113.16,USD,1.00
+2026-08-14,11:10:53,DEMO-C,Buy,40,25.93,USD,1.00
+2026-08-14,13:25:05,DEMO-C,Sell,40,25.43,USD,1.00
+2026-08-17,09:38:00,DEMO-A,Buy,50,45.45,USD,1.00
+2026-08-17,10:15:47,DEMO-A,Sell,50,46.05,USD,1.00
+2026-08-17,10:54:47,DEMO-C,Buy,40,25.49,USD,1.00
+2026-08-17,11:34:13,DEMO-C,Sell,40,25.91,USD,1.00
+2026-08-18,09:42:00,DEMO-A,Sell,40,46.02,USD,1.00
+2026-08-18,10:25:30,DEMO-A,Buy,40,45.69,USD,1.00
+2026-08-19,09:53:00,DEMO-B,Sell,40,113.51,USD,1.00
+2026-08-19,11:26:56,DEMO-B,Buy,40,114.41,USD,1.00
+2026-08-19,11:58:56,DEMO-C,Sell,25,25.99,USD,1.00
+2026-08-19,12:35:10,DEMO-C,Buy,25,25.60,USD,1.00
+2026-08-20,09:49:00,DEMO-B,Buy,30,114.68,USD,1.00
+2026-08-20,10:02:03,DEMO-B,Sell,30,117.12,USD,1.00
+2026-08-20,10:28:03,DEMO-B,Buy,20,116.81,USD,1.00
+2026-08-20,11:35:51,DEMO-B,Sell,20,114.83,USD,1.00
+2026-08-21,09:36:00,DEMO-B,Buy,40,114.70,USD,1.00
+2026-08-21,09:55:24,DEMO-B,Sell,40,116.46,USD,1.00
+2026-08-21,10:38:24,DEMO-A,Buy,50,45.58,USD,1.00
+2026-08-21,11:23:36,DEMO-A,Sell,50,46.41,USD,1.00
+2026-08-24,09:45:00,DEMO-C,Sell,20,25.52,USD,1.00
+2026-08-24,11:07:59,DEMO-C,Buy,20,25.71,USD,1.00
+2026-08-24,11:32:59,DEMO-A,Sell,30,46.49,USD,1.00
+2026-08-24,11:42:56,DEMO-A,Buy,30,45.56,USD,1.00
+2026-08-25,09:58:00,DEMO-B,Buy,20,116.36,USD,1.00
+2026-08-25,10:33:39,DEMO-B,Sell,20,114.13,USD,1.00
+2026-08-25,11:16:39,DEMO-B,Buy,50,114.53,USD,1.00
+2026-08-25,11:54:08,DEMO-B,Sell,50,116.15,USD,1.00
+2026-08-26,09:45:00,DEMO-B,Buy,30,116.13,USD,1.00
+2026-08-26,12:12:28,DEMO-B,Sell,30,113.98,USD,1.00
+2026-08-27,10:05:00,DEMO-B,Buy,20,114.36,USD,1.00
+2026-08-27,12:14:35,DEMO-B,Sell,20,112.09,USD,1.00
+2026-08-28,09:39:00,DEMO-A,Buy,20,45.58,USD,1.00
+2026-08-28,12:14:30,DEMO-A,Sell,20,44.87,USD,1.00
+2026-08-28,12:52:30,DEMO-A,Sell,30,44.80,USD,1.00
+2026-08-28,13:58:43,DEMO-A,Buy,30,45.08,USD,1.00
+2026-08-31,10:13:00,DEMO-C,Sell,25,25.65,USD,1.00
+2026-08-31,11:00:16,DEMO-C,Buy,25,25.99,USD,1.00
+2026-08-31,11:42:16,DEMO-A,Buy,20,44.93,USD,1.00
+2026-08-31,13:49:34,DEMO-A,Sell,20,44.42,USD,1.00
+2026-09-01,09:48:00,DEMO-B,Sell,20,111.86,USD,1.00
+2026-09-01,10:46:42,DEMO-B,Buy,20,113.08,USD,1.00
+2026-09-01,11:36:42,DEMO-C,Sell,20,25.90,USD,1.00
+2026-09-01,12:55:06,DEMO-C,Buy,20,26.09,USD,1.00
+2026-09-02,09:52:00,DEMO-C,Buy,20,26.13,USD,1.00
+2026-09-02,10:23:16,DEMO-C,Sell,20,26.55,USD,1.00
+2026-09-02,11:11:16,DEMO-C,Buy,30,26.53,USD,1.00
+2026-09-02,13:49:04,DEMO-C,Sell,30,26.04,USD,1.00
+2026-09-03,09:52:00,DEMO-B,Buy,40,112.86,USD,1.00
+2026-09-03,10:13:44,DEMO-B,Sell,40,113.87,USD,1.00
+2026-09-04,09:40:00,DEMO-A,Buy,50,44.38,USD,1.00
+2026-09-04,10:07:24,DEMO-A,Sell,50,44.97,USD,1.00
+2026-09-04,10:45:24,DEMO-A,Buy,30,44.95,USD,1.00
+2026-09-04,12:53:44,DEMO-A,Sell,30,44.45,USD,1.00
+2026-09-07,10:05:00,DEMO-A,Sell,25,44.56,USD,1.00
+2026-09-07,11:20:18,DEMO-A,Buy,25,45.24,USD,1.00
+2026-09-07,11:57:18,DEMO-C,Buy,20,26.02,USD,1.00
+2026-09-07,12:53:53,DEMO-C,Sell,20,25.56,USD,1.00
+2026-09-08,09:59:00,DEMO-B,Buy,40,114.26,USD,1.00
+2026-09-08,12:15:43,DEMO-B,Sell,40,113.01,USD,1.00
+2026-09-08,12:35:43,DEMO-A,Sell,25,45.40,USD,1.00
+2026-09-08,13:15:04,DEMO-A,Buy,25,44.55,USD,1.00
+2026-09-09,09:42:00,DEMO-B,Sell,25,112.60,USD,1.00
+2026-09-09,12:13:35,DEMO-B,Buy,25,113.50,USD,1.00
+2026-09-09,12:34:35,DEMO-A,Buy,50,44.44,USD,1.00
+2026-09-09,12:54:18,DEMO-A,Sell,50,44.98,USD,1.00
+2026-09-10,09:51:00,DEMO-C,Buy,40,25.56,USD,1.00
+2026-09-10,10:02:45,DEMO-C,Sell,40,25.98,USD,1.00
+2026-09-11,10:08:00,DEMO-B,Buy,20,113.16,USD,1.00
+2026-09-11,10:28:49,DEMO-B,Sell,20,115.66,USD,1.00
+2026-09-11,10:54:49,DEMO-C,Sell,50,26.01,USD,1.00
+2026-09-11,13:11:38,DEMO-C,Buy,50,26.52,USD,1.00
+2026-09-14,09:57:00,DEMO-B,Sell,25,116.09,USD,1.00
+2026-09-14,12:12:38,DEMO-B,Buy,25,116.96,USD,1.00
+2026-09-14,12:28:38,DEMO-C,Sell,30,26.61,USD,1.00
+2026-09-14,12:48:38,DEMO-C,Buy,30,26.45,USD,1.00
+2026-09-15,10:14:00,DEMO-C,Buy,30,26.41,USD,1.00
+2026-09-15,10:20:39,DEMO-C,Sell,30,26.78,USD,1.00
+2026-09-15,10:36:39,DEMO-C,Sell,40,26.68,USD,1.00
+2026-09-15,10:48:47,DEMO-C,Buy,40,26.35,USD,1.00
+2026-09-16,09:57:00,DEMO-B,Buy,50,116.55,USD,1.00
+2026-09-16,10:27:16,DEMO-B,Sell,50,118.01,USD,1.00
+2026-09-17,10:15:00,DEMO-A,Buy,30,44.80,USD,1.00
+2026-09-17,10:51:16,DEMO-A,Sell,30,44.38,USD,1.00
+2026-09-17,11:22:16,DEMO-C,Buy,50,26.44,USD,1.00
+2026-09-17,13:28:55,DEMO-C,Sell,50,25.93,USD,1.00
+2026-09-18,10:01:00,DEMO-B,Buy,25,118.20,USD,1.00
+2026-09-18,10:12:42,DEMO-B,Sell,25,119.11,USD,1.00
+2026-09-18,10:28:42,DEMO-A,Buy,40,44.27,USD,1.00
+2026-09-18,11:02:58,DEMO-A,Sell,40,44.83,USD,1.00
+2026-09-21,10:06:00,DEMO-B,Buy,25,119.40,USD,1.00
+2026-09-21,11:44:59,DEMO-B,Sell,25,118.01,USD,1.00
+2026-09-21,12:03:59,DEMO-B,Buy,25,118.17,USD,1.00
+2026-09-21,14:15:42,DEMO-B,Sell,25,116.42,USD,1.00
+2026-09-22,10:04:00,DEMO-C,Buy,40,25.85,USD,1.00
+2026-09-22,10:15:51,DEMO-C,Sell,40,26.02,USD,1.00
+2026-09-23,10:05:00,DEMO-C,Buy,30,26.12,USD,1.00
+2026-09-23,10:50:41,DEMO-C,Sell,30,26.59,USD,1.00
+2026-09-23,11:23:41,DEMO-C,Buy,40,26.50,USD,1.00
+2026-09-23,11:54:50,DEMO-C,Sell,40,27.13,USD,1.00
+2026-09-24,10:14:00,DEMO-A,Sell,20,44.84,USD,1.00
+2026-09-24,10:42:08,DEMO-A,Buy,20,44.35,USD,1.00
+2026-09-24,10:54:08,DEMO-C,Buy,30,27.20,USD,1.00
+2026-09-24,11:39:39,DEMO-C,Sell,30,27.85,USD,1.00
+2026-09-25,09:43:00,DEMO-B,Buy,50,116.09,USD,1.00
+2026-09-25,09:58:45,DEMO-B,Sell,50,117.26,USD,1.00
+2026-09-25,10:29:45,DEMO-B,Buy,25,117.27,USD,1.00
+2026-09-25,10:52:50,DEMO-B,Sell,25,119.05,USD,1.00
+2026-09-28,09:58:00,DEMO-A,Sell,30,44.29,USD,1.00
+2026-09-28,11:53:03,DEMO-A,Buy,30,45.07,USD,1.00
+2026-09-28,12:20:03,DEMO-C,Buy,25,27.79,USD,1.00
+2026-09-28,14:04:04,DEMO-C,Sell,25,27.35,USD,1.00
+2026-09-29,09:37:00,DEMO-A,Buy,30,45.05,USD,1.00
+2026-09-29,12:01:55,DEMO-A,Sell,30,44.27,USD,1.00
+2026-09-29,12:50:55,DEMO-B,Sell,50,119.30,USD,1.00
+2026-09-29,15:00:34,DEMO-B,Buy,50,120.77,USD,1.00
+2026-09-30,09:38:00,DEMO-A,Buy,20,44.42,USD,1.00
+2026-09-30,09:46:38,DEMO-A,Sell,20,45.35,USD,1.00
+2026-09-30,10:31:38,DEMO-C,Buy,25,27.31,USD,1.00
+2026-09-30,13:09:06,DEMO-C,Sell,25,27.07,USD,1.00
+2026-10-01,09:53:00,DEMO-C,Sell,30,26.99,USD,1.00
+2026-10-01,11:14:03,DEMO-C,Buy,30,27.42,USD,1.00
+2026-10-02,09:49:00,DEMO-A,Sell,25,45.32,USD,1.00
+2026-10-02,10:13:31,DEMO-A,Buy,25,44.68,USD,1.00
+2026-10-05,09:38:00,DEMO-B,Buy,25,121.24,USD,1.00
+2026-10-05,10:20:19,DEMO-B,Sell,25,122.97,USD,1.00
+2026-10-05,11:10:19,DEMO-C,Buy,25,27.48,USD,1.00
+2026-10-05,11:31:05,DEMO-C,Sell,25,27.74,USD,1.00
+2026-10-06,10:01:00,DEMO-C,Sell,20,27.83,USD,1.00
+2026-10-06,10:33:51,DEMO-C,Buy,20,27.44,USD,1.00
+2026-10-07,10:04:00,DEMO-A,Buy,40,44.71,USD,1.00
+2026-10-07,12:15:01,DEMO-A,Sell,40,43.91,USD,1.00
+2026-10-08,09:49:00,DEMO-A,Sell,30,43.91,USD,1.00
+2026-10-08,11:00:37,DEMO-A,Buy,30,44.43,USD,1.00
+2026-10-08,11:44:37,DEMO-A,Sell,50,44.43,USD,1.00
+2026-10-08,11:50:44,DEMO-A,Buy,50,43.97,USD,1.00
+2026-10-09,09:45:00,DEMO-B,Buy,40,123.05,USD,1.00
+2026-10-09,10:14:00,DEMO-B,Sell,40,125.53,USD,1.00
+2026-10-12,09:40:00,DEMO-A,Buy,40,44.11,USD,1.00
+2026-10-12,10:12:55,DEMO-A,Sell,40,44.58,USD,1.00
+2026-10-12,10:35:55,DEMO-B,Buy,40,125.39,USD,1.00
+2026-10-12,11:40:03,DEMO-B,Sell,40,123.83,USD,1.00
+2026-10-13,09:55:00,DEMO-C,Buy,20,27.44,USD,1.00
+2026-10-13,11:54:28,DEMO-C,Sell,20,27.03,USD,1.00
+2026-10-13,12:05:28,DEMO-A,Buy,50,44.61,USD,1.00
+2026-10-13,14:46:25,DEMO-A,Sell,50,44.30,USD,1.00
+2026-10-14,10:03:00,DEMO-C,Sell,40,27.07,USD,1.00
+2026-10-14,11:40:08,DEMO-C,Buy,40,27.28,USD,1.00
+2026-10-14,12:24:08,DEMO-C,Sell,50,27.34,USD,1.00
+2026-10-14,14:33:37,DEMO-C,Buy,50,27.52,USD,1.00
+2026-10-15,09:56:00,DEMO-C,Buy,30,27.63,USD,1.00
+2026-10-15,10:20:29,DEMO-C,Sell,30,27.83,USD,1.00
+2026-10-16,09:38:00,DEMO-B,Buy,25,123.58,USD,1.00
+2026-10-16,10:05:07,DEMO-B,Sell,25,126.34,USD,1.00
+2026-10-19,10:09:00,DEMO-B,Buy,25,126.69,USD,1.00
+2026-10-19,11:11:51,DEMO-B,Sell,25,125.23,USD,1.00
+</script>
+
+</main>
+<footer class="site-footer"><div class="wrap">
+  <div class="cols">
+    <nav aria-label="Traders"><h2>Traders</h2><ul><li><a href="/tools/">Free tools</a></li><li><a href="/tools/trade-stats/">Trade stats</a></li><li><a href="/for-traders/">Individual traders</a></li>
+    </ul></nav>
+    <nav aria-label="Firms"><h2>Firms</h2><ul><li><a href="/for-firms/">Prop firms &amp; brokers</a></li><li><a href="/for-platforms/">Journals &amp; platforms</a></li><li><a href="/for-firms/#copy-leader">Copy-trading platforms</a></li><li><a href="/for-firms/#claims-test">Firms making behaviour claims</a></li><li><a href="/pricing/">Pricing</a></li><li><a href="/start/?product=pilot#pilot">Start a Pilot</a></li>
+    </ul></nav>
+    <nav aria-label="Research"><h2>Research</h2><ul><li><a href="/research/">Research</a></li><li><a href="/plan-gap/">The plan gap</a></li><li><a href="/sample-memo/">Sample &amp; method</a></li><li><a href="/code/">Code</a></li><li><a href="/glossary/">Glossary</a></li><li><a href="/corrections/">Corrections</a></li><li><a href="/feed.xml">Atom feed</a></li>
+    </ul></nav>
+    <nav aria-label="Trust"><h2>Trust</h2><ul><li><a href="/independence/">Independence</a></li><li><a href="/about/">About</a></li><li><a href="/help/">Questions</a></li><li><a href="/for-researchers/">Researchers &amp; press</a></li>
+    </ul></nav>
+    <nav aria-label="Legal"><h2>Legal</h2><ul><li><a href="/terms/">Terms</a></li><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/#cancellation">Cancellations &amp; refunds</a></li>
+    </ul></nav>
+    <nav aria-label="Follow donttrade"><h2>Follow</h2><ul class="follow"><li><a href="https://donttrade.substack.com" rel="me noopener"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24"><path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"/></svg><span>Substack</span></a></li><li><a href="https://x.com/donttradestudy" rel="me noopener"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg><span>X</span><span class="visually-hidden"> @donttradestudy</span></a></li><li><a href="https://github.com/donttrade" rel="me noopener"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg><span>GitHub</span></a></li><li><a href="https://www.tiktok.com/@donttradestudy" rel="me noopener"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg><span>TikTok</span><span class="visually-hidden"> @donttradestudy</span></a></li><li><a href="https://www.instagram.com/donttradestudy/" rel="me noopener"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24"><path d="M7.0301.084c-1.2768.0602-2.1487.264-2.911.5634-.7888.3075-1.4575.72-2.1228 1.3877-.6652.6677-1.075 1.3368-1.3802 2.127-.2954.7638-.4956 1.6365-.552 2.914-.0564 1.2775-.0689 1.6882-.0626 4.947.0062 3.2586.0206 3.6671.0825 4.9473.061 1.2765.264 2.1482.5635 2.9107.308.7889.72 1.4573 1.388 2.1228.6679.6655 1.3365 1.0743 2.1285 1.38.7632.295 1.6361.4961 2.9134.552 1.2773.056 1.6884.069 4.9462.0627 3.2578-.0062 3.668-.0207 4.9478-.0814 1.28-.0607 2.147-.2652 2.9098-.5633.7889-.3086 1.4578-.72 2.1228-1.3881.665-.6682 1.0745-1.3378 1.3795-2.1284.2957-.7632.4966-1.636.552-2.9124.056-1.2809.0692-1.6898.063-4.948-.0063-3.2583-.021-3.6668-.0817-4.9465-.0607-1.2797-.264-2.1487-.5633-2.9117-.3084-.7889-.72-1.4568-1.3876-2.1228C21.2982 1.33 20.628.9208 19.8378.6165 19.074.321 18.2017.1197 16.9244.0645 15.6471.0093 15.236-.005 11.977.0014 8.718.0076 8.31.0215 7.0301.0839m.1402 21.6932c-1.17-.0509-1.8053-.2453-2.2287-.408-.5606-.216-.96-.4771-1.3819-.895-.422-.4178-.6811-.8186-.9-1.378-.1644-.4234-.3624-1.058-.4171-2.228-.0595-1.2645-.072-1.6442-.079-4.848-.007-3.2037.0053-3.583.0607-4.848.05-1.169.2456-1.805.408-2.2282.216-.5613.4762-.96.895-1.3816.4188-.4217.8184-.6814 1.3783-.9003.423-.1651 1.0575-.3614 2.227-.4171 1.2655-.06 1.6447-.072 4.848-.079 3.2033-.007 3.5835.005 4.8495.0608 1.169.0508 1.8053.2445 2.228.408.5608.216.96.4754 1.3816.895.4217.4194.6816.8176.9005 1.3787.1653.4217.3617 1.056.4169 2.2263.0602 1.2655.0739 1.645.0796 4.848.0058 3.203-.0055 3.5834-.061 4.848-.051 1.17-.245 1.8055-.408 2.2294-.216.5604-.4763.96-.8954 1.3814-.419.4215-.8181.6811-1.3783.9-.4224.1649-1.0577.3617-2.2262.4174-1.2656.0595-1.6448.072-4.8493.079-3.2045.007-3.5825-.006-4.848-.0608M16.953 5.5864A1.44 1.44 0 1 0 18.39 4.144a1.44 1.44 0 0 0-1.437 1.4424M5.8385 12.012c.0067 3.4032 2.7706 6.1557 6.173 6.1493 3.4026-.0065 6.157-2.7701 6.1506-6.1733-.0065-3.4032-2.771-6.1565-6.174-6.1498-3.403.0067-6.156 2.771-6.1496 6.1738M8 12.0077a4 4 0 1 1 4.008 3.9921A3.9996 3.9996 0 0 1 8 12.0077"/></svg><span>Instagram</span><span class="visually-hidden"> @donttradestudy</span></a></li><li><a href="https://www.youtube.com/@donttradestudy" rel="me noopener"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg><span>YouTube</span><span class="visually-hidden"> @donttradestudy</span></a></li>
+    </ul></nav>
+  </div>
+  <p class="legal">Email <a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a>. We reply within 1 business day (Eastern Time, Monday to Friday).</p>
+  <p class="legal" data-business-id>donttrade · Ontario, Canada · 2284 Calloway Drive, Oakville ON L6M 4X3 · <a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a></p>
+  <p class="legal"><strong>Firms pay for fixed-scope measurements of their own data. Readers pay nothing. No firm can pay to change a number.</strong> <a href="/independence/">Independence policy</a></p>
+  <p class="legal">donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.</p>
+  <p class="legal">This site sets no cookies and runs no analytics. It stores your light/dark choice in your own browser and, if you buy the habit report, your access key there too. For that report your browser sends our server only stripped trade numbers. The server does not keep them: of those numbers it keeps only a scrambled fingerprint of each trade row from your first report, to match a re-test to the same history. Your file itself is not uploaded. Card payments are handled by Stripe. Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; their privacy policies apply. <a href="/privacy/">Privacy</a></p>
+  <p class="legal">&copy; 2026 donttrade. Text and charts <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>; numbers are facts, quote them with a link.</p>
+</div></footer>
+
+</body>
+</html>
