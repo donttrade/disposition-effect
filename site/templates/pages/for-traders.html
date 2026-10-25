@@ -74,16 +74,8 @@
 
   <section class="section" aria-labelledby="free-h" data-reveal>
     <h2 id="free-h">Free now</h2>
-    <div class="table-wrap" tabindex="0" role="region" aria-label="Free tools">
-    <table class="tool-list">
-      <thead><tr><th scope="col">Tool</th><th scope="col">The question it answers</th><th scope="col">What you give it</th></tr></thead>
-      <tbody>
-      {%- for tl in tools[:3] %}
-        <tr><th scope="row"><a href="{{ tl.href }}">{{ tl.name }}</a></th><td>{{ tl.question }}</td><td>{{ tl.input }}</td></tr>
-      {%- endfor %}
-      </tbody>
-    </table>
-    </div>
+    {%- from "partials/tool_cards.html" import tool_cards %}
+    {{ tool_cards(tools[:3]) }}
     <p><a href="/tools/">All free tools</a> · <a href="/research/">The research is free</a></p>
   </section>
 
