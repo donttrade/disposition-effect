@@ -32,6 +32,14 @@ export function clearFieldErrors(ids, summaryBox) {
   if (summaryBox) summaryBox.hidden = true;
 }
 
+// QA 25 Oct: after a run, move focus to the result heading and bring the result's top into view
+// (a plain jump, no smooth scroll, under reduced motion).
+export function revealResult(heading) {
+  heading.focus({ preventScroll: true });
+  const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  heading.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' });
+}
+
 export function fieldError(id, message) {
   document.getElementById(id).setAttribute('aria-invalid', 'true');
   const box = document.getElementById(id + '-err');

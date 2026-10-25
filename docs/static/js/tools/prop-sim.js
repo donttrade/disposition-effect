@@ -6,7 +6,7 @@
 // the worker. Manual mode: four summary numbers. Either way the page's CSP is
 // connect-src 'none', nothing is stored, nothing is logged.
 
-import { createFileSlot, renderReadError, whileBusy, clearFieldErrors, fieldError, showProblems } from './tool-state.js?v=c82d0056';
+import { createFileSlot, renderReadError, whileBusy, clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js?v=fd4af716';
 import { RUNS, DEFAULT_SEED, tradingDays } from './prop-sim-core.js?v=ef3c575e';
 import { money, unitNote, pct, intText, el, DASH } from './format.js?v=acb0db51';
 import { parseStrict, parsePositive, parseWhole, InputError } from './num.js?v=8df99e34';
@@ -107,7 +107,7 @@ async function run(ev) {
   if (!p) return;
   if (worker) worker.terminate();
   $('ps-out').hidden = true;
-  $('ps-teaser').hidden = true;
+  if ($('ps-teaser')) $('ps-teaser').hidden = true;
   const st = $('ps-status');
   st.textContent = `Running ${intText(p.runs)} simulated challenges…`;
   st.hidden = false;
@@ -200,7 +200,8 @@ function render(p, res) {
     el('p', { id: 'ps-streak', 'data-busts': String(res.bust), text: streakLine(res) }),
     el('p', { class: 'small muted', text: `Rules used: ${rulesText}` })].filter(Boolean)); // no empty slot becomes the text "null"
   out.hidden = false;
-  $('ps-out-h').focus();
+  revealResult($('ps-out-h'));
+  if (!$('ps-teaser')) return; // paid_report on: partials/tool_next_step.html is the one offer
   $('ps-teaser-text').textContent = teaser(res);
   $('ps-teaser').hidden = false;
 }
@@ -228,7 +229,13 @@ function init() {
     onError: (err, retry) => renderReadError($('ps-file-error'), err, retry),
   });
   $('ps-file').addEventListener('change', (e) => slot.pickFile(e.target.files[0], 'your file'));
-  $('ps-sample-btn').addEventListener('click', () => slot.readBytes(new TextEncoder().encode($('ps-sample').textContent.replace(/^\s+/, '')), 'the synthetic sample file'));
+  $('ps-sample-btn').addEventListener('click', () => {
+    // QA 25 Oct: the sample also fills example rules (only boxes still empty), so Run works at once
+    for (const [id, v] of [['ps-target', '600'], ['ps-daily', '250'], ['ps-maxloss', '500'], ['ps-days', '60']]) {
+      if ($(id).value.trim() === '') $(id).value = v;
+    }
+    slot.readBytes(new TextEncoder().encode($('ps-sample').textContent.replace(/^\s+/, '')), 'the synthetic sample file');
+  });
   $('ps-form').addEventListener('submit', run);
   if (!$('ps-seed').value) $('ps-seed').value = String(DEFAULT_SEED);
   $('ps-js-needed').hidden = true;

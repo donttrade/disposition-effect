@@ -26,6 +26,10 @@
   --gain: #1F7A52;
   --loss: #A3264F;
   --caution: #8C6A1E;
+  /* the hero band (ARCHITECT-BRAND §2.2; owner, 25 Oct): in light it uses these page tokens, so only
+     its plot-paper motif is set here; the charcoal --band-* set is in the dark blocks. Never #9A3B1C on dark. */
+  --band-grid: rgb(154 59 28 / 0.07);
+  --band-grid-major: rgb(154 59 28 / 0.13);
 
   --font-sans: "Plex Sans", -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: "Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -61,6 +65,21 @@
     --gain: #3FB37F;
     --loss: #E86A8E;
     --caution: #D9A441;
+    --band-bg: #0E1013;   /* deeper than the dark page, so the band still reads as a band */
+    --band-surface: #16181C;
+    --band-text: #F2F1EE;
+    --band-muted: #A7ABB3;
+    --band-rust: #E07A52;
+    --band-rust-hover: #EC9A78;
+    --band-on-rust: #16181C;
+    --band-gain: #3FB37F;
+    --band-loss: #E86A8E;
+    --band-plan: #6E8BB0;
+    --band-caution: #D9A441;
+    --band-field-border: #8A8F98;
+    --band-border: #3A3E46;
+    --band-grid: rgb(224 122 82 / 0.10);
+    --band-grid-major: rgb(224 122 82 / 0.18);
     color-scheme: dark;
   }
 }
@@ -80,12 +99,29 @@
   --gain: #3FB37F;
   --loss: #E86A8E;
   --caution: #D9A441;
+  --band-bg: #0E1013;   /* deeper than the dark page, so the band still reads as a band */
+  --band-surface: #16181C;
+  --band-text: #F2F1EE;
+  --band-muted: #A7ABB3;
+  --band-rust: #E07A52;
+  --band-rust-hover: #EC9A78;
+  --band-on-rust: #16181C;
+  --band-gain: #3FB37F;
+  --band-loss: #E86A8E;
+  --band-plan: #6E8BB0;
+  --band-caution: #D9A441;
+  --band-field-border: #8A8F98;
+  --band-border: #3A3E46;
+  --band-grid: rgb(224 122 82 / 0.10);
+  --band-grid-major: rgb(224 122 82 / 0.18);
   color-scheme: dark;
 }
 
 /* ------------------------------------------------------------------ base */
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
+/* QA 25 Oct: an anchor target (#last-step, #firms, …) lands with room above it, not flush to the edge */
+[id] { scroll-margin-top: var(--s3); }
 body {
   margin: 0;
   background: var(--bg);
@@ -135,16 +171,59 @@ a:hover { color: var(--rust-hover); }
 .stack > * + * { margin-top: var(--s2); }
 
 /* ------------------------------------------------------------------ header / footer */
-/* Header (Manager V3): one 64 px line at every width. ≥ 900 px: brand · nav row · theme toggle.
-   < 900 px: brand · Menu (a <details>, works without JS) · theme toggle as an icon button; the
-   open menu is a list laid over the page under the header, so the page does not move. */
+/* Header (Manager V3; ARCHITECT-V3 §c.2): one 64 px line at every width. ≥ 900 px: brand · nav row
+   (3 drop-downs + 2 links) · theme toggle. < 900 px: brand · Menu (a <details>, works without JS) ·
+   theme toggle as an icon button; the open menu is an accordion laid over the page under the header.
+   Drop-down motion (B3): the panel fades in 6 px down in 200 ms, transform and opacity only; the
+   chevron turns in --dur-hover; nothing moves under prefers-reduced-motion. No close animation. */
+:root { --ease-nav: cubic-bezier(0.45, 0.05, 0.55, 0.95); } /* Stripe's nav easing [READ] */
 .site-header { border-bottom: 1px solid var(--border); position: relative; z-index: 20; background: var(--bg); }
 .site-header .wrap { display: flex; flex-wrap: nowrap; align-items: center; gap: var(--s1) var(--s3); min-height: 64px; }
 .brand { font-weight: 600; color: var(--text); text-decoration: none; font-size: var(--fs-2); margin-right: auto; display: inline-flex; align-items: center; min-height: var(--target); white-space: nowrap; }
 .site-nav ul { list-style: none; margin: 0; padding: 0; }
-.site-nav .nav-row { display: flex; flex-wrap: wrap; gap: 0 var(--s2); }
+.site-nav .nav-row { display: flex; flex-wrap: nowrap; align-items: center; gap: 0 var(--s2); }
 .site-nav a { display: inline-flex; align-items: center; min-height: var(--target); color: var(--text); text-decoration: none; white-space: nowrap; }
 .site-nav a:hover, .site-nav a[aria-current="page"], .site-nav a[aria-current="true"] { color: var(--rust); text-decoration: underline; }
+/* drop-downs (desktop) and the phone accordion share the summary look */
+details.nav-dd, details.nav-acc { border-bottom: 0; }
+.nav-dd > summary, .nav-acc > summary { list-style: none; display: flex; align-items: center; gap: 2px; min-height: var(--target);
+  padding: 0; font-weight: 400; color: var(--text); white-space: nowrap; transition: none; }
+.nav-dd > summary::-webkit-details-marker, .nav-acc > summary::-webkit-details-marker { display: none; }
+.nav-dd > summary:hover, .nav-dd[open] > summary, .nav-acc[open] > summary { color: var(--rust); }
+.nav-dd > summary.is-current, .nav-acc > summary.is-current { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.chev { flex: none; width: 16px; height: 16px; }
+details[open] > summary > .chev { transform: rotate(180deg); }
+.nav-dd-li { position: relative; }
+.nav-pop { position: absolute; top: calc(100% + 10px); left: -12px; z-index: 2; width: min(24rem, calc(100vw - 32px));
+  padding: var(--s1); background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--lift-shadow); }
+.nav-pop-end { left: auto; right: -12px; }
+.nav-pop::before { content: ""; position: absolute; left: 0; right: 0; top: -11px; height: 11px; } /* hover bridge over the gap */
+@media (min-width: 1100px) {
+  .nav-pop-2 { width: min(36rem, calc(100vw - 32px)); }
+  .nav-pop-2 .nav-items { display: grid; grid-template-columns: 1fr 1fr; }
+}
+.site-nav a.nav-item { display: flex; align-items: flex-start; gap: 12px; min-height: 48px; padding: 10px 12px; white-space: normal;
+  border-radius: var(--radius); text-decoration: none; }
+.site-nav a.nav-item:hover, .site-nav a.nav-item:focus-visible { background: var(--surface); }
+.site-nav a.nav-item:hover .ni-t, .site-nav a.nav-item[aria-current="page"] .ni-t { text-decoration: underline; }
+.ni { flex: none; margin-top: 2px; }
+.ni-text { display: flex; flex-direction: column; min-width: 0; }
+.ni-t { font-weight: 600; }
+.ni-d { font-size: var(--fs-0); color: var(--muted); }
+.nav-foot { border-top: 1px solid var(--border); margin-top: var(--s1); padding: 4px 12px 0; }
+/* a light veil over the page while a drop-down is open; it takes no clicks (nav.js closes on a click outside) */
+@media (min-width: 900px) {
+  .nav-dd[open] > summary::after { content: ""; position: fixed; left: 0; right: 0; top: 64px; bottom: 0; z-index: -1;
+    background: color-mix(in srgb, var(--text) 6%, transparent); pointer-events: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .nav-dd[open] > .nav-pop { animation: dt-pop 200ms var(--ease-nav) both; }
+  .nav-dd[open] > summary::after { animation: dt-fade 200ms var(--ease-nav) both; }
+  .nav-dd > summary > .chev, .nav-acc > summary > .chev { transition: transform var(--dur-hover) var(--ease-nav); }
+}
+@keyframes dt-pop { from { opacity: 0; transform: translateY(-6px); } }
+@keyframes dt-fade { from { opacity: 0; } }
+/* phone menu */
 .nav-menu { display: none; }
 .nav-menu > summary {
   list-style: none; display: inline-flex; align-items: center; gap: var(--s1);
@@ -158,12 +237,18 @@ a:hover { color: var(--rust-hover); }
 details.nav-menu { border-bottom: 0; }
 details.nav-menu[open] > summary { color: var(--text); background: var(--surface); }
 .site-nav .nav-panel {
-  position: absolute; left: 0; right: 0; top: 100%;
+  position: absolute; left: 0; right: 0; top: 100%; max-height: calc(100vh - 64px); overflow-y: auto;
   background: var(--bg); border-bottom: 1px solid var(--field-border);
   padding: var(--s1) var(--gutter) var(--s2); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
 }
-.site-nav .nav-panel a { display: flex; min-height: 48px; border-bottom: 1px solid var(--border); font-size: var(--fs-1); }
-.site-nav .nav-panel li:last-child a { border-bottom: 0; }
+.nav-panel .nav-acc > summary { min-height: 48px; justify-content: space-between; font-weight: 600; border-bottom: 1px solid var(--border); }
+.nav-panel .nav-acc > summary .chev { width: 20px; height: 20px; }
+.nav-panel .nav-items { padding: 4px 0; }
+.site-nav .nav-panel a.nav-item { padding: 10px 4px; }
+.nav-panel .nav-foot { margin: 0 0 var(--s1); padding: 4px 4px 0; }
+.site-nav .nav-panel .nav-foot a { min-height: 48px; }
+.site-nav .nav-panel .nav-links a { display: flex; min-height: 48px; border-bottom: 1px solid var(--border); font-size: var(--fs-1); font-weight: 600; }
+.site-nav .nav-panel .nav-links li:last-child a { border-bottom: 0; }
 .theme-toggle svg { display: block; flex: none; }
 .theme-toggle { display: inline-flex; align-items: center; gap: var(--s1); white-space: nowrap; }
 .theme-toggle[hidden] { display: none; }
@@ -212,12 +297,24 @@ details { border-bottom: 1px solid var(--border); }
 summary { cursor: pointer; min-height: var(--target); display: flex; align-items: center; font-weight: 600; padding: var(--s1) 0; }
 details > :not(summary) { margin-left: 0; }
 details[open] > summary { color: var(--rust); }
+/* 25 Oct: a <details> whose summary looks like a button (/pricing/ "Last step"), or holds a heading (Price history) */
+details.pay-step { border-bottom: 0; }
+details.pay-step > summary.btn { display: inline-flex; list-style: none; padding: 10px 20px; }
+details.pay-step > summary.btn::-webkit-details-marker { display: none; }
+details.pay-step[open] > summary.btn { color: var(--on-rust); }
+.pay-panel { margin-top: var(--s3); padding: var(--s3); border: 2px solid var(--rust); border-radius: var(--radius); }
+.pay-panel > h3:first-child { margin-top: 0; }
+.pay-panel .byp { grid-template-columns: 1fr; } .pay-panel .byp dd { margin-bottom: var(--s1); }
+@media (min-width: 900px) { .ladder-row:has(> details.pay-step[open]) { grid-column: 2 / -1; } }
+details > summary > h2, details > summary > h3 { margin: 0; font-size: inherit; display: inline; }
+details > summary > h2 { font-size: var(--fs-3); }
+@media print { details.pay-step > summary, .pay-panel { border: 0; padding: 0; } details.pay-step > summary { display: none !important; } }
 
 /* ------------------------------------------------------------------ forms */
 .field { margin-bottom: var(--s3); max-width: 32rem; }
 .field label, .field legend { display: block; font-weight: 600; margin-bottom: 4px; }
 .field .hint { display: block; color: var(--muted); font-size: var(--fs-0); margin-bottom: 4px; }
-input[type="text"], input[type="email"], input[type="number"], input[type="url"], input[type="file"], select, textarea {
+input[type="text"], input[type="email"], input[type="number"], input[type="url"], input[type="search"], input[type="file"], select, textarea {
   width: 100%; min-height: var(--target); padding: 10px 12px;
   background: var(--bg); color: var(--text);
   border: 1px solid var(--field-border); border-radius: var(--radius);
@@ -245,6 +342,7 @@ fieldset { border: 0; padding: 0; margin: 0 0 var(--s3); }
 .notice > :last-child { margin-bottom: 0; }
 .notice-caution { border-left-color: var(--caution); }
 .notice-error { border-left-color: var(--loss); }
+.field-err { color: var(--loss); margin: 4px 0 0; }
 .notice-gap { border-left-color: var(--rust); }
 .notice strong:first-child { display: block; }
 
@@ -314,6 +412,14 @@ fieldset { border: 0; padding: 0; margin: 0 0 var(--s3); }
 @media (max-width: 600px) { .lede { font-size: var(--fs-1); } }
 .crumb { margin: var(--s3) 0 0; }
 .crumb + h1 { margin-top: var(--s1); }
+.crumb + .hero, .crumb + .section { padding-top: var(--s2); }   /* door pages: keep the crumb next to the H1 */
+/* .crumb .crumbs outranks the lifted pages' list rules (.lifted ol/li), so the crumb looks the same everywhere */
+.crumb .crumbs { list-style: none; margin: 0; padding: 0; max-width: none; display: flex; flex-wrap: wrap; align-items: center; }
+.crumb .crumbs li { display: inline-flex; align-items: center; margin: 0; }
+.crumb-sep { margin: 0 0.4em; color: var(--muted); }
+@media (pointer: coarse), (max-width: 1000px) {   /* 44 px targets on touch screens, as the site's other small links */
+  .crumb .crumbs a { display: inline-flex; align-items: center; min-height: var(--target); padding-block: 0; }
+}
 .btn-row { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s2); align-items: center; }
 .tool { margin: var(--s4) 0; }
 .tool-out { margin-top: var(--s4); }
@@ -321,6 +427,18 @@ fieldset { border: 0; padding: 0; margin: 0 0 var(--s3); }
 .tool-out h3 { margin-top: var(--s5); }
 .tool-out .soon-list { margin-top: var(--s4); }   /* C1: the neutral lines where the badges were */
 .teaser { margin-top: var(--s4); }
+.next-step { margin-top: var(--s4); }
+/* QA 25 Oct: a short label table (the /pricing/ trader rows) stacks on a phone: one row per card */
+@media (max-width: 600px) {
+  .stack-table, .stack-table tbody, .stack-table tr, .stack-table th, .stack-table td { display: block; width: auto; }
+  .stack-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .stack-table tr { padding: var(--s2) 0; border-bottom: 1px solid var(--border); }
+  .stack-table th, .stack-table td { border: 0; padding: 4px 0; text-align: left; }
+  .stack-table td:empty { display: none; }
+  .stack-table td.num { white-space: normal; }
+  .stack-table .btn { white-space: normal; }
+}
+.next-step h2 { font-size: var(--fs-2); margin: 0 0 var(--s1); }
 .disclaimer { font-size: var(--fs-0); color: var(--muted); max-width: var(--prose); border-top: 1px solid var(--border); padding-top: var(--s1); }
 /* Numbers read best close to their labels: results tables and the equity chart are
    capped instead of stretching across 1200 px (SVG text also scales with the width). */
@@ -346,14 +464,8 @@ input[type="file"]:focus-visible { outline: 2px solid var(--rust); outline-offse
 .field-grid .field { max-width: none; }
 fieldset legend { font-weight: 600; margin-bottom: 4px; padding: 0; }
 .formula { font-family: var(--font-mono); font-size: var(--fs-0); background: var(--surface); border-left: 4px solid var(--plan); padding: var(--s2); overflow-x: auto; max-width: 820px; white-space: pre-wrap; }
-.tool-list th[scope="row"] { min-width: 12rem; font-size: var(--fs-1); }
-.tool-list td a { display: inline-flex; align-items: center; min-height: var(--target); }
 /* A visually-hidden (absolute) child must not escape the scroll container and widen the page. */
 .table-wrap { position: relative; }
-@media (max-width: 600px) {
-  .tool-list th:last-child, .tool-list td:last-child { display: none; } /* the tool name is already the link */
-  .tool-list th[scope="row"] { min-width: 7rem; }
-}
 
 /* ------------------------------------------------------------------ home (step 13) */
 .hero { padding: var(--s5) 0 var(--s4); }
@@ -390,6 +502,16 @@ fieldset legend { font-weight: 600; margin-bottom: 4px; padding: 0; }
 .mailto-line { margin-top: var(--s2); }
 .price-table td:nth-child(2) { min-width: 16rem; }
 .price-table td:nth-child(3), .price-table td:nth-child(4) { min-width: 8rem; }
+/* QA3 25 Oct: on a phone the five-column firm price table was clipped mid-word inside its scroll box.
+   Below 40rem each engagement becomes a stacked card with its own labels. */
+@media (max-width: 40rem) {
+  .price-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .price-table, .price-table tbody, .price-table tr, .price-table th, .price-table td { display: block; width: auto; }
+  .price-table tr { border: 1px solid var(--border); border-radius: var(--radius); padding: var(--s2); margin-bottom: var(--s2); }
+  .price-table th[scope="row"] { font-size: var(--fs-2); padding: 0 0 var(--s1); border: 0; }
+  .price-table td, .price-table td:nth-child(2), .price-table td:nth-child(3), .price-table td:nth-child(4) { min-width: 0; padding: var(--s1) 0 0; border: 0; text-align: left; }
+  .price-table td[data-label]::before { content: attr(data-label); display: block; font-size: var(--fs-0); color: var(--muted); font-weight: 600; }
+}
 pre { font-family: var(--font-mono); font-size: var(--fs-0); background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); padding: var(--s2); overflow-x: auto; max-width: 100%; }
 .jump { padding-left: 1.25rem; }
@@ -620,6 +742,171 @@ pre { font-family: var(--font-mono); font-size: var(--fs-0); background: var(--s
 .lifted .ls-m0 { margin: 0 !important; }
 .lifted .ls-boxhead { margin: 0 0 8px !important; padding: 0 !important; border: 0 !important; font-size: var(--fs-2) !important; }
 .lifted .ls-mt24 { margin-top: 24px !important; }
+
+/* ------------------------------------------------------------------ /start/ chooser (ARCHITECT-V3 §c.6)
+   JS off: a choice is a link to #<id>; :target shows that section only, :has() hides the list.
+   start-chooser.js keeps the same CSS: it only moves the hash (with a view transition) and focus. */
+.start-flow { margin: var(--s3) 0 var(--s5); }
+.choice-list { list-style: none; padding: 0; margin: 0 0 var(--s2); display: grid; gap: var(--s1); max-width: 46rem; }
+a.choice-link { display: grid; grid-template-columns: 1fr auto; gap: 2px var(--s2); padding: 14px var(--s2); min-height: var(--target);
+  border: 1px solid var(--field-border); border-radius: var(--radius); color: var(--text); text-decoration: none; }
+a.choice-link:hover { border-color: var(--rust); background: var(--surface); color: var(--text); }
+.cl-name { font-weight: 600; font-size: var(--fs-2); color: var(--rust); }
+.cl-price { font-family: var(--font-mono); font-variant-numeric: tabular-nums; align-self: center; text-align: right; }
+.cl-meta { grid-column: 1 / -1; color: var(--muted); font-size: var(--fs-0); }
+.choice { display: none; max-width: 46rem; }
+.choice:target { display: block; }
+.start-flow:has(> .choice:target) > .chooser { display: none; }
+/* QA 25 Oct: the partner and trader sections show only when asked for (#platform, #trader or their
+   ?product=); a browser without :has() shows them, as before */
+.start-extra:not(:has(:target)) { display: none; }
+.choice-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 var(--s2); }
+.choice-head h2 { margin-top: 0; }
+.choice-back { display: inline-flex; align-items: center; min-height: var(--target); }
+.recap { font-weight: 600; }
+.choice h2:focus, .chooser h2:focus { outline: none; }
+.choice h2:focus-visible, .chooser h2:focus-visible { outline: 2px solid var(--rust); outline-offset: 2px; }
+
+/* ------------------------------------------------------------------ home v3 (ARCHITECT-V3 §c.3) */
+.firm-door { border-left: 4px solid var(--plan); padding: var(--s1) 0 var(--s1) var(--s2); margin-top: var(--s4); }
+.firm-door p:last-child { margin-bottom: 0; }
+/* Tool cards (declutter, 25 Oct): name, one line, Open. One column on a phone. */
+.tool-cards { list-style: none; padding: 0; margin: 0 0 var(--s2); display: grid; gap: var(--s2); }
+@media (min-width: 700px) { .tool-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .tool-cards:not(.tool-cards-2) { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.tool-card { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s1); max-width: none; margin: 0;
+  padding: var(--s2); border: 1px solid var(--border); border-radius: var(--radius); }
+.tool-card h2, .tool-card h3 { margin: 0; font-size: var(--fs-2); }
+.tool-card p { margin: 0; flex: 1; }
+.tool-card > a.btn { margin-top: auto; }
+.tool-rows { list-style: none; padding: 0; margin: 0 0 var(--s2); display: grid; gap: 0 var(--s4); }
+@media (min-width: 900px) { .tool-rows { grid-template-columns: 1fr 1fr; } }
+.tool-rows li { display: flex; gap: 12px; align-items: flex-start; padding: var(--s2) 0; border-top: 1px solid var(--border); max-width: none; }
+.tool-rows .ni { margin-top: 12px; color: var(--muted); }
+.tool-rows a { display: inline-flex; align-items: center; min-height: var(--target); font-weight: 600; font-size: var(--fs-2); }
+.tool-rows p { margin: 0 0 4px; }
+.finding .evidence { margin-top: var(--s3); border-top: 1px solid var(--border); }
+.trust-list { padding-left: 1.25rem; }
+.ladder-rows { display: grid; gap: var(--s3); }
+@media (min-width: 900px) { .ladder-rows { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.ladder-row { border-top: 2px solid var(--field-border); padding-top: var(--s2); }
+.ladder-row h3 { font-size: var(--fs-2); margin-top: 0; }
+.ladder-row .btn { white-space: normal; text-align: center; }
+.latest-list { list-style: none; padding: 0; }
+.latest-list li { padding: var(--s1) 0; border-top: 1px solid var(--border); max-width: none; }
+.latest-list a { display: inline-flex; align-items: center; min-height: var(--target); }
+.latest .when { display: inline-block; min-width: 7.5rem; font-family: var(--font-mono); font-size: var(--fs-0); color: var(--muted); }
+
+/* ------------------------------------------------------------------ answer box + /help/ (ARCHITECT-V3 §c.5) */
+.ask-form label { display: block; font-weight: 600; margin-bottom: 4px; }
+.ask-row { display: flex; gap: var(--s1); max-width: 40rem; }
+.ask-row input { flex: 1 1 auto; min-width: 0; }
+.ask-row .btn { flex: none; }
+.help-jump ul { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0 var(--s3); }
+.help-jump a { display: inline-flex; align-items: center; min-height: var(--target); }
+.answer-box { display: block; margin: 0 0 var(--s3); max-width: 40rem; }
+.answer-box label { display: block; font-weight: 600; margin-bottom: 4px; }
+.answer-out:not(:empty) { margin-top: var(--s2); padding: var(--s2); background: var(--surface); border-radius: var(--radius); }
+.answer-out > :last-child { margin-bottom: 0; }
+.ans-from { font-weight: 600; }
+.nav-ask { border-bottom: 0; position: relative; }
+.nav-ask > summary { list-style: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: var(--target);
+  min-width: var(--target); padding: 0 10px; border: 1px solid var(--field-border); border-radius: var(--radius); font-weight: 400; color: var(--text); }
+.nav-ask > summary::-webkit-details-marker { display: none; }
+.nav-ask[open] > summary, .nav-ask > summary:hover { background: var(--surface); color: var(--text); }
+.ask-pop { position: absolute; right: 0; top: calc(100% + 10px); z-index: 2; width: min(28rem, calc(100vw - 32px)); padding: var(--s2);
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--lift-shadow); }
+.ask-pop .answer-box { margin: 0; }
+/* the header's search button: the .btn look without the .btn class (the header holds no .btn, no offer) */
+.ask-submit { flex: none; min-height: var(--target); min-width: var(--target); padding: 10px 20px; border: 2px solid var(--rust);
+  border-radius: var(--radius); background: var(--rust); color: var(--on-rust); font: 600 var(--fs-1)/1.2 var(--font-sans); cursor: pointer; }
+.ask-submit:hover { background: var(--rust-hover); border-color: var(--rust-hover); }
+@media (prefers-reduced-motion: no-preference) { .nav-ask[open] > .ask-pop { animation: dt-pop 200ms var(--ease-nav) both; } }
+@media (max-width: 1099.98px) { .ask-label { display: none; } }
+@media (max-width: 899.98px) { .nav-ask { display: none; } }
+.help-group details blockquote, .answer-out blockquote { margin: 0 0 var(--s1); padding-left: var(--s2); border-left: 3px solid var(--border); }
+
+/* ------------------------------------------------------------------ the dark hero band (ARCHITECT-BRAND-AND-WRAPPED §2.2–2.4)
+   partials/hero_band.html. It follows the theme (owner, 25 Oct): in light it keeps the light page tokens;
+   in dark it re-scopes them to the charcoal --band-* set, so every component inside it (buttons, links,
+   the dashboard, P&L colours, focus ring) turns dark with no per-component rule; checks/contrast.py
+   measures every dark pair as BAND_PAIRS. Signature: plot paper in rust behind the media side (motif-grid)
+   and the band's bottom edge drawn as a chart x-axis, ticks hanging below it (motif-axis). No animation. */
+.band { background: var(--bg); color: var(--text); position: relative; isolation: isolate; }
+:root[data-theme="dark"] .band { --bg: var(--band-bg); --surface: var(--band-surface); --text: var(--band-text); --muted: var(--band-muted);
+    --rust: var(--band-rust); --rust-hover: var(--band-rust-hover); --on-rust: var(--band-on-rust);
+    --gain: var(--band-gain); --loss: var(--band-loss); --plan: var(--band-plan); --caution: var(--band-caution);
+    --field-border: var(--band-field-border); --border: var(--band-border); --lift-shadow: 0 6px 16px -6px rgb(0 0 0 / 0.7);
+    color-scheme: dark; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .band { --bg: var(--band-bg); --surface: var(--band-surface); --text: var(--band-text); --muted: var(--band-muted);
+    --rust: var(--band-rust); --rust-hover: var(--band-rust-hover); --on-rust: var(--band-on-rust);
+    --gain: var(--band-gain); --loss: var(--band-loss); --plan: var(--band-plan); --caution: var(--band-caution);
+    --field-border: var(--band-field-border); --border: var(--band-border); --lift-shadow: 0 6px 16px -6px rgb(0 0 0 / 0.7);
+    color-scheme: dark; } }
+:root[data-theme="dark"] .band .hero-dash, :root[data-theme="dark"] .band .luck-panel { --bg: var(--band-surface); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .band .hero-dash, :root:not([data-theme="light"]) .band .luck-panel { --bg: var(--band-surface); } }
+.band.hero { padding: var(--s5) 0; margin-bottom: 12px; }   /* margin: the hanging ticks */
+.band h1 { font-size: var(--fs-6); line-height: 1.08; letter-spacing: -0.012em; max-width: 15ch; }
+.band .lede { color: var(--text); }
+:root[data-theme="dark"] .band .hero-dash { box-shadow: 0 24px 48px -24px rgb(0 0 0 / 0.6); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .band .hero-dash { box-shadow: 0 24px 48px -24px rgb(0 0 0 / 0.6); } }
+.band .hero-shot figcaption { margin-top: 12px; }
+@media (max-width: 600px) { .band.hero { padding: var(--s4) 0; } .band h1 { font-size: var(--fs-5); } }
+.band.motif-grid::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--band-grid-major) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--band-grid-major) 1px, transparent 1px),
+    linear-gradient(to right, var(--band-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--band-grid) 1px, transparent 1px);
+  background-size: 160px 160px, 160px 160px, 32px 32px, 32px 32px;
+  background-position: left bottom;            /* the lines meet the axis rule exactly */
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 48%); mask-image: linear-gradient(to right, transparent 0, #000 48%); }
+@media (max-width: 899.98px) { .band.motif-grid::before { -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 55%); mask-image: linear-gradient(to bottom, transparent 0, #000 55%); } }
+/* the axis: a 2 px rule on the band's bottom edge, 6 px ticks every 32 px and 12 px ticks every 160 px,
+   on the grid's lines (both are positioned from the left edge) */
+.band.motif-axis::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 12px; margin-top: -2px; pointer-events: none;
+  background-image: linear-gradient(var(--rust), var(--rust)),
+    repeating-linear-gradient(to right, var(--rust) 0 2px, transparent 2px 160px),
+    repeating-linear-gradient(to right, var(--rust) 0 1px, transparent 1px 32px);
+  background-size: 100% 2px, 100% 12px, 100% 6px; background-position: left top; background-repeat: no-repeat; }
+@media (forced-colors: active) { .band::before, .band::after { display: none; } }
+@media print {
+  .band, :root[data-theme="dark"] .band, :root:not([data-theme="light"]) .band {
+    --bg: #fff; --surface: #fff; --text: #000; --muted: #333; --border: #999; background: none; color: #000; }
+  .band .hero-dash, :root[data-theme="dark"] .band .hero-dash, :root:not([data-theme="light"]) .band .hero-dash { --bg: #fff; box-shadow: none; }
+  .band::before, .band::after { display: none; }
+}
+
+/* rust = "the finding": one key number per section (checks/lint.py refuses a second) */
+.key-num { color: var(--rust); font-weight: 600; font-variant-numeric: tabular-nums; }
+/* the axis tick above each section heading on the 4 marketing pages (build.MOTION_PAGES; base.html main.mkt) */
+.mkt .section > h2::before { content: ""; display: block; width: 24px; height: 3px; margin-bottom: var(--s2); background: var(--rust); }
+@media (forced-colors: active) { .mkt .section > h2::before { background: CanvasText; } }
+
+/* footer: Follow (site.toml [[channels]]); 20 px marks, 44 px targets (.site-footer li a) */
+.site-footer .follow a { gap: 10px; }
+.site-footer .follow svg { flex: none; width: 20px; height: 20px; fill: currentColor; }
+
+/* ------------------------------------------------------------------ trading heatmap (tools batch 2) */
+/* Cell text stays var(--text) on a light tint of gain or loss (never coloured text on colour), and every
+   cell prints its signed total and its trade count, so the shading is never the only signal. */
+.heatmap td.heat { min-width: 6.5rem; text-align: right; font-family: var(--font-mono); font-size: var(--fs-0); font-variant-numeric: tabular-nums; color: var(--text); }
+.heatmap td.heat span { display: block; white-space: nowrap; }
+.heatmap td.heat .heat-n { color: var(--text); font-family: var(--font-sans); }
+.heatmap td.heat-empty { color: var(--muted); text-align: center; }
+.heatmap tbody th[scope="row"] { min-width: 7.5rem; white-space: nowrap; font-family: var(--font-mono); font-size: var(--fs-0); }
+.heat-g1 { background: color-mix(in srgb, var(--gain) 12%, var(--bg)); }
+.heat-g2 { background: color-mix(in srgb, var(--gain) 22%, var(--bg)); }
+.heat-g3 { background: color-mix(in srgb, var(--gain) 32%, var(--bg)); }
+.heat-g4 { background: color-mix(in srgb, var(--gain) 42%, var(--bg)); }
+.heat-l1 { background: color-mix(in srgb, var(--loss) 12%, var(--bg)); }
+.heat-l2 { background: color-mix(in srgb, var(--loss) 22%, var(--bg)); }
+.heat-l3 { background: color-mix(in srgb, var(--loss) 32%, var(--bg)); }
+.heat-l4 { background: color-mix(in srgb, var(--loss) 42%, var(--bg)); }
+.tool-out .table-wrap:has(> .heatmap) { max-width: 100%; }
+.table-wrap.table-narrow { max-width: 32rem; }
+.table-narrow th.num { white-space: normal; } /* the recovery table's long header wraps, so both columns fit at 375 px */
+.tool-out .table-wrap.table-wide { max-width: none; } /* the drawdown list: 10 columns */
 
 /* ------------------------------------------------------------------ motion (ARCHITECT-MOTION-PLAN 2026-10-21)
    Hidden/moving states need .dt-motion (theme.js, pre-paint) or a motion.js class. */
