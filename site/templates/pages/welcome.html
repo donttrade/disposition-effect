@@ -1,14 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="wrap" data-requires-flag="paid_report">
+  {#- sweep 2 (25 Oct): the button first, then the three steps as a picture, then the restore link; the
+      disclaimer moves to the end in small type. -#}
   <h1>Thank you</h1>
-  {% include "partials/disclaimer.html" %}
   <section id="w-working" data-state><p>Confirming your purchase with Stripe…</p></section>
   <section id="w-ready" data-state hidden>
     <div class="notice"><strong>Your report is ready</strong><p id="w-saved"></p></div>
     <p><a class="btn" id="w-report" href="/report/">Open your report</a></p>
+    {% include "partials/report_steps.html" %}
     <h2>Save your restore link</h2>
-    <p>There is no account or password. This link reopens your purchase on any browser; keep it private.</p>
+    <p>No account. This link reopens your report on any browser. Keep it private.</p>
     <div class="field"><label for="w-link">Restore link</label><input id="w-link" type="text" readonly></div>
     <p><button class="btn btn-secondary" id="w-download" type="button">Download restore file</button>
        <button class="btn btn-secondary" id="w-copy" type="button">Copy link</button> <span id="w-copy-msg" role="status"></span></p>
@@ -23,5 +25,6 @@
     <p id="w-retry-row"><button class="btn" id="w-retry" type="button">Try again</button></p>
     <p class="small">Email <a href="mailto:{{ site.contact_email }}?subject={{ ('Habit report access')|urlencode }}">{{ site.contact_email }}</a>. {{ site.reply_promise }}</p>
   </section>
+  {% include "partials/disclaimer.html" %}
 </div>
 {% endblock %}

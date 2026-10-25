@@ -1,27 +1,28 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="wrap" data-requires-flag="paid_report">
+  {#- sweep 2 (25 Oct): the three steps, then the drop zone first; what leaves the computer is one line under
+      it with the full text behind a tap; the optional firm count and the disclaimer come after. -#}
   <h1>Your habit report</h1>
-  <div class="no-print">{% include "partials/disclaimer.html" %}</div>
-  <div class="notice no-print">
-    <strong>What leaves your computer</strong>
-    <p>Your browser reads the file in this tab and removes names, account numbers and symbols. {{ strings.p5.long }}</p>
-  </div>
+  <div class="no-print">{% include "partials/report_steps.html" %}</div>
   <section class="no-print" aria-labelledby="pick-h">
     <h2 id="pick-h">Choose your trade file</h2>
     <p id="rp-access" class="muted"></p>
-    <div class="field"><label for="rp-firm">Which firm do you trade with? (optional)</label>
-      <input id="rp-firm" type="text" maxlength="80" autocomplete="organization"></div>
-    <div class="field"><div class="check"><input id="rp-firm-consent" type="checkbox">
-      <label for="rp-firm-consent">Count my firm's name. Only a count per firm is kept, never linked to me.</label></div></div>
     <div class="dropzone" id="rp-drop">
       <p><strong>Drop your trade file here</strong>, or choose it:</p>
       <label for="rp-file">Trade file (MT5/MT4 report, IBKR Flex, Tradovate Orders, or the CSV template)</label>
       <input id="rp-file" type="file" accept=".csv,.htm,.html,.txt">
     </div>
+    <p class="small">Names, account numbers and symbols are removed in this tab before anything is sent.</p>
+    <details class="how-more"><summary>What is sent</summary><p>{{ strings.p5.long }}</p></details>
+    <div class="field"><label for="rp-firm">Which firm do you trade with? (optional)</label>
+      <input id="rp-firm" type="text" maxlength="80" autocomplete="organization"></div>
+    <div class="field"><div class="check"><input id="rp-firm-consent" type="checkbox">
+      <label for="rp-firm-consent">Count my firm's name. Only a count per firm is kept, never linked to me.</label></div></div>
     <p><button class="btn btn-secondary" id="rp-restore-file" type="button">Download restore file</button> <span id="rp-uses" role="status"></span></p>
   </section>
   <div id="rp-status" class="notice" role="status" hidden></div>
   <div id="rp-out"></div>
+  <div class="no-print">{% include "partials/disclaimer.html" %}</div>
 </div>
 {% endblock %}
