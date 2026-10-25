@@ -12,8 +12,9 @@ Rules (V2-BUILD-PLAN, STRUCTURE and step 3):
       - an externally linked id (path#id in the baseline) missing from its page,
       - trader_first_home != paid_report, or analytics on without a beacon token,
       - a paid-only page or paid-flagged markup in the output while paid_report is off,
-      - a page without exactly one footer business line while a commerce flag is on, or with
-        one while both are off (business_id_line(); decision 21 Oct),
+      - a page without exactly one footer business line while a commerce flag is on (the full one,
+        with the address, only on ADDRESS_LINE_PATHS; the short one elsewhere), or with one while
+        both are off (business_id_line(); decisions 21 and 25 Oct),
       - a private.toml value without the shape of a real one while a commerce flag is on
         (seller_problem(); DT_ALLOW_PLACEHOLDERS=1 skips only this check, for local test builds),
       - a malformed site.toml or private.toml (a BUILD FAILED line, not a traceback).
@@ -1084,19 +1085,48 @@ def footer_privacy(flags):
     return " ".join(parts)
 
 
-# Decision 21 Oct (revised 09:00): with ANY commerce flag on, every page footer identifies the
-# business: name, country/province, the mailing address from private.toml and the business email
-# (Visa Core Rules 5.8.4.1 "address for Cardholder correspondence" + merchant country; CASL).
+# Decision 21 Oct (revised 09:00), narrowed 25 Oct (owner: "feels very open for customers"): with
+# ANY commerce flag on, every page footer identifies the business, in one of two forms.
+# The FULL line (name, country/province, the mailing address from private.toml, the business email)
+# is on the pages where a buyer pays, or reads the terms before paying, or contacts us about a
+# payment (ADDRESS_LINE_PATHS): Visa Core Rules 5.8.4.1 "address for Cardholder correspondence" +
+# merchant country, shown where the cardholder transacts; Ontario Consumer Protection Act (O. Reg.
+# 17/05 s. 32) disclosure before payment; CASL (the address with the contact pages). Every other
+# page has the SHORT line (name, region, email, a link to the seller block on the terms), so no
+# page is without the business's identity and none repeats the address needlessly.
 # The seller's legal name and phone stay in the seller block (show_seller). With every commerce
-# flag off this line does not exist and private.toml is not read. One wording for template
-# pages and passthrough pages. build.verify() and lint check every page has it exactly once.
+# flag off neither line exists and private.toml is not read. One wording for template pages and
+# passthrough pages. build.verify() and lint check every page has the right one exactly once.
 BUSINESS_ID_ATTR = "data-business-id"
 BUSINESS_ID_RE = re.compile(r"(?s)<p\b[^>]*\bdata-business-id\b[^>]*>.*?</p>")
 BUSINESS_REGION = "Ontario, Canada"
+ADDRESS_LINE_PATHS = frozenset({
+    "/pricing/", "/for-traders/", "/terms/", "/privacy/", "/about/", "/start/", "/welcome/", "/report/",
+    "/restore/", "/for-traders/thanks/", "/start/pilot-thanks/",
+    "/fr/avant-de-payer/", "/fr/conditions/", "/fr/confidentialite/"})
+# The short line's link to the seller block: id="seller" in the terms' Contact section (the seller rows
+# whenever show_seller; the full footer line is on that page in any commerce build). French pages exist
+# only with paid_report, so the French link is used only then. verify() checks the target id exists.
+BUSINESS_DETAILS = {"en": ("/terms/#seller", "Business details"),
+                    "fr": ("/fr/conditions/#seller", "Coordonnées de l’entreprise")}
+SELLER_ANCHOR = 'id="seller"'
 
 
-def business_id_line(cfg, private, css_class=None):
-    """The footer's business-identification paragraph, or "" with every commerce flag off."""
+
+def url_of(rel):
+    """A built file's relative path → its URL ("about/index.html" → "/about/")."""
+    url = "/" + rel.replace(os.sep, "/")
+    return url[:-len("index.html")] if url.endswith("/index.html") or url == "/index.html" else url
+
+
+def business_line_full(url):
+    """Whether the page at this URL carries the full business line (with the mailing address)."""
+    return url in ADDRESS_LINE_PATHS
+
+
+def business_id_line(cfg, private, css_class=None, url=None, lang="en"):
+    """The footer's business-identification paragraph for the page at url, or "" with every commerce
+    flag off. The full form (with the address) on ADDRESS_LINE_PATHS, the short form elsewhere."""
     import html as _h
     if not any(cfg["flags"][f] for f in COMMERCE_FLAGS):
         return ""
@@ -1105,13 +1135,22 @@ def business_id_line(cfg, private, css_class=None):
         die("a commerce flag is on but there is no mailing address (private.toml premises_address) for the footer")
     email = cfg["site"]["contact_email"]
     cls = f' class="{css_class}"' if css_class else ""
-    return (f"<p{cls} {BUSINESS_ID_ATTR}>{_h.escape(cfg['site']['name'])} · {BUSINESS_REGION} · "
-            f"{_h.escape(address)} · <a href=\"mailto:{_h.escape(email)}\">{_h.escape(email)}</a></p>")
+    mail = f"<a href=\"mailto:{_h.escape(email)}\">{_h.escape(email)}</a>"
+    head = f"{_h.escape(cfg['site']['name'])} · {BUSINESS_REGION} · "
+    if url is None or business_line_full(url):
+        return f"<p{cls} {BUSINESS_ID_ATTR}=\"full\">{head}{_h.escape(address)} · {mail}</p>"
+    href, label = BUSINESS_DETAILS["fr" if lang == "fr" and cfg["flags"]["paid_report"] else "en"]
+    return f"<p{cls} {BUSINESS_ID_ATTR}=\"short\">{head}{mail} · <a href=\"{href}\">{label}</a></p>"
 
 
 # Where the line goes in a passthrough page: just before the "who pays" paragraph, right
 # under the contact line (every passthrough page has exactly one).
 PASSTHROUGH_BUSINESS_ANCHOR = '  <p class="whopays">'
+
+
+def passthrough_lang(text):
+    m = re.search(r'<html[^>]*\slang="([a-z]+)', text)
+    return m.group(1) if m else "en"
 
 
 def add_business_line(text, rel, line):
@@ -2089,7 +2128,8 @@ def verify(out, flags, seller=None, base_url=None):
     why = vt_css_problem(out)
     if why:
         die(why)
-    # Decision 21 Oct: the footer business line, on every page exactly once under any commerce flag
+    # Decision 21 Oct, narrowed 25 Oct: the footer business line, on every page exactly once under any
+    # commerce flag: the full one (with the address) on ADDRESS_LINE_PATHS, the short one everywhere else
     commerce = any(flags.get(f) for f in COMMERCE_FLAGS)
     for root, _, files in os.walk(out):
         for name in sorted(files):
@@ -2098,11 +2138,22 @@ def verify(out, flags, seller=None, base_url=None):
                 with open(fp, encoding="utf-8", errors="replace") as f:
                     text = f.read()
                 n, m = text.count(BUSINESS_ID_ATTR), len(BUSINESS_ID_RE.findall(text))
+                rel = os.path.relpath(fp, out)
                 if commerce and (n != 1 or m != 1):
-                    die(f"business line: {os.path.relpath(fp, out)} has {n} business-identification line(s), "
+                    die(f"business line: {rel} has {n} business-identification line(s), "
                         "expected exactly 1 while a commerce flag is on")
+                if commerce:
+                    want = "full" if business_line_full(url_of(rel)) else "short"
+                    if f'{BUSINESS_ID_ATTR}="{want}"' not in text:
+                        die(f"business line: {rel} has the wrong business line, expected the {want} one "
+                            "(the address only on build.ADDRESS_LINE_PATHS)")
                 if not commerce and n:
                     die(f"business line in {os.path.relpath(fp, out)} while every commerce flag is off")
+    if commerce:   # the short line's "Business details" links land on the seller block
+        for href, _ in ([BUSINESS_DETAILS["en"]] + ([BUSINESS_DETAILS["fr"]] if flags.get("paid_report") else [])):
+            fp = os.path.join(out, href.split("#")[0].strip("/"), "index.html")
+            if not os.path.exists(fp) or open(fp, encoding="utf-8").read().count(SELLER_ANCHOR) != 1:
+                die(f"business line: {href} has no single {SELLER_ANCHOR} for the footer's details link")
 
 
 def build():
@@ -2133,7 +2184,8 @@ def build():
             text = f.read()
         text = fix_passthrough_chrome(text, rel, flags)
         text = add_passthrough_csp(text, rel)
-        text = add_business_line(text, rel, business_id_line(cfg, private))
+        text = add_business_line(text, rel, business_id_line(cfg, private, url=url_of(rel),
+                                                             lang=passthrough_lang(text)))
         for old, new in PASSTHROUGH_FIXES.get(rel, []):
             if text.count(old) != 1:
                 die(f"passthrough fix: {rel} no longer holds this sentence exactly once: {old!r}")
@@ -2173,7 +2225,6 @@ def build():
                 "worker": cfg["worker"], "prices": prices, "products": products, "private": private,
                 "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": tools_for(flags),
                 "evidence": evidence(), "latest": latest(), "footer_privacy": footer_privacy(flags), "show_seller": show_seller(cfg),
-                "business_id_line": Markup(business_id_line(cfg, private, "legal")),
                 "strings": read_toml(os.path.join(SITE, "config", "strings.toml"), "strings.toml"),
                 "paid_method": paid_method(),
                 "report_link_fr": report_link_fr(products["report39"], cfg["stripe"]["mode"]),
@@ -2198,7 +2249,9 @@ def build():
             extra["lifted_html"] = Markup(paid_lifted(page["path"], lifted_fragment(page["lifted"]), flags["paid_report"]))
             if page["path"] == "/corrections/":
                 extra["report_methods"] = report_methods()
-        html = env.get_template(page["template"]).render(page=page, csp=csp_for(page, cfg), **base_ctx, **extra, **more)
+        line = Markup(business_id_line(cfg, private, "legal", url=page["path"], lang=page["lang"]))
+        html = env.get_template(page["template"]).render(page=page, csp=csp_for(page, cfg), business_id_line=line,
+                                                         **base_ctx, **extra, **more)
         if not page.get("lifted"):
             html = add_faq_ids(html)   # Q-A1: a stable id per FAQ question (lifted pages keep their frozen ids)
         if html.count(LD_MARKER) != 1:

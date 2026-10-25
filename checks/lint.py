@@ -10,7 +10,8 @@ words; tally.so; "nothing leaves"-type claims when a paid flow exists; "no analy
 when analytics is on; $ amounts not from prices.json; flag-gated strings with the paid
 flag off (seller name/placeholders, trader Stripe links, Product JSON-LD, paid markup);
 /dev/ in the build; secret patterns; the footer business line on every page exactly
-once while a commerce flag is on (and its address the private.toml one), none while both are off.
+once while a commerce flag is on (the full one, its address the private.toml one, only on
+build.ADDRESS_LINE_PATHS; the short one without the address elsewhere), none while both are off.
 
 Scope: every page the templates own (new design) gets the full rules. A page lifted word for
 word from the pre-v2 site (steps 28–29, build.LIFTED_PATHS) gets the full rules on everything
@@ -496,12 +497,16 @@ def strip_business_line(html):
 
 
 BUSINESS_LINE_TEXT = re.compile(r"^donttrade · Ontario, Canada · (?P<address>.+) · (?P<email>[^\s@·]+@[^\s@·]+)$")
+BUSINESS_LINE_SHORT = re.compile(r"^donttrade · Ontario, Canada · (?P<email>[^\s@·]+@[^\s@·]+) · (?P<label>Business details|Coordonnées de l’entreprise)$")
 
 
 def business_line_problems(html, where, commerce, private_values=()):
-    """Decision 21 Oct: with any commerce flag on, every page has exactly one business line,
-    "donttrade · Ontario, Canada · <mailing address> · <business email>", whose address is the
-    private.toml one; with every commerce flag off, none."""
+    """Decisions 21 and 25 Oct: with any commerce flag on, every page has exactly one business line.
+    On build.ADDRESS_LINE_PATHS (where a buyer pays or reads the terms first: Visa 5.8.4.1, Ontario CPA
+    disclosure before payment) it is "donttrade · Ontario, Canada · <mailing address> · <business email>",
+    whose address is the private.toml one; on every other page "donttrade · Ontario, Canada · <business
+    email> · Business details" (link to the terms' seller block), never with the address. With every
+    commerce flag off, none. where: the page's path in the build ("/about/index.html") or its URL."""
     import build
     found = build.BUSINESS_ID_RE.findall(html)
     n = html.count(build.BUSINESS_ID_ATTR)
@@ -510,8 +515,20 @@ def business_line_problems(html, where, commerce, private_values=()):
     if n != 1 or len(found) != 1:
         return [("business_line", where, f"{n} business-identification line(s), expected exactly 1")]
     text = " ".join(normalise(re.sub(r"<[^>]+>", " ", __import__("html").unescape(found[0]))).split())
+    full = build.business_line_full(build.url_of(where.lstrip("/")))
+    if not full:
+        m = BUSINESS_LINE_SHORT.fullmatch(text)
+        if not m or 'data-business-id="short"' not in found[0]:
+            return [("business_line", where, "not in the form 'donttrade · Ontario, Canada · <email> · Business details' "
+                     f"(the address only on build.ADDRESS_LINE_PATHS): {text!r}")]
+        href = build.BUSINESS_DETAILS["fr" if m.group("label") != "Business details" else "en"][0]
+        if f'href="{href}"' not in found[0]:
+            return [("business_line", where, f"its details link is not {href}")]
+        if any(v and v in found[0] for v in private_values):
+            return [("business_line", where, "the mailing address in the short business line")]
+        return []
     m = BUSINESS_LINE_TEXT.fullmatch(text)
-    if not m:
+    if not m or 'data-business-id="full"' not in found[0]:
         return [("business_line", where, f"not in the form 'donttrade · Ontario, Canada · <address> · <email>': {text!r}")]
     if private_values and m.group("address") not in private_values:
         return [("business_line", where, "its address is not the private.toml premises_address")]
