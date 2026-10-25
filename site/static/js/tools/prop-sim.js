@@ -229,7 +229,13 @@ function init() {
     onError: (err, retry) => renderReadError($('ps-file-error'), err, retry),
   });
   $('ps-file').addEventListener('change', (e) => slot.pickFile(e.target.files[0], 'your file'));
-  $('ps-sample-btn').addEventListener('click', () => slot.readBytes(new TextEncoder().encode($('ps-sample').textContent.replace(/^\s+/, '')), 'the synthetic sample file'));
+  $('ps-sample-btn').addEventListener('click', () => {
+    // QA 25 Oct: the sample also fills example rules (only boxes still empty), so Run works at once
+    for (const [id, v] of [['ps-target', '600'], ['ps-daily', '250'], ['ps-maxloss', '500'], ['ps-days', '60']]) {
+      if ($(id).value.trim() === '') $(id).value = v;
+    }
+    slot.readBytes(new TextEncoder().encode($('ps-sample').textContent.replace(/^\s+/, '')), 'the synthetic sample file');
+  });
   $('ps-form').addEventListener('submit', run);
   if (!$('ps-seed').value) $('ps-seed').value = String(DEFAULT_SEED);
   $('ps-js-needed').hidden = true;
