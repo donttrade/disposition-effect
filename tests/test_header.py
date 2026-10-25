@@ -8,7 +8,7 @@ brand · nav row · theme toggle. Checked on template pages and lifted pages, li
     focus returns to Menu; a click outside closes it; the expanded state is exposed;
   * axe: 0 serious/critical with the menu open; every target at least 44 px;
   * the toggle is named by its action ("Dark mode" / "Light mode", QA 25 Oct), the header holds no button and one plain
-    text offer link ("Start a Pilot", For firms panel; ARCHITECT-V3 Q3). v3 nav tests: test_v3_nav.py.
+    offer (25 Oct sweep: four items, no "Start a Pilot"). v3 nav tests: test_v3_nav.py.
 """
 import os
 import re
@@ -78,18 +78,19 @@ def test_menu_keyboard_escape_and_click_outside(browser, built_site, width):
     pg.keyboard.press("Enter")
     pg.wait_for_timeout(100)   # the accessibility tree updates after the toggle event
     assert pg.is_visible(".nav-panel") and _expanded(cdp) is True
-    pg.keyboard.press("Tab")   # v3 (ARCHITECT-V3 §c.2): the menu holds 3 accordion groups, then Pricing and About
+    pg.keyboard.press("Tab")   # 25 Oct sweep: the menu holds the Free tools group, then the plain links
     assert pg.evaluate("document.activeElement.matches('.nav-acc > summary')")
     assert pg.evaluate("document.activeElement.textContent") == "Free tools"
     groups = pg.eval_on_selector_all(".nav-panel .nav-acc > summary", "ss => ss.map(s => [s.textContent, s.classList.contains('is-current'), s.getBoundingClientRect().height])")
-    assert [t for t, _, _ in groups] == ["Free tools", "Research, current section", "For firms"]
-    assert [t for t, c, _ in groups if c] == ["Research, current section"]   # a study is in the Research section
+    assert [t for t, _, _ in groups] == ["Free tools"]
+    assert [t for t, c, _ in groups if c] == []   # Research is in the footer (25 Oct sweep)
     links = pg.eval_on_selector_all(".nav-panel .nav-links a", "as => as.map(a => [a.textContent, a.getBoundingClientRect().height])")
-    assert [t for t, _ in links] == ["Home", "For traders", "Pricing", "About"]   # Home link (a): first in .nav-links off the homepage; no "Ask a question" with ask_box = false; For traders (QA 25 Oct)
+    assert [t for t, _ in links] == ["Home", "Sample report", "Pricing", "For firms"]   # Home link (a): first in .nav-links off the homepage; no "Ask a question" with ask_box = false; 25 Oct sweep: four items
     assert all(h >= 44 for _, _, h in groups) and all(h >= 44 for _, h in links)
-    pg.click(".nav-acc:nth-of-type(2) > summary")
+    pg.click(".nav-acc > summary")
     items = pg.eval_on_selector_all(".nav-acc[open] a", "as => as.map(a => a.getBoundingClientRect().height)")
-    assert len(items) == 4 and all(h >= 48 for h in items)   # 25 Oct: Code, Corrections moved to the footer
+    assert len(items) == 10 and all(h >= 48 for h in items)   # 8 tools (journal off) + All free tools + For traders
+    pg.click(".nav-acc > summary")   # closed again, so the click-outside below lands outside the panel
     assert axe_violations(pg) == []
     pg.keyboard.press("Escape")
     assert not pg.is_visible(".nav-panel")
@@ -153,9 +154,8 @@ def test_header_markup(built_site):
         f = built_site["out"] / (os.path.join(path.strip("/"), "index.html") if path.endswith("/") else path.strip("/"))
         html = f.read_text(encoding="utf-8")
         header = re.search(r"(?s)<header class=\"site-header\">.*?</header>", html).group(0)
-        # v3: 3 drop-downs + the phone Menu + its 3 accordion groups; one offer, the plain text link
-        # "Start a Pilot" at the foot of For firms, once in each list (CSS shows one list at a time)
-        assert header.count("<nav ") == 1 and header.count("<details") == 7, path   # no "Ask" popover: ask_box = false (launch, 25 Oct)
+        # 25 Oct sweep: one drop-down (Free tools) + the phone Menu + its one accordion group; no offer
+        assert header.count("<nav ") == 1 and header.count("<details") == 3, path   # no "Ask" popover: ask_box = false (launch, 25 Oct)
         assert 'class="btn' not in header and not re.search(r"\$\d", header), path
-        assert header.count("Start a Pilot") == 2 == header.count('<li><a href="/start/?product=pilot#pilot">Start a Pilot</a></li>'), path
+        assert "Start a Pilot" not in header, path
         assert re.search(r'<script src="/static/js/nav\.js\?v=[0-9a-f]{8}" defer></script>', html), path  # N5: versioned
