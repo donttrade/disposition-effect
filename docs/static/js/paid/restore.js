@@ -1,0 +1,20 @@
+// restore.js — /restore/#t=<token>: the restore link or file saved on /welcome/.
+// Restore-by-email is not in v1 (decision 20 Oct), so this page has no email form.
+import { api, saveToken, tokenFromHash, OUTAGE } from './token.js?v=16f6dd26';
+
+const $ = (id) => document.getElementById(id);
+
+async function fromToken(token) {
+  $('r-status').textContent = 'Checking your access…';
+  const r = await api('/refresh', { token });
+  if (r.status === 0 || r.status >= 500) { $('r-status').textContent = OUTAGE; return; }
+  if (!r.ok) { $('r-status').textContent = r.json && r.json.error ? r.json.error.message : 'This link is not valid.'; return; }
+  const saved = await saveToken(r.json.token);
+  $('r-status').textContent = saved.local || saved.indexeddb ? 'Access restored in this browser.' : 'Access restored for this visit (this browser blocks saving).';
+  const a = $('r-open');
+  a.href = '/report/#t=' + r.json.token;
+  a.hidden = false;
+}
+
+const token = tokenFromHash();
+if (token) fromToken(token);
