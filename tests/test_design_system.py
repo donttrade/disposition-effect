@@ -54,7 +54,7 @@ def test_toggle_switches_and_survives_blocked_storage(browser, repo_server):
     assert btn.is_visible()
     btn.click()
     assert page.evaluate("document.documentElement.dataset.theme") == "dark"
-    assert btn.get_attribute("aria-pressed") == "true"
+    assert btn.get_attribute("aria-pressed") is None   # QA 25 Oct: named by the action instead
     ctx.close()
 
 

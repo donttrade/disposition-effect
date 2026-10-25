@@ -34,10 +34,13 @@
 
   function wire() {
     var buttons = document.querySelectorAll('[data-theme-toggle]');
+    // QA 25 Oct: the button is named by what it does ("Light mode" while dark is on). A label that
+    // changes carries the state itself, so the button has no aria-pressed (APG button pattern).
     function sync() {
+      var dark = current() === 'dark';
       for (var j = 0; j < buttons.length; j++) {
-        var dark = current() === 'dark';
-        buttons[j].setAttribute('aria-pressed', dark ? 'true' : 'false');
+        var label = buttons[j].querySelector('.tt-label');
+        if (label) label.textContent = dark ? 'Light mode' : 'Dark mode';
       }
     }
     for (var i = 0; i < buttons.length; i++) {
