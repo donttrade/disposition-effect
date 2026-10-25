@@ -20,6 +20,64 @@
       inputs[i].value = v;
     }
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
-  else apply();
+  // QA 25 Oct: an empty or wrong field gets the site's own message under it (not only the browser's
+  // tooltip). Without JavaScript the browser's own required checks still stop the POST.
+  function labelOf(el) {
+    var fs = el.type === 'radio' && el.closest('fieldset');
+    var l = fs ? fs.querySelector('legend') : document.querySelector('label[for="' + el.id + '"]');
+    var t = l ? l.textContent.replace(/\(required[^)]*\)/, '').trim() : '';
+    return t.replace(/[?.:]$/, '');
+  }
+  function message(el) {
+    if (el.type === 'checkbox') return 'Tick this box to continue.';
+    if (el.type === 'radio') return 'Choose one answer.';
+    if (el.validity.valueMissing) return labelOf(el) + ' is required.';
+    if (el.type === 'email') return 'Enter a full email address, like name@example.com.';
+    return 'Check this field.';
+  }
+  function errBox(el) {
+    var key = el.type === 'radio' ? el.name : el.id;
+    var id = (el.form.id || 'f') + '-' + key + '-err';
+    var box = document.getElementById(id);
+    if (!box) {
+      box = document.createElement('p');
+      box.id = id; box.className = 'field-err small'; box.hidden = true;
+      var at = (el.type === 'radio' && el.closest('fieldset')) || el.closest('.field') || el.parentNode;
+      at.appendChild(box);
+      var d = el.getAttribute('aria-describedby');
+      var group = el.type === 'radio' ? el.form.querySelectorAll('input[name="' + el.name + '"]') : [el];
+      for (var i = 0; i < group.length; i++) group[i].setAttribute('aria-describedby', (d ? d + ' ' : '') + id);
+    }
+    return box;
+  }
+  function check(form) {
+    var first = null, seen = {};
+    var els = form.querySelectorAll('input[required], textarea[required], select[required]');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      if (el.type === 'radio') { if (seen[el.name]) continue; seen[el.name] = true; }
+      var box = errBox(el), bad = !el.checkValidity();
+      box.textContent = bad ? message(el) : ''; box.hidden = !bad;
+      if (bad) el.setAttribute('aria-invalid', 'true'); else el.removeAttribute('aria-invalid');
+      if (bad && !first) first = el;
+    }
+    return first;
+  }
+  function wire() {
+    var forms = document.querySelectorAll('form[method="POST"][action*="web3forms"]');
+    for (var i = 0; i < forms.length; i++) {
+      var f = forms[i];
+      f.noValidate = true;
+      f.addEventListener('submit', function (e) {
+        var first = check(e.currentTarget);
+        if (first) { e.preventDefault(); first.focus(); }
+      });
+      f.addEventListener('change', function (e) {
+        if (e.target.getAttribute && e.target.getAttribute('aria-invalid')) check(e.currentTarget);
+      });
+    }
+  }
+  function start() { apply(); wire(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
 })();

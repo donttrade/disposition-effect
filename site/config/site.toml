@@ -16,9 +16,9 @@ reply_promise = "We reply within 1 business day (Eastern Time, Monday to Friday)
 manual_restore = true
 
 [flags]
-paid_report = false        # the $39 report, its pages and the trader Stripe links
+paid_report = true        # the $39 report, its pages and the trader Stripe links
 analytics = false          # Cloudflare Web Analytics beacon
-trader_first_home = false  # must equal paid_report (the build fails otherwise)
+trader_first_home = true  # must equal paid_report (the build fails otherwise)
 pilot_checkout = false     # "Start a Pilot" block + thanks page with the live Stripe Pilot link
 # R-D2 (23 Oct): the hold-gap check is excluded from any free_badges switch-on until Option B passes
 # (ARCHITECT-STATS-AMENDMENT-R2 §10 item 8; the free hold-gap badge is the paid hold_gap method, R2-8).
@@ -30,7 +30,7 @@ journal = false            # the free Trading Journal + P&L Calendar (/journal/,
 cf_beacon_token = ""       # required when analytics = true
 
 [stripe]
-mode = "test"              # which prices.json link the paid build renders: "test" or "live"
+mode = "live"              # which prices.json link the paid build renders: "test" or "live"
 
 [forms]
 endpoint = "https://api.web3forms.com/submit"
@@ -41,7 +41,7 @@ redirect_trader = "https://donttrade.ca/for-traders/thanks/"
 redirect_pilot = "https://donttrade.ca/start/pilot-thanks/"   # used only with pilot_checkout = true
 
 [worker]
-api_base = "http://127.0.0.1:8787"  # local dev server only; no production value yet
+api_base = "https://donttrade-api.donttrade-research.workers.dev"  # local dev server only; no production value yet
 
 [legal]
 # Show the seller's legal name, address and phone with pilot_checkout alone? The plan DoD says
@@ -53,7 +53,7 @@ show_seller_for_pilot = false
 # the price-history row of the launch changes. Empty = the build date, for builds before launch.
 # Set it on push day and keep it: a date after the build date fails the build, and
 # ./site/run.sh bundle refuses an empty one. Change it again with any later legal edit.
-launch_date = "2026-10-21"
+launch_date = "2026-10-25"
 # T0: the day the site moved from GitHub Pages to Cloudflare Pages (the zone became Active, runbook
 # step 83), YYYY-MM-DD. Stated on /privacy/ and /fr/confidentialite/. Required: empty or a date after
 # the build date fails the build. The privacy notice's version is the later of this and launch_date.

@@ -34,10 +34,13 @@
 
   function wire() {
     var buttons = document.querySelectorAll('[data-theme-toggle]');
+    // QA 25 Oct: the button is named by what it does ("Light mode" while dark is on). A label that
+    // changes carries the state itself, so the button has no aria-pressed (APG button pattern).
     function sync() {
+      var dark = current() === 'dark';
       for (var j = 0; j < buttons.length; j++) {
-        var dark = current() === 'dark';
-        buttons[j].setAttribute('aria-pressed', dark ? 'true' : 'false');
+        var label = buttons[j].querySelector('.tt-label');
+        if (label) label.textContent = dark ? 'Light mode' : 'Dark mode';
       }
     }
     for (var i = 0; i < buttons.length; i++) {
@@ -54,4 +57,23 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire);
   else wire();
+})();
+// 25 Oct: a link to an id inside a collapsed <details> (the /pricing/ last step and price history, the
+// long terms sections) opens it, on load and on hashchange. Here because every page loads theme.js.
+(function () {
+  'use strict';
+  function openHash() {
+    var id = decodeURIComponent((location.hash || '').slice(1));
+    var el = id && document.getElementById(id);
+    if (!el || !el.closest) return;
+    var any = false;
+    for (var d = el.closest('details'); d; d = d.parentElement && d.parentElement.closest('details')) {
+      if (d.closest('.site-nav')) break;
+      if (!d.open) { d.open = true; any = true; }
+    }
+    if (any) el.scrollIntoView();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', openHash);
+  else openHash();
+  window.addEventListener('hashchange', openHash);
 })();

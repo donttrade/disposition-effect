@@ -30,7 +30,7 @@
      "stripe_link_live": null, "stripe_link_test": null, "requires_flag": null},
     {"id": "report39", "audience": "trader", "name": "Habit report", "former_name": null, "price_usd": 39, "interval": "once",
      "founding": true, "credit_rule": null, "turnaround_days": null, "payment_terms": null,
-     "anchor": "traders", "cta_label": "Join the waitlist", "stripe_link_live": null, "stripe_link_test": null,
+     "anchor": "traders", "cta_label": "Join the waitlist", "stripe_link_live": "https://buy.stripe.com/eVq14m66H9Jw15a0Rwdwc04", "stripe_link_test": null,
      "stripe_link_live_fr": null, "stripe_link_test_fr": null,
      "requires_flag": "paid_report"},
     {"id": "tracker79", "audience": "trader", "name": "Habit Tracker", "former_name": null, "price_usd": 79, "interval": "year",

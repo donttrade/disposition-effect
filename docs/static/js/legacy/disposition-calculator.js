@@ -133,6 +133,13 @@
       $('dc-reading').textContent = r.reading;
     };
     var touchAll = function () { ids.forEach(function (id) { touched[id] = true; }); };
+    // QA 25 Oct: after the example or Enter, bring the result into view (no smooth scroll under reduced motion)
+    var reveal = function () {
+      var box = $('dc-results');
+      if (!box || box.hidden || !box.scrollIntoView) return;
+      var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      box.scrollIntoView({ block: 'nearest', behavior: still ? 'auto' : 'smooth' });
+    };
     var init = function () {
       if (!$('dc-rg') || !N) return;
       ids.forEach(function (id) {
@@ -143,11 +150,11 @@
       // submit it (and lifted.js stops a submit anyway); Enter checks every box instead.
       $('dc-form').addEventListener('submit', function () { touchAll(); update(); });
       $('dc-form').addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' && e.target && e.target.tagName === 'INPUT') { e.preventDefault(); touchAll(); update(); }
+        if (e.key === 'Enter' && e.target && e.target.tagName === 'INPUT') { e.preventDefault(); touchAll(); update(); reveal(); }
       });
       $('dc-example').addEventListener('click', function () {
         $('dc-rg').value = '420'; $('dc-pg').value = '1780'; $('dc-rl').value = '260'; $('dc-pl').value = '2240';
-        touchAll(); update();
+        touchAll(); update(); reveal();
       });
       $('dc-clear').addEventListener('click', function () { ids.forEach(function (id) { $(id).value = ''; }); touched = {}; update(); });
       update();
