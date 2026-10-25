@@ -69,7 +69,7 @@
 
   <section class="section" aria-labelledby="free-h" data-reveal>
     <h2 id="free-h">Free now</h2>
-    {%- from "partials/tool_cards.html" import tool_cards %}
+    {%- from "partials/tool_cards.html" import tool_cards with context %}
     {{ tool_cards(tools[:3]) }}
     <p><a href="/tools/">All free tools</a> · <a href="/research/">The research is free</a></p>
   </section>

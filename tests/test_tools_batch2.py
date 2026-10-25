@@ -573,4 +573,4 @@ def test_analytics_build_switches_the_privacy_sentence(tmp_path):
 def test_tools_index_lists_the_new_tools(built_site):
     h = (built_site["out"] / "tools" / "index.html").read_text(encoding="utf-8")
     for path in PATHS:
-        assert f'<a href="{path}">' in h and f'"url": "https://donttrade.ca{path}"' in h, path
+        assert f'<a class="tool-card-link" href="{path}">' in h and f'"url": "https://donttrade.ca{path}"' in h, path   # 25 Oct sweep: one link per card

@@ -612,28 +612,36 @@ PILOT_FLAG_MARKER = 'data-requires-flag="pilot_checkout"'
 # The /tools/ index rows: tool, the question it answers, input, Open (plan step 12).
 TOOLS = [
     {"name": "Trade stats", "href": "/tools/trade-stats/",
+     "short": "Your trade file → win rate, net result and streaks.", "preview": "stats", "icon": "stats",   # 25 Oct sweep: the card line and preview
      "question": "What does my own trade history show?",
      "question_if_badges": "What does my own trade history show, and which numbers are more than noise?",
      "input": "Your trade file"},
     {"name": "Trading heatmap", "href": "/tools/trading-heatmap/",
+     "short": "Your trade file → your results by hour and weekday.", "preview": "heat", "icon": "windows",   # 25 Oct sweep: the card line and preview
      "question": "How did my own trades turn out by the hour and weekday they opened?",
      "input": "Your trade file"},
     {"name": "Drawdown and recovery calculator", "href": "/tools/drawdown-calculator/",
+     "short": "A drawdown or your file → how deep and how long.", "preview": "dd", "icon": "split",   # 25 Oct sweep: the card line and preview
      "question": "What gain recovers a drawdown, and how deep and long were mine?",
      "input": "A drawdown in percent, or your trade file"},
     {"name": "Prop-firm challenge simulator", "href": "/tools/prop-challenge-simulator/",
+     "short": "Your file and a challenge’s rules → pass, bust or out of time.", "preview": "prop", "icon": "flag",   # 25 Oct sweep: the card line and preview
      "question": "How would my past trading days have fared under a challenge’s rules?",
      "input": "Your trade file, or win rate and average win and loss; the rules"},
     {"name": "Lot size calculator", "href": "/tools/lot-size-calculator/",
+     "short": "Balance, risk and stop → the lot size.", "preview": "", "icon": "scale",   # 25 Oct sweep: the card line and preview
      "question": "How many lots match the amount I chose to risk at this stop?",
      "input": "Balance, risk amount, stop distance, value per point"},
     {"name": "Risk-reward calculator", "href": "/tools/risk-reward-calculator/",
+     "short": "Entry, stop and target → the break-even win rate.", "preview": "", "icon": "percent",   # 25 Oct sweep: the card line and preview
      "question": "At what win rate does this reward-to-risk ratio break even, and what is the expectancy in R?",
      "input": "Entry, stop and target, or the ratio; optionally a win rate"},
     {"name": "Disposition-effect calculator", "href": "/tools/disposition-calculator/",
+     "short": "Four counts → did you sell winners sooner than losers?", "preview": "", "icon": "hourglass",   # 25 Oct sweep: the card line and preview
      "question": "Were winning positions sold more readily than losing ones?",
      "input": "Four counts of positions sold and held"},
     {"name": "Pass-rate calculator (for firm operators)", "href": "/tools/pass-rate-calculator/",
+     "short": "Cohort counts → pass and payout rate. For firms.", "preview": "", "icon": "check",   # 25 Oct sweep: the card line and preview
      "question": "What are one cohort’s evaluation pass rate and payout rate?",
      "input": "Cohort counts"},
 ]
@@ -647,6 +655,20 @@ def tools_for(flags):
 
 
 SAMPLE_CSV = os.path.join(SITE, "static", "samples", "demo-trades.csv")
+TOOL_PREVIEWS_JSON = os.path.join(SITE, "config", "tool_previews.json")
+
+
+def tool_previews():
+    """The tool cards' preview numbers (25 Oct sweep): the tools' own results on the sample file, captured by
+    checks/make_tool_previews.py. Refuses to build when the sample file changed since they were captured."""
+    with open(TOOL_PREVIEWS_JSON, encoding="utf-8") as f:
+        tp = json.load(f)
+    with open(SAMPLE_CSV, "rb") as f:
+        sha = hashlib.sha256(f.read()).hexdigest()
+    if tp.get("sample_sha256") != sha:
+        die(f"{TOOL_PREVIEWS_JSON} was captured from another sample file: rerun python3 checks/make_tool_previews.py")
+    return tp
+
 
 
 def evidence():
@@ -2232,7 +2254,7 @@ def build():
                 "legal": cfg["legal"], "forms": cfg["forms"], "analytics": cfg["analytics"],
                 "worker": cfg["worker"], "prices": prices, "products": products, "private": private,
                 "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": tools_for(flags),
-                "evidence": evidence(), "latest": latest(), "footer_privacy": footer_privacy(flags), "show_seller": show_seller(cfg),
+                "tool_previews": tool_previews(), "evidence": evidence(), "latest": latest(), "footer_privacy": footer_privacy(flags), "show_seller": show_seller(cfg),
                 "strings": read_toml(os.path.join(SITE, "config", "strings.toml"), "strings.toml"),
                 "paid_method": paid_method(),
                 "report_link_fr": report_link_fr(products["report39"], cfg["stripe"]["mode"]),

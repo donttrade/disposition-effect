@@ -4,7 +4,7 @@
   {% include "partials/crumbs.html" %}
   <h1>Free trading tools</h1>
   <p class="lede">Tools for your own trades that run entirely in your browser. No sign-up, no cookies, and nothing you enter or drop on these pages is sent anywhere.</p>
-  {%- from "partials/tool_cards.html" import tool_cards %}
+  {%- from "partials/tool_cards.html" import tool_cards with context %}
   {{ tool_cards(tools, h="h2") }}
   <p class="small muted">The trade-file tools read MT5 and MT4 reports, IBKR Flex Query files and Tradovate order exports (all in beta), and a plain CSV template. They measure your own past trades and describe what happened; they do not tell you what to trade, what size to use or when to exit.</p>
   {% include "partials/disclaimer.html" %}

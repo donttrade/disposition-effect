@@ -58,26 +58,48 @@
       <figcaption>Sample report on a made-up trade file. Not a real trader.</figcaption>
     </figure>
     <details class="how">
-      <summary>How the results work</summary>
-      <p>Each tested habit gets one of three results: “distinguishable from noise”, “not distinguishable from noise”, or “not enough trades to tell” when either of the two groups it compares has fewer than 30 trades. Each test compares trades from the same days with each other. Dollar figures are historical totals from your file. They describe what happened; they do not show that a habit caused a result.</p>
+      <summary>What the results mean</summary>
+      <p>In plain words: the pattern is unlikely to be luck. “Not distinguishable” means it could be luck. Each tested habit gets one of three results: “distinguishable from noise”, “not distinguishable from noise”, or “not enough trades to tell” when either of the two groups it compares has fewer than 30 trades. Each test compares trades from the same days with each other. Dollar figures are historical totals from your file. They describe what happened; they do not show that a habit caused a result.</p>
     </details>
   </section>
 
+  {#- 25 Oct sweep: the three steps as pictures. Step 2 shows what stays and what is sent instead of a
+      paragraph (strings.p5: the same facts as /privacy/#report); step 3 is the sample report's own result
+      pills (made-up file). No buy button in this section. -#}
   <section class="section" aria-labelledby="t-how-h" data-reveal>
     <h2 id="t-how-h">How it works</h2>
-    <ol class="steps" data-reveal data-reveal-stagger>
-      <li><strong>Export your history.</strong> A MetaTrader 5 or 4 report, an IBKR Flex Query or a Tradovate orders export (all three in beta), or the donttrade CSV template.</li>
-      <li><strong>Your browser reads it.</strong> It removes names, account numbers and symbols. {{ strings.p5.short }}</li>
-      <li><strong>Read your report.</strong> Run the free re-test on the same account 30 to 60 days after your first report.</li>
+    <ol class="how-steps" data-reveal-stagger>
+      <li class="how-step">
+        <div class="how-shot" aria-hidden="true"><span class="pill">MT5</span> <span class="pill">MT4</span> <span class="pill">IBKR</span> <span class="pill">Tradovate</span> <span class="pill">CSV</span></div>
+        <h3><span class="how-n">1</span> Export your trades</h3>
+        <p>From MetaTrader, IBKR or Tradovate. Or use our CSV template.</p>
+      </li>
+      <li class="how-step">
+        <div class="how-shot">
+          <table class="mini-table">
+            <thead><tr><th scope="col">Stays in your browser</th><th scope="col">Sent, stripped</th></tr></thead>
+            <tbody><tr><td>Your file</td><td>Times</td></tr><tr><td>Names</td><td>Buy or sell</td></tr><tr><td>Account numbers</td><td>Relative size</td></tr><tr><td>Tickers</td><td>Result</td></tr></tbody>
+          </table>
+        </div>
+        <h3><span class="how-n">2</span> Drop the file in</h3>
+        <details class="how-more"><summary>What we keep</summary><p>{{ strings.p5.short }} <a href="/privacy/#report">Exactly what is sent and kept</a></p></details>
+      </li>
+      <li class="how-step">
+        <div class="how-shot" aria-hidden="true">
+          {%- for h in sr.habits if h.verdict in pill %}<p class="how-row"><span>{{ short.get(h.id, h.name) }}</span> <span class="{{ pill[h.verdict][0] }}">{{ pill[h.verdict][1] }}</span></p>{% endfor %}
+        </div>
+        <h3><span class="how-n">3</span> See your habits</h3>
+        <p>Plus one free re-test, 30 to 60 days later.</p>
+        <details class="how-more"><summary>About the re-test</summary><p>Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.</p></details>
+      </li>
     </ol>
-    <p><a href="/privacy/#report">Exactly what is sent and kept</a></p>
   </section>
 
   <section class="section" aria-labelledby="tools-h" data-reveal>
-    <h2 id="tools-h">Free tools. No account.</h2>
-    {%- from "partials/tool_cards.html" import tool_cards %}
+    <h2 id="tools-h">Try the free tools first</h2>
+    {%- from "partials/tool_cards.html" import tool_cards with context %}
     {{ tool_cards(tools[:3]) }}
-    <p><a href="/tools/">All free tools</a></p>
+    <p><a class="more" href="/tools/">See all free tools <span aria-hidden="true">→</span></a></p>
   </section>
 
   <section class="section" aria-labelledby="faq-h" data-reveal>
@@ -88,10 +110,7 @@
     <details><summary>Refunds?</summary><p>A full refund if you ask by email within {{ prices.rules.trader_refund_days }} days of buying, even after your report has run. <a href="/terms/#traders">Trader terms</a></p></details>
   </section>
 
-  <section class="section closing" aria-labelledby="close-h" data-reveal>
-    <h2 id="close-h">At a trading firm?</h2>
-    <p>We measure the gap between your traders’ plans and their trades, at a fixed price published before you ask. <a href="/for-firms/">What firms get</a></p>
-  </section>
+  <p class="firm-line">Run a prop firm or broker? <a href="/for-firms/">See what firms get</a></p>
   {% include "partials/disclaimer.html" %}
   </div>
   </div>
