@@ -307,6 +307,18 @@ details { border-bottom: 1px solid var(--border); }
 summary { cursor: pointer; min-height: var(--target); display: flex; align-items: center; font-weight: 600; padding: var(--s1) 0; }
 details > :not(summary) { margin-left: 0; }
 details[open] > summary { color: var(--rust); }
+/* 25 Oct: a <details> whose summary looks like a button (/pricing/ "Last step"), or holds a heading (Price history) */
+details.pay-step { border-bottom: 0; }
+details.pay-step > summary.btn { display: inline-flex; list-style: none; padding: 10px 20px; }
+details.pay-step > summary.btn::-webkit-details-marker { display: none; }
+details.pay-step[open] > summary.btn { color: var(--on-rust); }
+.pay-panel { margin-top: var(--s3); padding: var(--s3); border: 2px solid var(--rust); border-radius: var(--radius); }
+.pay-panel > h3:first-child { margin-top: 0; }
+.pay-panel .byp { grid-template-columns: 1fr; } .pay-panel .byp dd { margin-bottom: var(--s1); }
+@media (min-width: 900px) { .ladder-row:has(> details.pay-step[open]) { grid-column: 2 / -1; } }
+details > summary > h2, details > summary > h3 { margin: 0; font-size: inherit; display: inline; }
+details > summary > h2 { font-size: var(--fs-3); }
+@media print { details.pay-step > summary, .pay-panel { border: 0; padding: 0; } details.pay-step > summary { display: none !important; } }
 
 /* ------------------------------------------------------------------ forms */
 .field { margin-bottom: var(--s3); max-width: 32rem; }

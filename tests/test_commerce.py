@@ -90,7 +90,9 @@ def test_pricing_tabs_axe_and_keyboard(browser, paid_site, color):
     page = ctx.new_page()
     page.goto(paid_site["url"] + "/pricing/")
     assert page.get_attribute("#tab-traders", "aria-selected") == "true"
-    assert page.is_visible("#before-you-pay") and page.is_hidden("#panel-firms")
+    assert page.is_hidden("#before-you-pay") and page.is_hidden("#panel-firms")   # 25 Oct: in the "Last step" panel
+    page.click("#last-step > summary")
+    assert page.is_visible("#before-you-pay") and page.is_visible("#last-step a[href*='buy.stripe.com']")
     page.focus("#tab-traders")
     page.keyboard.press("ArrowRight")
     assert page.get_attribute("#tab-firms", "aria-selected") == "true" and page.is_visible("#firms")

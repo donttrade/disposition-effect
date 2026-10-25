@@ -703,6 +703,9 @@ def test_nit7_hashchange_switches_the_pricing_tab(browser, paid_site):
     page.go_back()
     page.wait_for_function("() => document.getElementById('tab-traders').getAttribute('aria-selected') === 'true'")
     page.evaluate("location.hash = 'traders'")
+    assert page.is_visible("#traders")
+    page.evaluate("location.hash = 'before-you-pay'")   # 25 Oct: in the "Last step" <details>; the hash opens it
+    page.wait_for_function("() => document.getElementById('last-step').open")
     assert page.is_visible("#before-you-pay")
     ctx.close()
 

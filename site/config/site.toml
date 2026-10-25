@@ -124,16 +124,6 @@ href = "/sample-memo/"
 desc = "What a firm receives"
 icon = "doc"
 [[nav.items]]
-label = "Code"
-href = "/code/"
-desc = "Study scripts, and which are still to come"
-icon = "code"
-[[nav.items]]
-label = "Corrections"
-href = "/corrections/"
-desc = "Every change, dated"
-icon = "check"
-[[nav.items]]
 label = "Glossary"
 href = "/glossary/"
 desc = "Terms, defined"
@@ -235,7 +225,11 @@ heading = "Firms"
 links = [["Prop firms & brokers", "/for-firms/"], ["Journals & platforms", "/for-platforms/"], ["Copy-trading platforms", "/for-firms/#copy-leader"], ["Firms making behaviour claims", "/for-firms/#claims-test"], ["Pricing", "/pricing/"], ["Start a Pilot", "/start/?product=pilot#pilot"]]
 [[footer]]
 heading = "Research"
-links = [["Research", "/research/"], ["The plan gap", "/plan-gap/"], ["Sample & method", "/sample-memo/"], ["Code", "/code/"], ["Glossary", "/glossary/"], ["Corrections", "/corrections/"], ["Atom feed", "/feed.xml"]]
+links = [["Research", "/research/"], ["The plan gap", "/plan-gap/"], ["Sample & method", "/sample-memo/"], ["Glossary", "/glossary/"], ["Atom feed", "/feed.xml"]]
+[[footer]]
+# 25 Oct: the record-keeping pages, out of the header menus, kept together here (every in-text link stays)
+heading = "Transparency"
+links = [["Corrections", "/corrections/"], ["Code", "/code/"], ["Who pays", "/independence/"]]
 [[footer]]
 heading = "Trust"
 links = [["Independence", "/independence/"], ["About", "/about/"], ["Questions", "/help/"], ["Researchers & press", "/for-researchers/"]]
