@@ -541,19 +541,23 @@ def paid_tools_site(tmp_path_factory):
 
 
 def test_paid_build_sells_and_teasers_follow(browser, paid_tools_site):
+    # owner, 25 Oct: the paid build's one offer is partials/tool_next_step.html, right after the result
+    # container; the teaser box (which quoted the visitor's figures) is gone, and a run changes nothing in it.
     for path in PATHS:
         h = (paid_tools_site["out"] / path.strip("/") / "index.html").read_text(encoding="utf-8")
-        assert 'href="/pricing/#traders">Get the habit report — $39</a>' in h and "/for-traders/#waitlist" not in h, path
-        assert 'data-on-sale="true"' in h and not L.not_on_sale_claims(L.readable_text(h), path), path
+        assert 'href="/pricing/#last-step">Get the habit report — $39</a>' in h and "/for-traders/#waitlist" not in h, path
+        assert h.count('class="notice notice-gap next-step"') == 1 and "notice-gap teaser" not in h, path
+        assert not L.not_on_sale_claims(L.readable_text(h), path), path
     ctx, pg, _ = open_page(browser, paid_tools_site, DD)
+    before = pg.inner_text(".next-step")
     pg.click("#dd-sample-btn")
     pg.wait_for_selector("#dd-out:not([hidden])")
-    assert pg.inner_text("#dd-teaser-text").endswith("The habit report tests whether trades opened within 15 minutes of a loss "
-                                                     "turned out differently from the rest, and what they totalled in your file.")
+    assert pg.inner_text(".next-step") == before and "reads your trade file" in before
     pg.goto(paid_tools_site["url"] + HM)
+    before = pg.inner_text(".next-step")
     pg.click("#hm-sample-btn")
     pg.wait_for_selector("#hm-out:not([hidden])")
-    assert pg.inner_text("#hm-teaser-text").startswith("None of your cells has 30 or more trades yet. The habit report looks at")
+    assert pg.inner_text(".next-step") == before and "reads this same file" in before
     ctx.close()
 
 

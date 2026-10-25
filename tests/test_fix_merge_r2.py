@@ -344,7 +344,7 @@ def test_r5_no_page_of_a_paid_build_says_not_on_sale(paid_site):
                                   "/for-traders/", "/start/", "/for-traders/thanks/"])
 def test_r5_trader_blocks_sell_in_a_paid_build(paid_site, path):
     h = open(os.path.join(paid_site["out"], path.strip("/"), "index.html"), encoding="utf-8").read()
-    assert 'href="/pricing/#traders">Get the habit report — $39</a>' in h
+    assert 'href="/pricing/#last-step">Get the habit report — $39</a>' in h   # af52207: buy buttons open the pay panel
     assert 'product" value="waitlist"' not in h and 'id="wl"' not in h   # the waitlist form is gone
     assert "/for-traders/#waitlist" not in h
 
@@ -373,19 +373,27 @@ def test_r5_paid_metadata_and_faq_jsonld(paid_site):
 
 
 def test_r5_tool_teaser_script_wording_follows_the_offer(browser, paid_site, built_site):
-    texts = {}
-    for name, site in (("paid", paid_site), ("off", built_site)):
-        ctx = browser.new_context()
-        page = ctx.new_page()
-        page.goto(site["url"] + TS)
-        page.click("#ts-sample-btn")
-        page.wait_for_selector("#ts-teaser:not([hidden])", timeout=60000)
-        texts[name] = page.inner_text("#ts-teaser")
-        ctx.close()
-    # one of the five habits is described, not tested (CODER-WIRING-REPORT-2026-10-21)
-    # C1: without free_badges the teaser names no check ("tests four of them" is on the badges build)
-    assert "The habit report measures up to five habits like this one" in texts["paid"] and "We're building" not in texts["paid"]
-    assert "We're building a habit report" in texts["off"]
+    # owner, 25 Oct: a paid build has no teaser box; partials/tool_next_step.html is the one offer, the same
+    # words before and after a run (never the visitor's numbers). The flag-off build keeps the waitlist teaser.
+    ctx = browser.new_context()
+    page = ctx.new_page()
+    page.goto(paid_site["url"] + TS)
+    before = page.inner_text(".next-step")
+    page.click("#ts-sample-btn")
+    page.wait_for_selector("#ts-out:not([hidden])", timeout=60000)
+    page.wait_for_timeout(300)
+    assert page.locator("#ts-teaser").count() == 0
+    assert page.inner_text(".next-step") == before and before.startswith("Want to go one level deeper?")
+    assert page.evaluate("document.querySelector('#ts-out').nextElementSibling.classList.contains('next-step')")
+    ctx.close()
+    ctx = browser.new_context()
+    page = ctx.new_page()
+    page.goto(built_site["url"] + TS)
+    assert page.locator(".next-step").count() == 0
+    page.click("#ts-sample-btn")
+    page.wait_for_selector("#ts-teaser:not([hidden])", timeout=60000)
+    assert "We're building a habit report" in page.inner_text("#ts-teaser")
+    ctx.close()
 
 
 @pytest.mark.parametrize("plant", ["<p>Not on sale yet.</p>", "<p>Join the wait&#108;ist</p>",

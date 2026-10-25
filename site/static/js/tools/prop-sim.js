@@ -107,7 +107,7 @@ async function run(ev) {
   if (!p) return;
   if (worker) worker.terminate();
   $('ps-out').hidden = true;
-  $('ps-teaser').hidden = true;
+  if ($('ps-teaser')) $('ps-teaser').hidden = true;
   const st = $('ps-status');
   st.textContent = `Running ${intText(p.runs)} simulated challenges…`;
   st.hidden = false;
@@ -201,6 +201,7 @@ function render(p, res) {
     el('p', { class: 'small muted', text: `Rules used: ${rulesText}` })].filter(Boolean)); // no empty slot becomes the text "null"
   out.hidden = false;
   $('ps-out-h').focus();
+  if (!$('ps-teaser')) return; // paid_report on: partials/tool_next_step.html is the one offer
   $('ps-teaser-text').textContent = teaser(res);
   $('ps-teaser').hidden = false;
 }

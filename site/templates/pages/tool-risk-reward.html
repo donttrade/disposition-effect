@@ -46,12 +46,15 @@
   </section>
 
   <div id="rr-out" class="tool-out" hidden></div>
+  {%- with source = "typed", firm_line = false %}{% include "partials/tool_next_step.html" %}{% endwith %}
 
+  {%- if not flags.paid_report %}
   <aside class="notice notice-gap teaser" aria-labelledby="rr-teaser-h" {{ offer.on_sale_attr() }}>
     <strong id="rr-teaser-h">{{ offer.teaser_heading() }}</strong>
     <p>A planned ratio is one number; what your trades did after a loss is another. {{ offer.lead() }} checks, from your own trade file when it has times of day, whether your results change after a losing trade.</p>
     {{- offer.teaser() }}
   </aside>
+  {%- endif %}
 
   <section class="section" aria-labelledby="formula-h">
     <h2 id="formula-h">The three formulas</h2>

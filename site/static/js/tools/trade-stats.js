@@ -53,7 +53,7 @@ function clearOutput() {
   $('ts-error').hidden = true;
   $('ts-out').replaceChildren();
   $('ts-out').hidden = true;
-  $('ts-teaser').hidden = true;
+  if ($('ts-teaser')) $('ts-teaser').hidden = true;
 }
 
 // ------------------------------------------------------------------ input
@@ -304,6 +304,8 @@ const reportLead = () => ($('ts-teaser').dataset.onSale === 'true' ? 'The habit 
 
 // The teaser states only figures computed above: the hold gap (and, with badges, its check result).
 function teaser(noise) {
+  // paid_report on: no teaser box (partials/tool_next_step.html is the one offer, never next to a result)
+  if (!$('ts-teaser')) return;
   const s = state.stats || freeStats(state.result.trades);
   const text = $('ts-teaser-text');
   if (noise) text.textContent = B.teaserText(noise, s, reportLead());

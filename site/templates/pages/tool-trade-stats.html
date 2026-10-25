@@ -40,12 +40,15 @@
   </section>
 
   <div id="ts-out" class="tool-out" data-free-badges="{{ 'true' if flags.free_badges else 'false' }}" hidden></div>
+  {%- with source = "file", firm_line = false %}{% include "partials/tool_next_step.html" %}{% endwith %}
 
+  {%- if not flags.paid_report %}
   <aside id="ts-teaser" class="notice notice-gap teaser" aria-labelledby="ts-teaser-h" hidden {{ offer.on_sale_attr() }}>
     <strong id="ts-teaser-h">{{ offer.teaser_heading() }}</strong>
     <p id="ts-teaser-text"></p>
     {{- offer.teaser() }}
   </aside>
+  {%- endif %}
 
   <section class="section" aria-labelledby="files-h">
     <h2 id="files-h">Which files it reads</h2>
