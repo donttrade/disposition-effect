@@ -7,7 +7,7 @@ brand · nav row · theme toggle. Checked on template pages and lifted pages, li
   * keyboard: Tab reaches Menu, Enter/Space opens it, Tab enters the links, Escape closes it and
     focus returns to Menu; a click outside closes it; the expanded state is exposed;
   * axe: 0 serious/critical with the menu open; every target at least 44 px;
-  * the toggle keeps its name "Dark mode" (aria-pressed), the header holds no button and one plain
+  * the toggle is named by its action ("Dark mode" / "Light mode", QA 25 Oct), the header holds no button and one plain
     text offer link ("Start a Pilot", For firms panel; ARCHITECT-V3 Q3). v3 nav tests: test_v3_nav.py.
 """
 import os
@@ -142,7 +142,9 @@ def test_theme_toggle_keeps_its_name_and_state(browser, built_site):
     assert label["width"] <= 1 and label["height"] <= 1, "icon only on a phone; the name stays for screen readers"
     btn.click()
     assert pg.evaluate("document.documentElement.dataset.theme") == "dark"
-    assert btn.get_attribute("aria-pressed") == "true"
+    # QA 25 Oct: named by the action, no aria-pressed (a changing label carries the state)
+    assert pg.get_by_role("button", name="Light mode").count() == 1 and btn.count() == 0
+    assert pg.locator(".theme-toggle").get_attribute("aria-pressed") is None
     ctx.close()
 
 
