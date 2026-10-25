@@ -90,8 +90,8 @@ def test_analytics_on_calculators_allow_only_the_beacon(tmp_path):
 def test_launch_date_drives_dates_and_leaves_lifted_bodies_alone(tmp_path):
     a, _ = _flag_build(tmp_path, "d1", launch="2026-10-20", pilot_checkout=True)
     b, _ = _flag_build(tmp_path, "d2", launch="2026-10-19", pilot_checkout=True)
-    for p, wa, wb in (("/terms/", "2026-10-20", "2026-10-19"), ("/pricing/", "20 Oct 2026", "19 Oct 2026"),
-                      ("/start/", "20 Oct 2026", "19 Oct 2026")):
+    # QA 25 Oct: /start/ no longer carries the dated rename note (it stays in /terms/ and the /pricing/ history)
+    for p, wa, wb in (("/terms/", "2026-10-20", "2026-10-19"), ("/pricing/", "20 Oct 2026", "19 Oct 2026")):
         assert wa in _file(a, p).read_text(encoding="utf-8") and wb in _file(b, p).read_text(encoding="utf-8"), p
     frozen = re.compile(r"(?s)<!--frozen:start-->.*<!--frozen:end-->")
     for path in B.LIFTED_PATHS:
