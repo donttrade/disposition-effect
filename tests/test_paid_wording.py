@@ -217,12 +217,12 @@ N0 = ("No pattern is shown first. A pattern is shown first only when its gap is 
 
 
 # R-D2 H-2 exact texts
-V_LAUNCH = ("Not tested in this version of the report. In our tests on files built to have no real pattern, this test reported "
+V_LAUNCH = ("In our tests on files built to have no real pattern, this test reported "
             "a gap in more than 1 file in 20, the rate it is designed for, when a large win or loss changed how long the next "
             "trades were held. So this pattern is described here without a verdict.")
 HG_LINE = "Holding losers longer than winners is described, not tested, in this version of the report."
 # R-D3.2 exact texts
-V_LAUNCH_SIZE = ("Not tested in this version of the report. In our tests on files built to have no real pattern, this test "
+V_LAUNCH_SIZE = ("In our tests on files built to have no real pattern, this test "
                  "reported a gap in more than 1 file in 20, the rate it is designed for, in files that mix several symbols whose "
                  "sizes and results both follow the time of day. So this pattern is described here without a verdict.")
 SU_LINE = "Size after a loss is described, not tested, in this version of the report."

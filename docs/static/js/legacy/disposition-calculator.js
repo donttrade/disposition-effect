@@ -140,11 +140,20 @@
       var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       box.scrollIntoView({ block: 'nearest', behavior: still ? 'auto' : 'smooth' });
     };
+    var shownOnce = false;
     var init = function () {
       if (!$('dc-rg') || !N) return;
       ids.forEach(function (id) {
         $(id).addEventListener('input', function () { touched[id] = true; update(); });
         $(id).addEventListener('blur', function () { touched[id] = true; update(); });
+        // QA3 25 Oct: typed inputs showed the result below the fold with nothing pointing to it. When a
+        // finished box (change, not every keystroke) first makes a result appear off screen, bring it up once.
+        $(id).addEventListener('change', function () {
+          var box = $('dc-results');
+          if (shownOnce || !box || box.hidden) return;
+          shownOnce = true;
+          if (box.getBoundingClientRect().top > window.innerHeight - 80) setTimeout(reveal, 60); // after the Tab focus move, which cancels a smooth scroll started during it
+        });
       });
       // Enter in a box: the form has several boxes and no submit button, so the browser does not
       // submit it (and lifted.js stops a submit anyway); Enter checks every box instead.
@@ -156,7 +165,7 @@
         $('dc-rg').value = '420'; $('dc-pg').value = '1780'; $('dc-rl').value = '260'; $('dc-pl').value = '2240';
         touchAll(); update(); reveal();
       });
-      $('dc-clear').addEventListener('click', function () { ids.forEach(function (id) { $(id).value = ''; }); touched = {}; update(); });
+      $('dc-clear').addEventListener('click', function () { ids.forEach(function (id) { $(id).value = ''; }); touched = {}; shownOnce = false; update(); });
       update();
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
