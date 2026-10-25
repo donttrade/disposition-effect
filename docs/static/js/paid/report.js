@@ -11,7 +11,7 @@ import { ics, retestLine, RETEST_LINE } from './retest-copy.js?v=0c170eab';
 import { pgrPlrCounts } from '../engine/pgr.js?v=6a01bfc7';
 import { stripRows, spanLine } from './strip.js?v=03137080';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js?v=16f6dd26';
-import { habitSentences, methodLine, page1Lines, coverageLines, mergedLine, checkReport, SENTENCE_HABITS, RESEARCH, RESEARCH_PREFIX, holdDays } from './wording.js?v=25f7bb59';
+import { habitSentences, methodLine, page1Lines, coverageLines, mergedLine, checkReport, SENTENCE_HABITS, RESEARCH, RESEARCH_PREFIX, holdDays } from './wording.js?v=09f9dd9a';
 
 const $ = (id) => document.getElementById(id);
 const MINUS = '−';

@@ -488,6 +488,7 @@ fieldset legend { font-weight: 600; margin-bottom: 4px; padding: 0; }
 .split { display: grid; gap: var(--s3); grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); margin: 0; }
 .split dt { font-weight: 600; font-size: var(--fs-2); margin-bottom: var(--s1); }
 .split dd { margin: 0; max-width: var(--prose); }
+.split + p { margin-top: var(--s3); } /* QA3 25 Oct: the paragraph after the habit cards sat flush under them */
 .closing h3 { margin-top: var(--s2); }
 .finding .display { font-variant-numeric: tabular-nums; font-size: 4rem; line-height: 1; }
 @media (max-width: 600px) { .finding .display { font-size: var(--fs-6); } }

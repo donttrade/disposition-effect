@@ -23,11 +23,11 @@
 
 export const METHOD_VERSION = '2026-10-23.stats2f';
 // V-launch (R-D2 H-2, exact text): hold_gap under stats2b. Replaces M2 and the verdict.
-export const V_LAUNCH = 'Not tested in this version of the report. In our tests on files built to have no real pattern, this test reported a gap in more than 1 file in 20, the rate it is designed for, when a large win or loss changed how long the next trades were held. So this pattern is described here without a verdict.';
+export const V_LAUNCH = 'In our tests on files built to have no real pattern, this test reported a gap in more than 1 file in 20, the rate it is designed for, when a large win or loss changed how long the next trades were held. So this pattern is described here without a verdict.';
 // The fixed page-1 line (R-D2 H-2), on every stats2b and stats2c report.
 export const HOLD_GAP_COVERAGE = 'Holding losers longer than winners is described, not tested, in this version of the report.';
 // V-launch-size (R-D3.2, exact text): size_up under stats2c. Follows M1; replaces M2 and the verdict.
-export const V_LAUNCH_SIZE = 'Not tested in this version of the report. In our tests on files built to have no real pattern, this test reported a gap in more than 1 file in 20, the rate it is designed for, in files that mix several symbols whose sizes and results both follow the time of day. So this pattern is described here without a verdict.';
+export const V_LAUNCH_SIZE = 'In our tests on files built to have no real pattern, this test reported a gap in more than 1 file in 20, the rate it is designed for, in files that mix several symbols whose sizes and results both follow the time of day. So this pattern is described here without a verdict.';
 // R-D3 addendum 3 I-9, exact texts ({T}: datesSubject).
 export const NONE_TESTED = 'None of the patterns could be tested in this file. Some are described below without a verdict.';
 export const SIZE_UP_NONE = 'Size after a loss is not described or tested for this file.';
