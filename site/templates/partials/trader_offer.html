@@ -9,7 +9,7 @@
 {#- The one call-to-action button. -#}
 {%- macro button() -%}
 {%- if flags.paid_report -%}
-<a class="btn" href="/pricing/#traders">Get the habit report — {{ r.price_usd|usd }}</a>
+<a class="btn" href="/pricing/#last-step">Get the habit report — {{ r.price_usd|usd }}</a>
 {%- else -%}
 <a class="btn" href="/for-traders/#waitlist">Join the waitlist — {{ r.price_usd|usd }} founding price</a>
 {%- endif -%}
