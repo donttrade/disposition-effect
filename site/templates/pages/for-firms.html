@@ -63,7 +63,7 @@
       <tbody>
       {%- for id in firm_ids %}{% set p = products[id] %}
         <tr><th scope="row">{{ p.name }}</th>
-          <td>{{ what[id] }}</td><td>{{ p.turnaround_days }} business days</td><td>{{ p.payment_terms }}</td><td class="num">{{ p.price_usd|usd }}</td></tr>
+          <td data-label="What you get">{{ what[id] }}</td><td data-label="Delivery">{{ p.turnaround_days }} business days</td><td data-label="Payment">{{ p.payment_terms }}</td><td class="num" data-label="Price (USD)">{{ p.price_usd|usd }}</td></tr>
       {%- endfor %}
       </tbody>
     </table>

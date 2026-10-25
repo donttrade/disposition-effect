@@ -345,14 +345,20 @@ def cut_answer(text):
     return (head[:k + 1] if k > 200 else head.rsplit(" ", 1)[0]) + " …"
 
 
-def answer_units(rendered):
+def answer_units(rendered, private=None):
     """[(page, html)] → the index units {id, q, a, url, section, kind, updated}. Dies on a unit whose
-    anchor is not on its page, or whose text holds a finding number from evidence()."""
+    anchor is not on its page, or whose text holds a finding number from evidence().
+    QA3 25 Oct: a unit quoting the seller's name, address or phone, or the "called Trial" rename note,
+    is left out, so /help/ and the answer index never repeat them (they stay on their own pages)."""
     units, ids = [], set()
+    keep_out = [v for v in ((private or {}).get(k) for k in PRIVATE_FIELDS) if isinstance(v, str) and v.strip()]
+    keep_out.append("called \u201cTrial\u201d")
     ev = evidence()
     bad_numbers = [ev["finding"]["pct"], re.search(r"[\d,]{4,}", ev["finding"]["rest"]).group(0)]
 
     def add(page, kind, q, a, anchor, where):
+        if any(v in a or v in q for v in keep_out):
+            return
         a = cut_answer(a)
         if not q or not a:
             return
@@ -2272,7 +2278,7 @@ def build():
     for rel, page in sorted(owned.items()):
         if rel not in later:
             render(rel, page)
-    units = answer_units(rendered)
+    units = answer_units(rendered, private)
     with open(os.path.join(out, ANSWERS_JS.lstrip("/")), "w", encoding="utf-8", newline="\n") as f:
         f.write(answers_index_js(units, cfg))
     for rel, page in sorted(later.items()):
