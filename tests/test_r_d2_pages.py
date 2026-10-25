@@ -155,7 +155,7 @@ def raw(out, rel):
 
 
 NEXT_TYPED = ("Want to go one level deeper? The habit report reads your trade file and looks for up to five habits in your "
-              "own trades, testing two of them against chance. $39, one re-test included, refund within 14 days.")
+              "own trades, testing up to two of them against chance. $39, one re-test included, refund within 14 days.")
 
 
 def test_i3b_exact_offer_lines_on_each_page(builds):
