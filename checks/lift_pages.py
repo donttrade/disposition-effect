@@ -30,7 +30,7 @@ plus the three text fixes in LIFT_FIXES, which the passthrough build already app
 frozen body) and five rewordings of "sealed" in study link and teaser text on /about/,
 /for-researchers/ and /research/ (22 Oct 2026, brand Tester D4) and two rewordings of "verified"
 to "confirmed" in the correction promise on /corrections/ and /for-researchers/ (24 Oct 2026,
-Tester §12). compare.py proves that nothing else in the visible text, ids, links, tables or
+Tester §12) and two more links on /404.html, Free tools and For traders (25 Oct 2026, QA). compare.py proves that nothing else in the visible text, ids, links, tables or
 citation meta changed.
 
 This reads docs/ as it is before the step-30 bundle (old design). Once docs/ is replaced by
@@ -119,6 +119,9 @@ LIFT_FIXES = {
     ],
     "/404.html": [
         ('<a href="/start/">Start a trial</a>', '<a href="/start/">Start a Pilot</a>'),
+        # QA 25 Oct: the not-found page also offers the free tools and the trader page
+        ('Try <a href="/research/">Research</a>,',
+         'Try <a href="/tools/">Free tools</a>, <a href="/for-traders/">For traders</a>, <a href="/research/">Research</a>,'),
     ],
     # Delivery plan C-12 (P-3, now), text by the Architect's ruling R-D1.3(c) / D-3: the page is a research
     # figure, not the $39 report. Every report holds five habit entries; since R-D3 (stats2c) two can be tested

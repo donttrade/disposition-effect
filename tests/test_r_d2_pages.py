@@ -88,8 +88,8 @@ def test_habit_tables_and_ledes(builds, flavour):
         assert "(described, not tested)" in t, (flavour, rel)   # the oversized-loss row, in parallel
     ft = text_of(out, os.path.join("for-traders", "index.html"))
     assert COUNT in ft or COUNT_SOON in ft
-    if flavour == "paid":
-        assert COUNT in text_of(out, "index.html") and COUNT in ft
+    if flavour == "paid":   # QA 25 Oct: the home lede glosses "against chance" on first use
+        assert COUNT.replace("chance in", "chance (could the pattern be luck?) in") in text_of(out, "index.html") and COUNT in ft
     for s in (ROW, SIZE_ROW, COUNT, COUNT_SOON):
         assert lint_text(s) == [] and lint_text(s, "rd2", paid=True) == []
 
@@ -114,9 +114,11 @@ RETEST = ("Your re-test runs on the version of the report that is live when you 
           "corrections page.")
 RETEST_HTML = ('Your re-test runs on the version of the report that is live when you run it; every change is dated on the '
                '<a href="/corrections/">corrections page</a>.')
-HOME_LEDE = ("A habit report built from your own trade history. It measures and describes up to five habits in your own file, like "
-             "opening a new trade soon after a loss, with the dollar totals of the matching trades, and tests up to two of these "
-             "habits against chance in this version. It doesn’t tell you what to trade.")
+# QA 25 Oct: "plan" and "tested against chance" glossed on first use
+HOME_LEDE = ("Your plan is how you meant to handle wins and losses. A habit report built from your own trade history. It measures "
+             "and describes up to five habits in your own file, like opening a new trade soon after a loss, with the dollar totals of "
+             "the matching trades, and tests up to two of these habits against chance (could the pattern be luck?) in this version. "
+             "It doesn’t tell you what to trade.")
 FT_LEDE = ("It measures and describes up to five habits in your own past trades, like opening a new trade soon after a loss, with the "
            "dollar totals of the matching trades, and tests up to two of these habits against chance in this version. It "
            "includes one re-test 30 to 60 days after your first report. It doesn’t tell you what to trade.")

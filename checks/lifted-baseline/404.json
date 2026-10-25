@@ -5,10 +5,16 @@
   [
    "<a href=\"/start/\">Start a trial</a>",
    "<a href=\"/start/\">Start a Pilot</a>"
+  ],
+  [
+   "Try <a href=\"/research/\">Research</a>,",
+   "Try <a href=\"/tools/\">Free tools</a>, <a href=\"/for-traders/\">For traders</a>, <a href=\"/research/\">Research</a>,"
   ]
  ],
  "ids": [],
  "links": [
+  "a[href]=/tools/",
+  "a[href]=/for-traders/",
   "a[href]=/research/",
   "a[href]=/pricing/",
   "a[href]=/start/"
@@ -17,6 +23,6 @@
  "source": "docs/404.html",
  "source_sha256": "b88d9e9b23a29ccea06149192dabe7d0fafa3c745a8d7ad28533796cf1836295",
  "tables": [],
- "text": "\nNot foundThat page doesn’t exist. Try Research, Pricing, Start a Pilot, or email donttrade.research@gmail.com.\n",
- "text_collapsed": "Not foundThat page doesn’t exist. Try Research, Pricing, Start a Pilot, or email donttrade.research@gmail.com."
+ "text": "\nNot foundThat page doesn’t exist. Try Free tools, For traders, Research, Pricing, Start a Pilot, or email donttrade.research@gmail.com.\n",
+ "text_collapsed": "Not foundThat page doesn’t exist. Try Free tools, For traders, Research, Pricing, Start a Pilot, or email donttrade.research@gmail.com."
 }
