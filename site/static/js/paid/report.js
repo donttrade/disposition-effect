@@ -35,8 +35,13 @@ export function money(n, unit) {
   const sign = n < 0 ? MINUS : n > 0 ? '+' : '';
   if (unit === 'USD') return `${sign}$${grouped(n)}`;
   if (unit === 'points') return `${sign}${grouped(n)} pts`;
-  if (unit === 'account' || unit === 'base') return `${sign}${grouped(n)} (${unit === 'account' ? 'account' : 'base'} currency)`;
+  // sweep 2: the unit is named once on the summary (unitLine), not after every amount
+  if (unit === 'account' || unit === 'base') return `${sign}${grouped(n)}`;
   return `${sign}${grouped(n)} ${unit}`;
+}
+
+function unitLine(unit) {
+  return unit === 'account' ? ' Amounts are in your account currency.' : unit === 'base' ? ' Amounts are in your base currency.' : '';
 }
 
 function duration(s) {
@@ -216,15 +221,16 @@ export function renderReport(report, out, meta) {
   // sentences come from wording.js, which refuses a report of another method version.
   const focus = report.habits.find((h) => h.id === report.focus) || null;
   const p1 = el('section', { class: 'section', id: 'focus', 'aria-labelledby': 'focus-h' });
-  p1.append(el('h2', { id: 'focus-h', text: 'Page 1' }));
+  p1.append(el('h2', { id: 'focus-h', text: 'Summary' }));   // sweep 2: a heading that says what it is
   const head = el('div', { class: focus ? 'notice notice-gap' : 'notice', id: 'focus-lines' });
   for (const line of page1Lines(report, wordingFmt(unit))) head.append(el('p', { text: line }));
   if (focus) head.append(el('p', { class: 'muted', text: focus.question }), el('p', {}, badge(focus.verdict, focus)));
   p1.append(head);
+  // sweep 2: the coverage lines (each "… is described, not tested …") fold under one tap instead of repeating
   const cov = el('div', { id: 'coverage' });
   for (const line of coverageLines(report)) cov.append(el('p', { class: 'small', text: line }));
-  p1.append(cov);
-  p1.append(el('p', { class: 'small muted', text: `${report.n_trades} trades over about ${report.period_weeks} week${report.period_weeks === 1 ? '' : 's'}.${meta && meta.span_left_out ? ' ' + spanLine(meta.span_left_out) : ''}${meta && meta.limited ? ' Only the most recent 20,000 trades were used.' : ''}` }));
+  p1.append(cov.childNodes.length > 1 ? el('details', { class: 'how-more', id: 'coverage-more' }, el('summary', { text: 'What was tested, and what was only described' }), cov) : cov);
+  p1.append(el('p', { class: 'small muted', text: `${report.n_trades} trades over about ${report.period_weeks} week${report.period_weeks === 1 ? '' : 's'}.${unitLine(unit)}${meta && meta.span_left_out ? ' ' + spanLine(meta.span_left_out) : ''}${meta && meta.limited ? ' Only the most recent 20,000 trades were used.' : ''}` }));
   const merged = mergedLine(report, wordingFmt(unit));   // R-D3 addendum I-5: only when rows were merged
   if (merged) p1.append(el('p', { class: 'small', id: 'merged-rows', text: merged }));
   out.append(p1);
