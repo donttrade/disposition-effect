@@ -18,7 +18,7 @@
 {#- One line on where the offer stands. -#}
 {%- macro note() -%}
 {%- if flags.paid_report -%}
-{{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers. One time, in US dollars, with one free re-test 30 to 60 days after your first report. A full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying.
+{{ r.price_usd|usd }}, one time, in US dollars, with one free re-test 30 to 60 days after your first report. A full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying.
 {%- else -%}
 Not on sale yet: nothing is charged now. The free tools stay free.
 {%- endif -%}
@@ -69,7 +69,7 @@ data-on-sale="{{ 'true' if flags.paid_report else 'false' }}"
 {%- macro signup(heading_id, intro=false) %}
 {%- if flags.paid_report %}
     {%- if intro %}
-    <p>The habit report is on sale: {{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers, one time, with one free re-test. <a href="/for-traders/">What it measures</a></p>
+    <p>The habit report is on sale: {{ r.price_usd|usd }}, one time, with one free re-test. <a href="/for-traders/">What it measures</a></p>
     {%- endif %}
     <p>Read the “Before you pay” summary on the pricing page, then pay by card on Stripe’s page. A full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying.</p>
     <p>{{ button() }}</p>

@@ -253,12 +253,8 @@ links = [["Prop firms & brokers", "/for-firms/"], ["Journals & platforms", "/for
 heading = "Research"
 links = [["Research", "/research/"], ["The plan gap", "/plan-gap/"], ["Sample & method", "/sample-memo/"], ["Glossary", "/glossary/"], ["Atom feed", "/feed.xml"]]
 [[footer]]
-# 25 Oct: the record-keeping pages, out of the header menus, kept together here (every in-text link stays)
-heading = "Transparency"
-links = [["Corrections", "/corrections/"], ["Code", "/code/"], ["Who pays", "/independence/"]]
-[[footer]]
 heading = "Trust"
-links = [["Independence", "/independence/"], ["About", "/about/"], ["Questions", "/help/"], ["Researchers & press", "/for-researchers/"]]
+links = [["About", "/about/"], ["Questions", "/help/"]]
 [[footer]]
 heading = "Legal"
 links = [["Terms", "/terms/"], ["Privacy", "/privacy/"], ["Cancellations & refunds", "/terms/#cancellation"]]

@@ -25,7 +25,7 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=62df18f7">
+<link rel="stylesheet" href="/static/css/site.css?v=c80c5b6c">
 <link rel="stylesheet" href="/static/css/vt.css?v=af8673c7">
 <script src="/static/js/theme.js?v=74363ef7"></script>
 <script src="/static/js/nav.js?v=cd8f3405" defer></script>
@@ -148,7 +148,7 @@
         <h1 id="hero">See where your trades leave your plan.</h1>
         <p class="lede">Your plan is how you meant to handle wins and losses. A habit report built from your own trade history. It measures and describes up to five habits in your own file, like opening a new trade soon after a loss, with the dollar totals of the matching trades, and tests up to two of these habits against chance (could the pattern be luck?) in this version. It doesn’t tell you what to trade.</p>
         <p class="btn-row"><a class="btn" href="/pricing/#last-step">Get the habit report — $39</a> <a class="btn btn-secondary" href="/tools/trade-stats/">Free trade stats</a> <a href="/sample-report/">See a sample report</a></p>
-        <p class="small">$39 founding price for the first 100 buyers. One time, in US dollars, with one free re-test 30 to 60 days after your first report. A full refund if you ask within 14 days of buying.</p>
+        <p class="small">$39, one time, in US dollars, with one free re-test 30 to 60 days after your first report. A full refund if you ask within 14 days of buying.</p>
         <p class="small muted">Not investment advice. <a href="/pricing/#before-you-pay">Before you pay</a></p>
   </div>
     <div class="span-5 band-media"><figure class="hero-shot">
@@ -161,18 +161,54 @@
   </div></div>
 </section>
   <div class="wrap">
-
-  <section class="section" aria-labelledby="t-measure-h" data-reveal>
-    <h2 id="t-measure-h">What the report measures</h2>
-    <p>Five habits, measured in your own closed trades as far as your file allows.</p>
-    <dl class="split">
-      <div><dt>Hold gap</dt><dd>Did you hold losing trades longer than winning ones? (described, not tested in this version)</dd></div>
-      <div><dt>Re-entry after a loss</dt><dd>Did trades opened within 15 minutes of a loss turn out differently from the rest?</dd></div>
-      <div><dt>Size after a loss</dt><dd>Was the trade after a loss larger than the trade after a win? (described, not tested in this version)</dd></div>
-      <div><dt>Trading after a losing run</dt><dd>Did trades after two or more losses in a row turn out differently?</dd></div>
-      <div><dt>Unusually large losses</dt><dd>How many losses were more than twice your typical loss, and what share of your losses they made up (described, not tested)</dd></div>
-    </dl>
-    <p>Each tested habit gets one of three results: “distinguishable from noise”, “not distinguishable from noise”, or “not enough trades to tell” when either of the two groups it compares has fewer than 30 trades. Each test compares trades from the same days with each other. Dollar figures are historical totals from your file, such as “trades matching this pattern totalled −$X”. They describe what happened; they do not show that a habit caused a result.</p>
+  <section class="section showcase" aria-labelledby="t-measure-h" data-reveal>
+    <div class="showcase-copy">
+      <p class="kicker">The habit report</p>
+      <h2 id="t-measure-h">Five habits, checked in your own trades.</h2>
+      <ul class="ticks">
+        <li>Reads MetaTrader, IBKR, Tradovate or a simple CSV</li>
+        <li>Up to two habits tested against chance</li>
+        <li>Dollar totals straight from your file</li>
+        <li>Runs in your browser</li>
+      </ul>
+      <p><a class="more" href="/sample-report/">See the full sample report <span aria-hidden="true">→</span></a></p>
+    </div>
+    <figure class="showcase-shot" aria-label="Part of a sample habit report, from a made-up trade file">
+      <div class="shot-card">
+        <table class="shot-table">
+          <thead><tr><th scope="col">Habit</th><th scope="col" class="num">Trades</th><th scope="col" class="num">Total</th><th scope="col">Result</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Held losers longer</th>
+              <td class="num">71</td>
+              <td class="num loss">−$478.73</td>
+              <td><span class="pill pill-muted">Described</span></td></tr>
+            <tr><th scope="row">Re-entry after a loss</th>
+              <td class="num">71</td>
+              <td class="num loss">−$527.64</td>
+              <td><span class="pill pill-hit">Distinguishable from noise</span></td></tr>
+            <tr><th scope="row">Size after a loss</th>
+              <td class="num">24</td>
+              <td class="num loss">−$121.53</td>
+              <td><span class="pill pill-muted">Described</span></td></tr>
+            <tr><th scope="row">After a losing run</th>
+              <td class="num">89</td>
+              <td class="num loss">−$344.31</td>
+              <td><span class="pill">Not distinguishable</span></td></tr>
+            <tr><th scope="row">Unusually large losses</th>
+              <td class="num">24</td>
+              <td class="num loss">−$367.25</td>
+              <td><span class="pill pill-muted">Described</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="toast toast-a"><span class="toast-k">File read</span> 304 trades · 12 weeks</p>
+      <p class="toast toast-b"><span class="toast-k">Tested against chance</span> 1 of 2 distinguishable from noise</p>
+      <figcaption>Sample report on a made-up trade file. Not a real trader.</figcaption>
+    </figure>
+    <details class="how">
+      <summary>How the results work</summary>
+      <p>Each tested habit gets one of three results: “distinguishable from noise”, “not distinguishable from noise”, or “not enough trades to tell” when either of the two groups it compares has fewer than 30 trades. Each test compares trades from the same days with each other. Dollar figures are historical totals from your file. They describe what happened; they do not show that a habit caused a result.</p>
+    </details>
   </section>
 
   <section class="section" aria-labelledby="t-how-h" data-reveal>
@@ -220,9 +256,7 @@
     </ul></nav>
     <nav aria-label="Research"><h2>Research</h2><ul><li><a href="/research/">Research</a></li><li><a href="/plan-gap/">The plan gap</a></li><li><a href="/sample-memo/">Sample &amp; method</a></li><li><a href="/glossary/">Glossary</a></li><li><a href="/feed.xml">Atom feed</a></li>
     </ul></nav>
-    <nav aria-label="Transparency"><h2>Transparency</h2><ul><li><a href="/corrections/">Corrections</a></li><li><a href="/code/">Code</a></li><li><a href="/independence/">Who pays</a></li>
-    </ul></nav>
-    <nav aria-label="Trust"><h2>Trust</h2><ul><li><a href="/independence/">Independence</a></li><li><a href="/about/">About</a></li><li><a href="/help/">Questions</a></li><li><a href="/for-researchers/">Researchers &amp; press</a></li>
+    <nav aria-label="Trust"><h2>Trust</h2><ul><li><a href="/about/">About</a></li><li><a href="/help/">Questions</a></li>
     </ul></nav>
     <nav aria-label="Legal"><h2>Legal</h2><ul><li><a href="/terms/">Terms</a></li><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/#cancellation">Cancellations &amp; refunds</a></li>
     </ul></nav>

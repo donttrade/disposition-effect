@@ -69,7 +69,7 @@
     </table>
     </div>
     <p><a href="/sample-report/">See a sample report</a></p>
-    <p class="small">{{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers. Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>. Formats: MetaTrader 5/4, IBKR and Tradovate in beta, plus the donttrade CSV template. <a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a></p>
+    <p class="small">Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>. Formats: MetaTrader 5/4, IBKR and Tradovate in beta, plus the donttrade CSV template. <a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a></p>
     {% if stripe_mode == "test" %}<p class="notice notice-caution"><strong>Test mode</strong> Payments here use Stripe's test mode. No real card is charged.</p>{% endif %}
     {%- else %}
     <p><strong>Coming soon, not on sale yet.</strong> No money is taken now. The free tools cost nothing: <a href="/tools/">open the tools</a>.</p>
@@ -137,35 +137,8 @@
     <p><a href="/terms/#cancellation">Cancellation and refund terms</a> · <a href="/terms/#trial">{{ pilot.name }} terms</a></p>
   </section>
 
-  <section class="section" aria-labelledby="history">
-    <details class="history">
-    <summary><h2 id="history">Price history</h2></summary>
-    <div class="table-wrap" tabindex="0" role="region" aria-label="Price history">
-    <table>
-      <thead><tr><th scope="col">Date</th><th scope="col">Change</th></tr></thead>
-      <tbody>
-        {#- Rows newest first. The launch row's date is [legal] launch_date, so it sorts against the fixed rows. #}
-        {%- set launch_row %}<tr><td>{{ legal.launch_human }}</td><td>The first firm engagement is renamed {{ pilot.name }} (called “{{ pilot.former_name }}” before {{ legal.launch_human }}), at the same price. The trader prices once listed for after the founding offer are withdrawn; nothing had been sold at them. The end date once shown with the firm prices is removed: they have none. No price charged today changed.</td></tr>{% endset %}
-        {#- Owner decision 23 Oct: the founding offer is the first 100 buyers (Stripe enforces it: the $39 link is
-            limited to founding_limit completed payments). The 16 Oct row below stays as published. #}
-        {%- set founding_date = "23 Oct 2026" %}
-        {%- set founding_row %}<tr id="history-founding"><td>{{ founding_date }}</td><td>The founding price of the {{ r.name|lower }}, {{ r.price_usd|usd }}, is for its first {{ prices.rules.founding_limit }} buyers; people on the waitlist are emailed first when it goes on sale. No price changed.</td></tr>{% endset %}
-        {%- if legal.terms_version > founding_date|isodate %}
-        {{ launch_row }}
-        {{ founding_row }}
-        {%- else %}
-        {{ founding_row }}
-        {{ launch_row }}
-        {%- endif %}
-        <tr><td>17 Oct 2026</td><td>Claims substantiation test added, at the existing engagements and prices. No price changed.</td></tr>
-        <tr><td>17 Oct 2026</td><td>Copy-leader persistence test for copy-trading platforms added, at the existing engagements and prices. No price changed.</td></tr>
-        <tr><td>16 Oct 2026</td><td>Founding price for the first 100 on the trader waitlist added.</td></tr>
-        <tr><td>15 Oct 2026</td><td>Firm prices published.</td></tr>
-      </tbody>
-    </table>
-    </div>
-    </details>
-  </section>
+  {#- 25 Oct (owner): the price history is kept in git and the terms, not shown to buyers; the id stays for old links. -#}
+  <div id="history" hidden></div>
 
   <section class="section" aria-labelledby="faq-h">
     <h2 id="questions"><span id="faq-h">Questions about price</span></h2>
