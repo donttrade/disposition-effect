@@ -1,0 +1,11 @@
+/* vt.css: cross-document view transitions (ARCHITECT-V3 B6). Loaded only on the 4 motion pages and
+   /start/ (build guard: build.VT_PAGES); no tool or research page has @view-transition. Both pages of a
+   navigation must opt in; Firefox and older browsers get a plain navigation. Nothing runs under
+   prefers-reduced-motion. The home "Start a Pilot" button and the /start/ panel share one name, so the
+   button grows into the panel. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+  .vt-start { view-transition-name: start-panel; }
+  ::view-transition-group(start-panel) { animation-duration: 280ms; animation-timing-function: cubic-bezier(0.45, 0.05, 0.55, 0.95); }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 200ms; }
+}

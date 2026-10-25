@@ -7,108 +7,198 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#16181C" media="(prefers-color-scheme: dark)">
-<title>donttrade — behavioural measurement for trading firms</title>
-<meta name="description" content="We measure the plan gap: how traders plan to act versus how they act. Fixed price, public script, run on your own systems.">
+<title>donttrade - free trading tools and research on trader habits</title>
+<meta name="description" content="Free in-browser tools: trade stats, prop challenge odds, drawdown and risk-reward. Research on how traders behave. For firms: fixed-price measurement.">
 <link rel="canonical" href="https://donttrade.ca/">
+<meta name="robots" content="noindex,nofollow">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="donttrade">
-<meta property="og:title" content="donttrade — behavioural measurement for trading firms">
-<meta property="og:description" content="We measure the plan gap: how traders plan to act versus how they act. Fixed price, public script, run on your own systems.">
+<meta property="og:title" content="donttrade - free trading tools and research on trader habits">
+<meta property="og:description" content="Free in-browser tools: trade stats, prop challenge odds, drawdown and risk-reward. Research on how traders behave. For firms: fixed-price measurement.">
 <meta property="og:url" content="https://donttrade.ca/">
 <meta property="og:image" content="https://donttrade.ca/assets/og/home.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="donttrade — behavioural measurement for trading firms">
+<meta property="og:image:alt" content="donttrade - free trading tools and research on trader habits">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:description" content="Free in-browser tools: trade stats, prop challenge odds, drawdown and risk-reward. Research on how traders behave. For firms: fixed-price measurement.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=10d7bc57">
+<link rel="stylesheet" href="/static/css/site.css?v=b265641e">
+<link rel="stylesheet" href="/static/css/vt.css?v=af8673c7">
 <script src="/static/js/theme.js?v=ccbceb07"></script>
-<script src="/static/js/nav.js?v=99138326" defer></script>
+<script src="/static/js/nav.js?v=cd8f3405" defer></script>
+<script src="/static/js/ask.js?v=dae8287b" defer></script>
 <script src="/static/js/motion.js?v=7ce8bd22" defer></script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@id": "https://donttrade.ca/#website", "@type": "WebSite", "name": "donttrade", "publisher": {"@id": "https://donttrade.ca/#org"}, "url": "https://donttrade.ca/"}, {"@id": "https://donttrade.ca/#org", "@type": "Organization", "email": "donttrade.research@gmail.com", "name": "donttrade", "sameAs": ["https://donttrade.substack.com", "https://github.com/donttrade"], "url": "https://donttrade.ca/"}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Your trading records never leave your systems. Your staff run our public script on your own computers, and you can read every line first. Only the totals it prints come back to us: no account IDs, no trades, no names."}, "name": "Is our firm’s data safe?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Then that is your answer, and it is a finished result. The price is fixed before anyone sees data, so you pay the same either way. The result stays private unless you choose to publish it."}, "name": "What if no effect is found?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Every price is published on the pricing page , the same for every firm, and fixed in writing in the scope before any data is seen. No cancellation fees."}, "name": "What does it cost?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. It describes past behaviour. It does not tell anyone what to trade."}, "name": "Is this advice?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "The free tools read it inside your browser tab; those pages block every outgoing request, so the file is not uploaded. When the habit report launches, the page that runs it will say exactly what it sends."}, "name": "Where does my trade file go?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Firms: a Pilot is refunded in full if your extract can’t be made to run, or if your own re-run of the same script on the same export does not reproduce the figure. Traders: nothing is sold yet. Cancellation and refund terms"}, "name": "Refunds?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "donttrade is one person, writing under a pen name, based in Canada. Every study names the script that made its numbers, or says plainly when it is still to follow, so you check the work, not the author. The legal contracting party is named in writing, in the engagement agreement, before anything is paid. About"}, "name": "Who’s behind it?"}]}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@id": "https://donttrade.ca/#website", "@type": "WebSite", "name": "donttrade", "publisher": {"@id": "https://donttrade.ca/#org"}, "url": "https://donttrade.ca/"}, {"@id": "https://donttrade.ca/#org", "@type": "Organization", "email": "donttrade.research@gmail.com", "name": "donttrade", "sameAs": ["https://donttrade.substack.com", "https://x.com/donttradestudy", "https://github.com/donttrade", "https://www.tiktok.com/@donttradestudy", "https://www.instagram.com/donttradestudy/", "https://www.youtube.com/@donttradestudy"], "url": "https://donttrade.ca/"}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. It describes your own past trades. It does not tell you what to trade, how much, or when to exit."}, "name": "Is this advice?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "The file stays in your browser. For the report: Your browser sends our server only stripped trade numbers: open and close times, buy or sell, relative size, the realised result, a random symbol number and a scrambled fingerprint of each row. No name, account number or ticker is sent. The numbers are not kept; we keep only a scrambled fingerprint of each trade row from your first report, so a re-test can be matched to the same history, and we delete it on the dates in our privacy notice. The free tools send nothing at all."}, "name": "Where does my trade file go?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "It runs the same report on a newer export of the same account, 30 to 60 days after your first report, so you can compare the two. It is included in the price. Your re-test runs on the version of the report that is live when you run it; every change is dated on the corrections page ."}, "name": "What does the re-test do?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "A full refund if you ask by email within 14 days of buying, even after your report has run. Trader terms"}, "name": "Refunds?"}]}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
+<p class="notice notice-caution" role="note" data-preview-band><strong>Preview, not the live site.</strong> This copy (paid-preview) is for testing; the live site is https://donttrade.ca.</p>
 
 <header class="site-header"><div class="wrap">
   <a class="brand" href="/">donttrade</a>
   <nav class="site-nav" aria-label="Main"><ul class="nav-row">
-    <li><a href="/for-firms/">For firms</a></li>
-    <li><a href="/for-traders/">For traders</a></li>
-    <li><a href="/tools/">Free tools</a></li>
+    <li class="nav-dd-li"><details name="nav" class="nav-dd" data-nav-dd>
+      <summary>Free tools<svg class="chev" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg></summary>
+      <div class="nav-pop nav-pop-2">
+      <ul class="nav-items">
+        <li><a class="nav-item" href="/tools/trade-stats/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-9l5 6-5 6h9"/></svg><span class="ni-text"><span class="ni-t">Trade stats</span> <span class="ni-d">Totals from your trade file</span></span></a></li>
+        <li><a class="nav-item" href="/tools/prop-challenge-simulator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18V3"/><path d="M5 4h10l-2.5 3.5L15 11H5"/></svg><span class="ni-text"><span class="ni-t">Prop challenge simulator</span> <span class="ni-d">Your past days under a challenge’s rules</span></span></a></li>
+        <li><a class="nav-item" href="/tools/lot-size-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v14M6 17h8M4 6h12"/><path d="M4 6l-2 5h4zM16 6l-2 5h4z"/></svg><span class="ni-text"><span class="ni-t">Lot size calculator</span> <span class="ni-d">Lots for the risk you chose</span></span></a></li>
+        <li><a class="nav-item" href="/tools/disposition-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h10M5 17h10"/><path d="M6.5 3v2.5L13.5 14.5V17M13.5 3v2.5L6.5 14.5V17"/></svg><span class="ni-text"><span class="ni-t">Disposition calculator</span> <span class="ni-d">Winners vs losers sold, from four counts</span></span></a></li>
+      </ul>
+      <ul class="nav-foot">
+        <li><a href="/tools/">All free tools</a></li>
+        <li><a href="/for-traders/">For traders: the habit report</a></li>
+      </ul>
+      </div>
+    </details></li>
+    <li class="nav-dd-li"><details name="nav" class="nav-dd" data-nav-dd>
+      <summary>Research<svg class="chev" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg></summary>
+      <div class="nav-pop">
+      <ul class="nav-items">
+        <li><a class="nav-item" href="/research/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h12M4 10h12M4 15h8"/></svg><span class="ni-text"><span class="ni-t">All research</span> <span class="ni-d">Studies with their data and scripts</span></span></a></li>
+        <li><a class="nav-item" href="/plan-gap/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h14v12H3z"/><path d="M10 4v12"/></svg><span class="ni-text"><span class="ni-t">The plan gap</span> <span class="ni-d">What we measure and why</span></span></a></li>
+        <li><a class="nav-item" href="/sample-memo/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2.5h6.5l3.5 3.5v11.5H5z"/><path d="M11.5 2.5V6H15M7.5 10h5M7.5 13h5"/></svg><span class="ni-text"><span class="ni-t">Sample memo &amp; method</span> <span class="ni-d">What a firm receives</span></span></a></li>
+        <li><a class="nav-item" href="/code/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 6l-4 4 4 4M13 6l4 4-4 4M11.5 4l-3 12"/></svg><span class="ni-text"><span class="ni-t">Code</span> <span class="ni-d">Study scripts, and which are still to come</span></span></a></li>
+        <li><a class="nav-item" href="/corrections/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg><span class="ni-text"><span class="ni-t">Corrections</span> <span class="ni-d">Every change, dated</span></span></a></li>
+        <li><a class="nav-item" href="/glossary/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8v14l-4-3-4 3z"/></svg><span class="ni-text"><span class="ni-t">Glossary</span> <span class="ni-d">Terms, defined</span></span></a></li>
+      </ul>
+      </div>
+    </details></li>
+    <li class="nav-dd-li"><details name="nav" class="nav-dd" data-nav-dd>
+      <summary>For firms<svg class="chev" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg></summary>
+      <div class="nav-pop nav-pop-end">
+      <ul class="nav-items">
+        <li><a class="nav-item" href="/for-firms/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V4h8v13M12 8h4v9M3 17h14"/><path d="M7 7h2M7 10h2M7 13h2"/></svg><span class="ni-text"><span class="ni-t">For firms overview</span> <span class="ni-d">Measure your traders’ plan gap</span></span></a></li>
+        <li><a class="nav-item" href="/for-firms/#copy-leader"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h12l-3-3M16 13H4l3 3"/></svg><span class="ni-text"><span class="ni-t">Copy-trading platforms</span> <span class="ni-d">A leader-ranking test, not yet available</span></span></a></li>
+        <li><a class="nav-item" href="/for-platforms/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h10v10H3z"/><path d="M7 13v4h10V7h-4"/></svg><span class="ni-text"><span class="ni-t">Journals &amp; platforms</span> <span class="ni-d">Partner with us</span></span></a></li>
+        <li><a class="nav-item" href="/tools/pass-rate-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15L15 5"/><circle cx="6" cy="6" r="1.75"/><circle cx="14" cy="14" r="1.75"/></svg><span class="ni-text"><span class="ni-t">Pass-rate calculator</span> <span class="ni-d">One cohort’s pass and payout rate</span></span></a></li>
+        <li><a class="nav-item" href="/independence/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5l6 2.5v5c0 3.8-2.6 6-6 7.5-3.4-1.5-6-3.7-6-7.5V5z"/></svg><span class="ni-text"><span class="ni-t">Independence</span> <span class="ni-d">Why no firm can pay to change a number</span></span></a></li>
+      </ul>
+      <ul class="nav-foot">
+        <li><a href="/start/?product=pilot#pilot">Start a Pilot</a></li>
+      </ul>
+      </div>
+    </details></li>
     <li><a href="/pricing/">Pricing</a></li>
-    <li><a href="/research/">Research</a></li>
     <li><a href="/about/">About</a></li>
   </ul>
   <details class="nav-menu" data-nav-menu>
     <summary><svg class="i-menu" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg><svg class="i-close" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>Menu</summary>
-    <ul class="nav-panel">
-    <li><a href="/for-firms/">For firms</a></li>
-    <li><a href="/for-traders/">For traders</a></li>
-    <li><a href="/tools/">Free tools</a></li>
-    <li><a href="/pricing/">Pricing</a></li>
-    <li><a href="/research/">Research</a></li>
-    <li><a href="/about/">About</a></li>
-    </ul>
+    <div class="nav-panel">
+      <details name="m" class="nav-acc">
+        <summary>Free tools<svg class="chev" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg></summary>
+      <ul class="nav-items">
+        <li><a class="nav-item" href="/tools/trade-stats/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-9l5 6-5 6h9"/></svg><span class="ni-text"><span class="ni-t">Trade stats</span> <span class="ni-d">Totals from your trade file</span></span></a></li>
+        <li><a class="nav-item" href="/tools/prop-challenge-simulator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18V3"/><path d="M5 4h10l-2.5 3.5L15 11H5"/></svg><span class="ni-text"><span class="ni-t">Prop challenge simulator</span> <span class="ni-d">Your past days under a challenge’s rules</span></span></a></li>
+        <li><a class="nav-item" href="/tools/lot-size-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v14M6 17h8M4 6h12"/><path d="M4 6l-2 5h4zM16 6l-2 5h4z"/></svg><span class="ni-text"><span class="ni-t">Lot size calculator</span> <span class="ni-d">Lots for the risk you chose</span></span></a></li>
+        <li><a class="nav-item" href="/tools/disposition-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h10M5 17h10"/><path d="M6.5 3v2.5L13.5 14.5V17M13.5 3v2.5L6.5 14.5V17"/></svg><span class="ni-text"><span class="ni-t">Disposition calculator</span> <span class="ni-d">Winners vs losers sold, from four counts</span></span></a></li>
+      </ul>
+      <ul class="nav-foot">
+        <li><a href="/tools/">All free tools</a></li>
+        <li><a href="/for-traders/">For traders: the habit report</a></li>
+      </ul>
+      </details>
+      <details name="m" class="nav-acc">
+        <summary>Research<svg class="chev" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg></summary>
+      <ul class="nav-items">
+        <li><a class="nav-item" href="/research/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h12M4 10h12M4 15h8"/></svg><span class="ni-text"><span class="ni-t">All research</span> <span class="ni-d">Studies with their data and scripts</span></span></a></li>
+        <li><a class="nav-item" href="/plan-gap/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h14v12H3z"/><path d="M10 4v12"/></svg><span class="ni-text"><span class="ni-t">The plan gap</span> <span class="ni-d">What we measure and why</span></span></a></li>
+        <li><a class="nav-item" href="/sample-memo/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2.5h6.5l3.5 3.5v11.5H5z"/><path d="M11.5 2.5V6H15M7.5 10h5M7.5 13h5"/></svg><span class="ni-text"><span class="ni-t">Sample memo &amp; method</span> <span class="ni-d">What a firm receives</span></span></a></li>
+        <li><a class="nav-item" href="/code/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 6l-4 4 4 4M13 6l4 4-4 4M11.5 4l-3 12"/></svg><span class="ni-text"><span class="ni-t">Code</span> <span class="ni-d">Study scripts, and which are still to come</span></span></a></li>
+        <li><a class="nav-item" href="/corrections/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg><span class="ni-text"><span class="ni-t">Corrections</span> <span class="ni-d">Every change, dated</span></span></a></li>
+        <li><a class="nav-item" href="/glossary/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8v14l-4-3-4 3z"/></svg><span class="ni-text"><span class="ni-t">Glossary</span> <span class="ni-d">Terms, defined</span></span></a></li>
+      </ul>
+      </details>
+      <details name="m" class="nav-acc">
+        <summary>For firms<svg class="chev" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg></summary>
+      <ul class="nav-items">
+        <li><a class="nav-item" href="/for-firms/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V4h8v13M12 8h4v9M3 17h14"/><path d="M7 7h2M7 10h2M7 13h2"/></svg><span class="ni-text"><span class="ni-t">For firms overview</span> <span class="ni-d">Measure your traders’ plan gap</span></span></a></li>
+        <li><a class="nav-item" href="/for-firms/#copy-leader"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h12l-3-3M16 13H4l3 3"/></svg><span class="ni-text"><span class="ni-t">Copy-trading platforms</span> <span class="ni-d">A leader-ranking test, not yet available</span></span></a></li>
+        <li><a class="nav-item" href="/for-platforms/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h10v10H3z"/><path d="M7 13v4h10V7h-4"/></svg><span class="ni-text"><span class="ni-t">Journals &amp; platforms</span> <span class="ni-d">Partner with us</span></span></a></li>
+        <li><a class="nav-item" href="/tools/pass-rate-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15L15 5"/><circle cx="6" cy="6" r="1.75"/><circle cx="14" cy="14" r="1.75"/></svg><span class="ni-text"><span class="ni-t">Pass-rate calculator</span> <span class="ni-d">One cohort’s pass and payout rate</span></span></a></li>
+        <li><a class="nav-item" href="/independence/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5l6 2.5v5c0 3.8-2.6 6-6 7.5-3.4-1.5-6-3.7-6-7.5V5z"/></svg><span class="ni-text"><span class="ni-t">Independence</span> <span class="ni-d">Why no firm can pay to change a number</span></span></a></li>
+      </ul>
+      <ul class="nav-foot">
+        <li><a href="/start/?product=pilot#pilot">Start a Pilot</a></li>
+      </ul>
+      </details>
+      <ul class="nav-links">
+        <li><a href="/pricing/">Pricing</a></li>
+        <li><a href="/about/">About</a></li>
+        <li><a href="/help/#ask">Ask a question</a></li>
+      </ul>
+    </div>
   </details></nav>
+  <details class="nav-ask" data-ask>
+    <summary aria-label="Ask a question"><svg class="ask-i" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="5"/><path d="M12.2 12.2L17 17"/></svg><span class="ask-label" aria-hidden="true">Ask</span></summary>
+    <div class="ask-pop"><search class="answer-box" data-answer-box>
+  <form action="/help/" method="get" data-mail="donttrade.research@gmail.com" data-index-src="/static/js/answers-index.js?v=e76c03fb" data-js-src="/static/js/answers.js?v=70c79990" data-ui-src="/static/js/answer-ui.js?v=a4dfada1">
+    <label for="hd-q">Ask about prices, refunds, files, privacy…</label>
+    <div class="ask-row"><input id="hd-q" type="search" autocomplete="off" maxlength="200"><button class="ask-submit" type="submit">Ask</button></div>
+  </form>
+  <div class="answer-out" aria-live="polite" data-answer-out></div>
+  <p class="small muted">Answers are quoted from this site’s own pages. Your question is never sent anywhere: it is matched in your browser, and without JavaScript, Ask opens the list of every answer instead.</p>
+</search></div>
+  </details>
   <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" hidden><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg><span class="tt-label">Dark mode</span></button>
 </div></header>
 
-<main id="main">
+<main id="main" class="mkt">
 
-<div class="wrap">
-  <section class="hero" aria-labelledby="hero">
-    <div class="grid">
-      <div class="span-7">
-        <h1 id="hero">Measure the gap between your traders’ plans and their trades.</h1>
-        <p class="lede">Traders plan how they will handle wins and losses. What they actually do can differ. We call that difference the plan gap, and we measure it, starting with one measure available today: are your traders more likely to sell a winning trade than a losing one?</p>
-        <p>Your staff run our public script on your own systems. Only totals come back to us. You get the number, how sure it is, and a one-page memo, at a fixed price published before you ask.</p>
-        <p class="btn-row"><a class="btn" href="/start/?product=pilot#firm">Start a Pilot</a> <a class="btn btn-secondary" href="/sample-memo/">See a sample memo</a></p>
-        <p class="small muted">Refunded in full if your own re-run of the same script on the same export does not reproduce the figure. <a href="/pricing/">Pricing</a></p>
-        <div class="trader-line">
-          <p><strong>Trading your own account?</strong> The free trade-stats dashboard reads your MT5, IBKR or Tradovate file inside your browser. A habit report for traders is on the way.</p>
-          <p class="btn-row"><a class="btn" href="/for-traders/#waitlist">Join the waitlist — $39 founding price</a> <a href="/tools/trade-stats/">Try the free trade stats</a></p>
-        </div>
-      </div>
-      <figure class="span-5 hero-shot">
-        
+  <div data-requires-flag="paid_report">
+  <section class="band hero motif-grid motif-axis" aria-labelledby="hero" data-band>
+  <div class="wrap"><div class="grid">
+    <div class="span-7 band-copy">
+        <h1 id="hero">See where your trades leave your plan.</h1>
+        <p class="lede">A habit report built from your own trade history. It measures and describes up to five habits in your own file, like opening a new trade soon after a loss, with the dollar totals of the matching trades, and tests up to two of these habits against chance in this version. It doesn’t tell you what to trade.</p>
+        <p class="btn-row"><a class="btn" href="/pricing/#traders">Get the habit report — $39</a> <a class="btn btn-secondary" href="/tools/trade-stats/">Free trade stats</a></p>
+        <p class="small">$39 founding price for the first 100 buyers. One time, in US dollars, with one free re-test 30 to 60 days after your first report. A full refund if you ask within 14 days of buying.</p>
+        <p class="small muted">Not investment advice. <a href="/pricing/#before-you-pay">Before you pay</a></p>
+  </div>
+    <div class="span-5 band-media"><figure class="hero-shot">
+  
 <div class="hero-dash" role="img" aria-label="The free trade-stats dashboard on the synthetic sample file: 160 closed trades, a net result of plus 277.95 US dollars, win rate 51.9%, profit factor 1.14, and an equity and drawdown chart."><p class="dash-h">Headline numbers</p><dl class="stats"><div class="stat"><dt>Closed trades</dt><dd data-count>160</dd></div><div class="stat"><dt>Net result</dt><dd data-count class="gain">+$277.95</dd></div><div class="stat"><dt>Win rate</dt><dd data-count>51.9%</dd></div><div class="stat"><dt>Profit factor</dt><dd data-count>1.14</dd></div><div class="stat"><dt>Mean result per trade</dt><dd data-count class="gain">+$1.74</dd></div><div class="stat"><dt>Largest drawdown</dt><dd data-count class="loss">−$341.20</dd></div></dl><p class="dash-h">Equity and drawdown</p><div class="plot chart"><svg viewBox="0 0 496 300" aria-hidden="true" focusable="false"><line class="grid-line" x1="92" x2="488" y1="10" y2="10"></line><text class="axis" x="86" y="14" text-anchor="end">+$458.60</text><line class="grid-line" x1="92" x2="488" y1="190" y2="190"></line><text class="axis" x="86" y="194" text-anchor="end">−$40.20</text><polyline class="line-actual" points="92.0,173.8 94.5,176.9 97.0,180.5 99.5,183.4 102.0,190.0 104.5,156.8 106.9,154.6 109.4,157.9 111.9,151.7 114.4,148.6 116.9,135.4 119.4,132.9 121.9,129.7 124.4,125.7 126.9,132.8 129.4,117.5 131.8,113.1 134.3,98.1 136.8,95.2 139.3,99.9 141.8,97.0 144.3,105.6 146.8,87.0 149.3,82.6 151.8,80.4 154.3,78.7 156.8,51.3 159.2,35.1 161.7,33.7 164.2,16.1 166.7,22.7 169.2,16.8 171.7,29.4 174.2,38.5 176.7,34.3 179.2,27.8 181.7,32.2 184.2,38.1 186.6,45.7 189.1,16.3 191.6,27.0 194.1,35.6 196.6,40.7 199.1,22.1 201.6,10.0 204.1,13.0 206.6,25.6 209.1,21.9 211.5,46.4 214.0,53.9 216.5,64.0 219.0,67.8 221.5,71.5 224.0,68.2 226.5,99.8 229.0,96.7 231.5,91.8 234.0,95.1 236.5,102.1 238.9,106.4 241.4,75.9 243.9,86.8 246.4,80.7 248.9,91.6 251.4,90.7 253.9,85.5 256.4,93.8 258.9,90.7 261.4,107.8 263.8,117.2 266.3,133.1 268.8,130.8 271.3,100.4 273.8,99.0 276.3,114.1 278.8,110.0 281.3,86.5 283.8,73.5 286.3,70.6 288.8,86.0 291.2,89.7 293.7,104.6 296.2,112.5 298.7,102.4 301.2,97.1 303.7,93.0 306.2,106.7 308.7,104.0 311.2,78.3 313.7,93.3 316.2,68.6 318.6,54.3 321.1,56.4 323.6,47.1 326.1,63.9 328.6,35.4 331.1,59.4 333.6,76.5 336.1,82.3 338.6,86.1 341.1,89.9 343.5,94.3 346.0,103.8 348.5,105.9 351.0,103.6 353.5,109.6 356.0,95.8 358.5,85.8 361.0,92.0 363.5,98.8 366.0,102.9 368.5,121.6 370.9,114.7 373.4,123.5 375.9,114.5 378.4,109.2 380.9,91.8 383.4,101.8 385.9,110.3 388.4,109.3 390.9,106.0 393.4,102.0 395.8,76.4 398.3,81.6 400.8,91.6 403.3,84.1 405.8,76.7 408.3,90.0 410.8,106.5 413.3,104.8 415.8,100.4 418.3,92.0 420.8,89.2 423.2,82.9 425.7,62.5 428.2,47.2 430.7,56.3 433.2,61.0 435.7,70.2 438.2,97.4 440.7,91.4 443.2,94.3 445.7,99.7 448.2,94.7 450.6,79.8 453.1,78.1 455.6,76.1 458.1,88.3 460.6,94.7 463.1,87.1 465.6,52.0 468.1,46.0 470.6,69.2 473.1,72.9 475.5,79.2 478.0,82.9 480.5,86.9 483.0,85.5 485.5,61.3 488.0,75.2"></polyline><text class="axis" x="92" y="208">Drawdown from the previous high</text><line class="grid-line" x1="92" x2="488" y1="214" y2="214"></line><path class="area-dd" d="M92,214 L92.0,214.0 L94.5,215.6 L97.0,217.5 L99.5,219.0 L102.0,222.4 L104.5,214.0 L106.9,214.0 L109.4,215.7 L111.9,214.0 L114.4,214.0 L116.9,214.0 L119.4,214.0 L121.9,214.0 L124.4,214.0 L126.9,217.7 L129.4,214.0 L131.8,214.0 L134.3,214.0 L136.8,214.0 L139.3,216.4 L141.8,214.9 L144.3,219.4 L146.8,214.0 L149.3,214.0 L151.8,214.0 L154.3,214.0 L156.8,214.0 L159.2,214.0 L161.7,214.0 L164.2,214.0 L166.7,217.5 L169.2,214.4 L171.7,220.9 L174.2,225.6 L176.7,223.5 L179.2,220.1 L181.7,222.4 L184.2,225.5 L186.6,229.4 L189.1,214.1 L191.6,219.7 L194.1,224.2 L196.6,226.8 L199.1,217.1 L201.6,214.0 L204.1,215.6 L206.6,222.1 L209.1,220.2 L211.5,232.9 L214.0,236.8 L216.5,242.1 L219.0,244.0 L221.5,246.0 L224.0,244.2 L226.5,260.7 L229.0,259.1 L231.5,256.5 L234.0,258.3 L236.5,261.9 L238.9,264.1 L241.4,248.3 L243.9,253.9 L246.4,250.8 L248.9,256.4 L251.4,255.9 L253.9,253.2 L256.4,257.5 L258.9,255.9 L261.4,264.8 L263.8,269.7 L266.3,278.0 L268.8,276.8 L271.3,261.0 L273.8,260.3 L276.3,268.1 L278.8,266.0 L281.3,253.8 L283.8,247.0 L286.3,245.5 L288.8,253.5 L291.2,255.4 L293.7,263.2 L296.2,267.3 L298.7,262.0 L301.2,259.3 L303.7,257.2 L306.2,264.3 L308.7,262.8 L311.2,249.5 L313.7,257.3 L316.2,244.5 L318.6,237.0 L321.1,238.1 L323.6,233.3 L326.1,242.0 L328.6,227.2 L331.1,239.7 L333.6,248.6 L336.1,251.6 L338.6,253.5 L341.1,255.5 L343.5,257.8 L346.0,262.8 L348.5,263.8 L351.0,262.6 L353.5,265.8 L356.0,258.6 L358.5,253.4 L361.0,256.6 L363.5,260.2 L366.0,262.3 L368.5,272.0 L370.9,268.4 L373.4,273.0 L375.9,268.3 L378.4,265.5 L380.9,256.5 L383.4,261.7 L385.9,266.2 L388.4,265.6 L390.9,263.9 L393.4,261.8 L395.8,248.5 L398.3,251.2 L400.8,256.4 L403.3,252.5 L405.8,248.7 L408.3,255.6 L410.8,264.2 L413.3,263.3 L415.8,261.0 L418.3,256.6 L420.8,255.2 L423.2,251.9 L425.7,241.3 L428.2,233.3 L430.7,238.1 L433.2,240.5 L435.7,245.3 L438.2,259.4 L440.7,256.3 L443.2,257.8 L445.7,260.6 L448.2,258.0 L450.6,250.3 L453.1,249.4 L455.6,248.3 L458.1,254.7 L460.6,258.0 L463.1,254.1 L465.6,235.8 L468.1,232.7 L470.6,244.8 L473.1,246.7 L475.5,250.0 L478.0,251.9 L480.5,254.0 L483.0,253.2 L485.5,240.7 L488.0,247.9 L488,214 Z"></path><text class="axis" x="86" y="282" text-anchor="end">−$341.20</text><circle cx="266.33962264150944" cy="278" r="4" class="annot"></circle><text class="annot" x="274.33962264150944" y="270">largest drawdown</text><text class="axis" x="92" y="298">trade 1</text><text class="axis" x="488" y="298" text-anchor="end">trade 160</text></svg><span class="veil" aria-hidden="true"></span></div></div>
 
-        <figcaption>The free <a href="/tools/trade-stats/">trade-stats dashboard</a>, run on its synthetic sample file. Sample data, not a real trader.</figcaption>
-      </figure>
+  <figcaption>The free <a href="/tools/trade-stats/">trade-stats dashboard</a>, run on its synthetic sample file. Sample data, not a real trader.</figcaption>
+</figure>
+</div>
+  </div></div>
+</section>
+  <div class="wrap">
+
+  <section class="section" aria-labelledby="t-measure-h" data-reveal>
+    <h2 id="t-measure-h">What the report measures</h2>
+    <p>Five habits, measured in your own closed trades as far as your file allows.</p>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="The five habits">
+    <table>
+      <thead><tr><th scope="col">Habit</th><th scope="col">The question about your own trades</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Hold gap</th><td>Did you hold losing trades longer than winning ones? (described, not tested in this version)</td></tr>
+        <tr><th scope="row">Re-entry after a loss</th><td>Did trades opened within 15 minutes of a loss turn out differently from the rest?</td></tr>
+        <tr><th scope="row">Size after a loss</th><td>Was the trade after a loss larger than the trade after a win? (described, not tested in this version)</td></tr>
+        <tr><th scope="row">Trading after a losing run</th><td>Did trades after two or more losses in a row turn out differently?</td></tr>
+        <tr><th scope="row">Unusually large losses</th><td>How many losses were more than twice your typical loss, and what share of your losses they made up (described, not tested)</td></tr>
+      </tbody>
+    </table>
     </div>
+    <p>Each tested habit gets one of three results: “distinguishable from noise”, “not distinguishable from noise”, or “not enough trades to tell” when either of the two groups it compares has fewer than 30 trades. Each test compares trades from the same days with each other. Dollar figures are historical totals from your file, such as “trades matching this pattern totalled −$X”. They describe what happened; they do not show that a habit caused a result.</p>
   </section>
-  <ul class="evidence" aria-label="What you can check before you pay" data-reveal>
-    <li><a href="/research/">6 published studies</a></li>
-    <li><a href="/code/">Scripts public for 4 of 6</a></li>
-    <li><a href="/corrections/">6 corrections, dated and logged</a></li>
-    <li><a href="/independence/">No firm can pay to change a number</a></li>
-  </ul>
-  <section class="section" aria-labelledby="how-h" data-reveal>
-    <h2 id="how-h">How it works for a firm</h2>
+
+  <section class="section" aria-labelledby="t-how-h" data-reveal>
+    <h2 id="t-how-h">How it works</h2>
     <ol class="steps" data-reveal data-reveal-stagger>
-      <li><strong>Tell us which traders and which dates.</strong> A short form or an email, about five minutes.</li>
-      <li><strong>Get a written scope and a fixed price within 1 business day.</strong> Your staff run the public script on your own systems. Only totals come back.</li>
-      <li><strong>Get the number, how sure it is, and a one-page memo.</strong> You decide whether anything is published.</li>
+      <li><strong>Export your history.</strong> A MetaTrader 5 or 4 report, an IBKR Flex Query or a Tradovate orders export (all three in beta), or the donttrade CSV template.</li>
+      <li><strong>Your browser reads it.</strong> It removes names, account numbers and symbols. It sends our server only stripped trade numbers. Those are not kept; only a scrambled fingerprint of each trade is kept, for the re-test.</li>
+      <li><strong>Read your report.</strong> Run the free re-test on the same account 30 to 60 days after your first report.</li>
     </ol>
-    <p><a href="/for-firms/">What firms get, and what it costs</a></p>
+    <p><a href="/privacy/#report">Exactly what is sent and kept</a></p>
   </section>
-  <section class="section finding" aria-labelledby="finding-h" data-reveal>
-    <h2 id="finding-h" class="visually-hidden">A published finding</h2>
-    <div class="grid">
-      <div class="span-7">
-        <p class="display">76.1%</p>
-        <p class="finding-text">of 4,659 retail traders realised their gains more readily than their losses.</p>
-      </div>
-      <div class="span-5 finding-note">
-        <p class="muted">From our replication of Odean (1998) on a free, public (CC0) data set. The disposition effect is common; a measurement on your own records shows whether it is in your traders’ trades.</p>
-        <p><a href="/research/disposition-effect/">Read the study and method</a></p>
-      </div>
-    </div>
-  </section>
+
   <section class="section" aria-labelledby="tools-h" data-reveal>
     <h2 id="tools-h">Free tools. No account.</h2>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Free tools">
@@ -116,78 +206,52 @@
       <thead><tr><th scope="col">Tool</th><th scope="col">The question it answers</th><th scope="col">What you give it</th></tr></thead>
       <tbody>
         <tr><th scope="row"><a href="/tools/trade-stats/">Trade stats</a></th><td>What does my own trade history show?</td><td>Your trade file</td></tr>
-        <tr><th scope="row"><a href="/tools/prop-challenge-simulator/">Prop-firm challenge simulator</a></th><td>How would my past trading days have fared under a challenge’s rules?</td><td>Your trade file, or win rate and average win and loss; the rules</td></tr>
-        <tr><th scope="row"><a href="/tools/lot-size-calculator/">Lot size calculator</a></th><td>How many lots match the amount I chose to risk at this stop?</td><td>Balance, risk amount, stop distance, value per point</td></tr>
+        <tr><th scope="row"><a href="/tools/trading-heatmap/">Trading heatmap</a></th><td>How did my own trades turn out by the hour and weekday they opened?</td><td>Your trade file</td></tr>
+        <tr><th scope="row"><a href="/tools/drawdown-calculator/">Drawdown and recovery calculator</a></th><td>What gain recovers a drawdown, and how deep and long were mine?</td><td>A drawdown in percent, or your trade file</td></tr>
       </tbody>
     </table>
     </div>
     <p><a href="/tools/">All free tools</a></p>
   </section>
-  <section class="section" aria-labelledby="price-h" data-reveal>
-    <h2 id="price-h">Pricing, in short</h2>
-    <dl class="split" data-reveal data-reveal-stagger>
-      <div><dt>Firms</dt><dd>Fixed prices, published and the same for every firm, starting with a Pilot. The price is set in writing before anyone sees data. <a href="/pricing/#firms">Firm pricing</a></dd></div>
-      <div><dt>Traders</dt><dd>The free tools cost nothing. The habit report is not on sale yet: $39 founding price for the first 100 buyers. Nothing is charged now. <a href="/pricing/#traders">Trader pricing</a></dd></div>
-    </dl>
-  </section>
-  <section class="section" aria-labelledby="cmp-h" data-reveal>
-    <h2 id="cmp-h">What donttrade adds to a trading journal</h2>
-    <div class="table-wrap" tabindex="0" role="region" aria-label="Comparison with a typical trading journal">
-    <table>
-      <thead><tr><th scope="col"><span class="visually-hidden">Question</span></th><th scope="col">Most trading journals</th><th scope="col">donttrade</th></tr></thead>
-      <tbody>
-        <tr><th scope="row">Logs your trades</th><td>Yes</td><td>No: it reads the export your platform already makes</td></tr>
-        <tr><th scope="row">Needs an account</th><td>Usually</td><td>No account or login</td></tr>
-        <tr><th scope="row">Tests whether a pattern is more than noise</th><td>Varies</td><td>Yes, a stated statistical check, with “not enough trades to tell” under 30 trades</td></tr>
-        <tr><th scope="row">Shows the method and the code</th><td>Rarely</td><td>Yes</td></tr>
-        <tr><th scope="row">Tells you what to buy or sell</th><td>Some do</td><td>No</td></tr>
-      </tbody>
-    </table>
-    </div>
-  </section>
-  <section class="section" aria-labelledby="trust-h" data-reveal>
-    <h2 id="trust-h">No cookies. No analytics. Firms can’t pay to change a number.</h2>
-    <p>Firms pay for fixed-scope measurements of their own data. Readers pay nothing. Nothing on the research pages is for sale, and every correction is logged with its date.</p>
-    <p><a href="/independence/">Independence policy</a> · <a href="/privacy/">Privacy</a> · <a href="/corrections/">Corrections</a></p>
-  </section>
+
   <section class="section" aria-labelledby="faq-h" data-reveal>
     <h2 id="faq-h">Questions</h2>
-    <details><summary>Is our firm’s data safe?</summary><p>Your trading records never leave your systems. Your staff run our public script on your own computers, and you can read every line first. Only the totals it prints come back to us: no account IDs, no trades, no names.</p></details>
-    <details><summary>What if no effect is found?</summary><p>Then that is your answer, and it is a finished result. The price is fixed before anyone sees data, so you pay the same either way. The result stays private unless you choose to publish it.</p></details>
-    <details><summary>What does it cost?</summary><p>Every price is published on the <a href="/pricing/">pricing page</a>, the same for every firm, and fixed in writing in the scope before any data is seen. No cancellation fees.</p></details>
-    <details><summary>Is this advice?</summary><p>No. It describes past behaviour. It does not tell anyone what to trade.</p></details>
-    <details><summary>Where does my trade file go?</summary><p>The free tools read it inside your browser tab; those pages block every outgoing request, so the file is not uploaded. When the habit report launches, the page that runs it will say exactly what it sends.</p></details>
-    <details><summary>Refunds?</summary><p>Firms: a Pilot is refunded in full if your extract can’t be made to run, or if your own re-run of the same script on the same export does not reproduce the figure. Traders: nothing is sold yet. <a href="/terms/#cancellation">Cancellation and refund terms</a></p></details>
-    <details><summary>Who’s behind it?</summary><p>donttrade is one person, writing under a pen name, based in Canada. Every study names the script that made its numbers, or says plainly when it is still to follow, so you check the work, not the author. The legal contracting party is named in writing, in the engagement agreement, before anything is paid. <a href="/about/">About</a></p></details>
+    <details id="q-is-this-advice"><summary>Is this advice?</summary><p>No. It describes your own past trades. It does not tell you what to trade, how much, or when to exit.</p></details>
+    <details id="q-where-does-my-trade-file-go"><summary>Where does my trade file go?</summary><p>The file stays in your browser. For the report: Your browser sends our server only stripped trade numbers: open and close times, buy or sell, relative size, the realised result, a random symbol number and a scrambled fingerprint of each row. No name, account number or ticker is sent. The numbers are not kept; we keep only a scrambled fingerprint of each trade row from your first report, so a re-test can be matched to the same history, and we delete it on the dates in our privacy notice. The free tools send nothing at all.</p></details>
+    <details id="q-what-does-the-re-test-do"><summary>What does the re-test do?</summary><p>It runs the same report on a newer export of the same account, 30 to 60 days after your first report, so you can compare the two. It is included in the price. Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.</p></details>
+    <details id="q-refunds"><summary>Refunds?</summary><p>A full refund if you ask by email within 14 days of buying, even after your report has run. <a href="/terms/#traders">Trader terms</a></p></details>
   </section>
+
   <section class="section closing" aria-labelledby="close-h" data-reveal>
-    <h2 id="close-h">Two ways to start</h2>
-    <div class="grid" data-reveal data-reveal-stagger>
-      <div class="span-6"><h3>Trading your own account</h3><p>Start with the free trade-stats dashboard: your own file, in your browser, in seconds.</p><p><a class="btn btn-secondary" href="/tools/trade-stats/">Open trade stats</a></p></div>
-      <div class="span-6"><h3>At a firm</h3><p>Tell us the population and the period. You get a written scope and a fixed price within 1 business day.</p><p><a class="btn" href="/start/?product=pilot#firm">Start a Pilot</a></p></div>
-    </div>
-    <p class="small muted">Prefer email? Write to <a href="mailto:donttrade.research@gmail.com?subject=Question">donttrade.research@gmail.com</a>. We reply within 1 business day (Eastern Time, Monday to Friday).</p>
+    <h2 id="close-h">At a trading firm?</h2>
+    <p>We measure the gap between your traders’ plans and their trades, at a fixed price published before you ask. <a href="/for-firms/">What firms get</a></p>
   </section>
-</div>
+  <p class="disclaimer">donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.</p>
+
+  </div>
+  </div>
 
 </main>
 <footer class="site-footer"><div class="wrap">
   <div class="cols">
     <nav aria-label="Traders"><h2>Traders</h2><ul><li><a href="/tools/">Free tools</a></li><li><a href="/tools/trade-stats/">Trade stats</a></li><li><a href="/for-traders/">Individual traders</a></li>
     </ul></nav>
-    <nav aria-label="Firms"><h2>Firms</h2><ul><li><a href="/for-firms/">Prop firms &amp; brokers</a></li><li><a href="/for-platforms/">Journals &amp; platforms</a></li><li><a href="/for-firms/#copy-leader">Copy-trading platforms</a></li><li><a href="/for-firms/#claims-test">Firms making behaviour claims</a></li><li><a href="/pricing/">Pricing</a></li><li><a href="/start/#firm">Start a Pilot</a></li>
+    <nav aria-label="Firms"><h2>Firms</h2><ul><li><a href="/for-firms/">Prop firms &amp; brokers</a></li><li><a href="/for-platforms/">Journals &amp; platforms</a></li><li><a href="/for-firms/#copy-leader">Copy-trading platforms</a></li><li><a href="/for-firms/#claims-test">Firms making behaviour claims</a></li><li><a href="/pricing/">Pricing</a></li><li><a href="/start/?product=pilot#pilot">Start a Pilot</a></li>
     </ul></nav>
     <nav aria-label="Research"><h2>Research</h2><ul><li><a href="/research/">Research</a></li><li><a href="/plan-gap/">The plan gap</a></li><li><a href="/sample-memo/">Sample &amp; method</a></li><li><a href="/code/">Code</a></li><li><a href="/glossary/">Glossary</a></li><li><a href="/corrections/">Corrections</a></li><li><a href="/feed.xml">Atom feed</a></li>
     </ul></nav>
-    <nav aria-label="Trust"><h2>Trust</h2><ul><li><a href="/independence/">Independence</a></li><li><a href="/about/">About</a></li><li><a href="/for-researchers/">Researchers &amp; press</a></li>
+    <nav aria-label="Trust"><h2>Trust</h2><ul><li><a href="/independence/">Independence</a></li><li><a href="/about/">About</a></li><li><a href="/help/">Questions</a></li><li><a href="/for-researchers/">Researchers &amp; press</a></li>
     </ul></nav>
     <nav aria-label="Legal"><h2>Legal</h2><ul><li><a href="/terms/">Terms</a></li><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/#cancellation">Cancellations &amp; refunds</a></li>
     </ul></nav>
+    <nav aria-label="Follow donttrade"><h2>Follow</h2><ul class="follow"><li><a href="https://donttrade.substack.com" rel="me noopener"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24"><path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"/></svg><span>Substack</span></a></li><li><a href="https://x.com/donttradestudy" rel="me noopener"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg><span>X</span><span class="visually-hidden"> @donttradestudy</span></a></li><li><a href="https://github.com/donttrade" rel="me noopener"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg><span>GitHub</span></a></li><li><a href="https://www.tiktok.com/@donttradestudy" rel="me noopener"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg><span>TikTok</span><span class="visually-hidden"> @donttradestudy</span></a></li><li><a href="https://www.instagram.com/donttradestudy/" rel="me noopener"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24"><path d="M7.0301.084c-1.2768.0602-2.1487.264-2.911.5634-.7888.3075-1.4575.72-2.1228 1.3877-.6652.6677-1.075 1.3368-1.3802 2.127-.2954.7638-.4956 1.6365-.552 2.914-.0564 1.2775-.0689 1.6882-.0626 4.947.0062 3.2586.0206 3.6671.0825 4.9473.061 1.2765.264 2.1482.5635 2.9107.308.7889.72 1.4573 1.388 2.1228.6679.6655 1.3365 1.0743 2.1285 1.38.7632.295 1.6361.4961 2.9134.552 1.2773.056 1.6884.069 4.9462.0627 3.2578-.0062 3.668-.0207 4.9478-.0814 1.28-.0607 2.147-.2652 2.9098-.5633.7889-.3086 1.4578-.72 2.1228-1.3881.665-.6682 1.0745-1.3378 1.3795-2.1284.2957-.7632.4966-1.636.552-2.9124.056-1.2809.0692-1.6898.063-4.948-.0063-3.2583-.021-3.6668-.0817-4.9465-.0607-1.2797-.264-2.1487-.5633-2.9117-.3084-.7889-.72-1.4568-1.3876-2.1228C21.2982 1.33 20.628.9208 19.8378.6165 19.074.321 18.2017.1197 16.9244.0645 15.6471.0093 15.236-.005 11.977.0014 8.718.0076 8.31.0215 7.0301.0839m.1402 21.6932c-1.17-.0509-1.8053-.2453-2.2287-.408-.5606-.216-.96-.4771-1.3819-.895-.422-.4178-.6811-.8186-.9-1.378-.1644-.4234-.3624-1.058-.4171-2.228-.0595-1.2645-.072-1.6442-.079-4.848-.007-3.2037.0053-3.583.0607-4.848.05-1.169.2456-1.805.408-2.2282.216-.5613.4762-.96.895-1.3816.4188-.4217.8184-.6814 1.3783-.9003.423-.1651 1.0575-.3614 2.227-.4171 1.2655-.06 1.6447-.072 4.848-.079 3.2033-.007 3.5835.005 4.8495.0608 1.169.0508 1.8053.2445 2.228.408.5608.216.96.4754 1.3816.895.4217.4194.6816.8176.9005 1.3787.1653.4217.3617 1.056.4169 2.2263.0602 1.2655.0739 1.645.0796 4.848.0058 3.203-.0055 3.5834-.061 4.848-.051 1.17-.245 1.8055-.408 2.2294-.216.5604-.4763.96-.8954 1.3814-.419.4215-.8181.6811-1.3783.9-.4224.1649-1.0577.3617-2.2262.4174-1.2656.0595-1.6448.072-4.8493.079-3.2045.007-3.5825-.006-4.848-.0608M16.953 5.5864A1.44 1.44 0 1 0 18.39 4.144a1.44 1.44 0 0 0-1.437 1.4424M5.8385 12.012c.0067 3.4032 2.7706 6.1557 6.173 6.1493 3.4026-.0065 6.157-2.7701 6.1506-6.1733-.0065-3.4032-2.771-6.1565-6.174-6.1498-3.403.0067-6.156 2.771-6.1496 6.1738M8 12.0077a4 4 0 1 1 4.008 3.9921A3.9996 3.9996 0 0 1 8 12.0077"/></svg><span>Instagram</span><span class="visually-hidden"> @donttradestudy</span></a></li><li><a href="https://www.youtube.com/@donttradestudy" rel="me noopener"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg><span>YouTube</span><span class="visually-hidden"> @donttradestudy</span></a></li>
+    </ul></nav>
   </div>
   <p class="legal">Email <a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a>. We reply within 1 business day (Eastern Time, Monday to Friday).</p>
+  <p class="legal" data-business-id>donttrade · Ontario, Canada · 2284 Calloway Drive, Oakville ON L6M 4X3 · <a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a></p>
   <p class="legal"><strong>Firms pay for fixed-scope measurements of their own data. Readers pay nothing. No firm can pay to change a number.</strong> <a href="/independence/">Independence policy</a></p>
   <p class="legal">donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.</p>
-  <p class="legal">This site sets no cookies and runs no analytics. It stores only your light/dark choice, in your own browser. Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; their privacy policies apply. <a href="/privacy/">Privacy</a></p>
+  <p class="legal">This site sets no cookies and runs no analytics. It stores your light/dark choice in your own browser and, if you buy the habit report, your access key there too. For that report your browser sends our server only stripped trade numbers. The server does not keep them: of those numbers it keeps only a scrambled fingerprint of each trade row from your first report, to match a re-test to the same history. Your file itself is not uploaded. Card payments are handled by Stripe. Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; their privacy policies apply. <a href="/privacy/">Privacy</a></p>
   <p class="legal">&copy; 2026 donttrade. Text and charts <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>; numbers are facts, quote them with a link.</p>
 </div></footer>
 
