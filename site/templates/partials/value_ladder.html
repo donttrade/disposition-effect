@@ -51,7 +51,7 @@
       <h3>For firms: a {{ pilot.name }} at a fixed, published price</h3>
       {%- endif %}
       <p>A written scope, then one measure on your traders’ records, run by your own staff on your own systems, and a one-page memo. Each engagement is scoped and written up by a person, so it is priced per engagement, the same for every firm.{% if show_firm_price %} Firms also: Snapshot, Memo, Outcomes pack.{% endif %}</p>
-      <p><a href="/pricing/#firms">{% if show_firm_price %}All firm prices{% else %}See Pricing{% endif %}</a></p>
+      <p><a href="{% if flags.paid_report %}/for-firms/#what-it-costs{% else %}/pricing/#firms{% endif %}">{% if show_firm_price %}All firm prices{% else %}See Pricing{% endif %}</a></p>
     </div>
   </div>
   <p class="small muted">The free tools and the report describe your past trades. They do not tell you what to trade.</p>
