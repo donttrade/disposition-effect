@@ -90,7 +90,9 @@
       <li><a href="/tools/trade-stats/">Trade stats</a>: profit factor, win rate and streaks from your own trade file.</li>
       <li><a href="/tools/drawdown-calculator/">Drawdown and recovery calculator</a>: your own drawdowns and how long they lasted.</li>
       <li><a href="/tools/prop-challenge-simulator/">Prop-firm challenge simulator</a>: replay a challenge from your own trading days.</li>
+      {%- if not flags.paid_report %}{# paid: the next-step card is the one offer (QA 25 Oct) #}
       <li><a href="/for-traders/">The habit report for traders</a> ({{ offer.short_state() }}).</li>
+      {%- endif %}
     </ul>
   </section>
   <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR and Tradovate are trademarks of their owners. donttrade is not affiliated with any of them.</p>

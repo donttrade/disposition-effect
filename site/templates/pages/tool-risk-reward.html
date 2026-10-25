@@ -82,7 +82,9 @@
       <li><a href="/tools/lot-size-calculator/">Lot size calculator</a>: the size in lots from balance, risk amount and stop distance.</li>
       <li><a href="/tools/trade-stats/">Trade stats</a>: win rate, average win and average loss from your own trade file.</li>
       <li><a href="/tools/drawdown-calculator/">Drawdown and recovery calculator</a>: the gain that recovers a drawdown, and your own drawdowns.</li>
+      {%- if not flags.paid_report %}{# paid: the next-step card is the one offer (QA 25 Oct) #}
       <li><a href="/for-traders/">The habit report for traders</a> ({{ offer.short_state() }}).</li>
+      {%- endif %}
     </ul>
   </section>
 </div>

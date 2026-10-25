@@ -105,7 +105,9 @@
       <li><a href="/tools/trading-heatmap/">Trading heatmap</a>: your trades by hour and weekday.</li>
       <li><a href="/tools/prop-challenge-simulator/">Prop-firm challenge simulator</a>: replay a challenge from your own trading days.</li>
       <li><a href="/tools/risk-reward-calculator/">Risk-reward calculator</a>: R multiple, break-even win rate and expectancy in R.</li>
+      {%- if not flags.paid_report %}{# paid: the next-step card is the one offer (QA 25 Oct) #}
       <li><a href="/for-traders/">The habit report for traders</a> ({{ offer.short_state() }}).</li>
+      {%- endif %}
     </ul>
   </section>
   <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR and Tradovate are trademarks of their owners. donttrade is not affiliated with any of them.</p>
