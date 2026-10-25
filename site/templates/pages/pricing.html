@@ -5,6 +5,7 @@
     ids are kept: firms copy-leader claims-test platforms traders researchers payment refunds
     history questions. #}
 {% block content %}
+{%- import "partials/pilot_terms.html" as pt with context %}
 {%- set pilot = products["pilot"] %}{%- set r = products["report39"] %}{%- set t = products["tracker79"] %}
 {%- set firm_ids = ["pilot", "snapshot", "memo", "outcomes"] %}
 {%- set pct = prices.rules.recheck.percent_of_engagement %}
@@ -18,7 +19,7 @@
       <thead><tr><th scope="col">Engagement</th><th scope="col">What you get</th><th scope="col">Delivery</th><th scope="col">Payment</th><th scope="col" class="num">Price (USD)</th></tr></thead>
       <tbody>
       {%- set what = {
-        "pilot": "Your first Snapshot at an introductory price, one per firm: one disposition figure on your own records, with a one-page memo. Refunded in full if your extract can’t be made to run, or if your own re-run of the same script version on the same export (same file hash) doesn’t reproduce the figure. " ~ pilot.credit_rule ~ ".",
+        "pilot": "Your first Snapshot at an introductory price, one per firm: one disposition figure on your own records, with a one-page memo. " ~ pilot.credit_rule ~ ".",
         "snapshot": "One disposition figure for one population and period you name: PGR, PLR, their ratio, a t statistic, the counts behind them and a one-page memo.",
         "memo": "Everything in a Snapshot, plus your ratio set beside the public study’s ratio, with the differences explained in writing.",
         "outcomes": "Everything in a Memo for your whole book, plus each split you agree in the scope.",
@@ -29,7 +30,8 @@
       </tbody>
     </table>
     </div>
-    <p class="small muted">{{ pilot.name }} (called “{{ pilot.former_name }}” before {{ legal.launch_human }}). The disposition effect is selling winning positions more readily than losing ones; PGR and PLR are the shares of winning and losing positions that were sold. <a href="/glossary/">Glossary</a></p>
+    <p class="small"><strong>{{ pilot.name }} refunds (from the <a href="/terms/#trial">terms</a>):</strong> {{ pt.both() }}</p>
+    <p class="small muted">The disposition effect is selling winning positions more readily than losing ones; PGR and PLR are the shares of winning and losing positions that were sold. <a href="/glossary/">Glossary</a></p>
     <p><strong>Quarterly re-check:</strong> the same measurement on a fresh extract, at {{ pct }}% of the price of the engagement being repeated (for example {{ (ex.price_usd * pct / 100)|usd }} for a {{ ex.name }}), payable in advance, delivered in {{ prices.rules.recheck.turnaround_days }} business days.</p>
     <p class="btn-row"><a class="btn" href="/start/?product=pilot#pilot">Start a {{ pilot.name }} — {{ pilot.price_usd|usd }} USD</a> <a class="btn btn-secondary" href="/for-firms/#what-it-costs">Full detail for firms</a></p>
   </section>
@@ -55,24 +57,25 @@
     <h2 id="traders">Individual traders</h2>
     {%- if flags.paid_report %}
     <div class="table-wrap" tabindex="0" role="region" aria-label="Trader prices">
-    <table>
+    <table class="stack-table">
       <thead><tr><th scope="col">Product</th><th scope="col">What you get</th><th scope="col" class="num">Price (USD)</th><th scope="col"><span class="visually-hidden">Action</span></th></tr></thead>
       <tbody>
         <tr><th scope="row">Free tools</th><td>{% if flags.free_badges %}Trade stats with a real-or-noise check, and calculators{% else %}Trade stats from your own file, and calculators{% endif %}. No account.</td><td class="num">$0</td><td><a href="/tools/">Open the tools</a></td></tr>
         <tr><th scope="row">{{ r.name }}</th><td>Up to five habits measured and described in your own trades, with the dollar totals of the matching trades; up to two of them tested against chance in this version; plus one re-test 30 to 60 days after your first report.</td>
           <td class="num">{{ r.price_usd|usd }} one time</td>
           <td><a class="btn" href="#last-step">Get the report — {{ r.price_usd|usd }}</a></td></tr>
-        <tr><th scope="row">{{ t.name }}</th><td>Comes later. It is not sold until it exists.</td><td class="num">—</td><td></td></tr>
+        <tr><th scope="row">{{ t.name }}</th><td>Comes later. It is not sold until it exists.</td><td class="num">Not for sale yet</td><td></td></tr>
       </tbody>
     </table>
     </div>
+    <p><a href="/sample-report/">See a sample report</a></p>
     <p class="small">{{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers. Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>. Formats: MetaTrader 5/4, IBKR and Tradovate in beta, plus the donttrade CSV template. <a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a></p>
     {% if stripe_mode == "test" %}<p class="notice notice-caution"><strong>Test mode</strong> Payments here use Stripe's test mode. No real card is charged.</p>{% endif %}
     {%- else %}
     <p><strong>Coming soon, not on sale yet.</strong> No money is taken now. The free tools cost nothing: <a href="/tools/">open the tools</a>.</p>
     <p>{{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers of the {{ r.name|lower }}, one time, including one re-test. A yearly {{ t.name|lower }} comes later, at {{ t.price_usd|usd }} a year as its founding price; it is not sold until it exists. Prices in USD. Nothing is charged now.</p>
     <p>When it launches: a full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying. The seller’s details and the full terms are shown before anyone pays. <a href="/terms/#traders">Trader terms</a></p>
-    <p><a class="btn" href="/for-traders/#waitlist">Join the waitlist — {{ r.price_usd|usd }} founding price</a></p>
+    <p class="btn-row"><a class="btn" href="/for-traders/#waitlist">Join the waitlist — {{ r.price_usd|usd }} founding price</a> <a href="/sample-report/">See a sample report</a></p>
     {%- endif %}
   </section>
 {%- endmacro %}
@@ -119,7 +122,7 @@
   <section class="section" aria-labelledby="refunds">
     <h2 id="refunds">Cancellations, refunds and the {{ pilot.name }}</h2>
     <ul>
-      <li><strong>Firms:</strong> no cancellation fees. The {{ pilot.name }} is refundable in full until your staff first run the script on your records (data kick-off), and after that if your extract can’t be made to run, or through the reproduction refund. Snapshot, Memo and Outcomes pack are paid 50% on acceptance and 50% within 7 days of delivery; if either side stops, completed work is billed pro rata.</li>
+      <li><strong>Firms:</strong> no cancellation fees. {{ pt.kickoff(pilot, "") }} Snapshot, Memo and Outcomes pack are paid 50% on acceptance and 50% within 7 days of delivery; if either side stops, completed work is billed pro rata.</li>
       {%- if flags.paid_report %}
       <li><strong>Traders:</strong> a full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying, even if you have already run your report.</li>
       {%- else %}

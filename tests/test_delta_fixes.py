@@ -274,8 +274,11 @@ def test_c3_launch_date_dates_every_launch_statement(tmp_path):
     from test_legal import build
     r, out = build(tmp_path, "set", DT_SITE_TOML=_toml_launch(tmp_path, "2026-10-20"))
     assert r.returncode == 0, r.stderr
-    for path in LAUNCH_PAGES:
+    # QA 25 Oct: the rename note stays only in the terms and the price-history row (/pricing/)
+    for path in ("/pricing/", "/terms/"):
         assert "called “Trial” before 20 Oct 2026" in _visible(out, path), path
+    for path in ("/for-firms/", "/start/"):
+        assert "called “Trial”" not in _visible(out, path), path
     assert "<td>20 Oct 2026</td>" in (out / "pricing" / "index.html").read_text(encoding="utf-8")
     assert "Version 2026-10-20." in _visible(out, "/terms/")
     assert "Version 2026-10-24." in _visible(out, "/privacy/")  # T0: the hosting date is later

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+{%- import "partials/pilot_terms.html" as pt with context %}
 {%- set pilot = products["pilot"] %}
 {%- set firm_ids = ["pilot", "snapshot", "memo", "outcomes"] %}
 {%- set pct = prices.rules.recheck.percent_of_engagement %}
@@ -11,9 +12,9 @@
       <div class="span-7">
         <h1 id="ff-h">Find out whether your traders sell winners more readily than losers — measured privately on your own records.</h1>
         <p class="lede">We measure the plan gap: the difference between how your traders plan to handle wins and losses and how they actually trade. One measure is available today: the disposition effect, which is whether your traders close winning positions more readily than losing ones.</p>
-        <p>Tell us the population and the period. Your staff run a published script inside your systems. You get back PGR, PLR, their pooled ratio and a t statistic, the counts and period behind them, and a one-page memo. The price is fixed before anyone sees data.</p>
+        <p>Tell us the population and the period. Your staff run a published script inside your systems. You get back <a href="/glossary/#pgr">PGR</a>, <a href="/glossary/#plr">PLR</a>, their pooled ratio and a <a href="/glossary/#t">t statistic</a>, the counts and period behind them, and a one-page memo. The price is fixed before anyone sees data.</p>
         <p class="btn-row"><a class="btn" href="#request">Start a {{ pilot.name }} — {{ pilot.price_usd|usd }} USD</a> <a class="btn btn-secondary" href="/sample-memo/">See a sample memo</a></p>
-        <p class="small muted">{{ pilot.name }} (called “{{ pilot.former_name }}” before {{ legal.launch_human }}). Email only, no calls. <a href="#what-it-costs">See what it costs</a></p>
+        <p class="small muted">Email only, no calls. <a href="#what-it-costs">See what it costs</a></p>
         <p class="small">Here as a trader? See <a href="/for-traders/">Individual traders</a> or the free <a href="/tools/">tools</a>. We can’t help with disputes about a firm.</p>
       </div>
       <div class="span-5">
@@ -67,7 +68,8 @@
       </tbody>
     </table>
     </div>
-    <p>The {{ pilot.name }} fee is refunded in full if your extract can’t be made to run with the script, even with our help by email, or if your own re-run of the same script version on the same export (same file hash) does not reproduce the figure. Before starting, we agree with you in writing what result would make a Memo worth doing.</p>
+    <p>{{ pilot.name }} refunds, from the <a href="/terms/#trial">terms</a>: {{ pt.both() }}</p>
+    <p>Before starting, we agree with you in writing what result would make a Memo worth doing.</p>
     <p><strong>Optional quarterly re-check:</strong> the same measurement on a fresh extract, at {{ pct }}% of the tier price, payable in advance, delivered in {{ prices.rules.recheck.turnaround_days }} business days.</p>
     <p>Every engagement is invoiced in USD; pay by bank transfer, or, in Canada, the CAD equivalent by Interac e-Transfer. {% include "partials/card_timing.html" %} One-off engagement, fixed scope, no subscription.</p>
     <p>Delivery times are in business days. The clock starts when payment is received and the script’s output comes back without validation errors, and it pauses while a clarifying question is open.</p>
@@ -183,7 +185,7 @@ a7f3,2026-03-04,p91,1,240.00</pre>
     <details><summary>What if the number is bad for us?</summary><p>Then that is the number. You can keep it private, and we publish nothing from the engagement. The fee is unchanged.</p></details>
     <details><summary>Can you publish without our consent?</summary><p>No. You review anything describing your data first and may decline publication outright. We may say only that an engagement took place, without naming you or the figure.</p></details>
     <details><summary>Isn’t this a kind of audit?</summary><p>No. It is a measurement with its limits stated. Please don’t describe it as audited, certified or verified.</p></details>
-    <details><summary>What if we stop halfway?</summary><p>No cancellation fees. The {{ pilot.name }} is refundable in full until your staff first run the script on your records, and after that through the reproduction refund. Snapshot, Memo and Outcomes pack are paid 50% on acceptance and 50% within 7 days of delivery; if either side stops, completed work is billed pro rata.</p></details>
+    <details><summary>What if we stop halfway?</summary><p>No cancellation fees. {{ pt.kickoff(pilot, "") }} Snapshot, Memo and Outcomes pack are paid 50% on acceptance and 50% within 7 days of delivery; if either side stops, completed work is billed pro rata.</p></details>
     <details><summary>How do we pay?</summary><p>Invoiced in USD; bank transfer, or in Canada the CAD equivalent by Interac e-Transfer. {% include "partials/card_timing.html" %}</p></details>
     <details><summary>Can we talk on a call?</summary><p>We work by email only, so every answer is in writing and can go straight to your compliance file.</p></details>
     <details><summary>Why is there no client list?</summary><p>There are no paying clients yet. A firm that chooses to publish its result will be listed, with its consent.</p></details>

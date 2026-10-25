@@ -6,6 +6,7 @@
     Habit Tracker renewal clause is drafted in partials/terms_tracker_renewal.html and is
     not rendered anywhere: the Tracker is not built (V2 NOT IN SCOPE). #}
 {% block content %}
+{%- import "partials/pilot_terms.html" as pt with context %}
 {%- from "partials/seller.html" import seller_rows %}
 {%- set pilot = products["pilot"] %}{%- from "partials/pilot_refund.html" import pilot_refund %}{%- set r = products["report39"] %}{%- set t = products["tracker79"] %}
 {%- set pct = prices.rules.recheck.percent_of_engagement %}
@@ -41,8 +42,8 @@
     <li>One disposition figure; one per firm; {{ pilot.turnaround_days }} business days.</li>
     <li>What result would make a Memo worth doing is agreed in writing before work starts.</li>
     <li>The fee is credited in full toward a Memo signed within {{ prices.rules.pilot_credit_days }} days of {{ pilot.name }} delivery. The credit has no cash value and cannot be transferred.</li>
-    <li><strong>Extract refund:</strong> if your extract can’t be made to run with the script, even with our help by email, the fee is refunded in full.</li>
-    <li><strong>Reproduction refund:</strong> if your own re-run of the same published script version on the same export (same file hash) does not reproduce the figure, the fee is refunded in full, by the original payment method, within 10 business days.</li>
+    <li><strong>Extract refund:</strong> {{ pt.extract() }}</li>
+    <li><strong>Reproduction refund:</strong> {{ pt.reproduction() }}</li>
     {%- if flags.pilot_checkout %}
     <li id="pilot-card"><strong>Paying by card before the scope:</strong> after you send the {{ pilot.name }} request form and confirm you have read these terms, a card link is shown. Paying through it accepts these {{ pilot.name }} terms. We then send the written scope naming the traders and dates. The delivery clock starts only once the scope is agreed, payment is received and the script’s output comes back clean.</li>
     <li id="pilot-refund"><strong>Automatic refund if the scope isn’t confirmed:</strong> {{ pilot_refund(products) }}</li>
@@ -53,7 +54,7 @@
   <p>No cancellation fees, for firms or traders.</p>
   <h3 id="refunds">Firms</h3>
   <ul>
-    <li>The {{ pilot.name }} is refundable in full until data kick-off, the day your staff first run the script on your records. After that, it is refunded if your extract can’t be made to run, or through the reproduction refund above.</li>
+    <li>{{ pt.kickoff(pilot) }}</li>
     <li>Snapshot, Memo and Outcomes pack are paid 50% on acceptance and 50% within 7 days of delivery. Either side may stop in writing. If either side stops, completed work is billed pro rata.</li>
     <li>A “no measurable effect” answer is a finished deliverable.</li>
   </ul>

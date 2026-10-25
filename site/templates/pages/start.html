@@ -53,7 +53,7 @@
     <p class="recap">{{ p.turnaround_days }} business days · {{ p.payment_terms }}{% if p.credit_rule %} · {{ p.credit_rule }} of delivery{% endif %}</p>
     <p>{{ blurb[p.id] }}</p>
     {%- if p.id == "pilot" %}
-    <p class="small muted">{{ pilot.name }} (called “{{ pilot.former_name }}” before {{ legal.launch_human }}). <a href="/terms/#trial">{{ pilot.name }} terms</a></p>
+    <p class="small muted"><a href="/terms/#trial">{{ pilot.name }} terms</a></p>
     {%- endif %}
     {%- if p.id == "pilot" and flags.pilot_checkout %}
     {%- with heading_id = "pilot-h" %}{% include "partials/pilot_block.html" %}{% endwith %}
@@ -70,13 +70,13 @@
   {%- endfor %}
   </div>
 
-  <section class="section" aria-labelledby="platform">
+  <section class="section start-extra" aria-labelledby="platform">
     <h2 id="platform">Trading journals and platforms</h2>
     <p>Apply to be one of the first three partners: a free 12-month licence and a co-published study. <a href="/for-platforms/">What partners get</a></p>
     {%- with fid = "sp", product = "platform", partner = true, heading_id = "platform" %}{% include "partials/form_firm.html" %}{% endwith %}
   </section>
 
-  <section class="section" aria-labelledby="trader">
+  <section class="section start-extra" aria-labelledby="trader">
     <h2 id="trader">Individual traders</h2>
     {{- offer.signup("trader", intro=true) }}
   </section>
