@@ -33,7 +33,6 @@ const FORMAT_NAMES = {
 // C1: the badges only when the build includes them (see the header comment).
 const BADGES = $('ts-out').dataset.freeBadges === 'true';
 const B = BADGES ? await import('./trade-stats-badges.js') : null;
-const SOON = 'A ‘real or noise’ check for this number is coming soon.';
 
 const plural = (n, one, many) => `${intText(n)} ${n === 1 ? one : many}`;
 
@@ -202,13 +201,8 @@ async function render(focus = true) {
       ['Short', intText(s.short.n), pct(s.short.win_rate), m(s.short.pnl)],
     ]))));
 
-  // The checks (badges build: filled in by the worker), or the three numbers they would cover
-  // with the neutral line where each badge was.
-  out.append(B ? B.section() : el('section', { id: 'ts-noise', 'aria-label': 'Checks for three of the numbers' },
-    el('ul', { class: 'soon-list' },
-      el('li', {}, el('strong', { text: 'Mean result per trade' }), ` (${money(s.expectancy, state.unit)}): ${SOON}`),
-      el('li', {}, el('strong', { text: 'Hold time, losers vs winners' }), ` (${ratio(s.hold_ratio)}): ${SOON}`),
-      el('li', {}, el('strong', { text: 'Longest losing streak' }), ` (${plural(s.max_consec_losses.n, 'trade', 'trades')}): ${SOON}`))));
+  // The checks (badges build only: filled in by the worker). QA 25 Oct: without badges, no placeholder line.
+  if (B) out.append(B.section());
 
   out.hidden = false;
   if (focus) $('ts-out-h').focus();

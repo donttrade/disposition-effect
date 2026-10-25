@@ -2,8 +2,7 @@
 
 Off (the committed site.toml and built_site): the free tools show only the descriptive numbers.
 No verdict badge, no p, no "distinguishable"/"may be noise"/"not enough trades to tell", no footnote
-about error rates; where each badge was, the line "A ‘real or noise’ check for this number is
-coming soon." The badge module is not in the build and no check is run. Lint refuses the badge and
+about error rates, and (QA 25 Oct) no "coming soon" placeholder where each badge was. The badge module is not in the build and no check is run. Lint refuses the badge and
 footnote strings in a flags-off build. On (badges_site): today's behaviour, which the existing
 badge tests check (test_tool_trade_stats, test_wording_wiring, test_fix_merge NIT 5).
 The statistics code (static/js/engine/) is unchanged.
@@ -22,7 +21,6 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import lint as L  # noqa: E402
 from a11y import axe_violations, horizontal_overflow  # noqa: E402
 
-SOON = "A ‘real or noise’ check for this number is coming soon."
 VERDICTS = ("distinguishable from noise", "may be noise", "not enough trades to tell", "Real or noise?",
             "1 time in 20", "1 file in 7", "p is the share", "Running the checks")
 
@@ -34,7 +32,7 @@ def _sample(browser, site, width=1280, scheme="light"):
     page.on("request", lambda r: urls.append(r.url))
     page.goto(site["url"] + "/tools/trade-stats/")
     page.click("#ts-sample-btn")
-    page.wait_for_selector("#ts-noise", timeout=60000)
+    page.wait_for_selector("#ts-out:not([hidden])", timeout=60000)
     page.wait_for_selector("#ts-teaser:not([hidden])", timeout=60000)
     return ctx, page, urls
 
@@ -51,8 +49,7 @@ def test_off_shows_numbers_and_the_neutral_line_only(browser, built_site):
     teaser = page.inner_text("#ts-teaser-text")
     page.wait_for_timeout(500)
     ctx.close()
-    assert len(items) == 3 and all(i.endswith(SOON) for i in items), items
-    assert [i.split(" (")[0] for i in items] == ["Mean result per trade", "Hold time, losers vs winners", "Longest losing streak"]
+    assert items == [] and "coming soon" not in text, items   # QA 25 Oct: no placeholder line with badges off
     for v in VERDICTS:
         assert v not in text, v
     assert "noise" not in teaser.lower(), teaser
@@ -66,7 +63,7 @@ def test_off_page_copy_and_files(built_site, badges_site):
     assert (badges_site["out"] / "static" / "js" / "tools" / "trade-stats-badges.js").exists()
     ts = (out / "tools" / "trade-stats" / "index.html").read_text(encoding="utf-8")
     assert 'data-free-badges="false"' in ts and "What does the real-or-noise result mean?" not in ts
-    assert "A ‘real or noise’ check for three of the numbers is coming soon." in ts
+    assert "coming soon" not in ts   # QA 25 Oct
     on = (badges_site["out"] / "tools" / "trade-stats" / "index.html").read_text(encoding="utf-8")
     assert 'data-free-badges="true"' in on and "What does the real-or-noise result mean?" in on
     for page in ("tools", "pricing", "tools/lot-size-calculator", "for-traders", ""):
