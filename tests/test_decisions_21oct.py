@@ -25,6 +25,7 @@ from test_legal import FAKE, all_html, build, paid_env, private_with, same_tree,
 BOX = "PO Box 4417 STN Main, Zzqxville ON K9Z 9Z9"   # Canada Post style, with a station qualifier
 EMAIL = "donttrade.research@gmail.com"                # [site] contact_email, the business email
 LINE_TEXT = f"donttrade · Ontario, Canada · {BOX} · {EMAIL}"
+SHORT_TEXT = f"donttrade · Ontario, Canada · {EMAIL} · Business details"   # 25 Oct: every page off ADDRESS_LINE_PATHS
 
 
 def _text(fragment):
@@ -101,12 +102,44 @@ def test_every_page_has_the_business_line_once(builds, combo):
     for rel, h in pages.items():
         found = B.BUSINESS_ID_RE.findall(h)
         assert len(found) == 1, rel
-        assert _text(found[0]) == LINE_TEXT, (rel, _text(found[0]))
+        full = B.business_line_full(B.url_of(rel.lstrip("/")))
+        assert _text(found[0]) == (LINE_TEXT if full else SHORT_TEXT), (rel, _text(found[0]))
+        assert (BOX in found[0]) == full, rel   # the address in the footer line only where it belongs
+        if not full:
+            assert '<a href="/terms/#seller">Business details</a>' in found[0], rel
         assert f'<a href="mailto:{EMAIL}">{EMAIL}</a>' in found[0], rel
         # inside the footer, right under the contact line
         foot = h[h.rindex("<footer"):]
         assert found[0] in foot, rel
         assert foot.index(found[0]) < foot.index("Firms pay for fixed-scope measurements"), rel
+
+
+@pytest.mark.parametrize("combo", ["pilot", "paid", "both"])
+def test_address_line_exactly_on_the_listed_pages(builds, combo):
+    out, _ = builds[combo]
+    pages = {B.url_of(rel.lstrip("/")): h for rel, h in all_html(out).items()}
+    built = {u for u in B.ADDRESS_LINE_PATHS if u in pages}
+    assert "/pricing/" in built and "/terms/" in built and "/about/" in built
+    for url, h in pages.items():
+        kind = "full" if url in B.ADDRESS_LINE_PATHS else "short"
+        assert h.count(f'data-business-id="{kind}"') == 1 and h.count("data-business-id") == 1, url
+    terms = pages["/terms/"]
+    assert terms.count('id="seller"') == 1
+
+
+def test_short_line_never_carries_the_address():
+    cfg = {"flags": {"paid_report": True, "pilot_checkout": False}, "site": {"name": "donttrade", "contact_email": EMAIL}}
+    short = B.business_id_line(cfg, {"premises_address": BOX}, url="/tools/")
+    assert BOX not in short and 'data-business-id="short"' in short and 'href="/terms/#seller"' in short
+    fr = B.business_id_line(cfg, {"premises_address": BOX}, url="/x/", lang="fr")
+    assert "Coordonnées de l’entreprise" in fr and 'href="/fr/conditions/#seller"' in fr
+    full = B.business_id_line(cfg, {"premises_address": BOX}, url="/pricing/")
+    assert BOX in full and 'data-business-id="full"' in full
+    assert L.business_line_problems(short, "/tools/index.html", True, [BOX]) == []
+    assert L.business_line_problems(full, "/pricing/index.html", True, [BOX]) == []
+    assert L.business_line_problems(full, "/tools/index.html", True, [BOX])[0][0] == "business_line"   # address off-list
+    assert L.business_line_problems(short, "/pricing/index.html", True, [BOX])[0][0] == "business_line"  # no address on-list
+    assert L.business_line_problems(short + full, "/tools/index.html", True, [BOX])[0][2].startswith("2 business")
 
 
 def test_pilot_alone_shows_no_legal_name_or_phone(builds):
@@ -150,14 +183,15 @@ def test_verify_fails_when_a_page_loses_its_line(builds, tmp_path):
 
 def test_lint_flags_a_line_in_a_flag_off_build_and_a_wrong_address(builds, tmp_path):
     line = B.business_id_line({"flags": {"paid_report": False, "pilot_checkout": True},
-                               "site": {"name": "donttrade", "contact_email": EMAIL}}, {"premises_address": BOX})
-    assert L.business_line_problems("<footer>" + line + "</footer>", "/x/", commerce=False) == [
-        ("flag:business_line", "/x/", "business line with every commerce flag off")]
-    assert L.business_line_problems("<footer>" + line + "</footer>", "/x/", True, [BOX]) == []
+                               "site": {"name": "donttrade", "contact_email": EMAIL}}, {"premises_address": BOX},
+                              url="/about/")
+    assert L.business_line_problems("<footer>" + line + "</footer>", "/about/", commerce=False) == [
+        ("flag:business_line", "/about/", "business line with every commerce flag off")]
+    assert L.business_line_problems("<footer>" + line + "</footer>", "/about/", True, [BOX]) == []
     other = line.replace("4417", "4418")
-    assert L.business_line_problems(other, "/x/", True, [BOX])[0][0] == "business_line"
-    assert L.business_line_problems(line + line, "/x/", True, [BOX])[0][2].startswith("2 business")
-    assert L.business_line_problems(line.replace("Ontario, Canada", "Canada"), "/x/", True, [BOX])[0][0] == "business_line"
+    assert L.business_line_problems(other, "/about/", True, [BOX])[0][0] == "business_line"
+    assert L.business_line_problems(line + line, "/about/", True, [BOX])[0][2].startswith("2 business")
+    assert L.business_line_problems(line.replace("Ontario, Canada", "Canada"), "/about/", True, [BOX])[0][0] == "business_line"
 
 
 def test_passthrough_page_without_the_footer_anchor_fails_the_build(monkeypatch):
