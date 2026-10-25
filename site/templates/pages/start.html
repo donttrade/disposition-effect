@@ -35,7 +35,7 @@
       <li><a class="choice-link" href="#{{ p.id }}" data-choice="{{ p.id }}"><span class="cl-name">{{ p.name }}</span> <span class="cl-price">{{ p.price_usd|usd }} USD</span> <span class="cl-meta">{{ p.turnaround_days }} business days · {{ blurb[p.id] }}</span></a></li>
     {%- endfor %}
     </ul>
-    <p class="small">A claims test uses these same engagements: pick one and describe the claim in the form. <a href="/for-firms/#claims-test">How the claims test works</a> · <a href="/pricing/#firms">Firm pricing</a></p>
+    <p class="small">A claims test uses these same engagements: pick one and describe the claim in the form. <a href="/for-firms/#claims-test">How the claims test works</a> · <a href="{% if flags.paid_report %}/for-firms/#what-it-costs{% else %}/pricing/#firms{% endif %}">Firm pricing</a></p>
     <p class="small">Run a trading journal or platform? <a href="#platform">Partner application</a>. Trading your own account? <a href="#trader">The trader {{ offer.short_state() }}</a>.</p>
     {%- if flags.ask_box %}
     {%- from "partials/answer_box.html" import answer_box with context %}
