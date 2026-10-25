@@ -115,10 +115,7 @@ RETEST = ("Your re-test runs on the version of the report that is live when you 
 RETEST_HTML = ('Your re-test runs on the version of the report that is live when you run it; every change is dated on the '
                '<a href="/corrections/">corrections page</a>.')
 # QA 25 Oct: "plan" and "tested against chance" glossed on first use
-HOME_LEDE = ("Your plan is how you meant to handle wins and losses. A habit report built from your own trade history. It measures "
-             "and describes up to five habits in your own file, like opening a new trade soon after a loss, with the dollar totals of "
-             "the matching trades, and tests up to two of these habits against chance (could the pattern be luck?) in this version. "
-             "It doesn’t tell you what to trade.")
+HOME_LEDE = ("Drop your broker export. Get a report on up to five habits in your trades, with the dollar total of each.")   # sweep 2 hero
 FT_LEDE = ("It measures and describes up to five habits in your own past trades, like opening a new trade soon after a loss, with the "
            "dollar totals of the matching trades, and tests up to two of these habits against chance in this version. It "
            "includes one re-test 30 to 60 days after your first report. It doesn’t tell you what to trade.")
@@ -154,7 +151,7 @@ def raw(out, rel):
     return open(os.path.join(out, rel), encoding="utf-8").read()
 
 
-NEXT_TYPED = ("Want to go one level deeper? The habit report reads your trade file and looks for up to five habits in your "
+NEXT_TYPED = ("The habit report reads your trade file It looks for up to five habits in your "   # owner Q3, 25 Oct: the heading names the report
               "own trades, testing up to two of them against chance. $39, one re-test included, refund within 14 days.")
 
 

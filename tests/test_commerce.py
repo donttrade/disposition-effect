@@ -101,7 +101,7 @@ def test_pricing_traders_only_axe_and_pay_panel(browser, built_site, color):
         assert page.locator(f"#firms #{anchor}, p#{anchor}").count() == 1, anchor
     assert page.get_attribute("#firms a", "href") == "/for-firms/#what-it-costs"
     page.goto(built_site["url"] + "/")
-    assert "See where your trades leave your plan." in page.inner_text("h1")
+    assert "See the habits in your trade history." in page.inner_text("h1")
     assert axe_violations(page) == []
     ctx.close()
 

@@ -130,6 +130,8 @@ def test_i4_hero_text_is_always_the_final_value(browser, built_site):
     ctx = _ctx(browser)
     pg = ctx.new_page()
     pg.goto(built_site["url"] + "/", wait_until="commit")
+    pg.wait_for_selector(".hero-dash", state="attached")
+    pg.evaluate("document.querySelector('.hero-dash').scrollIntoView()")   # sweep 2: the dashboard is below the hero now
     pg.wait_for_timeout(2500)
     m = pg.evaluate("__m")
     assert len(m["dd"]) >= 30 and all(s == FINAL for s in m["dd"]), m["dd"][:3]
@@ -342,7 +344,7 @@ def test_i10_hero_follows_the_chosen_theme_not_the_os(browser, built_site, os_sc
     # Owner, 25 Oct: the hero band follows the chosen theme (never the OS). Light: the band keeps the light
     # page tokens (white, charcoal text). Dark: the charcoal --band-* set, #0E1013 / #16181C, text #F2F1EE.
     r = pg.evaluate("""() => { const d = document.querySelector('.hero-dash');
-      return {page: getComputedStyle(document.body).backgroundColor, band: getComputedStyle(d.closest('.band')).backgroundColor,
+      return {page: getComputedStyle(document.body).backgroundColor, band: getComputedStyle(document.querySelector('.band')).backgroundColor,
               dash: getComputedStyle(d).backgroundColor, line: getComputedStyle(d.querySelector('.line-actual')).stroke}; }""")
     ctx.close()
     page, band, surface, line = {"dark": ("rgb(22, 24, 28)", "rgb(14, 16, 19)", "rgb(22, 24, 28)", "rgb(242, 241, 238)"),
@@ -394,9 +396,10 @@ def test_i12_tabbing_into_an_unrevealed_section_shows_it_at_once(browser, built_
     pg.goto(built_site["url"] + "/")
     pg.wait_for_timeout(300)
     r = pg.evaluate("""() => new Promise(res => {
-      const sec = [...document.querySelectorAll('[data-reveal].rv')].find(s => s.querySelector('a'));
+      const open = (s) => [...s.querySelectorAll('a')].find(a => !a.closest('details:not([open])'));   // a link Tab can reach
+      const sec = [...document.querySelectorAll('[data-reveal].rv')].find(open);
       const before = getComputedStyle(sec).opacity;
-      sec.querySelector('a').focus();
+      open(sec).focus();
       requestAnimationFrame(() => res({before, after: getComputedStyle(sec).opacity}));
     })""")
     ctx.close()

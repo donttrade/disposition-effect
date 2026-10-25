@@ -1,0 +1,23 @@
+{#- Hero media (sweep 2, 25 Oct; Architect plan §2.3): the sample report's first page as a card, from
+    site/config/sample-report.report.json (a made-up file). The habit name and result label are the report's
+    own (wording.js / report.js). No dollar figure here: this card sits beside the buy button (owner: the
+    sample's dollar figure never right next to a buy button); the totals are in the showcase below. The bars
+    show the two groups' average result per trade, scaled to each other, without amounts. -#}
+{%- set sr = sample_report %}
+{%- set f = (sr.habits | selectattr("id", "equalto", sr.focus) | list | first) %}
+{%- set a = f.measure_a | abs %}{% set b = f.measure_b | abs %}{% set top = [a, b] | max %}
+<figure class="hero-shot report-card" aria-labelledby="rc-cap">
+  <div class="rc">
+    <p class="rc-top"><span>Sample report · Summary</span><span class="pill pill-muted">Made-up file</span></p>
+    <p class="rc-k">Shown first</p>
+    <p class="rc-h">{{ f.name }}</p>
+    <p class="rc-pill"><span class="pill pill-hit">Distinguishable from noise</span> <span class="rc-gloss">unlikely to be luck</span></p>
+    <svg class="rc-bars" viewBox="0 0 300 64" aria-hidden="true" focusable="false">
+      <text class="rc-ax" x="0" y="16">After a loss</text><rect class="rc-bar" x="110" y="5" width="{{ (a / top * 188) | round(1) }}" height="16" rx="3"/>
+      <text class="rc-ax" x="0" y="50">Other trades</text><rect class="rc-bar rc-bar-b" x="110" y="39" width="{{ [(b / top * 188) | round(1), 3] | max }}" height="16" rx="3"/>
+    </svg>
+    <p class="rc-note">{% if f.measure_a < 0 and f.measure_b < 0 %}Average loss per trade. Longer bar, bigger loss.{% else %}Average result per trade, scaled to each other.{% endif %}</p>
+    <p class="rc-more">{{ sr.n_tested }} habits tested against chance · {{ sr.habits | length - sr.n_tested }} described</p>
+  </div>
+  <figcaption id="rc-cap">Page 1 of a sample report, on a made-up trade file. Not a real trader.</figcaption>
+</figure>

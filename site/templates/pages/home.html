@@ -7,12 +7,14 @@
   {#- Trader-first home (paid_report only; Tester D5). Prices from prices.json. No study finding
       on this page, so none can sit next to an offer. The hero is the dark band (ARCHITECT-BRAND §2.5). #}
   <div data-requires-flag="paid_report">
-  {% call hero_band("hero", media="dashboard") %}
-        <h1 id="hero">See where your trades leave your plan.</h1>
-        <p class="lede">Your plan is how you meant to handle wins and losses. A habit report built from your own trade history. It measures and describes up to five habits in your own file, like opening a new trade soon after a loss, with the dollar totals of the matching trades, and tests up to two of these habits against chance (could the pattern be luck?) in this version. It doesn’t tell you what to trade.</p>
-        <p class="btn-row"><a class="btn" href="/pricing/#last-step">Get the habit report — {{ r.price_usd|usd }}</a> <a class="btn btn-secondary" href="/tools/trade-stats/">Free trade stats</a> <a href="/sample-report/">See a sample report</a></p>
-        <p class="small">{{ r.price_usd|usd }}, one time, in US dollars, with one free re-test 30 to 60 days after your first report. A full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying.</p>
-        <p class="small muted">Not investment advice. <a href="/pricing/#before-you-pay">Before you pay</a></p>
+  {#- sweep 2 (25 Oct; Architect plan §2.3): one sentence, one real output. The visual is the sample
+      report's first page with no dollar figure (it sits beside the buy button). -#}
+  {% call hero_band("hero", media="report") %}
+        <h1 id="hero">See the habits in your trade history.</h1>
+        <p class="lede">Drop your broker export. Get a report on up to five habits in your trades, with the dollar total of each.</p>
+        <p class="btn-row"><a class="btn" href="/pricing/#last-step">Get the habit report — {{ r.price_usd|usd }}</a> <a href="/sample-report/">See a sample</a></p>
+        <p class="small">{{ r.price_usd|usd }} once · {{ prices.rules.trader_refund_days }}-day refund</p>
+        <p class="small muted">Not investment advice · <a href="/pricing/#before-you-pay">Before you pay</a></p>
   {% endcall %}
   <div class="wrap">
 
@@ -44,7 +46,7 @@
           <tbody>
           {%- for h in sr.habits %}
             {%- set d = h.dollars or {} %}
-            {%- set pc = pill.get(h.verdict, ("pill pill-muted", "Described")) %}
+            {%- set pc = pill.get(h.verdict, ("pill pill-muted", "Described, not tested")) %}
             <tr><th scope="row">{{ short.get(h.id, h.name) }}</th>
               <td class="num">{{ d.n_trades if d else "–" }}</td>
               <td class="num {{ 'loss' if d and d.amount < 0 else 'gain' }}">{% if d %}{{ "−" if d.amount < 0 else "" }}${{ "{:,.2f}".format(d.amount|abs) }}{% else %}–{% endif %}</td>
@@ -95,11 +97,21 @@
     </ol>
   </section>
 
-  <section class="section" aria-labelledby="tools-h" data-reveal>
-    <h2 id="tools-h">Try the free tools first</h2>
+  {#- sweep 2: the free trade-stats dashboard (the old hero, the tool's own output on its sample file) is the
+      picture for the free tools; the cards show the other three file tools. No buy button here. -#}
+  <section class="section showcase tools-home" aria-labelledby="tools-h" data-reveal>
+    <div class="showcase-copy">
+      <h2 id="tools-h">Try the free tools first</h2>
+      <ul class="ticks">
+        <li>No account, no card</li>
+        <li>Your file is read in your browser</li>
+      </ul>
+      <p><a class="more" href="/tools/trade-stats/">Try trade stats free <span aria-hidden="true">→</span></a></p>
+    </div>
+    <div class="showcase-shot">{% include "partials/hero_media_dashboard.html" %}</div>
     {%- from "partials/tool_cards.html" import tool_cards with context %}
-    {{ tool_cards(tools[:3]) }}
-    <p><a class="more" href="/tools/">See all free tools <span aria-hidden="true">→</span></a></p>
+    <div class="how">{{ tool_cards(tools[1:4]) }}
+    <p><a class="more" href="/tools/">See all free tools <span aria-hidden="true">→</span></a></p></div>
   </section>
 
   {#- 25 Oct sweep (research: no FAQ or refund band on the home page): the questions live on /pricing/ and /help/. #}

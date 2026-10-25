@@ -412,7 +412,7 @@ def paid_site(tmp_path_factory):
 
 def test_d5_paid_home_has_the_founding_offer(paid_site):
     text = L.visible_text((paid_site["out"] / "index.html").read_text(encoding="utf-8"))
-    assert "See where your trades leave your plan." in text
+    assert "See the habits in your trade history." in text   # sweep 2 hero
     assert "$39 founding price for the first 100 buyers." in text
     assert "One time, in US dollars, with one free re-test 30 to 60 days after your first report." in text
     assert "Get the habit report — $39" in text and "What the report measures" in text and "How it works" in text
