@@ -10,6 +10,7 @@
 {%- set firm_ids = ["pilot", "snapshot", "memo", "outcomes"] %}
 {%- set pct = prices.rules.recheck.percent_of_engagement %}
 {%- set ex = products[prices.rules.recheck.example_product] %}
+{%- set RETEST = 'Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.' %}
 
 {%- macro firms_block() %}
   <section class="section" aria-labelledby="firms">
@@ -80,6 +81,72 @@
   </section>
 {%- endmacro %}
 
+{%- if flags.paid_report %}
+{#- 25 Oct sweep (owner): /pricing/ is for traders only; firm prices live on /for-firms/. One boxed price
+    card, then the pay panel (#last-step: the full "Before you pay" disclosure between the two Stripe links,
+    unchanged). No sample figure on this page, so none sits beside a buy button. Every old id stays as an
+    anchor on the firm line, so old links still land. -#}
+{%- set link = r["stripe_link_" + stripe_mode] %}
+<div class="wrap">
+  {% include "partials/crumbs.html" %}
+  <h1>Pricing</h1>
+  <p class="lede">One report, one price. The free tools cost nothing.</p>
+  <div class="price-cards" id="traders">
+    <section class="price-card" aria-labelledby="pc-free-h">
+      <h2 id="pc-free-h">Free tools</h2>
+      <p class="price-big"><span class="num">$0</span></p>
+      <ul class="ticks">
+        <li>Trade stats, heatmap, drawdown and more</li>
+        <li>No account, no card</li>
+        <li>Your file is read in your browser</li>
+      </ul>
+      <p><a class="more" href="/tools/">Try the free tools <span aria-hidden="true">→</span></a></p>
+    </section>
+    <section class="price-card price-card-main" aria-labelledby="pc-report-h">
+      <h2 id="pc-report-h">{{ r.name }}</h2>
+      <p class="price-big"><span class="num">{{ r.price_usd|usd }}</span> <span class="muted">USD, one time · no sales tax</span></p>
+      <ul class="ticks">
+        <li>Up to five habits measured in your trades</li>
+        <li>Up to two tested against chance</li>
+        <li>The dollar total for each habit</li>
+        <li>One free re-test, 30 to 60 days later</li>
+        <li>Pay by card on Stripe’s page</li>
+      </ul>
+      <details class="pay-step" id="last-step">
+        <summary class="btn">Get the habit report — {{ r.price_usd|usd }}</summary>
+        <div class="pay-panel" role="group" aria-labelledby="last-step-h">
+          <h3 id="last-step-h">Last step</h3>
+          <p class="no-print">{% if link %}<a class="btn" href="{{ link }}" rel="noopener">Pay {{ r.price_usd|usd }} on Stripe</a>{% else %}<span class="muted">Payment link not set yet</span>{% endif %}</p>
+          {% include "partials/before_you_pay.html" %}
+          <p class="no-print">{% if link %}<a class="btn" href="{{ link }}" rel="noopener">Pay {{ r.price_usd|usd }} on Stripe</a>{% endif %}</p>
+        </div>
+      </details>
+      <p class="small muted">Total {{ r.price_usd|usd }} USD. The button shows the terms first, then Stripe.</p>
+      <p class="small" id="refunds">Full refund if you ask within {{ prices.rules.trader_refund_days }} days, even after your report runs.</p>
+      <p class="small"><a href="/sample-report/">See a sample report</a> · <a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a></p>
+      {% if stripe_mode == "test" %}<p class="notice notice-caution"><strong>Test mode</strong> Payments here use Stripe's test mode. No real card is charged.</p>{% endif %}
+    </section>
+  </div>
+  <p class="firm-line" id="firms"><span id="copy-leader"></span><span id="claims-test"></span><span id="platforms"></span><span id="researchers"></span><span id="payment"></span>Buying for a firm? <a href="/for-firms/#what-it-costs">Firm prices are on For firms</a></p>
+  <div id="history" hidden></div>
+
+  <section class="section" aria-labelledby="faq-h">
+    <h2 id="questions"><span id="faq-h">Questions</span></h2>
+    {%- if flags.ask_box %}
+    {%- from "partials/answer_box.html" import answer_box with context %}
+    {{ answer_box("pg") }}
+    {%- endif %}
+    <details><summary>What exactly do I get?</summary><p>{{ page.product }}</p></details>
+    <details><summary>What does “tested against chance” mean?</summary><p>We check whether a habit’s pattern in your trades could just be luck. The report says “distinguishable from noise” when it is unlikely to be luck, and “not distinguishable” when it could be. Up to two habits get this test; the others are described only.</p></details>
+    <details><summary>What does the re-test do?</summary><p>It runs the same report on a newer export of the same account, 30 to 60 days after your first report. {{ RETEST|safe }}</p></details>
+    <details><summary>Which files work?</summary><p>MetaTrader 5 or 4, IBKR and Tradovate exports (all in beta), or the donttrade CSV template.</p></details>
+    <details><summary>Where does my file go?</summary><p>It stays in your browser. {{ strings.p5.long }}</p></details>
+    <details><summary>Is this investment advice?</summary><p>No. It describes your own past trades. It does not tell you what to trade, how much, or when to exit.</p></details>
+    <details><summary>Do you take payment by email?</summary><p>No. We never ask for card details by email. <a href="/terms/#cancellation">Cancellation and refund terms</a></p></details>
+  </section>
+  {% include "partials/disclaimer.html" %}
+</div>
+{%- else %}
 <div class="wrap">
   {% include "partials/crumbs.html" %}
   <h1>Pricing</h1>
@@ -155,4 +222,5 @@
   </section>
   {% include "partials/disclaimer.html" %}
 </div>
+{%- endif %}
 {% endblock %}

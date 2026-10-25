@@ -887,6 +887,19 @@ svg.tp { padding: 8px 10px; }
 .firm-line { color: var(--muted); }
 @media (max-width: 899.98px) { .how-steps { grid-template-columns: minmax(0, 1fr); } .how-shot { height: auto; } }
 
+/* /pricing/ (sweep 1): traders only, one boxed card per offer; the pay panel opens inside the report card */
+.price-cards { display: grid; gap: var(--s3); grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; margin: var(--s4) 0 var(--s3); }
+.price-card { margin: 0; max-width: none; padding: var(--s4); background: var(--bg); border: 1px solid var(--border); border-radius: 16px; }
+.price-card-main { border: 2px solid var(--rust); box-shadow: 0 24px 48px -28px rgb(22 24 28 / 0.3); }
+.price-card h2 { font-size: var(--fs-3); margin: 0; }
+.price-card h2::before { display: none; }
+.price-big { margin: var(--s1) 0 var(--s3); }
+.price-big .num { font-size: var(--fs-5); font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.price-card .ticks li { font-size: var(--fs-1); }
+.price-card .pay-step { border: 0; margin: var(--s2) 0; }
+.price-card .more { font-weight: 600; text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 2px; }
+@media (max-width: 899.98px) { .price-cards { grid-template-columns: minmax(0, 1fr); } .price-card-main { order: -1; } .price-card { padding: var(--s3); } }
+
 .tp-icon { height: 56px; }
 /* ------------------------------------------------------------------ the dark hero band (ARCHITECT-BRAND-AND-WRAPPED §2.2–2.4)
    partials/hero_band.html. It follows the theme (owner, 25 Oct): in light it keeps the light page tokens;

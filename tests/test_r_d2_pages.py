@@ -184,8 +184,8 @@ def test_i3b_the_version_sentence_sits_where_the_re_test_is_described_and_links_
         h = re.sub(r"\s+", " ", raw(paid, rel))
         assert RETEST_HTML in h, rel
     pr = re.sub(r"\s+", " ", raw(paid, "pricing/index.html"))
-    # merge into delivery-39 (24 Oct): the v3 value ladder describes the re-test too, so it carries the sentence
-    assert pr.count(RETEST_HTML) == 3, "the pricing note, Before you pay and the value ladder"
+    # 25 Oct sweep: no value ladder on /pricing/; the re-test answer and Before you pay carry the sentence
+    assert pr.count(RETEST_HTML) == 2, "the re-test answer and Before you pay"
     assert os.path.exists(os.path.join(paid, "corrections", "index.html"))
     fr = re.sub(r"\s+", " ", raw(paid, "fr/avant-de-payer/index.html"))
     assert 'daté, en anglais, sur la <a href="/corrections/" hreflang="en">page des corrections</a>.' in fr
@@ -200,7 +200,7 @@ def test_i3b_product_text_is_the_same_everywhere(builds):
     build = importlib.import_module("build")
     assert build.PRODUCT_TEXT == PRODUCT
     h = raw(builds["paid"], "pricing/index.html")
-    assert "<td>" + PRODUCT + "</td>" in h
+    assert "<p>" + PRODUCT + "</p>" in h   # 25 Oct sweep: the answer to "What exactly do I get?" on /pricing/
     ld = [m for m in re.findall(r'<script type="application/ld\+json">(.*?)</script>', h, re.S) if '"Product"' in m]
     assert ld and all(PRODUCT in m for m in ld)
     seen = []
