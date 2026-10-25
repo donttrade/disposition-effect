@@ -62,8 +62,8 @@ cloudflare_pages_since = "2026-10-24"
 disclaimer_short = "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results."
 disclaimer_long = "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results."
 
-# Nav (ARCHITECT-V3 §c.2, owner decision Q1 21 Oct ~18:30): Free tools · Research · For firms · Pricing ·
-# About. A [[nav]] entry with [[nav.items]] is a drop-down (<details name="nav">, works without JS);
+# Nav (ARCHITECT-V3 §c.2, owner decision Q1 21 Oct ~18:30; QA 25 Oct adds For traders): Free tools ·
+# Research · For firms · For traders · Pricing · About. A [[nav]] entry with [[nav.items]] is a drop-down (<details name="nav">, works without JS);
 # one without is a plain link. Each item: label, href, desc (one plain line: the build refuses a digit,
 # "$", "%" or a banned.toml word in any nav text), icon (partials/icons.html) and optional
 # requires_flag. [[nav.foot]] = text links under the panel's rule; label_if_paid replaces label
@@ -84,6 +84,16 @@ href = "/tools/trade-stats/"
 desc = "Totals from your trade file"
 icon = "stats"
 [[nav.items]]
+label = "Trading heatmap"
+href = "/tools/trading-heatmap/"
+desc = "Your results by hour and weekday"
+icon = "windows"
+[[nav.items]]
+label = "Drawdown calculator"
+href = "/tools/drawdown-calculator/"
+desc = "What gain recovers a drawdown"
+icon = "split"
+[[nav.items]]
 label = "Prop challenge simulator"
 href = "/tools/prop-challenge-simulator/"
 desc = "Your past days under a challenge’s rules"
@@ -94,10 +104,20 @@ href = "/tools/lot-size-calculator/"
 desc = "Lots for the risk you chose"
 icon = "scale"
 [[nav.items]]
+label = "Risk-reward calculator"
+href = "/tools/risk-reward-calculator/"
+desc = "Break-even win rate for a ratio"
+icon = "percent"
+[[nav.items]]
 label = "Disposition calculator"
 href = "/tools/disposition-calculator/"
 desc = "Winners vs losers sold, from four counts"
 icon = "hourglass"
+[[nav.items]]
+label = "Pass-rate calculator"
+href = "/tools/pass-rate-calculator/"
+desc = "One cohort’s pass and payout rate"
+icon = "check"
 [[nav.foot]]
 label = "All free tools"
 href = "/tools/"
@@ -161,6 +181,11 @@ icon = "shield"
 [[nav.foot]]
 label = "Start a Pilot"
 href = "/start/?product=pilot#pilot"
+
+# QA 25 Oct: the trader page as its own top-level link (desktop row and phone Menu)
+[[nav]]
+label = "For traders"
+href = "/for-traders/"
 
 [[nav]]
 label = "Pricing"
