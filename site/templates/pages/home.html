@@ -162,7 +162,9 @@
   {%- from "partials/answer_box.html" import answer_box with context %}
   <section class="section" aria-labelledby="faq-h" data-reveal>
     <h2 id="faq-h">Questions</h2>
+    {%- if flags.ask_box %}
     {{ answer_box("pg") }}
+    {%- endif %}
     <details><summary>Is this advice?</summary><p>No. It describes past trades and past behaviour. It does not tell anyone what to trade, how much, or when to exit.</p></details>
     <details><summary>Where does my trade file go?</summary><p>The free tools read it inside your browser tab; those pages block every outgoing request, so the file is not uploaded. When the habit report launches, the page that runs it will say exactly what it sends.</p></details>
     <details><summary>What do the free tools cost?</summary><p>Nothing, with no account and no card. They run in your browser, so serving them costs us almost nothing.</p></details>

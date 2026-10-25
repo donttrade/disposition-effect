@@ -12,12 +12,14 @@
   {% include "partials/crumbs.html" %}
   <h1>Questions</h1>
   <p class="lede">Every answer on this site in one place. Each one is quoted from its page, with a link to it.</p>
+  {%- if flags.ask_box %}
   <section class="ask" id="ask" aria-labelledby="ask-h">
     <h2 id="ask-h">Ask about prices, refunds, files or privacy</h2>
     {%- from "partials/answer_box.html" import answer_box with context %}
     {{ answer_box("ask") }}
     <p class="small muted">Without JavaScript this page cannot search: every answer is listed below.</p>
   </section>
+  {%- endif %}
   <nav class="help-jump" aria-label="Groups"><ul>
   {%- for kind, label in groups if answer_units|selectattr("kind", "equalto", kind)|list %}
     <li><a href="#g-{{ kind }}">{{ label }}</a></li>

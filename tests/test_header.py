@@ -85,7 +85,7 @@ def test_menu_keyboard_escape_and_click_outside(browser, built_site, width):
     assert [t for t, _, _ in groups] == ["Free tools", "Research, current section", "For firms"]
     assert [t for t, c, _ in groups if c] == ["Research, current section"]   # a study is in the Research section
     links = pg.eval_on_selector_all(".nav-panel .nav-links a", "as => as.map(a => [a.textContent, a.getBoundingClientRect().height])")
-    assert [t for t, _ in links] == ["Home", "Pricing", "About", "Ask a question"]   # Home link (a): first in .nav-links off the homepage
+    assert [t for t, _ in links] == ["Home", "Pricing", "About"]   # Home link (a): first in .nav-links off the homepage; no "Ask a question" with ask_box = false (launch, 25 Oct)
     assert all(h >= 44 for _, _, h in groups) and all(h >= 44 for _, h in links)
     pg.click(".nav-acc:nth-of-type(2) > summary")
     items = pg.eval_on_selector_all(".nav-acc[open] a", "as => as.map(a => a.getBoundingClientRect().height)")
@@ -153,7 +153,7 @@ def test_header_markup(built_site):
         header = re.search(r"(?s)<header class=\"site-header\">.*?</header>", html).group(0)
         # v3: 3 drop-downs + the phone Menu + its 3 accordion groups; one offer, the plain text link
         # "Start a Pilot" at the foot of For firms, once in each list (CSS shows one list at a time)
-        assert header.count("<nav ") == 1 and header.count("<details") == 8, path   # + the "Ask" popover (§c.5)
+        assert header.count("<nav ") == 1 and header.count("<details") == 7, path   # no "Ask" popover: ask_box = false (launch, 25 Oct)
         assert 'class="btn' not in header and not re.search(r"\$\d", header), path
         assert header.count("Start a Pilot") == 2 == header.count('<li><a href="/start/?product=pilot#pilot">Start a Pilot</a></li>'), path
         assert re.search(r'<script src="/static/js/nav\.js\?v=[0-9a-f]{8}" defer></script>', html), path  # N5: versioned

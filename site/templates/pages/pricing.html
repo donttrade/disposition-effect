@@ -161,8 +161,10 @@
 
   <section class="section" aria-labelledby="faq-h">
     <h2 id="questions"><span id="faq-h">Questions about price</span></h2>
+    {%- if flags.ask_box %}
     {%- from "partials/answer_box.html" import answer_box with context %}
     {{ answer_box("pg") }}
+    {%- endif %}
     <details><summary>Why publish prices?</summary><p>So you know the cost before you write, and every firm pays the same.</p></details>
     <details><summary>Do you take card payments?</summary><p>Yes. {% include "partials/card_timing.html" %} Bank transfer, or Interac e-Transfer in Canada, also work.</p></details>
     <details><summary>What is the difference between the {{ pilot.name }}, a Snapshot and a Memo?</summary><p>The {{ pilot.name }} is your first Snapshot at an introductory price, one per firm. A Snapshot is one figure for one population and period. A Memo adds your ratio set beside the public study’s, with the differences explained in writing.</p></details>

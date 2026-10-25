@@ -96,7 +96,7 @@ def test_n2_nav_text_has_no_price_and_one_text_offer(built_site):
         assert not re.search(r"\d\s*%|\$", text), rel
         for p in prices["products"]:
             assert B.usd(p["price_usd"]) not in text, rel
-        assert set(re.findall(r'aria-label="([^"]+)"', head)) == {"Main", "Ask a question"}, rel
+        assert set(re.findall(r'aria-label="([^"]+)"', head)) == {"Main"}, rel   # ask_box = false (launch, 25 Oct)
         assert 'class="btn' not in head
         assert head.count("Start a Pilot") == 2   # once per list: desktop panel, phone accordion
 

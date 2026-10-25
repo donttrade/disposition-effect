@@ -30,6 +30,26 @@ def builds(tmp_path_factory, built_site):
     return {"free": built_site["out"], "paid": paid}
 
 
+@pytest.fixture(scope="module")
+def ask_builds(tmp_path_factory, ask_site):
+    """MR-4 is about the box: the ask_box = true builds (the box is off by default for launch, 25 Oct)."""
+    tmp = tmp_path_factory.mktemp("mr-ask")
+    r, paid = _build(tmp, "paid")
+    assert r.returncode == 0, r.stderr
+    toml = tmp / "paid.toml"
+    src, n = re.subn(r"(?m)^ask_box = false", "ask_box = true", toml.read_text(encoding="utf-8"))
+    assert n == 1
+    toml.write_text(src, encoding="utf-8")
+    import subprocess
+    env = {**os.environ, "DT_SITE_TOML": str(toml), "DT_PRIVATE_TOML": str(tmp / "paid-private.toml"),
+           "DT_PRICES_JSON": str(tmp / "paid-prices.json"), "DT_OUT": str(paid), "DT_DEV": ""}
+    for k in ("DT_ALLOW_PLACEHOLDERS", "DT_ALLOW_LOCAL_API", "DT_ALLOW_NO_STRIPE_LINK", "DT_PREVIEW"):
+        env.pop(k, None)
+    r = subprocess.run([sys.executable, os.path.join(REPO, "site", "build.py")], env=env, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    return {"free": ask_site["out"], "paid": paid}
+
+
 def text_of(out, rel):
     return re.sub(r"\s+", " ", visible_text(open(os.path.join(out, rel), encoding="utf-8").read()))
 
@@ -132,8 +152,8 @@ ASK_LINE = ("Answers are quoted from this site’s own pages. Your question is n
             "browser, and without JavaScript, Ask opens the list of every answer instead.")
 
 
-def test_mr4_no_answer_box_field_has_a_name_and_the_line_says_so(builds):
-    for out in builds.values():
+def test_mr4_no_answer_box_field_has_a_name_and_the_line_says_so(ask_builds):
+    for out in ask_builds.values():
         for rel in ("index.html", "help/index.html", "tools/trade-stats/index.html", "pricing/index.html"):
             h = raw(out, rel)
             for box in re.findall(r"(?s)<search class=\"answer-box\".*?</search>", h):
@@ -143,7 +163,8 @@ def test_mr4_no_answer_box_field_has_a_name_and_the_line_says_so(builds):
 
 
 @pytest.mark.parametrize("mode", ["no-js", "engine-blocked", "js"])
-def test_mr4_the_typed_question_never_leaves_the_browser(browser, built_site, mode):
+def test_mr4_the_typed_question_never_leaves_the_browser(browser, ask_site, mode):
+    built_site = ask_site
     ctx = browser.new_context(viewport={"width": 1280, "height": 900}, java_script_enabled=(mode != "no-js"))
     pg = ctx.new_page()
     urls = []
