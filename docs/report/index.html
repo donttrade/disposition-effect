@@ -108,7 +108,7 @@
   </li>
   <li class="how-step">
     <h2 class="rs-h"><span class="how-n">2</span> Drop the file in</h2>
-    <p>Your browser strips names, account numbers and tickers first.</p>
+    <p>Your browser removes names, account numbers and symbols before anything is sent.</p>
   </li>
   <li class="how-step">
     <h2 class="rs-h"><span class="how-n">3</span> Read your report</h2>
@@ -124,7 +124,6 @@
       <label for="rp-file">Trade file (MT5/MT4 report, IBKR Flex, Tradovate Orders, or the CSV template)</label>
       <input id="rp-file" type="file" accept=".csv,.htm,.html,.txt">
     </div>
-    <p class="small">Names, account numbers and symbols are removed in this tab before anything is sent.</p>
     <details class="how-more"><summary>What is sent</summary><p>Your browser sends our server only stripped trade numbers: open and close times, buy or sell, relative size, the realised result, a random symbol number and a scrambled fingerprint of each row. No name, account number or ticker is sent. The numbers are not kept; we keep only a scrambled fingerprint of each trade row from your first report, so a re-test can be matched to the same history, and we delete it on the dates in our privacy notice.</p></details>
     <div class="field"><label for="rp-firm">Which firm do you trade with? (optional)</label>
       <input id="rp-firm" type="text" maxlength="80" autocomplete="organization"></div>
