@@ -149,7 +149,7 @@ async function render(focus = true) {
       `Times are ${r.tz_label}. ${unitNote(state.unit)}`),
   );
   if (state.fileLabel === 'the synthetic sample file') {
-    read.append(el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Sample data' }), 'Synthetic trades made up for this demo, not a real trader.'));
+    read.append(el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Sample data' }), 'Demo file, not a real trader.'));
   }
   if (r.warnings.length) {
     read.append(el('div', { class: 'notice notice-caution', id: 'ts-warnings' },

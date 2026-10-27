@@ -1066,9 +1066,9 @@ PAID_REPLACES_LIFTED = ("/sample-report/",)
 SAMPLE_REPORT_JSON = os.path.join(SITE, "config", "sample-report.report.json")
 SAMPLE_PAGE = {"template": "pages/sample-report.html", "path": "/sample-report/", "requires_flag": None,
                "modules": ["/static/js/paid/sample.js"], "crumb": "Sample habit report", "og_image": "/assets/og/sample-report.png",
-               "title": "Sample habit report, from a made-up trade file — donttrade", "sample_report": True,
-               "description": "A sample of the paid habit report: the report's own engine and page run on a trade file made up "
-                              "for this page. Not a real trader. Not advice.", "updated": "2026-10-23"}
+               "title": "Sample habit report, on a demo file — donttrade", "sample_report": True,
+               "description": "A sample of the paid habit report: the report's own engine and page run on a demo file. "
+                              "Not a real trader. Not advice.", "updated": "2026-10-23"}
 
 
 def lifted_paths_for(paid):
