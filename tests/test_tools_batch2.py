@@ -323,7 +323,7 @@ def test_dd_sample_equals_python_mirror_and_teaser(browser, built_site):
     assert k(pg, "summary", s).startswith(f"{len(eps)} drawdowns in {len(trades)} closed trades; {sum(e['recovered'] for e in eps)} recovered")
     cur = eps[-1]
     assert k(pg, "current", s) == ("none: at the high" if cur["recovered"] else money(-(cur["high"] - final)))
-    assert "Synthetic trades made up for this demo" in pg.inner_text(s)
+    assert "Demo file, not a real trader" in pg.inner_text(s)
     assert hits > 0
     want = (f"Your deepest drawdown ran {len(inside)} trades, and {round(100 * hits / len(inside))}% of the trades inside it "
             "were opened within 15 minutes of a loss. We're building a habit report that tests whether trades opened within "
