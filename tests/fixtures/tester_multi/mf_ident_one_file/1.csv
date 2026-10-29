@@ -1,0 +1,4 @@
+Date,Time,Symbol,Side,Qty,Price,TradeID
+2026-03-20,10:00:00,EURUSD,Buy,1,1.1,0
+2026-03-20,10:00:00,EURUSD,Buy,1,1.1,1
+2026-03-20,10:05:00,EURUSD,Sell,2,1.2,2

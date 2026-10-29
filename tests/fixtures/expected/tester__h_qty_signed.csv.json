@@ -1,0 +1,7 @@
+{
+ "error": {
+  "code": "E_MISSING_COLUMN",
+  "column": "side",
+  "row": 1
+ }
+}
