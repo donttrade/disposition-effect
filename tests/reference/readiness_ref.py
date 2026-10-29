@@ -698,17 +698,34 @@ def simulated_habits(res, flags_by_day, dates_only=False):
 
 
 # ------------------------------------------------------------------ presets (challenge-presets.js)
+NOT_STATED = "not stated"
 SCALED = ("target", "daily_loss", "max_loss", "trail_stop_at", "profitable_day_min")
+DEFAULTS = {"target_check": "eod", "drawdown": "static", "trail_stop_at": None, "consistency": None, "min_days": 0,
+            "count_day_if": "any", "time_limit": None, "day_start": None, "daily_loss": None}
+QUOTED = ("target", "target_check", "daily_loss", "max_loss", "drawdown", "trail_stop_at", "consistency", "min_days",
+          "count_day_if", "time_limit", "day_start")
+
+
+def _relevant(f, r):
+    if f == "trail_stop_at" and r["drawdown"] == "static":
+        return False
+    if f == "count_day_if" and (r["min_days"] in (0, NOT_STATED) or r["min_days_kind"] == "profitable"):
+        return False
+    return True
 
 
 def preset_rules(preset, account_size=None):
     if not preset or preset["status"] == "not_quotable" or not preset.get("rules"):
         raise ValueError("preset: no rules to use")
+    src = preset["rules"]
+    not_stated = [f for f in QUOTED if src[f] == NOT_STATED and _relevant(f, src)]
     k = account_size / preset["account_size"] if preset["scale"] == "percent" and account_size else 1
-    r = dict(preset["rules"])
+    r = {f: (DEFAULTS[f] if v == NOT_STATED else v) for f, v in src.items()}
     for f in SCALED:
         if r[f] is not None:
             r[f] = r[f] * k
+    r["target_check"] = {"intraday": "intraday", "end of day": "eod"}.get(r["target_check"], r["target_check"])
+    r["count_day_if"] = {"any trade": "any", "non-zero P&L": "nonzero"}.get(r["count_day_if"], r["count_day_if"])
     day_start = r.pop("day_start")
     return {"rules": r, "dayStart": day_start, "accountSize": preset["account_size"] if k == 1 else account_size,
-            "unconfirmed": list(preset["unconfirmed"])}
+            "notStated": not_stated, "notModelled": list(preset["not_modelled"])}
