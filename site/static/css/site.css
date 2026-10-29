@@ -1227,3 +1227,22 @@ svg.tp { padding: 8px 10px; }
   .hs-row th a::after { content: none; }
   .report-out details > summary { display: none; }
 }
+
+/* tool hero pictures (sweep 3; partials/tool_shot.html) */
+.tool-shot { margin: 0; padding-top: var(--s3); }
+.tool-shot-card { position: relative; padding: var(--s4) var(--s3) var(--s3); }
+.tool-shot-card > .tp { display: block; width: 100%; height: auto; min-height: 120px; }
+.tool-shot-card > svg.tp { height: 160px; }
+.tool-shot-card .tp-stats, .tool-shot-card .tp-prop { min-height: 0; }
+.tool-shot-card .tp-legend { font-size: var(--fs-0); }
+.tool-shot-card .tp-prop svg { height: 22px; }
+.tool-shot figcaption { font-size: var(--fs-0); color: var(--muted); margin-top: var(--s1); }
+.shot-line { margin: var(--s2) 0 0; font-size: var(--fs-1); }
+.mini-shot .mini-total > * { font-weight: 600; color: var(--text); border-top: 2px solid var(--border); }
+.rr-ladder { display: block; width: 100%; max-width: 320px; height: auto; }
+.rr-axis { stroke: var(--border); stroke-width: 2; }
+.rr-win { fill: var(--gain); } .rr-risk { fill: var(--loss); }
+.rr-k { font: 13px var(--font-sans); fill: var(--muted); }
+.rr-v { font: 14px var(--font-mono); fill: var(--text); }
+.rr-big { font: 600 44px var(--font-sans); fill: var(--text); }
+@media (max-width: 899.98px) { .tool-hero .tool-shot { display: none; } }   /* phones: the tool itself comes first */

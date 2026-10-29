@@ -11,14 +11,17 @@
 {%- import "partials/trader_offer.html" as offer with context %}
 {%- set r = products["report39"] %}
 <div class="wrap">
-  <div class="grid">
-    <div class="span-8">
+  {#- sweep 3 (29 Oct, owner: show, don't tell): one line and a picture; the longer explanation is under
+      "How it works" below, word for word. -#}
+  {%- from "partials/tool_shot.html" import shot with context %}{% set t = tools | selectattr("href", "equalto", "/tools/prop-challenge-simulator/") | first %}
+  <div class="tool-hero">
+    <div>
       {% include "partials/crumbs.html" %}
       <h1>Prop-firm challenge simulator</h1>
-      <p class="lede">Most challenge simulators ask for a win rate and an average win and loss, then invent trades from them. This one can start from your own record.</p>
-      <p>Drop a trade file and it builds 10,000 simulated challenges by drawing whole trading days from your history at random, so a day with three quick losses stays a day with three quick losses, which is what daily loss limits react to. Enter the rules you face: profit target, daily loss limit, maximum loss as a static or trailing limit, time limit and minimum trading days. The result shows the share of runs that passed, busted or ran out of time, and how many busts came after two or more losses in a row. No file? A manual mode takes the usual summary numbers instead. The random seed is fixed, so the same inputs always give the same answer.</p>
-      <p><strong>This is a simulation of your past trades, not a prediction.</strong> It runs entirely in your browser: the page’s security policy blocks every outgoing request.</p>
+      <p class="lede">Replay 10,000 challenges from your own trading days, under your firm’s rules.</p>
+      <p><strong>This is a simulation of your past trades, not a prediction.</strong></p>
     </div>
+    {{ shot("prop", t) }}
   </div>
   {% include "partials/disclaimer.html" %}
 
@@ -83,7 +86,11 @@
   {%- endif %}
 
   <section class="section" aria-labelledby="how-h">
-    <h2 id="how-h">How each run works</h2>
+    <h2 id="how-h">How it works</h2>
+    <details class="how-group"><summary>How each run works</summary>
+    <p>Most challenge simulators ask for a win rate and an average win and loss, then invent trades from them. This one can start from your own record.</p>
+    <p>Drop a trade file and it builds 10,000 simulated challenges by drawing whole trading days from your history at random, so a day with three quick losses stays a day with three quick losses, which is what daily loss limits react to. Enter the rules you face: profit target, daily loss limit, maximum loss as a static or trailing limit, time limit and minimum trading days. The result shows the share of runs that passed, busted or ran out of time, and how many busts came after two or more losses in a row. No file? A manual mode takes the usual summary numbers instead. The random seed is fixed, so the same inputs always give the same answer.</p>
+    <p>It runs entirely in your browser: the page’s security policy blocks every outgoing request.</p>
     <ol>
       <li>Each simulated day is one of your past trading days, drawn at random (a day can be drawn more than once), with its trades replayed in their real order. In manual mode each day is the number of trades you entered, each a win or a loss at your win rate.</li>
       <li>After every trade, the run busts if the day’s loss reaches the daily limit, or if the balance reaches the maximum-loss floor. Reaching a limit counts as breaking it.</li>
@@ -91,6 +98,7 @@
       <li>A run that neither passes nor busts within the time limit has run out of time.</li>
     </ol>
     <p>Only closed trades are in a trade file, so the simulation sees each trade’s final result, not how far it went against you while open. A limit that a firm checks on open positions can break earlier than shown here.</p>
+    </details>
   </section>
 
   <section class="section" aria-labelledby="faq-h">
@@ -103,14 +111,6 @@
     <details><summary>Is my file uploaded?</summary><p>No. The file is read in this tab and all 10,000 runs happen in your browser. The page’s security policy blocks outgoing requests.</p></details>
   </section>
 
-  <section class="section" aria-labelledby="more-h">
-    <h2 id="more-h">Related</h2>
-    <ul>
-      <li><a href="/tools/trade-stats/">Trade stats</a>: win rate, profit factor and drawdown from the same file.</li>
-      <li><a href="/tools/lot-size-calculator/">Lot size calculator</a>: the arithmetic from balance, risk amount and stop distance.</li>
-      <li><a href="/tools/pass-rate-calculator/">Pass-rate calculator</a>, for firm operators: a cohort’s pass and payout rates.</li>
-    </ul>
-  </section>
   <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR and Tradovate are trademarks of their owners. donttrade is not affiliated with any of them.</p>
 </div>
 <script type="text/csv" id="ps-sample">
