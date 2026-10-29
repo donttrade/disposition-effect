@@ -88,6 +88,8 @@ export const WARNING_TEXT = Object.freeze({
     'Some rows have a date but no time. Their trades are read at day level, with no time of day.',
   W_DATES_ONLY:
     'Your file has dates but no times. Results that depend on the time of day are not available; day-level results still are.',
+  W_REFUSED_FILLS:
+    'A row was refused because a number like 1,000 had no quotes, so its size is unknown. The later fills of its symbol, from the trade open at that time, were left out rather than paired wrongly.',
   W_WIDE_ROWS:
     'Some rows have more cells than the headings, as when a name or note holds a comma without quotes, so cells after it may be in the wrong column. Check these rows, or export the file again with quotes.',
   W_DST:

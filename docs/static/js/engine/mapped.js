@@ -12,12 +12,12 @@
 // Mirrors parse_mapped(), parse_files() and the helpers around them in tests/reference/engine_ref.py.
 
 import { clean, normHeader, parseNumber, resolveNumberStyle, checkQuoting, parseDateFmt, fallBackClose,
-  numberShape, DATE_FORMATS, wideRows, decodeBytes, isHtml, sniffDelimiter, parseCsv, fromPaste } from './csv.js?v=c0193c2a';
-import { ISO_CURRENCIES, checkCurrencyColumn } from './detect.js?v=a4376053';
-import { fail, LIMITS } from './errors.js?v=3327687b';
-import { reqNumber, optNumber, skip, isEmptyRow, htmlRows } from './mt.js?v=ec30543d';
-import { sideLetter } from './generic.js?v=128dbf64';
-import { CME_MULTIPLIERS } from './tradovate.js?v=63a36e33';
+  numberShape, DATE_FORMATS, wideRows, splitCell, decodeBytes, isHtml, sniffDelimiter, parseCsv, fromPaste } from './csv.js?v=7dca0e6f';
+import { ISO_CURRENCIES, checkCurrencyColumn } from './detect.js?v=3d28a2dd';
+import { fail, LIMITS } from './errors.js?v=8ee10796';
+import { reqNumber, optNumber, skip, isEmptyRow, htmlRows } from './mt.js?v=3f5ee677';
+import { sideLetter } from './generic.js?v=b28059a4';
+import { CME_MULTIPLIERS } from './tradovate.js?v=038beb75';
 
 // ---------------------------------------------------------------- reading one file or paste
 // An item is the bytes of a file (Uint8Array) or a pasted table ({paste: text}).
@@ -40,14 +40,16 @@ export function readRows(item, delimiter = null) {
 // `contains` (normalised: lowercase, letters and digits only). "Account Display Name", "Trade
 // Account", "acct_no", "Wallet address", "Deposit address", "E-mail", "Client name", "IBAN" are all
 // caught. Any hash is blocked (an on-chain transaction hash leads to the wallet), and every address
-// (to, from, deposit, IP). Kraken's txid stays readable: an exchange's own trade ID, not on-chain.
+// (to, from, deposit, IP). Kraken's txid stays readable: an exchange's own trade ID, not on-chain;
+// so does MetaTrader's Position ID, which the MT5 reader needs for hedged legs.
 export const BLOCKED = Object.freeze({
   contains: ['account', 'acct', 'wallet', 'email', 'phone', 'hash', 'address', 'iban', 'customer', 'client', 'passport',
-    'password', 'cardnumber', 'comment', 'remark', 'memo'],
+    'password', 'cardnumber', 'comment', 'remark', 'memo', 'beneficiary', 'counterparty', 'sender', 'login', 'bank',
+    'routing', 'telegram', 'discord', 'contact', 'referral'],
   exact: ['name', 'fullname', 'firstname', 'lastname', 'surname', 'tradername', 'legalname', 'displayname', 'nickname',
     'username', 'owner', 'user', 'uid', 'userid', 'traderid', 'note', 'notes', 'mail', 'transactionid', 'swift', 'bic',
     'ssn', 'sin', 'tin', 'taxid', 'nationalid', 'dob', 'dateofbirth', 'birthdate', 'publickey', 'pubkey', 'signature',
-    'description', 'mobile', 'ip'],
+    'description', 'mobile', 'ip', 'orderid', 'sortcode', 'handle', 'cell'],
 });
 
 export function isBlocked(norm) {
@@ -317,13 +319,29 @@ export function parseMapped(rows, mp, sideFrom, kind, delimiter) {
       : ['date', 'time', 'open_time', 'close_time'].includes(f) ? 'date' : 'text';
   }
   let wide = 0;
+  const refused = [];
   for (const r of data) {
     if (isEmptyRow(r.cells)) continue;
     nData++;
     if (mp.trim_ragged && isRagged(r.cells, header.length)) { skip(skipped, 'no_data'); continue; }
     if (isNoData(r.cells, header.length) || reqKeys.every((f) => cellAt(r, m[f]) === '')) { skip(skipped, 'no_data'); continue; }
     const wr = wideRows([r], header.length, kinds, ISO);
-    if (wr.split.length) { skip(skipped, 'split_number'); continue; }
+    if (wr.split.length) {
+      skip(skipped, 'split_number');
+      if (layout !== 'roundtrips') {
+        // Its symbol's later fills depend on it (trades.js leaves them out); see index.js refusedFills.
+        const sp = wr.split[0];
+        const c = (f) => (has(m, f) ? splitCell(r.cells, m[f], sp) : '');
+        let ts = null;
+        try {
+          const d = c('date');
+          const t = c('time');
+          ts = parseDateFmt(t !== '' && d !== '' ? d + ' ' + t : d, mp.date_format, r.row, 'date', { yearBase: mp.year_base || null });
+        } catch (e) { if (!e || e.name !== 'EngineError') throw e; }
+        refused.push({ symbol: c('symbol'), ts });
+      }
+      continue;
+    }
     wide += wr.wide;
     kept.push(r);
   }
@@ -472,7 +490,7 @@ export function parseMapped(rows, mp, sideFrom, kind, delimiter) {
     delete x._ooff;
     delete x._coff;
   }
-  const extra = { duplicate_rows: dup, currency_ignored: cc.ignored, wide_rows: wide, mapped: !mp.preset, preset: mp.preset || null,
+  const extra = { duplicate_rows: dup, currency_ignored: cc.ignored, wide_rows: wide, refused, mapped: !mp.preset, preset: mp.preset || null,
     orders_averaged: layout === 'orders', futures_sizes: mp.futures_sizes === true, pnl_sign: pnlSign,
     zone_ignored: seen.zone && !offsets, offsets, tz: mp.tz || null };
   return { res: { executions: execs, roundtrips: rts, skipped, extra }, nData };
@@ -577,6 +595,8 @@ export function mergeParsed(parts) {
     for (const k of SUM_EXTRA) if (has(p.res.extra, k)) extra[k] = (extra[k] || 0) + p.res.extra[k];
     for (const k of OR_EXTRA) if (has(p.res.extra, k)) extra[k] = extra[k] || p.res.extra[k];
   }
+  extra.refused = [];
+  for (const p of parts) if (p.res.extra.refused) extra.refused = extra.refused.concat(p.res.extra.refused);
   const ex = dropOverlap(parts.map((p) => p.res.executions), execKey);
   const rt = dropOverlap(parts.map((p) => p.res.roundtrips), rtKey);
   extra.overlap_rows = ex.dropped + rt.dropped;

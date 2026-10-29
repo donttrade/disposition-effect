@@ -8,9 +8,9 @@
 // trader id are not in the whitelist and are never read.
 // Mirrors parse_ibkr() in tests/reference/engine_ref.py.
 
-import { parseDate } from './csv.js?v=c0193c2a';
-import { cell, reqNumber, optNumber, skip, isEmptyRow } from './mt.js?v=ec30543d';
-import { sideLetter } from './generic.js?v=128dbf64';
+import { parseDate } from './csv.js?v=7dca0e6f';
+import { cell, reqNumber, optNumber, skip, isEmptyRow } from './mt.js?v=3f5ee677';
+import { sideLetter } from './generic.js?v=b28059a4';
 
 // A cancellation row ("BUY (Ca.)" / "SELL (Ca.)", or the code Ca; UNVERIFIED spellings
 // from the Flex docs) takes back an earlier execution. It is not a fill: the execution it

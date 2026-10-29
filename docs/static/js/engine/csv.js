@@ -6,7 +6,7 @@
 //   * dates are read as "naive UTC" with Date.UTC, never with the browser's time zone,
 //     so a file gives the same numbers in Toronto, Kolkata or UTC.
 
-import { fail, LIMITS } from './errors.js?v=3327687b';
+import { fail, LIMITS } from './errors.js?v=8ee10796';
 
 // Whitespace we strip or collapse: ASCII whitespace, NBSP, the en/em/thin spaces,
 // narrow NBSP, medium mathematical space and the ideographic space.
@@ -243,7 +243,13 @@ export function checkQuoting(rows, hi, map) {
 // of a number like 1,000 or $1,235.60 (and the next cell its last three digits), the row is
 // refused (skip reason split_number), never read as 1 and 000. Any other wide row (a name or note
 // with a comma) is read as it is and counted for W_WIDE_ROWS. kinds: {index: 'num' | 'date' |
-// 'ccy' | 'text'} for the read columns. → {split: [row numbers], wide: n}
+// 'ccy' | 'text'} for the read columns. → {split: [{row, at, shift}], wide: n}: at = the split
+// column, shift = how far the cells after it moved (splitCell reads a refused row's other cells).
+export function splitCell(cells, c, sp) {
+  const i = c <= sp.at ? c : c + sp.shift;
+  return i < cells.length ? cells[i] : '';
+}
+
 const RE_SPLIT_HEAD = /^[+\-−(]?[$€£¥₹]?\d{1,3}$/;
 const RE_SPLIT_TAIL = /^\d{3}(\.\d+)?\)?$/;
 const RE_DATEISH = /^[0-9][0-9 .:\/\-T;,+Z]*([AaPp][Mm])?( ?[A-Za-z]{2,5})?$/;
@@ -277,7 +283,8 @@ export function wideRows(rows, width, kinds, isoSet = new Set()) {
     const surplus = last + 1 - width;
     if (surplus <= 0) continue;
     if (surplus > 1) {
-      if (idx.some((j) => j + 1 < cells.length && numSplit(cells, j))) split.push(r.row); else wide++;
+      const j = idx.find((x) => x + 1 < cells.length && numSplit(cells, x));
+      if (j !== undefined) split.push({ row: r.row, at: j, shift: surplus }); else wide++;
       continue;
     }
     let best = -1;
@@ -290,7 +297,8 @@ export function wideRows(rows, width, kinds, isoSet = new Set()) {
       }
       if (score > best) { best = score; bestAt = [j]; } else if (score === best) bestAt.push(j);
     }
-    if (bestAt.some((j) => numSplit(cells, j))) split.push(r.row); else wide++;
+    const j = bestAt.find((x) => numSplit(cells, x));
+    if (j !== undefined) split.push({ row: r.row, at: j, shift: 1 }); else wide++;
   }
   return { split, wide };
 }

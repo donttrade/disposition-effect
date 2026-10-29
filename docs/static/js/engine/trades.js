@@ -7,8 +7,8 @@
 // crosses zero closes the trade at that time and opens the opposite trade with
 // the remainder. Positions still open at the end of the file are left out.
 
-import { fail, warning } from './errors.js?v=3327687b';
-import { spansDstNight } from './csv.js?v=c0193c2a';
+import { fail, warning } from './errors.js?v=8ee10796';
+import { spansDstNight } from './csv.js?v=7dca0e6f';
 
 const DAY_MS = 86400000;
 const UNIT = 1e8; // positions tracked in 1e-8 lots, so 0.1 + 0.2 - 0.3 is exactly flat
@@ -304,9 +304,35 @@ function tradeKey(t) {
 
 // reportedMode: null (compute P&L) | 'gross' (reported profit before fees, MetaTrader)
 //             | 'net' (reported P&L after fees, IBKR realized P&L)
-export function buildTrades(execs, reportedMode, detectHedging) {
+// Fills that depend on a refused fill (index.js refusedFills: a row refused as a split number):
+// per symbol, from the start of the trade open at the refused fill's time (or from that time, if
+// flat) to the end of the file, since the count is unknown from then on; every fill of the symbol
+// when the time is unknown. Never a phantom short from an unmatched sell (Tester N1).
+function refusedOut(execs, order, refused) {
+  const out = new Set();
+  for (const { symbol, ts } of refused) {
+    const list = order.filter((k) => execs[k].symbol === symbol);
+    let from = 0;
+    if (ts !== null) {
+      let pos = 0;
+      let i = 0;
+      for (; i < list.length; i++) {
+        const e = execs[list[i]];
+        if (e.ts >= ts) break;
+        pos += (e.side === 'buy' ? 1 : -1) * roundHalfAway(e.qty * UNIT);
+        if (pos === 0) from = i + 1;
+      }
+    }
+    for (let i = from; i < list.length; i++) out.add(list[i]);
+  }
+  return out;
+}
+
+export function buildTrades(execs, reportedMode, detectHedging, refused = []) {
   const order = chronoOrder(execs);
   const lots = preFileLots(execs, order, detectHedging);
+  const refusedSet = refusedOut(execs, order, refused);
+  for (const k of refusedSet) lots.excluded.add(k);
   const walk = nettingWalk(execs, order, lots.excluded, detectHedging);
   let done = walk.done;
   const excluded = new Set(lots.excluded);
@@ -315,6 +341,7 @@ export function buildTrades(execs, reportedMode, detectHedging) {
   for (const o of [tieOrder(execs, order, false), tieOrder(execs, order, true)]) {
     if (sameOrder(o, order) || others.some((x) => sameOrder(o, x.order))) continue;
     const l = preFileLots(execs, o, detectHedging);
+    for (const k of refusedSet) l.excluded.add(k);
     others.push({ order: o, lots: l, done: nettingWalk(execs, o, l.excluded, detectHedging).done });
   }
   if (others.length) {
@@ -378,7 +405,7 @@ export function buildTrades(execs, reportedMode, detectHedging) {
       fills_n: t.fills, currency: t.currency, _fx: t.fx, _seq: t.seq, _dateonly: t.dateonly };
   });
   return { trades, openN: walk.openN, hedging: (detectHedging ? lots.hedges : 0) + walk.hedging,
-    openAtStart: lots.openAtStart, ambiguous: ambiguousSyms.size, excluded };
+    openAtStart: lots.openAtStart, ambiguous: ambiguousSyms.size, excluded, refusedN: refusedSet.size };
 }
 
 // Execution indexes in time order. Fills with the same time keep their file order,
@@ -476,6 +503,7 @@ export function finish(fmt, verified, res, mode, tzLabel) {
   let hedging = 0;
   let openAtStart = 0;
   let ambiguous = 0;
+  let refusedN = 0;
   let trades;
   if (fmt === 'mt5' && extra.has_closed_positions) {
     trades = roundtripTrades(res.roundtrips, 0);
@@ -483,7 +511,7 @@ export function finish(fmt, verified, res, mode, tzLabel) {
     trades = roundtripTrades(res.roundtrips, 0);
     executions = roundtripExecutions(res.roundtrips);
   } else {
-    const b = buildTrades(executions, mode, fmt === 'mt5');
+    const b = buildTrades(executions, mode, fmt === 'mt5', extra.refused || []);
     trades = b.trades;
     openN += b.openN;
     hedging = b.hedging;
@@ -491,6 +519,7 @@ export function finish(fmt, verified, res, mode, tzLabel) {
     ambiguous = b.ambiguous;
     // Fills of positions opened before the file are left out of every later step (PGR/PLR too).
     if (b.excluded.size) executions = executions.filter((_, k) => !b.excluded.has(k));
+    refusedN = b.refusedN;
   }
   // A trade with a fill that has a date but no time (a mixed file, Tester F6) is read at day level:
   // its open and close on their dates, never a made-up midnight next to a real time.
@@ -505,6 +534,7 @@ export function finish(fmt, verified, res, mode, tzLabel) {
   if (hedging) warnings.push(warning('W_HEDGING', hedging));
   if (openN) warnings.push(warning('W_OPEN_POSITIONS', openN, `${openN} left out.`));
   if (openAtStart) warnings.push(warning('W_OPEN_AT_START', openAtStart, `${openAtStart} left out.`));
+  if (refusedN) warnings.push(warning('W_REFUSED_FILLS', refusedN, `${refusedN} left out.`));
   if (ambiguous) warnings.push(warning('W_AMBIGUOUS_FILLS', ambiguous, `${ambiguous} ${ambiguous === 1 ? 'symbol' : 'symbols'} affected.`));
   if (extra.pnl_sign) warnings.push(warning('W_PNL_SIGN', extra.pnl_sign, `${extra.pnl_sign} found.`));
   if (fmt === 'tradovate_orders' || extra.futures_sizes) {
