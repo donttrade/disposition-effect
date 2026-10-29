@@ -37,15 +37,15 @@ Version 1.0 (30 Oct 2026).
 #                                 modules import only bisect, decimal and math.
 #   The files opened ............ line 336 (the pre-registration) and line 418 (each CSV; it runs
 #                                 twice, once per CSV), all mode "r" (read-only). Nothing is written.
-#   Everything sent to stdout ... lines 882 and 883 (the results, then flush); line 895 only assigns
+#   Everything sent to stdout ... lines 883 and 884 (the results, then flush); line 896 only assigns
 #                                 None to stdout after a broken pipe. print() is never used.
-#   Everything sent to stderr ... lines 892, 898 and 901, all inside main().
+#   Everything sent to stderr ... lines 893, 899 and 902, all inside main().
 #   Error messages .............. built only at the ValidationError(...) sites (grep -n
-#                                 'ValidationError(' lists them) and printed only by main(), line 892.
+#                                 'ValidationError(' lists them) and printed only by main(), line 893.
 #                                 Each is a fixed sentence into which only a row or line number, a
 #                                 count, our own column names, our own sealed keys or the OS's reason
 #                                 text is substituted.
-#   The catch-all ............... line 900, "except Exception". It prints the exception's CLASS NAME
+#   The catch-all ............... line 901, "except Exception". It prints the exception's CLASS NAME
 #                                 only, never its text.
 #   Output text ................. built only in render() and render_json() from counts and statistics.
 #                                 Tables go through prediction_metrics.bands(), which merges adjacent
@@ -838,7 +838,8 @@ def render_json(params, fp, out):
     rec, res = out["rec"], out["res"]
     doc = {"script": SCRIPT_NAME, "version": SCRIPT_VERSION, "dt_version": params["dt_version"],
            "engine_method": params["engine_method"], "registration": params["registration"], "fingerprint": fp,
-           "outcome_mode": params["outcome_mode"], "reconciliation": rec, "verdict": out["verdict"]}
+           "outcome_mode": params["outcome_mode"], "firm_label": params["firm_label"], "reconciliation": rec,
+           "verdict": out["verdict"]}
     if res is not None:
         h2 = res["h2"]
         doc["h1"] = {k: res["h1"][k] for k in ("auc", "se", "lo", "hi", "n1", "n0")}
