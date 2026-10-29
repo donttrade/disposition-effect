@@ -102,8 +102,16 @@ def test_no_preset_or_signature_reads_a_blocked_column():
                 assert not E.is_blocked(a.split("#")[0]), a
     for h in ("account", "accountid", "accountdisplayname", "tradeaccount", "acctno", "name", "owner", "user", "uid",
               "walletaddress", "address", "email", "emailaddress", "phone", "clientid", "traderid", "comment",
-              "comments", "notes", "remarks"):
+              "comments", "notes", "remarks",
+              # Tester F7
+              "tradehash", "txhash", "transactionhash", "transactionid", "depositaddress", "toaddress", "fromaddress",
+              "receivingaddress", "iban", "customerid", "customer", "clientname", "tradername", "legalname",
+              "displayname", "nickname", "cardnumber", "ssn", "taxid", "mobile", "mail", "ipaddress", "publickey",
+              "signature", "ordercomment", "tradecomment", "memo", "description"):
         assert E.is_blocked(h), h
+    for h in ("symbol", "price", "quantity", "commission", "txid", "ordertxid", "instrument", "contractname", "time",
+              "filledquantity", "fillprice", "side", "status", "notescodes"):
+        assert not E.is_blocked(h), h
 
 
 def test_each_preset_reads_its_required_fields_from_its_match_headings():
@@ -188,7 +196,7 @@ def test_js_messages_for_files_xlsx_zip_and_mappings(engine_page):
     xlsx, zipped = run("auto/workbook.xlsx"), run("auto/export.zip")
     assert "Excel (.xlsx)" in xlsx and "Save it as CSV" in xlsx and "zip" not in xlsx
     assert "zip file. Open it and drop the CSV inside" in zipped and "xlsx" not in zipped
-    assert run("mapped/stale_heading.csv").startswith("The saved column choices do not fit this file.")
+    assert run("mapped/stale_heading.csv").startswith("These column choices do not fit this file.")
     assert "date form you chose (month/day/year)" in run("mapped/mixed_iso_and_slash.csv")
     assert run("paste/single_spaces_only.txt").startswith("This paste has no columns we can split.")
 
@@ -331,7 +339,7 @@ def test_bad_mappings_are_refused_alike():
         {"side_from": "sign", "layout": "roundtrips"}, {"side_values": {"buy": "long"}}, {"side_rules": [["regex", "b", "buy"]]},
         {"status_values": {"filled": "yes"}}, {"date_format": "dym"}, {"number_style": "space"}, {"currency": "usd"},
         {"tz": "local"}, {"preset": "../x"}, {"futures_sizes": "yes"}, {"source": {"kind": "pdf", "table": 0}},
-        {"side_default": "buy"}, {"cols": {**base["cols"], "qty": True}},
+        {"side_default": "buy"}, {"cols": {**base["cols"], "qty": True}}, {"year_base": 1950},
     ]
     good = [{}, {"side_from": "sign", "cols": {"date": 0, "symbol": 1, "qty": 3, "price": 4}}, {"cols": {**base["cols"], "fees": []}}]
     cases = [dict(base, **b) for b in bad] + [dict(base, **g) for g in good]

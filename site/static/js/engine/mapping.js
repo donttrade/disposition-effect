@@ -559,8 +559,11 @@ export function headingsEmail(headers, platform, hits, confirmed = false) {
   const no = (reason) => ({ ok: false, reason, subject: null, body: null });
   if (!PLATFORMS.includes(platform)) return no('platform');
   const cells = headers.map(clean);
-  for (const c of cells) {
+  for (let i = 0; i < cells.length; i++) {
+    const c = cells[i];
     if (c.length > HEADINGS_MAX_CELL) return no('long_cell');
+    // A tab inside a cell would break the tab-joined body; an @ is an e-mail address, never a heading.
+    if (/[\t@]/.test(String(headers[i]))) return no('data_cell');
     if (/\d{4,}/.test(c)) return no('digits');
     if (c !== '' && (numberShape(moneyClean(c)) !== 'other' || dateShape(c).kind !== 'other')) return no('data_cell');
   }
