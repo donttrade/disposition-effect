@@ -1,0 +1,8 @@
+{
+  "what": "Facts for /research/does-the-test-predict/ (flag prediction_results). Filled in on the day the OSF registration is posted; the build refuses the flag while osf_url or registered_on is empty.",
+  "osf_url": "",
+  "registered_on": "",
+  "release_tag": "prediction-v1",
+  "code_url": "https://github.com/donttrade/disposition-effect/tree/prediction-v1/partner",
+  "sha256": {}
+}

@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{#- /research/does-the-test-predict/ ([flags] prediction_results; ARCHITECT-PREDICTION-STUDY-2026-10-30 §6.1, R1).
+    Every verdict's wording below was written and committed before any firm ran the script, so the words can't
+    be chosen to fit a result. The build passes prediction = {study, result (or none), chart, verdicts}. #}
+{% block content %}
+{%- set st = prediction.study %}
+{%- set res = prediction.result %}
+{%- set v = res.verdict if res else none %}
+{%- set run = res.runs[0] if res and res.runs|length == 1 else none %}
+<div class="wrap">
+  {% include "partials/crumbs.html" %}
+  <section class="section" aria-labelledby="pr-h">
+    <div class="grid"><div class="span-8 prose">
+      <h1 id="pr-h">Do early trading habits predict prop-challenge rule breaches?</h1>
+      <p class="lede">We take each account’s first 30 trades and compute the donttrade habit score (DT-1) from them. Then we ask whether accounts with higher scores went on to break a daily-loss or max-loss rule in the next 30 days more often than accounts with lower scores, and whether the score adds anything beyond size, volatility, P&amp;L so far and how close the account already was to its limit.</p>
+      <p>The plan was registered before any data was analysed: <a href="{{ st.osf_url }}" rel="noopener">the OSF registration</a>, timestamped {{ st.registered_on }}. The result is published whatever it shows, including a result that says the habits add nothing.</p>
+
+      {%- if not res %}
+      <h2 id="pr-status">Registered: results pending</h2>
+      <p>No firm has run the study yet. When one does, this page shows the result, using the wording below that was written for that result in advance.</p>
+      {%- elif v == "NOT MEASURED" %}
+      <h2 id="pr-status">Not measured yet</h2>
+      <p>After the exclusions, fewer than 100 accounts broke a rule, or fewer than 100 did not. That is too few for any verdict. Nothing is claimed either way, and the study keeps collecting under the same registration.</p>
+      {%- elif v == "FAIL: does not predict usefully" %}
+      <h2 id="pr-status">Result: the habit score did not predict breaches usefully</h2>
+      <p>Accounts with higher DT-1 scores were not usefully more likely to break a loss rule in the next 30 days. Either the ranking accuracy (AUC) was below 0.55, or its whole 95% interval was below 0.60. donttrade does not offer DT-1 as a risk score. The habit report still describes past habits, with no claim about what happens next.</p>
+      {%- elif v == "FAIL: adds nothing" %}
+      <h2 id="pr-status">Result: habits rank risk, but add nothing beyond size, volatility and headroom</h2>
+      <p>Accounts with higher DT-1 scores did break loss rules more often. But a simple model with no habits in it (activity, volatility, P&amp;L so far and headroom) ranked them just as well, so the habit score added nothing to it. donttrade makes no claim that habits add predictive value.</p>
+      {%- elif v == "PASS: meets target" %}
+      <h2 id="pr-status">Result: in a pre-registered study, the habit score ranked later breaches, beyond size and volatility</h2>
+      <p>Among accounts that lasted 30 trades, those with higher DT-1 scores broke a loss rule in the next 30 days more often. The score added to a model of activity, volatility, P&amp;L so far and headroom, and its ranking accuracy reached the 0.65 target. This describes groups of past accounts. It does not say any one trader will break a rule.</p>
+      {%- elif v == "PASS: below target" %}
+      <h2 id="pr-status">Result: the habit score ranked later breaches, modestly</h2>
+      <p>Among accounts that lasted 30 trades, those with higher DT-1 scores broke a loss rule in the next 30 days more often, and the score added to a model of activity, volatility, P&amp;L so far and headroom. Its ranking accuracy stayed below the 0.65 target. donttrade describes it as a modest, group-level indicator for monitoring, not as a standard.</p>
+      {%- elif v == "INCONCLUSIVE" %}
+      <h2 id="pr-status">Result: inconclusive</h2>
+      <p>The 95% interval was too wide either to pass or to fail. donttrade publishes this result and starts a replication on new accounts, under a new registration with DT-1 unchanged. The two results are never merged.</p>
+      {%- endif %}
+    </div></div>
+  </section>
+
+  {%- if res and v != "NOT MEASURED" and run %}
+  <section class="section" aria-labelledby="pr-num">
+    <div class="grid"><div class="span-8 prose">
+      <h2 id="pr-num">The numbers</h2>
+      <dl class="byp">
+        <dt>Ranking accuracy (AUC) of DT-1</dt><dd>{{ "%.3f"|format(run.h1.auc) }} (95% interval {{ "%.3f"|format(run.h1.lo) }} to {{ "%.3f"|format(run.h1.hi) }}), from {{ run.h1.n1 }} accounts that broke a rule and {{ run.h1.n0 }} that did not. 0.50 is a coin flip.</dd>
+        {%- if run.h2.fit == "ok" %}
+        <dt>Added to the no-habit model</dt><dd>{{ "%+.3f"|format(run.h2.delta) }} AUC (95% interval {{ "%+.3f"|format(run.h2.delta_lo) }} to {{ "%+.3f"|format(run.h2.delta_hi) }}): {{ "%.3f"|format(run.h2.auc_b0) }} without the habit score, {{ "%.3f"|format(run.h2.auc_full) }} with it. Likelihood-ratio p {{ "%.4f"|format(run.h2.lr_p) if run.h2.lr_p >= 0.0001 else "below 0.0001" }}.</dd>
+        {%- else %}
+        <dt>Added to the no-habit model</dt><dd>The model could not be fitted, which counts as adding nothing.</dd>
+        {%- endif %}
+        <dt>Accounts</dt><dd>{{ run.reconciliation.read }} read, {{ run.reconciliation.eligible }} analysed. The exclusions are listed below.</dd>
+      </dl>
+    </div></div>
+  </section>
+
+  {%- if prediction.chart %}
+  <section class="section" aria-labelledby="pr-dec">
+    <div class="grid"><div class="span-8">
+      <h2 id="pr-dec">Breach rate by habit-score decile</h2>
+      <figure class="chart">
+        <svg viewBox="0 0 420 210" width="420" height="210" role="img" aria-label="The share of accounts that broke a loss rule in the next 30 days, for each tenth of accounts ranked by DT-1 score, lowest first. The same numbers are in the table below.">
+          {%- for t in prediction.chart.ticks %}
+          <line class="grid-line" x1="48" x2="408" y1="{{ '%.1f'|format(t.y) }}" y2="{{ '%.1f'|format(t.y) }}"/>
+          <text class="axis" x="42" y="{{ '%.1f'|format(t.y + 4) }}" text-anchor="end">{{ (t.v * 100)|round|int }}%</text>
+          {%- endfor %}
+          {%- for b in prediction.chart.bars %}
+          <rect class="bar-plain" x="{{ '%.1f'|format(b.x) }}" y="{{ '%.1f'|format(b.y) }}" width="{{ '%.1f'|format(b.w) }}" height="{{ '%.1f'|format(b.h) }}" rx="2"><title>Decile {{ b.label }}: {{ b.breaches }} of {{ b.n }} accounts broke a rule ({{ (b.rate * 100)|round|int }}%)</title></rect>
+          <text class="axis" x="{{ '%.1f'|format(b.x + b.w / 2) }}" y="198" text-anchor="middle">{{ b.label }}</text>
+          {%- endfor %}
+        </svg>
+        <figcaption>Deciles of DT-1, lowest scores on the left. Adjacent deciles are merged until every cell holds at least 5 accounts that broke a rule and 5 that did not.</figcaption>
+        <div class="table-wrap" tabindex="0" role="region" aria-label="Breach rate by decile"><table>
+          <thead><tr><th scope="col">Decile</th><th scope="col">Accounts</th><th scope="col">Broke a rule</th><th scope="col">Did not</th></tr></thead>
+          <tbody>
+          {%- for d in run.deciles %}
+          <tr><td>{{ d.first if d.first == d.last else d.first ~ "-" ~ d.last }}</td><td>{{ d.n }}</td><td>{{ d.breaches }}</td><td>{{ d.survivors }}</td></tr>
+          {%- endfor %}
+          </tbody>
+        </table></div>
+      </figure>
+      {%- if run.lift_top %}
+      <p>Accounts in the top row broke a rule {{ "%.1f"|format(run.lift_top) }} times as often as the accounts overall.</p>
+      {%- endif %}
+      {%- if prediction.chart.cal %}
+      <h2 id="pr-cal">Calibration: predicted against observed</h2>
+      <figure class="chart">
+        <svg viewBox="0 0 268 250" width="268" height="250" role="img" aria-label="For each band of predicted chance, the predicted chance of a breach against the share that broke a rule. Points on the dashed line would match exactly. The same numbers are in the table below.">
+          <line class="grid-line" x1="48" x2="248" y1="220" y2="220"/>
+          <line class="grid-line" x1="48" x2="48" y1="20" y2="220"/>
+          <line class="line-plan" x1="48" y1="220" x2="248" y2="20"/>
+          <text class="axis" x="48" y="238" text-anchor="middle">0%</text><text class="axis" x="248" y="238" text-anchor="middle">100%</text>
+          <text class="axis" x="42" y="224" text-anchor="end">0%</text><text class="axis" x="42" y="24" text-anchor="end">100%</text>
+          {%- for c in prediction.chart.cal %}
+          <circle class="bar-plain" cx="{{ '%.1f'|format(c.cx) }}" cy="{{ '%.1f'|format(c.cy) }}" r="5"><title>{{ c.n }} accounts: predicted {{ (c.p * 100)|round|int }}%, observed {{ (c.o * 100)|round|int }}%</title></circle>
+          {%- endfor %}
+        </svg>
+        <figcaption>The full model (no-habit model plus DT-1), cross-validated. Across: predicted chance. Up: the share that broke a rule.</figcaption>
+        <div class="table-wrap" tabindex="0" role="region" aria-label="Calibration bands"><table>
+          <thead><tr><th scope="col">Accounts</th><th scope="col">Predicted</th><th scope="col">Observed</th></tr></thead>
+          <tbody>
+          {%- for c in prediction.chart.cal %}
+          <tr><td>{{ c.n }}</td><td>{{ (c.p * 100)|round|int }}%</td><td>{{ (c.o * 100)|round|int }}%</td></tr>
+          {%- endfor %}
+          </tbody>
+        </table></div>
+      </figure>
+      {%- endif %}
+    </div></div>
+  </section>
+  {%- endif %}
+  {%- endif %}
+
+  {%- if res %}
+  <section class="section" aria-labelledby="pr-exc">
+    <div class="grid"><div class="span-8 prose">
+      <h2 id="pr-exc">Who was left out, and why</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Accounts left out, by reason"><table>
+        <thead><tr><th scope="col">Firm</th><th scope="col">Read</th><th scope="col">Fewer than 30 trades</th><th scope="col">Dates only</th><th scope="col">Too few habits measurable</th><th scope="col">Not observed 30 days</th><th scope="col">Flagged by the firm</th><th scope="col">Automated</th><th scope="col">Later account, same person</th><th scope="col">Analysed</th></tr></thead>
+        <tbody>
+        {%- for r in res.runs %}
+        {%- set c = r.reconciliation %}
+        <tr><td>{{ r.firm_label }}</td><td>{{ c.read }}</td><td>{{ c.E1 }}</td><td>{{ c.E2 }}</td><td>{{ c.E3 }}</td><td>{{ c.E4 }}</td><td>{{ c.E5 }}</td><td>{{ c.E6 }}</td><td>{{ c.E7 }}</td><td>{{ c.eligible }}</td></tr>
+        {%- endfor %}
+        </tbody>
+      </table></div>
+      <p>Accounts that broke a rule within their first 30 trades are left out, because the score needs 30 trades. Every result here is about accounts that lasted 30 trades.</p>
+      {%- if res.runs|length > 1 %}
+      <h2 id="pr-firms">Each firm</h2>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Each firm&#39;s result"><table>
+        <thead><tr><th scope="col">Firm</th><th scope="col">AUC (95% interval)</th><th scope="col">Broke a rule</th><th scope="col">Did not</th></tr></thead>
+        <tbody>
+        {%- for r in res.runs %}
+        <tr><td>{{ r.firm_label }}</td><td>{% if r.h1 %}{{ "%.3f"|format(r.h1.auc) }} ({{ "%.3f"|format(r.h1.lo) }} to {{ "%.3f"|format(r.h1.hi) }}){% else %}too few{% endif %}</td><td>{{ r.reconciliation.breaches }}</td><td>{{ r.reconciliation.survivors }}</td></tr>
+        {%- endfor %}
+        </tbody>
+      </table></div>
+      {%- if res.pooled %}
+      <p>Pooled across firms (fixed effect, inverse variance): AUC {{ "%.3f"|format(res.pooled.auc) }} (95% interval {{ "%.3f"|format(res.pooled.lo) }} to {{ "%.3f"|format(res.pooled.hi) }}). How much the firms disagree (I²): {{ (res.pooled.i2 * 100)|round|int }}%.</p>
+      {%- endif %}
+      {%- endif %}
+    </div></div>
+  </section>
+  {%- endif %}
+
+  <section class="section" aria-labelledby="pr-rules">
+    <div class="grid"><div class="span-8 prose">
+      <h2 id="pr-rules">How the verdict is decided</h2>
+      <p>Written down before any data was seen, and checked from the top. The first rule that matches wins.</p>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="How the verdict is decided"><table>
+        <thead><tr><th scope="col">Verdict</th><th scope="col">When</th></tr></thead>
+        <tbody>
+          <tr><td>Not measured</td><td>Fewer than 100 accounts that broke a rule, or fewer than 100 that did not</td></tr>
+          <tr><td>Does not predict usefully</td><td>AUC below 0.55, or the top of its 95% interval below 0.60</td></tr>
+          <tr><td>Adds nothing</td><td>The bottom of the 95% interval is above 0.55, but the score adds nothing to the no-habit model</td></tr>
+          <tr><td>Meets the target</td><td>The bottom of the interval is above 0.55, the score adds to the no-habit model, and the AUC is 0.65 or more</td></tr>
+          <tr><td>Below the target</td><td>The same, with an AUC below 0.65</td></tr>
+          <tr><td>Inconclusive</td><td>Anything else</td></tr>
+        </tbody>
+      </table></div>
+      <h2 id="pr-not">What this does not say</h2>
+      <ul>
+        <li>Nothing about any one trader. It describes groups of past accounts. No one is told they will break a rule.</li>
+        <li>DT-1 ranks accounts within a sample. It can’t yet score one new account on its own.</li>
+        <li>Past accounts only. Past results do not predict future results.</li>
+      </ul>
+      <h2 id="pr-code">Check the code yourself</h2>
+      <p>The firm runs the open-source script <code>prediction_test.py</code> on its own machine. The script has no network access and prints only group totals. Its SHA-256 fingerprints are listed in the registration, in the code’s licensing file and in the <a href="{{ st.code_url }}" rel="noopener">release {{ st.release_tag }}</a>. Anyone can run it on the published synthetic file and compare the output byte for byte.</p>
+      <p class="small">donttrade sells the donttrade test and gains from a positive result. That is why the plan was registered first, the code is public and every result is published. If anything here is found to be wrong, it is listed on <a href="/corrections/">corrections</a>. Not investment advice.</p>
+    </div></div>
+  </section>
+</div>
+{% endblock %}
