@@ -67,7 +67,7 @@
   <section class="tool" aria-labelledby="ps-tool-h">
     <h2 id="ps-tool-h">Your rules and your trades</h2>
     <p id="ps-js-needed" class="notice notice-caution" data-js-hide>This tool runs in your browser and needs JavaScript turned on.</p>
-    <form id="ps-form" novalidate hidden data-js-show data-tally="{{ 'on' if flags.analytics else 'off' }}">
+    <form id="ps-form" novalidate hidden data-js-show data-steps-counted="{{ 'on' if flags.analytics else 'off' }}">
       <h3 id="ps-rules-h">1. The rules</h3>
       <div class="field">
         <label for="ps-preset">Rules</label>

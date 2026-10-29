@@ -37,7 +37,7 @@ function mode() { return document.querySelector('input[name="ps-mode"]:checked')
 
 // ------------------------------------------------------------------ counting (live analytics only)
 function count(name) {
-  if ($('ps-form').dataset.tally !== 'on' || counted.has(name)) return;
+  if ($('ps-form').dataset.stepsCounted !== 'on' || counted.has(name)) return;
   counted.add(name);
   const f = el('iframe', { src: `${COUNT_PATH}${name}/`, hidden: true, 'aria-hidden': 'true', tabindex: '-1', title: 'Count', class: 'rc-count' });
   document.body.append(f);
