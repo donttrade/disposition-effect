@@ -13,7 +13,7 @@ import { recoveryGain, drawdowns, openedAfterLoss } from './drawdown-core.js?v=0
 import { money, pct, plain, day, intText, el } from './format.js?v=acb0db51';
 import { parsePositive, InputError } from './num.js?v=8df99e34';
 import { clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js?v=ea217a9e';
-import { wireFileTool, readSection, tableWrap, rowsTable, plural, reportLead, SAMPLE_LABEL } from './file-tool.js?v=dff45673';
+import { wireFileTool, readSection, tableWrap, rowsTable, plural, reportLead, SAMPLE_LABEL } from './file-tool.js?v=fb0c86b4';
 
 const $ = (id) => document.getElementById(id);
 

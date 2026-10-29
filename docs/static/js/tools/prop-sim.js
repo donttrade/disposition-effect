@@ -212,7 +212,7 @@ function streakLine(res) {
 }
 
 // R5: the teaser box says data-on-sale="true" when the build sells the report (partials/trader_offer.html).
-const reportLead = () => ($('ps-teaser').dataset.onSale === 'true' ? 'The habit report' : "We're building a habit report that");
+const reportLead = () => ($('ps-teaser').dataset.onSale === 'true' ? 'The donttrade test' : "We're building a test that");
 
 function teaser(res) {
   if (res.bust < MIN_STREAK_BUSTS) {
