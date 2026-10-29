@@ -147,6 +147,7 @@
       <p id="ps-file-status" class="small muted" role="status" hidden></p>
       <p id="ps-progress" class="progress-line small muted" hidden><progress aria-label="Reading your trades"></progress> <span data-elapsed aria-hidden="true"></span></p>
       <div id="ps-file-error" class="notice notice-error" role="alert" tabindex="-1" hidden></div>
+      <div id="ps-map" class="notice rc-map" role="group" aria-labelledby="ps-map-h" tabindex="-1" hidden></div>
       <div id="ps-tz-fields" class="field-grid">
         {{ pick("ps-filetz", "Times in this file are in", [("", "Choose one"), ("local", "My computer’s time zone"), ("UTC", "UTC"), ("broker", "Broker server time (GMT+2, GMT+3 in summer)"), ("offset", "Another offset from UTC")], hint="Daily limits group trades by day, so the time zone matters.") }}
         {{ field("ps-filetz-offset", "Hours from UTC", "For example 2, or -5.", "text") }}

@@ -387,6 +387,50 @@ def test_paste_needs_a_time_zone_then_runs(browser, built_site):
     ctx.close()
 
 
+def paste(pg, text, tz="UTC"):
+    pg.check("#ps-mode-paste")
+    pg.select_option("#ps-filetz", tz)
+    pg.fill("#ps-paste", text)
+    pg.click("#ps-paste-btn")
+
+
+def test_tradelocker_paste_reads_amount_as_the_size(browser, built_site):
+    """Tester page report F2: TradeLocker heads the size column "Amount"."""
+    ctx, pg, log = open_page(browser, built_site)
+    paste(pg, open(os.path.join(FIX, "tester", "fx_tl.paste.txt"), encoding="utf-8").read())
+    pg.wait_for_selector("#ps-file-status:text-matches('^Read your pasted table')", timeout=60000)
+    assert pg.is_hidden("#ps-map") and pg.is_hidden("#ps-file-error")
+    fill(pg, {"#ps-target": "100", "#ps-daily": "50", "#ps-maxloss": "100", "#ps-days": "20"})
+    run(pg)
+    assert errors(log) == []
+    ctx.close()
+
+
+def test_a_paste_without_a_named_size_column_asks_which_column(browser, built_site):
+    """F2: one choice per missing field from the table's own headings, never a dead-end error."""
+    text = open(os.path.join(FIX, "tester", "fx_tl.paste.txt"), encoding="utf-8").read().replace("\tAmount\t", "\tQ\t", 1)
+    ctx, pg, log = open_page(browser, built_site)
+    paste(pg, text)
+    pg.wait_for_selector("#ps-map:not([hidden])", timeout=60000)
+    assert pg.is_hidden("#ps-file-error")
+    assert [s.get_attribute("data-field") for s in pg.query_selector_all("#ps-map select")] == ["qty"]
+    assert pg.inner_text("label[for=ps-map-qty]") == "Quantity (size)"
+    labels = [o.inner_text() for o in pg.query_selector_all("#ps-map-qty option")]
+    assert labels[0] == "Choose a column" and "Q" in labels and "Instrument" in labels
+    pg.click("#ps-run")   # running before the columns are picked says what to do
+    assert "Pick the columns above" in pg.inner_text("#ps-errors")
+    pg.click("#ps-map-btn")
+    assert pg.inner_text("#ps-map-err") == "Pick a column for each box."
+    pg.select_option("#ps-map-qty", label="Q")
+    pg.click("#ps-map-btn")
+    pg.wait_for_selector("#ps-file-status:text-matches('^Read your pasted table')", timeout=60000)
+    assert pg.is_hidden("#ps-map")
+    fill(pg, {"#ps-target": "100", "#ps-daily": "50", "#ps-maxloss": "100", "#ps-days": "20"})
+    run(pg)
+    assert errors(log) == []
+    ctx.close()
+
+
 # ------------------------------------------------------------------ layout: CLS, axe, overflow, both themes
 @pytest.mark.parametrize("scheme", ["light", "dark"])
 @pytest.mark.parametrize("width", [390, 1280])
