@@ -89,7 +89,7 @@ export const SIGNATURES = {
     verified: false,
     fields: {
       open_time: ['opentime'], close_time: ['closetime'], symbol: ['symbol', 'ticker', 'instrument'],
-      direction: ['direction', 'side'], qty: ['volume', 'quantity', 'qty'],
+      direction: ['direction', 'side'], qty: ['volume', 'quantity', 'qty', 'amount', 'size', 'lots', 'units', 'contracts'],   // 30 Oct: TradeLocker says Amount
       open_price: ['openprice', 'entryprice'], close_price: ['closeprice', 'exitprice'],
       fees: ['fees', 'fee', 'commission', 'commissions'], currency: ['currency'],
     },
