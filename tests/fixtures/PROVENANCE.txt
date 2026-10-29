@@ -137,3 +137,9 @@ Mapped (no preset yet): fidelity_like (Moneydance thread header, 3RD), robinhood
   (GrantBirki/ghostfolio sample header, 3RD), tos_like_sections (TradingDiary Pro column list, 3RD,
   plus the OFFICIAL thinkorswim column table): heading structure only, read through a hand-made
   mapping until the B7 presets.
+
+Tester round fixtures (tester/, tester_multi/)
+  Copied unchanged from the Tester's synthetic files for TESTER-REPORT-IMPORTER-ENGINE-2026-10-29
+  (made by the Tester's gen.py; every row made up, no export copied). tester_multi/<spec>/ holds
+  the files of each multi-file spec in order (1.*, 2.*) and its mapping as map.json. They run as
+  cases (JS = Python), as pinned guesses, and in tests/test_importer_tester_round.py.

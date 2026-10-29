@@ -1,0 +1,200 @@
+{
+ "noise": {
+  "checks": [
+   {
+    "extreme": null,
+    "guard": null,
+    "label": "not enough trades to tell",
+    "method": "bootstrap-t",
+    "n_a": 1,
+    "n_b": null,
+    "n_needed": null,
+    "p": null,
+    "p_unguarded": null,
+    "skew": null,
+    "stat": "expectancy",
+    "value": null
+   },
+   {
+    "label": "not enough trades to tell",
+    "method": "label permutation",
+    "n_a": 0,
+    "n_b": 1,
+    "p": null,
+    "stat": "hold_gap_s",
+    "value": null
+   },
+   {
+    "label": "not enough trades to tell",
+    "method": "order shuffle",
+    "n_a": 1,
+    "n_b": null,
+    "p": null,
+    "stat": "longest_losing_streak",
+    "value": null
+   }
+  ],
+  "limited": false,
+  "n_used": 1
+ },
+ "pgr_plr": {
+  "coverage_pct": null,
+  "pg": 0,
+  "pl": 0,
+  "rg": 2,
+  "rl": 0
+ },
+ "result": {
+  "currency_groups": {
+   "points": 1
+  },
+  "dates_only": false,
+  "executions": [
+   {
+    "currency": null,
+    "fee": 0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 1.1,
+    "qty": 1.0,
+    "row": 2,
+    "side": "buy",
+    "symbol": "EURUSD",
+    "ts": 1774000800000
+   },
+   {
+    "currency": null,
+    "fee": 0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 1.1,
+    "qty": 1.0,
+    "row": 3,
+    "side": "buy",
+    "symbol": "EURUSD",
+    "ts": 1774000800000
+   },
+   {
+    "currency": null,
+    "fee": 0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 1.2,
+    "qty": 2.0,
+    "row": 4,
+    "side": "sell",
+    "symbol": "EURUSD",
+    "ts": 1774001100000
+   },
+   {
+    "currency": null,
+    "fee": 0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 1.1,
+    "qty": 1.0,
+    "row": 6,
+    "side": "buy",
+    "symbol": "EURUSD",
+    "ts": 1774000800000
+   },
+   {
+    "currency": null,
+    "fee": 0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 1.2,
+    "qty": 1.0,
+    "row": 7,
+    "side": "sell",
+    "symbol": "EURUSD",
+    "ts": 1774001100000
+   }
+  ],
+  "format": "mapped",
+  "n_date_only": 0,
+  "preset": null,
+  "skipped": {},
+  "trades": [
+   {
+    "close_ts": 1774001100000,
+    "currency": null,
+    "dir": "long",
+    "entry_vwap": 1.1,
+    "exit_vwap": 1.2,
+    "fees": 0.0,
+    "fills_n": 5,
+    "hold_s": 300,
+    "id": "t1",
+    "open_ts": 1774000800000,
+    "pnl": 0.2999999999999996,
+    "pnl_gross": 0.2999999999999996,
+    "pnl_source": "computed",
+    "pnl_unit": "points",
+    "qty": 3.0,
+    "symbol": "EURUSD"
+   }
+  ],
+  "tz_label": "as in the file",
+  "verified_format": false,
+  "warnings": [
+   {
+    "code": "W_MAPPED",
+    "n": 0
+   }
+  ]
+ },
+ "stats": {
+  "avg_loss": null,
+  "avg_win": 0.2999999999999996,
+  "expectancy": 0.2999999999999996,
+  "gross_loss": 0.0,
+  "gross_profit": 0.2999999999999996,
+  "hold_median_loss_s": null,
+  "hold_median_win_s": 300,
+  "hold_ratio": null,
+  "largest_loss": null,
+  "largest_win": 0.2999999999999996,
+  "long": {
+   "losses": 0,
+   "n": 1,
+   "pnl": 0.2999999999999996,
+   "win_rate": 1.0,
+   "wins": 1
+  },
+  "losses": 0,
+  "max_consec_losses": {
+   "n": 0,
+   "pnl": 0.0
+  },
+  "max_consec_wins": {
+   "n": 1,
+   "pnl": 0.2999999999999996
+  },
+  "max_drawdown_abs": 0.0,
+  "max_drawdown_pct": null,
+  "n": 1,
+  "net_pnl": 0.2999999999999996,
+  "profit_factor": "no losing trades",
+  "scratch": 0,
+  "short": {
+   "losses": 0,
+   "n": 0,
+   "pnl": 0.0,
+   "win_rate": null,
+   "wins": 0
+  },
+  "win_rate": 1.0,
+  "wins": 1
+ }
+}

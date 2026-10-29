@@ -3751,7 +3751,7 @@ def fixture_paths(root):
 # The universal importer's fixtures (tests/fixtures/make_mapped.py): each case is one or more files
 # or pastes, with a mapping (mapped/, paste/ with a .map.json, multi/ with a map.json), through the
 # presets (presets/, paste/ without one), or known formats only (auto/, multi/ without one).
-CASE_DIRS = ["mapped", "presets", "paste", "multi", "auto"]
+CASE_DIRS = ["mapped", "presets", "paste", "multi", "auto", "tester", "tester_multi"]
 
 
 def case_paths(root):
@@ -3782,7 +3782,7 @@ def case_spec(root, rel):
         with open(path, encoding="utf-8") as f:
             return json.load(f)
 
-    if d == "multi":
+    if d in ("multi", "tester_multi"):
         base = os.path.join(root, rel)
         names = sorted(n for n in os.listdir(base) if n != "map.json")
         return {"items": [item(os.path.join(base, n)) for n in names],
@@ -3791,6 +3791,16 @@ def case_spec(root, rel):
     mapping = load_map(os.path.join(root, d, os.path.splitext(name)[0] + ".map.json"))
     return {"items": [item(path)], "mapping": mapping,
             "presets": d == "presets" or (d == "paste" and mapping is None)}
+
+
+def run_case_items(items, mapping=None, presets=False):
+    """What the golden tests compare for a list of items: the result with its stats, or the error."""
+    out = read_with_presets(items) if presets else run_files(items, mapping)
+    if "result" in out:
+        trades = out["result"]["trades"]
+        out.update({"stats": free_stats(trades), "noise": noise_checks(trades),
+                    "pgr_plr": pgr_plr_counts(out["result"]["executions"])})
+    return out
 
 
 def run_case(root, rel):

@@ -27,7 +27,7 @@ WRITE = os.environ.get("DT_WRITE_GUESS") == "1"
 
 def guess_cases():
     out = []
-    for d in ("guess", "mapped", "presets", "paste"):
+    for d in ("guess", "mapped", "presets", "paste", "tester"):
         for name in sorted(os.listdir(os.path.join(FIX, d))):
             if not name.endswith(".map.json"):
                 out.append(d + "/" + name)
@@ -38,7 +38,10 @@ CASES = guess_cases()
 
 
 def spec_of(rel):
-    if rel.startswith("guess/"):
+    if rel.startswith("tester/") and rel.endswith(".paste.txt"):
+        with open(os.path.join(FIX, rel), encoding="utf-8") as f:
+            items = [{"paste": f.read()}]
+    elif rel.startswith("guess/") or rel.startswith("tester/"):
         with open(os.path.join(FIX, rel), "rb") as f:
             items = [{"b64": base64.b64encode(f.read()).decode()}]
     else:
@@ -88,7 +91,7 @@ def test_guess_properties(page, rel):
     got = inspect_js(page, rel)
     assert CANARY not in json.dumps(got, ensure_ascii=False), rel
     if "error" in got:
-        assert got["error"]["code"] in ("E_EMPTY", "E_PASTE_FORMAT", "E_ENCODING", "E_BAD_QUOTE"), got
+        assert got["error"]["code"] in ("E_EMPTY", "E_PASTE_FORMAT", "E_PASTE_ALIGN", "E_ENCODING", "E_BAD_QUOTE"), got
         return
     peek, guess = got["peek"], got["guess"]
     blocked = [i for i, b in enumerate(peek["blocked"]) if b]
