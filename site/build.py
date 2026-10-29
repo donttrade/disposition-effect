@@ -427,6 +427,13 @@ def answers_index_js(units, cfg):
 
 
 # Pages owned by templates. path → template, metadata, and the flag that must be on.
+# Challenge Readiness Check counting (ARCHITECT-CHALLENGE-READINESS §7, Revision 2): with [flags] analytics on, the
+# check page loads one of these tiny pages in a hidden same-origin frame when a step finishes, at most once per page
+# load, so the live Cloudflare Web Analytics beacon counts the step as a page view of that path. The frame URL is the
+# path only: no query, no fragment, nothing from the file. No other tracker. noindex, disallowed in robots.txt.
+COUNT_BASE = "/tools/prop-challenge-simulator/e/"
+COUNT_EVENTS = ("ran", "ran-sample", "whatif", "expert", "export", "card")
+CHALLENGE_RULES_JSON = os.path.join(SITE, "config", "challenge_rules.json")
 PAGES = [
     {"template": "pages/home.html", "path": "/", "requires_flag": None, "scripts": [MOTION_JS],
      "title": "donttrade - free trading tools and research on trader habits",
@@ -448,11 +455,11 @@ PAGES += [
      "if_badges": {"description": "Drop your MT5, MT4, IBKR, Tradovate or TradingView file: profit factor, expectancy, "
                                   "drawdown and streaks, with a real-or-noise check. Runs in your browser."}},
     {"template": "pages/tool-prop-sim.html", "path": "/tools/prop-challenge-simulator/", "requires_flag": None,
-     "modules": ["/static/js/tools/prop-sim.js"], "sample": True, "app": True, "updated": "2026-10-21",
-     "crumb": "Prop-firm challenge simulator",
-     "title": "Prop Firm Challenge Simulator on Your Own Trades",
-     "description": "Replay 10,000 challenges built from your own past trading days under the rules you enter. "
-                    "Pass, bust and time-out shares, fully explained. Free."},
+     "modules": ["/static/js/tools/prop-sim.js"], "sample": True, "app": True, "updated": "2026-10-29",
+     "presets": True, "crumb": "Challenge Readiness Check",
+     "title": "Challenge Readiness Check: Your Past Days, Firm Rules",
+     "description": "Replay your own past trading days 10,000 times under a prop firm's published rules or your own. "
+                    "Pass, bust and time-out shares, the rule that broke most. Free, in your browser."},
     {"template": "pages/tool-lot-size.html", "path": "/tools/lot-size-calculator/", "requires_flag": None,
      "modules": ["/static/js/tools/lot-size.js"], "app": True, "updated": "2026-10-21",
      "crumb": "Lot size calculator",
@@ -537,6 +544,12 @@ PAGES += [
      "crumb": "Thank you", "title": "Thank you — donttrade",
      "description": "Your message reached donttrade. Firms get a reply within 1 business day; traders get one email at launch.",
      "if_paid": {"description": "Your message reached donttrade. Firms get a reply within 1 business day."}},
+]
+PAGES += [
+    {"template": "pages/count-stub.html", "path": COUNT_BASE + name + "/", "requires_flag": "analytics", "noindex": True,
+     "no_ask": True, "crumb": "Counted", "title": "Counted — donttrade",
+     "description": "A page the Challenge Readiness Check loads so the site's cookie-free analytics count a finished step."}
+    for name in COUNT_EVENTS
 ]
 
 # Legal pages (step 17). The French versions (/fr/…) exist only with paid_report on; the
@@ -710,6 +723,33 @@ def page_method_version():
     if not m:
         die("report methods: no METHOD_VERSION line in site/static/js/paid/wording.js")
     return m.group(1)
+
+
+def challenge_presets():
+    """The firm-rules library for the Readiness Check (checks/check_rules.py): the build fails on any library problem,
+    warns about presets last checked more than 30 days ago, and leaves out those more than 45 days old and the ones
+    that cannot be quoted. DT_TODAY (yyyy-mm-dd) sets the date (tests). Only what the page uses goes in."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("check_rules", os.path.join(REPO, "checks", "check_rules.py"))
+    cr = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cr)
+    lib = cr.load(CHALLENGE_RULES_JSON)
+    import datetime
+    today = datetime.date.fromisoformat(os.environ["DT_TODAY"]) if os.environ.get("DT_TODAY") else datetime.date.today()
+    probs = cr.validate(lib, today)
+    if probs:
+        die("challenge rules: " + "; ".join(probs[:5]) + (" …" if len(probs) > 5 else ""))
+    warn, _ = cr.freshness(lib, today)
+    for pid in warn:
+        print(f"NOTE: challenge rules: {pid} was last checked more than {cr.WARN_DAYS} days ago (hidden after {cr.HIDE_DAYS})")
+    out = []
+    for p in cr.shown(lib, today):
+        y, mo, d = (int(x) for x in p["last_checked"].split("-"))
+        out.append({"id": p["id"], "firm": p["firm"], "program": p["program"], "account_size": p["account_size"],
+                    "scale": p["scale"], "status": p["status"], "rules": p["rules"], "not_modelled": p["not_modelled"],
+                    "not_stated": cr.not_stated(p), "last_checked": p["last_checked"],
+                    "read_text": f"{d} {MONTHS[mo - 1]} {y}", "url": p["sources"][0]["url"]})
+    return {"rules_lib": lib["rules_lib"], "presets": out, "firms": sorted({p["firm"] for p in out}, key=str.lower)}
 
 
 def report_methods():
@@ -1923,6 +1963,8 @@ def write_sitemap_and_robots(out, cfg, built_pages, flags):
     robots = ["User-agent: *", "Allow: /"]
     if flags["paid_report"]:
         robots += [f"Disallow: {p}" for p in PAID_APP_PATHS + PAID_DETAILS_PATHS]
+    if flags["analytics"]:
+        robots.append(f"Disallow: {COUNT_BASE}")
     robots.append(f"Sitemap: {base}/sitemap.xml")
     with open(os.path.join(out, "robots.txt"), "w", encoding="utf-8", newline="\n") as f:
         f.write(PREVIEW_ROBOTS_TXT if preview_name() else "\n".join(robots) + "\n")
@@ -2320,6 +2362,10 @@ def build():
         if not flags["ask_box"]:
             page["scripts"] = [s for s in page["scripts"] if s not in ASK_SCRIPTS]
         extra = {"sample_csv": sample_csv()} if page.get("sample") else {}
+        if page.get("presets"):
+            lib_ = challenge_presets()
+            extra["presets"] = lib_
+            extra["presets_json"] = Markup(json.dumps(lib_, sort_keys=True, ensure_ascii=False).replace("</", "<\\/"))
         if page.get("sample_report") or (page["path"] in ("/", "/for-traders/") and flags["paid_report"]):  # 25 Oct: the home showcase; sweep 2: the report card on /for-traders/
             rep_ = sample_report()
             extra["sample_report"] = rep_
