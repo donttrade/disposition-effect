@@ -28,7 +28,10 @@ BRIEF_BANNED = re.compile(r"\b(recommend\w*|should|fix|fixes|fixed it|coach\w*|m
 JARGON = ["bootstrap", "resample", "seed", "Monte Carlo", "percentile", "confidence interval", "EOD", "drawdown model"]
 FUTURE = re.compile(r"\b(you will (pass|fail)|your chances|odds of passing|ready to buy|best rule|best firm|safest|you should)\b", re.I)
 BEACON = ("https://static.cloudflareinsights.com/", "https://cloudflareinsights.com/cdn-cgi/rum")
-LOCAL_ONLY = ("cloudflareinsights.com/cdn-cgi/rum", "Failed to load resource: net::ERR_FAILED")
+# 127.0.0.1 only: the beacon's report is refused by CORS. And a timing warning about the site-wide font preload in
+# base.html ("preloaded using link preload but not used within a few seconds"): it depends on how fast the run is.
+LOCAL_ONLY = ("cloudflareinsights.com/cdn-cgi/rum", "Failed to load resource: net::ERR_FAILED",
+              "was preloaded using link preload but not used within a few seconds")
 # An MT4/MT5 HTML report parsed on the page (engine/mt.js DOMParser) draws this message for the report's own style
 # attributes; /tools/trade-stats/ shows the same four lines for the same file (pre-existing, not this page's).
 MT_HTML = "Refused to apply inline style because it violates the following Content Security Policy directive"
