@@ -16,7 +16,8 @@ Worlds (ARCHITECT-PREDICTION-STUDY-2026-10-30 section 5.1):
   M  mechanical: breaches come from replaying the trades under the account's own rules
   0  null: breaches depend on g only, and g is independent of z
   C  confounded: z drives g (g = 0.8 z + 0.6 e), and breaches depend on g only
-  K  look-ahead canary: breach depends on a hidden k; k = 1 accounts trade at 0.4x size AFTER trade 30
+  K  look-ahead canary: breach depends on a hidden k (logistic(-1.2 + 3 k)); k = 1 accounts trade at 0.25x
+     size AFTER trade 30, and a breach falls in days 20-30 after T0 (so most later trades stay in the file)
   E  exclusions: world L plus planted E1-E7 cases, with the exact expected counts in the truth file
 
 Usage (plain Terminal or Claude Code):
@@ -126,7 +127,7 @@ def trader(rng, world):
     return {
         "z": z, "g": g, "k": 1 if (world == "K" and rng.random() < 0.5) else 0,
         "A": rng.choice((10000, 25000, 50000, 100000)),
-        "sigma": 0.0045 * math.exp(0.35 * g),
+        "sigma": (0.0075 if world == "M" else 0.0045) * math.exp(0.35 * g),
         "rate": rng.uniform(2.5, 6.0),
         "win_p": rng.uniform(0.42, 0.55),
         "rr": rng.uniform(0.8, 1.5),
@@ -209,9 +210,9 @@ def t0_of(trades):
 
 def mechanical(trades, tr):
     """World M: replay under the account's rules (5% daily, 10% max of A, the account's drawdown kind, day
-    boundary 00:00) and an 8% target checked at the end of a day. Returns (outcome, time)."""
+    boundary 00:00) and a 10% target checked at the end of a day. Returns (outcome, time)."""
     A = tr["A"]
-    daily, mx, target = 0.05 * A, 0.10 * A, 0.08 * A
+    daily, mx, target = 0.05 * A, 0.10 * A, 0.10 * A
     eq = peak = 0.0
     floor = -mx
     day = None
@@ -243,8 +244,8 @@ def account(rng, world, start, special=None):
         order = sorted(range(len(trades)), key=lambda i: trades[i]["close_s"])
         for i in order[WINDOW:]:
             t = trades[i]
-            t["size"] = max(0.01, round(t["size"] * 0.4, 2))
-            t["pnl"] = round(t["pnl"] * 0.4, 2)
+            t["size"] = max(0.01, round(t["size"] * 0.25, 2))
+            t["pnl"] = round(t["pnl"] * 0.25, 2)
     t0 = t0_of(trades)
     rec = {"start": start, "A": tr["A"], "drawdown": tr["drawdown"], "z": tr["z"], "abuse": special == "E5",
            "bot": special == "E6"}
@@ -275,11 +276,10 @@ def account(rng, world, start, special=None):
         a, b = coef(world)
         x = {"L": tr["z"], "E": tr["z"], "0": tr["g"], "C": tr["g"], "K": tr["k"]}[world]
         if world == "K":
-            b = 1.2
-            a = -1.2
+            a, b = -1.2, 3.0
         y = rng.random() < logistic(a + b * x)
         if y:
-            ot = t0 + rng.randint(60, OUTCOME_DAYS * DAY)
+            ot = t0 + rng.randint(20 * DAY if world == "K" else 60, OUTCOME_DAYS * DAY)
             out = rng.choice(("daily", "max"))
         elif rng.random() < 0.15:
             ot = t0 + rng.randint(60, OUTCOME_DAYS * DAY)
