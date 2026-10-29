@@ -489,10 +489,10 @@ PAGES += [
     {"template": "pages/tools-index.html", "path": "/tools/", "requires_flag": None, "updated": "2026-10-21",
      "crumb": "Free tools", "itemlist": True,
      "title": "Free Trading Tools That Run in Your Browser",
-     "description": "Free tools for your own trades: trade stats from your own file, a prop-firm challenge "
-                    "simulator, a lot size calculator and more. No sign-up.",
+     "description": "Free tools for your own trades: trade stats from your file, a Challenge Readiness "
+                    "Check for prop-firm rules, a lot size calculator and more. No sign-up.",
      "if_badges": {"description": "Free tools for your own trades: trade stats with a real-or-noise check, a "
-                                  "prop-firm challenge simulator, a lot size calculator and more. No sign-up."}},
+                                  "Challenge Readiness Check, a lot size calculator and more. No sign-up."}},
 ]
 
 # Audience pages (step 14). Titles ≤ 60 and descriptions ≤ 155 characters (SEO-PLAN §3.1).
@@ -639,8 +639,8 @@ TOOLS = [
      "short": "A drawdown or your file → how deep and how long.", "preview": "dd", "icon": "split",   # 25 Oct sweep: the card line and preview
      "question": "What gain recovers a drawdown, and how deep and long were mine?",
      "input": "A drawdown in percent, or your trade file"},
-    {"name": "Prop-firm challenge simulator", "href": "/tools/prop-challenge-simulator/",
-     "short": "Your file and a challenge’s rules → pass, bust or out of time.", "preview": "prop", "icon": "flag",   # 25 Oct sweep: the card line and preview
+    {"name": "Challenge Readiness Check", "href": "/tools/prop-challenge-simulator/",
+     "short": "Your file and a firm’s rules → pass, bust or out of time.", "preview": "prop", "icon": "flag",   # 25 Oct sweep: the card line and preview
      "question": "How would my past trading days have fared under a challenge’s rules?",
      "input": "Your trade file, or win rate and average win and loss; the rules"},
     {"name": "Lot size calculator", "href": "/tools/lot-size-calculator/",
