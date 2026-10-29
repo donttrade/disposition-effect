@@ -277,8 +277,13 @@ def test_money_clean_vectors_match():
 
 
 PASTE_VECTORS = [
-    "a\tb\tc\n1\t2\t3\n", "Date  Symbol   Side\n2026-10-02 09:31  AAA  Buy\n", "a b c\n1 2 3\n", "a\nb\nc\n",
+    "a\tb\tc\n1\t2\t3\n", "Date              Symbol  Side\n2026-10-02 09:31  AAA     Buy\n", "a b c\n1 2 3\n", "a\nb\nc\n",
     "  \n\t\n", "menu\nA\tB\n\n1\t2\nfooter\n", "x\t\t\n\t\t\n1\t\t2\n",
+    # fixed width: a blank cell stays blank (Tester F1); a right-aligned number wider than its heading;
+    # a word under two headings (E_PASTE_ALIGN at its line); a short footer read as it is
+    "Date        Qty  SL    Price\n2026-10-02  1          1.10\n2026-10-03  1    1.05  1.11\n",
+    "Sym  Qty  Px\nAAA  10000  5\n", "Date  Symbol  Side\n2026-10-02 09:31  AAA  Buy\n",
+    "A    B    C    D\n1    2    3    4\nTotal  4\n",
 ]
 
 
@@ -289,12 +294,24 @@ def py_paste(t):
         return {"error": e.code}
 
 
+def test_long_whitespace_runs_stay_fast():
+    """Tester F8: clean() was quadratic on a long run of spaces (5.4 s for 200,000)."""
+    t = node("(() => { const t0 = Date.now(); try { C.fromPaste(' '.repeat(400000) + 'a  b\\n1  2\\n'); } catch (e) { } "
+             "C.clean(' '.repeat(2000000) + 'x' + ' '.repeat(2000000)); return Date.now() - t0; })()")
+    assert t < 1500, t
+    big = node("(() => { try { C.fromPaste('a\\tb\\n'.repeat(1500000)); } catch (e) { return e.code; } })()")
+    assert big == "E_PASTE_TOO_LARGE"
+
+
 def test_from_paste_vectors_match():
     js = node("%s.map((t) => { try { return C.fromPaste(t).map((r) => ({row: r.row, cells: r.cells})); } "
               "catch (e) { return {error: e.code}; } })" % json.dumps(PASTE_VECTORS))
     py = [py_paste(t) for t in PASTE_VECTORS]
     assert js == py
     assert py[1][1]["cells"] == ["2026-10-02 09:31", "AAA", "Buy"]
+    assert py[7][1]["cells"] == ["2026-10-02", "1", "", "1.10"] and py[7][2]["cells"] == ["2026-10-03", "1", "1.05", "1.11"]
+    assert py[8][1]["cells"] == ["AAA", "10000", "5"]
+    assert py[9] == {"error": "E_PASTE_ALIGN"} and py[10][2]["cells"] == ["Total", "4", "", ""]
     assert py[2] == {"error": "E_PASTE_FORMAT"} and py[3] == {"error": "E_PASTE_FORMAT"} and py[4] == {"error": "E_EMPTY"}
 
 

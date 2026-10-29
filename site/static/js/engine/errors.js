@@ -8,6 +8,7 @@
 export const LIMITS = Object.freeze({
   MAX_BYTES: 50 * 1024 * 1024, // 50 MB
   MAX_ROWS: 200000,
+  MAX_PASTE_CHARS: 5 * 1024 * 1024, // a pasted table: 5 MB of text
 });
 
 export class EngineError extends Error {
@@ -47,6 +48,9 @@ export const MESSAGES = Object.freeze({
   E_MIXED_FILES: 'These files have different columns. Add files from one platform at a time.',
   E_PASTE_FORMAT:
     'This paste has no columns we can split. Select the table rows, headings included, copy, and paste again.',
+  E_PASTE_ALIGN:
+    'A row of this paste does not line up under the headings, so its columns cannot be told apart. Copy the table again (most platforms copy with tabs), or drop the exported file.',
+  E_PASTE_TOO_LARGE: 'This paste is too large: the limit is 5 MB of text. Paste fewer rows at a time, or drop the exported file.',
 });
 
 export function fail(code, detail = '', row = null, column = null) {

@@ -187,6 +187,12 @@ export function dataRowsAfter(rows, hdrAt, section) {
   return out;
 }
 
+// A pasted footer or page line ("Showing 1-8 of 20", "Page 1 of 3"): fewer than half as many filled
+// cells as the headings. Counted on filled cells: a fixed-width paste pads every row to full width.
+export function isRagged(cells, width) {
+  return cells.filter((c) => c !== '').length * 2 < width;
+}
+
 // A title, footer or disclaimer line under a heading of 3 or more columns: one filled cell.
 export function isNoData(cells, width) {
   return width >= 3 && cells.filter((c) => c !== '').length === 1;
@@ -285,7 +291,7 @@ export function parseMapped(rows, mp, sideFrom, kind, delimiter) {
   for (const r of data) {
     if (isEmptyRow(r.cells)) continue;
     nData++;
-    if (mp.trim_ragged && r.cells.length * 2 < header.length) { skip(skipped, 'no_data'); continue; }
+    if (mp.trim_ragged && isRagged(r.cells, header.length)) { skip(skipped, 'no_data'); continue; }
     if (isNoData(r.cells, header.length) || reqKeys.every((f) => cellAt(r, m[f]) === '')) { skip(skipped, 'no_data'); continue; }
     kept.push(r);
   }

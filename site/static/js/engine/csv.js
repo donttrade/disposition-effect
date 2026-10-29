@@ -12,11 +12,14 @@ import { fail, LIMITS } from './errors.js';
 // narrow NBSP, medium mathematical space and the ideographic space.
 export const WS_CLASS = '[\\t\\n\\v\\f\\r \\u00a0\\u2000-\\u200a\\u202f\\u205f\\u3000]';
 const WS_RUN = new RegExp(WS_CLASS + '+', 'g');
-const WS_EDGE = new RegExp('^' + WS_CLASS + '+|' + WS_CLASS + '+$', 'g');
 
 export function clean(s) {
-  // Collapse inner whitespace runs to one space and trim the ends.
-  return String(s).replace(WS_RUN, ' ').replace(WS_EDGE, '');
+  // Collapse inner whitespace runs to one space and trim the ends. Linear: after the collapse an
+  // edge is at most one space (a WS+$ regex is quadratic on a long run of spaces, Tester F8).
+  let t = String(s).replace(WS_RUN, ' ');
+  if (t.charCodeAt(0) === 32) t = t.slice(1);
+  if (t.length && t.charCodeAt(t.length - 1) === 32) t = t.slice(0, -1);
+  return t;
 }
 
 export function normHeader(h) {
@@ -585,27 +588,105 @@ export function detectDateFormat(values) {
 
 // ---------------------------------------------------------------- a pasted table
 // Copying an HTML table or a web grid gives tab-separated text in Chrome, Firefox and Safari. A
-// paste with a tab anywhere is split on tabs; otherwise on runs of two or more spaces (never one:
-// "2026-10-02 09:31:05" holds one). Rows are like parseCsv's: {row: the 1-based line, cells}.
+// paste with a tab anywhere is split on tabs (a blank cell stays a cell). Otherwise the paste is a
+// fixed-width grid: words are cut at runs of two or more spaces (never one: "2026-10-02 09:31:05"
+// holds one), and each word of a row is placed under the heading it lines up with, by character
+// position, so a blank cell never shifts the cells after it (Tester F1). The heading row is the
+// first line with the most words; lines above it are left as they are (menus, balances). A row
+// whose words do not line up under exactly one heading each is E_PASTE_ALIGN, naming its line,
+// unless it holds at most half as many words as the headings (a footer: read as it is, and
+// skipped as no_data later). Rows are like parseCsv's: {row: the 1-based line, cells}.
 // Nothing here is kept: the pasted text lives only in the caller's memory.
-const PASTE_GAP = /[ \u00a0\u2000-\u200a\u202f\u205f\u3000]{2,}/;
+const PASTE_SPACE = ' \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000';
+
+// Words of one line cut at runs of 2+ spaces: [{start, end, text}], positions in code points.
+export function spaceWords(line) {
+  const cps = Array.from(line);
+  const n = cps.length;
+  const sp = (c) => PASTE_SPACE.indexOf(c) !== -1;
+  const out = [];
+  let i = 0;
+  while (i < n) {
+    while (i < n && sp(cps[i])) i++;
+    if (i >= n) break;
+    const start = i;
+    let end = i;
+    while (i < n) {
+      if (sp(cps[i])) {
+        let j = i;
+        while (j < n && sp(cps[j])) j++;
+        if (j - i >= 2 || j >= n) break;
+        i = j;
+        continue;
+      }
+      i++;
+      end = i;
+    }
+    out.push({ start, end, text: clean(cps.slice(start, end).join('')) });
+  }
+  return out;
+}
+
+// The cells of one row under the headings `ref`, or null when it cannot be told: a word under the
+// text of two headings, or two words under one. A word under one heading's text goes there (a
+// right-aligned number wider than its heading too); a word under none goes to the last heading
+// that starts at or before it (a left-aligned value in the gap after a short heading).
+export function alignWords(words, ref) {
+  const cells = ref.map(() => '');
+  for (const w of words) {
+    let hit = -1;
+    let hits = 0;
+    for (let k = 0; k < ref.length; k++) {
+      if (Math.min(w.end, ref[k].end) - Math.max(w.start, ref[k].start) > 0) { hits++; hit = k; }
+    }
+    if (hits > 1) return null;
+    if (hits === 0) {
+      hit = 0;
+      for (let k = 0; k < ref.length; k++) if (ref[k].start <= w.start) hit = k;
+    }
+    if (cells[hit] !== '') return null;
+    cells[hit] = w.text;
+  }
+  return cells;
+}
 
 export function fromPaste(text) {
   text = String(text);
-  if (text.length > LIMITS.MAX_BYTES) fail('E_TOO_LARGE');
+  if (text.length > LIMITS.MAX_PASTE_CHARS) fail('E_PASTE_TOO_LARGE');
   if (clean(text) === '') fail('E_EMPTY');
   const lines = text.split(/\r\n|\n|\r/);
   const tabs = lines.some((l) => l.indexOf('\t') !== -1);
   const out = [];
-  let wide = 0;
-  for (let k = 0; k < lines.length; k++) {
-    if (clean(lines[k]) === '') continue;
-    const parts = tabs ? lines[k].split('\t') : lines[k].replace(WS_EDGE, '').split(PASTE_GAP);
-    const cells = parts.map(clean);
-    if (cells.filter((c) => c !== '').length >= 2) wide++;
+  const push = (k, cells) => {
     out.push({ row: k + 1, cells, swallow: 0, ml: [], broken: false });
     if (out.length > LIMITS.MAX_ROWS + 1) fail('E_TOO_LARGE');
+  };
+  if (tabs) {
+    let wide = 0;
+    for (let k = 0; k < lines.length; k++) {
+      if (clean(lines[k]) === '') continue;
+      const cells = lines[k].split('\t').map(clean);
+      if (cells.filter((c) => c !== '').length >= 2) wide++;
+      push(k, cells);
+    }
+    if (wide === 0) fail('E_PASTE_FORMAT');
+    return out;
   }
-  if (wide === 0) fail('E_PASTE_FORMAT');
+  const words = lines.map((l) => (clean(l) === '' ? null : spaceWords(l)));
+  let refAt = -1;
+  for (let k = 0; k < lines.length; k++) {
+    if (words[k] && words[k].length >= 2 && (refAt < 0 || words[k].length > words[refAt].length)) refAt = k;
+  }
+  if (refAt < 0) fail('E_PASTE_FORMAT');
+  const ref = words[refAt];
+  for (let k = 0; k < lines.length; k++) {
+    const w = words[k];
+    if (!w) continue;
+    if (k <= refAt) { push(k, w.map((x) => x.text)); continue; }
+    const cells = alignWords(w, ref);
+    if (cells) push(k, cells);
+    else if (w.length * 2 <= ref.length) push(k, w.map((x) => x.text));
+    else fail('E_PASTE_ALIGN', '', k + 1);
+  }
   return out;
 }
