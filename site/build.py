@@ -1384,6 +1384,7 @@ OPTIONAL_FLAGS = {"pilot_checkout": False, "free_badges": False, "journal": Fals
 # copied engine (prop-sim-core.js), whose source line must read exactly RANKED_LINE.
 RANKED_JS = os.path.join("js", "tools", "prop-sim-core.js")
 RANKED_LINE = "export const WHATIF_RANKED = false;"
+RANK_JS = os.path.join("js", "tools", "prop-sim-rank.js")   # the ranked rules and their strings: only with the flag
 # Free-launch condition C1 (21 Oct 2026): free_badges turns on the free tools' "real or noise"
 # badges and their footnote, which the Architect is redesigning. Off (the committed default): the
 # free tools show only the descriptive numbers, static/js/tools/trade-stats-badges.js is left out
@@ -2323,6 +2324,7 @@ def build():
     def static_left_out(rel):
         return ((not flags["paid_report"] and rel.startswith("js" + os.sep + "paid"))
                 or (not flags["free_badges"] and rel == BADGES_JS)
+                or (not flags["whatif_ranked"] and rel == RANK_JS)
                 or (not flags["journal"] and (rel.startswith(JOURNAL_JS_DIR) or rel == os.path.join("css", "journal.css"))))   # ARCHITECT-V3 D7: out of the build until approved
     copy_tree_sorted(os.path.join(SITE, "static"), os.path.join(out, "static"), skip=static_left_out)
     set_ranked_flag(os.path.join(out, "static", RANKED_JS), flags["whatif_ranked"])

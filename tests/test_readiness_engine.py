@@ -29,6 +29,7 @@ from test_tool_prop_sim import RULES, simulate_py, demo_days  # noqa: E402
 DEMO = os.path.join(REPO, "site", "static", "samples", "example-trades.csv")
 CORE = "/site/static/js/tools/prop-sim-core.js"
 HAB = "/site/static/js/tools/habit-flags.js"
+RANK = "/site/static/js/tools/prop-sim-rank.js"
 
 
 # ------------------------------------------------------------------ helpers
@@ -64,12 +65,12 @@ def page(browser, repo_server):
 
 def js(page, fn, *args):
     """Call an export of prop-sim-core.js (or habit-flags.js with 'hab.' prefix) with JSON args."""
-    return page.evaluate("""async ([fn, args, core, hab]) => {
-        const c = await import(core); const h = await import(hab);
-        const f = fn.startsWith('hab.') ? h[fn.slice(4)] : c[fn];
+    return page.evaluate("""async ([fn, args, core, hab, rank]) => {
+        const c = await import(core); const h = await import(hab); const k = await import(rank);
+        const f = fn.startsWith('hab.') ? h[fn.slice(4)] : fn.startsWith('rank.') ? k[fn.slice(5)] : c[fn];
         const r = f(...args);
         return JSON.parse(JSON.stringify(r, (k, v) => (v instanceof Uint8Array ? Array.from(v) : v)));
-    }""", [fn, list(args), CORE, HAB])
+    }""", [fn, list(args), CORE, HAB, RANK])
 
 
 def both(page, fn_js, fn_py, *args):
@@ -404,10 +405,10 @@ def test_rule_labels(page):
 def test_ranked_is_off_by_default(page):
     assert page.evaluate(f"import('{CORE}').then(m => m.WHATIF_RANKED)") is False
     p = {"mode": "sequence", "days": [[1]], "rules": rules(time_limit=1)}
-    assert js(page, "rankRules", p) == {"enabled": False} == R.rank_rules(p)
-    assert js(page, "rankRules", p, {"enabled": 1}) == {"enabled": False}
+    assert js(page, "rank.rankRules", p) == {"enabled": False} == R.rank_rules(p)
+    assert js(page, "rank.rankRules", p, {"enabled": 1}) == {"enabled": False}
     src = open(os.path.join(REPO, "site", "static", "js", "tools", "prop-sim-worker.js"), encoding="utf-8").read()
-    assert "enabled: WHATIF_RANKED" in src and "enabled: true" not in src
+    assert "if (!WHATIF_RANKED) self.postMessage({ rank: { enabled: false } });" in src
 
 
 RANKED_SRC = "export const WHATIF_RANKED = false;"
@@ -430,6 +431,12 @@ def test_ranked_flag_comes_from_site_toml(built_site, tmp_path):
     assert r.returncode == 0, r.stderr
     on = (out / "static" / "js" / "tools" / "prop-sim-core.js").read_text(encoding="utf-8")
     assert "export const WHATIF_RANKED = true;" in on and RANKED_SRC not in on
+    # the ranked rules and their strings ship only with the flag
+    assert (out / "static" / "js" / "tools" / "prop-sim-rank.js").exists()
+    assert not (built_site["out"] / "static" / "js" / "tools" / "prop-sim-rank.js").exists()
+    for f in (built_site["out"] / "static").rglob("*.js"):
+        t = f.read_text(encoding="utf-8")
+        assert "Biggest changes" not in t and "best of the rules tried" not in t, f
     worker = (out / "static" / "js" / "tools" / "prop-sim-worker.js").read_text(encoding="utf-8")
     worker_off = (built_site["out"] / "static" / "js" / "tools" / "prop-sim-worker.js").read_text(encoding="utf-8")
     assert worker != worker_off   # the worker imports the engine with its own cache-busting version
@@ -439,7 +446,7 @@ def test_ranked_only_max_one_trade_changes_the_result(page):
     days = [[50, -10, 5]] * 4
     p = {"mode": "file", "days": days, "open_s": [[0, 100000, 200000]] * 4, "close_s": [[10, 100010, 200010]] * 4,
          "seed": 1, "runs": 2000, "rules": rules(target=250, max_loss=10000, time_limit=5)}
-    a = js(page, "rankRules", p, {"enabled": True})
+    a = js(page, "rank.rankRules", p, {"enabled": True})
     b = R.rank_rules(p, enabled=True)
     assert a == json.loads(json.dumps(b))
     assert [x["rule"] for x in a["ranked"]] == [{"max_trades": 1}]
@@ -451,7 +458,7 @@ def test_ranked_only_max_one_trade_changes_the_result(page):
 def test_ranked_never_lists_the_size_rule(page):
     p = {"mode": "file", "days": [[-10, -20, 100]], "seed": 1, "runs": 1000,
          "rules": rules(target=30, daily_loss=25, max_loss=10000, time_limit=1)}
-    a = js(page, "rankRules", p, {"enabled": True})
+    a = js(page, "rank.rankRules", p, {"enabled": True})
     assert a == json.loads(json.dumps(R.rank_rules(p, enabled=True)))
     factor = [g for g in a["grid"] if g["rule"] == {"after_loss_factor": 0.5}][0]
     assert factor["rise"] == 1000          # it would rank first...
@@ -592,13 +599,13 @@ ADVICE = re.compile(r"\badvice\b", re.IGNORECASE)
 
 
 def engine_strings(page):
-    return page.evaluate("""async ([core, hab]) => {
-        const c = await import(core); const h = await import(hab);
-        const labels = c.RANK_GRID.map((x) => c.ruleLabel(x));
+    return page.evaluate("""async ([core, hab, rank]) => {
+        const c = await import(core); const h = await import(hab); const k = await import(rank);
+        const labels = k.RANK_GRID.map((x) => c.ruleLabel(x));
         for (const x of [{stop_at_day_loss_amount: 50}, {cooldown_s: 60}, {after_loss_factor: 0.75}]) labels.push(c.ruleLabel(x));
-        return [...Object.values(c.WHATIF_TEXT), ...Object.values(h.HABIT_TEXT), ...labels,
+        return [...Object.values(c.WHATIF_TEXT), ...Object.values(h.HABIT_TEXT), ...Object.values(k.RANK_TEXT), ...labels,
           ...['dates_only', 'no_times', 'no_daily'].map(c.unavailableText)];
-    }""", [CORE, HAB])
+    }""", [CORE, HAB, RANK])
 
 
 def test_engine_strings_pass_the_wording_rules(page):
