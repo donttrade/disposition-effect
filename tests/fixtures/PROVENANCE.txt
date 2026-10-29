@@ -90,3 +90,50 @@ Format: generic template and round-trip layout
   format (tradervue.com/help/generic) and TradeZella's generic CSV help
   article (round-trip columns Open Time, Close Time, Symbol, Direction,
   Volume, Open Price, Close Price; UNVERIFIED as exact spellings).
+
+Universal importer fixtures (make_mapped.py: mapped/, presets/, paste/, multi/, auto/, guess/)
+  Every row is made up by make_mapped.py; no real export, and no user's file, is copied, not even
+  with rows changed. Every account, name, user, wallet and note cell holds CANARY-ZQ7X. What was
+  copied from each source below is the heading structure and the date and number style only.
+  Sources are the ones in BROKER-EXPORTS-RESEARCH-2026-10-25.md; every preset is beta
+  (verified_format false) until a real export is seen.
+
+Preset: ninjatrader_exec (presets/ninjatrader_exec.csv, ninjatrader_ambiguous_date.csv)
+  OFFICIAL: ninjatrader.com/support/helpGuides/nt8/executions_tab.htm (column names Instrument,
+  Action, Quantity, Price, Time, ID, E/X, Position, Order ID, Name, Commission, Rate, Account
+  Display Name, Connection). 3RD: tradezella.com/integrations/ninjatrader (the same header with
+  "Account"). Date order follows the Windows region (3RD): ambiguous files ask. AM/PM times and
+  "$1.04" commissions are UNVERIFIED.
+Preset: trading212_history (presets/trading212_history.csv)
+  3RD: github.com/dickwolff/Export-To-Ghostfolio src/models/trading212Record.ts (field list;
+  heading spelling inferred). Action text "Market buy" / "Limit sell" (the parser matches words
+  containing buy/sell). ISO times UNVERIFIED.
+Preset: kraken_trades (presets/kraken_trades.csv)
+  OFFICIAL: support.kraken.com/ca/articles/360001184886 (txid, ordertxid, pair, time, type,
+  ordertype, price, cost, fee, vol, margin, ...; type buy/sell; time in UTC). The fractional
+  seconds in the fixture are UNVERIFIED.
+Preset: sierra_fills (presets/sierra_fills.txt)
+  OFFICIAL: sierrachart.com/index.php?page=doc/TradeActivityLog.html (tab-separated; field names;
+  DateTime YYYY-MM-DD HH:MM:SS.US). Spaced vs run-together headings UNVERIFIED (normalising makes
+  them equal). ActivityType values "Fills" / "Orders" UNVERIFIED.
+Preset: rithmic_orders (presets/rithmic_orders.csv)
+  3RD: help.tradezella.com article 6839918 (Account, Status, Remarks, Buy/Sell, Qty To Fill,
+  Symbol, Qty Filled, Avg Fill Price, Limit price, Order Number, Create Time, Update Time,
+  Commission); 3RD: tradervue.com/site/platforms/rithmic-r-trader. Status spellings, B/S side
+  values and the day-first dates in the fixture are UNVERIFIED.
+Preset: ctrader_history (presets/ctrader_history.csv, ctrader_statement.html)
+  OFFICIAL: help.ctrader.com/ctrader-web/trading/history/ (History columns on screen, not a file
+  heading). Quantity units, date form and the HTML statement layout are UNVERIFIED.
+Preset: dxtrade_orders (paste/dxtrade_grid.txt)
+  3RD: tradesviz.com/brokers/DXtrade ('Date and Time','Symbol','Status','Side','Filled Volume',
+  'Fill Price','Commission','Take profit','Stop loss'). No file export (OFFICIAL manual); the
+  grid's copy-paste form and status spellings are UNVERIFIED.
+Preset: hyperliquid_fills (presets/hyperliquid_fills.csv, hyperliquid_iso_times.csv)
+  OFFICIAL: hyperliquid.gitbook.io .../api/info-endpoint (userFills fields closedPnl, coin,
+  crossed, dir, hash, oid, px, side, startPosition, sz, time, fee, feeToken, tid; side B/A; time
+  epoch ms). The web CSV heading was not found: this preset fires only on a CSV using the API's
+  names.
+Mapped (no preset yet): fidelity_like (Moneydance thread header, 3RD), robinhood_like_newest_first
+  (GrantBirki/ghostfolio sample header, 3RD), tos_like_sections (TradingDiary Pro column list, 3RD,
+  plus the OFFICIAL thinkorswim column table): heading structure only, read through a hand-made
+  mapping until the B7 presets.

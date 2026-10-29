@@ -1,0 +1,48 @@
+{
+ "cols": {
+  "close_price": 6,
+  "close_time": 1,
+  "currency": null,
+  "date": null,
+  "direction": 3,
+  "fees": [
+   7
+  ],
+  "open_price": 5,
+  "open_time": 0,
+  "pnl": 8,
+  "price": null,
+  "qty": 4,
+  "side": null,
+  "status": null,
+  "symbol": 2,
+  "time": null
+ },
+ "currency": null,
+ "date_format": "ymd",
+ "delimiter": null,
+ "futures_sizes": false,
+ "header_row": 0,
+ "headers": {
+  "0": "opened",
+  "1": "closed",
+  "2": "market",
+  "3": "longshort",
+  "4": "size",
+  "5": "entry",
+  "6": "exit",
+  "7": "costs",
+  "8": "pl"
+ },
+ "layout": "roundtrips",
+ "number_style": null,
+ "preset": null,
+ "side_from": "column",
+ "side_values": {
+  "long": "buy",
+  "short": "sell",
+  "transfer": "skip"
+ },
+ "status_values": null,
+ "v": 1
+}

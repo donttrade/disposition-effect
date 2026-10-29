@@ -2270,6 +2270,10 @@ def data_rows_after(rows, hdr_at, section):
     return out
 
 
+def is_no_data(cells, width):
+    return width >= 3 and len([c for c in cells if c != ""]) == 1
+
+
 def _cell_at(r, i):
     return "" if i is None or i >= len(r["cells"]) else r["cells"][i]
 
@@ -2371,7 +2375,7 @@ def parse_mapped(rows, mp, side_from, kind, delimiter):
         if mp.get("trim_ragged") and len(r["cells"]) * 2 < len(header):
             _skip(skipped, "no_data")
             continue
-        if all(_cell_at(r, m.get(f)) == "" for f in req):
+        if is_no_data(r["cells"], len(header)) or all(_cell_at(r, m.get(f)) == "" for f in req):
             _skip(skipped, "no_data")
             continue
         kept.append(r)
@@ -2745,6 +2749,199 @@ def parse_files(items, mapping=None):
     order = sorted(range(n), key=lambda k: (parts[k]["first"], k))
     res = merge_parsed([parts[k] for k in order])
     return finish(p["fmt"], p["verified"], res, p["mode"], mapped_tz_label(res["extra"]) if mapping is not None else p["tz"])
+
+
+# ----------------------------------------------------------------- presets
+# Must equal PRESETS in site/static/js/engine/presets.js (tests/test_engine_mapped.py).
+
+PRESET_SEARCH_ROWS = 50
+_BUY_SELL_PREFIX = [["prefix", "buy", "buy"], ["prefix", "sell", "sell"]]
+_B_S_PREFIX = [["prefix", "b", "buy"], ["prefix", "s", "sell"]]
+
+
+def _preset(**kw):
+    base = {"side_default": None, "status_rules": None, "futures_sizes": False, "tz": None, "keep_partial": False,
+            "section": False, "before_known": False}
+    base.update(kw)
+    return base
+
+
+PRESETS = [
+    _preset(id="ninjatrader_exec", name="NinjaTrader 8 executions",
+            source="OFFICIAL NinjaTrader 8 help, Executions tab column list; 3RD TradeZella NinjaTrader header",
+            match=["instrument", "action", "quantity", "price", "time", "ex"], layout="fills",
+            cols={"date": "time", "symbol": "instrument", "side": "action", "qty": "quantity", "price": "price",
+                  "fees": ["commission"]},
+            side_rules=_BUY_SELL_PREFIX, futures_sizes=True),
+    _preset(id="trading212_history", name="Trading 212 history",
+            source="3RD Export-To-Ghostfolio trading212Record field list (heading spelling inferred)",
+            match=["action", "time", "ticker", "noofshares", "priceshare"], layout="fills",
+            cols={"date": "time", "symbol": "ticker", "side": "action", "qty": "noofshares", "price": "priceshare",
+                  "currency": "currencypriceshare"},
+            side_rules=[["contains", "buy", "buy"], ["contains", "sell", "sell"]], side_default="skip"),
+    _preset(id="kraken_trades", name="Kraken trades", source="OFFICIAL Kraken support, Trades export fields",
+            match=["txid", "ordertxid", "pair", "time", "type", "price", "vol"], layout="fills",
+            cols={"date": "time", "symbol": "pair", "side": "type", "qty": "vol", "price": "price", "fees": ["fee"]},
+            side_rules=[["eq", "buy", "buy"], ["eq", "sell", "sell"]], tz="utc"),
+    _preset(id="sierra_fills", name="Sierra Chart trade activity (fills)",
+            source="OFFICIAL Sierra Chart Trade Activity Log documentation (spaced or run-together headings: UNVERIFIED)",
+            match=["activitytype", "datetime", "symbol", "buysell", "fillprice", "filledquantity"], layout="fills",
+            cols={"date": "datetime", "symbol": "symbol", "side": "buysell", "qty": "filledquantity",
+                  "price": "fillprice", "status": "activitytype"},
+            side_rules=_B_S_PREFIX, status_rules=[["prefix", "fill", "keep"]], before_known=True),
+    _preset(id="rithmic_orders", name="Rithmic R|Trader Pro completed orders",
+            source="3RD TradeZella R|Trader column list; 3RD Tradervue (Qty Filled)",
+            match=["buysell", "symbol", "qtyfilled", "avgfillprice", "status", "updatetime"], layout="orders",
+            cols={"date": "updatetime", "symbol": "symbol", "side": "buysell", "qty": "qtyfilled",
+                  "price": "avgfillprice", "status": "status", "fees": ["commission"]},
+            side_rules=_B_S_PREFIX,
+            status_rules=[["eq", "filled", "keep"], ["eq", "complete", "keep"], ["eq", "completed", "keep"],
+                          ["eq", "partially filled", "keep"]],
+            futures_sizes=True, keep_partial=True),
+    _preset(id="ctrader_history", name="cTrader history",
+            source="OFFICIAL cTrader Web History column list (on screen, not a file heading)",
+            match=["symbol", "openingdirection", "openingtime", "closingtime", "entryprice", "closingprice",
+                   "closingquantity"], layout="roundtrips",
+            cols={"open_time": "openingtime", "close_time": "closingtime", "symbol": "symbol",
+                  "direction": "openingdirection", "qty": "closingquantity", "open_price": "entryprice",
+                  "close_price": "closingprice", "fees": ["commissions", "swap"], "pnl": "gross"},
+            side_rules=_B_S_PREFIX),
+    _preset(id="dxtrade_orders", name="DXtrade order history (pasted)", source="3RD TradesViz DXtrade columns to show",
+            match=["dateandtime", "symbol", "status", "side", "filledvolume", "fillprice"], layout="orders",
+            cols={"date": "dateandtime", "symbol": "symbol", "side": "side", "qty": "filledvolume",
+                  "price": "fillprice", "status": "status", "fees": ["commission"]},
+            side_rules=_BUY_SELL_PREFIX, status_rules=[["eq", "filled", "keep"], ["eq", "partially filled", "keep"]],
+            keep_partial=True),
+    _preset(id="hyperliquid_fills", name="Hyperliquid fills",
+            source="OFFICIAL Hyperliquid API userFills fields (the web CSV heading was not found)",
+            match=["coin", "side", "px", "sz", "time"], layout="fills",
+            cols={"date": "time", "symbol": "coin", "side": "side", "qty": "sz", "price": "px", "fees": ["fee"]},
+            side_rules=[["eq", "b", "buy"], ["eq", "a", "sell"], ["eq", "buy", "buy"], ["eq", "sell", "sell"]]),
+]
+
+
+def preset_by_id(pid):
+    return next((p for p in PRESETS if p["id"] == pid), None)
+
+
+def find_preset_header(rows, preset, kind):
+    whole = preset["section"] or kind == "html"
+    seen = 0
+    for i, r in enumerate(rows):
+        if _empty(r["cells"]):
+            continue
+        seen += 1
+        if not whole and seen > PRESET_SEARCH_ROWS:
+            break
+        norm = [norm_header(c) for c in r["cells"]]
+        if all(h in norm for h in preset["match"]):
+            return i
+    return -1
+
+
+def preset_mapping(preset, src):
+    rows = src["rows"]
+    at = find_preset_header(rows, preset, src["kind"])
+    if at < 0:
+        return None
+    source = None
+    if src["kind"] == "html":
+        hdr = rows[at]
+        rows = [r for r in rows if r["table"] == hdr["table"]]
+        at = next(k for k, r in enumerate(rows) if r is hdr)
+        source = {"kind": "html", "table": hdr["table"]}
+    norm = [norm_header(c) for c in rows[at]["cells"]]
+    cols = {f: None for f in MAP_FIELDS}
+    headers = {}
+    for f, want in preset["cols"].items():
+        if f == "fees":
+            idx = []
+            for h in want:
+                if h in norm and not is_blocked(h):
+                    i = norm.index(h)
+                    idx.append(i)
+                    headers[str(i)] = h
+            cols["fees"] = idx or None
+            continue
+        if want not in norm or is_blocked(want):
+            continue
+        i = norm.index(want)
+        cols[f] = i
+        headers[str(i)] = want
+    trim = src["kind"] == "paste"
+    width = len(rows[at]["cells"])
+    data = [r for r in data_rows_after(rows, at, preset["section"])
+            if not _empty(r["cells"]) and not (trim and len(r["cells"]) * 2 < width) and not is_no_data(r["cells"], width)]
+    date_cols = [cols["open_time"], cols["close_time"]] if preset["layout"] == "roundtrips" else [cols["date"]]
+    values = []
+    for r in data:
+        for i in date_cols:
+            values.append(r["cells"][i] if i < len(r["cells"]) else "")
+    det = detect_date_format(values)
+    questions = []
+    if det["format"] is None:
+        questions.append({"q": "date_order", "reason": det["reason"]})
+    num_fields = ["qty", "open_price", "close_price", "pnl"] if preset["layout"] == "roundtrips" else ["qty", "price"]
+    num_idx = [cols[f] for f in num_fields if cols[f] is not None]
+    if cols["fees"]:
+        num_idx += cols["fees"]
+    delim = src["delimiter"] if src["kind"] == "csv" else ("," if src["kind"] == "html" else "\t")
+    nq = number_question(data, num_idx, delim)
+    if nq:
+        questions.append({"q": nq, "reason": "ask"})
+    mapping = {
+        "v": 1, "layout": preset["layout"], "header_row": rows[at]["row"] - 1,
+        "delimiter": src["delimiter"] if src["kind"] == "csv" else None, "cols": cols, "headers": headers,
+        "side_from": "column", "side_values": None, "side_rules": preset["side_rules"],
+        "side_default": preset["side_default"], "status_values": None, "status_rules": preset["status_rules"],
+        "date_format": det["format"], "number_style": None, "futures_sizes": preset["futures_sizes"], "currency": None,
+        "preset": preset["id"], "section": preset["section"], "trim_ragged": trim, "source": source,
+        "tz": preset["tz"], "keep_partial": preset["keep_partial"],
+    }
+    return {"preset": preset["id"], "mapping": mapping, "questions": questions}
+
+
+def match_preset(src, only=None):
+    for p in PRESETS:
+        if only is not None and not only(p):
+            continue
+        m = preset_mapping(p, src)
+        if m:
+            return m
+    return None
+
+
+PRESET_AFTER = ["E_UNKNOWN_FORMAT", "E_MISSING_COLUMN", "E_AMBIGUOUS_DATE"]
+
+
+def run_files(items, mapping=None):
+    try:
+        return {"result": parse_files(items, mapping)}
+    except EngineError as e:
+        return {"error": e.to_json()}
+
+
+def read_with_presets(items):
+    """Mirrors readWithPresets(): before_known presets, then known formats, then the other presets."""
+    try:
+        src = read_rows(items[0])
+    except EngineError:
+        src = None
+
+    def use(p):
+        if p["questions"]:
+            return {"question": {"preset": p["preset"], "questions": p["questions"]}}
+        return run_files(items, p["mapping"])
+
+    if src is not None:
+        p = match_preset(src, lambda x: x["before_known"])
+        if p:
+            return use(p)
+    auto = run_files(items)
+    if "error" not in auto or auto["error"]["code"] not in PRESET_AFTER or src is None:
+        return auto
+    p = match_preset(src)
+    return use(p) if p else auto
 
 
 # ----------------------------------------------------------------- FreeStats
@@ -3199,16 +3396,76 @@ def fixture_paths(root):
     return out
 
 
+# The universal importer's fixtures (tests/fixtures/make_mapped.py): each case is one or more files
+# or pastes, with a mapping (mapped/, paste/ with a .map.json, multi/ with a map.json), through the
+# presets (presets/, paste/ without one), or known formats only (auto/, multi/ without one).
+CASE_DIRS = ["mapped", "presets", "paste", "multi", "auto"]
+
+
+def case_paths(root):
+    out = []
+    for d in CASE_DIRS:
+        p = os.path.join(root, d)
+        for name in sorted(os.listdir(p)):
+            if name.endswith(".map.json"):
+                continue
+            out.append(d + "/" + name)
+    return out
+
+
+def case_spec(root, rel):
+    """-> {"items": [bytes | {"paste": text}], "mapping": dict | None, "presets": bool}"""
+    d, name = rel.split("/", 1)
+
+    def item(path):
+        if path.endswith(".paste.txt") or d == "paste":
+            with open(path, encoding="utf-8") as f:
+                return {"paste": f.read()}
+        with open(path, "rb") as f:
+            return f.read()
+
+    def load_map(path):
+        if not os.path.exists(path):
+            return None
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+
+    if d == "multi":
+        base = os.path.join(root, rel)
+        names = sorted(n for n in os.listdir(base) if n != "map.json")
+        return {"items": [item(os.path.join(base, n)) for n in names],
+                "mapping": load_map(os.path.join(base, "map.json")), "presets": False}
+    path = os.path.join(root, rel)
+    mapping = load_map(os.path.join(root, d, os.path.splitext(name)[0] + ".map.json"))
+    return {"items": [item(path)], "mapping": mapping,
+            "presets": d == "presets" or (d == "paste" and mapping is None)}
+
+
+def run_case(root, rel):
+    spec = case_spec(root, rel)
+    out = read_with_presets(spec["items"]) if spec["presets"] else run_files(spec["items"], spec["mapping"])
+    if "result" in out:
+        trades = out["result"]["trades"]
+        out.update({"stats": free_stats(trades), "noise": noise_checks(trades),
+                    "pgr_plr": pgr_plr_counts(out["result"]["executions"])})
+    return out
+
+
+def _dump(path, res):
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(res, f, indent=1, sort_keys=True)
+        f.write("\n")
+
+
 def write_expected(root):
     exp = os.path.join(root, "expected")
     os.makedirs(exp, exist_ok=True)
     for rel in fixture_paths(root):
         with open(os.path.join(root, rel), "rb") as f:
             res = run_fixture(f.read())
-        name = rel.replace("/", "__") + ".json"
-        with open(os.path.join(exp, name), "w", encoding="utf-8") as f:
-            json.dump(res, f, indent=1, sort_keys=True)
-            f.write("\n")
+        _dump(os.path.join(exp, rel.replace("/", "__") + ".json"), res)
+    for rel in case_paths(root):
+        _dump(os.path.join(exp, rel.replace("/", "__") + ".json"), run_case(root, rel))
     return exp
 
 

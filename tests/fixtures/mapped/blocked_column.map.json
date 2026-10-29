@@ -1,0 +1,38 @@
+{
+ "cols": {
+  "close_price": null,
+  "close_time": null,
+  "currency": null,
+  "date": 0,
+  "direction": null,
+  "fees": null,
+  "open_price": null,
+  "open_time": null,
+  "pnl": null,
+  "price": 5,
+  "qty": 4,
+  "side": 3,
+  "status": null,
+  "symbol": 1,
+  "time": null
+ },
+ "currency": null,
+ "date_format": "ymd",
+ "delimiter": null,
+ "futures_sizes": false,
+ "header_row": 0,
+ "headers": {
+  "0": "date",
+  "1": "account",
+  "3": "side",
+  "4": "qty",
+  "5": "price"
+ },
+ "layout": "fills",
+ "number_style": null,
+ "preset": null,
+ "side_from": "column",
+ "side_values": null,
+ "status_values": null,
+ "v": 1
+}
