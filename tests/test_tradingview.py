@@ -51,7 +51,7 @@ def test_detected_by_header_set_not_position():
         h = [head[i].upper() if rng.random() < 0.3 else head[i] for i in order] + ["Notes"]
         lines = [",".join(h)] + [",".join([r[i] for i in order] + [""]) for r in (row, row2)]
         res = E.parse_file(("\n".join(lines) + "\n").encode())
-        assert res["format"] == "tradingview" and res["verified_format"] is True
+        assert res["format"] == "tradingview" and res["verified_format"] is False  # beta (owner, 29 Oct)
         assert [(t["symbol"], t["dir"], t["pnl"], t["hold_s"]) for t in res["trades"]] == [("NASDAQ:AAPL", "long", 10.0, 1730)]
     # The generic template, Tradovate and IBKR files are not taken for TradingView.
     for rel in ("generic/basic.csv", "tradovate/orders.csv", "ibkr/activity_flex.csv", "generic_roundtrip/tradezella.csv"):
@@ -176,10 +176,10 @@ def test_trade_stats_tool_reads_tradingview(browser, built_site):
     assert k("win_rate") == f"{100 * st['win_rate']:.1f}%"
     assert k("profit_factor") == f"{st['profit_factor']:.2f}"
     out = page.inner_text("#ts-out")
-    assert "TradingView Order History export" in out and "(beta)" not in out
+    assert "TradingView Order History export (beta)" in out
     assert "Times are as exported, with no time zone stated." in out
     assert page.locator('#ts-warnings li[data-code="W_SKIPPED_ROWS"]').count() == 1
-    assert page.locator('#ts-warnings li[data-code="W_UNVERIFIED_FORMAT"]').count() == 0
+    assert page.locator('#ts-warnings li[data-code="W_UNVERIFIED_FORMAT"]').count() == 1
     assert CANARY not in page.content()
     assert all(u.startswith(built_site["url"] + "/static/js/") for u in requests), requests
     assert not errors, errors

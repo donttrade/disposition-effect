@@ -77,8 +77,9 @@ Format: TradingView Order History (CSV; Trading Panel > History > Export data)
   Type, Quantity, Limit price, Stop price, Fill price, Status, Commission,
   Placing time, Closing time, Order ID, Level ID, Leverage, Margin. Symbols
   are EXCHANGE:TICKER, times "yyyy-mm-dd HH:MM:SS" with no zone, one row per
-  order, statuses Filled / Rejected seen. So the format is verified_format =
-  true. UNVERIFIED: exports from broker-connected accounts (same columns
+  order, statuses Filled / Rejected seen. verified_format stays false (beta,
+  owner decision 29 Oct): only a paper-account export has been seen.
+  UNVERIFIED: exports from broker-connected accounts (same columns
   assumed), the "Cancelled" spelling, and whether a partly filled order shows
   as Filled. Fixtures: written by make_tradingview.py, all orders made up;
   numbers_bom.csv mimics a re-save from Apple Numbers (BOM, CRLF, quoted

@@ -72,9 +72,10 @@ export const SIGNATURES = {
     required: [['side'], ['contract'], ['status'], ['qty'], ['price'], ['time']],
   },
   // TradingView Order History export (Trading Panel → History → Export data). Column names
-  // confirmed against one real paper-trading export (29 Oct 2026); see PROVENANCE.txt.
+  // match one real paper-trading export (29 Oct 2026), but no broker-connected export has been
+  // seen, so it stays beta like IBKR and Tradovate (owner, 29 Oct); see PROVENANCE.txt.
   tradingview: {
-    verified: true,
+    verified: false,
     fields: {
       symbol: ['symbol'], side: ['side'], qty: ['quantity', 'qty'], price: ['fillprice'], status: ['status'],
       commission: ['commission'], time: ['closingtime'],

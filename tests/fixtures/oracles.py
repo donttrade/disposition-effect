@@ -435,7 +435,7 @@ ORACLES["ibkr/cnh_offshore_yuan.csv"] = {
 
 # TradingView Order History (tests/fixtures/make_tradingview.py; every order made up). One row per
 # order; a Filled order is one execution at its Closing time; P&L in points (no currency column).
-# Column names confirmed against a real export, so verified: no W_UNVERIFIED_FORMAT.
+# Beta like IBKR and Tradovate (only a paper-account export seen): W_UNVERIFIED_FORMAT.
 ORACLES["tradingview/orders.csv"] = {
     # Written newest first. Skipped: Rejected 3, Cancelled + Canceled 2, Expired 1 (not_filled).
     # AAPL: B10 @230.50 (1.00); S5 @232.00 (0.50); S5 @233.00 (0.50): exit vwap 232.50,
@@ -464,7 +464,7 @@ ORACLES["tradingview/orders.csv"] = {
                dict(symbol="NASDAQ:MSFT", dir="short", qty=6, pnl=49.1, fees=0.9, hold_s=12900, fills_n=3),
                dict(symbol="NASDAQ:AMD", dir="long", qty=20, pnl=-102.0, hold_s=7200),
                dict(symbol="NASDAQ:AAPL", dir="long", qty=5, pnl=5.0, fees=1.0, hold_s=9000)],
-    "warnings": {"W_SKIPPED_ROWS": 6, "W_OPEN_POSITIONS": 1},
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_SKIPPED_ROWS": 6, "W_OPEN_POSITIONS": 1},
     "skipped": {"rejected": 3, "cancelled": 2, "not_filled": 1},
 }
 ORACLES["tradingview/numbers_bom.csv"] = {
@@ -475,7 +475,7 @@ ORACLES["tradingview/numbers_bom.csv"] = {
     "trades": [dict(symbol="NASDAQ:AAPL", dir="long", qty=10, pnl=12.5, hold_s=1860),
                dict(symbol="NYSE:KO", dir="short", qty=50, pnl=25.0, hold_s=2700),
                dict(symbol="NASDAQ:TSLA", dir="long", qty=4, pnl=4.0, hold_s=3600)],
-    "warnings": {"W_SKIPPED_ROWS": 1},
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_SKIPPED_ROWS": 1},
     "skipped": {"rejected": 1},
 }
 ORACLES["tradingview/semicolon_comma.csv"] = {
@@ -483,7 +483,7 @@ ORACLES["tradingview/semicolon_comma.csv"] = {
     # 09:05 -> 15:20 = 22500 s. BMW short 20: S @80,10, B @79,60 (0,50 each): 10 - 1 = 9, 7200 s.
     "trades": [dict(symbol="XETR:SAP", dir="long", qty=10, pnl=15.5, fees=2.0, hold_s=22500),
                dict(symbol="XETR:BMW", dir="short", qty=20, pnl=9.0, fees=1.0, hold_s=7200)],
-    "warnings": {},
+    "warnings": {"W_UNVERIFIED_FORMAT": 0},
     "skipped": {},
 }
 ERRORS["errors/tradingview_slash_date.csv"] = ("E_AMBIGUOUS_DATE", 2, "time")      # Excel's m/d/yyyy times
@@ -495,14 +495,14 @@ ORACLES_COUNT_ONLY["tradingview/forty_trades.csv"] = 40
 ORACLES["tradingview/commission_with_currency.csv"] = {
     # Commission "0.50 USD" (was E_BAD_NUMBER): B10 @100, S10 @102 -> 20 - 1.00 = 19 ; 09:31:10 -> 10:00 = 1730 s
     "trades": [dict(symbol="NASDAQ:AAPL", dir="long", qty=10, pnl=19.0, pnl_gross=20.0, fees=1.0, hold_s=1730)],
-    "warnings": {},
+    "warnings": {"W_UNVERIFIED_FORMAT": 0},
     "skipped": {},
 }
 ORACLES["tradingview/negative_commission.csv"] = {
     # Commission -0.50 on each fill is a rebate (was abs()'d into a 1.00 cost, pnl 19): like a MetaTrader
     # net credit, fees stay 0 and the 1.00 credit is in the gross: 20 + 1 = 21
     "trades": [dict(symbol="NASDAQ:AAPL", dir="long", qty=10, pnl=21.0, pnl_gross=21.0, fees=0.0, hold_s=1730)],
-    "warnings": {},
+    "warnings": {"W_UNVERIFIED_FORMAT": 0},
     "skipped": {},
 }
 ORACLES["tradingview/currency_forms.csv"] = {
@@ -511,6 +511,6 @@ ORACLES["tradingview/currency_forms.csv"] = {
     #   gross 50 + 0.25 credit = 50.25 ; fees 0.75 ; pnl 49.50 ; 3600 s
     "trades": [dict(symbol="NASDAQ:AAPL", dir="long", qty=10, pnl=13.0, pnl_gross=15.0, fees=2.0, hold_s=3600),
                dict(symbol="NYSE:KO", dir="short", qty=100, pnl=49.5, pnl_gross=50.25, fees=0.75, hold_s=3600)],
-    "warnings": {},
+    "warnings": {"W_UNVERIFIED_FORMAT": 0},
     "skipped": {},
 }

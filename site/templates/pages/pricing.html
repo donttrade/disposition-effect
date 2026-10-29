@@ -70,7 +70,7 @@
     </table>
     </div>
     <p><a href="/sample-report/">See a sample report</a></p>
-    <p class="small">Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>. Formats: MetaTrader 5/4, IBKR and Tradovate in beta, TradingView, plus the donttrade CSV template. <a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a></p>
+    <p class="small">Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>. Formats: MetaTrader 5/4, IBKR, Tradovate and TradingView in beta, plus the donttrade CSV template. <a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a></p>
     {% if stripe_mode == "test" %}<p class="notice notice-caution"><strong>Test mode</strong> Payments here use Stripe's test mode. No real card is charged.</p>{% endif %}
     {%- else %}
     <p><strong>Coming soon, not on sale yet.</strong> No money is taken now. The free tools cost nothing: <a href="/tools/">open the tools</a>.</p>
@@ -139,7 +139,7 @@
     <details><summary>What exactly do I get?</summary><p>{{ page.product }}</p></details>
     <details><summary>What does “tested against chance” mean?</summary><p>We check whether a habit’s pattern in your trades could just be luck. The report says “distinguishable from noise” when it is unlikely to be luck, and “not distinguishable” when it could be. Up to two habits get this test; the others are described only.</p></details>
     <details><summary>What does the re-test do?</summary><p>It runs the same report on a newer export of the same account, 30 to 60 days after your first report. {{ RETEST|safe }}</p></details>
-    <details><summary>Which files work?</summary><p>MetaTrader 5 or 4, IBKR and Tradovate exports (all in beta), TradingView order history, or the donttrade CSV template.</p></details>
+    <details><summary>Which files work?</summary><p>MetaTrader 5 or 4, IBKR, Tradovate and TradingView exports (all in beta), or the donttrade CSV template.</p></details>
     <details><summary>Where does my file go?</summary><p>It stays in your browser. {{ strings.p5.long }}</p></details>
     <details><summary>Is this investment advice?</summary><p>No. It describes your own past trades. It does not tell you what to trade, how much, or when to exit.</p></details>
     <details><summary>Do you take payment by email?</summary><p>No. We never ask for card details by email. <a href="/terms/#cancellation">Cancellation and refund terms</a></p></details>

@@ -13,6 +13,7 @@
 //
 // Order ID, Level ID, Type, Limit/Stop price, Placing time, Leverage and Margin are not
 // in the whitelist and are never read.
+// verified_format is false (beta): only a paper-account export has been seen.
 // Mirrors parse_tradingview() in tests/reference/engine_ref.py.
 
 import { clean, parseDate } from './csv.js';
