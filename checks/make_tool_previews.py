@@ -25,7 +25,7 @@ from playwright.sync_api import sync_playwright
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(REPO, "site", "config", "tool_previews.json")
-SAMPLE = os.path.join(REPO, "site", "static", "samples", "demo-trades.csv")
+SAMPLE = os.path.join(REPO, "site", "static", "samples", "example-trades.csv")
 
 
 class Quiet(http.server.SimpleHTTPRequestHandler):

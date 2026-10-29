@@ -37,7 +37,7 @@ def make_csv():
             for _ in range(R.randint(4, 7)):
                 if t.hour >= 15:
                     break
-                sym = R.choice(["DEMO-A", "DEMO-B"])
+                sym = R.choice(["EX-A", "EX-B"])
                 long = R.random() < 0.55
                 qty = R.choice([1, 1, 2, 2, 3])
                 hold = dt.timedelta(minutes=R.randint(4, 75), seconds=R.randint(0, 59))

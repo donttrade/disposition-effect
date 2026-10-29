@@ -93,7 +93,7 @@ def test_j12_js_off_explains_and_offers_the_template(browser, journal_site):
     note = pg.locator("#j-nojs")
     assert note.is_visible()
     assert "needs JavaScript, because it runs in your browser" in note.inner_text()
-    assert pg.locator("#j-nojs a[href='/static/samples/demo-trades.csv']").count() == 1
+    assert pg.locator("#j-nojs a[href='/static/samples/example-trades.csv']").count() == 1
     assert not pg.is_visible("#j-app")
     assert pg.locator("h2", has_text="Where your journal is kept").is_visible()
     assert horizontal_overflow(pg) == []

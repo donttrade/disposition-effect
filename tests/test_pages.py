@@ -159,7 +159,7 @@ def test_home_hero_is_the_real_dashboard_capture(browser, built_site):
     import hashlib
     from lint import FREE_BADGE_STRINGS
     part = open(os.path.join(REPO, "site", "templates", "partials", "hero_dashboard.html"), encoding="utf-8").read()
-    sha = hashlib.sha256(open(os.path.join(REPO, "site", "static", "samples", "demo-trades.csv"), "rb").read()).hexdigest()
+    sha = hashlib.sha256(open(os.path.join(REPO, "site", "static", "samples", "example-trades.csv"), "rb").read()).hexdigest()
     assert re.search(r"sample-sha256: ([0-9a-f]{64})", part).group(1) == sha
     body = part.split("#}", 1)[1]
     assert " id=" not in body and not [x for x in FREE_BADGE_STRINGS if x in body]
