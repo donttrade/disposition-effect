@@ -11,7 +11,7 @@
 <div class="wrap">
   {% include "partials/crumbs.html" %}
   <h1>Questions</h1>
-  <p class="lede">Every answer on this site in one place. Each one is quoted from its page, with a link to it.</p>
+  <p class="lede">Every answer on this site, quoted from its page.</p>
   {%- if flags.ask_box %}
   <section class="ask" id="ask" aria-labelledby="ask-h">
     <h2 id="ask-h">Ask about prices, refunds, files or privacy</h2>
@@ -28,14 +28,18 @@
   {%- for kind, label in groups %}
   {%- set us = answer_units|selectattr("kind", "equalto", kind)|list %}
   {%- if us %}
-  <section class="section help-group" aria-labelledby="g-{{ kind }}">
-    <h2 id="g-{{ kind }}">{{ label }}</h2>
+  {#- sweep 3 (29 Oct): each group folds under its heading with its question count; the first stays open. A link
+      to /help/#u-… opens its group and its answer (theme.js). Two levels at most. -#}
+  <section class="help-group" aria-labelledby="g-{{ kind }}">
+    <details class="legal-sec"{% if loop.first %} open{% endif %}>
+    <summary><h2 id="g-{{ kind }}">{{ label }}</h2><span class="ls-sum">{{ us|length }} question{{ "s" if us|length != 1 }}</span></summary>
     {%- for u in us %}
     <details id="u-{{ u.id }}"><summary>{{ u.q }}</summary>
       <blockquote cite="{{ site.base_url }}{{ u.url }}"><p>{{ u.a }}</p></blockquote>
       <p class="small">From: <a href="{{ u.url }}">{{ u.section }}</a></p>
     </details>
     {%- endfor %}
+    </details>
   </section>
   {%- endif %}
   {%- endfor %}

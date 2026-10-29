@@ -10,6 +10,8 @@
 {#- [flags] ask_box = false: no Ask popover and no "Ask a question" Menu link (launch, 25 Oct) #}
 {%- set cur = nav_current(page) %}
 {%- macro plain_link(g) %}<a href="{{ g.href }}"{% if page.path == g.href %} aria-current="page"{% elif cur == g.label %} aria-current="true"{% endif %}>{{ g.label }}</a>{% endmacro %}
+{#- No buy button on the research study pages: never a study finding next to an offer (tests/test_oldpages.py). -#}
+{%- set show_cta = flags.paid_report and not page.path.startswith("/research/") %}
 {%- macro cta(cls) %}<a class="btn {{ cls }}" href="/pricing/#last-step" data-pay>Get report — {{ products["report39"].price_usd|usd }}</a>{% endmacro %}
 <header class="site-header"><div class="wrap">
   <a class="brand" href="/">{{ site.name }}</a>
@@ -32,12 +34,12 @@
         <li><a href="/help/#ask"{% if page.path == "/help/" %} aria-current="page"{% endif %}>Ask a question</a></li>
         {%- endif %}
       </ul>
-      {%- if flags.paid_report %}
+      {%- if show_cta %}
       <p class="nav-cta">{{ cta("") }}</p>
       {%- endif %}
     </div>
   </details></nav>
-  {%- if flags.paid_report %}
+  {%- if show_cta %}
   {{ cta("hdr-cta") }}
   {%- endif %}
   {#- the answer box (ARCHITECT-V3 §c.5): a <details> popover from 900 px (a GET form to /help/ without JS);

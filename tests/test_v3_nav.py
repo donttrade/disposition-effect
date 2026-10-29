@@ -81,7 +81,8 @@ def test_n2_only_the_buy_button_holds_a_price(built_site):
         prices = json.load(f)
     for rel in ("index.html", "pricing/index.html", "for-firms/index.html", "research/disposition-effect/index.html"):
         head = _header(built_site, rel)
-        assert len(CTA_RE.findall(head)) == 2, rel   # the bar's button and the Menu's
+        # the bar's button and the Menu's; none on the research pages (no study finding next to an offer)
+        assert len(CTA_RE.findall(head)) == (0 if rel.startswith("research/") else 2), rel
         rest = CTA_RE.sub("", head)
         text = re.sub(r"<[^>]+>", " ", rest)
         assert not re.search(r"\d\s*%|\$", text), rel

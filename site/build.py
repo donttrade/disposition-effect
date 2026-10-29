@@ -389,6 +389,7 @@ def answer_units(rendered, private=None):
                 end = heads[k + 1].start() if k + 1 < len(heads) else len(main)
                 body = main[h.end():end]
                 body = FAQ_SECTION_RE.sub("", body)
+                body = re.sub(r'(?s)<span class="ls-sum">.*?</span>', "", body)   # sweep 3: the fold's one-line summary is not the answer
                 q = plain(h.group(3))
                 add(page, ANSWER_SECTIONS[path], q, plain(body), h.group(2), f"{crumb}, {q}")
         if path == "/glossary/":

@@ -154,6 +154,7 @@ def test_header_markup(built_site):
         assert header.count("<nav ") == 1 and header.count("<details") == 1, path   # no "Ask" popover: ask_box = false (launch, 25 Oct)
         cta = re.findall(r'<a class="btn[^"]*" href="/pricing/#last-step" data-pay>Get report — \$39</a>', header)
         rest = re.sub(r'<a class="btn[^"]*" href="/pricing/#last-step" data-pay>Get report — \$39</a>', "", header)
-        assert len(cta) == 2 and 'class="btn' not in rest and not re.search(r"\$\d", rest), path
+        assert len(cta) == (0 if path.startswith("/research/") else 2), path   # no offer beside a study finding
+        assert 'class="btn' not in rest and not re.search(r"\$\d", rest), path
         assert "Start a Pilot" not in header, path
         assert re.search(r'<script src="/static/js/nav\.js\?v=[0-9a-f]{8}" defer></script>', html), path  # N5: versioned
