@@ -468,4 +468,4 @@ The version of 17 Oct 2026 was run on the fixture under CPython 3.8.20, 3.9.23, 
 
 ## Licence
 
-From version 2, this folder is licensed under **PolyForm Noncommercial 1.0.0**: free for traders, researchers, schools, charities, journalists and government; a business using it for its business needs a commercial licence, which comes with every engagement. `partner-v1` (commit `2ff165c`) was released under MIT and stays MIT. Organisations may evaluate any version on synthetic or test data for 32 days. Full terms: [LICENSING.md](LICENSING.md).
+From version 2, this folder is licensed under **PolyForm Noncommercial 1.0.0**: free for traders, researchers, schools, charities, journalists and government; a business using it for its business needs a commercial licence, which comes with the firm plan and the Pilot. `partner-v1` (commit `2ff165c`) was released under MIT and stays MIT. Organisations may evaluate any version on synthetic or test data for 32 days. Full terms: [LICENSING.md](LICENSING.md).
