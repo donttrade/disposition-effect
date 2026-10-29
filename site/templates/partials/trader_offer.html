@@ -1,5 +1,5 @@
 {#- trader_offer.html — the trader offer, in one place (Tester R5).
-    paid_report off: the habit report is not sold; the blocks invite people to the waitlist.
+    paid_report off: the donttrade test is not sold; the blocks invite people to the waitlist.
     paid_report on: every block sells it instead, linking to /pricing/#traders, where the
     "Before you pay" summary sits next to the Stripe link. No block says "not on sale" or
     "waitlist" then, and lint fails a paid build that does (claim:not_on_sale).
@@ -9,7 +9,7 @@
 {#- The one call-to-action button. -#}
 {%- macro button() -%}
 {%- if flags.paid_report -%}
-<a class="btn" href="/pricing/#last-step">Get the habit report — {{ r.price_usd|usd }}</a>
+<a class="btn" href="/pricing/#last-step">Take the test — {{ r.price_usd|usd }}</a>
 {%- else -%}
 <a class="btn" href="/for-traders/#waitlist">Join the waitlist — {{ r.price_usd|usd }} founding price</a>
 {%- endif -%}
@@ -18,21 +18,21 @@
 {#- One line on where the offer stands. -#}
 {%- macro note() -%}
 {%- if flags.paid_report -%}
-{{ r.price_usd|usd }}, one time, in US dollars, with one free re-test 30 to 60 days after your first report. A full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying.
+{{ r.price_usd|usd }}, one time, in US dollars, with one free re-test 30 to 60 days after your first result. A full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying.
 {%- else -%}
 Not on sale yet: nothing is charged now. The free tools stay free.
 {%- endif -%}
 {%- endmacro %}
 
-{#- A word or two for link lists: "The habit report for traders (…)". -#}
+{#- A word or two for link lists: "The donttrade test for traders (…)". -#}
 {%- macro short_state() -%}
 {%- if flags.paid_report %}{{ r.price_usd|usd }} founding price{% else %}waitlist{% endif -%}
 {%- endmacro %}
 
-{#- How a sentence about the report starts: "… describes, from your own trade file, your median size after a loss".
+{#- How a sentence about the test starts: "… describes, from your own trade file, your median size after a loss".
     The tool scripts use the same two openings (REPORT_LEAD in trade-stats.js / prop-sim.js). -#}
 {%- macro lead() -%}
-{%- if flags.paid_report %}The habit report{% else %}We’re building a habit report that{% endif -%}
+{%- if flags.paid_report %}The donttrade test{% else %}We’re building a test that{% endif -%}
 {%- endmacro %}
 
 {#- The data attribute the tool scripts read to word their teaser line. -#}
@@ -41,10 +41,10 @@ data-on-sale="{{ 'true' if flags.paid_report else 'false' }}"
 {%- endmacro %}
 
 {%- macro teaser_heading() -%}
-{%- if flags.paid_report %}What the habit report adds{% else %}What the habit report will add{% endif -%}
+{%- if flags.paid_report %}What the test adds{% else %}What the test will add{% endif -%}
 {%- endmacro %}
 
-{#- The teaser box on the three tool pages, under "What the habit report adds". -#}
+{#- The teaser box on the three tool pages, under "What the test adds". -#}
 {%- macro teaser() %}
     <p>{{ button() }}</p>
     <p class="small">{{ note() }}{% if flags.paid_report %} <a href="/pricing/#before-you-pay">Before you pay</a>{% endif %}</p>
@@ -63,19 +63,19 @@ data-on-sale="{{ 'true' if flags.paid_report else 'false' }}"
 {#- Where to get it: /for-traders/#waitlist and /start/#trader. The id stays "waitlist" on
     /for-traders/ so old links still land on the right section. -#}
 {%- macro signup_heading() -%}
-{%- if flags.paid_report %}Get the habit report{% else %}Join the waitlist{% endif -%}
+{%- if flags.paid_report %}Take the donttrade test{% else %}Join the waitlist{% endif -%}
 {%- endmacro %}
 
 {%- macro signup(heading_id, intro=false) %}
 {%- if flags.paid_report %}
     {%- if intro %}
-    <p>The habit report is on sale: {{ r.price_usd|usd }}, one time, with one free re-test. <a href="/for-traders/">What it measures</a></p>
+    <p>The donttrade test is on sale: {{ r.price_usd|usd }}, one time, with one free re-test. <a href="/for-traders/">What it measures</a></p>
     {%- endif %}
     <p>Read the “Before you pay” summary on the pricing page, then pay by card on Stripe’s page. A full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying.</p>
     <p>{{ button() }}</p>
 {%- else %}
     {%- if intro %}
-    <p>The trader report is not on sale yet. Join the waitlist and we email you once, when it launches. {{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers; nothing is charged now. <a href="/for-traders/#founding">Details</a></p>
+    <p>The donttrade test is not on sale yet. Join the waitlist and we email you once, when it launches. {{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers; nothing is charged now. <a href="/for-traders/#founding">Details</a></p>
     {%- endif %}
     {%- with heading_id = heading_id %}{% include "partials/form_waitlist.html" %}{% endwith %}
 {%- endif %}

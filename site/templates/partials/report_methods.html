@@ -1,15 +1,19 @@
-{#- The habit report's dated method versions (site/config/report_methods.json), outside the frozen
+{#- The donttrade test's dated method versions (site/config/report_methods.json), outside the frozen
     corrections log: they are not corrections, and the corrections count on the home page stays the log's.
-    The re-test sentence on /pricing/, /for-traders/, the home page and Before you pay points here. -#}
+    The re-test sentence on /pricing/, /for-traders/, the home page and Before you pay points here.
+    29 Oct (owner): a version's public name (DT-1) is always shown with what it is a version of. -#}
 <div class="wrap" data-report-methods>
-  <h2 id="report-method">Habit report: method versions</h2>
-  <p>Each version of the habit report’s method is listed here with its date. A report or a re-test runs on the version that is live on the day you run it.</p>
-  <div class="table-scroll" tabindex="0" role="region" aria-label="Habit report method versions"><table>
-    <thead><tr><th scope="col">Date</th><th scope="col">Method</th><th scope="col">What it does</th></tr></thead>
+  <h2 id="report-method">The donttrade test: method versions</h2>
+  <p>Each version of the method of the donttrade test, a habit test on your own trades, is listed here with its name and date. A test or a re-test runs on the version that is live on the day you run it.</p>
+  <div class="table-scroll" tabindex="0" role="region" aria-label="Method versions of the donttrade test"><table>
+    <thead><tr><th scope="col">Date</th><th scope="col">Method</th><th scope="col">Name</th><th scope="col">What it does</th></tr></thead>
     <tbody>
     {%- for e in report_methods %}
-      <tr><td>{{ e.date_text }}</td><td><code>{{ e.method }}</code></td><td>{{ e.text }}</td></tr>
+      <tr><td>{{ e.date_text }}</td><td><code>{{ e.method }}</code></td><td>{{ e.name or "" }}</td><td>{{ e.text }}</td></tr>
     {%- endfor %}
     </tbody>
   </table></div>
+  {%- if report_methods_renamed %}
+  <p class="small muted">{{ report_methods_renamed.date_text }}: {{ report_methods_renamed.text }}</p>
+  {%- endif %}
 </div>

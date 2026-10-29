@@ -103,7 +103,7 @@ def test_sample_report_lead_and_fr_page(builds):
             "your own file, tests up to two of them against chance, and shows no percentile.")
     assert lead in text_of(builds["free"], os.path.join("sample-report", "index.html"))
     # C-12 final (T-3 T3-E): the paid build's /sample-report/ is a real sample report (tests/test_sample_report_page.py)
-    assert "Sample habit report" in text_of(builds["paid"], os.path.join("sample-report", "index.html"))   # sweep 2 lead
+    assert "Sample test result" in text_of(builds["paid"], os.path.join("sample-report", "index.html"))   # sweep 2 lead
     fr = open(os.path.join(builds["paid"], "fr", "avant-de-payer", "index.html"), encoding="utf-8").read()
     for s in FR:
         assert s in fr
@@ -114,32 +114,32 @@ def test_sample_report_lead_and_fr_page(builds):
 # Each value line states: five habits measured and described in your own file with the dollar totals of the matching
 # trades; up to two tested against chance in this version; one re-test 30 to 60 days after the first report. Where the
 # re-test is described, the version sentence follows, its "corrections page" linked to /corrections/.
-RETEST = ("Your re-test runs on the version of the report that is live when you run it; every change is dated on the "
+RETEST = ("Your re-test runs on the version of the test that is live when you run it; every change is dated on the "
           "corrections page.")
-RETEST_HTML = ('Your re-test runs on the version of the report that is live when you run it; every change is dated on the '
+RETEST_HTML = ('Your re-test runs on the version of the test that is live when you run it; every change is dated on the '
                '<a href="/corrections/">corrections page</a>.')
 # QA 25 Oct: "plan" and "tested against chance" glossed on first use
 HOME_LEDE = ("Drop your broker export. Get a report on up to five habits in your trades, with the dollar total of each.")   # sweep 2 hero
 FT_LEDE = ("It measures and describes up to five habits in your own past trades, like opening a new trade soon after a loss, with the "
            "dollar totals of the matching trades, and tests up to two of these habits against chance in this version. It "
-           "includes one re-test 30 to 60 days after your first report. It doesn’t tell you what to trade.")
+           "includes one re-test 30 to 60 days after your first result. It doesn’t tell you what to trade.")
 FT_LEDE_SOON = ("It will measure and describe up to five habits in your own past trades, like opening a new trade soon after a loss, "
                 "with the dollar totals of the matching trades, and test up to two of these habits against chance in this "
-                "version. It will include one re-test 30 to 60 days after your first report. It will not tell you what to trade.")
+                "version. It will include one re-test 30 to 60 days after your first result. It will not tell you what to trade.")
 PRODUCT = ("Up to five habits measured and described in your own trades, with the dollar totals of the matching trades; up to two of "
-           "them tested against chance in this version; plus one re-test 30 to 60 days after your first report.")
+           "them tested against chance in this version; plus one re-test 30 to 60 days after your first result.")
 BYP = ("a report on habits in your own past trades, built from a trade file you choose. It measures and describes up to five "
        "habits, with the dollar totals of the matching trades, and tests up to two of them against chance in this version. "
-       "It includes one re-test 30 to 60 days after your first report. It describes what happened; it does not tell you "
+       "It includes one re-test 30 to 60 days after your first result. It describes what happened; it does not tell you "
        "what to trade.")
-LOT = ("Sizing on paper is one thing. The habit report describes, from your own trade file when it has times of day, your median size after a loss "
+LOT = ("Sizing on paper is one thing. The donttrade test describes, from your own trade file when it has times of day, your median size after a loss "
        "and after a win, and what trades after a loss at 1.5 times your usual size or more totalled. It measures and "
        "describes up to five habits with the dollar totals of the matching trades, tests up to two of them against chance in this "
-       "version, and includes one re-test 30 to 60 days after your first report.")
-LOT_SOON = ("Sizing on paper is one thing. We’re building a habit report that describes, from your own trade file when it has times of day, your median "
+       "version, and includes one re-test 30 to 60 days after your first result.")
+LOT_SOON = ("Sizing on paper is one thing. We’re building a test that describes, from your own trade file when it has times of day, your median "
             "size after a loss and after a win, and what trades after a loss at 1.5 times your usual size or more totalled. It "
             "will measure and describe up to five habits with the dollar totals of the matching trades, test up to two of them "
-            "against chance in this version, and include one re-test 30 to 60 days after your first report.")
+            "against chance in this version, and include one re-test 30 to 60 days after your first result.")
 FR_FACTS = ("Pour chacune, quand le fichier le permet, il totalise les montants réalisés des transactions en cause. Il en teste jusqu’à deux par rapport au "
             "hasard dans cette version : pour chacune, il indique si l’écart se distingue du hasard.",
             "Comprend un nouveau test gratuit, de 30 à 60 jours plus tard.",
@@ -155,7 +155,7 @@ def raw(out, rel):
     return open(os.path.join(out, rel), encoding="utf-8").read()
 
 
-NEXT_TYPED = ("The habit report reads your trade file It looks for up to five habits in your "   # owner Q3, 25 Oct: the heading names the report
+NEXT_TYPED = ("The donttrade test reads your trade file It looks for up to five habits in your "   # owner Q3, 25 Oct: the heading names the report
               "own trades, testing up to two of them against chance. $39, one re-test included, refund within 14 days.")
 
 

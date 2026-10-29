@@ -344,7 +344,7 @@ def test_r5_no_page_of_a_paid_build_says_not_on_sale(paid_site):
                                   "/for-traders/", "/start/", "/for-traders/thanks/"])
 def test_r5_trader_blocks_sell_in_a_paid_build(paid_site, path):
     h = open(os.path.join(paid_site["out"], path.strip("/"), "index.html"), encoding="utf-8").read()
-    assert 'href="/pricing/#last-step">Get the habit report — $39</a>' in h   # af52207: buy buttons open the pay panel
+    assert 'href="/pricing/#last-step">Take the test — $39</a>' in h   # af52207: buy buttons open the pay panel
     assert 'product" value="waitlist"' not in h and 'id="wl"' not in h   # the waitlist form is gone
     assert "/for-traders/#waitlist" not in h
 
@@ -383,7 +383,7 @@ def test_r5_tool_teaser_script_wording_follows_the_offer(browser, paid_site, bui
     page.wait_for_selector("#ts-out:not([hidden])", timeout=60000)
     page.wait_for_timeout(300)
     assert page.locator("#ts-teaser").count() == 0
-    assert page.inner_text(".next-step") == before and before.startswith("The habit report reads")
+    assert page.inner_text(".next-step") == before and before.startswith("The donttrade test reads")
     assert page.evaluate("document.querySelector('#ts-out').nextElementSibling.classList.contains('next-step')")
     ctx.close()
     ctx = browser.new_context()
@@ -392,7 +392,7 @@ def test_r5_tool_teaser_script_wording_follows_the_offer(browser, paid_site, bui
     assert page.locator(".next-step").count() == 0
     page.click("#ts-sample-btn")
     page.wait_for_selector("#ts-teaser:not([hidden])", timeout=60000)
-    assert "We're building a habit report" in page.inner_text("#ts-teaser")
+    assert "We're building a test" in page.inner_text("#ts-teaser")
     ctx.close()
 
 
@@ -669,7 +669,7 @@ def test_nit13_paid_footer_mentions_the_kept_fingerprints(paid_site):
     # C-14 (23 Oct): "only" now bounds what is kept of the trade numbers (the server keeps other records too)
     assert "does not keep them: of those numbers it keeps only a scrambled fingerprint" in line
     privacy = L.visible_text((paid_site["out"] / "privacy" / "index.html").read_text(encoding="utf-8"))
-    assert "scrambled fingerprints of the trades in your first report" in privacy   # what the footer now points at
+    assert "scrambled fingerprints of the trades in your first result" in privacy   # what the footer now points at
     assert line in (paid_site["out"] / "about" / "index.html").read_text(encoding="utf-8")
 
 

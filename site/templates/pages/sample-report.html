@@ -1,4 +1,4 @@
-{#- Delivery plan C-12 final (Tester T-3 T3-E), paid builds only: a real habit report on a made-up trade file.
+{#- Delivery plan C-12 final (Tester T-3 T3-E), paid builds only: a real donttrade test on a made-up trade file.
     The report is dt-private analyse() output (site/config/sample-report.report.json, method checked by build.py),
     rendered in the browser by the real report.js (static/js/paid/sample.js), so every habit name and sentence comes
     from wording.js. No percentile and no research figure: those are the free study pages. -#}
@@ -6,14 +6,14 @@
 {% block content %}
 <div class="wrap page-head">
   {#- sweep 2 (25 Oct): the lead in two short lines -#}
-  <p class="sr-tag"><span class="pill pill-muted">Example report</span></p>
-  <h1>Sample habit report</h1>
-  <p class="lede">Our real report engine, run on example data: {{ sample_report.n_trades }} trades over about {{ sample_report.period_weeks }} weeks.</p>
+  <p class="sr-tag"><span class="pill pill-muted">Example result</span></p>
+  <h1>Sample test result</h1>
+  <p class="lede">The test’s real engine, run on example data: {{ sample_report.n_trades }} trades over about {{ sample_report.period_weeks }} weeks.</p>
   <p>We built a re-entry habit into the data, so there is a result to show.</p>
-  <p class="small muted">Engine method {{ sample_report.method_version }}, the version listed on the <a href="/corrections/#report-method">corrections page</a>. Not investment advice.</p>
+  <p class="small muted">{% if method_name %}Method {{ method_name }} of the donttrade test, a habit test on your own trades (engine {{ sample_report.method_version }}){% else %}Engine method {{ sample_report.method_version }}{% endif %}, as listed on the <a href="/corrections/#report-method">corrections page</a>. Not investment advice.</p>
 </div>
 <div class="wrap">
-  <div id="sample-out" aria-live="polite"><noscript><p class="notice notice-caution">This sample is drawn by the report page’s own script, so it needs JavaScript turned on.</p></noscript></div>
+  <div id="sample-out" aria-live="polite"><noscript><p class="notice notice-caution">This sample is drawn by the result page’s own script, so it needs JavaScript turned on.</p></noscript></div>
   <script type="application/json" id="sample-data">{{ sample_report_json }}</script>
 </div>
 {% endblock %}

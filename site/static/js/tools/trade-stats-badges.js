@@ -87,8 +87,8 @@ export function render(box, noise, total, unit, tableWrap) {
     el('p', { class: 'small muted', id: 'ts-noise-footnote', text: FREE_CHECKS_FOOTNOTE }));
 }
 
-// The teaser line with the hold-gap check's result. s: freeStats; lead: "The habit report" or
-// "We're building a habit report that".
+// The teaser line with the hold-gap check's result. s: freeStats; lead: "The donttrade test" or
+// "We're building a test that".
 export function teaserText(noise, s, lead) {
   const gap = noise.checks.find((c) => c.stat === 'hold_gap_s');
   if (s.hold_ratio !== null && gap) {

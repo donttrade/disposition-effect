@@ -342,7 +342,7 @@ export function renderReport(report, out, meta) {
   }
   const print = el('button', { class: 'btn btn-secondary', type: 'button', text: 'Print or save as PDF' });
   print.addEventListener('click', () => window.print());
-  const body = 'I ran a donttrade habit report on my own trades. Your firm can measure the same on its own records: https://donttrade.ca/for-firms/?ref=report';
+  const body = 'I took the donttrade test on my own trades. Firms can test their own records too: https://donttrade.ca/for-firms/?ref=report';
   const mail = el('a', { class: 'btn btn-secondary', href: 'mailto:?subject=' + encodeURIComponent('A trading-habit measurement for your firm') + '&body=' + encodeURIComponent(body), text: 'Send to your firm' });
   out.append(el('section', { class: 'section no-print' }, el('h2', { text: 'Next' }),
     firstReport ? el('p', { id: 'rp-retest', text: win ? retestLine(win) : RETEST_LINE }) : null,

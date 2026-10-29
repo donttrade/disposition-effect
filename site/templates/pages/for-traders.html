@@ -14,7 +14,7 @@
   <section class="section" aria-labelledby="ft-h">
     <div class="showcase ft-hero">
       <div class="showcase-copy">
-        <h1 id="ft-h">A habit report from your own trade file</h1>
+        <h1 id="ft-h">The donttrade test, on your own trades</h1>
         <p class="lede">Up to five habits in your past trades, with the dollar total of each. It tests up to two of these habits against chance in this version.</p>
         <p class="btn-row">{{ offer.button() }} <a href="/sample-report/">See a sample</a></p>
         <p class="small">{{ r.price_usd|usd }} once · one re-test · {{ prices.rules.trader_refund_days }}-day refund</p>
@@ -63,8 +63,8 @@
       <tbody>
         <tr><th scope="row">Logs your trades</th><td>Yes</td><td>{% if flags.journal %}Yes: the free journal keeps them in your browser, on your device{% else %}No: it reads the export your platform already makes{% endif %}</td></tr>
         <tr><th scope="row">Needs an account</th><td>Usually</td><td>No account or login</td></tr>
-        <tr><th scope="row">Tests whether a habit is more than chance</th><td>Varies</td><td>Yes, in the habit report: up to two habits in this version, with a stated statistical check, and “not enough trades to tell” when either group of a tested habit has fewer than 30 trades</td></tr>
-        <tr><th scope="row">Shows its method and code</th><td>Rarely</td><td>The method, yes. The scripts behind {{ evidence.scripts_public }} of the {{ evidence.studies }} studies are public (<a href="/code/">Methods and code</a>); the habit report’s own engine is not</td></tr>
+        <tr><th scope="row">Tests whether a habit is more than chance</th><td>Varies</td><td>Yes, in the donttrade test: up to two habits in this version, with a stated statistical check, and “not enough trades to tell” when either group of a tested habit has fewer than 30 trades</td></tr>
+        <tr><th scope="row">Shows its method and code</th><td>Rarely</td><td>The method, yes. The scripts behind {{ evidence.scripts_public }} of the {{ evidence.studies }} studies are public (<a href="/code/">Methods and code</a>); the test’s own engine is not</td></tr>
         <tr><th scope="row">Tells you what to buy or sell</th><td>Some do</td><td>No</td></tr>
       </tbody>
     </table>
@@ -74,9 +74,9 @@
   <section class="section" aria-labelledby="faq-h" data-reveal>
     <h2 id="faq-h"><span id="founding">Questions</span></h2>
     <details><summary>Is this investment advice?</summary><p>No. It describes your own past trades. It does not recommend any security, trade, size or exit, and past results do not predict future results.</p></details>
-    <details><summary>What does the re-test do?</summary><p>It runs the same report on a newer export of the same account, 30 to 60 days after your first report. Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.</p></details>
-    <details><summary>How do I buy it?</summary><p>On the pricing page: read the “Before you pay” summary, then pay {{ r.price_usd|usd }} by card on Stripe’s page. The report opens in your browser right after payment.</p></details>
-    <details><summary>Can I get a refund?</summary><p>Yes. A full refund if you ask by email within {{ prices.rules.trader_refund_days }} days of buying, even if you have already run your report. <a href="/terms/#traders">Trader terms</a></p></details>
+    <details><summary>What does the re-test do?</summary><p>It runs the same test on a newer export of the same account, 30 to 60 days after your first result. Your re-test runs on the version of the test that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.</p></details>
+    <details><summary>How do I buy it?</summary><p>On the pricing page: read the “Before you pay” summary, then pay {{ r.price_usd|usd }} by card on Stripe’s page. Your result opens in your browser right after payment.</p></details>
+    <details><summary>Can I get a refund?</summary><p>Yes. A full refund if you ask by email within {{ prices.rules.trader_refund_days }} days of buying, even if you have already run your test. <a href="/terms/#traders">Trader terms</a></p></details>
     <details><summary>What can I use today for free?</summary><p>The free <a href="/tools/trade-stats/">trade-stats dashboard</a> reads the same files and shows the core numbers: win rate, profit factor, drawdown and streaks, in your browser.</p></details>
   </section>
   {% include "partials/disclaimer.html" %}
@@ -89,14 +89,14 @@
     <div class="grid">
       <div class="span-7">
         {%- if sale %}
-        <h1 id="ft-h">A habit report built from your own trade file.</h1>
-        <p class="lede">It measures and describes up to five habits in your own past trades, like opening a new trade soon after a loss, with the dollar totals of the matching trades, and tests up to two of these habits against chance in this version. It includes one re-test 30 to 60 days after your first report. It doesn’t tell you what to trade.</p>
+        <h1 id="ft-h">The donttrade test, on your own trades.</h1>
+        <p class="lede">It measures and describes up to five habits in your own past trades, like opening a new trade soon after a loss, with the dollar totals of the matching trades, and tests up to two of these habits against chance in this version. It includes one re-test 30 to 60 days after your first result. It doesn’t tell you what to trade.</p>
         {%- else %}
-        <h1 id="ft-h">A habit report built from your own trade file. Coming soon.</h1>
-        <p class="lede">It will measure and describe up to five habits in your own past trades, like opening a new trade soon after a loss, with the dollar totals of the matching trades, and test up to two of these habits against chance in this version. It will include one re-test 30 to 60 days after your first report. It will not tell you what to trade.</p>
+        <h1 id="ft-h">The donttrade test, on your own trades. Coming soon.</h1>
+        <p class="lede">It will measure and describe up to five habits in your own past trades, like opening a new trade soon after a loss, with the dollar totals of the matching trades, and test up to two of these habits against chance in this version. It will include one re-test 30 to 60 days after your first result. It will not tell you what to trade.</p>
         {%- endif %}
         {{- offer.status() }}
-        <p class="btn-row">{{ offer.button() }} <a class="btn btn-secondary" href="/tools/trade-stats/">Try the free trade stats</a> <a href="/sample-report/">See a sample report</a></p>
+        <p class="btn-row">{{ offer.button() }} <a class="btn btn-secondary" href="/tools/trade-stats/">Try the free trade stats</a> <a href="/sample-report/">See a sample result</a></p>
       </div>
     </div>
   </section>
@@ -107,7 +107,7 @@
     <p>Five habits, measured in your own closed trades as far as your file allows.</p>
     {%- else %}
     <h2 id="measure-h">What it is being built to measure</h2>
-    <p>Five habits, measured in your own closed trades as far as your file allows. These describe the report as it is being built; the final list is published before anyone pays.</p>
+    <p>Five habits, measured in your own closed trades as far as your file allows. These describe the test as it is being built; the final list is published before anyone pays.</p>
     {%- endif %}
     <dl class="split">
       <div><dt>Hold gap</dt><dd>Did you hold losing trades longer than winning ones? (described, not tested in this version)</dd></div>
@@ -125,16 +125,16 @@
       <li><strong>Files:</strong> the MetaTrader 5 or 4 history report, an Interactive Brokers Flex Query, a Tradovate orders export or a TradingView Order History export (all four in beta until real exports confirm the columns), or the donttrade CSV template.</li>
       <li><strong>The free tools</strong> open your file in your browser. {% if flags.analytics %}Your file’s contents are never sent; the only request those pages make is an anonymous page-view count.{% else %}Those pages block outgoing requests, so the file is not uploaded.{% endif %}</li>
       {%- if sale %}
-      <li><strong>For the paid report:</strong> {{ strings.p5.long }} <a href="/privacy/#report">Privacy notice</a>.</li>
+      <li><strong>For the paid test:</strong> {{ strings.p5.long }} <a href="/privacy/#report">Privacy notice</a>.</li>
       {%- else %}
-      <li><strong>For the paid report (not on sale yet):</strong> {{ strings.p5.long }} The exact list is published before launch.</li>
+      <li><strong>For the paid test (not on sale yet):</strong> {{ strings.p5.long }} The exact list is published before launch.</li>
       {%- endif %}
     </ul>
   </section>
 
   <section class="section" aria-labelledby="founding" data-reveal>
     <h2 id="founding">The founding offer</h2>
-    <p>The habit report is {{ r.price_usd|usd }}, one time, in US dollars. It includes one re-test of the same account. Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>. A yearly habit tracker comes later, at {{ t.price_usd|usd }} a year as its founding price; it is not sold until it exists.</p>
+    <p>The donttrade test is {{ r.price_usd|usd }}, one time, in US dollars. It includes one re-test of the same account. Your re-test runs on the version of the test that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>. A yearly habit tracker comes later, at {{ t.price_usd|usd }} a year as its founding price; it is not sold until it exists.</p>
     {%- if sale %}
     <p>The price, the seller’s details and the terms are in the “Before you pay” summary, shown before you pay. A full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying. <a href="/terms/#traders">Trader terms</a></p>
     {%- else %}
@@ -165,8 +165,8 @@
       <tbody>
         <tr><th scope="row">Logs your trades</th><td>Yes</td><td>{% if flags.journal %}Yes: the free journal keeps them in your browser, on your device{% else %}No: it reads the export your platform already makes{% endif %}</td></tr>
         <tr><th scope="row">Needs an account</th><td>Usually</td><td>No account or login</td></tr>
-        <tr><th scope="row">Tests whether a habit is more than chance</th><td>Varies</td><td>{% if flags.paid_report %}Yes, in the habit report{% else %}The habit report will{% endif %}: up to two habits in this version, with a stated statistical check, and “not enough trades to tell” when either group of a tested habit has fewer than 30 trades</td></tr>
-        <tr><th scope="row">Shows its method and code</th><td>Rarely</td><td>The method, yes. The scripts behind {{ evidence.scripts_public }} of the {{ evidence.studies }} studies are public (<a href="/code/">Methods and code</a>); the habit report’s own engine is not</td></tr>
+        <tr><th scope="row">Tests whether a habit is more than chance</th><td>Varies</td><td>{% if flags.paid_report %}Yes, in the donttrade test{% else %}The donttrade test will{% endif %}: up to two habits in this version, with a stated statistical check, and “not enough trades to tell” when either group of a tested habit has fewer than 30 trades</td></tr>
+        <tr><th scope="row">Shows its method and code</th><td>Rarely</td><td>The method, yes. The scripts behind {{ evidence.scripts_public }} of the {{ evidence.studies }} studies are public (<a href="/code/">Methods and code</a>); the test’s own engine is not</td></tr>
         <tr><th scope="row">Tells you what to buy or sell</th><td>Some do</td><td>No</td></tr>
       </tbody>
     </table>
@@ -177,8 +177,8 @@
     <h2 id="faq-h">Questions</h2>
     <details><summary>Is this investment advice?</summary><p>No. It {{ "describes" if sale else "will describe" }} your own past trades. It does not recommend any security, trade, size or exit, and past results do not predict future results.</p></details>
     {%- if sale %}
-    <details><summary>How do I buy it?</summary><p>On the pricing page: read the “Before you pay” summary, then pay {{ r.price_usd|usd }} by card on Stripe’s page. The report opens in your browser right after payment.</p></details>
-    <details><summary>Can I get a refund?</summary><p>Yes. A full refund if you ask by email within {{ prices.rules.trader_refund_days }} days of buying, even if you have already run your report.</p></details>
+    <details><summary>How do I buy it?</summary><p>On the pricing page: read the “Before you pay” summary, then pay {{ r.price_usd|usd }} by card on Stripe’s page. Your result opens in your browser right after payment.</p></details>
+    <details><summary>Can I get a refund?</summary><p>Yes. A full refund if you ask by email within {{ prices.rules.trader_refund_days }} days of buying, even if you have already run your test.</p></details>
     {%- else %}
     <details><summary>When does it launch?</summary><p>There is no launch date yet. Everyone on the waitlist gets one email when it does.</p></details>
     <details><summary>Is anything charged when I join?</summary><p>No. Joining is free, and no card is asked for.</p></details>
