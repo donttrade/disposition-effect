@@ -107,10 +107,13 @@ def test_no_preset_or_signature_reads_a_blocked_column():
               "tradehash", "txhash", "transactionhash", "transactionid", "depositaddress", "toaddress", "fromaddress",
               "receivingaddress", "iban", "customerid", "customer", "clientname", "tradername", "legalname",
               "displayname", "nickname", "cardnumber", "ssn", "taxid", "mobile", "mail", "ipaddress", "publickey",
-              "signature", "ordercomment", "tradecomment", "memo", "description"):
+              "signature", "ordercomment", "tradecomment", "memo", "description",
+              # Tester round 2, N4
+              "orderid", "beneficiary", "counterparty", "sender", "login", "bank", "bankname",
+              "routingnumber", "sortcode", "telegram", "discord", "handle", "cell", "contact", "referralcode"):
         assert E.is_blocked(h), h
     for h in ("symbol", "price", "quantity", "commission", "txid", "ordertxid", "instrument", "contractname", "time",
-              "filledquantity", "fillprice", "side", "status", "notescodes"):
+              "filledquantity", "fillprice", "side", "status", "notescodes", "cancelled", "canceled", "ordertype"):
         assert not E.is_blocked(h), h
 
 
