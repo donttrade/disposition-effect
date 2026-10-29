@@ -25,8 +25,8 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=0fc315ce">
-<script src="/static/js/theme.js?v=fd1ba361"></script>
+<link rel="stylesheet" href="/static/css/site.css?v=53abcad2">
+<script src="/static/js/theme.js?v=668db5fe"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
 <script src="/static/js/pay.js?v=d817e818" defer></script>
 <script src="/static/js/tools/risk-reward.js?v=c8b5f1af" type="module"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cdac673936b54f08beb5991aaae13975"}'></script>
@@ -93,8 +93,8 @@
 
   <section class="tool" aria-labelledby="rr-tool-h">
     <h2 id="rr-tool-h">Your numbers</h2>
-    <p id="rr-js-needed" class="notice notice-caution">This calculator runs in your browser and needs JavaScript turned on.</p>
-    <form id="rr-form" novalidate hidden>
+    <p id="rr-js-needed" class="notice notice-caution" data-js-hide>This calculator runs in your browser and needs JavaScript turned on.</p>
+    <form id="rr-form" novalidate hidden data-js-show>
       <fieldset>
         <legend>What you enter</legend>
         <div class="check"><input type="radio" id="rr-mode-prices" name="rr-mode" value="prices" checked><label for="rr-mode-prices">Entry, stop and target prices</label></div>

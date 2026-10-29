@@ -17,8 +17,8 @@
 
   <section class="tool" aria-labelledby="dd-q-h">
     <h2 id="dd-q-h">Gain that recovers a drawdown</h2>
-    <p id="dd-q-js-needed" class="notice notice-caution">This calculator runs in your browser and needs JavaScript turned on. The table below works without it.</p>
-    <form id="dd-q-form" novalidate hidden>
+    <p id="dd-q-js-needed" class="notice notice-caution" data-js-hide>This calculator runs in your browser and needs JavaScript turned on. The table below works without it.</p>
+    <form id="dd-q-form" novalidate hidden data-js-show>
       <div class="field">
         <label for="dd-pct">Drawdown, %</label>
         <span class="hint" id="dd-pct-hint">The fall from the high, as a percentage of the high. For example 20.</span>
@@ -45,8 +45,8 @@
 
   <section class="tool" aria-labelledby="dd-tool-h">
     <h2 id="dd-tool-h">Your own drawdowns, from your trade file</h2>
-    <p id="dd-js-needed" class="notice notice-caution">This part runs in your browser and needs JavaScript turned on.</p>
-    <div id="dd-controls" hidden>
+    <p id="dd-js-needed" class="notice notice-caution" data-js-hide>This part runs in your browser and needs JavaScript turned on.</p>
+    <div id="dd-controls" hidden data-js-show>
       <div class="dropzone" id="dd-drop">
         <p><strong>Drop a trade file here</strong>, or choose one from your computer.</p>
         <p class="small muted">MT5 or MT4 report (.htm, .html), IBKR Flex Query (.csv), Tradovate Orders (.csv), TradingView Order History (.csv), or the CSV template. Up to 50 MB and 200,000 rows.</p>

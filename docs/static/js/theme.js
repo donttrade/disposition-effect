@@ -7,6 +7,10 @@
   var KEY = 'donttrade-theme';
   var root = document.documentElement;
   var COLORS = { dark: '#16181C', light: '#FFFFFF' };
+  // CLS (29 Oct): before first paint, mark a browser that will run the tools' module scripts, so site.css swaps
+  // a tool's "needs JavaScript" notice for its form at once ([data-js-hide], [data-js-show]); each tool's init()
+  // then sets the same state with the hidden attribute. Without JavaScript or modules, nothing changes.
+  if ('noModule' in HTMLScriptElement.prototype) root.classList.add('dt-js');
   try { // motion: decided before first paint (this file blocks in <head>); motion.js and site.css read it
     if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches && 'IntersectionObserver' in window) {
       root.classList.add('dt-motion');

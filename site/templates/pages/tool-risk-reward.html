@@ -25,8 +25,8 @@
 
   <section class="tool" aria-labelledby="rr-tool-h">
     <h2 id="rr-tool-h">Your numbers</h2>
-    <p id="rr-js-needed" class="notice notice-caution">This calculator runs in your browser and needs JavaScript turned on.</p>
-    <form id="rr-form" novalidate hidden>
+    <p id="rr-js-needed" class="notice notice-caution" data-js-hide>This calculator runs in your browser and needs JavaScript turned on.</p>
+    <form id="rr-form" novalidate hidden data-js-show>
       <fieldset>
         <legend>What you enter</legend>
         <div class="check"><input type="radio" id="rr-mode-prices" name="rr-mode" value="prices" checked><label for="rr-mode-prices">Entry, stop and target prices</label></div>
