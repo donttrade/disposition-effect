@@ -53,23 +53,101 @@ def mix32(a, b):
     return h ^ (h >> 16)
 
 
+def _num(v):
+    return isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)
+
+
+def _whole(v, lo, hi):
+    return isinstance(v, int) and not isinstance(v, bool) and lo <= v <= hi or (
+        isinstance(v, float) and v.is_integer() and lo <= v <= hi)
+
+
+def _fail(msg):
+    raise ValueError(msg)
+
+
+MISSING = object()
+
+
 def norm_rules(r):
-    dd = r.get("drawdown")
+    if not isinstance(r, dict):
+        _fail("rules: missing")
+    g = lambda k, d=MISSING: r.get(k, d)  # noqa: E731
+    if not _num(g("target", None)) or r["target"] <= 0:
+        _fail("rules: target is an amount above zero")
+    if not _num(g("max_loss", None)) or r["max_loss"] <= 0:
+        _fail("rules: max_loss is an amount above zero")
+    dl = g("daily_loss")
+    if dl is MISSING or (dl is not None and (not _num(dl) or dl <= 0)):
+        _fail("rules: daily_loss is an amount above zero, or null for none")
+    tl = g("time_limit")
+    if tl is MISSING or (tl is not None and not _whole(tl, 1, 365)):
+        _fail("rules: time_limit is a whole number of days from 1 to 365, or null for none")
+    tr = g("trailing")
+    if tr is not MISSING and not isinstance(tr, bool):
+        _fail("rules: trailing is true or false")
+    dd = g("drawdown", None)
     if dd is None:
-        dd = "trailing_eod" if r.get("trailing") else "static"
+        dd = "trailing_eod" if tr is True else "static"
     if dd not in DRAWDOWNS:
-        raise ValueError(f"rules: unknown drawdown {dd}")
-    kind = r.get("min_days_kind") or "trading"
+        _fail("rules: drawdown is static, trailing_eod or trailing_trade")
+    stop = g("trail_stop_at", None)
+    if stop is not None and (not _num(stop) or stop < 0):
+        _fail("rules: trail_stop_at is an amount of zero or more, or null")
+    c = g("consistency", None)
+    if c is not None and (not _num(c) or not (0 < c <= 1)):
+        _fail("rules: consistency is a share above 0 and at most 1, or null")
+    md = g("min_days", 0)
+    if not _whole(md, 0, 365):
+        _fail("rules: min_days is a whole number from 0 to 365")
+    kind = g("min_days_kind", "trading")
     if kind not in ("trading", "profitable"):
-        raise ValueError(kind)
-    c = r.get("consistency")
-    if c is not None and not (0 < c <= 1):
-        raise ValueError("consistency")
-    no_limit = r.get("time_limit") is None
-    return {"target": r["target"], "daily_loss": r.get("daily_loss"), "max_loss": r["max_loss"], "drawdown": dd,
-            "trail_stop_at": r.get("trail_stop_at"), "consistency": c, "min_days": r.get("min_days") or 0,
-            "min_days_kind": kind, "profitable_day_min": r.get("profitable_day_min") or 0,
-            "limit": NO_LIMIT_CAP if no_limit else r["time_limit"], "no_limit": no_limit}
+        _fail("rules: min_days_kind is trading or profitable")
+    pm = g("profitable_day_min", 0)
+    if not _num(pm) or pm < 0:
+        _fail("rules: profitable_day_min is an amount of zero or more")
+    cif = g("count_day_if", "any")
+    if cif not in ("any", "nonzero"):
+        _fail("rules: count_day_if is any or nonzero")
+    tc = g("target_check", "eod")
+    if tc not in ("eod", "intraday"):
+        _fail("rules: target_check is eod or intraday")
+    no_limit = tl is None
+    return {"target": r["target"], "daily_loss": dl, "max_loss": r["max_loss"], "drawdown": dd, "trail_stop_at": stop,
+            "consistency": c, "min_days": md, "min_days_kind": kind, "profitable_day_min": pm, "count_day_if": cif,
+            "target_check": tc, "limit": NO_LIMIT_CAP if no_limit else tl, "no_limit": no_limit}
+
+
+def check_input(p):
+    if not isinstance(p, dict):
+        _fail("simulate: missing input")
+    if p.get("mode") not in ("file", "sequence", "manual"):
+        _fail("simulate: mode is file, sequence or manual")
+    if "runs" in p and not _whole(p["runs"], 1, 1000000):
+        _fail("simulate: runs is a whole number from 1 to 1,000,000")
+    if "seed" in p and not _whole(p["seed"], 0, 4294967295):
+        _fail("simulate: seed is a whole number from 0 to 4294967295")
+    if "stream" in p and p["stream"] not in ("legacy", "paired"):
+        _fail("simulate: stream is legacy or paired")
+    if p["mode"] == "manual":
+        if not _num(p.get("win_rate")) or not 0 <= p["win_rate"] <= 1:
+            _fail("simulate: win_rate is a share from 0 to 1")
+        if not _num(p.get("avg_win")) or p["avg_win"] <= 0:
+            _fail("simulate: avg_win is an amount above zero")
+        if not _num(p.get("avg_loss")) or p["avg_loss"] <= 0:
+            _fail("simulate: avg_loss is an amount above zero")
+        if not _whole(p.get("trades_per_day"), 1, 50):
+            _fail("simulate: trades_per_day is a whole number from 1 to 50")
+        return
+    days = p.get("days")
+    if not isinstance(days, list) or not days:
+        _fail("simulate: no trading days")
+    for d in days:
+        if not isinstance(d, list):
+            _fail("simulate: each day is a list of trade results")
+        for x in d:
+            if not _num(x):
+                _fail("simulate: every trade result is a finite number")
 
 
 def personal_unavailable(p, x, r=None):
@@ -92,29 +170,39 @@ def norm_personal(x, r):
     keys = [k for k, v in x.items() if v is not None]
     for k in keys:
         if k not in PERSONAL_KEYS:
-            raise ValueError(k)
+            _fail(f"personal: unknown rule {k}")
     if not keys:
         return None
     if len(keys) > MAX_PERSONAL:
-        raise ValueError("at most 2")
+        _fail(f"personal: at most {MAX_PERSONAL} rules at once")
     q = {"stop_losses": 0, "stop_at": None, "max_trades": 0, "cooldown": -1, "factor": 1}
     if x.get("stop_after_losses") is not None:
-        assert 1 <= x["stop_after_losses"] <= 10
+        if not _whole(x["stop_after_losses"], 1, 10):
+            _fail("personal: stop_after_losses is a whole number from 1 to 10")
         q["stop_losses"] = x["stop_after_losses"]
     if x.get("stop_at_day_loss") is not None:
-        assert 0.1 <= x["stop_at_day_loss"] <= 0.95 and r["daily_loss"] is not None
+        if not _num(x["stop_at_day_loss"]) or not 0.1 <= x["stop_at_day_loss"] <= 0.95:
+            _fail("personal: stop_at_day_loss is a share from 0.1 to 0.95")
+        if r["daily_loss"] is None:
+            _fail("personal: stop_at_day_loss needs a daily loss limit")
         q["stop_at"] = x["stop_at_day_loss"] * r["daily_loss"]
     if x.get("stop_at_day_loss_amount") is not None:
-        assert x.get("stop_at_day_loss") is None and x["stop_at_day_loss_amount"] > 0
+        if x.get("stop_at_day_loss") is not None:
+            _fail("personal: a share or an amount, not both")
+        if not _num(x["stop_at_day_loss_amount"]) or x["stop_at_day_loss_amount"] <= 0:
+            _fail("personal: stop_at_day_loss_amount is an amount above zero")
         q["stop_at"] = x["stop_at_day_loss_amount"]
     if x.get("max_trades") is not None:
-        assert 1 <= x["max_trades"] <= 50
+        if not _whole(x["max_trades"], 1, 50):
+            _fail("personal: max_trades is a whole number from 1 to 50")
         q["max_trades"] = x["max_trades"]
     if x.get("cooldown_s") is not None:
-        assert 60 <= x["cooldown_s"] <= 14400 and x["cooldown_s"] % 60 == 0
+        if not _whole(x["cooldown_s"], 60, 14400) or x["cooldown_s"] % 60:
+            _fail("personal: cooldown_s is whole minutes from 1 to 240")
         q["cooldown"] = x["cooldown_s"]
     if x.get("after_loss_factor") is not None:
-        assert x["after_loss_factor"] in FACTORS
+        if x["after_loss_factor"] not in FACTORS:
+            _fail("personal: after_loss_factor is 0.25, 0.5 or 0.75")
         q["factor"] = x["after_loss_factor"]
     return q
 
@@ -127,6 +215,7 @@ def _median_sorted(a):
 
 
 def simulate(p):
+    check_input(p)
     mode = p["mode"]
     seq, filem, manual = mode == "sequence", mode == "file", mode == "manual"
     runs = 1 if seq else (p.get("runs") or RUNS)
@@ -142,6 +231,15 @@ def simulate(p):
     n_days = len(days) if days else 0
     open_s = p.get("open_s") if pers and pers["cooldown"] >= 0 else None
     close_s = p.get("close_s") if pers and pers["cooldown"] >= 0 else None
+    if open_s is not None:
+        def same(x):
+            return isinstance(x, list) and len(x) == n_days and all(
+                isinstance(t, list) and len(t) == len(days[i]) and all(_num(v) for v in t) for i, t in enumerate(x))
+        if not same(open_s) or not same(close_s):
+            _fail("simulate: open_s and close_s hold one finite time per trade, day by day")
+    intraday = r["target_check"] == "intraday"
+    count_any = r["count_day_if"] == "any"
+    profitable = r["min_days_kind"] == "profitable"
     daily, max_loss, stop_at = r["daily_loss"], r["max_loss"], r["trail_stop_at"]
 
     def floor_of(peak):
@@ -159,7 +257,7 @@ def simulate(p):
     seq_target, seq_pnl = None, []
     for k in range(runs):
         rand = E.mulberry32(mix32(seed, k)) if stream == "paired" else shared
-        eq, peak, floor, loss_run, outcome, best, prof = 0.0, 0.0, floor_of(0.0), 0, "timeout", -math.inf, 0
+        eq, peak, floor, loss_run, outcome, best, prof, tdays = 0.0, 0.0, floor_of(0.0), 0, "timeout", -math.inf, 0, 0
         held_c = held_m = False
         bust_day = 0
         busted = False
@@ -182,7 +280,7 @@ def simulate(p):
                 n = p["trades_per_day"]
             start = eq
             taken = losses = 0
-            stopped = prev_loss = False
+            stopped = prev_loss = nz = False
             loss_closes = []
             for i in range(n):
                 pnl = day[i] if day is not None else (p["avg_win"] if rand() < p["win_rate"] else -p["avg_loss"])
@@ -201,6 +299,8 @@ def simulate(p):
                 before = loss_run
                 eq += pnl
                 loss_run = loss_run + 1 if pnl < 0 else 0
+                if pnl != 0:
+                    nz = True
                 why = None
                 if daily is not None and eq <= start - daily:
                     why = "daily"
@@ -234,6 +334,20 @@ def simulate(p):
                         stopped = True
                     if pers["stop_at"] is not None and eq - start <= -pers["stop_at"]:
                         stopped = True
+                if intraday and eq >= r["target"]:
+                    if seq and seq_target is None:
+                        seq_target = d
+                    cur = eq - start
+                    if profitable:
+                        cnt = prof + (1 if cur > 0 and cur >= r["profitable_day_min"] else 0)
+                    else:
+                        cnt = tdays + (1 if count_any or nz else 0)
+                    ok_m = cnt >= r["min_days"]
+                    ok_c = r["consistency"] is None or (cur if cur > best else best) <= r["consistency"] * eq
+                    if ok_m and ok_c:
+                        break
+                    held_m = held_m or not ok_m
+                    held_c = held_c or not ok_c
             if busted:
                 break
             day_pnl = eq - start
@@ -248,10 +362,12 @@ def simulate(p):
                 best = day_pnl
             if day_pnl > 0 and day_pnl >= r["profitable_day_min"]:
                 prof += 1
+            if count_any or nz:
+                tdays += 1
             if eq >= r["target"]:
                 if seq and seq_target is None:
                     seq_target = d
-                ok_m = (prof if r["min_days_kind"] == "profitable" else d) >= r["min_days"]
+                ok_m = (prof if profitable else tdays) >= r["min_days"]
                 ok_c = r["consistency"] is None or best <= r["consistency"] * eq
                 if ok_m and ok_c:
                     outcome = "pass"
@@ -391,13 +507,15 @@ def day_key(naive_ms, file_tz, day_start):
     if day_start["tz"] == "file":
         return (naive_ms - h) // DAY
     utc = file_to_utc(naive_ms, file_tz)
-    return (utc + tz_offset(day_start["tz"], utc) - h) // DAY
+    off = tz_offset("America/New_York", utc) + 7 * HOUR if day_start["tz"] == "broker" else tz_offset(day_start["tz"], utc)
+    return (utc + off - h) // DAY
 
 
 def group_days(trades, file_tz=None, day_start=None):
     days, opens, closes, index, keys = [], [], [], [], []
     key, base = None, 0
-    for i, t in enumerate(trades):
+    for i in sorted(range(len(trades)), key=lambda j: (trades[j]["close_ts"], j)):
+        t = trades[i]
         k = day_key(t["close_ts"], file_tz, day_start)
         o = 60 * (t["open_ts"] // 60000)
         c = o + (t["hold_s"] if "hold_s" in t else (t["close_ts"] - t["open_ts"]) // 1000)

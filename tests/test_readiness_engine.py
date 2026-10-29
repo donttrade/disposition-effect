@@ -587,3 +587,140 @@ def test_engine_strings_pass_the_wording_rules(page):
         assert L.lint_text(s, "engine") == [], s
     caveat = page.evaluate(f"import('{CORE}').then(m => m.WHATIF_TEXT.caveat)")
     assert caveat.endswith("Not investment advice.")
+
+
+# ------------------------------------------------------------------ Tester round 1 (F2, F4, F5, F3)
+def test_target_intraday_vs_end_of_day(page):
+    # [+1200, -300], target 1000: intraday passes on the first trade; end of day it does not
+    i = sim(page, seq_p([[1200, -300]], target=1000, target_check="intraday"))
+    e = sim(page, seq_p([[1200, -300]], target=1000))
+    assert (i["outcome"], i["day"], i["day_pnl"]) == ("pass", 1, [1200])
+    assert e["outcome"] == "timeout" and e["target_day"] is None
+    # [+1200, -1800] with max loss 500: intraday passes before the loss; end of day busts
+    i = sim(page, seq_p([[1200, -1800]], target=1000, max_loss=500, target_check="intraday"))
+    e = sim(page, seq_p([[1200, -1800]], target=1000, max_loss=500))
+    assert i["outcome"] == "pass" and (e["outcome"], e["why"]) == ("bust", "max")
+    # a breach before the target is a bust either way
+    for tc in ("intraday", "eod"):
+        b = sim(page, seq_p([[-600, 1700]], target=1000, daily_loss=500, target_check=tc))
+        assert (b["outcome"], b["why"]) == ("bust", "daily"), tc
+
+
+def test_target_intraday_counts_today_and_holds(page):
+    # min 2 trading days: day 1 reaches the target intraday but is held; day 2 passes on its first trade
+    a = sim(page, seq_p([[1200, -100], [10, -5000]], target=1000, min_days=2, target_check="intraday"))
+    assert (a["outcome"], a["day"], a["held_min_days"], a["day_pnl"]) == ("pass", 2, 1, [1100, 10])
+    # consistency 0.5: the best day so far includes today's running P&L
+    # day 2: +500 → 1100, best 600 > 550 (held); +100 → 1200, best 600 <= 600 (passes on that trade)
+    c = sim(page, seq_p([[600], [500, 100, -900]], target=1000, consistency=0.5, target_check="intraday"))
+    assert (c["outcome"], c["day"], c["held_consistency"], c["day_pnl"], c["trades_seen"]) == ("pass", 2, 1, [600, 600], 3)
+    h = sim(page, seq_p([[600], [450, 300]], target=1000, consistency=0.5, target_check="intraday"))
+    assert (h["outcome"], h["held_consistency"]) == ("timeout", 1)   # 600 > 525, then 750 > 675
+
+
+def test_count_day_if_nonzero(page):
+    d = [[0], [50], [0, 0], [60]]
+    a = sim(page, seq_p(d, target=100, min_days=3))                         # any traded day counts
+    n = sim(page, seq_p(d, target=100, min_days=3, count_day_if="nonzero"))  # only days with a non-zero result
+    assert (a["outcome"], a["day"]) == ("pass", 4)
+    assert (n["outcome"], n["held_min_days"]) == ("timeout", 1)
+    n2 = sim(page, seq_p(d + [[0, 5]], target=100, min_days=3, count_day_if="nonzero"))
+    assert (n2["outcome"], n2["day"]) == ("pass", 5)
+
+
+def test_broker_day_start(page):
+    br = {"tz": "broker", "hour": 0}
+    # broker midnight is 17:00 New York: 21:30Z on 27 Oct (EDT) is 00:30 broker time, the next day;
+    # 21:30Z on 1 Dec (EST) is 23:30 broker time, the same day as 20:00Z
+    for a, b, same in (("2026-10-27 20:00", "2026-10-27 21:30", False), ("2026-12-01 20:00", "2026-12-01 21:30", True)):
+        ka, kb = js(page, "dayKey", ms(a), "UTC", br), js(page, "dayKey", ms(b), "UTC", br)
+        assert (ka, kb) == (R.day_key(ms(a), "UTC", br), R.day_key(ms(b), "UTC", br))
+        assert (ka == kb) == same, (a, b)
+
+
+def test_group_days_sorts_by_close(page):
+    t = [trade("2026-10-27 10:00", "2026-10-27 11:00", 2), trade("2026-10-26 10:00", "2026-10-26 11:00", 1),
+         trade("2026-10-27 09:00", "2026-10-27 09:30", 3)]
+    g = group(page, t)
+    assert g["days"] == [[1], [3, 2]] and g["index"] == [[1], [2, 0]]
+
+
+R_OK = {"target": 100, "daily_loss": None, "max_loss": 100, "time_limit": 10}
+BAD_RULES = [
+    ({"target": float("nan")}, "rules: target is an amount above zero"),
+    ({"target": -5}, "rules: target is an amount above zero"),
+    ({"max_loss": None}, "rules: max_loss is an amount above zero"),
+    ({"max_loss": float("inf")}, "rules: max_loss is an amount above zero"),
+    ({"daily_loss": -5}, "rules: daily_loss is an amount above zero, or null for none"),
+    ({"daily_loss": float("nan")}, "rules: daily_loss is an amount above zero, or null for none"),
+    ({"time_limit": float("nan")}, "rules: time_limit is a whole number of days from 1 to 365, or null for none"),
+    ({"time_limit": 0}, "rules: time_limit is a whole number of days from 1 to 365, or null for none"),
+    ({"time_limit": 1000}, "rules: time_limit is a whole number of days from 1 to 365, or null for none"),
+    ({"time_limit": 2.5}, "rules: time_limit is a whole number of days from 1 to 365, or null for none"),
+    ({"min_days": -1}, "rules: min_days is a whole number from 0 to 365"),
+    ({"min_days": 1.5}, "rules: min_days is a whole number from 0 to 365"),
+    ({"trail_stop_at": -1}, "rules: trail_stop_at is an amount of zero or more, or null"),
+    ({"consistency": 0}, "rules: consistency is a share above 0 and at most 1, or null"),
+    ({"consistency": float("nan")}, "rules: consistency is a share above 0 and at most 1, or null"),
+    ({"profitable_day_min": -1}, "rules: profitable_day_min is an amount of zero or more"),
+    ({"drawdown": "trailing"}, "rules: drawdown is static, trailing_eod or trailing_trade"),
+    ({"trailing": "yes"}, "rules: trailing is true or false"),
+    ({"count_day_if": "always"}, "rules: count_day_if is any or nonzero"),
+    ({"target_check": "now"}, "rules: target_check is eod or intraday"),
+]
+
+
+def js_error(page, fn, *args):
+    return page.evaluate("""async ([fn, args, core]) => {
+        const c = await import(core);
+        try { c[fn](...args); return null; } catch (e) { return e.message; }
+    }""", [fn, list(args), CORE])
+
+
+def py_error(f, *args):
+    try:
+        f(*args)
+    except ValueError as e:
+        return str(e)
+    return None
+
+
+@pytest.mark.parametrize("bad,msg", BAD_RULES, ids=[m.split(":")[1].split()[0] + str(i) for i, (_, m) in enumerate(BAD_RULES)])
+def test_bad_rules_are_rejected_in_both_engines(page, bad, msg):
+    p = {"mode": "sequence", "days": [[1]], "rules": {**R_OK, **bad}}
+    assert js_error(page, "simulate", p) == msg == py_error(R.simulate, p)
+
+
+def test_missing_required_rules_are_rejected(page):
+    for k, msg in (("daily_loss", "rules: daily_loss is an amount above zero, or null for none"),
+                   ("time_limit", "rules: time_limit is a whole number of days from 1 to 365, or null for none"),
+                   ("target", "rules: target is an amount above zero"), ("max_loss", "rules: max_loss is an amount above zero")):
+        r = {kk: v for kk, v in R_OK.items() if kk != k}
+        p = {"mode": "sequence", "days": [[1]], "rules": r}
+        assert js_error(page, "simulate", p) == msg == py_error(R.simulate, p), k
+
+
+BAD_INPUT = [
+    ({"mode": "random"}, "simulate: mode is file, sequence or manual"),
+    ({"runs": 0}, "simulate: runs is a whole number from 1 to 1,000,000"),
+    ({"seed": -1}, "simulate: seed is a whole number from 0 to 4294967295"),
+    ({"seed": float("nan")}, "simulate: seed is a whole number from 0 to 4294967295"),
+    ({"stream": "other"}, "simulate: stream is legacy or paired"),
+    ({"days": []}, "simulate: no trading days"),
+    ({"days": [[1, float("nan")]]}, "simulate: every trade result is a finite number"),
+    ({"days": [5]}, "simulate: each day is a list of trade results"),
+    ({"mode": "manual", "win_rate": 1.5, "avg_win": 1, "avg_loss": 1, "trades_per_day": 1}, "simulate: win_rate is a share from 0 to 1"),
+    ({"mode": "manual", "win_rate": 0.5, "avg_win": -1, "avg_loss": 1, "trades_per_day": 1}, "simulate: avg_win is an amount above zero"),
+    ({"mode": "manual", "win_rate": 0.5, "avg_win": 1, "avg_loss": float("nan"), "trades_per_day": 1}, "simulate: avg_loss is an amount above zero"),
+    ({"mode": "manual", "win_rate": 0.5, "avg_win": 1, "avg_loss": 1, "trades_per_day": 0}, "simulate: trades_per_day is a whole number from 1 to 50"),
+    ({"personal": {"cooldown_s": 900}, "open_s": [[0, 1]], "close_s": [[0]]}, "simulate: open_s and close_s hold one finite time per trade, day by day"),
+    ({"personal": {"stop_at_day_loss_amount": float("inf")}}, "personal: stop_at_day_loss_amount is an amount above zero"),
+    ({"personal": {"stop_after_losses": float("nan")}}, "personal: stop_after_losses is a whole number from 1 to 10"),
+    ({"personal": {"max_trades": -2}}, "personal: max_trades is a whole number from 1 to 50"),
+]
+
+
+@pytest.mark.parametrize("bad,msg", BAD_INPUT, ids=[str(i) for i in range(len(BAD_INPUT))])
+def test_bad_input_is_rejected_in_both_engines(page, bad, msg):
+    p = {"mode": "file", "days": [[1]], "rules": R_OK, "runs": 10, **bad}
+    assert js_error(page, "simulate", p) == msg == py_error(R.simulate, p)
