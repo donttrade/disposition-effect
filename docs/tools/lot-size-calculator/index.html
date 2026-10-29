@@ -25,7 +25,7 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=82f5ebc1">
+<link rel="stylesheet" href="/static/css/site.css?v=80625a32">
 <script src="/static/js/theme.js?v=74363ef7"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
 <script src="/static/js/pay.js?v=d20a3680" defer></script>
@@ -63,14 +63,29 @@
 <main id="main">
 
 <div class="wrap">
-  <div class="grid">
-    <div class="span-8">
+  <div class="tool-hero">
+    <div>
       <nav class="crumb small" aria-label="Breadcrumb"><ol class="crumbs"><li><a href="/">Home</a><span class="crumb-sep" aria-hidden="true">›</span></li><li><a href="/tools/">Free tools</a><span class="crumb-sep" aria-hidden="true">›</span></li><li><span aria-current="page">Lot size calculator</span></li></ol></nav>
 
       <h1>Lot size calculator</h1>
-      <p class="lede">Enter your account balance, the amount you would lose if the stop is hit (as a percentage or as an amount), your stop distance, and the value of one point for one lot on your instrument.</p>
-      <p>The calculator returns the position size in lots, shows the loss at the stop after rounding down to your broker’s lot step, and prints the formula with your own numbers in it so you can redo it by hand. It works for forex pairs, gold, indices and futures, as long as you know the point value your broker uses; the section below shows where to find it. The inputs start blank on purpose. We do not suggest a risk percentage, because that choice is yours. Entries that could be read two ways, such as “1,500” in a field that also accepts decimals, are refused instead of guessed. It runs entirely in your browser and nothing you type is sent anywhere.</p>
+      <p class="lede">Your balance, risk and stop give the lot size, with the sum shown.</p>
     </div>
+    
+<figure class="tool-shot" aria-labelledby="shot-cap">
+  <div class="shot-card tool-shot-card">
+    <span class="tp-tag" aria-hidden="true">Example</span>
+    <table class="mini-shot">
+      <tbody>
+        <tr><th scope="row">Risk amount</th><td>200</td></tr>
+        <tr><th scope="row">Stop distance</th><td>40 points</td></tr>
+        <tr><th scope="row">Value per point, 1 lot</th><td>1</td></tr>
+        <tr class="mini-total"><th scope="row">Lot size</th><td>5 lots</td></tr>
+      </tbody>
+    </table>
+    <p class="shot-line"><span class="muted">200 ÷ (40 × 1) = 5</span></p>
+  </div>
+  <figcaption id="shot-cap">Example numbers.</figcaption>
+</figure>
   </div>
   
 
@@ -134,13 +149,17 @@
 
 
   <section class="section" aria-labelledby="vpp-h">
-    <h2 id="vpp-h">Where to find the value per point</h2>
+    <h2 id="vpp-h">How it works</h2>
+    <details class="how-group"><summary>What it does, and where to find the value per point</summary>
+    <p>Enter your account balance, the amount you would lose if the stop is hit (as a percentage or as an amount), your stop distance, and the value of one point for one lot on your instrument.</p>
+    <p>The calculator returns the position size in lots, shows the loss at the stop after rounding down to your broker’s lot step, and prints the formula with your own numbers in it so you can redo it by hand. It works for forex pairs, gold, indices and futures, as long as you know the point value your broker uses; the section below shows where to find it. The inputs start blank on purpose. We do not suggest a risk percentage, because that choice is yours. Entries that could be read two ways, such as “1,500” in a field that also accepts decimals, are refused instead of guessed. It runs entirely in your browser and nothing you type is sent anywhere.</p>
     <p>Your platform’s contract specification lists the contract size and tick value for each symbol. In MT5, right-click the symbol in Market Watch and open Specification. The value per point can differ between brokers for the same symbol name, so use your own broker’s figure, and measure the stop distance in the same points.</p>
     <ul>
       <li><strong>Forex:</strong> the value of one pip (or one point, if your platform quotes five decimals) for one standard lot, in your account currency.</li>
       <li><strong>Gold and indices (CFDs):</strong> the contract size times the price step, as listed in the specification.</li>
       <li><strong>Futures:</strong> the exchange’s multiplier per point for one contract; here a “lot” is one contract.</li>
     </ul>
+    </details>
   </section>
 
   <section class="section" aria-labelledby="faq-h">
@@ -152,13 +171,6 @@
     <details id="q-does-it-include-spread-commission-or-slippage"><summary>Does it include spread, commission or slippage?</summary><p>No. It sizes from the stop distance you enter. If you want costs included, add the spread to your stop distance; commission and slippage are not modelled.</p></details>
   </section>
 
-  <section class="section" aria-labelledby="more-h">
-    <h2 id="more-h">Related</h2>
-    <ul>
-      <li><a href="/tools/trade-stats/">Trade stats</a>: what your own trade file shows.</li>
-      <li><a href="/tools/prop-challenge-simulator/">Prop-firm challenge simulator</a>: replay a challenge from your own trading days.</li>
-    </ul>
-  </section>
   <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. donttrade is not affiliated with it.</p>
 </div>
 

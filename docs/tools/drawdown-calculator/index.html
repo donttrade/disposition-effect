@@ -25,7 +25,7 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=82f5ebc1">
+<link rel="stylesheet" href="/static/css/site.css?v=80625a32">
 <script src="/static/js/theme.js?v=74363ef7"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
 <script src="/static/js/pay.js?v=d20a3680" defer></script>
@@ -63,13 +63,25 @@
 <main id="main">
 
 <div class="wrap">
-  <div class="grid">
-    <div class="span-8">
+  <div class="tool-hero">
+    <div>
       <p class="crumb small"><a href="/tools/">Free tools</a></p>
       <h1>Drawdown and recovery calculator</h1>
-      <p class="lede">A drawdown is the fall from an account’s high to its lowest point before a new high. The recovery is never symmetrical: after a 20 percent drawdown it takes a 25 percent gain to get back, and after 50 percent it takes 100 percent.</p>
-      <p>The calculator at the top gives that figure for any drawdown you type, and the table below it lists the common ones. Further down, drop a trade file for the picture of your own record: your largest drawdown in money and, if you enter a starting balance, in percent; your longest drawdown measured in trades and in calendar days; how long each drawdown took to recover; and where you stand now. An underwater chart shows every drawdown at a glance, with a table version for screen readers. It reads MT5 and MT4 HTML reports, IBKR Flex Query trade files and Tradovate order exports (all three in beta), and a plain CSV template. Everything runs in this browser tab, and the page’s security policy blocks every outgoing network request, so your file is not uploaded anywhere.</p>
+      <p class="lede">Type a drawdown to see the gain that wins it back. Or drop a trade file.</p>
     </div>
+    
+<figure class="tool-shot" aria-labelledby="shot-cap">
+  <div class="shot-card tool-shot-card">
+    <span class="tp-tag" aria-hidden="true">Example</span>
+    
+<svg class="tp tp-dd" aria-hidden="true" focusable="false" viewBox="0 0 200 60" preserveAspectRatio="none">
+  <line class="tp-base" x1="0" x2="200" y1="2" y2="2"/>
+  <polygon class="tp-dd-area" points="0,2 0.0,2.0 1.3,3.3 3.8,6.1 6.3,2.0 8.8,3.4 11.3,2.0 13.8,2.0 16.4,2.0 18.9,2.0 21.4,2.0 23.9,4.0 26.4,6.4 28.9,2.0 31.5,2.0 34.0,2.0 36.5,2.0 39.0,2.3 41.5,11.5 44.0,7.0 46.5,11.3 49.1,2.1 51.6,10.3 54.1,4.5 56.6,3.3 59.1,7.0 61.6,20.5 64.2,26.4 66.7,26.5 69.2,38.6 71.7,38.0 74.2,42.7 76.7,34.5 79.2,36.5 81.8,33.9 84.3,36.1 86.8,47.3 89.3,53.0 91.8,39.6 94.3,44.2 96.8,28.8 99.4,34.1 101.9,42.0 104.4,41.0 106.9,37.1 109.4,41.7 111.9,37.2 114.5,20.7 117.0,17.7 119.5,12.7 122.0,30.1 124.5,34.1 127.0,37.6 129.5,42.5 132.1,44.1 134.6,34.0 137.1,39.5 139.6,49.1 142.2,49.9 144.7,43.9 147.2,40.8 149.7,43.9 152.2,40.8 154.7,32.3 157.2,33.3 159.8,35.8 162.3,42.0 164.8,36.6 167.3,32.8 169.8,17.7 172.3,23.5 174.8,38.9 177.4,37.6 179.9,37.8 182.4,30.8 184.9,35.1 187.4,34.6 189.9,17.2 192.5,28.6 195.0,32.8 197.5,33.9 200.0,29.5 200.0,2.0 200,2"/>
+  <polyline class="tp-dd-line" points="0.0,2.0 1.3,3.3 3.8,6.1 6.3,2.0 8.8,3.4 11.3,2.0 13.8,2.0 16.4,2.0 18.9,2.0 21.4,2.0 23.9,4.0 26.4,6.4 28.9,2.0 31.5,2.0 34.0,2.0 36.5,2.0 39.0,2.3 41.5,11.5 44.0,7.0 46.5,11.3 49.1,2.1 51.6,10.3 54.1,4.5 56.6,3.3 59.1,7.0 61.6,20.5 64.2,26.4 66.7,26.5 69.2,38.6 71.7,38.0 74.2,42.7 76.7,34.5 79.2,36.5 81.8,33.9 84.3,36.1 86.8,47.3 89.3,53.0 91.8,39.6 94.3,44.2 96.8,28.8 99.4,34.1 101.9,42.0 104.4,41.0 106.9,37.1 109.4,41.7 111.9,37.2 114.5,20.7 117.0,17.7 119.5,12.7 122.0,30.1 124.5,34.1 127.0,37.6 129.5,42.5 132.1,44.1 134.6,34.0 137.1,39.5 139.6,49.1 142.2,49.9 144.7,43.9 147.2,40.8 149.7,43.9 152.2,40.8 154.7,32.3 157.2,33.3 159.8,35.8 162.3,42.0 164.8,36.6 167.3,32.8 169.8,17.7 172.3,23.5 174.8,38.9 177.4,37.6 179.9,37.8 182.4,30.8 184.9,35.1 187.4,34.6 189.9,17.2 192.5,28.6 195.0,32.8 197.5,33.9 200.0,29.5 200.0,2.0"/>
+</svg>
+  </div>
+  <figcaption id="shot-cap">Example data.</figcaption>
+</figure>
   </div>
   
 
@@ -147,7 +159,10 @@
 
 
   <section class="section" aria-labelledby="count-h">
-    <h2 id="count-h">How the numbers are counted</h2>
+    <h2 id="count-h">How it works</h2>
+    <details class="how-group"><summary>How drawdowns are counted</summary>
+    <p>A drawdown is the fall from an account’s high to its lowest point before a new high. The recovery is never symmetrical: after a 20 percent drawdown it takes a 25 percent gain to get back, and after 50 percent it takes 100 percent.</p>
+    <p>The calculator at the top gives that figure for any drawdown you type, and the table below it lists the common ones. Further down, drop a trade file for the picture of your own record: your largest drawdown in money and, if you enter a starting balance, in percent; your longest drawdown measured in trades and in calendar days; how long each drawdown took to recover; and where you stand now. An underwater chart shows every drawdown at a glance, with a table version for screen readers. It reads MT5 and MT4 HTML reports, IBKR Flex Query trade files and Tradovate order exports (all three in beta), and a plain CSV template. Everything runs in this browser tab, and the page’s security policy blocks every outgoing network request, so your file is not uploaded anywhere.</p>
     <ul>
       <li>Equity is the running total of closed-trade results, net of fees when the file has them, starting at 0 before the first trade. A trade runs from flat to flat on each symbol, as on the trade-stats page.</li>
       <li>A drawdown starts when equity falls below its previous high and ends on the first trade that brings it back to that high or above. Its depth is the largest fall from the high in between.</li>
@@ -155,6 +170,7 @@
       <li>With a starting balance, a drawdown’s percentage is its depth divided by the balance plus the equity at the high, and the gain that recovers it is the depth divided by what was left at the low.</li>
       <li>Times are read exactly as written in the file, so results are the same in every time zone.</li>
     </ul>
+    </details>
   </section>
 
   <section class="section" aria-labelledby="faq-h">
@@ -167,15 +183,6 @@
     <details id="q-is-this-investment-advice"><summary>Is this investment advice?</summary><p>No. It measures your own past trades and does not recommend any security, trade, size or exit. Past results do not predict future results.</p></details>
   </section>
 
-  <section class="section" aria-labelledby="more-h">
-    <h2 id="more-h">Related</h2>
-    <ul>
-      <li><a href="/tools/trade-stats/">Trade stats</a>: profit factor, win rate and streaks from your own trade file.</li>
-      <li><a href="/tools/trading-heatmap/">Trading heatmap</a>: your trades by hour and weekday.</li>
-      <li><a href="/tools/prop-challenge-simulator/">Prop-firm challenge simulator</a>: replay a challenge from your own trading days.</li>
-      <li><a href="/tools/risk-reward-calculator/">Risk-reward calculator</a>: R multiple, break-even win rate and expectancy in R.</li>
-    </ul>
-  </section>
   <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR and Tradovate are trademarks of their owners. donttrade is not affiliated with any of them.</p>
 </div>
 <script type="text/csv" id="dd-sample">

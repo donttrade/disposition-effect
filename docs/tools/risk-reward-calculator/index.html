@@ -25,7 +25,7 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=82f5ebc1">
+<link rel="stylesheet" href="/static/css/site.css?v=80625a32">
 <script src="/static/js/theme.js?v=74363ef7"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
 <script src="/static/js/pay.js?v=d20a3680" defer></script>
@@ -63,13 +63,30 @@
 <main id="main">
 
 <div class="wrap">
-  <div class="grid">
-    <div class="span-8">
+  <div class="tool-hero">
+    <div>
       <p class="crumb small"><a href="/tools/">Free tools</a></p>
       <h1>Risk-reward calculator</h1>
-      <p class="lede">Enter an entry price, a stop and a target, or type the reward-to-risk ratio directly, and the calculator returns three numbers that belong together: the R multiple, the win rate at which that ratio breaks even, and the expectancy per trade in R at any win rate you enter.</p>
-      <p>The break-even win rate is 1 divided by 1 plus R, so a 2-to-1 setup breaks even at about 33 percent before costs. The page shows every formula with your numbers in it, so you can redo it by hand. The inputs start blank on purpose: the page does not propose a ratio or a win rate. Entries that could be read two ways, such as “1,500”, are refused instead of guessed. It runs entirely in your browser and nothing you type is sent anywhere.</p>
+      <p class="lede">Entry, stop and target give your R multiple and the win rate that breaks even.</p>
     </div>
+    
+<figure class="tool-shot" aria-labelledby="shot-cap">
+  <div class="shot-card tool-shot-card">
+    <span class="tp-tag" aria-hidden="true">Example</span>
+    <svg class="rr-ladder" viewBox="0 0 280 150" role="img" aria-label="Entry 100, stop 98, target 106: 3R. It breaks even when 1 trade in 4 wins.">
+      <line class="rr-axis" x1="70" x2="70" y1="10" y2="140"/>
+      <rect class="rr-win" x="62" y="14" width="16" height="72" rx="3"/>
+      <rect class="rr-risk" x="62" y="86" width="16" height="24" rx="3"/>
+      <text class="rr-k" x="0" y="20">Target</text><text class="rr-v" x="90" y="20">106</text>
+      <text class="rr-k" x="0" y="90">Entry</text><text class="rr-v" x="90" y="90">100</text>
+      <text class="rr-k" x="0" y="114">Stop</text><text class="rr-v" x="90" y="114">98</text>
+      <text class="rr-big" x="160" y="62">3R</text>
+      <text class="rr-k" x="160" y="86">6 up, 2 down</text>
+    </svg>
+    <p class="shot-line"><strong>Breaks even at 1 win in 4</strong> <span class="muted">before costs</span></p>
+  </div>
+  <figcaption id="shot-cap">Example numbers.</figcaption>
+</figure>
   </div>
   
 
@@ -137,13 +154,17 @@
 
 
   <section class="section" aria-labelledby="formula-h">
-    <h2 id="formula-h">The three formulas</h2>
+    <h2 id="formula-h">How it works</h2>
+    <details class="how-group"><summary>What it does, and the three formulas</summary>
+    <p>Enter an entry price, a stop and a target, or type the reward-to-risk ratio directly, and the calculator returns three numbers that belong together: the R multiple, the win rate at which that ratio breaks even, and the expectancy per trade in R at any win rate you enter.</p>
+    <p>The break-even win rate is 1 divided by 1 plus R, so a 2-to-1 setup breaks even at about 33 percent before costs. The page shows every formula with your numbers in it, so you can redo it by hand. The inputs start blank on purpose: the page does not propose a ratio or a win rate. Entries that could be read two ways, such as “1,500”, are refused instead of guessed. It runs entirely in your browser and nothing you type is sent anywhere.</p>
     <ul>
       <li><strong>R multiple</strong> = the distance from entry to target ÷ the distance from entry to stop. Entry 100, stop 98, target 106: 6 ÷ 2 = 3R.</li>
       <li><strong>Break-even win rate</strong> = 1 ÷ (1 + R). At 3R: 1 ÷ 4 = 25 percent. Costs are not included, so the real figure is a little higher.</li>
       <li><strong>Expectancy in R</strong> = win rate × R − loss rate × 1R. At 3R and a 40 percent win rate: 0.40 × 3 − 0.60 × 1 = +0.60R per trade. At the break-even win rate it is exactly 0.</li>
     </ul>
     <p>The calculator counts every win as exactly the R multiple and every loss as exactly 1R. Real trades rarely close exactly at the stop or the target. To see the average win and average loss your own past trades produced, use <a href="/tools/trade-stats/">trade stats</a>.</p>
+    </details>
   </section>
 
   <section class="section" aria-labelledby="faq-h">
@@ -156,14 +177,6 @@
     <details id="q-is-this-investment-advice"><summary>Is this investment advice?</summary><p>No. It is arithmetic on the numbers you enter and does not recommend any security, trade, size or exit. Past results do not predict future results.</p></details>
   </section>
 
-  <section class="section" aria-labelledby="more-h">
-    <h2 id="more-h">Related</h2>
-    <ul>
-      <li><a href="/tools/lot-size-calculator/">Lot size calculator</a>: the size in lots from balance, risk amount and stop distance.</li>
-      <li><a href="/tools/trade-stats/">Trade stats</a>: win rate, average win and average loss from your own trade file.</li>
-      <li><a href="/tools/drawdown-calculator/">Drawdown and recovery calculator</a>: the gain that recovers a drawdown, and your own drawdowns.</li>
-    </ul>
-  </section>
 </div>
 
 </main>
