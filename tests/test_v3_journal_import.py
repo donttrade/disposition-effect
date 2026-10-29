@@ -111,7 +111,12 @@ def test_j2_worker_gives_the_same_keys_as_the_page(jctx):
 
 
 # The engine commits made after the journal (motion), each a new reader the journal did not need to change.
-ENGINE_COMMITS_SINCE_MOTION = ("Engine: TradingView Order History parser",)
+# The universal importer (B1/B2) adds readers beside it; one file through runFile() reads as before,
+# with dates_only and n_date_only added to the result (the journal does not read them yet).
+ENGINE_COMMITS_SINCE_MOTION = ("Engine: TradingView Order History parser",
+                               "Engine: mapped columns, several files, pasted tables, dates_only",
+                               "Engine: eight timed presets, synthetic importer fixtures",
+                               "Engine: the column guess for the mapper")
 
 
 def test_j13_engine_and_file_worker_untouched():
