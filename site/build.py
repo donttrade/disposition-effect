@@ -458,8 +458,8 @@ PAGES += [
      "modules": ["/static/js/tools/prop-sim.js"], "sample": True, "app": True, "updated": "2026-10-29",
      "presets": True, "crumb": "Challenge Readiness Check",
      "title": "Challenge Readiness Check: Your Past Days, Firm Rules",
-     "description": "Replay your own past trading days 10,000 times under a prop firm's published rules or your own. "
-                    "Pass, bust and time-out shares, the rule that broke most. Free, in your browser."},
+     "description": "Replay your past trading days 10,000 times under a prop firm's published rules or your own: "
+                    "pass, bust and time-out shares. Free, in your browser."},
     {"template": "pages/tool-lot-size.html", "path": "/tools/lot-size-calculator/", "requires_flag": None,
      "modules": ["/static/js/tools/lot-size.js"], "app": True, "updated": "2026-10-21",
      "crumb": "Lot size calculator",
@@ -547,8 +547,8 @@ PAGES += [
 ]
 PAGES += [
     {"template": "pages/count-stub.html", "path": COUNT_BASE + name + "/", "requires_flag": "analytics", "noindex": True,
-     "no_ask": True, "crumb": "Counted", "title": "Counted — donttrade",
-     "description": "A page the Challenge Readiness Check loads so the site's cookie-free analytics count a finished step."}
+     "no_ask": True, "crumb": "Counted", "title": f"Counted: {name} — donttrade",
+     "description": f"A page the Challenge Readiness Check loads so the site's cookie-free analytics count one step: {name}."}
     for name in COUNT_EVENTS
 ]
 
