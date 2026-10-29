@@ -9,7 +9,7 @@
   <div class="tool-hero">
     <div>
       <h1>Trade stats from your own trade file</h1>
-      <p class="lede">Drop your MT5, MT4, IBKR, Tradovate or TradingView export. Get your win rate, profit factor, drawdown and streaks in seconds.</p>
+      <p class="lede">Drop your MT5, MT4, IBKR, Tradovate or TradingView export (all in beta). Get your win rate, profit factor, drawdown and streaks in seconds.</p>
       <p class="small muted">No account. Your file is read in this tab and not uploaded.{% if flags.free_badges %} Three of the numbers get a real-or-noise check. With fewer than 30 trades it says there are not enough trades to tell, because a figure from 12 trades can swing a long way on one result.{% endif %}</p>
     </div>
     {% include "partials/ts_mock.html" %}
@@ -22,7 +22,7 @@
     <div id="ts-controls" hidden data-js-show>
       <div class="dropzone" id="ts-drop">
         <p><strong>Drop a trade file here</strong>, or choose one from your computer.</p>
-        <p class="small muted">MT5 or MT4 report (.htm, .html), IBKR Flex Query (.csv), Tradovate Orders (.csv), TradingView Order History (.csv), or the CSV template. Up to 50 MB and 200,000 rows.</p>
+        <p class="small muted">MT5 or MT4 report (.htm, .html), IBKR Flex Query (.csv), Tradovate Orders (.csv), TradingView Order History (.csv), all in beta, or the CSV template. Up to 50 MB and 200,000 rows.</p>
         <div class="file-pick">
           <label for="ts-file">Your trade file</label>
           <input id="ts-file" type="file" accept=".csv,.htm,.html,.txt">

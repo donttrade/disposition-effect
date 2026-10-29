@@ -71,6 +71,7 @@
   <div class="no-print"><ol class="how-steps report-steps">
   <li class="how-step">
     <h2 class="rs-h"><span class="how-n">1</span> Export your full history</h2>
+    <p class="small muted">MetaTrader, IBKR, Tradovate and TradingView files are all in beta.</p>
     <details class="how-more"><summary>MetaTrader 5</summary><p>History tab, right-click, choose All History, then Report and save it as HTML.</p></details>
     <details class="how-more"><summary>MetaTrader 4</summary><p>Account History tab, right-click, choose All History, then Save as Detailed Report.</p></details>
     <details class="how-more"><summary>IBKR</summary><p>A Flex Query with the Trades section at execution level, as CSV. IBKR allows up to 365 days per export, so pick the last 365 days.</p></details>
@@ -92,7 +93,7 @@
     <p id="rp-access" class="muted"></p>
     <div class="dropzone" id="rp-drop">
       <p><strong>Drop your trade file here</strong>, or choose it:</p>
-      <label for="rp-file">Trade file (MT5/MT4 report, IBKR Flex, Tradovate Orders, TradingView Order History, or the CSV template)</label>
+      <label for="rp-file">Trade file (MT5/MT4 report, IBKR Flex, Tradovate Orders, TradingView Order History, all in beta, or the CSV template)</label>
       <input id="rp-file" type="file" accept=".csv,.htm,.html,.txt">
     </div>
     <details class="how-more"><summary>What is sent</summary><p>Your browser sends our server only stripped trade numbers: open and close times, buy or sell, relative size, the realised result, a random symbol number and a scrambled fingerprint of each row. No name, account number or ticker is sent. The numbers are not kept; we keep only a scrambled fingerprint of each trade row from your first report, so a re-test can be matched to the same history, and we delete it on the dates in our privacy notice.</p></details>
