@@ -517,7 +517,7 @@
     "symbol": "AAA"
    }
   ],
-  "tz_label": "as in the file; time zone labels ignored",
+  "tz_label": "as in the file; order and hold times use each row's UTC offset",
   "verified_format": false,
   "warnings": [
    {

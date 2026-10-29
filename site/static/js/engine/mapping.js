@@ -424,6 +424,9 @@ export function guessMapping(peek, dataRows, opts = {}) {
     const rowOf = (k) => (k >= 0 ? rows[Math.floor(k / dateCols.length)].row : null);
     dateInfo = { format: det.format, reason: det.reason, seen: det.at >= 0 ? short(values[det.at]) : null,
       seen_row: rowOf(det.at), seen2: det.at2 >= 0 ? short(values[det.at2]) : null, seen2_row: rowOf(det.at2) };
+    // Two-digit years 50-99: the engine reads them only with a century chosen (year_base).
+    const yk = values.findIndex((v) => { const y = /^\d{1,2}[-/.]\d{1,2}[-/.](\d{2})(?!\d)/.exec(clean(v)); return y && Number(y[1]) >= 50; });
+    if (yk >= 0) questions.push({ q: 'two_digit_year', example: short(values[yk]), row: rowOf(yk) });
     if (det.reason === 'ask') {
       const k = values.findIndex((v) => dateShape(v).kind === 'dm');
       questions.push({ q: 'date_order', example: short(values[k]), row: rowOf(k), readings: readings(values[k]) });
@@ -479,7 +482,7 @@ export function guessMapping(peek, dataRows, opts = {}) {
     side_from: sideFrom, side_values: sideValues, side_rules: null, side_default: null,
     status_values: statusValues, status_rules: null,
     date_format: dateInfo && dateInfo.format ? dateInfo.format : null, number_style: null, futures_sizes: false,
-    currency: null, preset: null, section: false, trim_ragged: peek.kind === 'paste',
+    currency: null, year_base: null, preset: null, section: false, trim_ragged: peek.kind === 'paste',
     source: peek.kind === 'html' ? { kind: 'html', table: peek.table } : null, tz: null, keep_partial: false,
   };
   return {

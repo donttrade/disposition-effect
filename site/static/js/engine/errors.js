@@ -84,6 +84,8 @@ export const WARNING_TEXT = Object.freeze({
   W_OVERLAP_ROWS: 'Some rows were in more than one file and were counted once.',
   W_PNL_SIGN:
     "In some rows the profit's sign does not match the prices and direction: the long/short column may be swapped.",
+  W_SOME_DATES_ONLY:
+    'Some rows have a date but no time. Their trades are read at day level, with no time of day.',
   W_DATES_ONLY:
     'Your file has dates but no times. Results that depend on the time of day are not available; day-level results still are.',
   W_WIDE_ROWS:
