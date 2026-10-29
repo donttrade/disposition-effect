@@ -386,6 +386,24 @@ def lint_text(text, where="text", paid=False, analytics=False, english=True):
     out += dated_pricing_claims(text, where)
     out += scarcity_claims(text, where)
     out += free_forever_claims(text, where)
+    out += dt_name_claims(text, where)
+    return out
+
+
+# 29 Oct (owner: one product): the method's version name (DT-1, DT-2 …) is never shown alone. Each mention has
+# the descriptor, "the donttrade test" (or « test donttrade »), within the same passage (250 characters either side).
+DT_NAME = re.compile(r"\bDT-[0-9]+\b")
+DT_DESCRIPTOR = re.compile(r"(?i)\bdonttrade test\b|\btest donttrade\b")
+DT_WINDOW = 250
+
+
+def dt_name_claims(text, where):
+    out = []
+    for m in DT_NAME.finditer(text):
+        win = text[max(0, m.start() - DT_WINDOW):m.end() + DT_WINDOW]
+        if not DT_DESCRIPTOR.search(win):
+            ctx = text[max(0, m.start() - 40):m.end() + 40].replace("\n", " ")
+            out.append(("claim:dt_name_alone", where, f"“{m.group(0)}” without “the donttrade test” nearby: …{ctx}…"))
     return out
 
 

@@ -9,7 +9,7 @@
     <thead><tr><th scope="col">Date</th><th scope="col">Method</th><th scope="col">Name</th><th scope="col">What it does</th></tr></thead>
     <tbody>
     {%- for e in report_methods %}
-      <tr><td>{{ e.date_text }}</td><td><code>{{ e.method }}</code></td><td>{{ e.name or "" }}</td><td>{{ e.text }}</td></tr>
+      <tr><td>{{ e.date_text }}</td><td><code>{{ e.method }}</code></td><td>{% if e.name %}{{ e.name }}: the donttrade test, a habit test on your own trades{% endif %}</td><td>{{ e.text }}</td></tr>
     {%- endfor %}
     </tbody>
   </table></div>

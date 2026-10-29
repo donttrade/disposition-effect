@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-{%- set r = products["report39"] %}{%- set t = products["tracker79"] %}
+{%- set r = products["report39"] %}
 {%- import "partials/trader_offer.html" as offer with context %}
 {%- set sale = flags.paid_report %}
 {%- if sale %}
@@ -134,7 +134,7 @@
 
   <section class="section" aria-labelledby="founding" data-reveal>
     <h2 id="founding">The founding offer</h2>
-    <p>The donttrade test is {{ r.price_usd|usd }}, one time, in US dollars. It includes one re-test of the same account. Your re-test runs on the version of the test that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>. A yearly habit tracker comes later, at {{ t.price_usd|usd }} a year as its founding price; it is not sold until it exists.</p>
+    <p>The donttrade test is {{ r.price_usd|usd }}, one time, in US dollars. It includes one re-test of the same account. Your re-test runs on the version of the test that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.</p>
     {%- if sale %}
     <p>The price, the seller’s details and the terms are in the “Before you pay” summary, shown before you pay. A full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying. <a href="/terms/#traders">Trader terms</a></p>
     {%- else %}

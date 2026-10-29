@@ -33,6 +33,9 @@ skill_claims = ["skill*", "skilful*", "unskill*", "talent*", "untalented", "beat
 # lifted STUDY bodies (/research/<study>/) keep their published "sealed pre-registration" (passthrough
 # rules only); the other lifted pages' frozen bodies and feed.xml get this group too (Tester D4).
 seal_words = ["seal*", "unseal*", "reseal*", "seal of approval"]
+# 29 Oct (owner: one product, the donttrade test): "improve" and the singular "signal" join the directive and coaching
+# words; the test's method name (DT-1) is never called a score.
+one_product = ["improve", "improves", "improving", "signal", "score", "scores", "scored", "scoring"]
 
 [allow]
 # the one place the old product name may appear: "called “Trial” before <[legal] launch_date>" (Manager C3)
@@ -72,6 +75,10 @@ phrases = [
   # FAQ questions whose answer on the page starts with "No."
   "Is this investment advice?",
   "Is this advice?",
+  # one_product (29 Oct): negations in frozen study and glossary text (the research heads, /glossary/)
+  "Not a strategy or signal.",
+  "Not a strategy or a signal.",
+  "is not scored as disciplined",
 ]
 
 [words_fr]
