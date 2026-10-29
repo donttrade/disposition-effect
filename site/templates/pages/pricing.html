@@ -113,7 +113,11 @@
         <li>One free re-test, 30 to 60 days later</li>
         <li>Pay by card on Stripe’s page</li>
       </ul>
-      <details class="pay-step" id="last-step">
+      {#- 29 Oct (Tester sweep 3 #4): #last-step and #byp-more are open in the HTML, so a visitor without JavaScript
+          who follows a buy link to #last-step lands on the open pay step with the full details. pay.js closes each at
+          load unless the URL targets it or something inside it, and site.css paints them closed until then (theme.js
+          .dt-pay-hash / .dt-byp-hash when the URL names them), so with JavaScript nothing changes and nothing shifts. -#}
+      <details class="pay-step" id="last-step" open>
         <summary class="btn">Get the habit report — {{ r.price_usd|usd }}</summary>
         {#- 29 Oct (owner): one click. Three facts, the complete Before-you-pay block one tap away (unchanged, on
             this page, before the Stripe button, printable: Ontario CPA s. 38 / O. Reg. 17/05 s. 32), then the button.
@@ -121,7 +125,7 @@
         <div class="pay-panel" role="group" aria-labelledby="last-step-h">
           <h3 id="last-step-h">Last step</h3>
           {{ pay_facts(r, prices.rules) }}
-          <details class="pay-more" id="byp-more">
+          <details class="pay-more" id="byp-more" open>
             <summary>Full details before you pay</summary>
             {% include "partials/before_you_pay.html" %}
           </details>
