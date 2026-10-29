@@ -21,7 +21,7 @@ import lint as L  # noqa: E402
 import engine_ref as E  # noqa: E402
 
 PATH = "/tools/prop-challenge-simulator/"
-DEMO = os.path.join(REPO, "site", "static", "samples", "demo-trades.csv")
+DEMO = os.path.join(REPO, "site", "static", "samples", "example-trades.csv")
 FIX = os.path.join(HERE, "fixtures")
 
 

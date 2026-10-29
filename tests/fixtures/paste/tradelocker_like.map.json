@@ -1,0 +1,45 @@
+{
+ "cols": {
+  "close_price": 6,
+  "close_time": 5,
+  "currency": null,
+  "date": null,
+  "direction": 1,
+  "fees": null,
+  "open_price": 4,
+  "open_time": 3,
+  "pnl": 7,
+  "price": null,
+  "qty": 2,
+  "side": null,
+  "status": null,
+  "symbol": 0,
+  "time": null
+ },
+ "currency": null,
+ "date_format": "ymd",
+ "delimiter": null,
+ "futures_sizes": false,
+ "header_row": 1,
+ "headers": {
+  "0": "instrument",
+  "1": "side",
+  "2": "amount",
+  "3": "opentime",
+  "4": "openprice",
+  "5": "closetime",
+  "6": "closeprice",
+  "7": "profit"
+ },
+ "layout": "roundtrips",
+ "number_style": null,
+ "preset": null,
+ "side_from": "column",
+ "side_values": {
+  "buy": "buy",
+  "sell": "sell"
+ },
+ "status_values": null,
+ "trim_ragged": true,
+ "v": 1
+}

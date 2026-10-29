@@ -6,8 +6,8 @@
 // the worker. Manual mode: four summary numbers. Either way the page's CSP is
 // connect-src 'none', nothing is stored, nothing is logged.
 
-import { createFileSlot, renderReadError, whileBusy, clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js?v=eb893892';
-import { RUNS, DEFAULT_SEED, tradingDays } from './prop-sim-core.js?v=e603160f';
+import { createFileSlot, renderReadError, whileBusy, clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js?v=ea217a9e';
+import { RUNS, DEFAULT_SEED, tradingDays } from './prop-sim-core.js?v=ef3c575e';
 import { money, unitNote, pct, intText, el, DASH } from './format.js?v=acb0db51';
 import { parseStrict, parsePositive, parseWhole, InputError } from './num.js?v=8df99e34';
 
@@ -80,7 +80,7 @@ function read() {
   const seed = get('ps-seed', (v, l) => parseWhole(v, l, 0, 4294967295));
   const p = { rules, seed, runs: RUNS, mode: mode() };
   if (p.mode === 'file') {
-    if (!loaded) problems.push({ id: 'ps-file', message: 'Choose a trade file, or try the sample file, or switch to manual numbers.' });
+    if (!loaded) problems.push({ id: 'ps-file', message: 'Choose a trade file, or try the example data, or switch to manual numbers.' });
     else p.days = loaded.days;
   } else {
     const wr = get('ps-wr', parseStrict);
@@ -119,7 +119,7 @@ async function run(ev) {
     st.textContent = 'The simulation could not run in this browser. Press Run to try again.';
     st.hidden = false;
   };
-  worker = new Worker(new URL('./prop-sim-worker.js?v=0d8f59e2', import.meta.url), { type: 'module' });
+  worker = new Worker(new URL('./prop-sim-worker.js?v=97f872c9', import.meta.url), { type: 'module' });
   worker.onmessage = (e) => {
     worker.terminate(); worker = null;
     btn.disabled = false;
@@ -194,7 +194,7 @@ function render(p, res) {
       `Each run is built from ${source}. ${unitNote(unit)}`),
     warn.length ? el('div', { class: 'notice notice-caution' }, el('strong', { text: 'Note' }), el('ul', {}, ...warn.map((w) => el('li', { text: w })))) : null,
     el('figure', { class: 'chart chart-bars' }, bars(rows),
-      el('figcaption', { text: `n = ${intText(res.runs)} runs · ${p.mode === 'file' && loaded.label === 'the synthetic sample file' ? 'synthetic sample data, not a real trader' : 'from your inputs'}` })),
+      el('figcaption', { text: `n = ${intText(res.runs)} runs · ${p.mode === 'file' && loaded.label === 'the synthetic sample file' ? 'example data' : 'from your inputs'}` })),
     el('div', { class: 'table-wrap', tabindex: '0', role: 'region', 'aria-label': 'Outcomes as a table' }, table),
     el('dl', { class: 'stats' }, ...facts.map(([l, v, k]) => el('div', { class: 'stat' }, el('dt', { text: l }), el('dd', { text: v, 'data-k': k })))),
     el('p', { id: 'ps-streak', 'data-busts': String(res.bust), text: streakLine(res) }),

@@ -169,6 +169,10 @@ function habitSection(h, unit, report) {
     return sec;
   }
   sec.append(el('h3', { id: 'h-' + h.id, text: h.name }), el('p', { class: 'muted', text: h.question }), el('p', {}, badge(h.verdict, h)));
+  // sweep 3 (29 Oct): the chart first, then the result sentences; the method line and the related research sit
+  // behind one tap ("How this was measured"), word for word
+  const chart = twoBarChart(h, unit, report);
+  if (chart) sec.append(chart);
   if (TESTED.includes(h.id)) {
     // ARCHITECT-STATS-AMENDMENT-R2 §9.2: the habit's lines in order (measures, the comparison
     // shares, the 12-hour count, the verdict; too_few / withheld lines replace the share and the
@@ -183,22 +187,77 @@ function habitSection(h, unit, report) {
   }
   const dl = dollarsLine(h, unit);
   if (dl) sec.append(el('p', { text: dl }));
+  const how = el('div', {});
   // The method line carries the habit's own n_perm (it scales with the file size, D-4).
   const method = methodLine(h, wordingFmt(unit));
   if (method && h.p_raw !== null && h.p_holm !== null) {
-    sec.append(el('p', { class: 'small muted habit-method', text: `${method} On past data: p = ${h.p_raw.toPrecision(3)}, or ${h.p_holm.toPrecision(3)} after adjusting for ${testedPhrase(report.n_tested)} (Holm).` }));
+    how.append(el('p', { class: 'small muted habit-method', text: `${method} On past data: p = ${h.p_raw.toPrecision(3)}, or ${h.p_holm.toPrecision(3)} after adjusting for ${testedPhrase(report.n_tested)} (Holm).` }));
   }
-  const chart = twoBarChart(h, unit, report);
-  if (chart) sec.append(chart);
   // R-D3 addendum I-6: the page's own related-research line (wording.js RESEARCH), never the report's
   // research_ref; oversized_loss has none.
   const res = Object.prototype.hasOwnProperty.call(RESEARCH, h.id) ? RESEARCH[h.id] : null;
   if (res) {
     const cite = el('p', { class: 'small research' }, RESEARCH_PREFIX + res.line + ' ');
     cite.append(el('a', { href: res.url, rel: 'noopener', text: res.cite }));
-    sec.append(cite);
+    how.append(cite);
   }
+  if (how.childNodes.length) sec.append(el('details', { class: 'how-more habit-how' }, el('summary', { text: 'How this was measured' }), how));
   return sec;
+}
+
+// sweep 3 (29 Oct, owner): "All habits measured" as a picture. On top, each tested habit's result as a big pill
+// with a plain gloss; then one row per habit (its result pill, a bar for its dollar total scaled to the largest,
+// the trade count as a badge), each row a link to its section below. Still a table (the rows' cells are the
+// numbers screen readers and the tests read); CSS lays each row out as a card. The verdict labels are report.js's
+// own (VERDICT); the totals are the habits' dollars, historical, as the sections below say.
+const GLOSS = { distinguishable: 'unlikely to be luck', not_distinguishable: 'could be luck' };
+
+function habitsSummary(report, unit) {
+  const sec = el('section', { class: 'section habits-sum', id: 'all-habits', 'aria-labelledby': 'all-h' }, el('h2', { id: 'all-h', text: 'All habits measured' }));
+  const tested = report.habits.filter((h) => GLOSS[h.verdict]);
+  if (tested.length) {
+    const top = el('div', { class: 'hs-top' });
+    for (const h of tested) {
+      top.append(el('p', { class: 'hs-verdict' + (h.verdict === 'distinguishable' ? ' is-hit' : '') },
+        badge(h.verdict, h), ' ', el('span', { class: 'hs-gloss', text: GLOSS[h.verdict] }), el('span', { class: 'hs-of', text: h.name })));
+    }
+    sec.append(top);
+  }
+  const amounts = report.habits.filter((h) => h.dollars).map((h) => Math.abs(h.dollars.amount));
+  const maxAbs = Math.max(...amounts, 0) || 1;
+  const tbody = el('tbody');
+  for (const h of report.habits) {
+    const amt = el('td', { class: 'num hs-total' });
+    if (h.dollars) {
+      amt.append(el('span', { class: 'hs-amt', text: money(h.dollars.amount, unit) }));
+      const fill = el('span', { class: 'hs-fill ' + (h.verdict === 'distinguishable' ? 'is-flag' : h.dollars.amount < 0 ? 'is-loss' : 'is-gain') });
+      fill.style.width = (100 * Math.abs(h.dollars.amount) / maxAbs).toFixed(1) + '%';   // CSSOM, allowed by the CSP
+      amt.append(el('span', { class: 'hs-bar', 'aria-hidden': 'true' }, fill));
+    } else amt.textContent = '—';
+    tbody.append(el('tr', { class: 'hs-row' }, el('th', { scope: 'row' }, el('a', { href: '#habit-' + h.id, text: h.name })),
+      el('td', { class: 'hs-res' }, badge(h.verdict, h)), amt,
+      el('td', { class: 'num hs-n' }, h.dollars ? el('span', { class: 'hs-count', text: String(h.dollars.n_trades) }) : '—')));
+  }
+  sec.append(el('table', { class: 'hs-table' },
+    el('caption', { class: 'visually-hidden', text: 'All habits: result, dollar total of the matching trades, and trade count' }),
+    el('thead', {}, el('tr', {}, el('th', { scope: 'col', text: 'Habit' }), el('th', { scope: 'col', text: 'Result' }),
+      el('th', { scope: 'col', class: 'num', text: 'Total' }), el('th', { scope: 'col', class: 'num', text: 'Trades' }))), tbody));
+  sec.append(el('details', { class: 'how-more hs-note' }, el('summary', { text: 'What “Total” means' }),
+    el('p', { text: 'The dollar total of the trades that match each habit, from your file. Historical: it describes what happened. Tap a habit to see it in detail.' })));
+  return sec;
+}
+
+// Print shows every folded part (method lines, totals note, chart tables), then folds them back.
+let printWired = false;
+function wirePrint() {
+  if (printWired || typeof window === 'undefined') return;
+  printWired = true;
+  let opened = [];
+  window.addEventListener('beforeprint', () => {
+    opened = [...document.querySelectorAll('.report-out details:not([open])')];
+    opened.forEach((d) => { d.open = true; });
+  });
+  window.addEventListener('afterprint', () => { opened.forEach((d) => { d.open = false; }); opened = []; });
 }
 
 export { ics };  // in retest-copy.js with the re-test wording (fix D2); takes the server's window (delta D1)
@@ -215,6 +274,8 @@ export function renderReport(report, out, meta) {
   const unit = report.currency;
   checkReport(report);   // method, the hold_gap and size_up shapes and the row counts, before anything is drawn
   out.replaceChildren();
+  out.classList.add('report-out');
+  wirePrint();
   out.append(el('p', { class: 'disclaimer notice', text: report.disclaimer }));
   // Page 1 (ARCHITECT-STATS-AMENDMENT-R2 §9.1): the headline, the focus habit or why none is
   // shown first (one reason line per distinguishable habit), then the coverage line. All
@@ -235,17 +296,7 @@ export function renderReport(report, out, meta) {
   if (merged) p1.append(el('p', { class: 'small', id: 'merged-rows', text: merged }));
   out.append(p1);
 
-  // Summary table of all habits.
-  const tbody = el('tbody');
-  for (const h of report.habits) {
-    tbody.append(el('tr', {}, el('th', { scope: 'row' }, el('a', { href: '#habit-' + h.id, text: h.name })),
-      el('td', {}, badge(h.verdict, h)), el('td', { class: 'num', text: h.dollars ? money(h.dollars.amount, unit) : '—' }),
-      el('td', { class: 'num', text: h.dollars ? String(h.dollars.n_trades) : '—' })));
-  }
-  out.append(el('section', { class: 'section', 'aria-labelledby': 'all-h' }, el('h2', { id: 'all-h', text: 'All habits measured' }),
-    el('div', { class: 'table-wrap', tabindex: '0', role: 'region', 'aria-label': 'All habits table' },
-      el('table', {}, el('thead', {}, el('tr', {}, el('th', { scope: 'col', text: 'Habit' }), el('th', { scope: 'col', text: 'Result' }),
-        el('th', { scope: 'col', class: 'num', text: 'Matching trades totalled (historical)' }), el('th', { scope: 'col', class: 'num', text: 'Trades' }))), tbody))));
+  out.append(habitsSummary(report, unit));
 
   const details = el('section', { class: 'section', 'aria-labelledby': 'det-h' }, el('h2', { id: 'det-h', text: 'Each habit' }));
   for (const h of report.habits) details.append(habitSection(h, unit, report));
@@ -268,6 +319,11 @@ export function renderReport(report, out, meta) {
   });
   fs.append(el('div', { class: 'check' }, el('input', { type: 'radio', name: 'rule', id: 'rule-own', value: 'own' }), el('label', { for: 'rule-own', text: 'My own rule' })));
   lib.append(fs, el('div', { class: 'field' }, el('label', { for: 'own-rule', text: 'Your own rule' }), el('textarea', { id: 'own-rule', maxlength: '300' })));
+  if (meta && meta.sample) {
+    // sweep 3: the sample shows the library folded; the paid report keeps it open
+    const body = [...lib.childNodes].slice(1);
+    lib.replaceChildren(lib.firstChild, el('details', { class: 'how-more' }, el('summary', { text: 'Show the rule library' }), ...body));
+  }
   out.append(lib);
 
   // Delta D1: the re-test line and the .ics come from the window the server returned with the

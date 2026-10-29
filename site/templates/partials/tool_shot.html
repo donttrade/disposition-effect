@@ -1,0 +1,38 @@
+{#- Tool hero pictures (sweep 3, 29 Oct; owner: show, don't tell). The file tools show their own output on example
+    data (the same previews as the /tools/ cards: site/config/tool_previews.json); the two calculators show the
+    worked example their own Questions already give, as a picture. Every one is labelled "Example". aria-hidden
+    parts only repeat what the caption and the page say. Hidden on phones, where the tool itself comes first. -#}
+{%- from "partials/tool_cards.html" import preview with context %}
+{%- macro shot(kind, t=None) %}
+<figure class="tool-shot" aria-labelledby="shot-cap">
+  <div class="shot-card tool-shot-card">
+    <span class="tp-tag" aria-hidden="true">Example</span>
+  {%- if kind == "rr" %}
+    <svg class="rr-ladder" viewBox="0 0 280 150" role="img" aria-label="Entry 100, stop 98, target 106: 3R. It breaks even when 1 trade in 4 wins.">
+      <line class="rr-axis" x1="70" x2="70" y1="10" y2="140"/>
+      <rect class="rr-win" x="62" y="14" width="16" height="72" rx="3"/>
+      <rect class="rr-risk" x="62" y="86" width="16" height="24" rx="3"/>
+      <text class="rr-k" x="0" y="20">Target</text><text class="rr-v" x="90" y="20">106</text>
+      <text class="rr-k" x="0" y="90">Entry</text><text class="rr-v" x="90" y="90">100</text>
+      <text class="rr-k" x="0" y="114">Stop</text><text class="rr-v" x="90" y="114">98</text>
+      <text class="rr-big" x="160" y="62">3R</text>
+      <text class="rr-k" x="160" y="86">6 up, 2 down</text>
+    </svg>
+    <p class="shot-line"><strong>Breaks even at 1 win in 4</strong> <span class="muted">before costs</span></p>
+  {%- elif kind == "lot" %}
+    <table class="mini-shot">
+      <tbody>
+        <tr><th scope="row">Risk amount</th><td>200</td></tr>
+        <tr><th scope="row">Stop distance</th><td>40 points</td></tr>
+        <tr><th scope="row">Value per point, 1 lot</th><td>1</td></tr>
+        <tr class="mini-total"><th scope="row">Lot size</th><td>5 lots</td></tr>
+      </tbody>
+    </table>
+    <p class="shot-line"><span class="muted">200 ÷ (40 × 1) = 5</span></p>
+  {%- else %}
+    {{ preview(t) }}
+  {%- endif %}
+  </div>
+  <figcaption id="shot-cap">{% if kind in ("rr", "lot") %}Example numbers.{% else %}Example data.{% endif %}</figcaption>
+</figure>
+{%- endmacro %}

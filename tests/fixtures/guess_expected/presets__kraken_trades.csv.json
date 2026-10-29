@@ -1,0 +1,634 @@
+{
+ "guess": {
+  "badges": {
+   "date": "matched",
+   "fees": "matched",
+   "price": "matched",
+   "qty": "matched",
+   "side": "matched",
+   "symbol": "matched"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": "ymd",
+   "reason": null,
+   "seen": null,
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": null
+  },
+  "futures_offer": false,
+  "layout": "fills",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 3,
+    "direction": null,
+    "fees": [
+     8
+    ],
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 6,
+    "qty": 9,
+    "side": 4,
+    "status": null,
+    "symbol": 2,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "ymd",
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "2": "pair",
+    "3": "time",
+    "4": "type",
+    "6": "price",
+    "8": "fee",
+    "9": "vol"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": null,
+   "side_values": {
+    "buy": "buy",
+    "sell": "sell"
+   },
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1,
+   "year_base": null
+  },
+  "questions": [],
+  "side_checks": {},
+  "side_counts": {
+   "buy": 10,
+   "sell": 10
+  },
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": null
+ },
+ "peek": {
+  "blocked": [
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "delimiter": ",",
+  "header_hits": 6,
+  "header_row": 0,
+  "headers": [
+   "txid",
+   "ordertxid",
+   "pair",
+   "time",
+   "type",
+   "ordertype",
+   "price",
+   "cost",
+   "fee",
+   "vol",
+   "margin",
+   "misc",
+   "ledgers"
+  ],
+  "kind": "csv",
+  "labels": [
+   "txid",
+   "ordertxid",
+   "pair",
+   "time",
+   "type",
+   "ordertype",
+   "price",
+   "cost",
+   "fee",
+   "vol",
+   "margin",
+   "misc",
+   "ledgers"
+  ],
+  "n_rows": 20,
+  "options": [
+   {
+    "example": "T00000-ABCDE-FGHIJK",
+    "index": 0,
+    "label": "txid"
+   },
+   {
+    "example": "O00000-ABCDE-FGHIJK",
+    "index": 1,
+    "label": "ordertxid"
+   },
+   {
+    "example": "XXBTZUSD",
+    "index": 2,
+    "label": "pair"
+   },
+   {
+    "example": "2026-03-16 09:31:05.4321",
+    "index": 3,
+    "label": "time"
+   },
+   {
+    "example": "buy",
+    "index": 4,
+    "label": "type"
+   },
+   {
+    "example": "limit",
+    "index": 5,
+    "label": "ordertype"
+   },
+   {
+    "example": "60000.0",
+    "index": 6,
+    "label": "price"
+   },
+   {
+    "example": "600.00000",
+    "index": 7,
+    "label": "cost"
+   },
+   {
+    "example": "1.60000",
+    "index": 8,
+    "label": "fee"
+   },
+   {
+    "example": "0.01000000",
+    "index": 9,
+    "label": "vol"
+   },
+   {
+    "example": "0.00000",
+    "index": 10,
+    "label": "margin"
+   },
+   {
+    "example": "",
+    "index": 11,
+    "label": "misc"
+   },
+   {
+    "example": "L00000",
+    "index": 12,
+    "label": "ledgers"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     "T00000-ABCDE-FGHIJK",
+     "O00000-ABCDE-FGHIJK",
+     "XXBTZUSD",
+     "2026-03-16 09:31:05.4321",
+     "buy",
+     "limit",
+     "60000.0",
+     "600.00000",
+     "1.60000",
+     "0.01000000",
+     "0.00000",
+     "",
+     "L00000"
+    ],
+    "row": 2
+   },
+   {
+    "cells": [
+     "T00001-ABCDE-FGHIJK",
+     "O00001-ABCDE-FGHIJK",
+     "XXBTZUSD",
+     "2026-03-16 09:54:05.4321",
+     "sell",
+     "limit",
+     "58800.0",
+     "588.00000",
+     "1.56800",
+     "0.01000000",
+     "0.00000",
+     "",
+     "L00001"
+    ],
+    "row": 3
+   },
+   {
+    "cells": [
+     "T00002-ABCDE-FGHIJK",
+     "O00002-ABCDE-FGHIJK",
+     "XETHZUSD",
+     "2026-03-16 10:08:05.4321",
+     "sell",
+     "limit",
+     "67950.0",
+     "2038.50000",
+     "5.43600",
+     "0.03000000",
+     "0.00000",
+     "",
+     "L00002"
+    ],
+    "row": 4
+   },
+   {
+    "cells": [
+     "T00003-ABCDE-FGHIJK",
+     "O00003-ABCDE-FGHIJK",
+     "XETHZUSD",
+     "2026-03-16 10:36:05.4321",
+     "buy",
+     "limit",
+     "67350.0",
+     "2020.50000",
+     "5.38800",
+     "0.03000000",
+     "0.00000",
+     "",
+     "L00003"
+    ],
+    "row": 5
+   },
+   {
+    "cells": [
+     "T00004-ABCDE-FGHIJK",
+     "O00004-ABCDE-FGHIJK",
+     "XXBTZUSD",
+     "2026-03-16 10:48:05.4321",
+     "buy",
+     "limit",
+     "65700.0",
+     "3285.00000",
+     "8.76000",
+     "0.05000000",
+     "0.00000",
+     "",
+     "L00004"
+    ],
+    "row": 6
+   },
+   {
+    "cells": [
+     "T00005-ABCDE-FGHIJK",
+     "O00005-ABCDE-FGHIJK",
+     "XXBTZUSD",
+     "2026-03-16 11:21:05.4321",
+     "sell",
+     "limit",
+     "66150.0",
+     "3307.50000",
+     "8.82000",
+     "0.05000000",
+     "0.00000",
+     "",
+     "L00005"
+    ],
+    "row": 7
+   },
+   {
+    "cells": [
+     "T00006-ABCDE-FGHIJK",
+     "O00006-ABCDE-FGHIJK",
+     "XETHZUSD",
+     "2026-03-16 11:31:05.4321",
+     "buy",
+     "limit",
+     "63450.0",
+     "1269.00000",
+     "3.38400",
+     "0.02000000",
+     "0.00000",
+     "",
+     "L00006"
+    ],
+    "row": 8
+   },
+   {
+    "cells": [
+     "T00007-ABCDE-FGHIJK",
+     "O00007-ABCDE-FGHIJK",
+     "XETHZUSD",
+     "2026-03-16 12:09:05.4321",
+     "sell",
+     "limit",
+     "64050.0",
+     "1281.00000",
+     "3.41600",
+     "0.02000000",
+     "0.00000",
+     "",
+     "L00007"
+    ],
+    "row": 9
+   },
+   {
+    "cells": [
+     "T00008-ABCDE-FGHIJK",
+     "O00008-ABCDE-FGHIJK",
+     "XXBTZUSD",
+     "2026-03-16 12:17:05.4321",
+     "sell",
+     "limit",
+     "60600.0",
+     "2424.00000",
+     "6.46400",
+     "0.04000000",
+     "0.00000",
+     "",
+     "L00008"
+    ],
+    "row": 10
+   },
+   {
+    "cells": [
+     "T00009-ABCDE-FGHIJK",
+     "O00009-ABCDE-FGHIJK",
+     "XXBTZUSD",
+     "2026-03-16 12:40:05.4321",
+     "buy",
+     "limit",
+     "61800.0",
+     "2472.00000",
+     "6.59200",
+     "0.04000000",
+     "0.00000",
+     "",
+     "L00009"
+    ],
+    "row": 11
+   },
+   {
+    "cells": [
+     "T00010-ABCDE-FGHIJK",
+     "O00010-ABCDE-FGHIJK",
+     "XETHZUSD",
+     "2026-03-16 13:06:05.4321",
+     "buy",
+     "limit",
+     "68550.0",
+     "685.50000",
+     "1.82800",
+     "0.01000000",
+     "0.00000",
+     "",
+     "L00010"
+    ],
+    "row": 12
+   },
+   {
+    "cells": [
+     "T00011-ABCDE-FGHIJK",
+     "O00011-ABCDE-FGHIJK",
+     "XETHZUSD",
+     "2026-03-16 13:34:05.4321",
+     "sell",
+     "limit",
+     "67650.0",
+     "676.50000",
+     "1.80400",
+     "0.01000000",
+     "0.00000",
+     "",
+     "L00011"
+    ],
+    "row": 13
+   },
+   {
+    "cells": [
+     "T00012-ABCDE-FGHIJK",
+     "O00012-ABCDE-FGHIJK",
+     "XXBTZUSD",
+     "2026-03-16 13:43:05.4321",
+     "buy",
+     "limit",
+     "66300.0",
+     "1989.00000",
+     "5.30400",
+     "0.03000000",
+     "0.00000",
+     "",
+     "L00012"
+    ],
+    "row": 14
+   },
+   {
+    "cells": [
+     "T00013-ABCDE-FGHIJK",
+     "O00013-ABCDE-FGHIJK",
+     "XXBTZUSD",
+     "2026-03-16 14:16:05.4321",
+     "sell",
+     "limit",
+     "66000.0",
+     "1980.00000",
+     "5.28000",
+     "0.03000000",
+     "0.00000",
+     "",
+     "L00013"
+    ],
+    "row": 15
+   },
+   {
+    "cells": [
+     "T00014-ABCDE-FGHIJK",
+     "O00014-ABCDE-FGHIJK",
+     "XETHZUSD",
+     "2026-03-16 14:23:05.4321",
+     "sell",
+     "limit",
+     "64050.0",
+     "3202.50000",
+     "8.54000",
+     "0.05000000",
+     "0.00000",
+     "",
+     "L00014"
+    ],
+    "row": 16
+   },
+   {
+    "cells": [
+     "T00015-ABCDE-FGHIJK",
+     "O00015-ABCDE-FGHIJK",
+     "XETHZUSD",
+     "2026-03-16 15:01:05.4321",
+     "buy",
+     "limit",
+     "64350.0",
+     "3217.50000",
+     "8.58000",
+     "0.05000000",
+     "0.00000",
+     "",
+     "L00015"
+    ],
+    "row": 17
+   },
+   {
+    "cells": [
+     "T00016-ABCDE-FGHIJK",
+     "O00016-ABCDE-FGHIJK",
+     "XXBTZUSD",
+     "2026-03-17 09:31:05.4321",
+     "buy",
+     "limit",
+     "61200.0",
+     "1224.00000",
+     "3.26400",
+     "0.02000000",
+     "0.00000",
+     "",
+     "L00016"
+    ],
+    "row": 18
+   },
+   {
+    "cells": [
+     "T00017-ABCDE-FGHIJK",
+     "O00017-ABCDE-FGHIJK",
+     "XXBTZUSD",
+     "2026-03-17 09:54:05.4321",
+     "sell",
+     "limit",
+     "62100.0",
+     "1242.00000",
+     "3.31200",
+     "0.02000000",
+     "0.00000",
+     "",
+     "L00017"
+    ],
+    "row": 19
+   },
+   {
+    "cells": [
+     "T00018-ABCDE-FGHIJK",
+     "O00018-ABCDE-FGHIJK",
+     "XETHZUSD",
+     "2026-03-17 10:17:05.4321",
+     "buy",
+     "limit",
+     "69150.0",
+     "2766.00000",
+     "7.37600",
+     "0.04000000",
+     "0.00000",
+     "",
+     "L00018"
+    ],
+    "row": 20
+   },
+   {
+    "cells": [
+     "T00019-ABCDE-FGHIJK",
+     "O00019-ABCDE-FGHIJK",
+     "XETHZUSD",
+     "2026-03-17 10:45:05.4321",
+     "sell",
+     "limit",
+     "67950.0",
+     "2718.00000",
+     "7.24800",
+     "0.04000000",
+     "0.00000",
+     "",
+     "L00019"
+    ],
+    "row": 21
+   }
+  ],
+  "table": null,
+  "tables": null
+ },
+ "preset": {
+  "id": "kraken_trades",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 3,
+    "direction": null,
+    "fees": [
+     8
+    ],
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 6,
+    "qty": 9,
+    "side": 4,
+    "status": null,
+    "symbol": 2,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "ymd",
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "2": "pair",
+    "3": "time",
+    "4": "type",
+    "6": "price",
+    "8": "fee",
+    "9": "vol"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": "kraken_trades",
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": [
+    [
+     "eq",
+     "buy",
+     "buy"
+    ],
+    [
+     "eq",
+     "sell",
+     "sell"
+    ]
+   ],
+   "side_values": null,
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": "utc",
+   "v": 1
+  },
+  "name": "Kraken trades",
+  "questions": []
+ },
+ "signature": "04416fda657b00fcead4e5689b9372d6"
+}

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Write site/static/samples/demo-trades.csv: the synthetic "Try a sample file" for the
+"""Write site/static/samples/example-trades.csv: the synthetic "Try with example data" for the
 free dashboard (and the homepage screenshot).
 
     python3 checks/make_demo_trades.py          # rewrite the file
     python3 checks/make_demo_trades.py --check  # exit 1 if the committed file differs
 
 SYNTHETIC: made-up trades from a seeded generator, not a real trader. The symbols are
-fictional (DEMO-A, DEMO-B, DEMO-C) so the file can never be read as a real account.
+fictional (EX-A, EX-B, EX-C) so the file can never be read as a real account.
 
 What it is built to show (so every panel of the dashboard has something to say):
   * 160 round trips over about 16 weeks, generic template layout, USD, $1 fee per fill;
@@ -22,10 +22,10 @@ import random
 import sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(REPO, "site", "static", "samples", "demo-trades.csv")
+OUT = os.path.join(REPO, "site", "static", "samples", "example-trades.csv")
 SEED = 20261021
 N = 160
-SYMBOLS = {"DEMO-A": 48.0, "DEMO-B": 112.0, "DEMO-C": 23.5}
+SYMBOLS = {"EX-A": 48.0, "EX-B": 112.0, "EX-C": 23.5}   # 29 Oct (owner): no "demo" anywhere
 
 
 def make():
@@ -72,7 +72,7 @@ def main(argv):
     if "--check" in argv:
         with open(OUT, encoding="utf-8") as f:
             same = f.read() == text
-        print("demo-trades.csv:", "up to date" if same else "DIFFERS from the generator")
+        print("example-trades.csv:", "up to date" if same else "DIFFERS from the generator")
         return 0 if same else 1
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8", newline="\n") as f:

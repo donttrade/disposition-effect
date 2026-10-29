@@ -1,0 +1,44 @@
+{
+ "cols": {
+  "close_price": 6,
+  "close_time": 1,
+  "currency": null,
+  "date": null,
+  "direction": 3,
+  "fees": null,
+  "open_price": 5,
+  "open_time": 0,
+  "pnl": null,
+  "price": null,
+  "qty": 4,
+  "side": null,
+  "status": null,
+  "symbol": 2,
+  "time": null
+ },
+ "currency": null,
+ "date_format": "ymd",
+ "delimiter": null,
+ "futures_sizes": false,
+ "header_row": 4,
+ "headers": {
+  "0": "open",
+  "1": "close",
+  "2": "symbol",
+  "3": "side",
+  "4": "volume",
+  "5": "openprice",
+  "6": "closeprice"
+ },
+ "layout": "roundtrips",
+ "number_style": null,
+ "preset": null,
+ "side_from": "column",
+ "side_values": null,
+ "source": {
+  "kind": "html",
+  "table": 2
+ },
+ "status_values": null,
+ "v": 1
+}

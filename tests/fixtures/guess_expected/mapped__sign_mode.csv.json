@@ -1,0 +1,279 @@
+{
+ "guess": {
+  "badges": {
+   "date": "matched",
+   "price": "choose",
+   "qty": "matched",
+   "side": "check",
+   "symbol": "matched"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": "ymd",
+   "reason": null,
+   "seen": null,
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": null
+  },
+  "futures_offer": false,
+  "layout": "fills",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 0,
+    "direction": null,
+    "fees": null,
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": null,
+    "qty": 2,
+    "side": null,
+    "status": null,
+    "symbol": 1,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "ymd",
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "0": "when",
+    "1": "ticker",
+    "2": "shares"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "sign",
+   "side_rules": null,
+   "side_values": null,
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1,
+   "year_base": null
+  },
+  "questions": [],
+  "side_checks": {},
+  "side_counts": null,
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": null
+ },
+ "peek": {
+  "blocked": [
+   false,
+   false,
+   false,
+   false
+  ],
+  "delimiter": ",",
+  "header_hits": 3,
+  "header_row": 0,
+  "headers": [
+   "When",
+   "Ticker",
+   "Shares",
+   "Fill"
+  ],
+  "kind": "csv",
+  "labels": [
+   "When",
+   "Ticker",
+   "Shares",
+   "Fill"
+  ],
+  "n_rows": 17,
+  "options": [
+   {
+    "example": "2026-03-02 09:31:05",
+    "index": 0,
+    "label": "When"
+   },
+   {
+    "example": "AAA",
+    "index": 1,
+    "label": "Ticker"
+   },
+   {
+    "example": "+1",
+    "index": 2,
+    "label": "Shares"
+   },
+   {
+    "example": "100.0",
+    "index": 3,
+    "label": "Fill"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     "2026-03-02 09:31:05",
+     "AAA",
+     "+1",
+     "100.0"
+    ],
+    "row": 2
+   },
+   {
+    "cells": [
+     "2026-03-02 09:54:05",
+     "AAA",
+     "-1",
+     "98.0"
+    ],
+    "row": 3
+   },
+   {
+    "cells": [
+     "2026-03-02 10:08:05",
+     "BBB",
+     "-3",
+     "113.25"
+    ],
+    "row": 4
+   },
+   {
+    "cells": [
+     "2026-03-02 10:36:05",
+     "BBB",
+     "+3",
+     "112.25"
+    ],
+    "row": 5
+   },
+   {
+    "cells": [
+     "2026-03-02 09:31:05",
+     "AAA",
+     "0",
+     "100"
+    ],
+    "row": 6
+   },
+   {
+    "cells": [
+     "2026-03-02 10:48:05",
+     "CCC",
+     "+5",
+     "109.5"
+    ],
+    "row": 7
+   },
+   {
+    "cells": [
+     "2026-03-02 11:21:05",
+     "CCC",
+     "-5",
+     "110.25"
+    ],
+    "row": 8
+   },
+   {
+    "cells": [
+     "2026-03-02 11:31:05",
+     "AAA",
+     "+2",
+     "105.75"
+    ],
+    "row": 9
+   },
+   {
+    "cells": [
+     "2026-03-02 12:09:05",
+     "AAA",
+     "-2",
+     "106.75"
+    ],
+    "row": 10
+   },
+   {
+    "cells": [
+     "2026-03-02 12:17:05",
+     "BBB",
+     "-4",
+     "101.0"
+    ],
+    "row": 11
+   },
+   {
+    "cells": [
+     "2026-03-02 12:40:05",
+     "BBB",
+     "+4",
+     "103.0"
+    ],
+    "row": 12
+   },
+   {
+    "cells": [
+     "2026-03-02 13:06:05",
+     "CCC",
+     "+1",
+     "114.25"
+    ],
+    "row": 13
+   },
+   {
+    "cells": [
+     "2026-03-02 13:34:05",
+     "CCC",
+     "-1",
+     "112.75"
+    ],
+    "row": 14
+   },
+   {
+    "cells": [
+     "2026-03-02 13:43:05",
+     "AAA",
+     "+3",
+     "110.5"
+    ],
+    "row": 15
+   },
+   {
+    "cells": [
+     "2026-03-02 14:16:05",
+     "AAA",
+     "-3",
+     "110.0"
+    ],
+    "row": 16
+   },
+   {
+    "cells": [
+     "2026-03-02 14:23:05",
+     "BBB",
+     "-5",
+     "106.75"
+    ],
+    "row": 17
+   },
+   {
+    "cells": [
+     "2026-03-02 15:01:05",
+     "BBB",
+     "+5",
+     "107.25"
+    ],
+    "row": 18
+   }
+  ],
+  "table": null,
+  "tables": null
+ },
+ "preset": null,
+ "signature": "f7059b8254dff4a171eed82fe2927dec"
+}

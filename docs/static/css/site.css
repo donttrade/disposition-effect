@@ -177,50 +177,19 @@ a:hover { color: var(--rust-hover); }
    Drop-down motion (B3): the panel fades in 6 px down in 200 ms, transform and opacity only; the
    chevron turns in --dur-hover; nothing moves under prefers-reduced-motion. No close animation. */
 :root { --ease-nav: cubic-bezier(0.45, 0.05, 0.55, 0.95); } /* Stripe's nav easing [READ] */
-.site-header { border-bottom: 1px solid var(--border); position: relative; z-index: 20; background: var(--bg); }
-.site-header .wrap { display: flex; flex-wrap: nowrap; align-items: center; gap: var(--s1) var(--s3); min-height: 64px; }
+/* 29 Oct (owner): slim and sticky. It stays in view on scroll (position: sticky keeps its place in the flow, so
+   nothing shifts), and scroll-padding keeps a focused element or an anchor target from sliding under it. */
+html { scroll-padding-top: 72px; }
+.site-header { border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 20; background: var(--bg); }
+.site-header .wrap { display: flex; flex-wrap: nowrap; align-items: center; gap: var(--s1) var(--s3); min-height: 56px; }
 .brand { font-weight: 600; color: var(--text); text-decoration: none; font-size: var(--fs-2); margin-right: auto; display: inline-flex; align-items: center; min-height: var(--target); white-space: nowrap; }
 .site-nav ul { list-style: none; margin: 0; padding: 0; }
-.site-nav .nav-row { display: flex; flex-wrap: nowrap; align-items: center; gap: 0 var(--s2); }
+.site-nav .nav-row { display: flex; flex-wrap: nowrap; align-items: center; gap: 0 var(--s3); }
 .site-nav a { display: inline-flex; align-items: center; min-height: var(--target); color: var(--text); text-decoration: none; white-space: nowrap; }
-.site-nav a:hover, .site-nav a[aria-current="page"], .site-nav a[aria-current="true"] { color: var(--rust); text-decoration: underline; }
-/* drop-downs (desktop) and the phone accordion share the summary look */
-details.nav-dd, details.nav-acc { border-bottom: 0; }
-.nav-dd > summary, .nav-acc > summary { list-style: none; display: flex; align-items: center; gap: 2px; min-height: var(--target);
-  padding: 0; font-weight: 400; color: var(--text); white-space: nowrap; transition: none; }
-.nav-dd > summary::-webkit-details-marker, .nav-acc > summary::-webkit-details-marker { display: none; }
-.nav-dd > summary:hover, .nav-dd[open] > summary, .nav-acc[open] > summary { color: var(--rust); }
-.nav-dd > summary.is-current, .nav-acc > summary.is-current { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.site-nav a:hover, .site-nav a[aria-current="page"], .site-nav a[aria-current="true"] { color: var(--rust); text-decoration: underline; text-underline-offset: 4px; }
+.site-header .hdr-cta { width: 10.5rem; padding: 0 8px; font-size: var(--fs-0); white-space: nowrap; flex: none; }   /* a fixed width: the web font loading moves nothing (CLS) */
 .chev { flex: none; width: 16px; height: 16px; }
 details[open] > summary > .chev { transform: rotate(180deg); }
-.nav-dd-li { position: relative; }
-.nav-pop { position: absolute; top: calc(100% + 10px); left: -12px; z-index: 2; width: min(24rem, calc(100vw - 32px));
-  padding: var(--s1); background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--lift-shadow); }
-.nav-pop-end { left: auto; right: -12px; }
-.nav-pop::before { content: ""; position: absolute; left: 0; right: 0; top: -11px; height: 11px; } /* hover bridge over the gap */
-@media (min-width: 1100px) {
-  .nav-pop-2 { width: min(36rem, calc(100vw - 32px)); }
-  .nav-pop-2 .nav-items { display: grid; grid-template-columns: 1fr 1fr; }
-}
-.site-nav a.nav-item { display: flex; align-items: flex-start; gap: 12px; min-height: 48px; padding: 10px 12px; white-space: normal;
-  border-radius: var(--radius); text-decoration: none; }
-.site-nav a.nav-item:hover, .site-nav a.nav-item:focus-visible { background: var(--surface); }
-.site-nav a.nav-item:hover .ni-t, .site-nav a.nav-item[aria-current="page"] .ni-t { text-decoration: underline; }
-.ni { flex: none; margin-top: 2px; }
-.ni-text { display: flex; flex-direction: column; min-width: 0; }
-.ni-t { font-weight: 600; }
-.ni-d { font-size: var(--fs-0); color: var(--muted); }
-.nav-foot { border-top: 1px solid var(--border); margin-top: var(--s1); padding: 4px 12px 0; }
-/* a light veil over the page while a drop-down is open; it takes no clicks (nav.js closes on a click outside) */
-@media (min-width: 900px) {
-  .nav-dd[open] > summary::after { content: ""; position: fixed; left: 0; right: 0; top: 64px; bottom: 0; z-index: -1;
-    background: color-mix(in srgb, var(--text) 6%, transparent); pointer-events: none; }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .nav-dd[open] > .nav-pop { animation: dt-pop 200ms var(--ease-nav) both; }
-  .nav-dd[open] > summary::after { animation: dt-fade 200ms var(--ease-nav) both; }
-  .nav-dd > summary > .chev, .nav-acc > summary > .chev { transition: transform var(--dur-hover) var(--ease-nav); }
-}
 @keyframes dt-pop { from { opacity: 0; transform: translateY(-6px); } }
 @keyframes dt-fade { from { opacity: 0; } }
 /* phone menu */
@@ -237,26 +206,24 @@ details[open] > summary > .chev { transform: rotate(180deg); }
 details.nav-menu { border-bottom: 0; }
 details.nav-menu[open] > summary { color: var(--text); background: var(--surface); }
 .site-nav .nav-panel {
-  position: absolute; left: 0; right: 0; top: 100%; max-height: calc(100vh - 64px); overflow-y: auto;
+  position: absolute; left: 0; right: 0; top: 100%; max-height: calc(100vh - 56px); overflow-y: auto;
   background: var(--bg); border-bottom: 1px solid var(--field-border);
   padding: var(--s1) var(--gutter) var(--s2); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
 }
-.nav-panel .nav-acc > summary { min-height: 48px; justify-content: space-between; font-weight: 600; border-bottom: 1px solid var(--border); }
-.nav-panel .nav-acc > summary .chev { width: 20px; height: 20px; }
-.nav-panel .nav-items { padding: 4px 0; }
-.site-nav .nav-panel a.nav-item { padding: 10px 4px; }
-.nav-panel .nav-foot { margin: 0 0 var(--s1); padding: 4px 4px 0; }
-.site-nav .nav-panel .nav-foot a { min-height: 48px; }
 .site-nav .nav-panel .nav-links a { display: flex; min-height: 48px; border-bottom: 1px solid var(--border); font-size: var(--fs-1); font-weight: 600; }
 .site-nav .nav-panel .nav-links li:last-child a { border-bottom: 0; }
 .theme-toggle svg { display: block; flex: none; }
 .theme-toggle { display: inline-flex; align-items: center; gap: var(--s1); white-space: nowrap; }
 .theme-toggle[hidden] { display: none; }
+/* in the header the toggle keeps its 44 px while theme.js unhides it, so the links and the button never jump (CLS) */
+.site-header .theme-toggle[hidden] { display: inline-flex; visibility: hidden; }
 @media (max-width: 899.98px) {
   .site-header .wrap { gap: var(--s1); }
-  .site-nav .nav-row { display: none; }
+  .site-nav .nav-row, .site-header .hdr-cta { display: none; }
   .nav-menu { display: block; }
 }
+.nav-panel .nav-cta { margin: var(--s2) 0 0; }
+.site-nav .nav-panel .nav-cta .btn { width: 100%; color: var(--on-rust); text-decoration: none; }
 /* 25 Oct sweep: the theme toggle is an icon button at every width; its name stays for screen readers */
 .site-header .theme-toggle { justify-content: center; padding: 0; width: var(--target); }
 .site-header .theme-toggle .tt-label { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
@@ -303,6 +270,11 @@ details.pay-step { border-bottom: 0; }
 details.pay-step > summary.btn { display: inline-flex; list-style: none; padding: 10px 20px; }
 details.pay-step > summary.btn::-webkit-details-marker { display: none; }
 details.pay-step[open] > summary.btn { color: var(--on-rust); }
+/* /pricing/ #last-step and #byp-more are open in the HTML for no-JS visitors; until pay.js decides (.ls-ready), a JS
+   browser paints them closed, unless the URL names them (theme.js .dt-pay-hash, .dt-byp-hash) */
+.dt-js:not(.dt-pay-hash) details#last-step:not(.ls-ready) > :not(summary),
+.dt-js:not(.dt-byp-hash) details#byp-more:not(.ls-ready) > :not(summary) { display: none; }
+.dt-js:not(.dt-byp-hash) details#byp-more:not(.ls-ready) > summary { margin-bottom: 0; list-style-type: disclosure-closed; }
 .pay-panel { margin-top: var(--s3); padding: var(--s3); border: 2px solid var(--rust); border-radius: var(--radius); }
 .pay-panel > h3:first-child { margin-top: 0; }
 .pay-panel .byp { grid-template-columns: 1fr; } .pay-panel .byp dd { margin-bottom: var(--s1); }
@@ -395,6 +367,9 @@ fieldset { border: 0; padding: 0; margin: 0 0 var(--s3); }
 .dropzone.is-over { border-color: var(--rust); }
 
 /* ------------------------------------------------------------------ before-you-pay */
+/* /before-you-pay/ gives the block's heading as an h2 (right under its h1); it keeps the h3 size it has on /pricing/ */
+#before-you-pay > h2 { font-size: var(--fs-3); }
+@media (max-width: 600px) { #before-you-pay > h2 { font-size: var(--fs-2); } }
 .byp { display: grid; grid-template-columns: minmax(0, 11rem) minmax(0, 1fr); gap: 6px var(--s2); margin: 0 0 var(--s2); }
 .byp dt { font-weight: 600; }
 .byp dd { margin: 0; }
@@ -428,6 +403,10 @@ fieldset { border: 0; padding: 0; margin: 0 0 var(--s3); }
 .tool-out h3 { margin-top: var(--s5); }
 .tool-out .soon-list { margin-top: var(--s4); }   /* C1: the neutral lines where the badges were */
 .teaser { margin-top: var(--s4); }
+/* CLS (29 Oct): theme.js sets html.dt-js before first paint, so a tool's form takes its space at once and its
+   "needs JavaScript" notice is never painted; without that class the attributes do nothing */
+.dt-js [data-js-hide] { display: none !important; }
+.dt-js [data-js-show][hidden] { display: block; }
 .next-step { margin-top: var(--s4); }
 /* QA 25 Oct: a short label table (the /pricing/ trader rows) stacks on a phone: one row per card */
 @media (max-width: 600px) {
@@ -1154,3 +1133,152 @@ svg.tp { padding: 8px 10px; }
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .shot-card, :root:not([data-theme="light"]) .toast { box-shadow: 0 16px 36px -16px rgb(0 0 0 / 0.7); } }
 :root[data-theme="dark"] .shot-card, :root[data-theme="dark"] .toast { box-shadow: 0 16px 36px -16px rgb(0 0 0 / 0.7); }
+
+/* ------------------------------------------------------------------ sweep 3 (29 Oct, owner) */
+/* the one-word "Example" label above the sample report's H1 */
+.sr-tag { margin: var(--s3) 0 0; }
+.sr-tag + h1 { margin-top: var(--s1); }
+
+/* the pay step (29 Oct, owner: one click to the pay step from any page, two to Stripe). Three facts as chips, then
+   "Full details before you pay" (the complete Before-you-pay block), then the Stripe button. Used in the /pricing/
+   panel (#last-step) and in the site-wide <dialog> (partials/pay_dialog.html, static/js/pay.js). */
+.pay-facts { list-style: none; padding: 0; margin: var(--s2) 0; display: grid; gap: var(--s1); }
+.pay-facts li { display: flex; align-items: center; gap: 10px; margin: 0; max-width: none; padding: 10px 12px;
+  border: 1px solid var(--border); border-radius: 10px; background: var(--surface); font-weight: 600; }
+.pay-facts svg { flex: none; color: var(--rust); }
+.pay-more { border: 0; margin: 0 0 var(--s2); }
+.pay-more > summary { font-weight: 400; font-size: var(--fs-0); color: var(--rust); padding: 0; text-decoration: underline; text-underline-offset: 3px; }
+.pay-more[open] > summary { margin-bottom: var(--s1); }
+.pay-go { margin: 0 0 var(--s1); }
+.pay-go .btn { width: 100%; }
+.pay-panel .pay-links { margin: 0; }
+.pay-dialog { width: min(32rem, calc(100vw - 32px)); max-height: calc(100dvh - 32px); margin: auto; padding: 0; overflow: auto;
+  overscroll-behavior: contain; border: 1px solid var(--border); border-radius: 16px; background: var(--bg); color: var(--text);
+  box-shadow: 0 24px 64px -24px rgb(0 0 0 / 0.5); }
+.pay-dialog::backdrop { background: rgb(22 24 28 / 0.55); }
+.pd-inner { padding: var(--s3); }
+.pd-top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s2); }
+.pd-top h2 { margin: 0; font-size: var(--fs-3); line-height: 1.2; }
+.pd-top h2::before { display: none; }
+.pd-close { flex: none; display: inline-flex; align-items: center; justify-content: center; width: var(--target); height: var(--target);
+  padding: 0; background: transparent; color: var(--text); border: 1px solid var(--field-border); border-radius: var(--radius); cursor: pointer; }
+.pd-close:hover { background: var(--surface); }
+.pd-full .notice { max-width: none; margin: 0; }
+.pd-full .byp { grid-template-columns: 1fr; } .pd-full .byp dd { margin-bottom: var(--s1); }
+.pd-full h3 { margin-top: 0; font-size: var(--fs-2); }
+.pd-links { margin: var(--s2) 0 0; }
+.pd-frame { position: absolute; width: 1px; height: 1px; border: 0; clip-path: inset(50%); }
+@media (max-width: 600px) {   /* a bottom sheet on a phone */
+  .pay-dialog { width: 100%; max-width: 100%; max-height: 92dvh; margin: auto 0 0; border-radius: 16px 16px 0 0; border-bottom: 0; }
+  .pd-inner { padding: var(--s3) var(--s2); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pay-dialog[open] { animation: dt-pop 200ms var(--ease-nav) both; }
+  .pay-dialog[open]::backdrop { animation: dt-fade 200ms var(--ease-nav) both; }
+}
+@media print {
+  .pay-more > summary { display: none; }
+  html.pd-open body > :not(.pay-dialog) { display: none !important; }
+  html.pd-open .pay-dialog { position: static; width: auto; max-width: none; max-height: none; margin: 0; border: 0; box-shadow: none; overflow: visible; }
+  html.pd-open .pay-dialog::backdrop { display: none; }
+}
+/* /tools/ (29 Oct, owner): all eight tools on one screen; every preview box the same height, so the grid is even */
+.tool-cards-all { margin-top: var(--s4); }
+.tool-cards-all .tool-card-link { padding: var(--s2); }
+.tool-cards-all .tp-wrap > .tp { height: 84px; box-sizing: border-box; }
+.tool-cards-all .tp-icon { height: 84px; }
+.tool-cards-all .tc-name { font-size: var(--fs-1); margin-top: 4px; }
+@media (max-width: 600px) { .tool-cards-all { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s1); }
+  .tool-cards-all .tool-card-link { padding: 10px; } .tool-cards-all .tc-line { font-size: 0.8rem; }
+  .tool-cards-all .tp-wrap > .tp, .tool-cards-all .tp-icon { height: 72px; }
+  .tool-cards-all .tp-wrap > .tp:not(.tp-icon) { padding-top: 24px; }   /* the "Example" tag sits above the preview */
+  .tool-cards-all .tp-tag { font-size: 0.62rem; top: 3px; right: 3px; }
+  .tool-cards-all .tp-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); padding-bottom: 4px; }
+  .tool-cards-all .tp-stats .tp-tile:nth-child(3) { display: none; }
+  .tool-cards-all .tp-tile { padding: 2px 6px; } .tool-cards-all .tp-tile b { font-size: 0.78rem; }
+  .tool-cards-all .tp-prop { gap: 4px; } .tool-cards-all .tp-legend { font-size: 0.62rem; } }
+
+/* "All habits measured" (29 Oct, owner; static/js/paid/report.js habitsSummary): the tested results as big pills,
+   then each habit as a card row: result pill, dollar total with a bar scaled to the largest, trade count badge.
+   The whole row is the link to the habit's section. A real table underneath (thead kept for screen readers). */
+.habits-sum .hs-top { display: flex; flex-wrap: wrap; gap: var(--s2); margin: 0 0 var(--s3); }
+.hs-verdict { flex: 1 1 15rem; max-width: 26rem; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  padding: var(--s2) var(--s3); border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+.hs-verdict.is-hit { border: 2px solid var(--rust); }
+.hs-verdict .badge { font-size: var(--fs-1); min-height: 34px; padding: 4px 14px; background: var(--bg); white-space: normal; max-width: 100%; }
+@media (max-width: 400px) { .hs-verdict { flex-basis: 100%; padding: var(--s2); } .hs-verdict .badge { font-size: var(--fs-0); } }
+.hs-verdict.is-hit .badge { background: var(--rust); color: var(--on-rust); border-color: var(--rust); }
+.hs-gloss { font-size: var(--fs-2); font-weight: 600; }
+.hs-of { font-size: var(--fs-0); color: var(--muted); }
+.hs-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.hs-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.hs-table tbody { display: grid; gap: var(--s1); }
+.hs-row { position: relative; display: grid; grid-template-columns: minmax(0, 1.4fr) auto minmax(9rem, 1fr) auto; align-items: center;
+  gap: var(--s1) var(--s2); padding: 12px var(--s2); border: 1px solid var(--border); border-radius: 12px; background: var(--bg); }
+.hs-row:hover { border-color: var(--rust); }
+.hs-row:focus-within { outline: 3px solid var(--rust); outline-offset: 2px; }
+.hs-row > * { padding: 0; border: 0; text-align: left; }
+.hs-row th a { font-weight: 600; color: var(--text); text-decoration: none; }
+.hs-row th a:focus-visible { outline: none; }
+.hs-row th a::after { content: ""; position: absolute; inset: 0; border-radius: 12px; }   /* the whole row is the link */
+.hs-row:hover th a { color: var(--rust); text-decoration: underline; }
+.hs-total { display: flex; flex-direction: column; align-items: stretch; gap: 4px; }
+.hs-amt { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+.hs-bar { display: block; height: 8px; border-radius: 4px; background: var(--surface); overflow: hidden; }
+.hs-fill { display: block; height: 100%; border-radius: 4px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.hs-fill.is-loss { background: var(--loss); } .hs-fill.is-gain { background: var(--gain); } .hs-fill.is-flag { background: var(--rust); }
+.hs-count { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border);
+  font-family: var(--font-mono); font-size: 0.78rem; white-space: nowrap; }
+.hs-count::after { content: "trades"; margin-left: 0.3em; font-family: var(--font-sans); }
+.hs-note { margin-top: var(--s1); }
+@media (max-width: 700px) {
+  .hs-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "name name" "res n" "total total"; }
+  .hs-row th { grid-area: name; } .hs-res { grid-area: res; } .hs-n { grid-area: n; } .hs-total { grid-area: total; }
+}
+.habit-how { margin-top: var(--s1); }
+@media print {
+  .hs-row { break-inside: avoid; border-color: #999; }
+  .hs-row th a::after { content: none; }
+  .report-out details > summary { display: none; }
+}
+
+/* tool hero pictures (sweep 3; partials/tool_shot.html) */
+.tool-shot { margin: 0; padding-top: var(--s3); }
+.tool-shot-card { position: relative; padding: var(--s4) var(--s3) var(--s3); }
+.tool-shot-card > .tp { display: block; width: 100%; height: auto; min-height: 120px; }
+.tool-shot-card > svg.tp { height: 160px; }
+.tool-shot-card .tp-stats, .tool-shot-card .tp-prop { min-height: 0; }
+.tool-shot-card .tp-legend { font-size: var(--fs-0); }
+.tool-shot-card .tp-prop svg { height: 22px; }
+.tool-shot figcaption { font-size: var(--fs-0); color: var(--muted); margin-top: var(--s1); }
+.shot-line { margin: var(--s2) 0 0; font-size: var(--fs-1); }
+.mini-shot .mini-total > * { font-weight: 600; color: var(--text); border-top: 2px solid var(--border); }
+.rr-ladder { display: block; width: 100%; max-width: 320px; height: auto; }
+.rr-axis { stroke: var(--border); stroke-width: 2; }
+.rr-win { fill: var(--gain); } .rr-risk { fill: var(--loss); }
+.rr-k { font: 13px var(--font-sans); fill: var(--muted); }
+.rr-v { font: 14px var(--font-mono); fill: var(--text); }
+.rr-big { font: 600 44px var(--font-sans); fill: var(--text); }
+@media (max-width: 899.98px) { .tool-hero .tool-shot { display: none; } }   /* phones: the tool itself comes first */
+
+/* /terms/ and /privacy/ (29 Oct, owner: presentation only): each section folds under its heading with a one-line
+   summary; the text inside is unchanged. A link to any id inside opens its fold (theme.js); print opens them all. */
+details.legal-sec { border-bottom: 1px solid var(--border); }
+details.legal-sec > summary { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--s2); align-items: center;
+  padding: var(--s2) 0; list-style: none; font-weight: 400; color: var(--text); }
+details.legal-sec > summary::-webkit-details-marker { display: none; }
+details.legal-sec > summary::after { content: "+"; grid-column: 2; grid-row: 1 / span 2; font: 400 var(--fs-3) var(--font-mono); color: var(--rust); }
+details.legal-sec[open] > summary::after { content: "−"; }
+details.legal-sec > summary h2 { margin: 0; font-size: var(--fs-3); }
+details.legal-sec > summary h2::before { display: none; }
+details.legal-sec > summary:hover h2 { color: var(--rust); }
+.ls-sum { grid-column: 1; color: var(--muted); font-size: var(--fs-1); margin-top: 4px; }
+details.legal-sec[open] > summary { color: var(--text); }
+details.legal-sec[open] { padding-bottom: var(--s2); }
+@media print { details.legal-sec > summary::after, .ls-sum { display: none; } }
+/* print in the light palette whatever the screen theme (sweep 3: the dark report cards printed dark) */
+@media print {
+  :root, :root:not([data-theme="light"]), :root[data-theme="dark"] {
+    --bg: #FFFFFF; --surface: #F4F5F7; --text: #16181C; --muted: #5B606A; --rust: #9A3B1C; --rust-hover: #7C2F16; --on-rust: #FFFFFF;
+    --border: #DADCE0; --field-border: #6B717B; --plan: #4A6A94; --gain: #1F7A52; --loss: #A3264F; --caution: #8C6A1E; color-scheme: light; }
+}

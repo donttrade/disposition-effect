@@ -70,6 +70,7 @@ disclaimer_long = "donttrade measures your own past trades. It is not investment
 # requires_flag. [[nav.foot]] = text links under the panel's rule; label_if_paid replaces label
 # with paid_report on. The nav never shows a price, a % or a study number (D3).
 # 25 Oct sweep (owner): four items. Research, About and For traders are in the footer.
+# 29 Oct (owner): four plain links, no drop-down; /tools/ shows every tool with a preview.
 [[nav]]
 label = "Sample report"
 href = "/sample-report/"
@@ -77,60 +78,6 @@ href = "/sample-report/"
 [[nav]]
 label = "Free tools"
 href = "/tools/"
-columns = 2          # two columns from 1100 px
-[[nav.items]]
-label = "Trading journal"
-href = "/journal/"
-desc = "Your trades and a P&L calendar, saved on this device. No account."
-icon = "journal"
-requires_flag = "journal"
-[[nav.items]]
-label = "Trade stats"
-href = "/tools/trade-stats/"
-desc = "Totals from your trade file"
-icon = "stats"
-[[nav.items]]
-label = "Trading heatmap"
-href = "/tools/trading-heatmap/"
-desc = "Your results by hour and weekday"
-icon = "windows"
-[[nav.items]]
-label = "Drawdown calculator"
-href = "/tools/drawdown-calculator/"
-desc = "What gain recovers a drawdown"
-icon = "split"
-[[nav.items]]
-label = "Prop challenge simulator"
-href = "/tools/prop-challenge-simulator/"
-desc = "Your past days under a challenge’s rules"
-icon = "flag"
-[[nav.items]]
-label = "Lot size calculator"
-href = "/tools/lot-size-calculator/"
-desc = "Lots for the risk you chose"
-icon = "scale"
-[[nav.items]]
-label = "Risk-reward calculator"
-href = "/tools/risk-reward-calculator/"
-desc = "Break-even win rate for a ratio"
-icon = "percent"
-[[nav.items]]
-label = "Disposition calculator"
-href = "/tools/disposition-calculator/"
-desc = "Winners vs losers sold, from four counts"
-icon = "hourglass"
-[[nav.items]]
-label = "Pass-rate calculator"
-href = "/tools/pass-rate-calculator/"
-desc = "One cohort’s pass and payout rate"
-icon = "check"
-[[nav.foot]]
-label = "All free tools"
-href = "/tools/"
-[[nav.foot]]
-label = "For traders: the habit report (waitlist)"
-label_if_paid = "For traders: the habit report"
-href = "/for-traders/"
 
 [[nav]]
 label = "Pricing"

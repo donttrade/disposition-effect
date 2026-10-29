@@ -1,0 +1,341 @@
+{
+ "noise": {
+  "checks": [
+   {
+    "extreme": null,
+    "guard": null,
+    "label": "not enough trades to tell",
+    "method": "bootstrap-t",
+    "n_a": 5,
+    "n_b": null,
+    "n_needed": null,
+    "p": null,
+    "p_unguarded": null,
+    "skew": null,
+    "stat": "expectancy",
+    "value": null
+   },
+   {
+    "label": "not enough trades to tell",
+    "method": "label permutation",
+    "n_a": 2,
+    "n_b": 3,
+    "p": null,
+    "stat": "hold_gap_s",
+    "value": null
+   },
+   {
+    "label": "not enough trades to tell",
+    "method": "order shuffle",
+    "n_a": 5,
+    "n_b": null,
+    "p": null,
+    "stat": "longest_losing_streak",
+    "value": null
+   }
+  ],
+  "limited": false,
+  "n_used": 5
+ },
+ "pgr_plr": {
+  "coverage_pct": null,
+  "pg": 0,
+  "pl": 0,
+  "rg": 5,
+  "rl": 2
+ },
+ "result": {
+  "currency_groups": {
+   "points": 5
+  },
+  "dates_only": false,
+  "executions": [
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 1.1,
+    "qty": 1.0,
+    "row": 5,
+    "side": "buy",
+    "symbol": "EURUSD",
+    "ts": 1773480600000
+   },
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 1.11,
+    "qty": 2.0,
+    "row": 6,
+    "side": "sell",
+    "symbol": "EURUSD",
+    "ts": 1773567001000
+   },
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 1.12,
+    "qty": 3.0,
+    "row": 7,
+    "side": "buy",
+    "symbol": "EURUSD",
+    "ts": 1773653402000
+   },
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 1.13,
+    "qty": 1.0,
+    "row": 8,
+    "side": "sell",
+    "symbol": "EURUSD",
+    "ts": 1773739803000
+   },
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 1.14,
+    "qty": 2.0,
+    "row": 9,
+    "side": "buy",
+    "symbol": "EURUSD",
+    "ts": 1773826204000
+   },
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 1.15,
+    "qty": 3.0,
+    "row": 10,
+    "side": "sell",
+    "symbol": "EURUSD",
+    "ts": 1773912605000
+   },
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 1.16,
+    "qty": 1.0,
+    "row": 11,
+    "side": "buy",
+    "symbol": "EURUSD",
+    "ts": 1773999006000
+   },
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 1.17,
+    "qty": 2.0,
+    "row": 12,
+    "side": "sell",
+    "symbol": "EURUSD",
+    "ts": 1774085407000
+   },
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 1.18,
+    "qty": 3.0,
+    "row": 13,
+    "side": "buy",
+    "symbol": "EURUSD",
+    "ts": 1774171808000
+   },
+   {
+    "currency": null,
+    "fee": 0.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 1.19,
+    "qty": 1.0,
+    "row": 14,
+    "side": "sell",
+    "symbol": "EURUSD",
+    "ts": 1774258209000
+   }
+  ],
+  "format": "generic",
+  "n_date_only": 0,
+  "skipped": {},
+  "trades": [
+   {
+    "close_ts": 1773567001000,
+    "currency": null,
+    "dir": "long",
+    "entry_vwap": 1.1,
+    "exit_vwap": 1.11,
+    "fees": 0.0,
+    "fills_n": 2,
+    "hold_s": 86401,
+    "id": "t1",
+    "open_ts": 1773480600000,
+    "pnl": 0.010000000000000009,
+    "pnl_gross": 0.010000000000000009,
+    "pnl_source": "computed",
+    "pnl_unit": "points",
+    "qty": 1.0,
+    "symbol": "EURUSD"
+   },
+   {
+    "close_ts": 1773653402000,
+    "currency": null,
+    "dir": "short",
+    "entry_vwap": 1.11,
+    "exit_vwap": 1.12,
+    "fees": 0.0,
+    "fills_n": 2,
+    "hold_s": 86401,
+    "id": "t2",
+    "open_ts": 1773567001000,
+    "pnl": -0.010000000000000009,
+    "pnl_gross": -0.010000000000000009,
+    "pnl_source": "computed",
+    "pnl_unit": "points",
+    "qty": 1.0,
+    "symbol": "EURUSD"
+   },
+   {
+    "close_ts": 1773912605000,
+    "currency": null,
+    "dir": "long",
+    "entry_vwap": 1.13,
+    "exit_vwap": 1.145,
+    "fees": 0.0,
+    "fills_n": 4,
+    "hold_s": 259203,
+    "id": "t3",
+    "open_ts": 1773653402000,
+    "pnl": 0.0600000000000005,
+    "pnl_gross": 0.0600000000000005,
+    "pnl_source": "computed",
+    "pnl_unit": "points",
+    "qty": 3.0,
+    "symbol": "EURUSD"
+   },
+   {
+    "close_ts": 1774085407000,
+    "currency": null,
+    "dir": "long",
+    "entry_vwap": 1.16,
+    "exit_vwap": 1.17,
+    "fees": 0.0,
+    "fills_n": 2,
+    "hold_s": 86401,
+    "id": "t4",
+    "open_ts": 1773999006000,
+    "pnl": 0.010000000000000009,
+    "pnl_gross": 0.010000000000000009,
+    "pnl_source": "computed",
+    "pnl_unit": "points",
+    "qty": 1.0,
+    "symbol": "EURUSD"
+   },
+   {
+    "close_ts": 1774171808000,
+    "currency": null,
+    "dir": "short",
+    "entry_vwap": 1.17,
+    "exit_vwap": 1.18,
+    "fees": 0.0,
+    "fills_n": 2,
+    "hold_s": 86401,
+    "id": "t5",
+    "open_ts": 1774085407000,
+    "pnl": -0.010000000000000009,
+    "pnl_gross": -0.010000000000000009,
+    "pnl_source": "computed",
+    "pnl_unit": "points",
+    "qty": 1.0,
+    "symbol": "EURUSD"
+   }
+  ],
+  "tz_label": "as in the file",
+  "verified_format": true,
+  "warnings": [
+   {
+    "code": "W_OPEN_POSITIONS",
+    "n": 1
+   }
+  ]
+ },
+ "stats": {
+  "avg_loss": -0.010000000000000009,
+  "avg_win": 0.02666666666666684,
+  "expectancy": 0.012000000000000099,
+  "gross_loss": -0.020000000000000018,
+  "gross_profit": 0.08000000000000052,
+  "hold_median_loss_s": 86401.0,
+  "hold_median_win_s": 86401,
+  "hold_ratio": 1.0,
+  "largest_loss": -0.010000000000000009,
+  "largest_win": 0.0600000000000005,
+  "long": {
+   "losses": 0,
+   "n": 3,
+   "pnl": 0.08000000000000052,
+   "win_rate": 1.0,
+   "wins": 3
+  },
+  "losses": 2,
+  "max_consec_losses": {
+   "n": 1,
+   "pnl": -0.010000000000000009
+  },
+  "max_consec_wins": {
+   "n": 2,
+   "pnl": 0.0700000000000005
+  },
+  "max_drawdown_abs": 0.010000000000000009,
+  "max_drawdown_pct": null,
+  "n": 5,
+  "net_pnl": 0.0600000000000005,
+  "profit_factor": 4.000000000000022,
+  "scratch": 0,
+  "short": {
+   "losses": 2,
+   "n": 2,
+   "pnl": -0.020000000000000018,
+   "win_rate": 0.0,
+   "wins": 0
+  },
+  "win_rate": 0.6,
+  "wins": 3
+ }
+}

@@ -1,0 +1,267 @@
+{
+ "guess": {
+  "badges": {
+   "date": "matched",
+   "price": "matched",
+   "qty": "matched",
+   "side": "matched",
+   "symbol": "matched"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": "ymd",
+   "reason": null,
+   "seen": null,
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": null
+  },
+  "futures_offer": false,
+  "layout": "fills",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 0,
+    "direction": null,
+    "fees": null,
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 4,
+    "qty": 3,
+    "side": 2,
+    "status": null,
+    "symbol": 1,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "ymd",
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "0": "date",
+    "1": "symbol",
+    "2": "side",
+    "3": "qty",
+    "4": "price"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": null,
+   "side_values": {
+    "buy": "buy",
+    "sell": "sell"
+   },
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1,
+   "year_base": null
+  },
+  "questions": [
+   {
+    "example": "2,000",
+    "q": "number_style"
+   }
+  ],
+  "side_checks": {},
+  "side_counts": {
+   "buy": 6,
+   "sell": 6
+  },
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": null
+ },
+ "peek": {
+  "blocked": [
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "delimiter": ",",
+  "header_hits": 5,
+  "header_row": 0,
+  "headers": [
+   "Date",
+   "Symbol",
+   "Side",
+   "Qty",
+   "Price"
+  ],
+  "kind": "csv",
+  "labels": [
+   "Date",
+   "Symbol",
+   "Side",
+   "Qty",
+   "Price"
+  ],
+  "n_rows": 12,
+  "options": [
+   {
+    "example": "2026-03-02 09:31:05",
+    "index": 0,
+    "label": "Date"
+   },
+   {
+    "example": "AAA",
+    "index": 1,
+    "label": "Symbol"
+   },
+   {
+    "example": "buy",
+    "index": 2,
+    "label": "Side"
+   },
+   {
+    "example": "1",
+    "index": 3,
+    "label": "Qty"
+   },
+   {
+    "example": "2,000",
+    "index": 4,
+    "label": "Price"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     "2026-03-02 09:31:05",
+     "AAA",
+     "buy",
+     "1",
+     "2,000"
+    ],
+    "row": 2
+   },
+   {
+    "cells": [
+     "2026-03-02 09:54:05",
+     "AAA",
+     "sell",
+     "1",
+     "1,960"
+    ],
+    "row": 3
+   },
+   {
+    "cells": [
+     "2026-03-02 10:08:05",
+     "BBB",
+     "sell",
+     "3",
+     "2,265"
+    ],
+    "row": 4
+   },
+   {
+    "cells": [
+     "2026-03-02 10:36:05",
+     "BBB",
+     "buy",
+     "3",
+     "2,245"
+    ],
+    "row": 5
+   },
+   {
+    "cells": [
+     "2026-03-02 10:48:05",
+     "CCC",
+     "buy",
+     "5",
+     "2,190"
+    ],
+    "row": 6
+   },
+   {
+    "cells": [
+     "2026-03-02 11:21:05",
+     "CCC",
+     "sell",
+     "5",
+     "2,205"
+    ],
+    "row": 7
+   },
+   {
+    "cells": [
+     "2026-03-02 11:31:05",
+     "AAA",
+     "buy",
+     "2",
+     "2,115"
+    ],
+    "row": 8
+   },
+   {
+    "cells": [
+     "2026-03-02 12:09:05",
+     "AAA",
+     "sell",
+     "2",
+     "2,135"
+    ],
+    "row": 9
+   },
+   {
+    "cells": [
+     "2026-03-02 12:17:05",
+     "BBB",
+     "sell",
+     "4",
+     "2,020"
+    ],
+    "row": 10
+   },
+   {
+    "cells": [
+     "2026-03-02 12:40:05",
+     "BBB",
+     "buy",
+     "4",
+     "2,060"
+    ],
+    "row": 11
+   },
+   {
+    "cells": [
+     "2026-03-02 13:06:05",
+     "CCC",
+     "buy",
+     "1",
+     "2,285"
+    ],
+    "row": 12
+   },
+   {
+    "cells": [
+     "2026-03-02 13:34:05",
+     "CCC",
+     "sell",
+     "1",
+     "2,255"
+    ],
+    "row": 13
+   }
+  ],
+  "table": null,
+  "tables": null
+ },
+ "preset": null,
+ "signature": "cf03bf534a12d44f88f47a6c55c4b6a0"
+}

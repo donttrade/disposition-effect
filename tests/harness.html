@@ -9,7 +9,8 @@
 <body>
 <p id="status">loading</p>
 <script type="module">
-import { runFile } from '/site/static/js/engine/index.js';
+import { runFile, runFiles, readWithPresets } from '/site/static/js/engine/index.js';
+import { inspect, signature, headingsEmail, headingsMailto } from '/site/static/js/engine/mapping.js';
 import { freeStats } from '/site/static/js/engine/stats.js';
 import { noiseChecks, checkExpectancy, SEED_BASE } from '/site/static/js/engine/noise.js';
 import { pgrPlrCounts } from '/site/static/js/engine/pgr.js';
@@ -50,6 +51,31 @@ window.runEngineTimed = (b64) => {
   const ms = performance.now() - t0;
   return JSON.stringify({ ms, error: r.error || null, trades: r.result ? r.result.trades.length : 0 });
 };
+// The universal importer's cases (engine_ref.run_case): {items: [{b64} | {paste}], mapping, presets}.
+window.runCase = (json) => {
+  const spec = JSON.parse(json);
+  const items = spec.items.map((it) => (it.paste !== undefined ? { paste: it.paste } : bytesOf(it.b64)));
+  const r = spec.presets ? readWithPresets(items) : runFiles(items, spec.mapping ? { mapping: spec.mapping } : {});
+  if (!r.result) return JSON.stringify(r);
+  return JSON.stringify({ result: r.result, stats: freeStats(r.result.trades), noise: noiseChecks(r.result.trades),
+    pgr_plr: pgrPlrCounts(r.result.executions) });
+};
+// The column guess (mapping.js) on a case's first item: {peek, guess, preset, signature} or {error}.
+window.inspectCase = async (json, opts) => {
+  const spec = JSON.parse(json);
+  const it = spec.items[0];
+  try {
+    const r = inspect(it.paste !== undefined ? { paste: it.paste } : bytesOf(it.b64), opts || {});
+    r.signature = await signature(r.peek.headers, r.peek.delimiter);
+    return JSON.stringify(r);
+  } catch (e) {
+    if (e && e.name === 'EngineError') return JSON.stringify({ error: { code: e.code, row: e.row, column: e.column } });
+    throw e;
+  }
+};
+window.signatureOf = (headers, delim) => signature(headers, delim);
+window.headingsMail = (json) => { const a = JSON.parse(json); const m = headingsEmail(...a);
+  return JSON.stringify(m.ok ? Object.assign(m, { href: headingsMailto('someone@example.org', m) }) : m); };
 document.getElementById('status').textContent = 'ready';
 </script>
 </body>

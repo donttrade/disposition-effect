@@ -48,6 +48,7 @@
   "currency_groups": {
    "points": 40
   },
+  "dates_only": false,
   "executions": [
    {
     "currency": null,
@@ -1171,6 +1172,7 @@
    }
   ],
   "format": "generic",
+  "n_date_only": 0,
   "skipped": {},
   "trades": [
    {
@@ -1900,6 +1902,10 @@
    {
     "code": "W_CURRENCY_IGNORED",
     "n": 0
+   },
+   {
+    "code": "W_WIDE_ROWS",
+    "n": 60
    }
   ]
  },

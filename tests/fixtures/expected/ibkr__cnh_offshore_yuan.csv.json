@@ -48,6 +48,7 @@
   "currency_groups": {
    "CNH": 2
   },
+  "dates_only": false,
   "executions": [
    {
     "currency": "CNH",
@@ -107,6 +108,7 @@
    }
   ],
   "format": "ibkr_flex",
+  "n_date_only": 0,
   "skipped": {},
   "trades": [
    {

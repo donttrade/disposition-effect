@@ -1,0 +1,692 @@
+{
+ "guess": {
+  "badges": {
+   "date": "matched",
+   "fees": "matched",
+   "price": "matched",
+   "qty": "matched",
+   "side": "matched",
+   "status": "matched",
+   "symbol": "matched"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": "dmy",
+   "reason": "seen",
+   "seen": "16/03/2026 09:31:05",
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": 2
+  },
+  "futures_offer": true,
+  "layout": "orders",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 11,
+    "direction": null,
+    "fees": [
+     12
+    ],
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 7,
+    "qty": 6,
+    "side": 3,
+    "status": 1,
+    "symbol": 5,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "dmy",
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "1": "status",
+    "11": "updatetime",
+    "12": "commission",
+    "3": "buysell",
+    "5": "symbol",
+    "6": "qtyfilled",
+    "7": "avgfillprice"
+   },
+   "keep_partial": false,
+   "layout": "orders",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": null,
+   "side_values": {
+    "b": "buy",
+    "s": "sell"
+   },
+   "source": null,
+   "status_rules": null,
+   "status_values": {
+    "cancelled": "skip",
+    "filled": "keep",
+    "rejected": "skip"
+   },
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1,
+   "year_base": null
+  },
+  "questions": [],
+  "side_checks": {},
+  "side_counts": {
+   "b": 11,
+   "s": 11
+  },
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": {
+   "cancelled": 1,
+   "filled": 20,
+   "rejected": 1
+  }
+ },
+ "peek": {
+  "blocked": [
+   true,
+   false,
+   true,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "delimiter": ",",
+  "header_hits": 7,
+  "header_row": 0,
+  "headers": [
+   "Account",
+   "Status",
+   "Remarks",
+   "Buy/Sell",
+   "Qty To Fill",
+   "Symbol",
+   "Qty Filled",
+   "Avg Fill Price",
+   "Limit price",
+   "Order Number",
+   "Create Time",
+   "Update Time",
+   "Commission"
+  ],
+  "kind": "csv",
+  "labels": [
+   "Account",
+   "Status",
+   "Remarks",
+   "Buy/Sell",
+   "Qty To Fill",
+   "Symbol",
+   "Qty Filled",
+   "Avg Fill Price",
+   "Limit price",
+   "Order Number",
+   "Create Time",
+   "Update Time",
+   "Commission"
+  ],
+  "n_rows": 22,
+  "options": [
+   {
+    "example": "Filled",
+    "index": 1,
+    "label": "Status"
+   },
+   {
+    "example": "B",
+    "index": 3,
+    "label": "Buy/Sell"
+   },
+   {
+    "example": "1",
+    "index": 4,
+    "label": "Qty To Fill"
+   },
+   {
+    "example": "MNQZ6",
+    "index": 5,
+    "label": "Symbol"
+   },
+   {
+    "example": "1",
+    "index": 6,
+    "label": "Qty Filled"
+   },
+   {
+    "example": "20300.00",
+    "index": 7,
+    "label": "Avg Fill Price"
+   },
+   {
+    "example": "20300.00",
+    "index": 8,
+    "label": "Limit price"
+   },
+   {
+    "example": "R0",
+    "index": 9,
+    "label": "Order Number"
+   },
+   {
+    "example": "16/03/2026 09:31:01",
+    "index": 10,
+    "label": "Create Time"
+   },
+   {
+    "example": "16/03/2026 09:31:05",
+    "index": 11,
+    "label": "Update Time"
+   },
+   {
+    "example": "0.74",
+    "index": 12,
+    "label": "Commission"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     null,
+     "Filled",
+     null,
+     "B",
+     "1",
+     "MNQZ6",
+     "1",
+     "20300.00",
+     "20300.00",
+     "R0",
+     "16/03/2026 09:31:01",
+     "16/03/2026 09:31:05",
+     "0.74"
+    ],
+    "row": 2
+   },
+   {
+    "cells": [
+     null,
+     "Filled",
+     null,
+     "S",
+     "1",
+     "MNQZ6",
+     "1",
+     "20294.00",
+     "20294.00",
+     "R1",
+     "16/03/2026 09:54:01",
+     "16/03/2026 09:54:05",
+     "0.74"
+    ],
+    "row": 3
+   },
+   {
+    "cells": [
+     null,
+     "Filled",
+     null,
+     "S",
+     "3",
+     "ESZ6",
+     "3",
+     "20339.75",
+     "20339.75",
+     "R2",
+     "16/03/2026 10:08:01",
+     "16/03/2026 10:08:05",
+     "0.74"
+    ],
+    "row": 4
+   },
+   {
+    "cells": [
+     null,
+     "Cancelled",
+     null,
+     "B",
+     "2",
+     "ESZ6",
+     "0",
+     "",
+     "5800.00",
+     "RX1",
+     "16/03/2026 09:31:05",
+     "16/03/2026 09:31:05",
+     ""
+    ],
+    "row": 5
+   },
+   {
+    "cells": [
+     null,
+     "Filled",
+     null,
+     "B",
+     "3",
+     "ESZ6",
+     "3",
+     "20336.75",
+     "20336.75",
+     "R3",
+     "16/03/2026 10:36:01",
+     "16/03/2026 10:36:05",
+     "0.74"
+    ],
+    "row": 6
+   },
+   {
+    "cells": [
+     null,
+     "Filled",
+     null,
+     "B",
+     "5",
+     "MNQZ6",
+     "5",
+     "20328.50",
+     "20328.50",
+     "R4",
+     "16/03/2026 10:48:01",
+     "16/03/2026 10:48:05",
+     "0.74"
+    ],
+    "row": 7
+   },
+   {
+    "cells": [
+     null,
+     "Rejected",
+     null,
+     "S",
+     "1",
+     "ESZ6",
+     "0",
+     "",
+     "5800.00",
+     "RX2",
+     "16/03/2026 09:31:05",
+     "16/03/2026 09:31:05",
+     ""
+    ],
+    "row": 8
+   },
+   {
+    "cells": [
+     null,
+     "Filled",
+     null,
+     "S",
+     "5",
+     "MNQZ6",
+     "5",
+     "20330.75",
+     "20330.75",
+     "R5",
+     "16/03/2026 11:21:01",
+     "16/03/2026 11:21:05",
+     "0.74"
+    ],
+    "row": 9
+   },
+   {
+    "cells": [
+     null,
+     "Filled",
+     null,
+     "B",
+     "2",
+     "ESZ6",
+     "2",
+     "20317.25",
+     "20317.25",
+     "R6",
+     "16/03/2026 11:31:01",
+     "16/03/2026 11:31:05",
+     "0.74"
+    ],
+    "row": 10
+   },
+   {
+    "cells": [
+     null,
+     "Filled",
+     null,
+     "S",
+     "2",
+     "ESZ6",
+     "2",
+     "20320.25",
+     "20320.25",
+     "R7",
+     "16/03/2026 12:09:01",
+     "16/03/2026 12:09:05",
+     "0.74"
+    ],
+    "row": 11
+   },
+   {
+    "cells": [
+     null,
+     "Filled",
+     null,
+     "S",
+     "4",
+     "MNQZ6",
+     "4",
+     "20303.00",
+     "20303.00",
+     "R8",
+     "16/03/2026 12:17:01",
+     "16/03/2026 12:17:05",
+     "0.74"
+    ],
+    "row": 12
+   },
+   {
+    "cells": [
+     null,
+     "Filled",
+     null,
+     "B",
+     "4",
+     "MNQZ6",
+     "4",
+     "20309.00",
+     "20309.00",
+     "R9",
+     "16/03/2026 12:40:01",
+     "16/03/2026 12:40:05",
+     "0.74"
+    ],
+    "row": 13
+   },
+   {
+    "cells": [
+     null,
+     "Filled",
+     null,
+     "B",
+     "1",
+     "ESZ6",
+     "1",
+     "20342.75",
+     "20342.75",
+     "R10",
+     "16/03/2026 13:06:01",
+     "16/03/2026 13:06:05",
+     "0.74"
+    ],
+    "row": 14
+   },
+   {
+    "cells": [
+     null,
+     "Filled",
+     null,
+     "S",
+     "1",
+     "ESZ6",
+     "1",
+     "20338.25",
+     "20338.25",
+     "R11",
+     "16/03/2026 13:34:01",
+     "16/03/2026 13:34:05",
+     "0.74"
+    ],
+    "row": 15
+   },
+   {
+    "cells": [
+     null,
+     "Filled",
+     null,
+     "B",
+     "3",
+     "MNQZ6",
+     "3",
+     "20331.50",
+     "20331.50",
+     "R12",
+     "16/03/2026 13:43:01",
+     "16/03/2026 13:43:05",
+     "0.74"
+    ],
+    "row": 16
+   },
+   {
+    "cells": [
+     null,
+     "Filled",
+     null,
+     "S",
+     "3",
+     "MNQZ6",
+     "3",
+     "20330.00",
+     "20330.00",
+     "R13",
+     "16/03/2026 14:16:01",
+     "16/03/2026 14:16:05",
+     "0.74"
+    ],
+    "row": 17
+   },
+   {
+    "cells": [
+     null,
+     "Filled",
+     null,
+     "S",
+     "5",
+     "ESZ6",
+     "5",
+     "20320.25",
+     "20320.25",
+     "R14",
+     "16/03/2026 14:23:01",
+     "16/03/2026 14:23:05",
+     "0.74"
+    ],
+    "row": 18
+   },
+   {
+    "cells": [
+     null,
+     "Filled",
+     null,
+     "B",
+     "5",
+     "ESZ6",
+     "5",
+     "20321.75",
+     "20321.75",
+     "R15",
+     "16/03/2026 15:01:01",
+     "16/03/2026 15:01:05",
+     "0.74"
+    ],
+    "row": 19
+   },
+   {
+    "cells": [
+     null,
+     "Filled",
+     null,
+     "B",
+     "2",
+     "MNQZ6",
+     "2",
+     "20306.00",
+     "20306.00",
+     "R16",
+     "17/03/2026 09:31:01",
+     "17/03/2026 09:31:05",
+     "0.74"
+    ],
+    "row": 20
+   },
+   {
+    "cells": [
+     null,
+     "Filled",
+     null,
+     "S",
+     "2",
+     "MNQZ6",
+     "2",
+     "20310.50",
+     "20310.50",
+     "R17",
+     "17/03/2026 09:54:01",
+     "17/03/2026 09:54:05",
+     "0.74"
+    ],
+    "row": 21
+   },
+   {
+    "cells": [
+     null,
+     "Filled",
+     null,
+     "B",
+     "4",
+     "ESZ6",
+     "4",
+     "20345.75",
+     "20345.75",
+     "R18",
+     "17/03/2026 10:17:01",
+     "17/03/2026 10:17:05",
+     "0.74"
+    ],
+    "row": 22
+   },
+   {
+    "cells": [
+     null,
+     "Filled",
+     null,
+     "S",
+     "4",
+     "ESZ6",
+     "4",
+     "20339.75",
+     "20339.75",
+     "R19",
+     "17/03/2026 10:45:01",
+     "17/03/2026 10:45:05",
+     "0.74"
+    ],
+    "row": 23
+   }
+  ],
+  "table": null,
+  "tables": null
+ },
+ "preset": {
+  "id": "rithmic_orders",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 11,
+    "direction": null,
+    "fees": [
+     12
+    ],
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 7,
+    "qty": 6,
+    "side": 3,
+    "status": 1,
+    "symbol": 5,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "dmy",
+   "delimiter": ",",
+   "futures_sizes": true,
+   "header_row": 0,
+   "headers": {
+    "1": "status",
+    "11": "updatetime",
+    "12": "commission",
+    "3": "buysell",
+    "5": "symbol",
+    "6": "qtyfilled",
+    "7": "avgfillprice"
+   },
+   "keep_partial": true,
+   "layout": "orders",
+   "number_style": null,
+   "preset": "rithmic_orders",
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": [
+    [
+     "prefix",
+     "b",
+     "buy"
+    ],
+    [
+     "prefix",
+     "s",
+     "sell"
+    ]
+   ],
+   "side_values": null,
+   "source": null,
+   "status_rules": [
+    [
+     "eq",
+     "filled",
+     "keep"
+    ],
+    [
+     "eq",
+     "complete",
+     "keep"
+    ],
+    [
+     "eq",
+     "completed",
+     "keep"
+    ],
+    [
+     "eq",
+     "partially filled",
+     "keep"
+    ]
+   ],
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1
+  },
+  "name": "Rithmic R|Trader Pro completed orders",
+  "questions": []
+ },
+ "signature": "790826011d4428209a09f6c6e4753fda"
+}

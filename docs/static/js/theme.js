@@ -7,6 +7,14 @@
   var KEY = 'donttrade-theme';
   var root = document.documentElement;
   var COLORS = { dark: '#16181C', light: '#FFFFFF' };
+  // CLS (29 Oct): before first paint, mark a browser that will run the tools' module scripts, so site.css swaps
+  // a tool's "needs JavaScript" notice for its form at once ([data-js-hide], [data-js-show]); each tool's init()
+  // then sets the same state with the hidden attribute. Without JavaScript or modules, nothing changes.
+  if ('noModule' in HTMLScriptElement.prototype) root.classList.add('dt-js');
+  // /pricing/'s #last-step and #byp-more are open in the HTML (no-JS visitors); site.css paints them closed until
+  // pay.js runs, unless the URL names one or an id inside it, which pay.js then keeps open: no shift either way.
+  if (/^#(last-step|byp-|before-you-pay)/.test(location.hash)) root.classList.add('dt-pay-hash');
+  if (/^#(byp-|before-you-pay)/.test(location.hash)) root.classList.add('dt-byp-hash');
   try { // motion: decided before first paint (this file blocks in <head>); motion.js and site.css read it
     if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches && 'IntersectionObserver' in window) {
       root.classList.add('dt-motion');
@@ -76,4 +84,8 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', openHash);
   else openHash();
   window.addEventListener('hashchange', openHash);
+  // sweep 3 (29 Oct): the folded sections of /terms/ and /privacy/ all print open
+  window.addEventListener('beforeprint', function () {
+    [].forEach.call(document.querySelectorAll('details.legal-sec'), function (d) { d.open = true; });
+  });
 })();

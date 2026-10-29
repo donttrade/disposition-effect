@@ -1,0 +1,323 @@
+{
+ "guess": {
+  "badges": {
+   "date": "matched",
+   "price": "matched",
+   "qty": "matched",
+   "side": "matched",
+   "status": "matched",
+   "symbol": "matched"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": "ymd",
+   "reason": null,
+   "seen": null,
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": null
+  },
+  "futures_offer": false,
+  "layout": "orders",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 2,
+    "direction": null,
+    "fees": null,
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 6,
+    "qty": 5,
+    "side": 4,
+    "status": 7,
+    "symbol": 3,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "ymd",
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "2": "filledat",
+    "3": "symbol",
+    "4": "side",
+    "5": "filledqty",
+    "6": "avgfillprice",
+    "7": "status"
+   },
+   "keep_partial": false,
+   "layout": "orders",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": null,
+   "side_values": {
+    "buy": "buy",
+    "sell": "sell"
+   },
+   "source": null,
+   "status_rules": null,
+   "status_values": {
+    "filled": "keep"
+   },
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1,
+   "year_base": null
+  },
+  "questions": [],
+  "side_checks": {},
+  "side_counts": {
+   "buy": 6,
+   "sell": 6
+  },
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": {
+   "filled": 12
+  }
+ },
+ "peek": {
+  "blocked": [
+   true,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "delimiter": ",",
+  "header_hits": 6,
+  "header_row": 0,
+  "headers": [
+   "Order ID",
+   "Placed",
+   "Filled At",
+   "Symbol",
+   "Side",
+   "Filled Qty",
+   "Avg Fill Price",
+   "Status"
+  ],
+  "kind": "csv",
+  "labels": [
+   "Order ID",
+   "Placed",
+   "Filled At",
+   "Symbol",
+   "Side",
+   "Filled Qty",
+   "Avg Fill Price",
+   "Status"
+  ],
+  "n_rows": 12,
+  "options": [
+   {
+    "example": "2026-03-02 09:31:05",
+    "index": 1,
+    "label": "Placed"
+   },
+   {
+    "example": "2026-03-02 09:31:05",
+    "index": 2,
+    "label": "Filled At"
+   },
+   {
+    "example": "AAA",
+    "index": 3,
+    "label": "Symbol"
+   },
+   {
+    "example": "Buy",
+    "index": 4,
+    "label": "Side"
+   },
+   {
+    "example": "1",
+    "index": 5,
+    "label": "Filled Qty"
+   },
+   {
+    "example": "100.0",
+    "index": 6,
+    "label": "Avg Fill Price"
+   },
+   {
+    "example": "Filled",
+    "index": 7,
+    "label": "Status"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     null,
+     "2026-03-02 09:31:05",
+     "2026-03-02 09:31:05",
+     "AAA",
+     "Buy",
+     "1",
+     "100.0",
+     "Filled"
+    ],
+    "row": 2
+   },
+   {
+    "cells": [
+     null,
+     "2026-03-02 09:54:05",
+     "2026-03-02 09:54:05",
+     "AAA",
+     "Sell",
+     "1",
+     "98.0",
+     "Filled"
+    ],
+    "row": 3
+   },
+   {
+    "cells": [
+     null,
+     "2026-03-02 10:08:05",
+     "2026-03-02 10:08:05",
+     "BBB",
+     "Sell",
+     "3",
+     "113.25",
+     "Filled"
+    ],
+    "row": 4
+   },
+   {
+    "cells": [
+     null,
+     "2026-03-02 10:36:05",
+     "2026-03-02 10:36:05",
+     "BBB",
+     "Buy",
+     "3",
+     "112.25",
+     "Filled"
+    ],
+    "row": 5
+   },
+   {
+    "cells": [
+     null,
+     "2026-03-02 10:48:05",
+     "2026-03-02 10:48:05",
+     "CCC",
+     "Buy",
+     "5",
+     "109.5",
+     "Filled"
+    ],
+    "row": 6
+   },
+   {
+    "cells": [
+     null,
+     "2026-03-02 11:21:05",
+     "2026-03-02 11:21:05",
+     "CCC",
+     "Sell",
+     "5",
+     "110.25",
+     "Filled"
+    ],
+    "row": 7
+   },
+   {
+    "cells": [
+     null,
+     "2026-03-02 11:31:05",
+     "2026-03-02 11:31:05",
+     "AAA",
+     "Buy",
+     "2",
+     "105.75",
+     "Filled"
+    ],
+    "row": 8
+   },
+   {
+    "cells": [
+     null,
+     "2026-03-02 12:09:05",
+     "2026-03-02 12:09:05",
+     "AAA",
+     "Sell",
+     "2",
+     "106.75",
+     "Filled"
+    ],
+    "row": 9
+   },
+   {
+    "cells": [
+     null,
+     "2026-03-02 12:17:05",
+     "2026-03-02 12:17:05",
+     "BBB",
+     "Sell",
+     "4",
+     "101.0",
+     "Filled"
+    ],
+    "row": 10
+   },
+   {
+    "cells": [
+     null,
+     "2026-03-02 12:40:05",
+     "2026-03-02 12:40:05",
+     "BBB",
+     "Buy",
+     "4",
+     "103.0",
+     "Filled"
+    ],
+    "row": 11
+   },
+   {
+    "cells": [
+     null,
+     "2026-03-02 13:06:05",
+     "2026-03-02 13:06:05",
+     "CCC",
+     "Buy",
+     "1",
+     "114.25",
+     "Filled"
+    ],
+    "row": 12
+   },
+   {
+    "cells": [
+     null,
+     "2026-03-02 13:34:05",
+     "2026-03-02 13:34:05",
+     "CCC",
+     "Sell",
+     "1",
+     "112.75",
+     "Filled"
+    ],
+    "row": 13
+   }
+  ],
+  "table": null,
+  "tables": null
+ },
+ "preset": null,
+ "signature": "f1e16977d4c6f77e0b5721a511ba82d7"
+}

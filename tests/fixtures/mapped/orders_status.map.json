@@ -1,0 +1,48 @@
+{
+ "cols": {
+  "close_price": null,
+  "close_time": null,
+  "currency": null,
+  "date": 0,
+  "direction": null,
+  "fees": [
+   6
+  ],
+  "open_price": null,
+  "open_time": null,
+  "pnl": null,
+  "price": 4,
+  "qty": 3,
+  "side": 2,
+  "status": 5,
+  "symbol": 1,
+  "time": null
+ },
+ "currency": null,
+ "date_format": "ymd",
+ "delimiter": null,
+ "futures_sizes": true,
+ "header_row": 0,
+ "headers": {
+  "0": "ordertime",
+  "1": "contract",
+  "2": "bs",
+  "3": "filled",
+  "4": "avgprice",
+  "5": "state",
+  "6": "commission"
+ },
+ "keep_partial": true,
+ "layout": "orders",
+ "number_style": null,
+ "preset": null,
+ "side_from": "column",
+ "side_values": null,
+ "status_values": {
+  "cancelled": "skip",
+  "filled": "keep",
+  "rejected": "skip",
+  "working": "skip"
+ },
+ "v": 1
+}

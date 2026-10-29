@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src &#39;self&#39;; script-src &#39;self&#39; https://static.cloudflareinsights.com; style-src &#39;self&#39;; img-src &#39;self&#39; data:; font-src &#39;self&#39;; connect-src &#39;none&#39; https://cloudflareinsights.com; worker-src &#39;self&#39;; form-action &#39;self&#39; https://api.web3forms.com; base-uri &#39;none&#39;; object-src &#39;none&#39;">
+<meta http-equiv="Content-Security-Policy" content="default-src &#39;self&#39;; script-src &#39;self&#39; https://static.cloudflareinsights.com; style-src &#39;self&#39;; img-src &#39;self&#39; data:; font-src &#39;self&#39;; connect-src https://cloudflareinsights.com; worker-src &#39;self&#39;; form-action &#39;self&#39; https://api.web3forms.com; base-uri &#39;none&#39;; object-src &#39;none&#39;">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#16181C" media="(prefers-color-scheme: dark)">
@@ -25,10 +25,11 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=08b3fe6b">
-<script src="/static/js/theme.js?v=74363ef7"></script>
-<script src="/static/js/nav.js?v=cd8f3405" defer></script>
-<script src="/static/js/tools/lot-size.js?v=9aa50972" type="module"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cdac673936b54f08beb5991aaae13975"}'></script>
+<link rel="stylesheet" href="/static/css/site.css?v=620363ac">
+<script src="/static/js/theme.js?v=7e47c1a9"></script>
+<script src="/static/js/nav.js?v=9c8cacb8" defer></script>
+<script src="/static/js/pay.js?v=7eb376c2" defer></script>
+<script src="/static/js/tools/lot-size.js?v=0d515456" type="module"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cdac673936b54f08beb5991aaae13975"}'></script>
 
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "item": "https://donttrade.ca/tools/", "name": "Free tools", "position": 2}, {"@type": "ListItem", "name": "Lot size calculator", "position": 3}]}, {"@id": "https://donttrade.ca/tools/lot-size-calculator/#app", "@type": "WebApplication", "applicationCategory": "FinanceApplication", "browserRequirements": "Requires JavaScript", "description": "Work out position size in lots from your balance, risk amount and stop distance. Shows the formula with your numbers and the loss after rounding.", "isAccessibleForFree": true, "name": "Lot size calculator", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "operatingSystem": "Any (runs in a web browser)", "publisher": {"@id": "https://donttrade.ca/#org"}, "url": "https://donttrade.ca/tools/lot-size-calculator/"}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Lot size equals the amount you are prepared to lose divided by the stop distance times the value of one point for one lot. For example, a risk amount of 200 with a 40-point stop and 1 per point per lot gives 5 lots. The page shows this formula filled in with your inputs."}, "name": "How is lot size calculated?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Your platform’s contract specification lists the contract size and tick value for each symbol. In MT5, right-click the symbol in Market Watch and open Specification. The value per point can differ between brokers for the same symbol name, so use your own broker’s figure."}, "name": "Where do I find the value per point for gold or an index?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "The calculator does not suggest one. How much you risk is your decision, and this page does not recommend any size. It only converts the amount you choose into lots."}, "name": "What risk percentage do other traders use?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Brokers trade in fixed lot steps, often 0.01 lots. If the exact size falls between steps, the page rounds down and shows the loss at the rounded size. If even one step is larger than your risk amount, the page says so instead of rounding up quietly."}, "name": "Why is the loss at the rounded size lower than what I entered?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. It sizes from the stop distance you enter. If you want costs included, add the spread to your stop distance; commission and slippage are not modelled."}, "name": "Does it include spread, commission or slippage?"}]}]}</script>
 </head>
@@ -39,77 +40,60 @@
   <a class="brand" href="/">donttrade</a>
   <nav class="site-nav" aria-label="Main"><ul class="nav-row">
     <li><a href="/sample-report/">Sample report</a></li>
-    <li class="nav-dd-li"><details name="nav" class="nav-dd" data-nav-dd>
-      <summary class="is-current">Free tools<span class="visually-hidden">, current section</span><svg class="chev" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg></summary>
-      <div class="nav-pop nav-pop-2 nav-pop-end">
-      <ul class="nav-items">
-        <li><a class="nav-item" href="/tools/trade-stats/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-9l5 6-5 6h9"/></svg><span class="ni-text"><span class="ni-t">Trade stats</span> <span class="ni-d">Totals from your trade file</span></span></a></li>
-        <li><a class="nav-item" href="/tools/trading-heatmap/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h10v10H3z"/><path d="M7 13v4h10V7h-4"/></svg><span class="ni-text"><span class="ni-t">Trading heatmap</span> <span class="ni-d">Your results by hour and weekday</span></span></a></li>
-        <li><a class="nav-item" href="/tools/drawdown-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h14v12H3z"/><path d="M10 4v12"/></svg><span class="ni-text"><span class="ni-t">Drawdown calculator</span> <span class="ni-d">What gain recovers a drawdown</span></span></a></li>
-        <li><a class="nav-item" href="/tools/prop-challenge-simulator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18V3"/><path d="M5 4h10l-2.5 3.5L15 11H5"/></svg><span class="ni-text"><span class="ni-t">Prop challenge simulator</span> <span class="ni-d">Your past days under a challenge’s rules</span></span></a></li>
-        <li><a class="nav-item" href="/tools/lot-size-calculator/" aria-current="page"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v14M6 17h8M4 6h12"/><path d="M4 6l-2 5h4zM16 6l-2 5h4z"/></svg><span class="ni-text"><span class="ni-t">Lot size calculator</span> <span class="ni-d">Lots for the risk you chose</span></span></a></li>
-        <li><a class="nav-item" href="/tools/risk-reward-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15L15 5"/><circle cx="6" cy="6" r="1.75"/><circle cx="14" cy="14" r="1.75"/></svg><span class="ni-text"><span class="ni-t">Risk-reward calculator</span> <span class="ni-d">Break-even win rate for a ratio</span></span></a></li>
-        <li><a class="nav-item" href="/tools/disposition-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h10M5 17h10"/><path d="M6.5 3v2.5L13.5 14.5V17M13.5 3v2.5L6.5 14.5V17"/></svg><span class="ni-text"><span class="ni-t">Disposition calculator</span> <span class="ni-d">Winners vs losers sold, from four counts</span></span></a></li>
-        <li><a class="nav-item" href="/tools/pass-rate-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg><span class="ni-text"><span class="ni-t">Pass-rate calculator</span> <span class="ni-d">One cohort’s pass and payout rate</span></span></a></li>
-      </ul>
-      <ul class="nav-foot">
-        <li><a href="/tools/">All free tools</a></li>
-        <li><a href="/for-traders/">For traders: the habit report</a></li>
-      </ul>
-      </div>
-    </details></li>
+    <li><a href="/tools/" aria-current="true">Free tools</a></li>
     <li><a href="/pricing/">Pricing</a></li>
     <li><a href="/for-firms/">For firms</a></li>
   </ul>
   <details class="nav-menu" data-nav-menu>
     <summary><svg class="i-menu" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg><svg class="i-close" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>Menu</summary>
     <div class="nav-panel">
-      <details name="m" class="nav-acc">
-        <summary class="is-current">Free tools<span class="visually-hidden">, current section</span><svg class="chev" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg></summary>
-      <ul class="nav-items">
-        <li><a class="nav-item" href="/tools/trade-stats/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-9l5 6-5 6h9"/></svg><span class="ni-text"><span class="ni-t">Trade stats</span> <span class="ni-d">Totals from your trade file</span></span></a></li>
-        <li><a class="nav-item" href="/tools/trading-heatmap/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h10v10H3z"/><path d="M7 13v4h10V7h-4"/></svg><span class="ni-text"><span class="ni-t">Trading heatmap</span> <span class="ni-d">Your results by hour and weekday</span></span></a></li>
-        <li><a class="nav-item" href="/tools/drawdown-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h14v12H3z"/><path d="M10 4v12"/></svg><span class="ni-text"><span class="ni-t">Drawdown calculator</span> <span class="ni-d">What gain recovers a drawdown</span></span></a></li>
-        <li><a class="nav-item" href="/tools/prop-challenge-simulator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18V3"/><path d="M5 4h10l-2.5 3.5L15 11H5"/></svg><span class="ni-text"><span class="ni-t">Prop challenge simulator</span> <span class="ni-d">Your past days under a challenge’s rules</span></span></a></li>
-        <li><a class="nav-item" href="/tools/lot-size-calculator/" aria-current="page"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v14M6 17h8M4 6h12"/><path d="M4 6l-2 5h4zM16 6l-2 5h4z"/></svg><span class="ni-text"><span class="ni-t">Lot size calculator</span> <span class="ni-d">Lots for the risk you chose</span></span></a></li>
-        <li><a class="nav-item" href="/tools/risk-reward-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15L15 5"/><circle cx="6" cy="6" r="1.75"/><circle cx="14" cy="14" r="1.75"/></svg><span class="ni-text"><span class="ni-t">Risk-reward calculator</span> <span class="ni-d">Break-even win rate for a ratio</span></span></a></li>
-        <li><a class="nav-item" href="/tools/disposition-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h10M5 17h10"/><path d="M6.5 3v2.5L13.5 14.5V17M13.5 3v2.5L6.5 14.5V17"/></svg><span class="ni-text"><span class="ni-t">Disposition calculator</span> <span class="ni-d">Winners vs losers sold, from four counts</span></span></a></li>
-        <li><a class="nav-item" href="/tools/pass-rate-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg><span class="ni-text"><span class="ni-t">Pass-rate calculator</span> <span class="ni-d">One cohort’s pass and payout rate</span></span></a></li>
-      </ul>
-      <ul class="nav-foot">
-        <li><a href="/tools/">All free tools</a></li>
-        <li><a href="/for-traders/">For traders: the habit report</a></li>
-      </ul>
-      </details>
       <ul class="nav-links">
         <li><a href="/">Home</a></li>
         <li><a href="/sample-report/">Sample report</a></li>
+        <li><a href="/tools/" aria-current="true">Free tools</a></li>
         <li><a href="/pricing/">Pricing</a></li>
         <li><a href="/for-firms/">For firms</a></li>
       </ul>
+      <p class="nav-cta"><a class="btn " href="/pricing/#last-step" data-pay>Get report — $39</a></p>
     </div>
   </details></nav>
+  <a class="btn hdr-cta" href="/pricing/#last-step" data-pay>Get report — $39</a>
   <button class="theme-toggle" type="button" data-theme-toggle hidden><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg><span class="tt-label">Dark mode</span></button>
 </div></header>
 
 <main id="main">
 
 <div class="wrap">
-  <div class="grid">
-    <div class="span-8">
+  <div class="tool-hero">
+    <div>
       <nav class="crumb small" aria-label="Breadcrumb"><ol class="crumbs"><li><a href="/">Home</a><span class="crumb-sep" aria-hidden="true">›</span></li><li><a href="/tools/">Free tools</a><span class="crumb-sep" aria-hidden="true">›</span></li><li><span aria-current="page">Lot size calculator</span></li></ol></nav>
 
       <h1>Lot size calculator</h1>
-      <p class="lede">Enter your account balance, the amount you would lose if the stop is hit (as a percentage or as an amount), your stop distance, and the value of one point for one lot on your instrument.</p>
-      <p>The calculator returns the position size in lots, shows the loss at the stop after rounding down to your broker’s lot step, and prints the formula with your own numbers in it so you can redo it by hand. It works for forex pairs, gold, indices and futures, as long as you know the point value your broker uses; the section below shows where to find it. The inputs start blank on purpose. We do not suggest a risk percentage, because that choice is yours. Entries that could be read two ways, such as “1,500” in a field that also accepts decimals, are refused instead of guessed. It runs entirely in your browser and nothing you type is sent anywhere.</p>
+      <p class="lede">Your balance, risk and stop give the lot size, with the sum shown.</p>
     </div>
+    
+<figure class="tool-shot" aria-labelledby="shot-cap">
+  <div class="shot-card tool-shot-card">
+    <span class="tp-tag" aria-hidden="true">Example</span>
+    <table class="mini-shot">
+      <tbody>
+        <tr><th scope="row">Risk amount</th><td>200</td></tr>
+        <tr><th scope="row">Stop distance</th><td>40 points</td></tr>
+        <tr><th scope="row">Value per point, 1 lot</th><td>1</td></tr>
+        <tr class="mini-total"><th scope="row">Lot size</th><td>5 lots</td></tr>
+      </tbody>
+    </table>
+    <p class="shot-line"><span class="muted">200 ÷ (40 × 1) = 5</span></p>
+  </div>
+  <figcaption id="shot-cap">Example numbers.</figcaption>
+</figure>
   </div>
   
 
   <section class="tool" aria-labelledby="ls-tool-h">
     <h2 id="ls-tool-h">Your numbers</h2>
-    <p id="ls-js-needed" class="notice notice-caution">This calculator runs in your browser and needs JavaScript turned on.</p>
-    <form id="ls-form" novalidate hidden>
+    <p id="ls-js-needed" class="notice notice-caution" data-js-hide>This calculator runs in your browser and needs JavaScript turned on.</p>
+    <form id="ls-form" novalidate hidden data-js-show>
       <fieldset>
         <legend>How you state the risk</legend>
         <div class="check"><input type="radio" id="ls-mode-amount" name="ls-mode" value="amount" checked><label for="ls-mode-amount">As an amount of money</label></div>
@@ -166,13 +150,17 @@
 
 
   <section class="section" aria-labelledby="vpp-h">
-    <h2 id="vpp-h">Where to find the value per point</h2>
+    <h2 id="vpp-h">How it works</h2>
+    <details class="how-group"><summary>What it does, and where to find the value per point</summary>
+    <p>Enter your account balance, the amount you would lose if the stop is hit (as a percentage or as an amount), your stop distance, and the value of one point for one lot on your instrument.</p>
+    <p>The calculator returns the position size in lots, shows the loss at the stop after rounding down to your broker’s lot step, and prints the formula with your own numbers in it so you can redo it by hand. It works for forex pairs, gold, indices and futures, as long as you know the point value your broker uses; the section below shows where to find it. The inputs start blank on purpose. We do not suggest a risk percentage, because that choice is yours. Entries that could be read two ways, such as “1,500” in a field that also accepts decimals, are refused instead of guessed. It runs entirely in your browser and nothing you type is sent anywhere.</p>
     <p>Your platform’s contract specification lists the contract size and tick value for each symbol. In MT5, right-click the symbol in Market Watch and open Specification. The value per point can differ between brokers for the same symbol name, so use your own broker’s figure, and measure the stop distance in the same points.</p>
     <ul>
       <li><strong>Forex:</strong> the value of one pip (or one point, if your platform quotes five decimals) for one standard lot, in your account currency.</li>
       <li><strong>Gold and indices (CFDs):</strong> the contract size times the price step, as listed in the specification.</li>
       <li><strong>Futures:</strong> the exchange’s multiplier per point for one contract; here a “lot” is one contract.</li>
     </ul>
+    </details>
   </section>
 
   <section class="section" aria-labelledby="faq-h">
@@ -184,13 +172,6 @@
     <details id="q-does-it-include-spread-commission-or-slippage"><summary>Does it include spread, commission or slippage?</summary><p>No. It sizes from the stop distance you enter. If you want costs included, add the spread to your stop distance; commission and slippage are not modelled.</p></details>
   </section>
 
-  <section class="section" aria-labelledby="more-h">
-    <h2 id="more-h">Related</h2>
-    <ul>
-      <li><a href="/tools/trade-stats/">Trade stats</a>: what your own trade file shows.</li>
-      <li><a href="/tools/prop-challenge-simulator/">Prop-firm challenge simulator</a>: replay a challenge from your own trading days.</li>
-    </ul>
-  </section>
   <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. donttrade is not affiliated with it.</p>
 </div>
 
@@ -214,6 +195,28 @@
   </details>
   <p class="legal">&copy; 2026 donttrade · <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
 </div></footer>
+
+
+<dialog class="pay-dialog" id="pay-dialog" aria-labelledby="pd-h" data-pay-dialog>
+  <div class="pd-inner">
+    <div class="pd-top">
+      <h2 id="pd-h">Get the habit report</h2>
+      <button class="pd-close no-print" type="button" data-pay-close aria-label="Close"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg></button>
+    </div>
+    <ul class="pay-facts">
+  <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M3 10.5 9.5 4H16v6.5L9.5 17z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="13" cy="7" r="1.3" fill="currentColor"/></svg><span>US$39 once</span></li>
+  <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M11 2 4 11.5h5L8 18l7-9.5h-5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span>Report right after payment</span></li>
+  <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M4.5 8.5A6 6 0 1 1 4 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 4.5v4.5h4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Full refund within 14 days</span></li>
+</ul>
+    <details class="pay-more" data-pay-more>
+      <summary>Full details before you pay</summary>
+      <div class="pd-full" data-pay-full><p class="small"><a href="/pricing/#before-you-pay">Read the full details on the pricing page</a></p></div>
+    </details>
+    <p class="pay-go no-print"><a class="btn" href="https://buy.stripe.com/eVq14m66H9Jw15a0Rwdwc04" rel="noopener">Continue to secure payment</a></p>
+    <p class="small muted pd-links no-print"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a> · <a href="/terms/#seller">Business details</a></p>
+    
+  </div>
+</dialog>
 
 </body>
 </html>

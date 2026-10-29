@@ -1,0 +1,742 @@
+{
+ "guess": {
+  "badges": {
+   "date": "matched",
+   "price": "matched",
+   "qty": "matched",
+   "side": "matched",
+   "symbol": "matched"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": "ymd",
+   "reason": null,
+   "seen": null,
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": null
+  },
+  "futures_offer": false,
+  "layout": "fills",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 0,
+    "direction": null,
+    "fees": null,
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 4,
+    "qty": 3,
+    "side": 2,
+    "status": null,
+    "symbol": 1,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "ymd",
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "0": "tradedate",
+    "1": "symbol",
+    "2": "side",
+    "3": "qty",
+    "4": "price"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": null,
+   "side_values": {
+    "buy": "buy",
+    "sell": "sell"
+   },
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1,
+   "year_base": null
+  },
+  "questions": [],
+  "side_checks": {},
+  "side_counts": {
+   "buy": 30,
+   "sell": 30
+  },
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": null
+ },
+ "peek": {
+  "blocked": [
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "delimiter": ",",
+  "header_hits": 5,
+  "header_row": 0,
+  "headers": [
+   "Trade Date",
+   "Symbol",
+   "Side",
+   "Qty",
+   "Price"
+  ],
+  "kind": "csv",
+  "labels": [
+   "Trade Date",
+   "Symbol",
+   "Side",
+   "Qty",
+   "Price"
+  ],
+  "n_rows": 60,
+  "options": [
+   {
+    "example": "2026-04-30",
+    "index": 0,
+    "label": "Trade Date"
+   },
+   {
+    "example": "BBB",
+    "index": 1,
+    "label": "Symbol"
+   },
+   {
+    "example": "Sell",
+    "index": 2,
+    "label": "Side"
+   },
+   {
+    "example": "10",
+    "index": 3,
+    "label": "Qty"
+   },
+   {
+    "example": "128",
+    "index": 4,
+    "label": "Price"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     "2026-04-30",
+     "BBB",
+     "Sell",
+     "10",
+     "128"
+    ],
+    "row": 2
+   },
+   {
+    "cells": [
+     "2026-04-30",
+     "BBB",
+     "Buy",
+     "10",
+     "129"
+    ],
+    "row": 3
+   },
+   {
+    "cells": [
+     "2026-04-29",
+     "AAA",
+     "Sell",
+     "10",
+     "128"
+    ],
+    "row": 4
+   },
+   {
+    "cells": [
+     "2026-04-29",
+     "AAA",
+     "Buy",
+     "10",
+     "128"
+    ],
+    "row": 5
+   },
+   {
+    "cells": [
+     "2026-04-28",
+     "BBB",
+     "Sell",
+     "10",
+     "128"
+    ],
+    "row": 6
+   },
+   {
+    "cells": [
+     "2026-04-28",
+     "BBB",
+     "Buy",
+     "10",
+     "127"
+    ],
+    "row": 7
+   },
+   {
+    "cells": [
+     "2026-04-27",
+     "AAA",
+     "Sell",
+     "10",
+     "125"
+    ],
+    "row": 8
+   },
+   {
+    "cells": [
+     "2026-04-27",
+     "AAA",
+     "Buy",
+     "10",
+     "126"
+    ],
+    "row": 9
+   },
+   {
+    "cells": [
+     "2026-04-26",
+     "BBB",
+     "Sell",
+     "10",
+     "125"
+    ],
+    "row": 10
+   },
+   {
+    "cells": [
+     "2026-04-26",
+     "BBB",
+     "Buy",
+     "10",
+     "125"
+    ],
+    "row": 11
+   },
+   {
+    "cells": [
+     "2026-04-25",
+     "AAA",
+     "Sell",
+     "10",
+     "125"
+    ],
+    "row": 12
+   },
+   {
+    "cells": [
+     "2026-04-25",
+     "AAA",
+     "Buy",
+     "10",
+     "124"
+    ],
+    "row": 13
+   },
+   {
+    "cells": [
+     "2026-04-24",
+     "BBB",
+     "Sell",
+     "10",
+     "122"
+    ],
+    "row": 14
+   },
+   {
+    "cells": [
+     "2026-04-24",
+     "BBB",
+     "Buy",
+     "10",
+     "123"
+    ],
+    "row": 15
+   },
+   {
+    "cells": [
+     "2026-04-23",
+     "AAA",
+     "Sell",
+     "10",
+     "122"
+    ],
+    "row": 16
+   },
+   {
+    "cells": [
+     "2026-04-23",
+     "AAA",
+     "Buy",
+     "10",
+     "122"
+    ],
+    "row": 17
+   },
+   {
+    "cells": [
+     "2026-04-22",
+     "BBB",
+     "Sell",
+     "10",
+     "122"
+    ],
+    "row": 18
+   },
+   {
+    "cells": [
+     "2026-04-22",
+     "BBB",
+     "Buy",
+     "10",
+     "121"
+    ],
+    "row": 19
+   },
+   {
+    "cells": [
+     "2026-04-21",
+     "AAA",
+     "Sell",
+     "10",
+     "119"
+    ],
+    "row": 20
+   },
+   {
+    "cells": [
+     "2026-04-21",
+     "AAA",
+     "Buy",
+     "10",
+     "120"
+    ],
+    "row": 21
+   },
+   {
+    "cells": [
+     "2026-04-20",
+     "BBB",
+     "Sell",
+     "10",
+     "119"
+    ],
+    "row": 22
+   },
+   {
+    "cells": [
+     "2026-04-20",
+     "BBB",
+     "Buy",
+     "10",
+     "119"
+    ],
+    "row": 23
+   },
+   {
+    "cells": [
+     "2026-04-19",
+     "AAA",
+     "Sell",
+     "10",
+     "119"
+    ],
+    "row": 24
+   },
+   {
+    "cells": [
+     "2026-04-19",
+     "AAA",
+     "Buy",
+     "10",
+     "118"
+    ],
+    "row": 25
+   },
+   {
+    "cells": [
+     "2026-04-18",
+     "BBB",
+     "Sell",
+     "10",
+     "116"
+    ],
+    "row": 26
+   },
+   {
+    "cells": [
+     "2026-04-18",
+     "BBB",
+     "Buy",
+     "10",
+     "117"
+    ],
+    "row": 27
+   },
+   {
+    "cells": [
+     "2026-04-17",
+     "AAA",
+     "Sell",
+     "10",
+     "116"
+    ],
+    "row": 28
+   },
+   {
+    "cells": [
+     "2026-04-17",
+     "AAA",
+     "Buy",
+     "10",
+     "116"
+    ],
+    "row": 29
+   },
+   {
+    "cells": [
+     "2026-04-16",
+     "BBB",
+     "Sell",
+     "10",
+     "116"
+    ],
+    "row": 30
+   },
+   {
+    "cells": [
+     "2026-04-16",
+     "BBB",
+     "Buy",
+     "10",
+     "115"
+    ],
+    "row": 31
+   },
+   {
+    "cells": [
+     "2026-04-15",
+     "AAA",
+     "Sell",
+     "10",
+     "113"
+    ],
+    "row": 32
+   },
+   {
+    "cells": [
+     "2026-04-15",
+     "AAA",
+     "Buy",
+     "10",
+     "114"
+    ],
+    "row": 33
+   },
+   {
+    "cells": [
+     "2026-04-14",
+     "BBB",
+     "Sell",
+     "10",
+     "113"
+    ],
+    "row": 34
+   },
+   {
+    "cells": [
+     "2026-04-14",
+     "BBB",
+     "Buy",
+     "10",
+     "113"
+    ],
+    "row": 35
+   },
+   {
+    "cells": [
+     "2026-04-13",
+     "AAA",
+     "Sell",
+     "10",
+     "113"
+    ],
+    "row": 36
+   },
+   {
+    "cells": [
+     "2026-04-13",
+     "AAA",
+     "Buy",
+     "10",
+     "112"
+    ],
+    "row": 37
+   },
+   {
+    "cells": [
+     "2026-04-12",
+     "BBB",
+     "Sell",
+     "10",
+     "110"
+    ],
+    "row": 38
+   },
+   {
+    "cells": [
+     "2026-04-12",
+     "BBB",
+     "Buy",
+     "10",
+     "111"
+    ],
+    "row": 39
+   },
+   {
+    "cells": [
+     "2026-04-11",
+     "AAA",
+     "Sell",
+     "10",
+     "110"
+    ],
+    "row": 40
+   },
+   {
+    "cells": [
+     "2026-04-11",
+     "AAA",
+     "Buy",
+     "10",
+     "110"
+    ],
+    "row": 41
+   },
+   {
+    "cells": [
+     "2026-04-10",
+     "BBB",
+     "Sell",
+     "10",
+     "110"
+    ],
+    "row": 42
+   },
+   {
+    "cells": [
+     "2026-04-10",
+     "BBB",
+     "Buy",
+     "10",
+     "109"
+    ],
+    "row": 43
+   },
+   {
+    "cells": [
+     "2026-04-09",
+     "AAA",
+     "Sell",
+     "10",
+     "107"
+    ],
+    "row": 44
+   },
+   {
+    "cells": [
+     "2026-04-09",
+     "AAA",
+     "Buy",
+     "10",
+     "108"
+    ],
+    "row": 45
+   },
+   {
+    "cells": [
+     "2026-04-08",
+     "BBB",
+     "Sell",
+     "10",
+     "107"
+    ],
+    "row": 46
+   },
+   {
+    "cells": [
+     "2026-04-08",
+     "BBB",
+     "Buy",
+     "10",
+     "107"
+    ],
+    "row": 47
+   },
+   {
+    "cells": [
+     "2026-04-07",
+     "AAA",
+     "Sell",
+     "10",
+     "107"
+    ],
+    "row": 48
+   },
+   {
+    "cells": [
+     "2026-04-07",
+     "AAA",
+     "Buy",
+     "10",
+     "106"
+    ],
+    "row": 49
+   },
+   {
+    "cells": [
+     "2026-04-06",
+     "BBB",
+     "Sell",
+     "10",
+     "104"
+    ],
+    "row": 50
+   },
+   {
+    "cells": [
+     "2026-04-06",
+     "BBB",
+     "Buy",
+     "10",
+     "105"
+    ],
+    "row": 51
+   },
+   {
+    "cells": [
+     "2026-04-05",
+     "AAA",
+     "Sell",
+     "10",
+     "104"
+    ],
+    "row": 52
+   },
+   {
+    "cells": [
+     "2026-04-05",
+     "AAA",
+     "Buy",
+     "10",
+     "104"
+    ],
+    "row": 53
+   },
+   {
+    "cells": [
+     "2026-04-04",
+     "BBB",
+     "Sell",
+     "10",
+     "104"
+    ],
+    "row": 54
+   },
+   {
+    "cells": [
+     "2026-04-04",
+     "BBB",
+     "Buy",
+     "10",
+     "103"
+    ],
+    "row": 55
+   },
+   {
+    "cells": [
+     "2026-04-03",
+     "AAA",
+     "Sell",
+     "10",
+     "101"
+    ],
+    "row": 56
+   },
+   {
+    "cells": [
+     "2026-04-03",
+     "AAA",
+     "Buy",
+     "10",
+     "102"
+    ],
+    "row": 57
+   },
+   {
+    "cells": [
+     "2026-04-02",
+     "BBB",
+     "Sell",
+     "10",
+     "101"
+    ],
+    "row": 58
+   },
+   {
+    "cells": [
+     "2026-04-02",
+     "BBB",
+     "Buy",
+     "10",
+     "101"
+    ],
+    "row": 59
+   },
+   {
+    "cells": [
+     "2026-04-01",
+     "AAA",
+     "Sell",
+     "10",
+     "101"
+    ],
+    "row": 60
+   },
+   {
+    "cells": [
+     "2026-04-01",
+     "AAA",
+     "Buy",
+     "10",
+     "100"
+    ],
+    "row": 61
+   }
+  ],
+  "table": null,
+  "tables": null
+ },
+ "preset": null,
+ "signature": "1b730bddec416c9daa90a59697975fa5"
+}

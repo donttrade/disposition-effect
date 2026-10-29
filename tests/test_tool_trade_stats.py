@@ -31,7 +31,7 @@ def built_site(badges_site):
 
 
 FIX = os.path.join(HERE, "fixtures")
-DEMO = os.path.join(REPO, "site", "static", "samples", "demo-trades.csv")
+DEMO = os.path.join(REPO, "site", "static", "samples", "example-trades.csv")
 CANARY = "CANARY-ZQ7X"
 PATH = "/tools/trade-stats/"
 
@@ -61,7 +61,8 @@ def test_demo_file_is_what_the_generator_writes():
 def test_csp_blocks_all_connections(built_site):
     html = (built_site["out"] / "tools" / "trade-stats" / "index.html").read_text()
     csp = re.search(r'http-equiv="Content-Security-Policy" content="([^"]+)"', html).group(1)
-    assert "connect-src &#39;none&#39;" in csp
+    # 29 Oct: with analytics on, the beacon host alone (never "'none' <host>", which browsers reject: CSP3)
+    assert "connect-src &#39;none&#39;;" in csp or "connect-src https://cloudflareinsights.com;" in csp
 
 
 def test_sample_matches_reference_and_sends_nothing(browser, built_site):
@@ -97,7 +98,7 @@ def test_sample_matches_reference_and_sends_nothing(browser, built_site):
     assert L.lint_text(body, PATH) == []
     assert log["console"] == [] and log["errors"] == []
     assert page.is_visible("#ts-teaser")
-    assert "Demo file, not a real trader" in body
+    assert "Example data" in body   # 29 Oct (owner): the one word "Example" labels sample data
     assert page.get_attribute("#ts-teaser a.btn", "href") == "/for-traders/#waitlist"
     assert "Join the waitlist — $39 founding price" in page.inner_text("#ts-teaser")
     ctx.close()
