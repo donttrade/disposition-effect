@@ -29,6 +29,7 @@ R_STAR = {"daily_share": 0.05, "max_share": 0.10, "drawdown": "static"}
 O2_SHARE = 0.5
 BREACH = ("daily", "max")
 OUTCOMES = ("daily", "max", "other_rule", "passed", "closed_no_breach", "active")
+DRAWDOWNS = ("static", "trailing_eod", "trailing_trade")   # readiness_ref.py line 27
 
 
 def day_key(t_s, day_start_s):
