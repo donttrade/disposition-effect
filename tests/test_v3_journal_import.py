@@ -116,7 +116,13 @@ def test_j2_worker_gives_the_same_keys_as_the_page(jctx):
 ENGINE_COMMITS_SINCE_MOTION = ("Engine: TradingView Order History parser",
                                "Engine: mapped columns, several files, pasted tables, dates_only",
                                "Engine: eight timed presets, synthetic importer fixtures",
-                               "Engine: the column guess for the mapper")
+                               "Engine: the column guess for the mapper",
+                               # the importer's fix round (Tester report 29 Oct): one file still reads as
+                               # before, except a Sierra log (now its preset) and the wide-row warning
+                               "Paste: fixed-width columns", "Rows wider than the heading",
+                               "Several files: the overlap key", "runFile goes through the preset flow",
+                               "Guess: footers and short rows", "Dates: day level for rows without a time",
+                               "Block list widened")
 
 
 def test_j13_engine_and_file_worker_untouched():
