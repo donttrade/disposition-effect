@@ -442,9 +442,9 @@ PAGES += [
      "modules": ["/static/js/tools/trade-stats.js"], "sample": True, "app": True, "updated": "2026-10-21",
      "crumb": "Trade stats from your own trade file",
      "title": "Free MT5 Report Analyzer: Trade Stats From Your File",
-     "description": "Drop your MT5, MT4, IBKR or Tradovate file and get profit factor, expectancy, drawdown and "
-                    "streaks. Runs in your browser.",
-     "if_badges": {"description": "Drop your MT5, MT4, IBKR or Tradovate file and get profit factor, expectancy, "
+     "description": "Drop your MT5, MT4, IBKR, Tradovate or TradingView file and get profit factor, expectancy, "
+                    "drawdown and streaks. Runs in your browser.",
+     "if_badges": {"description": "Drop your MT5, MT4, IBKR, Tradovate or TradingView file: profit factor, expectancy, "
                                   "drawdown and streaks, with a real-or-noise check. Runs in your browser."}},
     {"template": "pages/tool-prop-sim.html", "path": "/tools/prop-challenge-simulator/", "requires_flag": None,
      "modules": ["/static/js/tools/prop-sim.js"], "sample": True, "app": True, "updated": "2026-10-21",
@@ -497,10 +497,10 @@ PAGES += [
     {"template": "pages/for-traders.html", "path": "/for-traders/", "requires_flag": None, "updated": "2026-10-21",
      "crumb": "Individual traders", "og_image": "/assets/og/traders.png", "scripts": [FORM_JS, MOTION_JS],
      "title": "Trader Habit Report: Waitlist and Founding Price",
-     "description": "A habit report built from your own MT5, IBKR or Tradovate file, with a real-or-noise check "
-                    "for each tested habit. Coming soon; join the waitlist.",
+     "description": "A habit report from your own MT5, IBKR, Tradovate or TradingView file, with a real-or-noise "
+                    "check for each tested habit. Coming soon; join the waitlist.",
      "if_paid": {"title": "Trader Habit Report: Founding Price",
-                 "description": "A habit report built from your own MT5, IBKR or Tradovate file, with a "
+                 "description": "A habit report from your own MT5, IBKR, Tradovate or TradingView file, with a "
                                 "real-or-noise check for each tested habit. Founding price, one free re-test."}},
     {"template": "pages/for-firms.html", "path": "/for-firms/", "requires_flag": None, "updated": "2026-10-21",
      "crumb": "Prop firms & brokers", "og_image": "/assets/og/firms.png", "scripts": [FORM_JS, MOTION_JS],
@@ -587,8 +587,8 @@ PAGES += [
      "modules": ["/static/js/journal/main.js"], "styles": [JOURNAL_CSS], "no_forms": True, "no_analytics": True, "no_ask": True,
      "updated": "2026-10-21", "crumb": "Free trading journal", "parent": ("Free tools", "/tools/"),
      "title": "Free Trading Journal and P&L Calendar, No Sign-Up",
-     "description": "A free trading journal with a P&L calendar for MT5, MT4, IBKR and Tradovate exports. No account: "
-                    "your trades stay in this browser, with a backup file you keep."},
+     "description": "A free trading journal and P&L calendar for MT5, MT4, IBKR, Tradovate and TradingView files. "
+                    "No account: trades stay in this browser, with a backup you keep."},
 ]
 
 # /help/ (ARCHITECT-V3 §c.5, Q-A1): every answer unit, grouped; the answer box's no-JS landing page.

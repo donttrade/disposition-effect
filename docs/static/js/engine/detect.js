@@ -13,8 +13,8 @@
 // importers, not from a real export; see tests/fixtures/PROVENANCE.txt.
 // tests/test_alias_parity.py checks this table equals the Python reference's.
 
-import { clean, normHeader } from './csv.js?v=ad87ab8b';
-import { fail } from './errors.js?v=a49d9d6e';
+import { clean, normHeader } from './csv.js?v=09ecf6e4';
+import { fail } from './errors.js?v=31d80675';
 
 // verified: false = column names not yet confirmed against a real export.
 export const SIGNATURES = {
@@ -71,6 +71,16 @@ export const SIGNATURES = {
     },
     required: [['side'], ['contract'], ['status'], ['qty'], ['price'], ['time']],
   },
+  // TradingView Order History export (Trading Panel → History → Export data). Column names
+  // confirmed against one real paper-trading export (29 Oct 2026); see PROVENANCE.txt.
+  tradingview: {
+    verified: true,
+    fields: {
+      symbol: ['symbol'], side: ['side'], qty: ['quantity', 'qty'], price: ['fillprice'], status: ['status'],
+      commission: ['commission'], time: ['closingtime'],
+    },
+    required: [['symbol'], ['side'], ['qty'], ['price'], ['status'], ['time']],
+  },
   // The TradeZella-style round-trip layout we also accept.
   generic_roundtrip: {
     verified: false,
@@ -104,6 +114,7 @@ export const NUMERIC_FIELDS = {
   mt4: ['size', 'open_price', 'close_price', 'commission', 'taxes', 'swap', 'profit'],
   ibkr_flex: ['quantity', 'price', 'commission', 'realized', 'multiplier', 'fx'],
   tradovate_orders: ['qty', 'price'],
+  tradingview: ['qty', 'price', 'commission'],
   generic_roundtrip: ['qty', 'open_price', 'close_price', 'fees'],
   generic: ['qty', 'price', 'fees'],
 };
@@ -145,7 +156,7 @@ export function checkCurrencyColumn(rows, map) {
   return { map, ignored: false };
 }
 
-export const CSV_ORDER = ['mt5_deals', 'ibkr_flex', 'tradovate_orders', 'generic_roundtrip', 'generic'];
+export const CSV_ORDER = ['mt5_deals', 'ibkr_flex', 'tradovate_orders', 'tradingview', 'generic_roundtrip', 'generic'];
 export const HTML_ORDER = ['mt5_deals', 'mt5_positions', 'mt4'];
 
 // MetaTrader section titles. Rows under a HEADER title (account number, owner
