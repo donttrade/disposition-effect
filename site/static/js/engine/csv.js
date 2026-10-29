@@ -525,7 +525,12 @@ const DATE_FORMAT_LABELS = {
 };
 const RE_DF = /^([0-9./-]+)(?:[ T]+(\d{1,2}):(\d{2})(?::(\d{2})(?:[.,]\d+)?)?(?: ?([AaPp][Mm]))?)?$/;
 const RE_ZONE_WORD = /^(.*[0-9AaPpMm]) ([A-Za-z]{2,5})$/;
-const RE_ZONE_OFFSET = /^(.*\d:\d{2}.*?) ?(?:(?:UTC|GMT) ?)?[+-]\d{1,2}(?::?\d{2})?$/;
+const RE_ZONE_OFFSET = /^(.*\d:\d{2}.*?) ?(?:(?:UTC|GMT) ?)?([+-])(\d{1,2})(?::?(\d{2}))?$/;
+// Zone labels with one known offset, in minutes. Others (IST, CST in China...) are read as written.
+export const ZONE_OFFSETS = Object.freeze({ UTC: 0, GMT: 0, WET: 0, WEST: 60, BST: 60, CET: 60, CEST: 120, EET: 120,
+  EEST: 180, MSK: 180, EST: -300, EDT: -240, CST: -360, CDT: -300, MST: -420, MDT: -360, PST: -480, PDT: -420,
+  AKST: -540, AKDT: -480, HST: -600, JST: 540, KST: 540, HKT: 480, SGT: 480, AEST: 600, AEDT: 660, NZST: 720,
+  NZDT: 780 });
 const RE_ZONE_Z = /^(.*\d)Z$/;
 const RE_YMD = /^(\d{4})([-/.])(\d{1,2})\2(\d{1,2})$/;
 const RE_YMD8 = /^(\d{4})(\d{2})(\d{2})$/;
@@ -533,16 +538,27 @@ const RE_DMY = /^(\d{1,2})([-/.])(\d{1,2})\2(\d{4}|\d{2})$/;
 const RE_SERIAL = /^\d+(\.\d+)?$/;
 const MAX_TS = Date.UTC(2101, 0, 1); // utcMs accepts years 1970-2100
 
-// → [text without a trailing zone label, whether one was removed]
+// → [text without a trailing zone label, whether one was removed, its UTC offset in minutes or null]
 export function stripZone(s) {
   let zone = false;
+  let off = null;
   let m = RE_ZONE_WORD.exec(s);
-  if (m && !/^[AaPp][Mm]$/.test(m[2]) && /\d/.test(m[1])) { s = m[1]; zone = true; }
+  if (m && !/^[AaPp][Mm]$/.test(m[2]) && /\d/.test(m[1])) {
+    s = m[1];
+    zone = true;
+    const k = m[2].toUpperCase();
+    off = Object.prototype.hasOwnProperty.call(ZONE_OFFSETS, k) ? ZONE_OFFSETS[k] : null;
+  }
   m = RE_ZONE_OFFSET.exec(s);
-  if (m && /[0-9AaPpMm]$/.test(m[1])) { s = m[1]; zone = true; }
+  if (m && /[0-9AaPpMm]$/.test(m[1])) {
+    s = m[1];
+    zone = true;
+    const h = Number(m[3]), mi = m[4] === undefined ? 0 : Number(m[4]);
+    off = h <= 14 && mi <= 59 ? (m[2] === '-' ? -1 : 1) * (h * 60 + mi) : null;
+  }
   m = RE_ZONE_Z.exec(s);
-  if (m) { s = m[1]; zone = true; }
-  return [s, zone];
+  if (m) { s = m[1]; zone = true; off = 0; }
+  return [s, zone, off];
 }
 
 function badOrder(fmt, row, column) {
@@ -554,14 +570,20 @@ function inRange(ms, row, column) {
   return ms;
 }
 
+// seen (optional): in {zone, yearBase}; out: zone (a label was removed), timed (the cell has a time
+// of day), off (its UTC offset in minutes, or null).
 export function parseDateFmt(raw, fmt, row, column, seen) {
-  const [s, zone] = stripZone(clean(raw));
+  const [s, zone, off] = stripZone(clean(raw));
   if (s === '') fail('E_BAD_DATE', 'the date is empty', row, column);
   const m = RE_DF.exec(s);
   if (!m) badOrder(fmt, row, column);
   if (zone && seen) seen.zone = true;
   const d = m[1];
   const timed = m[2] !== undefined;
+  if (seen) {
+    seen.timed = timed || fmt === 'epoch_s' || fmt === 'epoch_ms' || (fmt === 'excel' && d.indexOf('.') !== -1);
+    seen.off = seen.timed ? off : null;
+  }
   let h = timed ? Number(m[2]) : 0;
   const mi = timed ? Number(m[3]) : 0;
   const sec = m[4] === undefined ? 0 : Number(m[4]);
@@ -595,7 +617,15 @@ export function parseDateFmt(raw, fmt, row, column, seen) {
     x = RE_DMY.exec(d);
     if (!x) badOrder(fmt, row, column);
     const a = Number(x[1]), b = Number(x[3]);
-    y = Number(x[4]) + (x[4].length === 2 ? 2000 : 0);
+    y = Number(x[4]);
+    if (x[4].length === 2) {
+      // Two-digit years: 00-49 are 2000-2049; 50-99 could be 1950s-1990s or 2050s-2090s, so they are
+      // read only when the mapping says which century (year_base), never guessed (Tester F6).
+      const base = seen && seen.yearBase ? seen.yearBase : null;
+      if (base !== null) y += base;
+      else if (y <= 49) y += 2000;
+      else fail('E_BAD_DATE', 'a two-digit year like 99 could be 1999 or 2099: choose the century, or export four-digit years', row, column);
+    }
     if (fmt === 'mdy') { mo = a; dd = b; } else { dd = a; mo = b; }
     if (mo > 12) badOrder(fmt, row, column);
   } else {

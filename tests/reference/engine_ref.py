@@ -743,7 +743,11 @@ def parse_date(raw, kind, row, column):
 DATE_FORMATS = ["ymd", "mdy", "dmy", "excel", "epoch_s", "epoch_ms"]
 _RE_DF = re.compile(r"^([0-9./-]+)(?:[ T]+(\d{1,2}):(\d{2})(?::(\d{2})(?:[.,]\d+)?)?(?: ?([AaPp][Mm]))?)?$", re.ASCII)
 _RE_ZONE_WORD = re.compile(r"^(.*[0-9AaPpMm]) ([A-Za-z]{2,5})$", re.ASCII)
-_RE_ZONE_OFFSET = re.compile(r"^(.*\d:\d{2}.*?) ?(?:(?:UTC|GMT) ?)?[+-]\d{1,2}(?::?\d{2})?$", re.ASCII)
+_RE_ZONE_OFFSET = re.compile(r"^(.*\d:\d{2}.*?) ?(?:(?:UTC|GMT) ?)?([+-])(\d{1,2})(?::?(\d{2}))?$", re.ASCII)
+ZONE_OFFSETS = {"UTC": 0, "GMT": 0, "WET": 0, "WEST": 60, "BST": 60, "CET": 60, "CEST": 120, "EET": 120, "EEST": 180,
+                "MSK": 180, "EST": -300, "EDT": -240, "CST": -360, "CDT": -300, "MST": -420, "MDT": -360, "PST": -480,
+                "PDT": -420, "AKST": -540, "AKDT": -480, "HST": -600, "JST": 540, "KST": 540, "HKT": 480, "SGT": 480,
+                "AEST": 600, "AEDT": 660, "NZST": 720, "NZDT": 780}
 _RE_ZONE_Z = re.compile(r"^(.*\d)Z$", re.ASCII)
 _RE_YMD = re.compile(r"^(\d{4})([-/.])(\d{1,2})\2(\d{1,2})$", re.ASCII)
 _RE_YMD8 = re.compile(r"^(\d{4})(\d{2})(\d{2})$", re.ASCII)
@@ -753,17 +757,23 @@ MAX_TS = 4133980800000  # 2101-01-01: utc_ms accepts years 1970-2100
 
 
 def strip_zone(s):
+    """-> (text without a trailing zone label, whether one was removed, UTC offset in minutes or None)"""
     zone = False
+    off = None
     m = _RE_ZONE_WORD.match(s)
     if m and not re.match(r"^[AaPp][Mm]$", m.group(2)) and re.search(r"\d", m.group(1), re.ASCII):
         s, zone = m.group(1), True
+        off = ZONE_OFFSETS.get(m.group(2).upper())
     m = _RE_ZONE_OFFSET.match(s)
     if m and re.search(r"[0-9AaPpMm]$", m.group(1), re.ASCII):
         s, zone = m.group(1), True
+        h = int(m.group(3))
+        mi = int(m.group(4)) if m.group(4) is not None else 0
+        off = (-1 if m.group(2) == "-" else 1) * (h * 60 + mi) if h <= 14 and mi <= 59 else None
     m = _RE_ZONE_Z.match(s)
     if m:
-        s, zone = m.group(1), True
-    return s, zone
+        s, zone, off = m.group(1), True, 0
+    return s, zone, off
 
 
 def _in_range(ms, row, column):
@@ -773,7 +783,7 @@ def _in_range(ms, row, column):
 
 
 def parse_date_fmt(raw, fmt, row, column, seen=None):
-    s, zone = strip_zone(clean(raw))
+    s, zone, off = strip_zone(clean(raw))
     if s == "":
         fail("E_BAD_DATE", "empty", row, column)
     m = _RE_DF.match(s)
@@ -783,6 +793,9 @@ def parse_date_fmt(raw, fmt, row, column, seen=None):
         seen["zone"] = True
     d = m.group(1)
     timed = m.group(2) is not None
+    if seen is not None:
+        seen["timed"] = timed or fmt in ("epoch_s", "epoch_ms") or (fmt == "excel" and "." in d)
+        seen["off"] = off if seen["timed"] else None
     h = int(m.group(2)) if timed else 0
     mi = int(m.group(3)) if timed else 0
     sec = int(m.group(4)) if m.group(4) is not None else 0
@@ -822,7 +835,15 @@ def parse_date_fmt(raw, fmt, row, column, seen=None):
         if not x:
             fail("E_BAD_DATE", "does not fit the chosen form", row, column)
         a, b = int(x.group(1)), int(x.group(3))
-        y = int(x.group(4)) + (2000 if len(x.group(4)) == 2 else 0)
+        y = int(x.group(4))
+        if len(x.group(4)) == 2:
+            base = seen.get("yearBase") if seen is not None else None
+            if base:
+                y += base
+            elif y <= 49:
+                y += 2000
+            else:
+                fail("E_BAD_DATE", "two-digit year 50-99: century not chosen", row, column)
         mo, dd = (a, b) if fmt == "mdy" else (b, a)
         if mo > 12:
             fail("E_BAD_DATE", "does not fit the chosen form", row, column)
@@ -1688,11 +1709,17 @@ def round_half_away(x):
     return int(math.floor(abs(x) + 0.5)) * (1 if x >= 0 else -1)
 
 
+def inst_of(e):
+    """Mirrors instOf(): the fill's time less its UTC offset, when the file gives one on every row."""
+    return e.get("_inst", e["ts"])
+
+
 def _new_trade(e, dr, seq):
     return {"symbol": e["symbol"], "dir": dr, "open_ts": e["ts"], "close_ts": None, "peak": 0,
             "entry_qty": 0.0, "entry_not": 0.0, "exit_qty": 0.0, "exit_not": 0.0, "fees": 0.0,
             "credit": 0.0, "rep_sum": 0.0, "rep_missing": False, "fills": 0, "multiplier": e["multiplier"],
-            "currency": e["currency"], "unit": e["_unit"], "fx": None, "seq": seq}
+            "currency": e["currency"], "unit": e["_unit"], "fx": None, "seq": seq, "oi": inst_of(e), "ci": None,
+            "dateonly": e.get("_dateonly") is True}
 
 
 def chrono_order(execs):
@@ -1700,13 +1727,13 @@ def chrono_order(execs):
     file's own direction (newest-first file -> bottom-up). Mirrors chronoOrder()."""
     up = down = 0
     for k in range(1, len(execs)):
-        d = execs[k]["ts"] - execs[k - 1]["ts"]
+        d = inst_of(execs[k]) - inst_of(execs[k - 1])
         if d > 0:
             up += 1
         elif d < 0:
             down += 1
     sign = -1 if down > up else 1
-    return sorted(range(len(execs)), key=lambda k: (execs[k]["ts"], sign * execs[k]["row"], sign * k))
+    return sorted(range(len(execs)), key=lambda k: (inst_of(execs[k]), sign * execs[k]["row"], sign * k))
 
 
 # ----------------------------------------------------------------- positions opened before the file
@@ -1886,6 +1913,8 @@ def netting_walk(execs, order, excluded, detect_hedging):
             if e.get("_credit"):
                 t["credit"] += e["_credit"]
             t["fills"] += 1
+            if e.get("_dateonly"):
+                t["dateonly"] = True
             if e["pnl_reported"] is not None:
                 t["rep_sum"] += e["pnl_reported"]
             p += s * q_units
@@ -1909,6 +1938,8 @@ def netting_walk(execs, order, excluded, detect_hedging):
         if e.get("_credit"):
             t["credit"] += e["_credit"] if rem_units == 0 else e["_credit"] * close_units / q_units
         t["fills"] += 1
+        if e.get("_dateonly"):
+            t["dateonly"] = True
         if e["pnl_reported"] is None:
             t["rep_missing"] = True
         else:
@@ -1918,6 +1949,7 @@ def netting_walk(execs, order, excluded, detect_hedging):
         p += s * close_units
         if p == 0:
             t["close_ts"] = e["ts"]
+            t["ci"] = inst_of(e)
             done.append(t)
             del cur[sym]
         if rem_units:
@@ -1945,7 +1977,7 @@ TIE_RANK = {"close": 0, "reverse": 1, "net": 1, "open": 2}
 
 def tie_order(execs, order, opens_first):
     sign = -1 if opens_first else 1
-    return sorted(order, key=lambda k: (execs[k]["ts"], sign * TIE_RANK[lot_kind(execs[k])]))
+    return sorted(order, key=lambda k: (inst_of(execs[k]), sign * TIE_RANK[lot_kind(execs[k])]))
 
 
 def trade_key(t):
@@ -2028,10 +2060,10 @@ def build_trades(execs, reported_mode, detect_hedging=False):
                 gross += t["credit"]
             pnl = gross - t["fees"]
         trades.append({"symbol": t["symbol"], "dir": t["dir"], "open_ts": t["open_ts"], "close_ts": t["close_ts"],
-                       "hold_s": (t["close_ts"] - t["open_ts"]) // 1000, "qty": t["peak"] / UNIT,
+                       "hold_s": (t["ci"] - t["oi"]) // 1000, "qty": t["peak"] / UNIT,
                        "entry_vwap": entry_vwap, "exit_vwap": exit_vwap, "pnl": pnl, "pnl_gross": gross,
                        "fees": t["fees"], "pnl_source": src, "pnl_unit": t["unit"], "fills_n": t["fills"],
-                       "currency": t["currency"], "_fx": t["fx"], "_seq": t["seq"]})
+                       "currency": t["currency"], "_fx": t["fx"], "_seq": t["seq"], "_dateonly": t["dateonly"]})
     hedging = (lots["hedges"] if detect_hedging else 0) + walk["hedging"]
     return trades, walk["open_n"], hedging, lots["open_at_start"], len(ambiguous_syms), excluded
 
@@ -2046,12 +2078,14 @@ def roundtrip_trades(rts, start_seq):
         else:
             gross = (r["exit"] - r["entry"]) * r["qty"] * 1 * sign
             src = "computed"
+        oi = r.get("_oi", r["open_ts"])
+        ci = r.get("_ci", r["close_ts"])
         trades.append({"symbol": r["symbol"], "dir": r["dir"], "open_ts": r["open_ts"], "close_ts": r["close_ts"],
-                       "hold_s": (r["close_ts"] - r["open_ts"]) // 1000, "qty": r["qty"],
+                       "hold_s": (ci - oi) // 1000, "qty": r["qty"],
                        "entry_vwap": r["entry"], "exit_vwap": r["exit"], "pnl": gross - r["fees"],
                        "pnl_gross": gross, "fees": r["fees"], "pnl_source": src, "pnl_unit": r["unit"],
                        "fills_n": 2, "currency": r["currency"], "_fx": None, "_seq": start_seq + i,
-                       "_reordered": r.get("reordered") is True})
+                       "_reordered": r.get("reordered") is True, "_dateonly": r.get("_dateonly") is True})
     return trades
 
 
@@ -2150,6 +2184,15 @@ def finish(fmt, verified, res, mode, tz_label):
         # fills of positions opened before the file are left out of every later step (PGR/PLR too)
         if excluded:
             executions = [e for k, e in enumerate(executions) if k not in excluded]
+    # a trade with a fill that has a date but no time is read at day level (mirrors finish())
+    part_dates = 0
+    for t in trades:
+        if not t.get("_dateonly"):
+            continue
+        part_dates += 1
+        t["open_ts"] = (t["open_ts"] // DAY_MS_) * DAY_MS_
+        t["close_ts"] = (t["close_ts"] // DAY_MS_) * DAY_MS_
+        t["hold_s"] = (t["close_ts"] - t["open_ts"]) // 1000
     if hedging:
         warnings.append(warning("W_HEDGING", hedging))
     if open_n:
@@ -2210,6 +2253,9 @@ def finish(fmt, verified, res, mode, tz_label):
         if t["open_ts"] % DAY_MS_ == 0 and t["hold_s"] % 86400 == 0:
             n_date_only += 1
     dates_only = 20 * n_date_only >= len(trades)
+    marked = sum(1 for t in trades if t.get("_dateonly"))
+    if part_dates and marked and marked < len(trades):
+        warnings.append(warning("W_SOME_DATES_ONLY", marked))
     if dates_only:
         warnings.append(warning("W_DATES_ONLY", n_date_only))
     out_trades = []
@@ -2296,7 +2342,8 @@ _RULE_KINDS = ["eq", "prefix", "contains"]
 STATUS_KEEP = ["filled", "fully filled", "executed", "complete", "completed", "partially filled", "partial fill",
                "partially executed"]
 MAX_FEE_COLUMNS = 3
-MAPPED_TZ = {"plain": "as in the file", "zone": "as in the file; time zone labels ignored", "utc": "UTC, as exported"}
+MAPPED_TZ = {"plain": "as in the file", "zone": "as in the file; time zone labels ignored", "utc": "UTC, as exported",
+             "offsets": "as in the file; order and hold times use each row's UTC offset"}
 
 
 def _bad(field):
@@ -2385,6 +2432,8 @@ def check_mapping(mp):
         _bad("currency")
     if mp.get("tz") is not None and mp["tz"] != "utc":
         _bad("tz")
+    if mp.get("year_base") is not None and (isinstance(mp["year_base"], bool) or mp["year_base"] not in (1900, 2000)):
+        _bad("year_base")
     if mp.get("preset") is not None and not (isinstance(mp["preset"], str)
                                             and re.match(r"^[a-z0-9_]{1,40}$", mp["preset"], re.ASCII)):
         _bad("preset")
@@ -2605,8 +2654,15 @@ def parse_mapped(rows, mp, side_from, kind, delimiter):
             dup += 1
         else:
             seen_keys.add(key)
-    seen = {"zone": False}
+    seen = {"zone": False, "yearBase": mp.get("year_base") or None}
     fmt = mp["date_format"]
+    offs = {"all": True, "any": False}
+
+    def note_off(o):
+        if o is None:
+            offs["all"] = False
+        else:
+            offs["any"] = True
     execs, rts = [], []
     pnl_sign = 0
 
@@ -2633,9 +2689,19 @@ def parse_mapped(rows, mp, side_from, kind, delimiter):
                 _skip(skipped, "no_symbol")
                 continue
             ot = parse_date_fmt(_cell_at(r, cm.get("open_time")), fmt, row, "open_time", seen)
+            o_timed, o_off = seen["timed"], seen["off"]
             ct = parse_date_fmt(_cell_at(r, cm.get("close_time")), fmt, row, "close_time", seen)
-            reordered = ct < ot
-            if reordered:
+            c_timed, c_off = seen["timed"], seen["off"]
+            if o_timed:
+                note_off(o_off)
+            if c_timed:
+                note_off(c_off)
+            reordered = False
+            if o_off is not None and c_off is not None:
+                if ct - c_off * 60000 < ot - o_off * 60000:
+                    fail("E_BAD_DATE", "close before open", row, "close_time")
+            elif ct < ot:
+                reordered = True
                 ct = fall_back_close(ot, ct)
                 if ct is None:
                     fail("E_BAD_DATE", "close before open", row, "close_time")
@@ -2654,7 +2720,8 @@ def parse_mapped(rows, mp, side_from, kind, delimiter):
             cur = _cell_at(r, cm.get("currency")).upper() or (mp.get("currency") or None)
             rts.append({"row": row, "symbol": symbol, "dir": dr, "open_ts": ot, "close_ts": ct, "qty": qty,
                         "entry": op, "exit": cp, "fees": fee, "pnl_gross": None, "reported": False,
-                        "currency": cur, "unit": cur if cur else "points", "pos_id": None, "reordered": reordered})
+                        "currency": cur, "unit": cur if cur else "points", "pos_id": None, "reordered": reordered,
+                        "_dateonly": not o_timed or not c_timed, "_ooff": o_off, "_coff": c_off})
             continue
         side = None
         if side_from == "column":
@@ -2681,6 +2748,9 @@ def parse_mapped(rows, mp, side_from, kind, delimiter):
         d = _cell_at(r, cm.get("date"))
         t = _cell_at(r, cm.get("time"))
         ts = parse_date_fmt(d + " " + t if t != "" and d != "" else d, fmt, row, "date", seen)
+        timed, off = seen["timed"], seen["off"]
+        if timed:
+            note_off(off)
         q = req_number(_cell_at(r, cm.get("qty")), row, "qty")
         if side_from == "sign" and q != 0:
             side = "sell" if q < 0 else "buy"
@@ -2704,10 +2774,23 @@ def parse_mapped(rows, mp, side_from, kind, delimiter):
                 unit = "points"
         execs.append({"row": row, "ts": ts, "symbol": symbol, "side": side, "qty": q, "price": price, "fee": fee,
                       "currency": cur, "oc": None, "pos_id": None, "pnl_reported": None, "multiplier": mult,
-                      "_unit": unit, "_fx": None})
+                      "_unit": unit, "_fx": None, "_dateonly": not timed, "_off": off})
+    offsets = offs["all"] and offs["any"]
+    for e in execs:
+        if offsets and e["_off"] is not None:
+            e["_inst"] = e["ts"] - e["_off"] * 60000
+        del e["_off"]
+        if not e["_dateonly"]:
+            del e["_dateonly"]
+    for x in rts:
+        if offsets:
+            x["_oi"] = x["open_ts"] - x["_ooff"] * 60000 if x["_ooff"] is not None else x["open_ts"]
+            x["_ci"] = x["close_ts"] - x["_coff"] * 60000 if x["_coff"] is not None else x["close_ts"]
+        del x["_ooff"]
+        del x["_coff"]
     extra = {"duplicate_rows": dup, "currency_ignored": cur_ignored, "wide_rows": wide, "mapped": not mp.get("preset"),
              "preset": mp.get("preset") or None, "orders_averaged": layout == "orders",
-             "futures_sizes": mp.get("futures_sizes") is True, "pnl_sign": pnl_sign, "zone_ignored": seen["zone"],
+             "futures_sizes": mp.get("futures_sizes") is True, "pnl_sign": pnl_sign, "zone_ignored": seen["zone"] and not offsets, "offsets": offsets,
              "tz": mp.get("tz") or None}
     return {"executions": execs, "roundtrips": rts, "skipped": skipped, "extra": extra}, n_data
 
@@ -2715,6 +2798,8 @@ def parse_mapped(rows, mp, side_from, kind, delimiter):
 def mapped_tz_label(extra):
     if extra.get("tz") == "utc":
         return MAPPED_TZ["utc"]
+    if extra.get("offsets"):
+        return MAPPED_TZ["offsets"]
     return MAPPED_TZ["zone"] if extra.get("zone_ignored") else MAPPED_TZ["plain"]
 
 
@@ -2786,7 +2871,7 @@ def first_ts(res):
 
 
 _SUM_EXTRA = ["duplicate_rows", "open_positions", "pnl_sign", "wide_rows"]
-_OR_EXTRA = ["currency_ignored", "has_closed_positions", "has_deals", "zone_ignored"]
+_OR_EXTRA = ["currency_ignored", "has_closed_positions", "has_deals", "zone_ignored", "offsets"]
 
 
 def merge_parsed(parts):

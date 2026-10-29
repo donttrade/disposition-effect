@@ -6,7 +6,7 @@
     "guard": null,
     "label": "not enough trades to tell",
     "method": "bootstrap-t",
-    "n_a": 10,
+    "n_a": 7,
     "n_b": null,
     "n_needed": null,
     "p": null,
@@ -18,8 +18,8 @@
    {
     "label": "not enough trades to tell",
     "method": "label permutation",
-    "n_a": 6,
-    "n_b": 4,
+    "n_a": 4,
+    "n_b": 2,
     "p": null,
     "stat": "hold_gap_s",
     "value": null
@@ -27,7 +27,7 @@
    {
     "label": "not enough trades to tell",
     "method": "order shuffle",
-    "n_a": 10,
+    "n_a": 7,
     "n_b": null,
     "p": null,
     "stat": "longest_losing_streak",
@@ -35,7 +35,7 @@
    }
   ],
   "limited": false,
-  "n_used": 10
+  "n_used": 7
  },
  "pgr_plr": {
   "coverage_pct": null,
@@ -46,7 +46,7 @@
  },
  "result": {
   "currency_groups": {
-   "points": 10
+   "points": 7
   },
   "dates_only": false,
   "executions": [
@@ -337,52 +337,16 @@
   "skipped": {},
   "trades": [
    {
-    "close_ts": 1772445245000,
-    "currency": null,
-    "dir": "long",
-    "entry_vwap": 100.0,
-    "exit_vwap": 98.0,
-    "fees": 0.0,
-    "fills_n": 2,
-    "hold_s": 1380,
-    "id": "t1",
-    "open_ts": 1772443865000,
-    "pnl": -2.0,
-    "pnl_gross": -2.0,
-    "pnl_source": "computed",
-    "pnl_unit": "points",
-    "qty": 1.0,
-    "symbol": "AAA"
-   },
-   {
-    "close_ts": 1772447765000,
+    "close_ts": 1772448485000,
     "currency": null,
     "dir": "short",
-    "entry_vwap": 113.25,
-    "exit_vwap": 112.25,
+    "entry_vwap": 110.25,
+    "exit_vwap": 109.5,
     "fees": 0.0,
     "fills_n": 2,
-    "hold_s": 1680,
-    "id": "t2",
-    "open_ts": 1772446085000,
-    "pnl": 3.0,
-    "pnl_gross": 3.0,
-    "pnl_source": "computed",
-    "pnl_unit": "points",
-    "qty": 3.0,
-    "symbol": "BBB"
-   },
-   {
-    "close_ts": 1772450465000,
-    "currency": null,
-    "dir": "long",
-    "entry_vwap": 109.5,
-    "exit_vwap": 110.25,
-    "fees": 0.0,
-    "fills_n": 2,
-    "hold_s": 1980,
-    "id": "t3",
-    "open_ts": 1772448485000,
+    "hold_s": 5220,
+    "id": "t1",
+    "open_ts": 1772450465000,
     "pnl": 3.75,
     "pnl_gross": 3.75,
     "pnl_source": "computed",
@@ -394,37 +358,19 @@
     "close_ts": 1772453345000,
     "currency": null,
     "dir": "long",
-    "entry_vwap": 105.75,
-    "exit_vwap": 106.75,
+    "entry_vwap": 103.83333333333333,
+    "exit_vwap": 103.83333333333333,
     "fees": 0.0,
-    "fills_n": 2,
-    "hold_s": 2280,
-    "id": "t4",
-    "open_ts": 1772451065000,
-    "pnl": 2.0,
-    "pnl_gross": 2.0,
+    "fills_n": 4,
+    "hold_s": 9480,
+    "id": "t2",
+    "open_ts": 1772443865000,
+    "pnl": 0.0,
+    "pnl_gross": 0.0,
     "pnl_source": "computed",
     "pnl_unit": "points",
-    "qty": 2.0,
+    "qty": 3.0,
     "symbol": "AAA"
-   },
-   {
-    "close_ts": 1772455205000,
-    "currency": null,
-    "dir": "short",
-    "entry_vwap": 101.0,
-    "exit_vwap": 103.0,
-    "fees": 0.0,
-    "fills_n": 2,
-    "hold_s": 1380,
-    "id": "t5",
-    "open_ts": 1772453825000,
-    "pnl": -8.0,
-    "pnl_gross": -8.0,
-    "pnl_source": "computed",
-    "pnl_unit": "points",
-    "qty": 4.0,
-    "symbol": "BBB"
    },
    {
     "close_ts": 1772458445000,
@@ -435,7 +381,7 @@
     "fees": 0.0,
     "fills_n": 2,
     "hold_s": 1680,
-    "id": "t6",
+    "id": "t3",
     "open_ts": 1772456765000,
     "pnl": -1.5,
     "pnl_gross": -1.5,
@@ -452,8 +398,8 @@
     "exit_vwap": 110.0,
     "fees": 0.0,
     "fills_n": 2,
-    "hold_s": 1980,
-    "id": "t7",
+    "hold_s": 9180,
+    "id": "t4",
     "open_ts": 1772458985000,
     "pnl": -1.5,
     "pnl_gross": -1.5,
@@ -466,18 +412,18 @@
     "close_ts": 1772463665000,
     "currency": null,
     "dir": "short",
-    "entry_vwap": 106.75,
-    "exit_vwap": 107.25,
+    "entry_vwap": 106.45833333333333,
+    "exit_vwap": 107.08333333333333,
     "fees": 0.0,
-    "fills_n": 2,
-    "hold_s": 2280,
-    "id": "t8",
-    "open_ts": 1772461385000,
-    "pnl": -2.5,
-    "pnl_gross": -2.5,
+    "fills_n": 6,
+    "hold_s": 10380,
+    "id": "t5",
+    "open_ts": 1772446085000,
+    "pnl": -7.5,
+    "pnl_gross": -7.5,
     "pnl_source": "computed",
     "pnl_unit": "points",
-    "qty": 5.0,
+    "qty": 9.0,
     "symbol": "BBB"
    },
    {
@@ -488,8 +434,8 @@
     "exit_vwap": 103.5,
     "fees": 0.0,
     "fills_n": 2,
-    "hold_s": 1380,
-    "id": "t9",
+    "hold_s": 8580,
+    "id": "t6",
     "open_ts": 1772530265000,
     "pnl": 3.0,
     "pnl_gross": 3.0,
@@ -507,7 +453,7 @@
     "fees": 0.0,
     "fills_n": 2,
     "hold_s": 1680,
-    "id": "t10",
+    "id": "t7",
     "open_ts": 1772533025000,
     "pnl": -8.0,
     "pnl_gross": -8.0,
@@ -517,7 +463,7 @@
     "symbol": "AAA"
    }
   ],
-  "tz_label": "as in the file; time zone labels ignored",
+  "tz_label": "as in the file; order and hold times use each row's UTC offset",
   "verified_format": false,
   "warnings": [
    {
@@ -527,46 +473,46 @@
   ]
  },
  "stats": {
-  "avg_loss": -3.9166666666666665,
-  "avg_win": 2.9375,
-  "expectancy": -1.175,
-  "gross_loss": -23.5,
-  "gross_profit": 11.75,
-  "hold_median_loss_s": 1680.0,
-  "hold_median_win_s": 1830.0,
-  "hold_ratio": 0.9180327868852459,
+  "avg_loss": -4.625,
+  "avg_win": 3.375,
+  "expectancy": -1.6785714285714286,
+  "gross_loss": -18.5,
+  "gross_profit": 6.75,
+  "hold_median_loss_s": 5430.0,
+  "hold_median_win_s": 6900.0,
+  "hold_ratio": 0.7869565217391304,
   "largest_loss": -8.0,
   "largest_win": 3.75,
   "long": {
-   "losses": 4,
-   "n": 7,
-   "pnl": -4.25,
-   "win_rate": 0.42857142857142855,
-   "wins": 3
-  },
-  "losses": 6,
-  "max_consec_losses": {
-   "n": 4,
-   "pnl": -13.5
-  },
-  "max_consec_wins": {
-   "n": 3,
-   "pnl": 8.75
-  },
-  "max_drawdown_abs": 18.5,
-  "max_drawdown_pct": null,
-  "n": 10,
-  "net_pnl": -11.75,
-  "profit_factor": 0.5,
-  "scratch": 0,
-  "short": {
-   "losses": 2,
-   "n": 3,
-   "pnl": -7.5,
-   "win_rate": 0.3333333333333333,
+   "losses": 3,
+   "n": 5,
+   "pnl": -8.0,
+   "win_rate": 0.25,
    "wins": 1
   },
-  "win_rate": 0.4,
-  "wins": 4
+  "losses": 4,
+  "max_consec_losses": {
+   "n": 3,
+   "pnl": -10.5
+  },
+  "max_consec_wins": {
+   "n": 1,
+   "pnl": 3.75
+  },
+  "max_drawdown_abs": 15.5,
+  "max_drawdown_pct": null,
+  "n": 7,
+  "net_pnl": -11.75,
+  "profit_factor": 0.36486486486486486,
+  "scratch": 1,
+  "short": {
+   "losses": 1,
+   "n": 2,
+   "pnl": -3.75,
+   "win_rate": 0.5,
+   "wins": 1
+  },
+  "win_rate": 0.3333333333333333,
+  "wins": 2
  }
 }

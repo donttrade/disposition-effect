@@ -75,7 +75,8 @@
    "status_values": null,
    "trim_ragged": false,
    "tz": null,
-   "v": 1
+   "v": 1,
+   "year_base": null
   },
   "questions": [],
   "side_checks": {},

@@ -157,6 +157,7 @@ export function checkMapping(mp) {
   if (mp.number_style !== undefined && mp.number_style !== null && !['dot', 'comma'].includes(mp.number_style)) bad('number_style');
   if (mp.currency !== undefined && mp.currency !== null && !ISO.has(mp.currency)) bad('currency');
   if (mp.tz !== undefined && mp.tz !== null && mp.tz !== 'utc') bad('tz');
+  if (mp.year_base !== undefined && mp.year_base !== null && mp.year_base !== 1900 && mp.year_base !== 2000) bad('year_base');
   if (mp.preset !== undefined && mp.preset !== null && !(typeof mp.preset === 'string' && /^[a-z0-9_]{1,40}$/.test(mp.preset))) bad('preset');
   for (const f of ['futures_sizes', 'section', 'trim_ragged', 'keep_partial']) {
     if (mp[f] !== undefined && mp[f] !== null && typeof mp[f] !== 'boolean') bad(f);
@@ -356,8 +357,12 @@ export function parseMapped(rows, mp, sideFrom, kind, delimiter) {
       if (seen.has(key)) dup++; else seen.add(key);
     }
   }
-  const seen = { zone: false };
+  const seen = { zone: false, yearBase: mp.year_base || null };
   const fmt = mp.date_format;
+  // UTC offsets per row ("-04:00", "Z", "EDT"): kept only when every timed cell has one (Tester F6).
+  let offsAll = true;
+  let offsAny = false;
+  const noteOff = (o) => { if (o === null) offsAll = false; else offsAny = true; };
   const execs = [];
   const rts = [];
   let pnlSign = 0;
@@ -376,9 +381,17 @@ export function parseMapped(rows, mp, sideFrom, kind, delimiter) {
       const symbol = cellAt(r, cm.symbol);
       if (symbol === '') { skip(skipped, 'no_symbol'); continue; }
       const ot = parseDateFmt(cellAt(r, cm.open_time), fmt, row, 'open_time', seen);
+      const oTimed = seen.timed, oOff = seen.off;
       let ct = parseDateFmt(cellAt(r, cm.close_time), fmt, row, 'close_time', seen);
-      const reordered = ct < ot; // the repeated hour of a fall-back night, flagged (F-N3), as generic does
-      if (reordered) {
+      const cTimed = seen.timed, cOff = seen.off;
+      if (oTimed) noteOff(oOff);
+      if (cTimed) noteOff(cOff);
+      let reordered = false;
+      if (oOff !== null && cOff !== null) {
+        // Both ends carry an offset: order by the instants, no fall-back reading.
+        if (ct - cOff * 60000 < ot - oOff * 60000) fail('E_BAD_DATE', 'the close time is before the open time', row, 'close_time');
+      } else if (ct < ot) {
+        reordered = true; // the repeated hour of a fall-back night, flagged (F-N3), as generic does
         ct = fallBackClose(ot, ct);
         if (ct === null) fail('E_BAD_DATE', 'the close time is before the open time', row, 'close_time');
       }
@@ -394,7 +407,8 @@ export function parseMapped(rows, mp, sideFrom, kind, delimiter) {
       }
       const cur = cellAt(r, cm.currency).toUpperCase() || (mp.currency || null);
       rts.push({ row, symbol, dir, open_ts: ot, close_ts: ct, qty, entry: op, exit: cp, fees: fee, pnl_gross: null,
-        reported: false, currency: cur, unit: cur ? cur : 'points', pos_id: null, reordered });
+        reported: false, currency: cur, unit: cur ? cur : 'points', pos_id: null, reordered,
+        _dateonly: !oTimed || !cTimed, _ooff: oOff, _coff: cOff });
       continue;
     }
     let side = null;
@@ -419,6 +433,8 @@ export function parseMapped(rows, mp, sideFrom, kind, delimiter) {
     const d = cellAt(r, cm.date);
     const t = cellAt(r, cm.time);
     const ts = parseDateFmt(t !== '' && d !== '' ? d + ' ' + t : d, fmt, row, 'date', seen);
+    const timed = seen.timed, off = seen.off;
+    if (timed) noteOff(off);
     let q = reqNumber(cellAt(r, cm.qty), row, 'qty');
     if (sideFrom === 'sign' && q !== 0) side = q < 0 ? 'sell' : 'buy';
     q = Math.abs(q);
@@ -434,19 +450,34 @@ export function parseMapped(rows, mp, sideFrom, kind, delimiter) {
       else { cur = null; unit = 'points'; }
     }
     execs.push({ row, ts, symbol, side, qty: q, price, fee, currency: cur, oc: null, pos_id: null,
-      pnl_reported: null, multiplier: mult, _unit: unit, _fx: null });
+      pnl_reported: null, multiplier: mult, _unit: unit, _fx: null, _dateonly: !timed, _off: off });
+  }
+  const offsets = offsAll && offsAny;
+  for (const e of execs) {
+    if (offsets && e._off !== null) e._inst = e.ts - e._off * 60000;
+    delete e._off;
+    if (!e._dateonly) delete e._dateonly;
+  }
+  for (const x of rts) {
+    if (offsets) {
+      x._oi = x._ooff !== null ? x.open_ts - x._ooff * 60000 : x.open_ts;
+      x._ci = x._coff !== null ? x.close_ts - x._coff * 60000 : x.close_ts;
+    }
+    delete x._ooff;
+    delete x._coff;
   }
   const extra = { duplicate_rows: dup, currency_ignored: cc.ignored, wide_rows: wide, mapped: !mp.preset, preset: mp.preset || null,
     orders_averaged: layout === 'orders', futures_sizes: mp.futures_sizes === true, pnl_sign: pnlSign,
-    zone_ignored: seen.zone, tz: mp.tz || null };
+    zone_ignored: seen.zone && !offsets, offsets, tz: mp.tz || null };
   return { res: { executions: execs, roundtrips: rts, skipped, extra }, nData };
 }
 
 export const MAPPED_TZ = Object.freeze({ plain: 'as in the file', zone: 'as in the file; time zone labels ignored',
-  utc: 'UTC, as exported' });
+  utc: 'UTC, as exported', offsets: "as in the file; order and hold times use each row's UTC offset" });
 
 export function mappedTzLabel(extra) {
   if (extra.tz === 'utc') return MAPPED_TZ.utc;
+  if (extra.offsets) return MAPPED_TZ.offsets;
   return extra.zone_ignored ? MAPPED_TZ.zone : MAPPED_TZ.plain;
 }
 
@@ -521,7 +552,7 @@ export function firstTs(res) {
 }
 
 const SUM_EXTRA = ['duplicate_rows', 'open_positions', 'pnl_sign', 'wide_rows'];
-const OR_EXTRA = ['currency_ignored', 'has_closed_positions', 'has_deals', 'zone_ignored'];
+const OR_EXTRA = ['currency_ignored', 'has_closed_positions', 'has_deals', 'zone_ignored', 'offsets'];
 
 // Parsed files (in time order) → one parser result for finish(). Row numbers are moved past the
 // rows of the files before, so same-time fills keep file order and then row order (chronoOrder).
