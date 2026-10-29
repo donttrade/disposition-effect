@@ -76,4 +76,8 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', openHash);
   else openHash();
   window.addEventListener('hashchange', openHash);
+  // sweep 3 (29 Oct): the folded sections of /terms/ and /privacy/ all print open
+  window.addEventListener('beforeprint', function () {
+    [].forEach.call(document.querySelectorAll('details.legal-sec'), function (d) { d.open = true; });
+  });
 })();
