@@ -121,7 +121,9 @@
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 /* QA 25 Oct: an anchor target (#last-step, #firms, …) lands with room above it, not flush to the edge */
-[id] { scroll-margin-top: var(--s3); }
+/* 29 Oct: headings, anchors and scroll targets stop below the sticky header (.site-header is 57px at every width). */
+:root { --header-h: 57px; }
+[id], h1, h2, h3, h4, a[name], :target, summary { scroll-margin-top: calc(var(--header-h) + var(--s2)); }
 body {
   margin: 0;
   background: var(--bg);
@@ -179,7 +181,7 @@ a:hover { color: var(--rust-hover); }
 :root { --ease-nav: cubic-bezier(0.45, 0.05, 0.55, 0.95); } /* Stripe's nav easing [READ] */
 /* 29 Oct (owner): slim and sticky. It stays in view on scroll (position: sticky keeps its place in the flow, so
    nothing shifts), and scroll-padding keeps a focused element or an anchor target from sliding under it. */
-html { scroll-padding-top: 72px; }
+html { scroll-padding-top: calc(var(--header-h) + var(--s2)); }
 .site-header { border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 20; background: var(--bg); }
 .site-header .wrap { display: flex; flex-wrap: nowrap; align-items: center; gap: var(--s1) var(--s3); min-height: 56px; }
 .brand { font-weight: 600; color: var(--text); text-decoration: none; font-size: var(--fs-2); margin-right: auto; display: inline-flex; align-items: center; min-height: var(--target); white-space: nowrap; }
@@ -1308,6 +1310,7 @@ details.legal-sec[open] { padding-bottom: var(--s2); }
 .rc-habits .h-name { font-weight: 600; }
 .rc-habits .h-base { color: var(--muted); font-size: var(--fs-0); }
 .wi-row { align-items: end; }
+.wi-row select { width: 100%; }
 .wi-pair { display: grid; gap: var(--s1); max-width: 40rem; margin: 0 0 var(--s2); }
 .wi-pair .wi-k { font-size: var(--fs-0); color: var(--muted); }
 .expert > summary { cursor: pointer; font-weight: 600; font-size: var(--fs-2); }

@@ -14,7 +14,7 @@ import { createFileSlot, renderReadError, whileBusy, clearFieldErrors, fieldErro
 import { RUNS, DEFAULT_SEED, NO_LIMIT_CAP, METHOD_VERSION, WHATIF_TEXT, groupDays, simulate, ruleLabel, mcError, unavailableText, personalUnavailable, normRules } from './prop-sim-core.js?v=8dc5524e';
 import { presetRules, NOT_STATED } from './challenge-presets.js?v=2e7fd947';
 import { HABITS, HABIT_TEXT, itemsFromTrades, isDatesOnly, habitFlags, dayFlags, realBreachDays, simulatedHabits, countFlags, MIN_BREACH_DAYS, MIN_BUSTS } from './habit-flags.js?v=72b76dd0';
-import { drawCard, cardBlob, altText } from '../card/readiness-card.js?v=9587f27e';
+import { drawCard, cardBlob, altText } from '../card/readiness-card.js?v=b211143d';
 import { money, unitNote, pct, intText, el, DASH } from './format.js?v=acb0db51';
 import { parseStrict, parsePositive, parseNonNegative, parseWhole, InputError } from './num.js?v=8df99e34';
 import { SAMPLE_LABEL, FORMAT_NAMES, plural, tableWrap, rowsTable } from './file-tool.js?v=c246361c';
@@ -422,7 +422,7 @@ function render() {
     el('h2', { id: 'ps-out-h', tabindex: '-1', text: headline }),
     el('p', { class: 'notice' }, el('strong', { text: 'A replay of past trades, not a prediction' }),
       `Each replay is built from ${source}. ${unitNote(last.unit)}`),
-    last.example ? el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Example data' }), 'Not a real trader.') : null,
+    last.example ? el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Example data' })) : null,
     warn.length ? el('div', { class: 'notice notice-caution' }, el('strong', { text: 'Note' }), el('ul', {}, ...warn.map((w) => el('li', { text: w })))) : null,
     el('div', { class: 'rc-visuals' }, outcome, ruleCard(res), last.file ? habitsCard(last.real, p.rules) : null),
   ].filter(Boolean));
@@ -472,7 +472,7 @@ function renderWhatIfForm() {
   for (const n of [1, 2]) {
     const opt = $(`ps-wi-rule${n}`).querySelector('option[value="cooldown_s"]');
     opt.disabled = noTimes;
-    opt.textContent = noTimes ? `No new trade for some minutes after a loss (${last.file ? 'not available for files with dates but no times' : 'needs a file'})` : 'No new trade for some minutes after a loss';
+    opt.textContent = noTimes ? `Pause after a loss (${last.file ? 'needs times' : 'needs a file'})` : 'Pause N minutes after a loss';
     if (noTimes && $(`ps-wi-rule${n}`).value === 'cooldown_s') { $(`ps-wi-rule${n}`).value = n === 1 ? 'stop_after_losses' : ''; syncWiRow(n, true); }
   }
 }
