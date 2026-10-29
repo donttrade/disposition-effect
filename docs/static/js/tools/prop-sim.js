@@ -6,7 +6,7 @@
 // the worker. Manual mode: four summary numbers. Either way the page's CSP is
 // connect-src 'none', nothing is stored, nothing is logged.
 
-import { createFileSlot, renderReadError, whileBusy, clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js?v=fd4af716';
+import { createFileSlot, renderReadError, whileBusy, clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js?v=eb893892';
 import { RUNS, DEFAULT_SEED, tradingDays } from './prop-sim-core.js?v=ef3c575e';
 import { money, unitNote, pct, intText, el, DASH } from './format.js?v=acb0db51';
 import { parseStrict, parsePositive, parseWhole, InputError } from './num.js?v=8df99e34';

@@ -12,7 +12,8 @@ export const SAMPLE_LABEL = 'the synthetic sample file';
 
 export const FORMAT_NAMES = {
   mt5: 'MetaTrader 5 report', mt4: 'MetaTrader 4 statement', ibkr_flex: 'Interactive Brokers Flex Query',
-  tradovate_orders: 'Tradovate Orders export', generic: 'donttrade CSV template (one row per fill)',
+  tradovate_orders: 'Tradovate Orders export', tradingview: 'TradingView Order History export',
+  generic: 'donttrade CSV template (one row per fill)',
   generic_roundtrip: 'CSV with one row per round trip',
 };
 

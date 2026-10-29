@@ -43,7 +43,7 @@
         <p id="ps-file-status" class="small muted" role="status" hidden></p>
         <p id="ps-progress" class="progress-line small muted" hidden><progress aria-label="Reading your file"></progress> <span data-elapsed aria-hidden="true"></span></p>
         <div id="ps-file-error" class="notice notice-error" role="alert" tabindex="-1" hidden></div>
-        <p class="small muted">Same formats as <a href="/tools/trade-stats/">trade stats</a>: MT5/MT4 report, IBKR Flex Query, Tradovate Orders (all beta) or the CSV template. The example data also fills in example rules where the boxes are empty, not any firm’s.</p>
+        <p class="small muted">Same formats as <a href="/tools/trade-stats/">trade stats</a>: MT5/MT4 report, IBKR Flex Query, Tradovate Orders, TradingView Order History (all beta) or the CSV template. The example data also fills in example rules where the boxes are empty, not any firm’s.</p>
       </div>
       <div id="ps-manual-fields" class="field-grid" hidden>
         {{ field("ps-wr", "Win rate (%)", "Between 0 and 100. Break-even trades are not modelled.") }}
@@ -90,7 +90,7 @@
     <details class="how-group"><summary>How each run works</summary>
     <p>Most challenge simulators ask for a win rate and an average win and loss, then invent trades from them. This one can start from your own record.</p>
     <p>Drop a trade file and it builds 10,000 simulated challenges by drawing whole trading days from your history at random, so a day with three quick losses stays a day with three quick losses, which is what daily loss limits react to. Enter the rules you face: profit target, daily loss limit, maximum loss as a static or trailing limit, time limit and minimum trading days. The result shows the share of runs that passed, busted or ran out of time, and how many busts came after two or more losses in a row. No file? A manual mode takes the usual summary numbers instead. The random seed is fixed, so the same inputs always give the same answer.</p>
-    <p>It runs entirely in your browser: the page’s security policy blocks every outgoing request.</p>
+    <p>It runs entirely in your browser: your file is never sent.</p>
     <ol>
       <li>Each simulated day is one of your past trading days, drawn at random (a day can be drawn more than once), with its trades replayed in their real order. In manual mode each day is the number of trades you entered, each a win or a loss at your win rate.</li>
       <li>After every trade, the run busts if the day’s loss reaches the daily limit, or if the balance reaches the maximum-loss floor. Reaching a limit counts as breaking it.</li>
@@ -111,7 +111,7 @@
     <details><summary>Is my file uploaded?</summary><p>No. The file is read in this tab and all 10,000 runs happen in your browser. The page’s security policy blocks outgoing requests.</p></details>
   </section>
 
-  <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR and Tradovate are trademarks of their owners. donttrade is not affiliated with any of them.</p>
+  <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR, Tradovate and TradingView are trademarks of their owners. donttrade is not affiliated with any of them.</p>
 </div>
 <script type="text/csv" id="ps-sample">
 {{ sample_csv|safe }}</script>

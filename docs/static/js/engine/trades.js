@@ -7,8 +7,8 @@
 // crosses zero closes the trade at that time and opens the opposite trade with
 // the remainder. Positions still open at the end of the file are left out.
 
-import { fail, warning } from './errors.js?v=a49d9d6e';
-import { spansDstNight } from './csv.js?v=ad87ab8b';
+import { fail, warning } from './errors.js?v=31d80675';
+import { spansDstNight } from './csv.js?v=09ecf6e4';
 
 const UNIT = 1e8; // positions tracked in 1e-8 lots, so 0.1 + 0.2 - 0.3 is exactly flat
 
@@ -18,7 +18,7 @@ function roundHalfAway(x) {
 
 function newTrade(e, dir, seq) {
   return { symbol: e.symbol, dir, open_ts: e.ts, close_ts: null, peak: 0, entry_qty: 0, entry_not: 0,
-    exit_qty: 0, exit_not: 0, fees: 0, rep_sum: 0, rep_missing: false, fills: 0, multiplier: e.multiplier,
+    exit_qty: 0, exit_not: 0, fees: 0, credit: 0, rep_sum: 0, rep_missing: false, fills: 0, multiplier: e.multiplier,
     currency: e.currency, unit: e._unit, fx: null, seq };
 }
 
@@ -217,6 +217,7 @@ function nettingWalk(execs, order, excluded, detectHedging) {
       t.entry_qty += e.qty;
       t.entry_not += e.qty * e.price;
       t.fees += e.fee;
+      if (e._credit) t.credit += e._credit;
       t.fills += 1;
       if (e.pnl_reported !== null) t.rep_sum += e.pnl_reported;
       p += s * qUnits;
@@ -235,6 +236,7 @@ function nettingWalk(execs, order, excluded, detectHedging) {
     t.exit_qty += cq;
     t.exit_not += cq * e.price;
     t.fees += cf;
+    if (e._credit) t.credit += remUnits === 0 ? e._credit : e._credit * closeUnits / qUnits;
     t.fills += 1;
     if (e.pnl_reported === null) t.rep_missing = true;
     else t.rep_sum += e.pnl_reported;
@@ -248,6 +250,7 @@ function nettingWalk(execs, order, excluded, detectHedging) {
       nt.entry_qty += rq;
       nt.entry_not += rq * e.price;
       nt.fees += e.fee * remUnits / qUnits;
+      if (e._credit) nt.credit += e._credit * remUnits / qUnits;
       nt.fills += 1;
       nt.peak = remUnits;
       if (e._fx !== null) nt.fx = e._fx;
@@ -287,7 +290,7 @@ function sameOrder(a, b) {
 function tradeKey(t) {
   const r = (x) => Math.floor(x * 1e6 + 0.5);
   return [t.symbol, t.dir, t.open_ts, t.close_ts, t.peak, t.fills, r(t.entry_qty), r(t.entry_not), r(t.exit_qty),
-    r(t.exit_not), r(t.fees), r(t.rep_sum), t.rep_missing].join('\u0001');
+    r(t.exit_not), r(t.fees), r(t.credit), r(t.rep_sum), t.rep_missing].join('\u0001');
 }
 
 // reportedMode: null (compute P&L) | 'gross' (reported profit before fees, MetaTrader)
@@ -355,6 +358,9 @@ export function buildTrades(execs, reportedMode, detectHedging) {
       // Total traded quantity, not the peak: with adds after a partial exit the
       // peak understates the quantity that earned the price difference.
       gross = (exitVwap - entryVwap) * t.entry_qty * t.multiplier * sign;
+      // A commission rebate (TradingView: a negative Commission) is a credit, not a negative fee:
+      // fees stay >= 0 and the credit is part of the gross result, as mt.js does for a net credit.
+      if (t.credit) gross += t.credit;
       pnl = gross - t.fees;
     }
     return { symbol: t.symbol, dir: t.dir, open_ts: t.open_ts, close_ts: t.close_ts,

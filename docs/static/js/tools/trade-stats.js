@@ -17,7 +17,7 @@
 // Without it this page shows only the descriptive numbers, no checks are run, and a neutral
 // line says a check is coming.
 
-import { createFileSlot, renderReadError, fieldError, revealResult } from './tool-state.js?v=fd4af716';
+import { createFileSlot, renderReadError, fieldError, revealResult } from './tool-state.js?v=eb893892';
 import { freeStats, equityCurve, NO_LOSSES } from '../engine/stats.js?v=b2ec2891';
 import { money, unitNote, pct, ratio, duration, day, intText, el, signClass } from './format.js?v=acb0db51';
 import { parsePositive, InputError } from './num.js?v=8df99e34';
@@ -26,7 +26,8 @@ const $ = (id) => document.getElementById(id);
 
 const FORMAT_NAMES = {
   mt5: 'MetaTrader 5 report', mt4: 'MetaTrader 4 statement', ibkr_flex: 'Interactive Brokers Flex Query',
-  tradovate_orders: 'Tradovate Orders export', generic: 'donttrade CSV template (one row per fill)',
+  tradovate_orders: 'Tradovate Orders export', tradingview: 'TradingView Order History export',
+  generic: 'donttrade CSV template (one row per fill)',
   generic_roundtrip: 'CSV with one row per round trip',
 };
 

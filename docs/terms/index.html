@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src &#39;self&#39;; script-src &#39;self&#39;; style-src &#39;self&#39;; img-src &#39;self&#39; data:; font-src &#39;self&#39;; connect-src &#39;none&#39;; worker-src &#39;self&#39;; form-action &#39;self&#39; https://api.web3forms.com; base-uri &#39;none&#39;; object-src &#39;none&#39;">
+<meta http-equiv="Content-Security-Policy" content="default-src &#39;self&#39;; script-src &#39;self&#39; https://static.cloudflareinsights.com; style-src &#39;self&#39;; img-src &#39;self&#39; data:; font-src &#39;self&#39;; connect-src &#39;none&#39; https://cloudflareinsights.com; worker-src &#39;self&#39;; form-action &#39;self&#39; https://api.web3forms.com; base-uri &#39;none&#39;; object-src &#39;none&#39;">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#16181C" media="(prefers-color-scheme: dark)">
@@ -31,7 +31,8 @@
 <link rel="stylesheet" href="/static/css/site.css?v=0fc315ce">
 <script src="/static/js/theme.js?v=fd1ba361"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
-<script src="/static/js/pay.js?v=d20a3680" defer></script>
+<script src="/static/js/pay.js?v=d20a3680" defer></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cdac673936b54f08beb5991aaae13975"}'></script>
+
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "name": "Terms", "position": 2}]}]}</script>
 </head>
 <body>
@@ -68,7 +69,7 @@
   <nav class="crumb small" aria-label="Breadcrumb"><ol class="crumbs"><li><a href="/">Home</a><span class="crumb-sep" aria-hidden="true">›</span></li><li><span aria-current="page">Terms</span></li></ol></nav>
 
   <h1>Terms, refunds and the Pilot</h1>
-  <p class="notice">Plain-language terms, version 2026-10-25. Where a signed engagement agreement differs, the agreement governs. <a href="/fr/conditions/" hreflang="fr" lang="fr">Version française</a></p>
+  <p class="notice">Plain-language terms, version 2026-10-29. Where a signed engagement agreement differs, the agreement governs. <a href="/fr/conditions/" hreflang="fr" lang="fr">Version française</a></p>
 
   <details class="legal-sec">
     <summary><h2 id="prices">Prices</h2><span class="ls-sum">Firm prices are in US dollars, before sales tax.</span></summary>
@@ -98,7 +99,7 @@
 
   <details class="legal-sec">
     <summary><h2 id="trial">The Pilot</h2><span class="ls-sum">One figure, one per firm; its fee can count toward a Memo.</span></summary>
-  <p class="small muted">Pilot (called “Trial” before 25 Oct 2026).</p>
+  <p class="small muted">Pilot (called “Trial” before 29 Oct 2026).</p>
   <ul>
     <li>One disposition figure; one per firm; 5 business days.</li>
     <li>What result would make a Memo worth doing is agreed in writing before work starts.</li>
@@ -127,7 +128,7 @@
     <dt>Phone</dt><dd>437-600-3946</dd>
     <dt>Email</dt><dd><a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a>. We reply within 1 business day (Eastern Time, Monday to Friday).</dd></dl>
     <ul>
-      <li><strong>What you buy:</strong> a one-off measurement of your own past trades, from a file you export (MetaTrader 5/4 report, IBKR Flex Query or Tradovate orders, all three in beta until a real export confirms the columns, or the donttrade CSV template), with one free re-test.</li>
+      <li><strong>What you buy:</strong> a one-off measurement of your own past trades, from a file you export (MetaTrader 5/4 report, IBKR Flex Query, Tradovate orders or TradingView order history, all four in beta until real exports confirm the columns, or the donttrade CSV template), with one free re-test.</li>
       <li><strong>Price:</strong> $39 USD, one time; $39 founding price for the first 100 buyers. No sales tax is charged. Your card issuer may add a currency conversion fee; donttrade does not receive it. The price you accept at checkout is the price that applies.</li>
       <li><strong>Payment:</strong> in full at checkout, by card, on Stripe’s payment page.</li>
       <li><strong>Delivery:</strong> online only, on donttrade.ca, right after payment. Your access key is saved in your browser. Keep the restore link and file shown after payment: they are the only automatic way to reopen your purchase in another browser. <span id="manual-restore">If your access link stops working, email us from the address you paid with and we’ll send a new one. We send it by hand, and only to the email address on the payment.</span></li>
@@ -178,7 +179,7 @@
     <dt>Phone</dt><dd>437-600-3946</dd>
     <dt>Email</dt><dd><a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a>. We reply within 1 business day (Eastern Time, Monday to Friday).</dd></dl>
   </details>
-  <p class="small muted">Version 2026-10-25.</p>
+  <p class="small muted">Version 2026-10-29.</p>
 </div></div>
 
 </main>
@@ -197,7 +198,7 @@
   <p class="legal" data-business-id="full">donttrade · Ontario, Canada · 2284 Calloway Drive, Oakville ON L6M 4X3 · <a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a></p>
   <p class="legal">donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.</p>
   <details class="legal legal-more"><summary>No cookies. What this site stores and sends</summary>
-    <p>This site sets no cookies and runs no analytics. It stores your light/dark choice in your own browser and, if you buy the habit report, your access key there too. For that report your browser sends our server only stripped trade numbers. The server does not keep them: of those numbers it keeps only a scrambled fingerprint of each trade row from your first report, to match a re-test to the same history. Your file itself is not uploaded. Card payments are handled by Stripe. Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; their privacy policies apply. <a href="/privacy/">Privacy</a></p>
+    <p>This site sets no cookies. Visits are counted with Cloudflare Web Analytics, which sets no cookie. It stores your light/dark choice in your own browser and, if you buy the habit report, your access key there too. For that report your browser sends our server only stripped trade numbers. The server does not keep them: of those numbers it keeps only a scrambled fingerprint of each trade row from your first report, to match a re-test to the same history. Your file itself is not uploaded. Card payments are handled by Stripe. Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; their privacy policies apply. <a href="/privacy/">Privacy</a></p>
   </details>
   <p class="legal">&copy; 2026 donttrade · <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
 </div></footer>
