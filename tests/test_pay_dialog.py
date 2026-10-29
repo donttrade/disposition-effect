@@ -1,8 +1,8 @@
 """The site-wide pay dialog (29 Oct, owner: "the whole website always one click away from paying").
 
 Every buy link opens a <dialog> on the page it is on (static/js/pay.js; partials/pay_dialog.html): three facts,
-"Full details before you pay" (the complete Before-you-pay block, copied from /pricing/ only when opened), then the
-Stripe button. Without JS the link goes to /pricing/#last-step. Esc closes it and focus goes back to the link. The
+"Full details before you pay" (the complete Before-you-pay block, copied only when opened from /before-you-pay/, a
+noindex page with no analytics, so opening it is not a /pricing/ pageview), then the Stripe button. Without JS the link goes to /pricing/#last-step. Esc closes it and focus goes back to the link. The
 seller's address stays out of every page's HTML except build.ADDRESS_LINE_PATHS; no sample figure in the dialog.
 """
 import os
@@ -17,6 +17,14 @@ sys.path.insert(0, os.path.join(REPO, "site"))
 from a11y import axe_violations, horizontal_overflow  # noqa: E402
 import build as B  # noqa: E402
 import lint as L  # noqa: E402
+
+
+def _no_beacon_network(ctx):
+    """With analytics on, the Cloudflare beacon script is answered locally with an empty script: a local origin
+    gets CORS errors from the real one, which are not the site's. Requests still show in page.on("request")."""
+    ctx.route("https://static.cloudflareinsights.com/**",
+              lambda r: r.fulfill(status=200, content_type="text/javascript", body=""))
+    return ctx
 
 
 def _dialog(html):
@@ -53,7 +61,7 @@ def test_dialog_markup_on_every_page_without_the_address(built_site):
 @pytest.mark.parametrize("scheme", ["light", "dark"])
 @pytest.mark.parametrize("width", [390, 1280])
 def test_buy_link_opens_the_dialog_esc_returns_focus(browser, built_site, width, scheme):
-    ctx = browser.new_context(viewport={"width": width, "height": 844}, color_scheme=scheme)
+    ctx = _no_beacon_network(browser.new_context(viewport={"width": width, "height": 844}, color_scheme=scheme))
     pg = ctx.new_page()
     errors = []
     pg.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
@@ -108,4 +116,40 @@ def test_without_js_the_buy_link_goes_to_the_pay_step(browser, built_site):
     pg.click(".hdr-cta")
     pg.wait_for_load_state()
     assert pg.url.endswith("/pricing/#last-step")
+    ctx.close()
+
+
+def test_details_page_is_the_block_alone_without_analytics(built_site):
+    """29 Oct: /before-you-pay/ holds the same Before-you-pay block as /pricing/, loads no beacon, is noindex,
+    out of the sitemap, disallowed in robots.txt, and may carry the address (build.ADDRESS_LINE_PATHS)."""
+    out = built_site["out"]
+    page = (out / "before-you-pay" / "index.html").read_text(encoding="utf-8")
+    pricing = (out / "pricing" / "index.html").read_text(encoding="utf-8")
+    block = lambda h: re.search(r'(?s)<section class="notice" id="before-you-pay".*?</section>', h).group(0)
+    assert block(page) == block(pricing)
+    assert "cloudflareinsights" not in page   # with analytics on, every other page has it (lint flags_of_build)
+    assert '<meta name="robots" content="noindex">' in page
+    assert "/before-you-pay/" not in (out / "sitemap.xml").read_text(encoding="utf-8")
+    assert "Disallow: /before-you-pay/\n" in (out / "robots.txt").read_text(encoding="utf-8")
+    assert "/before-you-pay/" in B.ADDRESS_LINE_PATHS and 'data-business-id="full"' in page
+
+
+@pytest.mark.parametrize("start", ["/tools/trade-stats/", "/"])
+def test_opening_the_details_requests_no_pricing_page(browser, built_site, start):
+    """The hidden frame loads /before-you-pay/, never /pricing/, and no beacon fires from it."""
+    ctx = _no_beacon_network(browser.new_context(viewport={"width": 1280, "height": 844}))
+    pg = ctx.new_page()
+    pg.goto(built_site["url"] + start)
+    pg.wait_for_load_state("networkidle")
+    seen = []
+    pg.on("request", lambda r: seen.append(r.url))
+    pg.click(".hdr-cta")
+    pg.click("#pay-dialog .pay-more > summary")
+    pg.wait_for_selector("#pd-before-you-pay dl.byp", timeout=10000)
+    pg.wait_for_load_state("networkidle")
+    paths = [u[len(built_site["url"]):] for u in seen if u.startswith(built_site["url"])]
+    assert "/before-you-pay/" in paths, paths
+    assert not any(p.startswith("/pricing/") for p in paths), paths
+    assert not any("cloudflareinsights" in u for u in seen), seen
+    assert pg.locator('#pay-dialog a[href="/pricing/#before-you-pay"]').count() == 0   # replaced by the block
     ctx.close()

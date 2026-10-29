@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{#- /before-you-pay/ (29 Oct): the pay dialog's source for "Full details before you pay". static/js/pay.js loads
+    this page in a hidden same-origin frame and copies its #before-you-pay block, so opening the details is not a
+    /pricing/ pageview: the page loads no analytics (no_analytics, like the journal), is noindex and disallowed in
+    robots.txt, and is on build.ADDRESS_LINE_PATHS because the block names the seller. Paid builds only. The block is
+    the one /pricing/ shows (partials/before_you_pay.html), unchanged. -#}
+{% block content %}
+<div class="wrap">
+  <h1>Before you pay</h1>
+  <p class="small"><a href="/pricing/#last-step">Price and how to pay</a> · <a href="/terms/">Terms</a></p>
+  {% include "partials/before_you_pay.html" %}
+</div>
+{% endblock %}

@@ -4,9 +4,10 @@
     It holds the three facts (partials/pay_facts.html), "Full details before you pay" and the Stripe link, in that
     order, so the full disclosure is one tap away and sits above the link once open. The disclosure itself is NOT in
     this page's HTML: the seller's address is only on build.ADDRESS_LINE_PATHS (lint). pay.js copies the
-    #before-you-pay block from /pricing/ when the expander opens (a hidden same-origin frame of /pricing/: no fetch, so
-    every page keeps connect-src 'none'); if that fails, the link below takes the buyer to it. No study finding and
-    no sample figure in here. -#}
+    #before-you-pay block when the expander opens, from a hidden same-origin frame of /before-you-pay/ (no fetch, so
+    every page keeps connect-src 'none'; that page loads no analytics, so this is not a /pricing/ pageview); if that
+    fails, or without JavaScript, the link below takes the buyer to /pricing/. No study finding and no sample figure
+    in here. -#}
 {%- from "partials/pay_facts.html" import pay_facts %}
 {%- set r = products["report39"] %}{%- set link = r["stripe_link_" + stripe_mode] %}
 <dialog class="pay-dialog" id="pay-dialog" aria-labelledby="pd-h" data-pay-dialog>
