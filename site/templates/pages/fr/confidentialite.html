@@ -39,7 +39,7 @@
     {#- T0 (QUICKWINS §4 FR-1). TRANSLATOR CHECK: EN /privacy/#site "The site is hosted on Cloudflare Pages; before <date> it was hosted on GitHub Pages. Cloudflare receives visitors’ IP addresses to deliver the pages and protect the site; see Cloudflare’s privacy policy." #}
     <li><strong>Hébergement :</strong> le site est hébergé sur Cloudflare Pages; avant le {{ legal.cloudflare_pages_since_fr }}, il l’était sur GitHub Pages. Cloudflare reçoit l’adresse IP des visiteurs pour livrer les pages et protéger le site; voir la <a href="https://www.cloudflare.com/privacypolicy/">politique de confidentialité de Cloudflare</a>.</li>
     {%- if flags.analytics %}
-    <li><strong>Mesure d’audience :</strong> Cloudflare Web Analytics compte les visites sans déposer de témoin et sans vous suivre d’un site à l’autre.</li>
+    <li><strong>Mesure d’audience :</strong> Cloudflare Web Analytics compte les visites sans déposer de témoin et sans vous suivre d’un site à l’autre. Sur le Challenge Readiness Check, une étape terminée (une vérification, une règle essayée, les détails ouverts, une exportation ou une carte) est aussi comptée, une fois par visite, comme la visite d’une petite page de comptage; rien de votre fichier n’y est joint.{# TRANSLATOR CHECK: EN /privacy/ "On the Challenge Readiness Check, a finished step (...) is also counted, once per visit, as a view of a small counting page; nothing from your file goes with it." #}</li>
     {%- endif %}
   </ul>
   <p>Nous ne vendons aucun renseignement. Nous n’utilisons ces fournisseurs que pour faire fonctionner le site, les paiements, les formulaires, le courriel et l’infolettre.</p>
