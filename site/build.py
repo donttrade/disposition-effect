@@ -41,6 +41,7 @@ Local-test escapes (ESCAPES): each opens ONE guard, prints a WARNING, and is ref
 
 import hashlib
 import json
+import math
 import os
 import re
 import unicodedata
@@ -600,6 +601,63 @@ PAGES += [
      "description": "Every answer on donttrade in one place: prices, refunds, what the free tools do with your file, "
                     "privacy and the terms, each with a link to its page."},
 ]
+
+# The prediction study's results page (ARCHITECT-PREDICTION-STUDY-2026-10-30 §6.1, batch R1; [flags]
+# prediction_results, off until the OSF registration is posted). Every verdict's wording is in the template
+# before any firm runs; the page shows the one the result's verdict names, with the numbers from the script's
+# --json output (site/config/prediction_result.json, or DT_PREDICTION_RESULT). No result file = "results pending".
+PREDICTION_PATH = "/research/does-the-test-predict/"
+PREDICTION_VERDICTS = ("NOT MEASURED", "FAIL: does not predict usefully", "FAIL: adds nothing", "PASS: meets target",
+                       "PASS: below target", "INCONCLUSIVE")
+PAGES += [
+    {"template": "pages/research-prediction.html", "path": PREDICTION_PATH, "requires_flag": "prediction_results",
+     "prediction": True, "updated": "2026-10-30", "crumb": "Does the test predict?", "parent": ("Research", "/research/"),
+     "title": "Does the donttrade Test Predict Prop-Challenge Breaches? A Pre-Registered Study",
+     "description": "A pre-registered study of past prop-firm accounts: do habits in the first 30 trades rank the "
+                    "accounts that broke a loss rule in the next 30 days? The plan, the code and every result."},
+]
+
+
+def prediction_context():
+    """The study facts (site/config/prediction_study.json) and, if it exists, one result (the script's --json
+    output, wrapped as {"runs": [...], "pooled": {...} or null, "verdict": ...}), plus the chart geometry."""
+    sp = os.environ.get("DT_PREDICTION_STUDY") or os.path.join(SITE, "config", "prediction_study.json")
+    with open(sp, encoding="utf-8") as f:
+        study = json.load(f)
+    if not study.get("osf_url") or not study.get("registered_on"):
+        die("prediction_results is on, but prediction_study.json has no osf_url or registered_on: the page goes "
+            "live only after the OSF registration is posted")
+    rp = os.environ.get("DT_PREDICTION_RESULT") or os.path.join(SITE, "config", "prediction_result.json")
+    result = None
+    if os.path.exists(rp):
+        with open(rp, encoding="utf-8") as f:
+            result = json.load(f)
+        if result.get("verdict") not in PREDICTION_VERDICTS:
+            die(f"{rp}: verdict must be one of: {', '.join(PREDICTION_VERDICTS)}")
+        if not result.get("runs"):
+            die(f"{rp}: no runs")
+        for run in result["runs"]:
+            if run.get("dt_version") != "DT-1" or run.get("script") != "prediction_test.py":
+                die(f"{rp}: a run is not prediction_test.py output for DT-1")
+    chart = None
+    if result and result["verdict"] != "NOT MEASURED" and len(result["runs"]) == 1 and "deciles" in result["runs"][0]:
+        run = result["runs"][0]
+        rates = [d["breaches"] / d["n"] for d in run["deciles"]]
+        top = max(0.1, math.ceil(max(rates) * 10) / 10)
+        n = len(rates)
+        bw = 360 / n
+        bars = [{"x": 48 + i * bw + 1, "w": bw - 2, "h": 160 * r / top, "y": 180 - 160 * r / top, "rate": r,
+                 "label": (str(d["first"]) if d["first"] == d["last"] else f"{d['first']}-{d['last']}"),
+                 "n": d["n"], "breaches": d["breaches"]} for i, (r, d) in enumerate(zip(rates, run["deciles"]))]
+        ticks = [{"y": 180 - 160 * k / 4, "v": top * k / 4} for k in range(5)]
+        cal = None
+        full = (run.get("calibration") or {}).get("Full model (B0 + DT-1)")
+        if full:
+            cal = [{"cx": 48 + 200 * b["mean_pred"], "cy": 220 - 200 * b["observed"], "p": b["mean_pred"],
+                    "o": b["observed"], "n": b["n"]} for b in full["bands"]]
+        chart = {"bars": bars, "ticks": ticks, "cal": cal}
+    return {"study": study, "result": result, "chart": chart, "verdicts": PREDICTION_VERDICTS}
+
 
 # Hybrid "Start a Pilot" (pilot_checkout, default off): the thank-you page with the Stripe link.
 PAGES += [
@@ -1326,8 +1384,10 @@ def die(msg):
     raise BuildError(msg)
 
 
-FLAGS = ("paid_report", "analytics", "trader_first_home", "pilot_checkout", "free_badges", "journal", "ask_box")
-OPTIONAL_FLAGS = {"pilot_checkout": False, "free_badges": False, "journal": False, "ask_box": False}  # older site.toml files may lack the line
+FLAGS = ("paid_report", "analytics", "trader_first_home", "pilot_checkout", "free_badges", "journal", "ask_box",
+         "prediction_results")
+OPTIONAL_FLAGS = {"pilot_checkout": False, "free_badges": False, "journal": False, "ask_box": False,
+                  "prediction_results": False}  # older site.toml files may lack the line
 # Free-launch condition C1 (21 Oct 2026): free_badges turns on the free tools' "real or noise"
 # badges and their footnote, which the Architect is redesigning. Off (the committed default): the
 # free tools show only the descriptive numbers, static/js/tools/trade-stats-badges.js is left out
@@ -2303,6 +2363,8 @@ def build():
         if not flags["ask_box"]:
             page["scripts"] = [s for s in page["scripts"] if s not in ASK_SCRIPTS]
         extra = {"sample_csv": sample_csv()} if page.get("sample") else {}
+        if page.get("prediction"):
+            extra["prediction"] = prediction_context()
         if page.get("sample_report") or (page["path"] in ("/", "/for-traders/") and flags["paid_report"]):  # 25 Oct: the home showcase; sweep 2: the report card on /for-traders/
             rep_ = sample_report()
             extra["sample_report"] = rep_

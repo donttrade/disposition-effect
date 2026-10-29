@@ -703,9 +703,9 @@ def private_values(fields=("seller_legal_name", "premises_address", "phone"), da
     return out
 
 
-def owned_paths(paid, pilot=False, journal=False):
+def owned_paths(paid, pilot=False, journal=False, prediction=False):
     import build
-    on = {"paid_report": paid, "pilot_checkout": pilot, "journal": journal}
+    on = {"paid_report": paid, "pilot_checkout": pilot, "journal": journal, "prediction_results": prediction}
     out = []
     for p in build.PAGES:
         if p["requires_flag"] and not on[p["requires_flag"]]:
@@ -775,9 +775,12 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, b
     if (paid or pilot) and data is None:   # Tester delta N2: say so instead of skipping the check silently
         WARNINGS.append(f"no private.toml at {private_toml_path()}: the footer line's address was NOT checked "
                         "against it (set DT_PRIVATE_TOML to the file the build used)")
-    owned_rel = {"/" + os.path.relpath(build.out_file(out_dir, p), out_dir) for p in owned_paths(paid, pilot, journal)}
+    # the prediction study's results page exists only in a prediction_results build (build.PREDICTION_PATH)
+    prediction = os.path.exists(build.out_file(out_dir, build.PREDICTION_PATH))
+    owned_rel = {"/" + os.path.relpath(build.out_file(out_dir, p), out_dir)
+                 for p in owned_paths(paid, pilot, journal, prediction)}
     lifted = set(build.lifted_paths_for(paid))   # C-12 final: a paid build's /sample-report/ is a template page
-    for path in owned_paths(paid, pilot, journal):
+    for path in owned_paths(paid, pilot, journal, prediction):
         fp = build.out_file(out_dir, path)
         if not os.path.exists(fp):
             problems.append(("flags", path, "page missing: is the build made with these flags?"))
