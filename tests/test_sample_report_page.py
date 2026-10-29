@@ -66,7 +66,7 @@ def test_the_page_embeds_the_golden_and_its_method_is_the_pages(paid):
     t = re.sub(r"\s+", " ", visible_text(html))
     for bad in ("percentile among", "2,262", "SAMPLE TRADER REPORT", "sample trader report", "SP1000074", "real public data"):
         assert bad not in t, bad
-    assert "Sample habit report" in t and "demo file" in t and "not a real trader" in t   # sweep 2 lead
+    assert "Sample habit report" in t and "Example report" in t and "run on example data" in t   # 29 Oct (owner): "Example", no "demo"
     assert lint_text(t) == [] and lint_text(t, "sample", paid=True) == []
 
 

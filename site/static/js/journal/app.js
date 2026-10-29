@@ -225,7 +225,7 @@ async function readFile(file) {
 
 function readSample() {
   const text = $('j-sample').textContent.replace(/^\s+/, '');
-  readBytes(new TextEncoder().encode(text), 'demo-trades.csv', true);
+  readBytes(new TextEncoder().encode(text), 'example-trades.csv', true);
 }
 
 // ------------------------------------------------------------------ import: preview and write (§d.4)
@@ -261,11 +261,11 @@ function preview() {
   const cancel = button('Cancel', () => { current = null; box.hidden = true; box.replaceChildren(); $('j-file').focus(); });
   const first = parsed.date_from, last = parsed.date_to;
   box.replaceChildren(...[
-    el('h3', { id: 'j-prev-h', tabindex: '-1', text: sample ? 'Check before adding: the sample file' : 'Check before adding' }),
+    el('h3', { id: 'j-prev-h', tabindex: '-1', text: sample ? 'Check before adding: the example data' : 'Check before adding' }),
     el('p', {}, `File: ${FORMAT_NAMES[parsed.format] || parsed.format}${parsed.verified_format ? '' : ' (beta)'} · `,
       `${plural(parsed.trades.length, 'closed trade', 'closed trades')}`,
       first !== null ? ` · closed ${M.dayKey(first)} to ${M.dayKey(last)}` : '', ` · times: ${parsed.tz_label}. ${unitNote(parsed.pnl_unit)}`),
-    sample ? el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Sample data' }), 'Synthetic trades made up for this demo, not a real trader. They go into their own account.') : null,
+    sample ? el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Example data' }), 'These trades go into their own account.') : null,
     (parsed.warnings || []).length ? el('div', { class: 'notice notice-caution', id: 'j-imp-warn' },
       el('strong', { text: parsed.warnings.length === 1 ? '1 note about this file' : `${parsed.warnings.length} notes about this file` }),
       el('ul', {}, ...parsed.warnings.map((w) => el('li', { 'data-code': w.code, text: w.message })))) : null,

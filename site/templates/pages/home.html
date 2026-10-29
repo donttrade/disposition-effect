@@ -32,14 +32,14 @@
       <p class="kicker">The habit report</p>
       <h2 id="t-measure-h">Five habits, checked in your own trades.</h2>
       <ul class="ticks">
-        <li>Reads MetaTrader, IBKR, Tradovate, TradingView or a simple CSV</li>
+        <li>Reads MetaTrader, IBKR, Tradovate, TradingView (all in beta) or a simple CSV</li>
         <li>Up to two habits tested against chance</li>
         <li>Dollar totals straight from your file</li>
         <li>Runs in your browser</li>
       </ul>
       <p><a class="more" href="/sample-report/">See the full sample report <span aria-hidden="true">→</span></a></p>
     </div>
-    <figure class="showcase-shot" aria-label="Part of a sample habit report, on a demo file">
+    <figure class="showcase-shot" aria-label="Part of an example habit report">
       <div class="shot-card">
         <table class="shot-table">
           <thead><tr><th scope="col">Habit</th><th scope="col" class="num">Trades</th><th scope="col" class="num">Total</th><th scope="col">Result</th></tr></thead>
@@ -57,7 +57,7 @@
       </div>
       <p class="toast toast-a"><span class="toast-k">File read</span> {{ sr.n_trades }} trades · {{ sr.period_weeks }} weeks</p>
       <p class="toast toast-b"><span class="toast-k">Tested against chance</span> {{ sr.n_distinguishable }} of {{ sr.n_tested }} distinguishable from noise</p>
-      <figcaption>Sample report on a demo file. Not a real trader.</figcaption>
+      <figcaption>Example report.</figcaption>
     </figure>
     <details class="how">
       <summary>What the results mean</summary>
@@ -74,7 +74,7 @@
       <li class="how-step">
         <div class="how-shot" aria-hidden="true"><span class="pill">MT5</span> <span class="pill">MT4</span> <span class="pill">IBKR</span> <span class="pill">Tradovate</span> <span class="pill">TradingView</span> <span class="pill">CSV</span></div>
         <h3><span class="how-n">1</span> Export your trades</h3>
-        <p>From MetaTrader, IBKR, Tradovate or TradingView. Or use our CSV template.</p>
+        <p>From MetaTrader, IBKR, Tradovate or TradingView (all in beta). Or use our CSV template.</p>
       </li>
       <li class="how-step">
         <div class="how-shot">
@@ -87,7 +87,7 @@
         <details class="how-more"><summary>What we keep</summary><p>{{ strings.p5.short }} <a href="/privacy/#report">Exactly what is sent and kept</a></p></details>
       </li>
       <li class="how-step">
-        <div class="how-shot how-shot-tagged" aria-hidden="true"><span class="tp-tag">Sample report</span>
+        <div class="how-shot how-shot-tagged" aria-hidden="true"><span class="tp-tag">Example report</span>
           {%- for h in sr.habits if h.verdict in pill %}<p class="how-row"><span>{{ short.get(h.id, h.name) }}</span> <span class="{{ pill[h.verdict][0] }}">{{ pill[h.verdict][1] }}</span></p>{% endfor %}
         </div>
         <h3><span class="how-n">3</span> See your habits</h3>
@@ -132,7 +132,7 @@
       the first screen (H1). The words are unchanged. #}
   {% call hero_band("hero", media="dashboard") %}
         <h1 id="hero">See what your trades did, free.</h1>
-        <p class="lede">Drop your MetaTrader, IBKR, Tradovate or TradingView export and see your profit factor, expectancy, drawdown and streaks. No account. The page reads the file in your browser, so the file is not uploaded.</p>
+        <p class="lede">Drop your MetaTrader, IBKR, Tradovate or TradingView export (all in beta) and see your profit factor, expectancy, drawdown and streaks. No account. The page reads the file in your browser, so the file is not uploaded.</p>
         <p class="btn-row"><a class="btn" href="/tools/trade-stats/">Open trade stats</a> <a href="/tools/">All free tools</a></p>
         <p class="small muted">Reads MetaTrader 5 and 4 reports, IBKR Flex Queries, Tradovate exports and TradingView order history (all in beta), and the donttrade CSV template.</p>
         <div class="firm-door">
@@ -181,7 +181,7 @@
     <ul class="trust-list">
       <li>No cookies{% if not flags.analytics %} and no analytics{% endif %}.</li>
       <li>No account, for any free tool.</li>
-      <li>The free tool pages block every outgoing request, so your file is not uploaded.</li>
+      <li>{% if flags.analytics %}On the free tool pages your file’s contents are never sent; the only request those pages make is an anonymous page-view count.{% else %}The free tool pages block every outgoing request, so your file is not uploaded.{% endif %}</li>
       <li>Firms pay for fixed-scope measurements of their own data. No firm can pay to change a number.</li>
     </ul>
     <p><a href="/independence/">Independence policy</a> · <a href="/privacy/">Privacy</a> · <a href="/corrections/">Corrections</a></p>
@@ -211,7 +211,7 @@
     {{ answer_box("pg") }}
     {%- endif %}
     <details><summary>Is this advice?</summary><p>No. It describes past trades and past behaviour. It does not tell anyone what to trade, how much, or when to exit.</p></details>
-    <details><summary>Where does my trade file go?</summary><p>The free tools read it inside your browser tab; those pages block every outgoing request, so the file is not uploaded. When the habit report launches, the page that runs it will say exactly what it sends.</p></details>
+    <details><summary>Where does my trade file go?</summary><p>The free tools read it inside your browser tab; {% if flags.analytics %}its contents are never sent; the only request those pages make is an anonymous page-view count.{% else %}those pages block every outgoing request, so the file is not uploaded.{% endif %} When the habit report launches, the page that runs it will say exactly what it sends.</p></details>
     <details><summary>What do the free tools cost?</summary><p>Nothing, with no account and no card. They run in your browser, so serving them costs us almost nothing.</p></details>
     <details><summary>Is our firm’s data safe?</summary><p>Your trading records never leave your systems. Your staff run our public script on your own computers, and you can read every line first. Only the totals it prints come back to us: no account IDs, no trades, no names.</p></details>
     <details><summary>What if no effect is found?</summary><p>Then that is your answer, and it is a finished result. The price is fixed before anyone sees data, so you pay the same either way. The result stays private unless you choose to publish it.</p></details>

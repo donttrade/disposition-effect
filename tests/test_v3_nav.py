@@ -1,8 +1,10 @@
 """v3 nav (ARCHITECT-V3-PLAN 2026-10-21 §c.2, steps A1-A2): Tester invariants N1-N8.
 
-25 Oct sweep (owner): Sample report · Free tools ▾ · Pricing · For firms. Free tools ▾ is a <details name="nav">
-disclosure (no ARIA menu role) that works with JS off; nav.js adds Escape, focus-out, click-outside and hover
-intent. The nav never shows a price, a % or a study number, and holds no offer.
+29 Oct (owner): Sample report · Free tools · Pricing · For firms as four plain links (no drop-down: /tools/ shows
+every tool), one compact "Get report — $39" button in paid builds (it opens the pay dialog; a link to
+/pricing/#last-step without JS), the theme icon, all in a slim sticky bar. Below 900 px the links and the button sit
+in one "Menu" <details>. The [[nav]] labels never show a price, a % or a study number (D3); the only price in the
+header is the button's own.
 """
 import json
 import os
@@ -18,9 +20,8 @@ from a11y import axe_violations, horizontal_overflow  # noqa: E402
 import build as B  # noqa: E402
 
 ORDER = ["Sample report", "Free tools", "Pricing", "For firms"]
-DD = ".nav-dd-li summary"
 HEADER_H = "Math.round(document.querySelector('.site-header').getBoundingClientRect().height)"
-OPEN = "() => [...document.querySelectorAll('details.nav-dd')].map(d => d.open)"
+CTA_RE = re.compile(r'<a class="btn[^"]*" href="/pricing/#last-step" data-pay>Get report — \$39</a>')
 
 
 def _ctx(browser, width, scheme="light", js=True, **kw):
@@ -39,128 +40,111 @@ def _cfg():
         return tomllib.load(f)
 
 
-# ------------------------------------------------------------------ N1: order and the journal flag
-def test_n1_order_and_journal_item_only_with_its_flag(built_site):
+# ------------------------------------------------------------------ N1: order, plain links, the journal flag
+def test_n1_order_plain_links_and_no_journal(built_site):
     head = _header(built_site)
     row = head[head.index('<ul class="nav-row">'):head.index('<details class="nav-menu"')]
-    tops = [re.sub(r"<[^>]+>", "", t) for t in re.findall(r'\n    <li(?: class="nav-dd-li")?>(?:<details[^>]*>\s*<summary[^>]*>|<a [^>]*>)(.*?)(?:<svg|</a>)', row, re.S)]
-    assert tops == ORDER
+    assert [re.sub(r"<[^>]+>", "", t) for t in re.findall(r"<li><a [^>]*>(.*?)</a></li>", row)] == ORDER
+    assert "<details" not in row and "nav-dd" not in head and "nav-pop" not in head
     menu = head[head.index('<details class="nav-menu"'):]
-    acc = [re.sub(r"<[^>]+>", "", t) for t in re.findall(r"<summary[^>]*>([^<]*)<svg class=\"chev\"", menu)]
-    assert acc == ["Free tools"] and re.findall(r'class="nav-links">.*?</ul>', menu, re.S)
-    # journal = false (committed): the journal is nowhere in the build
+    links = re.findall(r'class="nav-links">(.*?)</ul>', menu, re.S)[0]   # the home page: no Home link (a)
+    assert [re.sub(r"<[^>]+>", "", t) for t in re.findall(r"<li><a [^>]*>(.*?)</a></li>", links)] == ORDER
+    assert head.count("<details") == 1   # the phone Menu only
     assert _cfg()["flags"]["journal"] is False
     for root, _, files in os.walk(built_site["out"]):
         for name in files:
             if name.endswith((".html", ".xml", ".js")):
                 s = open(os.path.join(root, name), encoding="utf-8", errors="replace").read()
                 assert 'href="/journal/' not in s and "donttrade.ca/journal/" not in s, name
-    # with the flag on, the journal row is the first Free tools item (data level; the page arrives in J3)
-    nav = B.nav_for(_cfg()["nav"], {"journal": True, "paid_report": False})
-    assert nav[1]["items"][0]["href"] == "/journal/"
-    nav = B.nav_for(_cfg()["nav"], {"journal": False, "paid_report": False})
-    assert all(i["href"] != "/journal/" for g in nav for i in g["items"])
+    assert all(not g["items"] and not g["foot"] for g in B.nav_for(_cfg()["nav"], {"journal": True, "paid_report": True}))
 
 
-def test_n1_label_if_paid_drops_the_waitlist_word():
-    on = B.nav_for(_cfg()["nav"], {"journal": False, "paid_report": True})
-    off = B.nav_for(_cfg()["nav"], {"journal": False, "paid_report": False})
-    assert "For traders: the habit report (waitlist)" in [i["label"] for i in off[1]["foot"]]
-    assert "For traders: the habit report" in [i["label"] for i in on[1]["foot"]]
-    assert not any("waitlist" in i["label"] for g in on for i in g["items"] + g["foot"])
-
-
-# ------------------------------------------------------------------ N2: no price, %, number or banned word
+# ------------------------------------------------------------------ N2: no price, %, number or banned word in the nav text
 def test_n2_build_guard_refuses_numbers_prices_and_banned_words():
     good = _cfg()["nav"]
     assert B.nav_problem(good) is None
     for bad in ("Pilot from $745", "76.1% of traders", "Five habits in 5 minutes", "Our best advice", "Unlock your edge",
                 "Get a free trial"):
         nav = json.loads(json.dumps(good))
-        nav[1]["items"][1]["desc"] = bad
+        nav[1]["label"] = bad
         assert B.nav_problem(nav), bad
+    item = {"label": "Trade stats", "href": "/tools/trade-stats/", "desc": "Totals from your trade file", "icon": "stats"}
     nav = json.loads(json.dumps(good))
-    nav[1]["items"][1]["requires_flag"] = "jornal"
+    nav[1]["items"] = [dict(item, requires_flag="jornal")]
     assert "not a flag" in B.nav_problem(nav)
-    nav = json.loads(json.dumps(good))
-    nav[1]["items"][1]["icon"] = "rocket"
+    nav[1]["items"] = [dict(item, icon="rocket")]
     assert "icon" in B.nav_problem(nav)
 
 
-def test_n2_nav_text_has_no_price_and_one_text_offer(built_site):
+def test_n2_only_the_buy_button_holds_a_price(built_site):
     with open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8") as f:
         prices = json.load(f)
     for rel in ("index.html", "pricing/index.html", "for-firms/index.html", "research/disposition-effect/index.html"):
         head = _header(built_site, rel)
-        text = re.sub(r"<[^>]+>", " ", head)
+        # the bar's button and the Menu's; none on the research pages (no study finding next to an offer)
+        assert len(CTA_RE.findall(head)) == (0 if rel.startswith("research/") else 2), rel
+        rest = CTA_RE.sub("", head)
+        text = re.sub(r"<[^>]+>", " ", rest)
         assert not re.search(r"\d\s*%|\$", text), rel
         for p in prices["products"]:
             assert B.usd(p["price_usd"]) not in text, rel
         assert set(re.findall(r'aria-label="([^"]+)"', head)) == {"Main"}, rel   # ask_box = false (launch, 25 Oct)
-        assert 'class="btn' not in head
-        assert "Start a Pilot" not in head   # 25 Oct sweep: no offer in the nav
+        assert 'class="btn' not in rest
+        assert "Start a Pilot" not in head
 
 
-# ------------------------------------------------------------------ N3: JS off
-def test_n3_no_js_the_group_opens_by_click_and_links_tab(browser, built_site):
+# ------------------------------------------------------------------ N3: JS off: the button is a link to the pay step
+def test_n3_no_js_the_button_is_a_link_to_the_pay_step(browser, built_site):
     ctx = _ctx(browser, 1280, js=False)
     pg = ctx.new_page()
     pg.goto(built_site["url"] + "/about/")
-    pg.click(DD)
-    assert pg.evaluate(OPEN) == [True] and pg.is_visible(".nav-dd-li .nav-pop")
-    pg.focus(DD)
-    seen = []
-    for _ in range(3):
-        pg.keyboard.press("Tab")
-        seen.append(pg.evaluate("document.activeElement.getAttribute('href')"))
-    assert seen == ["/tools/trade-stats/", "/tools/trading-heatmap/", "/tools/drawdown-calculator/"]
-    pg.click(".nav-dd-li a[href='/tools/trading-heatmap/']")
+    pg.click(".hdr-cta")
     pg.wait_for_load_state()
-    assert pg.url.endswith("/tools/trading-heatmap/")
+    assert pg.url.endswith("/pricing/#last-step")
     ctx.close()
 
 
 # ------------------------------------------------------------------ N4: phone, targets, axe
 @pytest.mark.parametrize("scheme", ["light", "dark"])
-@pytest.mark.parametrize("width", [320, 375])
-def test_n4_phone_each_group_open_no_overflow_targets_axe(browser, built_site, width, scheme):
+@pytest.mark.parametrize("width", [320, 375, 390])
+def test_n4_phone_menu_no_overflow_targets_axe(browser, built_site, width, scheme):
     ctx = _ctx(browser, width, scheme)
     pg = ctx.new_page()
     pg.goto(built_site["url"] + "/")
     pg.wait_for_load_state("networkidle")
+    assert not pg.is_visible(".hdr-cta")
     pg.click(".nav-menu > summary")
-    for i in range(1):
-        pg.click(".nav-acc > summary")
-        assert pg.evaluate("[...document.querySelectorAll('.nav-acc')].map(d => d.open)") == [True]
-        assert horizontal_overflow(pg) == []
-        sizes = pg.eval_on_selector_all(".nav-panel a:visible, .nav-panel summary:visible",
-                                        "es => es.map(e => { const r = e.getBoundingClientRect(); return [r.width, r.height, e.closest('.nav-acc[open]') ? 1 : 0]; })")
-        assert all(h >= 44 and w >= 44 for w, h, _ in sizes)
-        assert all(h >= 48 for w, h, inside in sizes if inside)
-        assert axe_violations(pg) == [], (i, width, scheme)
+    assert horizontal_overflow(pg) == []
+    sizes = pg.eval_on_selector_all(".nav-panel a:visible", "es => es.map(e => { const r = e.getBoundingClientRect(); return [r.width, r.height]; })")
+    assert len(sizes) == 5 and all(h >= 44 and w >= 44 for w, h in sizes)
+    assert pg.inner_text(".nav-panel a[data-pay]") == "Get report — $39"
+    assert axe_violations(pg) == [], (width, scheme)
     ctx.close()
 
 
 @pytest.mark.parametrize("scheme", ["light", "dark"])
-def test_n4_desktop_each_panel_axe_clean_and_inside_the_viewport(browser, built_site, scheme):
+def test_n4_desktop_axe_clean_and_keyboard_order(browser, built_site, scheme):
     for width in (900, 1280):
         ctx = _ctx(browser, width, scheme)
         pg = ctx.new_page()
         pg.goto(built_site["url"] + "/pricing/")
         pg.wait_for_load_state("networkidle")
-        for i in range(1):
-            pg.click(DD)
-            box = pg.locator(".nav-dd-li .nav-pop").bounding_box()
-            assert box["x"] >= 0 and box["x"] + box["width"] <= width, (width, i, box)
-            assert horizontal_overflow(pg) == []
-            assert axe_violations(pg) == [], (width, i, scheme)
+        assert horizontal_overflow(pg) == []
+        assert axe_violations(pg) == [], (width, scheme)
+        seen = []
+        pg.keyboard.press("Tab")   # the skip link
+        for _ in range(7):
+            pg.keyboard.press("Tab")
+            seen.append(pg.evaluate("document.activeElement.textContent.trim()"))
+        assert seen[:6] == ["donttrade"] + ORDER + ["Get report — $39"], seen
+        assert pg.evaluate("document.activeElement.matches('[data-theme-toggle]')")
         ctx.close()
 
 
-# ------------------------------------------------------------------ N8: one line, no layout shift
+# ------------------------------------------------------------------ N8: slim, sticky, no layout shift
 @pytest.mark.parametrize("scheme", ["light", "dark"])
-def test_n8_header_one_line_and_opening_a_panel_shifts_nothing(browser, built_site, scheme):
-    for width in (900, 1024, 1280, 1440):
+def test_n8_header_slim_sticky_and_scrolling_shifts_nothing(browser, built_site, scheme):
+    for width in (390, 900, 1280):
         ctx = _ctx(browser, width, scheme)
         ctx.add_init_script("window.__cls = 0; new PerformanceObserver(l => l.getEntries().forEach(e => { __cls += e.value; }))"
                             ".observe({type: 'layout-shift', buffered: true});")
@@ -168,118 +152,21 @@ def test_n8_header_one_line_and_opening_a_panel_shifts_nothing(browser, built_si
         pg.goto(built_site["url"] + "/about/")
         pg.wait_for_load_state("networkidle")
         pg.wait_for_timeout(300)
-        assert pg.evaluate(HEADER_H) <= 66
-        tops = pg.eval_on_selector_all(".nav-row > li", "ls => ls.map(l => Math.round(l.getBoundingClientRect().top))")
-        assert len(set(tops)) == 1, (width, tops)
+        assert pg.evaluate(HEADER_H) <= 58
         before = pg.evaluate("__cls")
-        main_top = pg.evaluate("document.querySelector('main').getBoundingClientRect().top")
-        for i in range(2):   # open, then close
-            pg.click(DD)
-            pg.wait_for_timeout(250)
-            assert pg.evaluate(HEADER_H) <= 66
-            assert pg.evaluate("document.querySelector('main').getBoundingClientRect().top") == main_top
+        pg.mouse.wheel(0, 1200)
+        pg.wait_for_timeout(300)
+        assert abs(pg.evaluate("document.querySelector('.site-header').getBoundingClientRect().top")) < 1, width
         assert pg.evaluate("__cls") == before, width
+        # a focused element is never left under the bar (scroll-padding)
+        pg.focus("footer a")
+        top = pg.evaluate("document.activeElement.getBoundingClientRect().top")
+        assert top >= pg.evaluate(HEADER_H) - 1, (width, top)
         ctx.close()
 
 
-# ------------------------------------------------------------------ N5: Escape and focus-out (nav.js)
-def test_n5_escape_returns_focus_and_tabbing_out_closes(browser, built_site):
-    ctx = _ctx(browser, 1280)
-    pg = ctx.new_page()
-    pg.goto(built_site["url"] + "/about/")
-    pg.focus(DD)
-    pg.keyboard.press("Enter")
-    assert pg.evaluate(OPEN) == [True]
-    pg.keyboard.press("ArrowDown")   # APG optional: ↓ on an open summary focuses the first link
-    assert pg.evaluate("document.activeElement.getAttribute('href')") == "/tools/trade-stats/"
-    pg.keyboard.press("Escape")
-    assert pg.evaluate(OPEN) == [False]
-    assert pg.evaluate(f"document.activeElement.matches('{DD}')")
-    # Tab out of the panel's last link (to Pricing, still in the nav: stays open), then out of the nav
-    pg.focus(DD)
-    pg.keyboard.press(" ")
-    pg.focus(".nav-dd-li .nav-foot li:last-child a")
-    pg.keyboard.press("Tab")
-    assert pg.evaluate("document.activeElement.getAttribute('href')") == "/pricing/"
-    pg.focus(".nav-dd-li .nav-foot li:last-child a")
-    assert pg.evaluate(OPEN) == [True]
-    pg.focus("[data-theme-toggle]")   # focus leaves nav.site-nav
-    assert pg.evaluate(OPEN) == [False]
-    # a click outside closes; a click on the panel's own padding does not
-    pg.click(DD)
-    box = pg.locator(".nav-dd-li .nav-pop").bounding_box()
-    pg.mouse.click(box["x"] + 3, box["y"] + box["height"] - 3)
-    assert pg.evaluate(OPEN) == [True]
-    pg.mouse.click(40, 700)
-    assert pg.evaluate(OPEN) == [False]
-    ctx.close()
-
-
-# ------------------------------------------------------------------ N6: hover intent
-TRACE = """window.__t = []; document.addEventListener('toggle', e => { if (e.target.matches('.nav-dd'))
-  __t.push([e.target.parentNode.querySelector('summary').textContent, e.target.open, performance.now()]); }, true);"""
-
-
-def test_n6_hover_intent_timings_and_click_guard(browser, built_site):
-    ctx = _ctx(browser, 1280)
-    ctx.add_init_script(TRACE)
-    pg = ctx.new_page()
-    pg.goto(built_site["url"] + "/about/")
-    pg.wait_for_load_state("networkidle")
-    assert pg.evaluate("matchMedia('(hover: hover) and (pointer: fine)').matches")
-    s = pg.locator(DD).bounding_box()
-    pg.mouse.move(40, 400)
-    t0 = pg.evaluate("performance.now()")
-    pg.mouse.move(s["x"] + 10, s["y"] + s["height"] / 2)
-    pg.wait_for_timeout(60)
-    assert pg.evaluate(OPEN)[0] is False, "no open before 100 ms"
-    pg.wait_for_timeout(120)
-    assert pg.evaluate(OPEN)[0] is True, "open by 150 ms (+ headless slack)"
-    opened = [t for _, o, t in pg.evaluate("__t") if o][0]
-    assert 95 <= opened - t0 <= 220
-    # summary → down through the gap → a panel link: stays open
-    link = pg.locator(".nav-dd-li .nav-item").first.bounding_box()
-    pg.mouse.move(s["x"] + 10, s["y"] + s["height"] + 5, steps=3)
-    pg.mouse.move(link["x"] + 20, link["y"] + 10, steps=5)
-    pg.wait_for_timeout(450)
-    assert pg.evaluate(OPEN)[0] is True
-    # leave: closes within 350 ms
-    t1 = pg.evaluate("performance.now()")
-    pg.mouse.move(40, 700)
-    pg.wait_for_timeout(450)
-    closed = [t for _, o, t in pg.evaluate("__t") if not o][-1]
-    assert pg.evaluate(OPEN)[0] is False and closed - t1 <= 350 + 50
-    # hover-open then click at once: stays open (the "hover opened, click closed" bug)
-    pg.mouse.move(s["x"] + 10, s["y"] + s["height"] / 2)
-    pg.wait_for_function("document.querySelector('.nav-dd').open")
-    pg.mouse.down(); pg.mouse.up()
-    pg.wait_for_timeout(50)
-    assert pg.evaluate(OPEN)[0] is True
-    pg.wait_for_timeout(450)
-    pg.mouse.down(); pg.mouse.up()   # a later click toggles as usual
-    assert pg.evaluate(OPEN)[0] is False
-    ctx.close()
-
-
-def test_n6_no_hover_logic_on_touch(browser, built_site):
-    ctx = browser.new_context(viewport={"width": 1280, "height": 800}, has_touch=True, is_mobile=True)
-    pg = ctx.new_page()
-    pg.goto(built_site["url"] + "/about/")
-    if pg.evaluate("matchMedia('(hover: hover) and (pointer: fine)').matches"):
-        pytest.skip("this Chromium reports a fine hover pointer under touch emulation")
-    s = pg.locator(DD)
-    if not s.is_visible():   # is_mobile may shrink to the phone layout; then there is no drop-down to hover
-        ctx.close()
-        return
-    box = s.bounding_box()
-    pg.mouse.move(box["x"] + 10, box["y"] + 10)
-    pg.wait_for_timeout(400)
-    assert pg.evaluate(OPEN)[0] is False
-    ctx.close()
-
-
-# ------------------------------------------------------------------ N7: motion
-PANEL_ANIMS = """() => document.getAnimations().map(a => {
+# ------------------------------------------------------------------ N7: motion (the phone menu)
+PANEL_ANIMS = """() => document.getAnimations().filter(a => a.effect.target && a.effect.target.closest('.nav-panel') && !a.transitionProperty).map(a => {
   const t = a.effect.getComputedTiming();
   const props = a.transitionProperty ? [a.transitionProperty]
     : a.effect.getKeyframes().flatMap(k => Object.keys(k).filter(x => !['offset', 'computedOffset', 'easing', 'composite'].includes(x)));
@@ -288,22 +175,21 @@ PANEL_ANIMS = """() => document.getAnimations().map(a => {
 
 
 @pytest.mark.parametrize("motion", ["reduce", "no-preference"])
-def test_n7_panel_motion(browser, built_site, motion):
-    ctx = _ctx(browser, 1280, reduced_motion=motion)
+def test_n7_menu_motion(browser, built_site, motion):
+    ctx = _ctx(browser, 390, reduced_motion=motion)
     pg = ctx.new_page()
     pg.goto(built_site["url"] + "/pricing/")
     pg.wait_for_load_state("networkidle")
-    for i in range(1):
-        pg.focus(DD)
-        pg.keyboard.press("Enter")
-        anims = pg.evaluate(PANEL_ANIMS)
-        if motion == "reduce":
-            assert anims == [], anims
-        else:
-            assert anims, "the panel fades in"
-            for a in anims:
-                assert set(a["props"]) <= {"opacity", "transform"} and a["iter"] == 1 and a["end"] <= 240, a
-        pg.keyboard.press("Escape")
+    pg.focus(".nav-menu > summary")
+    pg.keyboard.press("Enter")
+    anims = pg.evaluate(PANEL_ANIMS)
+    if motion == "reduce":
+        assert anims == [], anims
+    else:
+        # 29 Oct: the phone menu opens at once (an entrance animation made a click on its links wait for it);
+        # anything that does animate there may move only transform and opacity
+        for a in anims:
+            assert set(a["props"]) <= {"opacity", "transform"} and a["iter"] == 1 and a["end"] <= 240, a
     ctx.close()
 
 

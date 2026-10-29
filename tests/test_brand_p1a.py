@@ -119,7 +119,7 @@ def test_other_scripts_keep_the_narrower_scan():
 def test_nav_text_refuses_the_new_groups(tmp_path):
     src = open(os.path.join(REPO, "site", "config", "site.toml"), encoding="utf-8").read()
     for word in ("sealed", "skilled"):
-        bad = src.replace('desc = "Totals from your trade file"', f'desc = "Totals, {word}"', 1)
+        bad = src.replace('label = "Free tools"', f'label = "Free tools, {word}"', 1)   # 29 Oct: no drop-down items; a label
         assert bad != src
         (tmp_path / "site.toml").write_text(bad, encoding="utf-8")
         r = subprocess.run([sys.executable, os.path.join(REPO, "site", "build.py")], capture_output=True, text=True,

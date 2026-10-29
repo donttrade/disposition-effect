@@ -1,9 +1,12 @@
 {#- "Before you pay" (GET-PAID L1 / O. Reg. 17/05 s. 32, shown before Stripe, printable).
     Rendered only when paid_report = true; the supplier block comes from the gitignored private.toml. -#}
+{#- byp_h: the heading tag, "h3" under /pricing/'s "Last step" h3 panel; "h2" on /before-you-pay/, right under its
+    h1 (axe heading-order). Same words either way; pay.js copies it into the dialog as an h3. -#}
+{%- set byp_h = byp_h | default("h3") %}
 {%- set r = products["report39"] %}
 {%- from "partials/seller.html" import seller_rows %}
 <section class="notice" id="before-you-pay" aria-labelledby="byp-h" data-requires-flag="paid_report">
-  <h3 id="byp-h">Before you pay: what you’re agreeing to</h3>
+  <{{ byp_h }} id="byp-h">Before you pay: what you’re agreeing to</{{ byp_h }}>
   <p class="small"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Version française</a></p>
   <dl class="byp">
     {{ seller_rows(private, site, "en") }}

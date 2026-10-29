@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src &#39;self&#39;; script-src &#39;self&#39; https://static.cloudflareinsights.com; style-src &#39;self&#39;; img-src &#39;self&#39; data:; font-src &#39;self&#39;; connect-src &#39;none&#39; https://cloudflareinsights.com; worker-src &#39;self&#39;; form-action &#39;self&#39; https://api.web3forms.com; base-uri &#39;none&#39;; object-src &#39;none&#39;">
+<meta http-equiv="Content-Security-Policy" content="default-src &#39;self&#39;; script-src &#39;self&#39; https://static.cloudflareinsights.com; style-src &#39;self&#39;; img-src &#39;self&#39; data:; font-src &#39;self&#39;; connect-src https://cloudflareinsights.com; worker-src &#39;self&#39;; form-action &#39;self&#39; https://api.web3forms.com; base-uri &#39;none&#39;; object-src &#39;none&#39;">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#16181C" media="(prefers-color-scheme: dark)">
@@ -25,9 +25,10 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=08b3fe6b">
-<script src="/static/js/theme.js?v=74363ef7"></script>
-<script src="/static/js/nav.js?v=cd8f3405" defer></script>
+<link rel="stylesheet" href="/static/css/site.css?v=620363ac">
+<script src="/static/js/theme.js?v=7e47c1a9"></script>
+<script src="/static/js/nav.js?v=9c8cacb8" defer></script>
+<script src="/static/js/pay.js?v=7eb376c2" defer></script>
 <script src="/static/js/tools/risk-reward.js?v=230bece1" type="module"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cdac673936b54f08beb5991aaae13975"}'></script>
 
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "item": "https://donttrade.ca/tools/", "name": "Free tools", "position": 2}, {"@type": "ListItem", "name": "Risk-reward calculator", "position": 3}]}, {"@id": "https://donttrade.ca/tools/risk-reward-calculator/#app", "@type": "WebApplication", "applicationCategory": "FinanceApplication", "browserRequirements": "Requires JavaScript", "description": "Enter entry, stop and target to get your R multiple, the win rate that breaks even, and the expectancy per trade in R, with every formula shown. Free.", "isAccessibleForFree": true, "name": "Risk-reward calculator", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "operatingSystem": "Any (runs in a web browser)", "publisher": {"@id": "https://donttrade.ca/#org"}, "url": "https://donttrade.ca/tools/risk-reward-calculator/"}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Divide the distance from entry to target by the distance from entry to stop. An entry at 100, stop at 98 and target at 106 risks 2 to make 6, which is 3R."}, "name": "How do you calculate risk-reward ratio?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Break-even win rate equals 1 divided by 1 plus the reward-to-risk ratio, before costs. At 1R it is 50 percent, at 2R about 33 percent, and at 3R 25 percent."}, "name": "At what win rate does a ratio break even?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Expectancy is the average result per trade measured in units of risk. It equals win rate times average win in R, minus loss rate times average loss in R. This calculator counts every win as the R multiple and every loss as 1R. A positive figure means trades with those numbers make more than they lose on average."}, "name": "What is expectancy in R?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Exits rarely happen exactly at the stop or target. Early exits, partial closes, slippage and fees all move the realised figure. The trade stats page shows the average win and average loss your own trade file actually produced."}, "name": "Why is a realised ratio often lower than the planned one?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Not on its own. A higher ratio usually comes with a lower win rate, and what matters is the combination. This page shows the arithmetic and does not recommend any ratio."}, "name": "Is a higher risk-reward ratio always better?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. It is arithmetic on the numbers you enter and does not recommend any security, trade, size or exit. Past results do not predict future results."}, "name": "Is this investment advice?"}]}]}</script>
@@ -39,76 +40,61 @@
   <a class="brand" href="/">donttrade</a>
   <nav class="site-nav" aria-label="Main"><ul class="nav-row">
     <li><a href="/sample-report/">Sample report</a></li>
-    <li class="nav-dd-li"><details name="nav" class="nav-dd" data-nav-dd>
-      <summary class="is-current">Free tools<span class="visually-hidden">, current section</span><svg class="chev" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg></summary>
-      <div class="nav-pop nav-pop-2 nav-pop-end">
-      <ul class="nav-items">
-        <li><a class="nav-item" href="/tools/trade-stats/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-9l5 6-5 6h9"/></svg><span class="ni-text"><span class="ni-t">Trade stats</span> <span class="ni-d">Totals from your trade file</span></span></a></li>
-        <li><a class="nav-item" href="/tools/trading-heatmap/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h10v10H3z"/><path d="M7 13v4h10V7h-4"/></svg><span class="ni-text"><span class="ni-t">Trading heatmap</span> <span class="ni-d">Your results by hour and weekday</span></span></a></li>
-        <li><a class="nav-item" href="/tools/drawdown-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h14v12H3z"/><path d="M10 4v12"/></svg><span class="ni-text"><span class="ni-t">Drawdown calculator</span> <span class="ni-d">What gain recovers a drawdown</span></span></a></li>
-        <li><a class="nav-item" href="/tools/prop-challenge-simulator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18V3"/><path d="M5 4h10l-2.5 3.5L15 11H5"/></svg><span class="ni-text"><span class="ni-t">Prop challenge simulator</span> <span class="ni-d">Your past days under a challenge’s rules</span></span></a></li>
-        <li><a class="nav-item" href="/tools/lot-size-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v14M6 17h8M4 6h12"/><path d="M4 6l-2 5h4zM16 6l-2 5h4z"/></svg><span class="ni-text"><span class="ni-t">Lot size calculator</span> <span class="ni-d">Lots for the risk you chose</span></span></a></li>
-        <li><a class="nav-item" href="/tools/risk-reward-calculator/" aria-current="page"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15L15 5"/><circle cx="6" cy="6" r="1.75"/><circle cx="14" cy="14" r="1.75"/></svg><span class="ni-text"><span class="ni-t">Risk-reward calculator</span> <span class="ni-d">Break-even win rate for a ratio</span></span></a></li>
-        <li><a class="nav-item" href="/tools/disposition-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h10M5 17h10"/><path d="M6.5 3v2.5L13.5 14.5V17M13.5 3v2.5L6.5 14.5V17"/></svg><span class="ni-text"><span class="ni-t">Disposition calculator</span> <span class="ni-d">Winners vs losers sold, from four counts</span></span></a></li>
-        <li><a class="nav-item" href="/tools/pass-rate-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg><span class="ni-text"><span class="ni-t">Pass-rate calculator</span> <span class="ni-d">One cohort’s pass and payout rate</span></span></a></li>
-      </ul>
-      <ul class="nav-foot">
-        <li><a href="/tools/">All free tools</a></li>
-        <li><a href="/for-traders/">For traders: the habit report</a></li>
-      </ul>
-      </div>
-    </details></li>
+    <li><a href="/tools/" aria-current="true">Free tools</a></li>
     <li><a href="/pricing/">Pricing</a></li>
     <li><a href="/for-firms/">For firms</a></li>
   </ul>
   <details class="nav-menu" data-nav-menu>
     <summary><svg class="i-menu" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg><svg class="i-close" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>Menu</summary>
     <div class="nav-panel">
-      <details name="m" class="nav-acc">
-        <summary class="is-current">Free tools<span class="visually-hidden">, current section</span><svg class="chev" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg></summary>
-      <ul class="nav-items">
-        <li><a class="nav-item" href="/tools/trade-stats/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-9l5 6-5 6h9"/></svg><span class="ni-text"><span class="ni-t">Trade stats</span> <span class="ni-d">Totals from your trade file</span></span></a></li>
-        <li><a class="nav-item" href="/tools/trading-heatmap/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h10v10H3z"/><path d="M7 13v4h10V7h-4"/></svg><span class="ni-text"><span class="ni-t">Trading heatmap</span> <span class="ni-d">Your results by hour and weekday</span></span></a></li>
-        <li><a class="nav-item" href="/tools/drawdown-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h14v12H3z"/><path d="M10 4v12"/></svg><span class="ni-text"><span class="ni-t">Drawdown calculator</span> <span class="ni-d">What gain recovers a drawdown</span></span></a></li>
-        <li><a class="nav-item" href="/tools/prop-challenge-simulator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18V3"/><path d="M5 4h10l-2.5 3.5L15 11H5"/></svg><span class="ni-text"><span class="ni-t">Prop challenge simulator</span> <span class="ni-d">Your past days under a challenge’s rules</span></span></a></li>
-        <li><a class="nav-item" href="/tools/lot-size-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v14M6 17h8M4 6h12"/><path d="M4 6l-2 5h4zM16 6l-2 5h4z"/></svg><span class="ni-text"><span class="ni-t">Lot size calculator</span> <span class="ni-d">Lots for the risk you chose</span></span></a></li>
-        <li><a class="nav-item" href="/tools/risk-reward-calculator/" aria-current="page"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15L15 5"/><circle cx="6" cy="6" r="1.75"/><circle cx="14" cy="14" r="1.75"/></svg><span class="ni-text"><span class="ni-t">Risk-reward calculator</span> <span class="ni-d">Break-even win rate for a ratio</span></span></a></li>
-        <li><a class="nav-item" href="/tools/disposition-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h10M5 17h10"/><path d="M6.5 3v2.5L13.5 14.5V17M13.5 3v2.5L6.5 14.5V17"/></svg><span class="ni-text"><span class="ni-t">Disposition calculator</span> <span class="ni-d">Winners vs losers sold, from four counts</span></span></a></li>
-        <li><a class="nav-item" href="/tools/pass-rate-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg><span class="ni-text"><span class="ni-t">Pass-rate calculator</span> <span class="ni-d">One cohort’s pass and payout rate</span></span></a></li>
-      </ul>
-      <ul class="nav-foot">
-        <li><a href="/tools/">All free tools</a></li>
-        <li><a href="/for-traders/">For traders: the habit report</a></li>
-      </ul>
-      </details>
       <ul class="nav-links">
         <li><a href="/">Home</a></li>
         <li><a href="/sample-report/">Sample report</a></li>
+        <li><a href="/tools/" aria-current="true">Free tools</a></li>
         <li><a href="/pricing/">Pricing</a></li>
         <li><a href="/for-firms/">For firms</a></li>
       </ul>
+      <p class="nav-cta"><a class="btn " href="/pricing/#last-step" data-pay>Get report — $39</a></p>
     </div>
   </details></nav>
+  <a class="btn hdr-cta" href="/pricing/#last-step" data-pay>Get report — $39</a>
   <button class="theme-toggle" type="button" data-theme-toggle hidden><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg><span class="tt-label">Dark mode</span></button>
 </div></header>
 
 <main id="main">
 
 <div class="wrap">
-  <div class="grid">
-    <div class="span-8">
+  <div class="tool-hero">
+    <div>
       <p class="crumb small"><a href="/tools/">Free tools</a></p>
       <h1>Risk-reward calculator</h1>
-      <p class="lede">Enter an entry price, a stop and a target, or type the reward-to-risk ratio directly, and the calculator returns three numbers that belong together: the R multiple, the win rate at which that ratio breaks even, and the expectancy per trade in R at any win rate you enter.</p>
-      <p>The break-even win rate is 1 divided by 1 plus R, so a 2-to-1 setup breaks even at about 33 percent before costs. The page shows every formula with your numbers in it, so you can redo it by hand. The inputs start blank on purpose: the page does not propose a ratio or a win rate. Entries that could be read two ways, such as “1,500”, are refused instead of guessed. It runs entirely in your browser and nothing you type is sent anywhere.</p>
+      <p class="lede">Entry, stop and target give your R multiple and the win rate that breaks even.</p>
     </div>
+    
+<figure class="tool-shot" aria-labelledby="shot-cap">
+  <div class="shot-card tool-shot-card">
+    <span class="tp-tag" aria-hidden="true">Example</span>
+    <svg class="rr-ladder" viewBox="0 0 280 150" role="img" aria-label="Entry 100, stop 98, target 106: 3R. It breaks even when 1 trade in 4 wins.">
+      <line class="rr-axis" x1="70" x2="70" y1="10" y2="140"/>
+      <rect class="rr-win" x="62" y="14" width="16" height="72" rx="3"/>
+      <rect class="rr-risk" x="62" y="86" width="16" height="24" rx="3"/>
+      <text class="rr-k" x="0" y="20">Target</text><text class="rr-v" x="90" y="20">106</text>
+      <text class="rr-k" x="0" y="90">Entry</text><text class="rr-v" x="90" y="90">100</text>
+      <text class="rr-k" x="0" y="114">Stop</text><text class="rr-v" x="90" y="114">98</text>
+      <text class="rr-big" x="160" y="62">3R</text>
+      <text class="rr-k" x="160" y="86">6 up, 2 down</text>
+    </svg>
+    <p class="shot-line"><strong>Breaks even at 1 win in 4</strong> <span class="muted">before costs</span></p>
+  </div>
+  <figcaption id="shot-cap">Example numbers.</figcaption>
+</figure>
   </div>
   
 
   <section class="tool" aria-labelledby="rr-tool-h">
     <h2 id="rr-tool-h">Your numbers</h2>
-    <p id="rr-js-needed" class="notice notice-caution">This calculator runs in your browser and needs JavaScript turned on.</p>
-    <form id="rr-form" novalidate hidden>
+    <p id="rr-js-needed" class="notice notice-caution" data-js-hide>This calculator runs in your browser and needs JavaScript turned on.</p>
+    <form id="rr-form" novalidate hidden data-js-show>
       <fieldset>
         <legend>What you enter</legend>
         <div class="check"><input type="radio" id="rr-mode-prices" name="rr-mode" value="prices" checked><label for="rr-mode-prices">Entry, stop and target prices</label></div>
@@ -169,13 +155,17 @@
 
 
   <section class="section" aria-labelledby="formula-h">
-    <h2 id="formula-h">The three formulas</h2>
+    <h2 id="formula-h">How it works</h2>
+    <details class="how-group"><summary>What it does, and the three formulas</summary>
+    <p>Enter an entry price, a stop and a target, or type the reward-to-risk ratio directly, and the calculator returns three numbers that belong together: the R multiple, the win rate at which that ratio breaks even, and the expectancy per trade in R at any win rate you enter.</p>
+    <p>The break-even win rate is 1 divided by 1 plus R, so a 2-to-1 setup breaks even at about 33 percent before costs. The page shows every formula with your numbers in it, so you can redo it by hand. The inputs start blank on purpose: the page does not propose a ratio or a win rate. Entries that could be read two ways, such as “1,500”, are refused instead of guessed. It runs entirely in your browser and nothing you type is sent anywhere.</p>
     <ul>
       <li><strong>R multiple</strong> = the distance from entry to target ÷ the distance from entry to stop. Entry 100, stop 98, target 106: 6 ÷ 2 = 3R.</li>
       <li><strong>Break-even win rate</strong> = 1 ÷ (1 + R). At 3R: 1 ÷ 4 = 25 percent. Costs are not included, so the real figure is a little higher.</li>
       <li><strong>Expectancy in R</strong> = win rate × R − loss rate × 1R. At 3R and a 40 percent win rate: 0.40 × 3 − 0.60 × 1 = +0.60R per trade. At the break-even win rate it is exactly 0.</li>
     </ul>
     <p>The calculator counts every win as exactly the R multiple and every loss as exactly 1R. Real trades rarely close exactly at the stop or the target. To see the average win and average loss your own past trades produced, use <a href="/tools/trade-stats/">trade stats</a>.</p>
+    </details>
   </section>
 
   <section class="section" aria-labelledby="faq-h">
@@ -188,14 +178,6 @@
     <details id="q-is-this-investment-advice"><summary>Is this investment advice?</summary><p>No. It is arithmetic on the numbers you enter and does not recommend any security, trade, size or exit. Past results do not predict future results.</p></details>
   </section>
 
-  <section class="section" aria-labelledby="more-h">
-    <h2 id="more-h">Related</h2>
-    <ul>
-      <li><a href="/tools/lot-size-calculator/">Lot size calculator</a>: the size in lots from balance, risk amount and stop distance.</li>
-      <li><a href="/tools/trade-stats/">Trade stats</a>: win rate, average win and average loss from your own trade file.</li>
-      <li><a href="/tools/drawdown-calculator/">Drawdown and recovery calculator</a>: the gain that recovers a drawdown, and your own drawdowns.</li>
-    </ul>
-  </section>
 </div>
 
 </main>
@@ -218,6 +200,28 @@
   </details>
   <p class="legal">&copy; 2026 donttrade · <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
 </div></footer>
+
+
+<dialog class="pay-dialog" id="pay-dialog" aria-labelledby="pd-h" data-pay-dialog>
+  <div class="pd-inner">
+    <div class="pd-top">
+      <h2 id="pd-h">Get the habit report</h2>
+      <button class="pd-close no-print" type="button" data-pay-close aria-label="Close"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg></button>
+    </div>
+    <ul class="pay-facts">
+  <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M3 10.5 9.5 4H16v6.5L9.5 17z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="13" cy="7" r="1.3" fill="currentColor"/></svg><span>US$39 once</span></li>
+  <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M11 2 4 11.5h5L8 18l7-9.5h-5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span>Report right after payment</span></li>
+  <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M4.5 8.5A6 6 0 1 1 4 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 4.5v4.5h4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Full refund within 14 days</span></li>
+</ul>
+    <details class="pay-more" data-pay-more>
+      <summary>Full details before you pay</summary>
+      <div class="pd-full" data-pay-full><p class="small"><a href="/pricing/#before-you-pay">Read the full details on the pricing page</a></p></div>
+    </details>
+    <p class="pay-go no-print"><a class="btn" href="https://buy.stripe.com/eVq14m66H9Jw15a0Rwdwc04" rel="noopener">Continue to secure payment</a></p>
+    <p class="small muted pd-links no-print"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a> · <a href="/terms/#seller">Business details</a></p>
+    
+  </div>
+</dialog>
 
 </body>
 </html>
