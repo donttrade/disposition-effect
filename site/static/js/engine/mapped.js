@@ -185,6 +185,11 @@ export function dataRowsAfter(rows, hdrAt, section) {
   return out;
 }
 
+// A title, footer or disclaimer line under a heading of 3 or more columns: one filled cell.
+export function isNoData(cells, width) {
+  return width >= 3 && cells.filter((c) => c !== '').length === 1;
+}
+
 function cellAt(r, i) {
   return i === undefined || i >= r.cells.length ? '' : r.cells[i];
 }
@@ -270,8 +275,8 @@ export function parseMapped(rows, mp, sideFrom, kind, delimiter) {
   const layout = mp.layout;
   const data = dataRowsAfter(rows, hdrAt, mp.section === true);
   const skipped = {};
-  // Rows that hold no trade data: a pasted footer (trim_ragged), a legal footer or disclaimer
-  // line whose mapped required cells are all empty. Counted as no_data, never an error.
+  // Rows that hold no trade data: a pasted footer (trim_ragged), a legal footer or disclaimer line
+  // (one filled cell, or every mapped required cell empty). Counted as no_data, never an error.
   const reqKeys = LAYOUT_FIELDS[layout].required.filter((f) => !(f === 'side' && sideFrom === 'sign'));
   const kept = [];
   let nData = 0;
@@ -279,7 +284,7 @@ export function parseMapped(rows, mp, sideFrom, kind, delimiter) {
     if (isEmptyRow(r.cells)) continue;
     nData++;
     if (mp.trim_ragged && r.cells.length * 2 < header.length) { skip(skipped, 'no_data'); continue; }
-    if (reqKeys.every((f) => cellAt(r, m[f]) === '')) { skip(skipped, 'no_data'); continue; }
+    if (isNoData(r.cells, header.length) || reqKeys.every((f) => cellAt(r, m[f]) === '')) { skip(skipped, 'no_data'); continue; }
     kept.push(r);
   }
   if (nData === 0) fail('E_HEADER_ONLY');

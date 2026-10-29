@@ -1,0 +1,56 @@
+{
+ "cols": {
+  "close_price": null,
+  "close_time": null,
+  "currency": null,
+  "date": 0,
+  "direction": null,
+  "fees": [
+   7,
+   8
+  ],
+  "open_price": null,
+  "open_time": null,
+  "pnl": null,
+  "price": 6,
+  "qty": 5,
+  "side": 2,
+  "status": null,
+  "symbol": 3,
+  "time": null
+ },
+ "currency": "USD",
+ "date_format": "mdy",
+ "delimiter": null,
+ "futures_sizes": false,
+ "header_row": 6,
+ "headers": {
+  "0": "rundate",
+  "2": "action",
+  "3": "symbol",
+  "5": "quantity",
+  "6": "price",
+  "7": "commission",
+  "8": "fees"
+ },
+ "layout": "fills",
+ "number_style": null,
+ "preset": null,
+ "side_default": "skip",
+ "side_from": "column",
+ "side_rules": [
+  [
+   "contains",
+   "you bought",
+   "buy"
+  ],
+  [
+   "contains",
+   "you sold",
+   "sell"
+  ]
+ ],
+ "side_values": null,
+ "status_values": null,
+ "v": 1
+}

@@ -9,7 +9,8 @@
 <body>
 <p id="status">loading</p>
 <script type="module">
-import { runFile } from '/site/static/js/engine/index.js';
+import { runFile, runFiles } from '/site/static/js/engine/index.js';
+import { readWithPresets } from '/site/static/js/engine/presets.js';
 import { freeStats } from '/site/static/js/engine/stats.js';
 import { noiseChecks, checkExpectancy, SEED_BASE } from '/site/static/js/engine/noise.js';
 import { pgrPlrCounts } from '/site/static/js/engine/pgr.js';
@@ -49,6 +50,15 @@ window.runEngineTimed = (b64) => {
   const r = runFile(bytes);
   const ms = performance.now() - t0;
   return JSON.stringify({ ms, error: r.error || null, trades: r.result ? r.result.trades.length : 0 });
+};
+// The universal importer's cases (engine_ref.run_case): {items: [{b64} | {paste}], mapping, presets}.
+window.runCase = (json) => {
+  const spec = JSON.parse(json);
+  const items = spec.items.map((it) => (it.paste !== undefined ? { paste: it.paste } : bytesOf(it.b64)));
+  const r = spec.presets ? readWithPresets(items) : runFiles(items, spec.mapping ? { mapping: spec.mapping } : {});
+  if (!r.result) return JSON.stringify(r);
+  return JSON.stringify({ result: r.result, stats: freeStats(r.result.trades), noise: noiseChecks(r.result.trades),
+    pgr_plr: pgrPlrCounts(r.result.executions) });
 };
 document.getElementById('status').textContent = 'ready';
 </script>

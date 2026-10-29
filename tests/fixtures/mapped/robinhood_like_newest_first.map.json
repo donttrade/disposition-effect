@@ -1,0 +1,44 @@
+{
+ "cols": {
+  "close_price": null,
+  "close_time": null,
+  "currency": null,
+  "date": 0,
+  "direction": null,
+  "fees": null,
+  "open_price": null,
+  "open_time": null,
+  "pnl": null,
+  "price": 7,
+  "qty": 6,
+  "side": 5,
+  "status": null,
+  "symbol": 3,
+  "time": null
+ },
+ "currency": "USD",
+ "date_format": "mdy",
+ "delimiter": null,
+ "futures_sizes": false,
+ "header_row": 0,
+ "headers": {
+  "0": "activitydate",
+  "3": "instrument",
+  "5": "transcode",
+  "6": "quantity",
+  "7": "price"
+ },
+ "layout": "fills",
+ "number_style": null,
+ "preset": null,
+ "side_from": "column",
+ "side_values": {
+  "bto": "skip",
+  "buy": "buy",
+  "cdiv": "skip",
+  "sell": "sell",
+  "stc": "skip"
+ },
+ "status_values": null,
+ "v": 1
+}
