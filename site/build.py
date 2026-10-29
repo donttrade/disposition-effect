@@ -1041,10 +1041,16 @@ PAID_LIFTED_SWAPS = {
                  "No author name is published here, on purpose (" + _SELLER_WHERE + "): every study")],
     "/code/": [("There is no name on this site; the scripts are what you check instead.",
                 "No author name is published on this site (" + _SELLER_WHERE + "); the scripts are what you check "
-                "instead.")],
+                "instead."),
+               # 29 Oct (owner): one visible name for /sample-report/, "Example report"
+               ('<td><a href="/sample-report/">Sample trader report</a></td>', '<td><a href="/sample-report/">Example report</a></td>'),
+               # 29 Oct (one product): the licence comes with the firm plan and the Pilot (partner/LICENSING.md)
+               ("businesses need a licence, included in every engagement.",
+                "businesses need a licence, included with the firm plan and the Pilot.")],
     # 29 Oct (owner): one visible name for /sample-report/, "Example report". In a paid build that page is the
     # donttrade test's own engine on example data, not the lifted research figure this sentence described.
-    "/research/": [("What the coming trader report looks like, run on one real trader from the same public CC0 panel as "
+    "/research/": [('<h2 id="sample-report">Sample trader report</h2>', '<h2 id="sample-report">Example report</h2>'),
+                   ("What the coming trader report looks like, run on one real trader from the same public CC0 panel as "
                     "the disposition-effect study, chosen by a rule fixed before any individual result was looked at. "
                     "<a href=\"/sample-report/\">Read the sample report →</a>",
                     "What the donttrade test’s result looks like, from its own engine, run on example data. "
