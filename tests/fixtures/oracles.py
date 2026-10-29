@@ -491,3 +491,26 @@ ERRORS["errors/tradingview_no_closing_time.csv"] = ("E_MISSING_COLUMN", 1, "time
 # 40 generated TradingView round trips (make_tradingview.history, seed 7), nothing skipped: the paid
 # end-to-end test (tests/test_tradingview.py) sends them to the report server, which needs 30.
 ORACLES_COUNT_ONLY["tradingview/forty_trades.csv"] = 40
+# Tester round 1, items 2 and 4: money cells with a currency, and rebates.
+ORACLES["tradingview/commission_with_currency.csv"] = {
+    # Commission "0.50 USD" (was E_BAD_NUMBER): B10 @100, S10 @102 -> 20 - 1.00 = 19 ; 09:31:10 -> 10:00 = 1730 s
+    "trades": [dict(symbol="NASDAQ:AAPL", dir="long", qty=10, pnl=19.0, pnl_gross=20.0, fees=1.0, hold_s=1730)],
+    "warnings": {},
+    "skipped": {},
+}
+ORACLES["tradingview/negative_commission.csv"] = {
+    # Commission -0.50 on each fill is a rebate (was abs()'d into a 1.00 cost, pnl 19): like a MetaTrader
+    # net credit, fees stay 0 and the 1.00 credit is in the gross: 20 + 1 = 21
+    "trades": [dict(symbol="NASDAQ:AAPL", dir="long", qty=10, pnl=21.0, pnl_gross=21.0, fees=0.0, hold_s=1730)],
+    "warnings": {},
+    "skipped": {},
+}
+ORACLES["tradingview/currency_forms.csv"] = {
+    # AAPL: B10 "$230.50" (comm "USD 1.00"), S10 "232.00 USD" (comm "$1.00"): 15 - 2 = 13 ; 3600 s
+    # KO short: S100 @60.00 (comm "-$0.25", a rebate), B100 @59.50 (comm "0.75 usd"):
+    #   gross 50 + 0.25 credit = 50.25 ; fees 0.75 ; pnl 49.50 ; 3600 s
+    "trades": [dict(symbol="NASDAQ:AAPL", dir="long", qty=10, pnl=13.0, pnl_gross=15.0, fees=2.0, hold_s=3600),
+               dict(symbol="NYSE:KO", dir="short", qty=100, pnl=49.5, pnl_gross=50.25, fees=0.75, hold_s=3600)],
+    "warnings": {},
+    "skipped": {},
+}
