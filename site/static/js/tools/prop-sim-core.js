@@ -66,7 +66,8 @@ export const FACTORS = Object.freeze([0.25, 0.5, 0.75]);
 export const MAX_PERSONAL = 2;
 
 // Ranked "Biggest changes on your past days" (§2.7.3): built, switched off until a lawyer has read
-// the strings (whatif_ranked = false). The worker passes this; nothing on the page turns it on.
+// the strings. site.toml [flags] whatif_ranked sets this line in the build (build.py set_ranked_flag);
+// the worker passes it to rankRules, and nothing else turns ranking on.
 export const WHATIF_RANKED = false;
 export const SCREEN_RUNS = 2000;
 export const RANK_TOP = 3;

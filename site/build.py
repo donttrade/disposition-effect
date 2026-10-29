@@ -893,6 +893,16 @@ JS_SPEC_RE = re.compile(r"""(\bfrom\s*|\bimport\s*\(?\s*|\bnew URL\(\s*)(['"])(\
 UNVERSIONED_RE = re.compile(r'(?:src|href)="/static/[^"]+\.(?:js|css)(?:#[^"]*)?"')
 
 
+def set_ranked_flag(path, on):
+    """[flags] whatif_ranked → the copied engine's WHATIF_RANKED (dies if the source line is not there once)."""
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    if text.count(RANKED_LINE) != 1 or text.count("WHATIF_RANKED = ") != 1:
+        die(f"whatif_ranked: {RANKED_JS} must hold the line {RANKED_LINE!r} exactly once")
+    with open(path, "w", encoding="utf-8", newline="") as f:
+        f.write(text.replace(RANKED_LINE, f"export const WHATIF_RANKED = {'true' if on else 'false'};"))
+
+
 def asset_version(data):
     return hashlib.sha256(data).hexdigest()[:8]
 
@@ -1302,8 +1312,14 @@ def die(msg):
     raise BuildError(msg)
 
 
-FLAGS = ("paid_report", "analytics", "trader_first_home", "pilot_checkout", "free_badges", "journal", "ask_box")
-OPTIONAL_FLAGS = {"pilot_checkout": False, "free_badges": False, "journal": False, "ask_box": False}  # older site.toml files may lack the line
+FLAGS = ("paid_report", "analytics", "trader_first_home", "pilot_checkout", "free_badges", "journal", "ask_box", "whatif_ranked")
+OPTIONAL_FLAGS = {"pilot_checkout": False, "free_badges": False, "journal": False, "ask_box": False,
+                  "whatif_ranked": False}  # older site.toml files may lack the line
+# ARCHITECT-CHALLENGE-READINESS §2.7.3: [flags] whatif_ranked switches the ranked "Biggest changes on your past
+# days" rules. Off until a Canadian securities lawyer clears the strings. The build writes the flag into the
+# copied engine (prop-sim-core.js), whose source line must read exactly RANKED_LINE.
+RANKED_JS = os.path.join("js", "tools", "prop-sim-core.js")
+RANKED_LINE = "export const WHATIF_RANKED = false;"
 # Free-launch condition C1 (21 Oct 2026): free_badges turns on the free tools' "real or noise"
 # badges and their footnote, which the Architect is redesigning. Off (the committed default): the
 # free tools show only the descriptive numbers, static/js/tools/trade-stats-badges.js is left out
@@ -2238,6 +2254,7 @@ def build():
                 or (not flags["free_badges"] and rel == BADGES_JS)
                 or (not flags["journal"] and (rel.startswith(JOURNAL_JS_DIR) or rel == os.path.join("css", "journal.css"))))   # ARCHITECT-V3 D7: out of the build until approved
     copy_tree_sorted(os.path.join(SITE, "static"), os.path.join(out, "static"), skip=static_left_out)
+    set_ranked_flag(os.path.join(out, "static", RANKED_JS), flags["whatif_ranked"])
     # 3. dev pages, only on request; never bundled
     if os.environ.get("DT_DEV") == "1":
         copy_tree_sorted(os.path.join(SITE, "dev"), os.path.join(out, "dev"))

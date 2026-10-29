@@ -25,6 +25,7 @@ pilot_checkout = false     # "Start a Pilot" block + thanks page with the live S
 free_badges = false        # free tools' "real or noise" badges + footnote (off: free-launch condition C1, being redesigned)
 ask_box = false            # hidden until the answer engine passes a real-question test
 journal = false            # the free Trading Journal + P&L Calendar (/journal/, /tools/pnl-calendar/ and their nav row): off until the Tester passes J1-J38 and the owner approves
+whatif_ranked = false      # Challenge Readiness Check: ranked "Biggest changes on your past days" rules: off until a securities lawyer clears the strings (ARCHITECT-CHALLENGE-READINESS §2.7.5)
 
 [analytics]
 cf_beacon_token = "cdac673936b54f08beb5991aaae13975"       # required when analytics = true
