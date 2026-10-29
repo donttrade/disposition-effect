@@ -487,7 +487,7 @@ ORACLES["tradingview/semicolon_comma.csv"] = {
     "skipped": {},
 }
 ERRORS["errors/tradingview_slash_date.csv"] = ("E_AMBIGUOUS_DATE", 2, "time")      # Excel's m/d/yyyy times
-ERRORS["errors/tradingview_no_closing_time.csv"] = ("E_MISSING_COLUMN", 1, "time")  # no fill time at all
+ERRORS["errors/tradingview_no_closing_time.csv"] = ("E_MISSING_COLUMN", 1, "Closing time")  # named as exported
 # 40 generated TradingView round trips (make_tradingview.history, seed 7), nothing skipped: the paid
 # end-to-end test (tests/test_tradingview.py) sends them to the report server, which needs 30.
 ORACLES_COUNT_ONLY["tradingview/forty_trades.csv"] = 40

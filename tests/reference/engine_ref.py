@@ -675,6 +675,8 @@ SIGNATURES = {
             "status": ["status"], "commission": ["commission"], "time": ["closingtime"],
         },
         "required": [["symbol"], ["side"], ["qty"], ["price"], ["status"], ["time"]],
+        "labels": {"symbol": "Symbol", "side": "Side", "qty": "Quantity", "price": "Fill price", "status": "Status",
+                   "time": "Closing time"},
     },
     "generic_roundtrip": {
         "verified": False,
@@ -807,7 +809,9 @@ def detect_csv(rows):
             if best is None or m["ok"] / m["total"] > best[0]["ok"] / best[0]["total"]:
                 best = (m, i)
     if best and best[0]["ok"] >= 3 and best[0]["ok"] / best[0]["total"] >= 0.5:
-        fail("E_MISSING_COLUMN", best[0]["missing"][0], rows[best[1]]["row"], best[0]["missing"][0])
+        f = best[0]["missing"][0]
+        col = SIGNATURES[best[0]["name"]].get("labels", {}).get(f, f)  # the export's spelling, when known
+        fail("E_MISSING_COLUMN", col, rows[best[1]]["row"], col)
     fail("E_UNKNOWN_FORMAT")
 
 

@@ -271,3 +271,15 @@ def test_currency_affixes_strip_like_the_reference(harness):
         return xs.map((x) => m.stripCurrency(x)); }""", cases)
     assert got == [E.strip_currency(x) for x in cases]
     assert got[:5] == ["0.50", "0.50", "0.50", "-0.50", "-0.50"]
+
+
+def test_missing_column_named_as_exported(harness):
+    """Item 5 (Tester round 1): the message names "Closing time", not the internal field "time"."""
+    data = load("errors/tradingview_no_closing_time.csv")
+    got = js(harness, "parseOnly", data)["error"]
+    assert got["column"] == "Closing time" and '"Closing time" was not found' in got["message"], got
+    for drop, label in (("Fill price", "Fill price"), ("Quantity", "Quantity"), ("Status", "Status")):
+        head = [h for h in TV.HEAD if h != drop]
+        text = ",".join(head) + "\n" + ",".join("x" for _ in head) + "\n"
+        assert ref(text.encode())["error"]["column"] == label, drop
+        assert js(harness, "parseOnly", text.encode())["error"]["column"] == label, drop
