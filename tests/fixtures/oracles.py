@@ -402,11 +402,13 @@ ERRORS["errors/fd7_leading_zero_dot_in_comma_file.csv"] = ("E_BAD_NUMBER", 2, "p
 # ISO 4217 code; otherwise it is ignored as a whole (W_CURRENCY_IGNORED, which repeats no cell),
 # so no name reaches the page or the paid request. 40 round trips: (101 - 100) x 1 - fees 0.5 x 2
 # = 0 points each, 60 s.
-for _rel in ("generic/fd3_name_shifted_into_currency.csv", "generic/fd3_three_letter_fragment.csv"):
+# Importer fix round (Tester F2): the rows the comma made wider than the heading are counted too
+# (W_WIDE_ROWS), so the shift is never silent; the comma is placed in the name, so they are read.
+for _rel, _wide in (("generic/fd3_name_shifted_into_currency.csv", 40), ("generic/fd3_three_letter_fragment.csv", 60)):
     ORACLES[_rel] = {
         "trades": [dict(symbol="AAA", dir="long", qty=1, pnl=0.0, fees=1.0, hold_s=60, pnl_unit="points",
                         currency=None)] * 40,
-        "warnings": {"W_CURRENCY_IGNORED": 0},
+        "warnings": {"W_CURRENCY_IGNORED": 0, "W_WIDE_ROWS": _wide},
         "skipped": {},
     }
 

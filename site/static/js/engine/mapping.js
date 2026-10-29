@@ -13,7 +13,7 @@
 //   preset: a shipped preset whose headings are all in the file, or null.
 // Every string from the file goes to the page as data: the page writes it with textContent.
 
-import { clean, normHeader, numberShape, dateShape, detectDateFormat } from './csv.js';
+import { clean, normHeader, numberShape, dateShape, detectDateFormat, wideRows } from './csv.js';
 import { ISO_CURRENCIES } from './detect.js';
 import { readRows } from './index.js';
 import { isBlocked, moneyClean, normValue, numberQuestion, futuresRoot, STATUS_KEEP, MAP_FIELDS, isNoData,
@@ -398,6 +398,20 @@ export function guessMapping(peek, dataRows, opts = {}) {
       if (ex) break;
     }
     questions.push({ q: 'number_style', example: short(ex) });
+  }
+  // Rows an unquoted comma made wider than the heading: a split number (1,000) in a read number
+  // column is refused by the engine, so the page says which rows, before the run (Tester F2).
+  {
+    const kinds = {};
+    for (const f of MAP_FIELDS) {
+      const v = cols[f];
+      if (v === null) continue;
+      const kind = ['qty', 'price', 'open_price', 'close_price', 'pnl', 'fees'].includes(f) ? 'num'
+        : f === 'currency' ? 'ccy' : ['date', 'time', 'open_time', 'close_time'].includes(f) ? 'date' : 'text';
+      for (const i of Array.isArray(v) ? v : [v]) kinds[i] = kind;
+    }
+    const wr = wideRows(rows, width, kinds, ISO);
+    if (wr.split.length) questions.push({ q: 'split_number', rows: wr.split.slice(0, 5), n: wr.split.length });
   }
   // Futures sizes: offered when the symbols are CME contracts the size table knows.
   let futuresOffer = false;

@@ -1902,6 +1902,10 @@
    {
     "code": "W_CURRENCY_IGNORED",
     "n": 0
+   },
+   {
+    "code": "W_WIDE_ROWS",
+    "n": 40
    }
   ]
  },

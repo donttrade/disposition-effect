@@ -4,8 +4,9 @@
 // cookies or storage, and raw rows are never kept: only whitelisted fields
 // survive into executions and trades.
 
-import { decodeBytes, isHtml, parseCsv, sniffDelimiter, resolveNumberStyle, checkQuoting, normHeader, fromPaste } from './csv.js';
-import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS, checkCurrencyColumn } from './detect.js';
+import { decodeBytes, isHtml, parseCsv, sniffDelimiter, resolveNumberStyle, checkQuoting, normHeader, fromPaste,
+  wideRows } from './csv.js';
+import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS, checkCurrencyColumn, ISO_CURRENCIES } from './detect.js';
 import { fail, inFile, LIMITS } from './errors.js';
 import { checkMapping, parseMapped, mappedTzLabel, mergeParsed, firstTs } from './mapped.js';
 import { htmlRows, parseMt, isEmptyRow } from './mt.js';
@@ -72,6 +73,16 @@ export function readRows(item, delimiter = null) {
   return { kind: 'csv', delimiter: delim, rows: parseCsv(text, delim), text };
 }
 
+// The read columns of a signature map by kind, for wideRows: numbers, dates and times, currency.
+const ISO_SET = new Set(ISO_CURRENCIES);
+function readKinds(m, numeric) {
+  const kinds = {};
+  for (const [f, i] of Object.entries(m)) {
+    kinds[i] = numeric.includes(f) ? 'num' : f === 'currency' ? 'ccy' : /time|date/.test(f) ? 'date' : 'text';
+  }
+  return kinds;
+}
+
 // A recognised format (no mapping) → {fmt, verified, res, mode, tz, nData, shape}
 function readAuto(src) {
   if (src.kind === 'html') {
@@ -84,7 +95,8 @@ function readAuto(src) {
     return { fmt: det.format, verified: false, res: withDuplicates(parseMt(det.tables), dup), mode: 'gross',
       tz: TZ_LABELS[det.format], nData, shape: det.format };
   }
-  const { rows, delimiter: delim } = src;
+  const { delimiter: delim } = src;
+  let rows = src.rows;
   if (!rows.length) fail('E_EMPTY');
   const det = detectCsv(rows);
   const { format: name, headerIndex: hi } = det;
@@ -95,12 +107,19 @@ function readAuto(src) {
   if (dataRows === 0) fail('E_HEADER_ONLY');
   if (dataRows > LIMITS.MAX_ROWS) fail('E_TOO_LARGE');
   checkQuoting(rows, hi, det.map);
+  // Rows an unquoted comma made wider than the heading (csv.js wideRows): a split number is refused.
+  const wr = wideRows(rows.slice(hi + 1), rows[hi].cells.length, readKinds(m, NUMERIC_FIELDS[name]), ISO_SET);
+  if (wr.split.length) rows = rows.slice(0, hi + 1).concat(rows.slice(hi + 1).filter((r) => !wr.split.includes(r.row)));
   if (name === 'tradingview') stripCurrencyCells(rows.slice(hi + 1), m);
   resolveNumberStyle([{ rows: rows.slice(hi + 1), map: m, fields: NUMERIC_FIELDS[name] }], delim === ',' ? 'dot' : null);
   const verified = SIGNATURES[name].verified;
   const dup = countDuplicateRows(rows.slice(hi + 1), m);
-  const out = (fmt, res, mode) => ({ fmt, verified, res: withDuplicates(res, dup, curIgnored), mode, tz: TZ_LABELS[fmt],
-    nData: dataRows, shape: fmt });
+  const out = (fmt, res, mode) => {
+    withDuplicates(res, dup, curIgnored);
+    if (wr.split.length) res.skipped.split_number = (res.skipped.split_number || 0) + wr.split.length;
+    res.extra.wide_rows = wr.wide;
+    return { fmt, verified, res, mode, tz: TZ_LABELS[fmt], nData: dataRows, shape: fmt };
+  };
   if (name === 'mt5_deals') {
     const table = { kind: 'mt5_deals', section: 'deals', map: m,
       rows: rows.slice(hi + 1).map((r) => ({ row: r.row, cells: r.cells, section: 'deals' })) };

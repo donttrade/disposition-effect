@@ -12,7 +12,7 @@
 // Mirrors parse_mapped(), parse_files() and the helpers around them in tests/reference/engine_ref.py.
 
 import { clean, normHeader, parseNumber, resolveNumberStyle, checkQuoting, parseDateFmt, fallBackClose,
-  numberShape, DATE_FORMATS } from './csv.js';
+  numberShape, DATE_FORMATS, wideRows } from './csv.js';
 import { ISO_CURRENCIES, checkCurrencyColumn } from './detect.js';
 import { fail, LIMITS } from './errors.js';
 import { reqNumber, optNumber, skip, isEmptyRow } from './mt.js';
@@ -288,11 +288,20 @@ export function parseMapped(rows, mp, sideFrom, kind, delimiter) {
   const reqKeys = LAYOUT_FIELDS[layout].required.filter((f) => !(f === 'side' && sideFrom === 'sign'));
   const kept = [];
   let nData = 0;
+  const kinds = {};
+  for (const [f, i] of Object.entries(m)) {
+    kinds[i] = NUMERIC[layout].includes(f) || f.startsWith('fee') ? 'num' : f === 'currency' ? 'ccy'
+      : ['date', 'time', 'open_time', 'close_time'].includes(f) ? 'date' : 'text';
+  }
+  let wide = 0;
   for (const r of data) {
     if (isEmptyRow(r.cells)) continue;
     nData++;
     if (mp.trim_ragged && isRagged(r.cells, header.length)) { skip(skipped, 'no_data'); continue; }
     if (isNoData(r.cells, header.length) || reqKeys.every((f) => cellAt(r, m[f]) === '')) { skip(skipped, 'no_data'); continue; }
+    const wr = wideRows([r], header.length, kinds, ISO);
+    if (wr.split.length) { skip(skipped, 'split_number'); continue; }
+    wide += wr.wide;
     kept.push(r);
   }
   if (nData === 0) fail('E_HEADER_ONLY');
@@ -411,7 +420,7 @@ export function parseMapped(rows, mp, sideFrom, kind, delimiter) {
     execs.push({ row, ts, symbol, side, qty: q, price, fee, currency: cur, oc: null, pos_id: null,
       pnl_reported: null, multiplier: mult, _unit: unit, _fx: null });
   }
-  const extra = { duplicate_rows: dup, currency_ignored: cc.ignored, mapped: !mp.preset, preset: mp.preset || null,
+  const extra = { duplicate_rows: dup, currency_ignored: cc.ignored, wide_rows: wide, mapped: !mp.preset, preset: mp.preset || null,
     orders_averaged: layout === 'orders', futures_sizes: mp.futures_sizes === true, pnl_sign: pnlSign,
     zone_ignored: seen.zone, tz: mp.tz || null };
   return { res: { executions: execs, roundtrips: rts, skipped, extra }, nData };
@@ -467,7 +476,7 @@ export function firstTs(res) {
   return t;
 }
 
-const SUM_EXTRA = ['duplicate_rows', 'open_positions', 'pnl_sign'];
+const SUM_EXTRA = ['duplicate_rows', 'open_positions', 'pnl_sign', 'wide_rows'];
 const OR_EXTRA = ['currency_ignored', 'has_closed_positions', 'has_deals', 'zone_ignored'];
 
 // Parsed files (in time order) → one parser result for finish(). Row numbers are moved past the
