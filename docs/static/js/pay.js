@@ -8,6 +8,17 @@
 // loads no analytics, so opening the details is not counted as a pageview of /pricing/ or any page. Stores and sends nothing.
 (function () {
   'use strict';
+  // /pricing/'s #last-step and #byp-more <details> are open in the HTML (for visitors without JavaScript). Close each
+  // unless the URL targets it or an element inside it; .ls-ready hands it back to site.css's normal rules.
+  var id = '';
+  try { id = decodeURIComponent(location.hash.slice(1)); } catch (e) { /* a malformed hash targets nothing */ }
+  var t = id && document.getElementById(id);
+  ['last-step', 'byp-more'].forEach(function (name) {
+    var d = document.getElementById(name);
+    if (!d || d.tagName !== 'DETAILS') return;
+    if (!(t && d.contains(t))) d.open = false;
+    d.classList.add('ls-ready');
+  });
   var dlg = document.getElementById('pay-dialog');
   if (!dlg || typeof dlg.showModal !== 'function') return;
   var opener = null, loaded = false;

@@ -153,3 +153,29 @@ def test_opening_the_details_requests_no_pricing_page(browser, built_site, start
     assert not any("cloudflareinsights" in u for u in seen), seen
     assert pg.locator('#pay-dialog a[href="/pricing/#before-you-pay"]').count() == 0   # replaced by the block
     ctx.close()
+
+
+@pytest.mark.parametrize("js,hash,want_open", [(False, "#last-step", True), (False, "", True),
+                                                (True, "", False), (True, "#last-step", True), (True, "#before-you-pay", True)])
+def test_last_step_open_without_js_closed_with_js_unless_targeted(browser, built_site, js, hash, want_open):
+    """Tester sweep 3 #4: #last-step (and #byp-more inside it) are open in the HTML (no-JS buyers land on the open pay
+    step with the full details); pay.js closes each at load unless the hash targets it or something inside it, with
+    no layout shift."""
+    ctx = _no_beacon_network(browser.new_context(viewport={"width": 390, "height": 844}, java_script_enabled=js))
+    if js:
+        ctx.add_init_script("window.__cls = 0; new PerformanceObserver(l => { for (const e of l.getEntries())"
+                            " if (!e.hadRecentInput) window.__cls += e.value; }).observe({type: 'layout-shift', buffered: true});")
+    pg = ctx.new_page()
+    pg.goto(built_site["url"] + "/pricing/" + hash)
+    pg.wait_for_load_state("networkidle")
+    assert pg.locator("#last-step").evaluate("d => d.open") is want_open
+    assert pg.locator("#last-step a[href*='buy.stripe.com']").is_visible() is want_open
+    # the full details: open without JS, closed with JS unless the URL names them
+    assert pg.locator("#before-you-pay").is_visible() is ((not js) or hash == "#before-you-pay")
+    if js:
+        pg.wait_for_timeout(500)
+        assert pg.evaluate("window.__cls") < 0.05
+        if not want_open:   # the summary still opens it
+            pg.click("#last-step > summary")
+            assert pg.locator("#last-step a[href*='buy.stripe.com']").is_visible()
+    ctx.close()

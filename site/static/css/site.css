@@ -270,6 +270,11 @@ details.pay-step { border-bottom: 0; }
 details.pay-step > summary.btn { display: inline-flex; list-style: none; padding: 10px 20px; }
 details.pay-step > summary.btn::-webkit-details-marker { display: none; }
 details.pay-step[open] > summary.btn { color: var(--on-rust); }
+/* /pricing/ #last-step and #byp-more are open in the HTML for no-JS visitors; until pay.js decides (.ls-ready), a JS
+   browser paints them closed, unless the URL names them (theme.js .dt-pay-hash, .dt-byp-hash) */
+.dt-js:not(.dt-pay-hash) details#last-step:not(.ls-ready) > :not(summary),
+.dt-js:not(.dt-byp-hash) details#byp-more:not(.ls-ready) > :not(summary) { display: none; }
+.dt-js:not(.dt-byp-hash) details#byp-more:not(.ls-ready) > summary { margin-bottom: 0; list-style-type: disclosure-closed; }
 .pay-panel { margin-top: var(--s3); padding: var(--s3); border: 2px solid var(--rust); border-radius: var(--radius); }
 .pay-panel > h3:first-child { margin-top: 0; }
 .pay-panel .byp { grid-template-columns: 1fr; } .pay-panel .byp dd { margin-bottom: var(--s1); }

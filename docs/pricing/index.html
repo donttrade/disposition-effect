@@ -28,10 +28,10 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=53abcad2">
-<script src="/static/js/theme.js?v=668db5fe"></script>
+<link rel="stylesheet" href="/static/css/site.css?v=d1263d6d">
+<script src="/static/js/theme.js?v=7e47c1a9"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
-<script src="/static/js/pay.js?v=d817e818" defer></script>
+<script src="/static/js/pay.js?v=1c432c14" defer></script>
 <script src="/static/js/print.js?v=ec0ebd3c" defer></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cdac673936b54f08beb5991aaae13975"}'></script>
 
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "name": "Pricing", "position": 2}]}, {"@type": "Product", "brand": {"@id": "https://donttrade.ca/#org"}, "description": "Up to five habits measured and described in your own trades, with the dollar totals of the matching trades; up to two of them tested against chance in this version; plus one re-test 30 to 60 days after your first report.", "name": "Habit report", "offers": {"@type": "Offer", "availability": "https://schema.org/InStock", "price": "39", "priceCurrency": "USD", "url": "https://donttrade.ca/pricing/"}}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Up to five habits measured and described in your own trades, with the dollar totals of the matching trades; up to two of them tested against chance in this version; plus one re-test 30 to 60 days after your first report."}, "name": "What exactly do I get?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "We check whether a habit’s pattern in your trades could just be luck. The report says “distinguishable from noise” when it is unlikely to be luck, and “not distinguishable” when it could be. Up to two habits get this test; the others are described only."}, "name": "What does “tested against chance” mean?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "It runs the same report on a newer export of the same account, 30 to 60 days after your first report. Your re-test runs on the version of the report that is live when you run it; every change is dated on the corrections page ."}, "name": "What does the re-test do?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "MetaTrader 5 or 4, IBKR, Tradovate and TradingView exports (all in beta), or the donttrade CSV template."}, "name": "Which files work?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "It stays in your browser. Your browser sends our server only stripped trade numbers: open and close times, buy or sell, relative size, the realised result, a random symbol number and a scrambled fingerprint of each row. No name, account number or ticker is sent. The numbers are not kept; we keep only a scrambled fingerprint of each trade row from your first report, so a re-test can be matched to the same history, and we delete it on the dates in our privacy notice."}, "name": "Where does my file go?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. It describes your own past trades. It does not tell you what to trade, how much, or when to exit."}, "name": "Is this investment advice?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. We never ask for card details by email. Cancellation and refund terms"}, "name": "Do you take payment by email?"}]}]}</script>
@@ -91,8 +91,7 @@
         <li>The dollar total for each habit</li>
         <li>One free re-test, 30 to 60 days later</li>
         <li>Pay by card on Stripe’s page</li>
-      </ul>
-      <details class="pay-step" id="last-step">
+      </ul><details class="pay-step" id="last-step" open>
         <summary class="btn">Get the habit report — $39</summary><div class="pay-panel" role="group" aria-labelledby="last-step-h">
           <h3 id="last-step-h">Last step</h3>
           <ul class="pay-facts">
@@ -100,7 +99,7 @@
   <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M11 2 4 11.5h5L8 18l7-9.5h-5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span>Report right after payment</span></li>
   <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M4.5 8.5A6 6 0 1 1 4 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 4.5v4.5h4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Full refund within 14 days</span></li>
 </ul>
-          <details class="pay-more" id="byp-more">
+          <details class="pay-more" id="byp-more" open>
             <summary>Full details before you pay</summary>
             
 <section class="notice" id="before-you-pay" aria-labelledby="byp-h" data-requires-flag="paid_report">
