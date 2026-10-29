@@ -22,7 +22,7 @@ import check_rules as C  # noqa: E402
 import engine_ref as E  # noqa: E402
 import readiness_ref as R  # noqa: E402
 
-DEMO = os.path.join(REPO, "site", "static", "samples", "demo-trades.csv")
+DEMO = os.path.join(REPO, "site", "static", "samples", "example-trades.csv")
 READ_ON = date(2026, 10, 29)
 
 

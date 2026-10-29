@@ -160,6 +160,12 @@ export function createFileSlot({ progressBox, noise = false, onStage = () => {},
     return read(id, bytes, label);
   }
 
+  // A table pasted from a platform's screen: read like a file (the worker's runFiles path).
+  function readPaste(text, label = 'your pasted table') {
+    const id = begin();
+    return read(id, { paste: text }, label);
+  }
+
   async function pickFile(file, label = 'your file') {
     if (!file) { // the picker was emptied or cancelled
       supersede();
@@ -194,6 +200,7 @@ export function createFileSlot({ progressBox, noise = false, onStage = () => {},
   return {
     pickFile,
     readBytes,
+    readPaste,
     get state() { return state; },
     // resolves with the final state once no read is in flight
     settled: () => (state === 'reading' ? new Promise((resolve) => waiters.push(resolve)) : Promise.resolve(state)),
