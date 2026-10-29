@@ -1,0 +1,1129 @@
+{
+  "rules_lib": "2026-10-29.1",
+  "about": "Challenge rules as published by each firm, read on the date shown. Every value is backed by a quote from the firm's own rules page. Quotes are data, not page copy. Firm names are plain-text descriptors; donttrade is not affiliated with any firm and is paid by none. Re-check with checks/check_rules.py --online.",
+  "presets": [
+    {
+      "id": "alpha-capital-group-alpha-pro-10-phase-1",
+      "firm": "Alpha Capital Group",
+      "program": "Alpha Pro 10%, Phase 1",
+      "market": "cfd",
+      "account_size": 100000,
+      "currency": "USD",
+      "scale": "percent",
+      "status": "partial",
+      "rules": {
+        "target": 10000,
+        "daily_loss": 5000,
+        "max_loss": 10000,
+        "drawdown": "static",
+        "trail_stop_at": null,
+        "consistency": null,
+        "min_days_kind": "trading",
+        "min_days": 3,
+        "profitable_day_min": 0,
+        "time_limit": null,
+        "day_start": {
+          "tz": "Etc/GMT-3",
+          "hour": 0
+        }
+      },
+      "not_modelled": [
+        "limits checked on open positions (the check sees closed trades only)",
+        "the daily limit is 5% of each day's starting balance; the check uses 5% of the starting account size",
+        "the max risk rule",
+        "the 2-minute average trade duration rule",
+        "lot exposure limits"
+      ],
+      "unconfirmed": [
+        "consistency",
+        "time_limit"
+      ],
+      "notes": [],
+      "sources": [
+        {
+          "url": "https://help.alphacapitalgroup.uk/en/articles/8420429-alpha-pro-plan",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "target"
+              ],
+              "text": "Pro10% plan: Phase 1 profit target: 10%"
+            },
+            {
+              "fields": [
+                "max_loss",
+                "drawdown"
+              ],
+              "text": "Max Drawdown (static): 10%"
+            },
+            {
+              "fields": [
+                "daily_loss"
+              ],
+              "text": "Max Daily Drawdown (balance-based): 5%"
+            },
+            {
+              "fields": [
+                "min_days"
+              ],
+              "text": "Minimum trading days (for each phase): 3"
+            }
+          ]
+        },
+        {
+          "url": "https://help.alphacapitalgroup.uk/en/articles/6934210-what-are-the-daily-risk-limits-and-how-do-they-work",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "day_start"
+              ],
+              "text": "the end of the trading day/beginning of the daily candle (broker time), which is 00:00 GMT+3"
+            }
+          ]
+        },
+        {
+          "url": "https://help.alphacapitalgroup.uk/en/articles/6934220-what-is-the-maximum-total-loss",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "max_loss",
+                "drawdown"
+              ],
+              "text": "Even if the balance grows to $110,000, the maximum loss limit remains at $90,000."
+            }
+          ]
+        }
+      ],
+      "last_checked": "2026-10-29",
+      "checked_by": "Coder (R3)"
+    },
+    {
+      "id": "blue-guardian-1-step-standard",
+      "firm": "Blue Guardian",
+      "program": "1 Step Standard",
+      "market": "cfd",
+      "account_size": 100000,
+      "currency": "USD",
+      "scale": "percent",
+      "status": "partial",
+      "rules": {
+        "target": 9000,
+        "daily_loss": 4000,
+        "max_loss": 6000,
+        "drawdown": "trailing_trade",
+        "trail_stop_at": 0,
+        "consistency": null,
+        "min_days_kind": "profitable",
+        "min_days": 3,
+        "profitable_day_min": 500,
+        "time_limit": null,
+        "day_start": {
+          "tz": "America/New_York",
+          "hour": 17
+        }
+      },
+      "not_modelled": [
+        "limits checked on open positions (the check sees closed trades only)",
+        "the minimum holding time of 2 minutes",
+        "news trading rules"
+      ],
+      "unconfirmed": [
+        "consistency",
+        "time_limit"
+      ],
+      "notes": [
+        "The page says 5pm EST; the check uses New York time, so the boundary follows US summer time."
+      ],
+      "sources": [
+        {
+          "url": "https://help.blueguardian.com/en/articles/14062186-1-step-standard-rules",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "target"
+              ],
+              "text": "For accounts purchased from August 20th onwards, traders must achieve a 9% profit target in Phase 1"
+            },
+            {
+              "fields": [
+                "daily_loss"
+              ],
+              "text": "The maximum daily loss is limited to 4% of the initial account balance."
+            },
+            {
+              "fields": [
+                "day_start"
+              ],
+              "text": "This value resets daily at 5pm EST"
+            },
+            {
+              "fields": [
+                "max_loss",
+                "drawdown"
+              ],
+              "text": "1 step standard maximum drawdown will remain at 6% trailing of your Highest Watermark Closing Trade made."
+            },
+            {
+              "fields": [
+                "trail_stop_at"
+              ],
+              "text": "If your account reaches 6% of your Initial balance your trailing Drawdown will lock in at your starting balance."
+            },
+            {
+              "fields": [
+                "min_days"
+              ],
+              "text": "A trading day is counted on any day where at least 0.5% profit is achieved."
+            },
+            {
+              "fields": [
+                "min_days"
+              ],
+              "text": "To pass the evaluation, traders must complete at least 3 trading days."
+            }
+          ]
+        }
+      ],
+      "last_checked": "2026-10-29",
+      "checked_by": "Coder (R3)"
+    },
+    {
+      "id": "blue-guardian-2-step-standard-phase-1",
+      "firm": "Blue Guardian",
+      "program": "2 Step Standard, Phase 1",
+      "market": "cfd",
+      "account_size": 100000,
+      "currency": "USD",
+      "scale": "percent",
+      "status": "partial",
+      "rules": {
+        "target": 8000,
+        "daily_loss": 4000,
+        "max_loss": 8000,
+        "drawdown": "static",
+        "trail_stop_at": null,
+        "consistency": null,
+        "min_days_kind": "profitable",
+        "min_days": 3,
+        "profitable_day_min": 500,
+        "time_limit": null,
+        "day_start": {
+          "tz": "America/New_York",
+          "hour": 17
+        }
+      },
+      "not_modelled": [
+        "limits checked on open positions (the check sees closed trades only)",
+        "the minimum holding time of 2 minutes",
+        "news trading rules"
+      ],
+      "unconfirmed": [
+        "consistency",
+        "time_limit"
+      ],
+      "notes": [
+        "The page says 5pm EST; the check uses New York time, so the boundary follows US summer time."
+      ],
+      "sources": [
+        {
+          "url": "https://help.blueguardian.com/en/articles/14062291-2-step-standard-rules",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "target"
+              ],
+              "text": "Traders must achieve a 8% profit target on phase 1"
+            },
+            {
+              "fields": [
+                "daily_loss"
+              ],
+              "text": "The maximum daily loss is limited to 4% of the initial account balance."
+            },
+            {
+              "fields": [
+                "day_start"
+              ],
+              "text": "This value resets daily at 5pm EST"
+            },
+            {
+              "fields": [
+                "max_loss",
+                "drawdown"
+              ],
+              "text": "Maximum Overall Drawdown: 8% (Static)"
+            },
+            {
+              "fields": [
+                "min_days"
+              ],
+              "text": "For accounts purchased from August 20th onwards, traders must complete at least 3 trading days to pass the evaluation."
+            },
+            {
+              "fields": [
+                "min_days"
+              ],
+              "text": "A trading day is counted on any day where at least 0.5% profit is achieved."
+            }
+          ]
+        }
+      ],
+      "last_checked": "2026-10-29",
+      "checked_by": "Coder (R3)"
+    },
+    {
+      "id": "earn2trade-gauntlet-mini-50k",
+      "firm": "Earn2Trade",
+      "program": "Gauntlet Mini 50K",
+      "market": "futures",
+      "account_size": 50000,
+      "currency": "USD",
+      "scale": "fixed",
+      "status": "partial",
+      "rules": {
+        "target": 3000,
+        "daily_loss": 1100,
+        "max_loss": 2000,
+        "drawdown": "trailing_eod",
+        "trail_stop_at": 0,
+        "consistency": 0.3,
+        "min_days_kind": "trading",
+        "min_days": 0,
+        "profitable_day_min": 0,
+        "time_limit": null,
+        "day_start": {
+          "tz": "America/Chicago",
+          "hour": 17
+        }
+      },
+      "not_modelled": [
+        "limits checked on open positions (the check sees closed trades only)",
+        "the progression ladder (position size)",
+        "approved trading times",
+        "a best day of exactly 30% counts as meeting the consistency share here; the firm's page counts it as not meeting it"
+      ],
+      "unconfirmed": [
+        "time_limit"
+      ],
+      "notes": [],
+      "sources": [
+        {
+          "url": "https://www.earn2trade.com/gauntlet-mini",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "target"
+              ],
+              "text": "Profit Goal $3,000"
+            },
+            {
+              "fields": [
+                "max_loss",
+                "drawdown"
+              ],
+              "text": "EOD Drawdown $2,000"
+            },
+            {
+              "fields": [
+                "daily_loss"
+              ],
+              "text": "Daily Loss Limit $1,100"
+            },
+            {
+              "fields": [
+                "consistency"
+              ],
+              "text": "Maintain Consistency 30%"
+            }
+          ]
+        },
+        {
+          "url": "https://help.earn2trade.com/en/articles/5372687-how-does-end-of-day-drawdown-work",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "drawdown"
+              ],
+              "text": "The minimum account balance is only adjusted at the end of the trading day."
+            },
+            {
+              "fields": [
+                "trail_stop_at"
+              ],
+              "text": "This continues until your Maximum Drawdown reaches the starting balance of your account, or in this case, $100,000, at which point it will no longer rise."
+            }
+          ]
+        },
+        {
+          "url": "https://help.earn2trade.com/en/articles/3849975-what-is-the-maintain-consistency-rule",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "consistency"
+              ],
+              "text": "no single trading day can account for 30% or more of your total PnL"
+            }
+          ]
+        },
+        {
+          "url": "https://help.earn2trade.com/en/articles/5941958-what-are-the-evaluation-rules",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "min_days"
+              ],
+              "text": "There is no minimum number of trading days required to pass."
+            }
+          ]
+        },
+        {
+          "url": "https://help.earn2trade.com/en/articles/3395926-how-is-my-daily-loss-calculated",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "day_start"
+              ],
+              "text": "It's calculated daily from 5:00 pm to 5:00 pm (Central Time)."
+            }
+          ]
+        }
+      ],
+      "last_checked": "2026-10-29",
+      "checked_by": "Coder (R3)"
+    },
+    {
+      "id": "ftmo-1-step",
+      "firm": "FTMO",
+      "program": "FTMO Challenge: 1-Step",
+      "market": "cfd",
+      "account_size": 100000,
+      "currency": "USD",
+      "scale": "percent",
+      "status": "complete",
+      "rules": {
+        "target": 10000,
+        "daily_loss": 3000,
+        "max_loss": 10000,
+        "drawdown": "trailing_eod",
+        "trail_stop_at": null,
+        "consistency": 0.5,
+        "min_days_kind": "trading",
+        "min_days": 0,
+        "profitable_day_min": 0,
+        "time_limit": null,
+        "day_start": {
+          "tz": "Europe/Prague",
+          "hour": 0
+        }
+      },
+      "not_modelled": [
+        "limits checked on open positions (the check sees closed trades only)",
+        "the Best Day Rule for accounts from orders before 12 Oct 2026"
+      ],
+      "unconfirmed": [],
+      "notes": [
+        "Consistency applies to accounts from orders created on or after 12 Oct 2026, as the page says.",
+        "The page's Minimum Trading Days rule names the 2-Step only, so this preset has none."
+      ],
+      "sources": [
+        {
+          "url": "https://ftmo.com/en/trading-objectives/",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "target"
+              ],
+              "text": "The Profit Target for the FTMO Challenge is calculated as 10% of the Initial Simulated Capital."
+            },
+            {
+              "fields": [
+                "daily_loss"
+              ],
+              "text": "the Maximum Daily Loss Amount, which is 3% of the Initial Simulated Capital."
+            },
+            {
+              "fields": [
+                "day_start"
+              ],
+              "text": "The Maximum Daily Loss Limit is recalculated daily at 00:00 CE(S)T"
+            },
+            {
+              "fields": [
+                "max_loss",
+                "drawdown"
+              ],
+              "text": "The Maximum Loss rule establishes an end-of-day trailing limit"
+            },
+            {
+              "fields": [
+                "max_loss"
+              ],
+              "text": "the Maximum Loss Amount, which is 10% of the Initial Simulated Capital."
+            },
+            {
+              "fields": [
+                "trail_stop_at"
+              ],
+              "text": "The limit can only increase, but never decrease."
+            },
+            {
+              "fields": [
+                "consistency"
+              ],
+              "text": "To pass the FTMO Challenge: 1-Step or to be eligible for a Reward on an FTMO Account, the Consistency rule requires that your Best Day does not represent more than 50% of your total profit."
+            },
+            {
+              "fields": [
+                "min_days"
+              ],
+              "text": "This rule applies to both phases (FTMO Challenge and Verification) of the FTMO Challenge: 2-Step."
+            },
+            {
+              "fields": [
+                "time_limit"
+              ],
+              "text": "No time limit"
+            }
+          ]
+        }
+      ],
+      "last_checked": "2026-10-29",
+      "checked_by": "Coder (R3)"
+    },
+    {
+      "id": "ftmo-2-step-challenge",
+      "firm": "FTMO",
+      "program": "FTMO Challenge: 2-Step, FTMO Challenge phase",
+      "market": "cfd",
+      "account_size": 100000,
+      "currency": "USD",
+      "scale": "percent",
+      "status": "complete",
+      "rules": {
+        "target": 10000,
+        "daily_loss": 5000,
+        "max_loss": 10000,
+        "drawdown": "static",
+        "trail_stop_at": null,
+        "consistency": null,
+        "min_days_kind": "trading",
+        "min_days": 4,
+        "profitable_day_min": 0,
+        "time_limit": null,
+        "day_start": {
+          "tz": "Europe/Prague",
+          "hour": 0
+        }
+      },
+      "not_modelled": [
+        "limits checked on open positions (the check sees closed trades only)",
+        "a trading day counts the day a position is opened; the check counts the day trades close"
+      ],
+      "unconfirmed": [],
+      "notes": [],
+      "sources": [
+        {
+          "url": "https://ftmo.com/en/trading-objectives/",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "target"
+              ],
+              "text": "10% for the FTMO Challenge 5% for the Verification"
+            },
+            {
+              "fields": [
+                "daily_loss"
+              ],
+              "text": "the Maximum Daily Loss Amount, which is 5% of the Initial Simulated Capital."
+            },
+            {
+              "fields": [
+                "day_start"
+              ],
+              "text": "The Maximum Daily Loss Limit is recalculated daily at 00:00 CE(S)T"
+            },
+            {
+              "fields": [
+                "max_loss",
+                "drawdown",
+                "trail_stop_at"
+              ],
+              "text": "The Maximum Loss rule establishes a static limit"
+            },
+            {
+              "fields": [
+                "min_days"
+              ],
+              "text": "The Minimum Trading Days rule requires the trader to achieve at least 4 Trading Days."
+            },
+            {
+              "fields": [
+                "consistency"
+              ],
+              "text": "To pass the FTMO Challenge: 1-Step or to be eligible for a Reward on an FTMO Account, the Consistency rule requires"
+            },
+            {
+              "fields": [
+                "time_limit"
+              ],
+              "text": "No time limit"
+            }
+          ]
+        }
+      ],
+      "last_checked": "2026-10-29",
+      "checked_by": "Coder (R3)"
+    },
+    {
+      "id": "fundednext-stellar-1-step",
+      "firm": "FundedNext",
+      "program": "Stellar 1-Step",
+      "market": "cfd",
+      "account_size": 100000,
+      "currency": "USD",
+      "scale": "percent",
+      "status": "complete",
+      "rules": {
+        "target": 10000,
+        "daily_loss": 3000,
+        "max_loss": 6000,
+        "drawdown": "static",
+        "trail_stop_at": null,
+        "consistency": null,
+        "min_days_kind": "trading",
+        "min_days": 2,
+        "profitable_day_min": 0,
+        "time_limit": null,
+        "day_start": {
+          "tz": "file",
+          "hour": 0
+        }
+      },
+      "not_modelled": [
+        "limits checked on open positions (the check sees closed trades only)",
+        "swap and commission count toward the daily limit at the firm; the check uses the file's P&L as written"
+      ],
+      "unconfirmed": [],
+      "notes": [
+        "Day boundary: 00:00 on the MT5 server clock, the clock MT5 reports are written in."
+      ],
+      "sources": [
+        {
+          "url": "https://fundednext.com/general-rules/cfds/trading-objectives",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "target"
+              ],
+              "text": "Stellar 1-Step: 10% (single phase)"
+            },
+            {
+              "fields": [
+                "daily_loss"
+              ],
+              "text": "Stellar 1-Step: 3% of initial balance"
+            },
+            {
+              "fields": [
+                "day_start"
+              ],
+              "text": "Resets daily at 0:00 server time."
+            },
+            {
+              "fields": [
+                "max_loss",
+                "drawdown",
+                "trail_stop_at"
+              ],
+              "text": "Stellar 1-Step: 6% (Static)"
+            },
+            {
+              "fields": [
+                "min_days"
+              ],
+              "text": "Stellar 1-Step: 2 trading days"
+            },
+            {
+              "fields": [
+                "consistency"
+              ],
+              "text": "Every rule, every condition, published before you start your challenge."
+            },
+            {
+              "fields": [
+                "time_limit"
+              ],
+              "text": "No deadline to pass the Challenge."
+            }
+          ]
+        },
+        {
+          "url": "https://help.fundednext.com/en/articles/8019811-how-can-i-calculate-the-daily-loss-limit",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "day_start"
+              ],
+              "text": "During Daylight Saving Time, which typically occurs in the summer months, the server operates on GMT+3."
+            }
+          ]
+        }
+      ],
+      "last_checked": "2026-10-29",
+      "checked_by": "Coder (R3)"
+    },
+    {
+      "id": "fundednext-stellar-2-step-phase-1",
+      "firm": "FundedNext",
+      "program": "Stellar 2-Step, Phase 1",
+      "market": "cfd",
+      "account_size": 100000,
+      "currency": "USD",
+      "scale": "percent",
+      "status": "complete",
+      "rules": {
+        "target": 8000,
+        "daily_loss": 5000,
+        "max_loss": 10000,
+        "drawdown": "static",
+        "trail_stop_at": null,
+        "consistency": null,
+        "min_days_kind": "trading",
+        "min_days": 5,
+        "profitable_day_min": 0,
+        "time_limit": null,
+        "day_start": {
+          "tz": "file",
+          "hour": 0
+        }
+      },
+      "not_modelled": [
+        "limits checked on open positions (the check sees closed trades only)",
+        "swap and commission count toward the daily limit at the firm; the check uses the file's P&L as written"
+      ],
+      "unconfirmed": [],
+      "notes": [
+        "Day boundary: 00:00 on the MT5 server clock, the clock MT5 reports are written in."
+      ],
+      "sources": [
+        {
+          "url": "https://fundednext.com/general-rules/cfds/trading-objectives",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "target"
+              ],
+              "text": "Stellar 2-Step: 8% Phase 1"
+            },
+            {
+              "fields": [
+                "daily_loss"
+              ],
+              "text": "Stellar 2-Step: 5% of initial balance"
+            },
+            {
+              "fields": [
+                "day_start"
+              ],
+              "text": "Resets daily at 0:00 server time."
+            },
+            {
+              "fields": [
+                "max_loss",
+                "drawdown",
+                "trail_stop_at"
+              ],
+              "text": "Stellar 2-Step: 10% (Static)"
+            },
+            {
+              "fields": [
+                "min_days"
+              ],
+              "text": "Stellar 2-Step: 5 trading days"
+            },
+            {
+              "fields": [
+                "consistency"
+              ],
+              "text": "Every rule, every condition, published before you start your challenge."
+            },
+            {
+              "fields": [
+                "time_limit"
+              ],
+              "text": "No deadline to pass the Challenge."
+            }
+          ]
+        },
+        {
+          "url": "https://help.fundednext.com/en/articles/8019811-how-can-i-calculate-the-daily-loss-limit",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "daily_loss"
+              ],
+              "text": "Example 1: You have a $100,000 Stellar 2-Step Challenge Account, and your daily loss limit is 5% of your initial balance."
+            }
+          ]
+        }
+      ],
+      "last_checked": "2026-10-29",
+      "checked_by": "Coder (R3)"
+    },
+    {
+      "id": "myfundedfutures-rapid-50k",
+      "firm": "MyFundedFutures",
+      "program": "Rapid 50K, Evaluation",
+      "market": "futures",
+      "account_size": 50000,
+      "currency": "USD",
+      "scale": "fixed",
+      "status": "partial",
+      "rules": {
+        "target": 3000,
+        "daily_loss": null,
+        "max_loss": 2000,
+        "drawdown": "trailing_eod",
+        "trail_stop_at": null,
+        "consistency": 0.5,
+        "min_days_kind": "trading",
+        "min_days": 2,
+        "profitable_day_min": 0,
+        "time_limit": null,
+        "day_start": null
+      },
+      "not_modelled": [
+        "limits checked on open positions (the check sees closed trades only)",
+        "contract limits"
+      ],
+      "unconfirmed": [
+        "trail_stop_at",
+        "time_limit",
+        "day_start"
+      ],
+      "notes": [],
+      "sources": [
+        {
+          "url": "https://help.myfundedfutures.com/en/articles/13134709-rapid-plan-50k-a-comprehensive-look",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "target"
+              ],
+              "text": "Profit Target $3,000"
+            },
+            {
+              "fields": [
+                "max_loss",
+                "drawdown"
+              ],
+              "text": "Maximum Loss Limit (EOD) $2,000"
+            },
+            {
+              "fields": [
+                "daily_loss"
+              ],
+              "text": "Daily Loss Limit None"
+            },
+            {
+              "fields": [
+                "consistency"
+              ],
+              "text": "Consistency 50% (Eval Only)"
+            },
+            {
+              "fields": [
+                "min_days"
+              ],
+              "text": "Minimum Trading Days 2 Days"
+            }
+          ]
+        }
+      ],
+      "last_checked": "2026-10-29",
+      "checked_by": "Coder (R3)"
+    },
+    {
+      "id": "take-profit-trader",
+      "firm": "Take Profit Trader",
+      "program": "Test",
+      "market": "futures",
+      "status": "not_quotable",
+      "rules": null,
+      "not_modelled": [],
+      "unconfirmed": [],
+      "reason": "The homepage gives only the number of days; the rules pages (help centre) answered with a bot check.",
+      "sources": [
+        {
+          "url": "https://takeprofittrader.com/",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [],
+              "text": "3 trading days, as long as you've met the profit target and all other test rules."
+            }
+          ]
+        }
+      ],
+      "last_checked": "2026-10-29",
+      "checked_by": "Coder (R3)"
+    },
+    {
+      "id": "the5ers-high-stakes-step-1",
+      "firm": "The5%ers",
+      "program": "High Stakes, Step 1",
+      "market": "cfd",
+      "account_size": 100000,
+      "currency": "USD",
+      "scale": "percent",
+      "status": "partial",
+      "rules": {
+        "target": 10000,
+        "daily_loss": 5000,
+        "max_loss": 10000,
+        "drawdown": "static",
+        "trail_stop_at": null,
+        "consistency": null,
+        "min_days_kind": "profitable",
+        "min_days": 3,
+        "profitable_day_min": 500,
+        "time_limit": null,
+        "day_start": {
+          "tz": "file",
+          "hour": 0
+        }
+      },
+      "not_modelled": [
+        "limits checked on open positions (the check sees closed trades only)",
+        "the daily limit is a share of each day's starting balance or equity; the check uses 5% of the starting account size",
+        "news trading rules"
+      ],
+      "unconfirmed": [
+        "drawdown",
+        "trail_stop_at",
+        "consistency"
+      ],
+      "notes": [
+        "Day boundary: 00:00 on the MT5 server clock, the clock MT5 reports are written in."
+      ],
+      "sources": [
+        {
+          "url": "https://the5ers.com/high-stakes/",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "time_limit"
+              ],
+              "text": "Max Trading Period Unlimited"
+            },
+            {
+              "fields": [
+                "min_days"
+              ],
+              "text": "Minimum Profitable Days 3"
+            },
+            {
+              "fields": [
+                "min_days"
+              ],
+              "text": "A profitable day is a day on which the closed positions made a positive profit* of at least 0.5% of the initial balance."
+            },
+            {
+              "fields": [
+                "daily_loss"
+              ],
+              "text": "Maximum Daily Loss 5%"
+            },
+            {
+              "fields": [
+                "max_loss"
+              ],
+              "text": "Maximum Loss 10%"
+            },
+            {
+              "fields": [
+                "target"
+              ],
+              "text": "Profit Target 10%"
+            },
+            {
+              "fields": [
+                "day_start"
+              ],
+              "text": "Daily loss is 5%, 3% or 4% (depending on the program) of the starting equity of the day OR the starting balance of the day (the highest between them) at MT5 Server Time."
+            }
+          ]
+        }
+      ],
+      "last_checked": "2026-10-29",
+      "checked_by": "Coder (R3)"
+    },
+    {
+      "id": "topstep-50k-trading-combine",
+      "firm": "Topstep",
+      "program": "Trading Combine 50K",
+      "market": "futures",
+      "account_size": 50000,
+      "currency": "USD",
+      "scale": "fixed",
+      "status": "partial",
+      "rules": {
+        "target": 3000,
+        "daily_loss": null,
+        "max_loss": 2000,
+        "drawdown": "trailing_eod",
+        "trail_stop_at": 0,
+        "consistency": 0.55,
+        "min_days_kind": "trading",
+        "min_days": 2,
+        "profitable_day_min": 0,
+        "time_limit": null,
+        "day_start": {
+          "tz": "America/Chicago",
+          "hour": 17
+        }
+      },
+      "not_modelled": [
+        "limits checked on open positions (the check sees closed trades only)",
+        "maximum position size",
+        "the optional Daily Loss Limit, which pauses trading for the rest of the session"
+      ],
+      "unconfirmed": [
+        "time_limit"
+      ],
+      "notes": [],
+      "sources": [
+        {
+          "url": "https://help.topstep.com/en/articles/8284204-what-is-the-maximum-loss-limit",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "max_loss"
+              ],
+              "text": "$50K $2,000"
+            },
+            {
+              "fields": [
+                "drawdown"
+              ],
+              "text": "The MLL is a trailing limit. It rises as your end-of-day balance grows, but never moves down."
+            },
+            {
+              "fields": [
+                "trail_stop_at"
+              ],
+              "text": "Once it reaches your starting balance, it locks permanently."
+            }
+          ]
+        },
+        {
+          "url": "https://intercom.help/topstep-llc/en/articles/8284208-consistency-at-topstep",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "target"
+              ],
+              "text": "$50K $3,000 Less than $1,650"
+            },
+            {
+              "fields": [
+                "consistency"
+              ],
+              "text": "Your single best day of profit must stay at or below 55% of your Profit Target. If it exceeds that, your Profit Target increases."
+            },
+            {
+              "fields": [
+                "consistency"
+              ],
+              "text": "To find your new Profit Target: Best Day ÷ 0.55 = Total Profit Needed."
+            }
+          ]
+        },
+        {
+          "url": "https://intercom.help/topstep-llc/en/articles/8284197-trading-combine-parameters",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "min_days"
+              ],
+              "text": "You can pass in as few as two days"
+            },
+            {
+              "fields": [
+                "day_start"
+              ],
+              "text": "The trading day runs from 5:00 PM CT through 3:10 PM CT the next calendar day."
+            }
+          ]
+        },
+        {
+          "url": "https://help.topstep.com/en/articles/10490293-daily-loss-limit-in-the-trading-combine-and-express-funded-account",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [
+                "daily_loss"
+              ],
+              "text": "The Daily Loss Limit (DLL) is optional in the Trading Combine® and Express Funded Account® (XFA)."
+            },
+            {
+              "fields": [
+                "daily_loss"
+              ],
+              "text": "Triggering it is not a rule violation"
+            }
+          ]
+        }
+      ],
+      "last_checked": "2026-10-29",
+      "checked_by": "Coder (R3)"
+    },
+    {
+      "id": "tradeify",
+      "firm": "Tradeify",
+      "program": "Evaluation",
+      "market": "futures",
+      "status": "not_quotable",
+      "rules": null,
+      "not_modelled": [],
+      "unconfirmed": [],
+      "reason": "The homepage's plan cards are filled in by script: the page as served shows a profit target of \"?\" and the same values for every account size. The help centre answered with a bot check.",
+      "sources": [
+        {
+          "url": "https://tradeify.co/",
+          "read_on": "2026-10-29",
+          "quotes": [
+            {
+              "fields": [],
+              "text": "Trailing Max Drawdown (EOD) $1,000"
+            }
+          ]
+        }
+      ],
+      "last_checked": "2026-10-29",
+      "checked_by": "Coder (R3)"
+    }
+  ]
+}

@@ -577,3 +577,20 @@ def simulated_habits(res, flags_by_day, dates_only=False):
         out["habits"][h] = {"on_busts": nb, "on_drawn_losing": nl, "share": share, "base": base,
                             "status": _status(share, base, res["bust"], MIN_BUSTS, dates_only, h)}
     return out
+
+
+# ------------------------------------------------------------------ presets (challenge-presets.js)
+SCALED = ("target", "daily_loss", "max_loss", "trail_stop_at", "profitable_day_min")
+
+
+def preset_rules(preset, account_size=None):
+    if not preset or preset["status"] == "not_quotable" or not preset.get("rules"):
+        raise ValueError("preset: no rules to use")
+    k = account_size / preset["account_size"] if preset["scale"] == "percent" and account_size else 1
+    r = dict(preset["rules"])
+    for f in SCALED:
+        if r[f] is not None:
+            r[f] = r[f] * k
+    day_start = r.pop("day_start")
+    return {"rules": r, "dayStart": day_start, "accountSize": preset["account_size"] if k == 1 else account_size,
+            "unconfirmed": list(preset["unconfirmed"])}
