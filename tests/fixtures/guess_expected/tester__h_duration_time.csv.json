@@ -5,7 +5,8 @@
    "price": "matched",
    "qty": "matched",
    "side": "matched",
-   "symbol": "matched"
+   "symbol": "matched",
+   "time": "check"
   },
   "currency_offer": true,
   "date": {
@@ -68,7 +69,15 @@
    "v": 1,
    "year_base": null
   },
-  "questions": [],
+  "questions": [
+   {
+    "column": 4,
+    "example": "00:30:05",
+    "label": "Time",
+    "q": "time_or_duration",
+    "row": 2
+   }
+  ],
   "side_checks": {},
   "side_counts": {
    "b": 10,
