@@ -108,7 +108,7 @@
     <details><summary>How many trading days do I need in the file?</summary><p>The simulation runs with any number, but with fewer than 30 trading days the page warns that the results lean heavily on a few days. More history gives a steadier picture.</p></details>
     <details><summary>Why are my results the same every time?</summary><p>The random number generator uses a fixed seed, so anyone can reproduce a result from the same inputs. Change the seed to see how much the answer moves.</p></details>
     <details><summary>Which firms’ rules does it include?</summary><p>None are built in or named. Enter the numbers from your own firm’s current rules, because rules change and vary by account type.</p></details>
-    <details><summary>Is my file uploaded?</summary><p>No. The file is read in this tab and all 10,000 runs happen in your browser. The page’s security policy blocks outgoing requests.</p></details>
+    <details><summary>Is my file uploaded?</summary><p>No. The file is read in this tab and all 10,000 runs happen in your browser. {% if flags.analytics %}Your file’s contents are never sent; the only request this page makes is an anonymous page-view count.{% else %}The page’s security policy blocks outgoing requests.{% endif %}</p></details>
   </section>
 
   <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR, Tradovate and TradingView are trademarks of their owners. donttrade is not affiliated with any of them.</p>
