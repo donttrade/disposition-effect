@@ -69,6 +69,47 @@ function clearFile() {
   loaded = null;
   setFileStatus('');
   $('ps-file-error').hidden = true;
+  $('ps-map').hidden = true;
+  $('ps-map').replaceChildren();
+}
+
+// A table whose headings leave a needed column unnamed (TradeLocker's "Amount" was one): one choice per
+// missing field, from the file's own headings, then the same table is read again with those columns.
+const MAP_NAMES = {
+  date: 'Date and time', symbol: 'Symbol', side: 'Buy or sell', qty: 'Quantity (size)', price: 'Price',
+  open_time: 'Open time', close_time: 'Close time', direction: 'Long or short', open_price: 'Open price', close_price: 'Close price',
+};
+function showMapStep(need, choose) {
+  const box = $('ps-map');
+  const taken = new Set(Object.values(need.chosen));
+  const options = need.labels.map((l, i) => [i, l || `Column ${i + 1}`]).filter(([i]) => !taken.has(i));
+  const err = el('p', { class: 'error', id: 'ps-map-err', hidden: true });
+  const fields = need.missing.map((f) => el('div', { class: 'field' },
+    el('label', { for: `ps-map-${f}`, text: MAP_NAMES[f] || f }),
+    el('select', { id: `ps-map-${f}`, 'data-field': f, 'aria-describedby': 'ps-map-err' },
+      el('option', { value: '', text: 'Choose a column' }), ...options.map(([i, l]) => el('option', { value: String(i), text: l })))));
+  const btn = el('button', { class: 'btn btn-secondary', type: 'button', id: 'ps-map-btn', text: 'Read with these columns' });
+  btn.addEventListener('click', () => {
+    const picked = {};
+    const seen = new Set();
+    for (const f of need.missing) {
+      const v = $(`ps-map-${f}`).value;
+      if (v === '' || seen.has(v)) {
+        err.textContent = v === '' ? 'Pick a column for each box.' : 'Pick a different column for each box.';
+        err.hidden = false;
+        $(`ps-map-${f}`).focus();
+        return;
+      }
+      seen.add(v);
+      picked[f] = Number(v);
+    }
+    choose(picked);
+  });
+  box.replaceChildren(el('strong', { id: 'ps-map-h', text: 'Which column is which?' }),
+    el('p', { text: `No heading in your ${need.missing.length === 1 ? 'table names this column' : 'table names these columns'}. Pick ${need.missing.length === 1 ? 'it' : 'each one'} from your headings.` }),
+    el('div', { class: 'field-grid' }, ...fields), err, el('p', { class: 'btn-row' }, btn));
+  box.hidden = false;
+  box.focus();
 }
 
 function showLoaded(out, label) {
@@ -243,7 +284,9 @@ function read() {
     p.avg_loss = get('ps-avgloss', parsePositive);
     p.trades_per_day = get('ps-tpd', (v, l) => parseWhole(v, l, 1, 50));
   } else {
-    if (!loaded) {
+    if (!loaded && slot.state === 'mapping') {
+      problems.push({ id: 'ps-map', message: 'Pick the columns above, then press Read with these columns.' });
+    } else if (!loaded) {
       const msg = m === 'paste' ? 'Paste a table and press Read the table, or switch to a file or summary numbers.'
         : 'Choose a trade file, or try the example data, or switch to summary numbers.';
       problems.push({ id: m === 'paste' ? 'ps-paste' : 'ps-file', message: msg });
@@ -787,6 +830,7 @@ function init() {
   slot = createFileSlot({
     progressBox: $('ps-progress'), onStage: setFileStatus, onClear: clearFile, onResult: showLoaded,
     onError: (err, retry) => renderReadError($('ps-file-error'), err, retry),
+    onMapNeeded: showMapStep,
   });
   $('ps-file').addEventListener('change', (e) => slot.pickFile(e.target.files[0], 'your file'));
   $('ps-sample-btn').addEventListener('click', () => {
