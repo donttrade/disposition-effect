@@ -163,8 +163,38 @@ def history(seed, n_trades=40, numbers=False, semicolon=False, bom=False, crlf=F
     return (b"\xef\xbb\xbf" + data) if bom else data
 
 
+COMMISSION_WITH_CURRENCY = (
+    'Symbol,Side,Type,Quantity,Limit price,Stop price,Fill price,Status,Commission,Placing time,Closing time,Order ID,Level ID,Leverage,Margin\n'
+    'NASDAQ:AAPL,Buy,Market,10,,,100.00,Filled,0.50 USD,2026-09-14 09:31:10,2026-09-14 09:31:10,1,,1:1,1000 USD\n'
+    'NASDAQ:AAPL,Sell,Market,10,,,102,Filled,0.50 USD,2026-09-14 10:00:00,2026-09-14 10:00:00,1,,1:1,1000 USD\n'
+)
+NEGATIVE_COMMISSION = (
+    'Symbol,Side,Type,Quantity,Limit price,Stop price,Fill price,Status,Commission,Placing time,Closing time,Order ID,Level ID,Leverage,Margin\n'
+    'NASDAQ:AAPL,Buy,Market,10,,,100.00,Filled,-0.50,2026-09-14 09:31:10,2026-09-14 09:31:10,1,,1:1,1000 USD\n'
+    'NASDAQ:AAPL,Sell,Market,10,,,102,Filled,-0.5,2026-09-14 10:00:00,2026-09-14 10:00:00,1,,1:1,1000 USD\n'
+)
+
+
+def currency_forms_csv():
+    """Money cells with a code or symbol before or after the number, a rebate inside a trade."""
+    rows = [
+        ("NYSE:KO", "Buy", "Market", "100", "", "", "59.50", "Filled", "0.75 usd", "2026-09-14 12:00:00", "2026-09-14 12:00:00"),
+        ("NYSE:KO", "Sell", "Market", "100", "", "", "60.00", "Filled", "-$0.25", "2026-09-14 11:00:00", "2026-09-14 11:00:00"),
+        ("NASDAQ:AAPL", "Sell", "Limit", "10", "232.00", "", "232.00 USD", "Filled", "$1.00", "2026-09-14 09:31:00", "2026-09-14 10:30:00"),
+        ("NASDAQ:AAPL", "Buy", "Market", "10", "", "", "$230.50", "Filled", "USD 1.00", "2026-09-14 09:30:00", "2026-09-14 09:30:00"),
+    ]
+    lines = [",".join(HEAD)]
+    for i, o in enumerate(rows):
+        lines.append(",".join(list(o) + [str(3469400000 + i), CANARY if i == 0 else "", "1:1", "1000.00 USD"]))
+    return "\n".join(lines) + "\n"
+
+
 def main():
     w("tradingview/orders.csv", orders_csv())
+    # Tester round 1 (12b, 12c): a Commission with a currency suffix, and negative Commissions (rebates).
+    w("tradingview/commission_with_currency.csv", COMMISSION_WITH_CURRENCY)
+    w("tradingview/negative_commission.csv", NEGATIVE_COMMISSION)
+    w("tradingview/currency_forms.csv", currency_forms_csv())
     # 40 closed trades, nothing skipped: enough for the paid report (the server needs 30).
     w("tradingview/forty_trades.csv", history(7, junk=False))
     w("tradingview/numbers_bom.csv", numbers_bom_csv())

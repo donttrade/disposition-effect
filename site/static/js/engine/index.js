@@ -11,7 +11,7 @@ import { htmlRows, parseMt, isEmptyRow } from './mt.js';
 import { parseGeneric, parseGenericRoundtrip } from './generic.js';
 import { parseIbkr } from './ibkr.js';
 import { parseTradovate } from './tradovate.js';
-import { parseTradingView } from './tradingview.js';
+import { parseTradingView, stripCurrencyCells } from './tradingview.js';
 import { finish } from './trades.js';
 
 export { EngineError } from './errors.js';
@@ -73,6 +73,7 @@ export function parseFile(bytes) {
   if (dataRows === 0) fail('E_HEADER_ONLY');
   if (dataRows > LIMITS.MAX_ROWS) fail('E_TOO_LARGE');
   checkQuoting(rows, hi, det.map);
+  if (name === 'tradingview') stripCurrencyCells(rows.slice(hi + 1), m);
   resolveNumberStyle([{ rows: rows.slice(hi + 1), map: m, fields: NUMERIC_FIELDS[name] }], delim === ',' ? 'dot' : null);
   const verified = SIGNATURES[name].verified;
   const dup = countDuplicateRows(rows.slice(hi + 1), m);

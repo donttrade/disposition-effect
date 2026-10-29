@@ -1208,6 +1208,58 @@ def parse_tradovate(rows, hi, m):
     return {"executions": execs, "roundtrips": [], "skipped": skipped, "extra": {}}
 
 
+_TV_SYMBOLS = "$€£¥"
+_TV_SIGNS = "+-−"
+_RE_TV_PRE = re.compile(r"^[A-Za-z]{3}( |(?=[0-9+\-−.,]))")
+_RE_TV_SUF = re.compile(r"(^|[0-9.,] ?)[A-Za-z]{3}$")
+TV_MONEY_FIELDS = ["price", "commission"]
+
+
+def strip_currency(raw):
+    """A money cell's currency code or symbol, before or after the number, removed ("0.50 USD",
+    "USD 0.50", "$0.50", "-$0.50"); anything else unchanged. Mirrors stripCurrency()."""
+    s = clean(raw)
+    sign = ""
+    cut = False
+    if len(s) > 1 and s[0] in _TV_SIGNS:
+        nxt = (s[2] if len(s) > 2 else "") if s[1] == " " else s[1]
+        if not re.search(r"[0-9.,]", nxt):
+            sign = s[0]
+            s = s[1:]
+            if s.startswith(" "):
+                s = s[1:]
+    if s != "" and s[0] in _TV_SYMBOLS:
+        s = s[1:]
+        if s.startswith(" "):
+            s = s[1:]
+        cut = True
+    elif _RE_TV_PRE.search(s) and s[:3].upper() in _ISO_SET:
+        s = s[3:]
+        if s.startswith(" "):
+            s = s[1:]
+        cut = True
+    if s != "" and s[-1] in _TV_SYMBOLS:
+        s = s[:-1]
+        if s.endswith(" "):
+            s = s[:-1]
+        cut = True
+    elif _RE_TV_SUF.search(s) and len(s) > 3 and s[-3:].upper() in _ISO_SET:
+        s = s[:-3]
+        if s.endswith(" "):
+            s = s[:-1]
+        cut = True
+    return sign + s if cut else clean(raw)
+
+
+def strip_currency_cells(rows, m):
+    """Before resolve_number_style, so "1.500 USD" counts as evidence like "1.500". In place."""
+    for r in rows:
+        for f in TV_MONEY_FIELDS:
+            i = m.get(f)
+            if i is not None and i < len(r["cells"]):
+                r["cells"][i] = strip_currency(r["cells"][i])
+
+
 def _tv_skip_reason(status):
     if status == "rejected":
         return "rejected"
@@ -1241,11 +1293,13 @@ def parse_tradingview(rows, hi, m):
             _skip(skipped, "zero_qty")
             continue
         price = req_number(cell(r, m, "price"), row, "price")
-        fee = abs(opt_number(cell(r, m, "commission"), row, "commission"))
+        c = opt_number(cell(r, m, "commission"), row, "commission")
+        fee = c if c > 0 else 0.0
+        credit = -c if c < 0 else 0.0  # a rebate: a credit, not a negative fee (as mt.js's net credit)
         ts = parse_date(cell(r, m, "time"), "generic", row, "time")
         execs.append({"row": row, "ts": ts, "symbol": symbol, "side": side, "qty": qty, "price": price,
                       "fee": fee, "currency": None, "oc": None, "pos_id": None, "pnl_reported": None,
-                      "multiplier": 1, "_unit": "points", "_fx": None})
+                      "multiplier": 1, "_unit": "points", "_fx": None, "_credit": credit})
     return {"executions": execs, "roundtrips": [], "skipped": skipped, "extra": {}}
 
 
@@ -1261,7 +1315,7 @@ def round_half_away(x):
 def _new_trade(e, dr, seq):
     return {"symbol": e["symbol"], "dir": dr, "open_ts": e["ts"], "close_ts": None, "peak": 0,
             "entry_qty": 0.0, "entry_not": 0.0, "exit_qty": 0.0, "exit_not": 0.0, "fees": 0.0,
-            "rep_sum": 0.0, "rep_missing": False, "fills": 0, "multiplier": e["multiplier"],
+            "credit": 0.0, "rep_sum": 0.0, "rep_missing": False, "fills": 0, "multiplier": e["multiplier"],
             "currency": e["currency"], "unit": e["_unit"], "fx": None, "seq": seq}
 
 
@@ -1453,6 +1507,8 @@ def netting_walk(execs, order, excluded, detect_hedging):
             t["entry_qty"] += e["qty"]
             t["entry_not"] += e["qty"] * e["price"]
             t["fees"] += e["fee"]
+            if e.get("_credit"):
+                t["credit"] += e["_credit"]
             t["fills"] += 1
             if e["pnl_reported"] is not None:
                 t["rep_sum"] += e["pnl_reported"]
@@ -1474,6 +1530,8 @@ def netting_walk(execs, order, excluded, detect_hedging):
         t["exit_qty"] += cq
         t["exit_not"] += cq * e["price"]
         t["fees"] += cf
+        if e.get("_credit"):
+            t["credit"] += e["_credit"] if rem_units == 0 else e["_credit"] * close_units / q_units
         t["fills"] += 1
         if e["pnl_reported"] is None:
             t["rep_missing"] = True
@@ -1493,6 +1551,8 @@ def netting_walk(execs, order, excluded, detect_hedging):
             nt["entry_qty"] += rq
             nt["entry_not"] += rq * e["price"]
             nt["fees"] += e["fee"] * rem_units / q_units
+            if e.get("_credit"):
+                nt["credit"] += e["_credit"] * rem_units / q_units
             nt["fills"] += 1
             nt["peak"] = rem_units
             if e["_fx"] is not None:
@@ -1516,7 +1576,8 @@ def trade_key(t):
     def r(x):
         return math.floor(x * 1e6 + 0.5)
     return (t["symbol"], t["dir"], t["open_ts"], t["close_ts"], t["peak"], t["fills"], r(t["entry_qty"]),
-            r(t["entry_not"]), r(t["exit_qty"]), r(t["exit_not"]), r(t["fees"]), r(t["rep_sum"]), t["rep_missing"])
+            r(t["entry_not"]), r(t["exit_qty"]), r(t["exit_not"]), r(t["fees"]), r(t["credit"]), r(t["rep_sum"]),
+            t["rep_missing"])
 
 
 def build_trades(execs, reported_mode, detect_hedging=False):
@@ -1587,6 +1648,8 @@ def build_trades(execs, reported_mode, detect_hedging=False):
             # Total traded quantity, not the peak: with adds after a partial exit the
             # peak understates the quantity that earned the price difference.
             gross = (exit_vwap - entry_vwap) * t["entry_qty"] * t["multiplier"] * sign
+            if t["credit"]:  # a commission rebate: part of the gross result, fees stay >= 0 (as mt.js)
+                gross += t["credit"]
             pnl = gross - t["fees"]
         trades.append({"symbol": t["symbol"], "dir": t["dir"], "open_ts": t["open_ts"], "close_ts": t["close_ts"],
                        "hold_s": (t["close_ts"] - t["open_ts"]) // 1000, "qty": t["peak"] / UNIT,
@@ -1696,6 +1759,8 @@ def parse_file(data):
         if len(data_rows) > MAX_ROWS:
             fail("E_TOO_LARGE")
         check_quoting(rows, hi, det["map"])
+        if name == "tradingview":
+            strip_currency_cells(rows[hi + 1:], m)
         resolve_number_style([{"rows": rows[hi + 1:], "map": m, "fields": NUMERIC_FIELDS[name]}],
                              "dot" if delim == "," else None)
         verified = SIGNATURES[name]["verified"]

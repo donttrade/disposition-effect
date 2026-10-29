@@ -134,7 +134,8 @@ def test_bad_cells_fail_with_existing_codes(harness):
         "slash date": (head + "\n" + good.replace("2026-09-14 09:31:10", "9/14/2026 9:31"), ("E_AMBIGUOUS_DATE", 2, "time")),
         "12h clock": (head + "\n" + good.replace(",2026-09-14 09:31:10,1,", ",2026-09-14 9:31:10 AM,1,"), ("E_BAD_DATE", 2, "time")),
         "empty fill price": (head + "\n" + good.replace(",230.50,", ",,"), ("E_BAD_NUMBER", 2, "price")),
-        "commission with unit": (head + "\n" + good.replace(",Filled,,", ",Filled,1.00 USD,"), ("E_BAD_NUMBER", 2, "commission")),
+        "commission with an unknown unit": (head + "\n" + good.replace(",Filled,,", ",Filled,1.00 XYZ,"), ("E_BAD_NUMBER", 2, "commission")),
+        "price with two symbols": (head + "\n" + good.replace(",230.50,", ",$$230.50,"), ("E_BAD_NUMBER", 2, "price")),
         "header only": (head, ("E_HEADER_ONLY", None, None)),
     }
     for name, (text, want) in cases.items():
@@ -260,3 +261,13 @@ def test_paid_report_end_to_end(browser, stack):
         assert s not in analyse[0].post_data, s
     assert CANARY not in page.content()
     ctx.close()
+
+
+def test_currency_affixes_strip_like_the_reference(harness):
+    """Item 2 (Tester round 1): a code or symbol around a money cell is removed the same way in both engines."""
+    cases = ["0.50 USD", "USD 0.50", "$0.50", "-$0.50", "$-0.50", "0,50 €", "usd 1.5", "1.5usd", "-0.50", "", "abc",
+             "1 234,50 EUR", "USD", "12 XYZ", "-USD 0.5", "0.5 USDT", "$ 3", "£12", "12¥", "+$1", "CAD-1.25", "1.25 CAD "]
+    got = harness.evaluate("""async (xs) => { const m = await import('/site/static/js/engine/tradingview.js');
+        return xs.map((x) => m.stripCurrency(x)); }""", cases)
+    assert got == [E.strip_currency(x) for x in cases]
+    assert got[:5] == ["0.50", "0.50", "0.50", "-0.50", "-0.50"]
