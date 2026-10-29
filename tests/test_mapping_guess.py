@@ -149,15 +149,15 @@ def test_layout_and_value_guesses(page):
     hl = inspect_js(page, "presets/hyperliquid_fills.csv")["guess"]
     assert hl["mapping"]["side_values"] == {"b": "buy", "a": "sell"} and hl["side_checks"] == {"a": "ask_side"}
     mixed = inspect_js(page, "guess/mixed_day_order.csv")["guess"]
-    assert mixed["questions"] == [{"q": "date_order", "error": "mixed_order", "rows": [2, 5]}]
+    assert mixed["questions"] == [{"q": "date_order", "error": "mixed_order", "rows": [4, 7]}]   # file rows (F5)
     assert mixed["date"]["seen"] == "13/04/2026" and mixed["date"]["seen2"] == "04/13/2026"
     lone = inspect_js(page, "guess/lone_thousands.csv")["guess"]
     assert lone["questions"] == [{"q": "number_style", "example": "2,000"}]
     sign = inspect_js(page, "mapped/sign_mode.csv")["guess"]
     assert sign["mapping"]["side_from"] == "sign" and sign["badges"]["side"] == "check"
     nt = inspect_js(page, "presets/ninjatrader_exec.csv")["guess"]
-    assert nt["futures_offer"] is True and nt["date"] == {"format": "mdy", "reason": "seen", "seen": nt["date"]["seen"],
-                                                           "seen2": None}
+    assert nt["futures_offer"] is True and (nt["date"]["format"], nt["date"]["reason"]) == ("mdy", "seen")
+    assert nt["date"]["seen_row"] >= 2 and nt["date"]["seen2"] is None
 
 
 def test_header_row_found_below_a_preamble_and_overridable(page):
