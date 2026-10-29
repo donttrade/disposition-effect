@@ -11,13 +11,15 @@ import { htmlRows, parseMt, isEmptyRow } from './mt.js';
 import { parseGeneric, parseGenericRoundtrip } from './generic.js';
 import { parseIbkr } from './ibkr.js';
 import { parseTradovate } from './tradovate.js';
+import { parseTradingView } from './tradingview.js';
 import { finish } from './trades.js';
 
 export { EngineError } from './errors.js';
 
 export const TZ_LABELS = Object.freeze({
   mt5: 'broker server time', mt4: 'broker server time', ibkr_flex: 'as exported',
-  tradovate_orders: 'local time, as exported', generic: 'as in the file', generic_roundtrip: 'as in the file',
+  tradovate_orders: 'local time, as exported', tradingview: 'as exported, with no time zone stated',
+  generic: 'as in the file', generic_roundtrip: 'as in the file',
 });
 
 // Rows whose whitelisted cells all equal an earlier row's (e.g. two overlapping exports
@@ -81,6 +83,7 @@ export function parseFile(bytes) {
   }
   if (name === 'ibkr_flex') return finish(name, verified, withDuplicates(parseIbkr(rows, hi, m), dup, curIgnored), 'net', TZ_LABELS[name]);
   if (name === 'tradovate_orders') return finish(name, verified, withDuplicates(parseTradovate(rows, hi, m), dup, curIgnored), null, TZ_LABELS[name]);
+  if (name === 'tradingview') return finish(name, verified, withDuplicates(parseTradingView(rows, hi, m), dup, curIgnored), null, TZ_LABELS[name]);
   if (name === 'generic_roundtrip') return finish(name, verified, withDuplicates(parseGenericRoundtrip(rows, hi, m), dup, curIgnored), null, TZ_LABELS[name]);
   return finish('generic', verified, withDuplicates(parseGeneric(rows, hi, m), dup, curIgnored), null, TZ_LABELS.generic);
 }
