@@ -32,9 +32,7 @@ BEACON = ("https://static.cloudflareinsights.com/", "https://cloudflareinsights.
 # base.html ("preloaded using link preload but not used within a few seconds"): it depends on how fast the run is.
 LOCAL_ONLY = ("cloudflareinsights.com/cdn-cgi/rum", "Failed to load resource: net::ERR_FAILED",
               "was preloaded using link preload but not used within a few seconds")
-# An MT4/MT5 HTML report parsed on the page (engine/mt.js DOMParser) draws this message for the report's own style
-# attributes; /tools/trade-stats/ shows the same four lines for the same file (pre-existing, not this page's).
-MT_HTML = "Refused to apply inline style because it violates the following Content Security Policy directive"
+MT_HTML = "Refused to apply inline style"
 
 
 def open_page(browser, built_site, width=1280, scheme="light", **kw):
@@ -356,11 +354,7 @@ FORMATS = ["mt5/deals_netting_40.htm", "mt4/statement.htm", "ibkr/activity_flex.
 @pytest.mark.parametrize("rel", FORMATS)
 def test_every_format_end_to_end(browser, built_site, rel):
     ctx, pg, log = open_page(browser, built_site)
-    if rel.endswith(".htm"):
-        log["console"] = []
-        LOCAL = list(LOCAL_ONLY) + [MT_HTML]
-    else:
-        LOCAL = list(LOCAL_ONLY)
+    LOCAL = list(LOCAL_ONLY)   # an MT4/MT5 report no longer draws style-src errors (engine/mt.js withoutStyles)
     pg.set_input_files("#ps-file", os.path.join(FIX, rel))
     pg.wait_for_selector("#ps-file-status:text-matches('^Read ')", timeout=60000)
     assert pg.input_value("#ps-filetz") == ("broker" if rel.startswith("mt") else "local")
@@ -436,4 +430,20 @@ def test_rule_labels_short_and_headings_clear_the_header(browser, built_site):
             return [h.getBoundingClientRect().top, document.querySelector('.site-header').getBoundingClientRect().bottom]; }}""")
         assert top >= hb, (sel, top, hb)   # scroll-margin-top keeps it below the sticky header
     assert pg.evaluate("getComputedStyle(document.querySelector('h2')).scrollMarginTop") == "73px"
+    ctx.close()
+
+
+@pytest.mark.parametrize("path", ["/tools/trade-stats/", "/tools/drawdown-calculator/", "/tools/trading-heatmap/", PATH])
+@pytest.mark.parametrize("rel", ["mt5/deals_netting.htm", "mt5/deals_hedging.htm", "mt4/statement.htm"])
+def test_metatrader_reports_draw_no_style_errors_on_any_tool(browser, built_site, path, rel):
+    """Tester F7: the shared reader parsed the report's own style attributes under the page's CSP."""
+    ctx = browser.new_context()
+    pg = ctx.new_page()
+    msgs = []
+    pg.on("console", lambda m: msgs.append(m.text))
+    pg.goto(built_site["url"] + path)
+    pg.wait_for_load_state("networkidle")
+    pg.set_input_files("input[type=file]", os.path.join(FIX, rel))
+    pg.wait_for_timeout(2500)
+    assert not [m for m in msgs if MT_HTML in m], (path, rel)
     ctx.close()
