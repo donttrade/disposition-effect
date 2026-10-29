@@ -462,8 +462,9 @@ def wide_rows(rows, width, kinds, iso_set=frozenset()):
         if surplus <= 0:
             continue
         if surplus > 1:
-            if any(j + 1 < len(cells) and num_split(cells, j) for j in idx):
-                split.append(r["row"])
+            j = next((x for x in idx if x + 1 < len(cells) and num_split(cells, x)), None)
+            if j is not None:
+                split.append({"row": r["row"], "at": j, "shift": surplus})
             else:
                 wide += 1
             continue
@@ -484,11 +485,48 @@ def wide_rows(rows, width, kinds, iso_set=frozenset()):
                 best, best_at = score, [j]
             elif score == best:
                 best_at.append(j)
-        if any(num_split(cells, j) for j in best_at):
-            split.append(r["row"])
+        j = next((x for x in best_at if num_split(cells, x)), None)
+        if j is not None:
+            split.append({"row": r["row"], "at": j, "shift": 1})
         else:
             wide += 1
     return {"split": split, "wide": wide}
+
+
+def split_cell(cells, c, sp):
+    i = c if c <= sp["at"] else c + sp["shift"]
+    return cells[i] if i < len(cells) else ""
+
+
+_TIME_OF = {
+    "generic": lambda c, m: parse_date(c("datetime"), "generic", None, None) if "datetime" in m else
+    parse_date(c("date") + " " + c("time") if c("time") else c("date"), "generic", None, None),
+    "tradingview": lambda c, m: parse_date(c("time"), "generic", None, None),
+    "tradovate_orders": lambda c, m: parse_date(c("time"), "tradovate", None, None),
+    "ibkr_flex": lambda c, m: parse_date(c("datetime") if "datetime" in m else
+                                         (c("tradedate") + ";" + c("tradetime") if c("tradetime") else c("tradedate")),
+                                         "ibkr", None, None),
+    "mt5_deals": lambda c, m: parse_date(c("time"), "mt", None, None),
+}
+
+
+def refused_fills(name, m, rows, split):
+    """Mirrors refusedFills() in index.js."""
+    if not split or name not in _TIME_OF:
+        return []
+    by_row = {r["row"]: r for r in rows}
+    out = []
+    for sp in split:
+        cells = by_row[sp["row"]]["cells"]
+
+        def c(f, cells=cells, sp=sp):
+            return split_cell(cells, m[f], sp) if f in m else ""
+        try:
+            ts = _TIME_OF[name](c, m)
+        except EngineError:
+            ts = None
+        out.append({"symbol": c("contract" if name == "tradovate_orders" else "symbol"), "ts": ts})
+    return out
 
 
 def _read_kinds(m, numeric):
@@ -1988,10 +2026,32 @@ def trade_key(t):
             t["rep_missing"])
 
 
-def build_trades(execs, reported_mode, detect_hedging=False):
+def refused_out(execs, order, refused):
+    """Mirrors refusedOut() in trades.js: the fills that depend on a refused fill."""
+    out = set()
+    for x in refused:
+        lst = [k for k in order if execs[k]["symbol"] == x["symbol"]]
+        frm = 0
+        if x["ts"] is not None:
+            pos = 0
+            for i, k in enumerate(lst):
+                e = execs[k]
+                if e["ts"] >= x["ts"]:
+                    break
+                pos += (1 if e["side"] == "buy" else -1) * round_half_away(e["qty"] * UNIT)
+                if pos == 0:
+                    frm = i + 1
+        for k in lst[frm:]:
+            out.add(k)
+    return out
+
+
+def build_trades(execs, reported_mode, detect_hedging=False, refused=()):
     """Flat-to-flat round trips per symbol. reported_mode: None | "gross" | "net"."""
     order = chrono_order(execs)
     lots = pre_file_lots(execs, order, detect_hedging)
+    refused_set = refused_out(execs, order, refused)
+    lots["excluded"] |= refused_set
     walk = netting_walk(execs, order, lots["excluded"], detect_hedging)
     done = walk["done"]
     excluded = set(lots["excluded"])
@@ -2001,6 +2061,7 @@ def build_trades(execs, reported_mode, detect_hedging=False):
         if o == order or any(o == x["order"] for x in others):
             continue
         lo = pre_file_lots(execs, o, detect_hedging)
+        lo["excluded"] |= refused_set
         others.append({"order": o, "lots": lo, "done": netting_walk(execs, o, lo["excluded"], detect_hedging)["done"]})
     if others:
         def keys_of(lst):
@@ -2065,7 +2126,7 @@ def build_trades(execs, reported_mode, detect_hedging=False):
                        "fees": t["fees"], "pnl_source": src, "pnl_unit": t["unit"], "fills_n": t["fills"],
                        "currency": t["currency"], "_fx": t["fx"], "_seq": t["seq"], "_dateonly": t["dateonly"]})
     hedging = (lots["hedges"] if detect_hedging else 0) + walk["hedging"]
-    return trades, walk["open_n"], hedging, lots["open_at_start"], len(ambiguous_syms), excluded
+    return trades, walk["open_n"], hedging, lots["open_at_start"], len(ambiguous_syms), excluded, len(refused_set)
 
 
 def roundtrip_trades(rts, start_seq):
@@ -2173,13 +2234,15 @@ def finish(fmt, verified, res, mode, tz_label):
     hedging = 0
     open_at_start = 0
     ambiguous = 0
+    refused_n = 0
     if fmt == "mt5" and extra.get("has_closed_positions"):
         trades = roundtrip_trades(res["roundtrips"], 0)
     elif res["roundtrips"]:
         trades = roundtrip_trades(res["roundtrips"], 0)
         executions = roundtrip_executions(res["roundtrips"])
     else:
-        trades, o, hedging, open_at_start, ambiguous, excluded = build_trades(executions, mode, detect_hedging=(fmt == "mt5"))
+        trades, o, hedging, open_at_start, ambiguous, excluded, refused_n = build_trades(
+            executions, mode, detect_hedging=(fmt == "mt5"), refused=extra.get("refused") or [])
         open_n += o
         # fills of positions opened before the file are left out of every later step (PGR/PLR too)
         if excluded:
@@ -2199,6 +2262,8 @@ def finish(fmt, verified, res, mode, tz_label):
         warnings.append(warning("W_OPEN_POSITIONS", open_n))
     if open_at_start:
         warnings.append(warning("W_OPEN_AT_START", open_at_start))
+    if refused_n:
+        warnings.append(warning("W_REFUSED_FILLS", refused_n))
     if ambiguous:
         warnings.append(warning("W_AMBIGUOUS_FILLS", ambiguous))
     if extra.get("pnl_sign"):
@@ -2598,6 +2663,7 @@ def parse_mapped(rows, mp, side_from, kind, delimiter):
         kinds[i] = "num" if f in _NUMERIC[layout] or f.startswith("fee") else "ccy" if f == "currency" else \
             "date" if f in ("date", "time", "open_time", "close_time") else "text"
     wide = 0
+    refused = []
     for r in data:
         if _empty(r["cells"]):
             continue
@@ -2611,6 +2677,18 @@ def parse_mapped(rows, mp, side_from, kind, delimiter):
         wr = wide_rows([r], len(header), kinds, _ISO_SET)
         if wr["split"]:
             _skip(skipped, "split_number")
+            if layout != "roundtrips":
+                sp = wr["split"][0]
+
+                def c(f, r=r, sp=sp):
+                    return split_cell(r["cells"], m[f], sp) if f in m else ""
+                try:
+                    d, t = c("date"), c("time")
+                    ts = parse_date_fmt(d + " " + t if t != "" and d != "" else d, mp["date_format"], r["row"], "date",
+                                        {"yearBase": mp.get("year_base") or None})
+                except EngineError:
+                    ts = None
+                refused.append({"symbol": c("symbol"), "ts": ts})
             continue
         wide += wr["wide"]
         kept.append(r)
@@ -2794,7 +2872,7 @@ def parse_mapped(rows, mp, side_from, kind, delimiter):
             x["_ci"] = x["close_ts"] - x["_coff"] * 60000 if x["_coff"] is not None else x["close_ts"]
         del x["_ooff"]
         del x["_coff"]
-    extra = {"duplicate_rows": dup, "currency_ignored": cur_ignored, "wide_rows": wide, "mapped": not mp.get("preset"),
+    extra = {"duplicate_rows": dup, "currency_ignored": cur_ignored, "wide_rows": wide, "refused": refused, "mapped": not mp.get("preset"),
              "preset": mp.get("preset") or None, "orders_averaged": layout == "orders",
              "futures_sizes": mp.get("futures_sizes") is True, "pnl_sign": pnl_sign, "zone_ignored": seen["zone"] and not offsets, "offsets": offsets,
              "tz": mp.get("tz") or None}
@@ -2904,6 +2982,9 @@ def merge_parsed(parts):
         for k in _OR_EXTRA:
             if k in p["res"]["extra"]:
                 extra[k] = extra.get(k) or p["res"]["extra"][k]
+    extra["refused"] = []
+    for p in parts:
+        extra["refused"] += p["res"]["extra"].get("refused") or []
     ex, d1 = drop_overlap([p["res"]["executions"] for p in parts], _exec_key)
     rt, d2 = drop_overlap([p["res"]["roundtrips"] for p in parts], _rt_key)
     extra["overlap_rows"] = d1 + d2
@@ -2961,8 +3042,10 @@ def _read_auto(src):
         fail("E_TOO_LARGE")
     check_quoting(rows, hi, det["map"])
     wr = wide_rows(rows[hi + 1:], len(rows[hi]["cells"]), _read_kinds(m, NUMERIC_FIELDS[name]), _ISO_SET)
+    refused = refused_fills(name, m, rows, wr["split"])
     if wr["split"]:
-        rows = rows[:hi + 1] + [r for r in rows[hi + 1:] if r["row"] not in wr["split"]]
+        gone = {x["row"] for x in wr["split"]}
+        rows = rows[:hi + 1] + [r for r in rows[hi + 1:] if r["row"] not in gone]
     if name == "tradingview":
         strip_currency_cells(rows[hi + 1:], m)
     resolve_number_style([{"rows": rows[hi + 1:], "map": m, "fields": NUMERIC_FIELDS[name]}],
@@ -2989,6 +3072,7 @@ def _read_auto(src):
     if wr["split"]:
         res["skipped"]["split_number"] = res["skipped"].get("split_number", 0) + len(wr["split"])
     res["extra"]["wide_rows"] = wr["wide"]
+    res["extra"]["refused"] = refused
     idx = id_columns(rows[hi]["cells"])
     return {"fmt": fmt, "verified": verified, "res": res, "mode": mode, "tz": TZ_LABELS[fmt],
             "n_data": len(data_rows), "shape": fmt, "id_of": id_lookup(rows[hi + 1:], lambda r: idx)}
