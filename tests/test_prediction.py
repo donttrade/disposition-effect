@@ -301,3 +301,25 @@ def test_verdict_table_top_down():
 
 def test_script_uses_the_golden_checked_feature_module():
     assert P.F is dt1_features
+
+
+def test_registration_template_is_refused_until_filled(fixture_dir):
+    rc, out, err = run_cli(fx_args(fixture_dir, os.path.join(PARTNER, "PREREG-PREDICTION.md")))
+    assert rc == 1 and out == "" and "FILL_IN" in err
+
+
+def test_registration_and_example_share_the_frozen_constants():
+    reg = open(os.path.join(PARTNER, "PREREG-PREDICTION.md"), encoding="utf-8").read()
+    ex = open(EXAMPLE, encoding="utf-8").read()
+    for key in ("dt_version", "engine_method", "window_trades", "outcome_days", "min_features", "pass_lower",
+                "fail_point", "fail_upper", "target", "h2_alpha", "min_each", "cv_folds"):
+        a = re.search(r"^%s = (.*)$" % key, reg, re.M).group(1)
+        b = re.search(r"^%s = (.*)$" % key, ex, re.M).group(1)
+        assert a == b, key
+
+
+def test_three_hash_places_agree():
+    """LICENSING.md, the registration and the release notes carry the same fingerprints (plan section 4.4)."""
+    r = subprocess.run([sys.executable, "-B", os.path.join(REPO, "research", "prediction-study", "fill_hashes.py"),
+                        "--check"], capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout + r.stderr
