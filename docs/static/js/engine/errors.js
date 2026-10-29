@@ -8,6 +8,7 @@
 export const LIMITS = Object.freeze({
   MAX_BYTES: 50 * 1024 * 1024, // 50 MB
   MAX_ROWS: 200000,
+  MAX_PASTE_CHARS: 5 * 1024 * 1024, // a pasted table: 5 MB of text
 });
 
 export class EngineError extends Error {
@@ -43,10 +44,13 @@ export const MESSAGES = Object.freeze({
   E_TOO_LARGE: 'The file is too large: the limit is 50 MB and 200,000 rows.',
   E_NO_CLOSED_TRADES: 'No closed trades were found.',
   // The universal importer (mapped columns, several files, pasted tables). The detail never repeats a cell.
-  E_BAD_MAPPING: 'The saved column choices do not fit this file. Match the columns again.',
+  E_BAD_MAPPING: 'These column choices do not fit this file. Match the columns again.',
   E_MIXED_FILES: 'These files have different columns. Add files from one platform at a time.',
   E_PASTE_FORMAT:
     'This paste has no columns we can split. Select the table rows, headings included, copy, and paste again.',
+  E_PASTE_ALIGN:
+    'A row of this paste does not line up under the headings, so its columns cannot be told apart. Copy the table again (most platforms copy with tabs), or drop the exported file.',
+  E_PASTE_TOO_LARGE: 'This paste is too large: the limit is 5 MB of text. Paste fewer rows at a time, or drop the exported file.',
 });
 
 export function fail(code, detail = '', row = null, column = null) {
@@ -80,8 +84,12 @@ export const WARNING_TEXT = Object.freeze({
   W_OVERLAP_ROWS: 'Some rows were in more than one file and were counted once.',
   W_PNL_SIGN:
     "In some rows the profit's sign does not match the prices and direction: the long/short column may be swapped.",
+  W_SOME_DATES_ONLY:
+    'Some rows have a date but no time. Their trades are read at day level, with no time of day.',
   W_DATES_ONLY:
     'Your file has dates but no times. Results that depend on the time of day are not available; day-level results still are.',
+  W_WIDE_ROWS:
+    'Some rows have more cells than the headings, as when a name or note holds a comma without quotes, so cells after it may be in the wrong column. Check these rows, or export the file again with quotes.',
   W_DST:
     'Some trades were open during a daylight-saving clock change (US or EU dates). The file\'s times have no time zone, so the hold time of these trades may be off by one hour, and a buy and a sell in the repeated hour may be in the wrong order.',
 });

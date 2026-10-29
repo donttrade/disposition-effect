@@ -12,8 +12,8 @@
 import { recoveryGain, drawdowns, openedAfterLoss } from './drawdown-core.js?v=0bcc5aae';
 import { money, pct, plain, day, intText, el } from './format.js?v=acb0db51';
 import { parsePositive, InputError } from './num.js?v=8df99e34';
-import { clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js?v=208b3ec8';
-import { wireFileTool, readSection, tableWrap, rowsTable, plural, reportLead, SAMPLE_LABEL } from './file-tool.js?v=0256768b';
+import { clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js?v=195e69cc';
+import { wireFileTool, readSection, tableWrap, rowsTable, plural, reportLead, SAMPLE_LABEL } from './file-tool.js?v=d25236dc';
 
 const $ = (id) => document.getElementById(id);
 

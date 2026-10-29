@@ -7,8 +7,8 @@
 // crosses zero closes the trade at that time and opens the opposite trade with
 // the remainder. Positions still open at the end of the file are left out.
 
-import { fail, warning } from './errors.js?v=eef16098';
-import { spansDstNight } from './csv.js?v=e5cb6d8a';
+import { fail, warning } from './errors.js?v=3327687b';
+import { spansDstNight } from './csv.js?v=c0193c2a';
 
 const DAY_MS = 86400000;
 const UNIT = 1e8; // positions tracked in 1e-8 lots, so 0.1 + 0.2 - 0.3 is exactly flat
@@ -17,10 +17,16 @@ function roundHalfAway(x) {
   return Math.floor(Math.abs(x) + 0.5) * (x >= 0 ? 1 : -1);
 }
 
+// The instant of a fill: its time less its UTC offset when the file gives one on every row
+// (mapped.js, Tester F6); otherwise its time as written, as for every other format.
+export function instOf(e) {
+  return e._inst !== undefined ? e._inst : e.ts;
+}
+
 function newTrade(e, dir, seq) {
   return { symbol: e.symbol, dir, open_ts: e.ts, close_ts: null, peak: 0, entry_qty: 0, entry_not: 0,
     exit_qty: 0, exit_not: 0, fees: 0, credit: 0, rep_sum: 0, rep_missing: false, fills: 0, multiplier: e.multiplier,
-    currency: e.currency, unit: e._unit, fx: null, seq };
+    currency: e.currency, unit: e._unit, fx: null, seq, oi: instOf(e), ci: null, dateonly: e._dateonly === true };
 }
 
 // ---------------------------------------------------------------- positions opened before the file
@@ -220,6 +226,7 @@ function nettingWalk(execs, order, excluded, detectHedging) {
       t.fees += e.fee;
       if (e._credit) t.credit += e._credit;
       t.fills += 1;
+      if (e._dateonly) t.dateonly = true;
       if (e.pnl_reported !== null) t.rep_sum += e.pnl_reported;
       p += s * qUnits;
       t.peak = Math.max(t.peak, Math.abs(p));
@@ -239,11 +246,12 @@ function nettingWalk(execs, order, excluded, detectHedging) {
     t.fees += cf;
     if (e._credit) t.credit += remUnits === 0 ? e._credit : e._credit * closeUnits / qUnits;
     t.fills += 1;
+    if (e._dateonly) t.dateonly = true;
     if (e.pnl_reported === null) t.rep_missing = true;
     else t.rep_sum += e.pnl_reported;
     if (e._fx !== null) t.fx = e._fx;
     p += s * closeUnits;
-    if (p === 0) { t.close_ts = e.ts; done.push(t); cur.delete(sym); }
+    if (p === 0) { t.close_ts = e.ts; t.ci = instOf(e); done.push(t); cur.delete(sym); }
     if (remUnits) {
       const nt = newTrade(e, s > 0 ? 'long' : 'short', seq);
       seq++;
@@ -278,7 +286,7 @@ const TIE_RANK = { close: 0, reverse: 1, net: 1, open: 2 };
 
 function tieOrder(execs, order, opensFirst) {
   const sign = opensFirst ? -1 : 1;
-  return order.slice().sort((a, b) => (execs[a].ts - execs[b].ts) ||
+  return order.slice().sort((a, b) => (instOf(execs[a]) - instOf(execs[b])) ||
     sign * (TIE_RANK[lotKind(execs[a])] - TIE_RANK[lotKind(execs[b])]));
 }
 
@@ -365,9 +373,9 @@ export function buildTrades(execs, reportedMode, detectHedging) {
       pnl = gross - t.fees;
     }
     return { symbol: t.symbol, dir: t.dir, open_ts: t.open_ts, close_ts: t.close_ts,
-      hold_s: Math.floor((t.close_ts - t.open_ts) / 1000), qty: t.peak / UNIT, entry_vwap: entryVwap,
+      hold_s: Math.floor((t.ci - t.oi) / 1000), qty: t.peak / UNIT, entry_vwap: entryVwap,
       exit_vwap: exitVwap, pnl, pnl_gross: gross, fees: t.fees, pnl_source: src, pnl_unit: t.unit,
-      fills_n: t.fills, currency: t.currency, _fx: t.fx, _seq: t.seq };
+      fills_n: t.fills, currency: t.currency, _fx: t.fx, _seq: t.seq, _dateonly: t.dateonly };
   });
   return { trades, openN: walk.openN, hedging: (detectHedging ? lots.hedges : 0) + walk.hedging,
     openAtStart: lots.openAtStart, ambiguous: ambiguousSyms.size, excluded };
@@ -381,12 +389,12 @@ export function chronoOrder(execs) {
   let up = 0;
   let down = 0;
   for (let k = 1; k < execs.length; k++) {
-    const d = execs[k].ts - execs[k - 1].ts;
+    const d = instOf(execs[k]) - instOf(execs[k - 1]);
     if (d > 0) up++; else if (d < 0) down++;
   }
   const dir = down > up ? -1 : 1;
   const order = execs.map((_, k) => k);
-  order.sort((a, b) => (execs[a].ts - execs[b].ts) || dir * (execs[a].row - execs[b].row) || dir * (a - b));
+  order.sort((a, b) => (instOf(execs[a]) - instOf(execs[b])) || dir * (execs[a].row - execs[b].row) || dir * (a - b));
   return order;
 }
 
@@ -396,10 +404,13 @@ export function roundtripTrades(rts, startSeq) {
     let gross, src;
     if (r.reported) { gross = r.pnl_gross; src = 'reported'; }
     else { gross = (r.exit - r.entry) * r.qty * 1 * sign; src = 'computed'; }
+    const oi = r._oi !== undefined ? r._oi : r.open_ts;
+    const ci = r._ci !== undefined ? r._ci : r.close_ts;
     return { symbol: r.symbol, dir: r.dir, open_ts: r.open_ts, close_ts: r.close_ts,
-      hold_s: Math.floor((r.close_ts - r.open_ts) / 1000), qty: r.qty, entry_vwap: r.entry, exit_vwap: r.exit,
+      hold_s: Math.floor((ci - oi) / 1000), qty: r.qty, entry_vwap: r.entry, exit_vwap: r.exit,
       pnl: gross - r.fees, pnl_gross: gross, fees: r.fees, pnl_source: src, pnl_unit: r.unit, fills_n: 2,
-      currency: r.currency, _fx: null, _seq: startSeq + i, _reordered: r.reordered === true };
+      currency: r.currency, _fx: null, _seq: startSeq + i, _reordered: r.reordered === true,
+      _dateonly: r._dateonly === true };
   });
 }
 
@@ -459,6 +470,7 @@ export function finish(fmt, verified, res, mode, tzLabel) {
   if (extra.duplicate_rows) warnings.push(warning('W_DUPLICATE_ROWS', extra.duplicate_rows, `${extra.duplicate_rows} found.`));
   if (extra.overlap_rows) warnings.push(warning('W_OVERLAP_ROWS', extra.overlap_rows, `${extra.overlap_rows} found.`));
   if (extra.currency_ignored) warnings.push(warning('W_CURRENCY_IGNORED', 0));
+  if (extra.wide_rows) warnings.push(warning('W_WIDE_ROWS', extra.wide_rows, `${extra.wide_rows} found.`));
   let executions = res.executions;
   let openN = extra.open_positions || 0;
   let hedging = 0;
@@ -479,6 +491,16 @@ export function finish(fmt, verified, res, mode, tzLabel) {
     ambiguous = b.ambiguous;
     // Fills of positions opened before the file are left out of every later step (PGR/PLR too).
     if (b.excluded.size) executions = executions.filter((_, k) => !b.excluded.has(k));
+  }
+  // A trade with a fill that has a date but no time (a mixed file, Tester F6) is read at day level:
+  // its open and close on their dates, never a made-up midnight next to a real time.
+  let partDates = 0;
+  for (const t of trades) {
+    if (!t._dateonly) continue;
+    partDates++;
+    t.open_ts = Math.floor(t.open_ts / DAY_MS) * DAY_MS;
+    t.close_ts = Math.floor(t.close_ts / DAY_MS) * DAY_MS;
+    t.hold_s = (t.close_ts - t.open_ts) / 1000;
   }
   if (hedging) warnings.push(warning('W_HEDGING', hedging));
   if (openN) warnings.push(warning('W_OPEN_POSITIONS', openN, `${openN} left out.`));
@@ -528,6 +550,9 @@ export function finish(fmt, verified, res, mode, tzLabel) {
   let nDateOnly = 0;
   for (const t of trades) if (t.open_ts % DAY_MS === 0 && t.hold_s % 86400 === 0) nDateOnly++;
   const datesOnly = 20 * nDateOnly >= trades.length;
+  let marked = 0;
+  for (const t of trades) if (t._dateonly) marked++;
+  if (partDates && marked < trades.length && marked) warnings.push(warning('W_SOME_DATES_ONLY', marked, `${marked} found.`));
   if (datesOnly) warnings.push(warning('W_DATES_ONLY', nDateOnly));
   const out = {
     format: fmt,

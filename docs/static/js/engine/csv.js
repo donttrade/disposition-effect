@@ -6,17 +6,20 @@
 //   * dates are read as "naive UTC" with Date.UTC, never with the browser's time zone,
 //     so a file gives the same numbers in Toronto, Kolkata or UTC.
 
-import { fail, LIMITS } from './errors.js?v=eef16098';
+import { fail, LIMITS } from './errors.js?v=3327687b';
 
 // Whitespace we strip or collapse: ASCII whitespace, NBSP, the en/em/thin spaces,
 // narrow NBSP, medium mathematical space and the ideographic space.
 export const WS_CLASS = '[\\t\\n\\v\\f\\r \\u00a0\\u2000-\\u200a\\u202f\\u205f\\u3000]';
 const WS_RUN = new RegExp(WS_CLASS + '+', 'g');
-const WS_EDGE = new RegExp('^' + WS_CLASS + '+|' + WS_CLASS + '+$', 'g');
 
 export function clean(s) {
-  // Collapse inner whitespace runs to one space and trim the ends.
-  return String(s).replace(WS_RUN, ' ').replace(WS_EDGE, '');
+  // Collapse inner whitespace runs to one space and trim the ends. Linear: after the collapse an
+  // edge is at most one space (a WS+$ regex is quadratic on a long run of spaces, Tester F8).
+  let t = String(s).replace(WS_RUN, ' ');
+  if (t.charCodeAt(0) === 32) t = t.slice(1);
+  if (t.length && t.charCodeAt(t.length - 1) === 32) t = t.slice(0, -1);
+  return t;
 }
 
 export function normHeader(h) {
@@ -229,6 +232,67 @@ export function checkQuoting(rows, hi, map) {
       if (r.ml.includes(i) || (i < r.cells.length && r.cells[i].indexOf('"') !== -1)) fail('E_BAD_QUOTE', '', r.row);
     }
   }
+}
+
+// ---------------------------------------------------------------- rows wider than the heading
+// A non-empty cell past the heading's last column means an unquoted comma split a cell, and every
+// cell after the split is one column to the right (Tester F2). For a row one cell too wide, each
+// place where two neighbouring cells may have been one is tried, and the read cells it gives are
+// scored (a date column holds a date, a number column a number without a leading-zero "000", a
+// currency column an ISO code). If the best place is a read number column holding the first part
+// of a number like 1,000 or $1,235.60 (and the next cell its last three digits), the row is
+// refused (skip reason split_number), never read as 1 and 000. Any other wide row (a name or note
+// with a comma) is read as it is and counted for W_WIDE_ROWS. kinds: {index: 'num' | 'date' |
+// 'ccy' | 'text'} for the read columns. → {split: [row numbers], wide: n}
+const RE_SPLIT_HEAD = /^[+\-−(]?[$€£¥₹]?\d{1,3}$/;
+const RE_SPLIT_TAIL = /^\d{3}(\.\d+)?\)?$/;
+const RE_DATEISH = /^[0-9][0-9 .:\/\-T;,+Z]*([AaPp][Mm])?( ?[A-Za-z]{2,5})?$/;
+const RE_LEAD_ZERO = /^[+-]?0\d/;
+
+function cellFits(kind, v, isoSet) {
+  if (v === '') return true;
+  if (kind === 'num') {
+    const s = moneyCleanLite(v);
+    return numberShape(s) !== 'other' && !RE_LEAD_ZERO.test(s);
+  }
+  if (kind === 'date') return RE_DATEISH.test(v);
+  if (kind === 'ccy') return isoSet.has(v.toUpperCase());
+  return true;
+}
+
+// Enough of mapped.js moneyClean for scoring ("$1", "(12.30)", "1,235.60 USD"); csv.js cannot import it.
+function moneyCleanLite(v) {
+  return v.replace(/^[(+\-−]+|[)\-−]+$/g, '').replace(/^[$€£¥₹] ?|[ ]?[$€£¥₹]$|^[A-Za-z]{3} |[ ][A-Za-z]{3}$/g, '');
+}
+
+export function wideRows(rows, width, kinds, isoSet = new Set()) {
+  const split = [];
+  let wide = 0;
+  const idx = Object.keys(kinds).map(Number).sort((a, b) => a - b);
+  const numSplit = (cells, j) => kinds[j] === 'num' && RE_SPLIT_HEAD.test(cells[j]) && RE_SPLIT_TAIL.test(cells[j + 1]);
+  for (const r of rows) {
+    const cells = r.cells;
+    let last = cells.length - 1;
+    while (last >= 0 && cells[last] === '') last--;
+    const surplus = last + 1 - width;
+    if (surplus <= 0) continue;
+    if (surplus > 1) {
+      if (idx.some((j) => j + 1 < cells.length && numSplit(cells, j))) split.push(r.row); else wide++;
+      continue;
+    }
+    let best = -1;
+    let bestAt = [];
+    for (let j = 0; j < last; j++) {
+      let score = 0;
+      for (const c of idx) {
+        const v = c < j ? cells[c] : c === j ? cells[j] + ',' + cells[j + 1] : (c + 1 < cells.length ? cells[c + 1] : '');
+        if (cellFits(kinds[c], v, isoSet)) score++;
+      }
+      if (score > best) { best = score; bestAt = [j]; } else if (score === best) bestAt.push(j);
+    }
+    if (bestAt.some((j) => numSplit(cells, j))) split.push(r.row); else wide++;
+  }
+  return { split, wide };
 }
 
 // ---------------------------------------------------------------- numbers
@@ -461,7 +525,12 @@ const DATE_FORMAT_LABELS = {
 };
 const RE_DF = /^([0-9./-]+)(?:[ T]+(\d{1,2}):(\d{2})(?::(\d{2})(?:[.,]\d+)?)?(?: ?([AaPp][Mm]))?)?$/;
 const RE_ZONE_WORD = /^(.*[0-9AaPpMm]) ([A-Za-z]{2,5})$/;
-const RE_ZONE_OFFSET = /^(.*\d:\d{2}.*?) ?(?:(?:UTC|GMT) ?)?[+-]\d{1,2}(?::?\d{2})?$/;
+const RE_ZONE_OFFSET = /^(.*\d:\d{2}.*?) ?(?:(?:UTC|GMT) ?)?([+-])(\d{1,2})(?::?(\d{2}))?$/;
+// Zone labels with one known offset, in minutes. Others (IST, CST in China...) are read as written.
+export const ZONE_OFFSETS = Object.freeze({ UTC: 0, GMT: 0, WET: 0, WEST: 60, BST: 60, CET: 60, CEST: 120, EET: 120,
+  EEST: 180, MSK: 180, EST: -300, EDT: -240, CST: -360, CDT: -300, MST: -420, MDT: -360, PST: -480, PDT: -420,
+  AKST: -540, AKDT: -480, HST: -600, JST: 540, KST: 540, HKT: 480, SGT: 480, AEST: 600, AEDT: 660, NZST: 720,
+  NZDT: 780 });
 const RE_ZONE_Z = /^(.*\d)Z$/;
 const RE_YMD = /^(\d{4})([-/.])(\d{1,2})\2(\d{1,2})$/;
 const RE_YMD8 = /^(\d{4})(\d{2})(\d{2})$/;
@@ -469,16 +538,27 @@ const RE_DMY = /^(\d{1,2})([-/.])(\d{1,2})\2(\d{4}|\d{2})$/;
 const RE_SERIAL = /^\d+(\.\d+)?$/;
 const MAX_TS = Date.UTC(2101, 0, 1); // utcMs accepts years 1970-2100
 
-// → [text without a trailing zone label, whether one was removed]
+// → [text without a trailing zone label, whether one was removed, its UTC offset in minutes or null]
 export function stripZone(s) {
   let zone = false;
+  let off = null;
   let m = RE_ZONE_WORD.exec(s);
-  if (m && !/^[AaPp][Mm]$/.test(m[2]) && /\d/.test(m[1])) { s = m[1]; zone = true; }
+  if (m && !/^[AaPp][Mm]$/.test(m[2]) && /\d/.test(m[1])) {
+    s = m[1];
+    zone = true;
+    const k = m[2].toUpperCase();
+    off = Object.prototype.hasOwnProperty.call(ZONE_OFFSETS, k) ? ZONE_OFFSETS[k] : null;
+  }
   m = RE_ZONE_OFFSET.exec(s);
-  if (m && /[0-9AaPpMm]$/.test(m[1])) { s = m[1]; zone = true; }
+  if (m && /[0-9AaPpMm]$/.test(m[1])) {
+    s = m[1];
+    zone = true;
+    const h = Number(m[3]), mi = m[4] === undefined ? 0 : Number(m[4]);
+    off = h <= 14 && mi <= 59 ? (m[2] === '-' ? -1 : 1) * (h * 60 + mi) : null;
+  }
   m = RE_ZONE_Z.exec(s);
-  if (m) { s = m[1]; zone = true; }
-  return [s, zone];
+  if (m) { s = m[1]; zone = true; off = 0; }
+  return [s, zone, off];
 }
 
 function badOrder(fmt, row, column) {
@@ -490,14 +570,20 @@ function inRange(ms, row, column) {
   return ms;
 }
 
+// seen (optional): in {zone, yearBase}; out: zone (a label was removed), timed (the cell has a time
+// of day), off (its UTC offset in minutes, or null).
 export function parseDateFmt(raw, fmt, row, column, seen) {
-  const [s, zone] = stripZone(clean(raw));
+  const [s, zone, off] = stripZone(clean(raw));
   if (s === '') fail('E_BAD_DATE', 'the date is empty', row, column);
   const m = RE_DF.exec(s);
   if (!m) badOrder(fmt, row, column);
   if (zone && seen) seen.zone = true;
   const d = m[1];
   const timed = m[2] !== undefined;
+  if (seen) {
+    seen.timed = timed || fmt === 'epoch_s' || fmt === 'epoch_ms' || (fmt === 'excel' && d.indexOf('.') !== -1);
+    seen.off = seen.timed ? off : null;
+  }
   let h = timed ? Number(m[2]) : 0;
   const mi = timed ? Number(m[3]) : 0;
   const sec = m[4] === undefined ? 0 : Number(m[4]);
@@ -531,7 +617,15 @@ export function parseDateFmt(raw, fmt, row, column, seen) {
     x = RE_DMY.exec(d);
     if (!x) badOrder(fmt, row, column);
     const a = Number(x[1]), b = Number(x[3]);
-    y = Number(x[4]) + (x[4].length === 2 ? 2000 : 0);
+    y = Number(x[4]);
+    if (x[4].length === 2) {
+      // Two-digit years: 00-49 are 2000-2049; 50-99 could be 1950s-1990s or 2050s-2090s, so they are
+      // read only when the mapping says which century (year_base), never guessed (Tester F6).
+      const base = seen && seen.yearBase ? seen.yearBase : null;
+      if (base !== null) y += base;
+      else if (y <= 49) y += 2000;
+      else fail('E_BAD_DATE', 'a two-digit year like 99 could be 1999 or 2099: choose the century, or export four-digit years', row, column);
+    }
     if (fmt === 'mdy') { mo = a; dd = b; } else { dd = a; mo = b; }
     if (mo > 12) badOrder(fmt, row, column);
   } else {
@@ -563,19 +657,23 @@ export function dateShape(raw) {
 // 'empty'. Nothing is ever guessed: 'ask' means the user chooses.
 export function detectDateFormat(values) {
   const kinds = [];
+  const firstAt = {};
   let dmyAt = -1;
   let mdyAt = -1;
   for (let i = 0; i < values.length; i++) {
     if (clean(values[i]) === '') continue;
     const sh = dateShape(values[i]);
-    if (!kinds.includes(sh.kind)) kinds.push(sh.kind);
+    if (!kinds.includes(sh.kind)) { kinds.push(sh.kind); firstAt[sh.kind] = i; }
     if (sh.kind === 'dm') {
       if (sh.a > 12 && dmyAt < 0) dmyAt = i;
       if (sh.b > 12 && mdyAt < 0) mdyAt = i;
     }
   }
   if (kinds.length === 0) return { format: null, reason: 'empty', at: -1, at2: -1 };
-  if (kinds.length > 1 || kinds[0] === 'other') return { format: null, reason: 'mixed', at: -1, at2: -1 };
+  // mixed: at = the first cell that is no date, else the first of the second form.
+  if (kinds.length > 1 || kinds[0] === 'other') {
+    return { format: null, reason: 'mixed', at: kinds.includes('other') ? firstAt.other : firstAt[kinds[1]], at2: -1 };
+  }
   if (kinds[0] !== 'dm') return { format: kinds[0], reason: null, at: -1, at2: -1 };
   if (dmyAt >= 0 && mdyAt >= 0) return { format: null, reason: 'mixed_order', at: dmyAt, at2: mdyAt };
   if (dmyAt >= 0) return { format: 'dmy', reason: 'seen', at: dmyAt, at2: -1 };
@@ -585,27 +683,105 @@ export function detectDateFormat(values) {
 
 // ---------------------------------------------------------------- a pasted table
 // Copying an HTML table or a web grid gives tab-separated text in Chrome, Firefox and Safari. A
-// paste with a tab anywhere is split on tabs; otherwise on runs of two or more spaces (never one:
-// "2026-10-02 09:31:05" holds one). Rows are like parseCsv's: {row: the 1-based line, cells}.
+// paste with a tab anywhere is split on tabs (a blank cell stays a cell). Otherwise the paste is a
+// fixed-width grid: words are cut at runs of two or more spaces (never one: "2026-10-02 09:31:05"
+// holds one), and each word of a row is placed under the heading it lines up with, by character
+// position, so a blank cell never shifts the cells after it (Tester F1). The heading row is the
+// first line with the most words; lines above it are left as they are (menus, balances). A row
+// whose words do not line up under exactly one heading each is E_PASTE_ALIGN, naming its line,
+// unless it holds at most half as many words as the headings (a footer: read as it is, and
+// skipped as no_data later). Rows are like parseCsv's: {row: the 1-based line, cells}.
 // Nothing here is kept: the pasted text lives only in the caller's memory.
-const PASTE_GAP = /[ \u00a0\u2000-\u200a\u202f\u205f\u3000]{2,}/;
+const PASTE_SPACE = ' \u00a0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u202f\u205f\u3000';
+
+// Words of one line cut at runs of 2+ spaces: [{start, end, text}], positions in code points.
+export function spaceWords(line) {
+  const cps = Array.from(line);
+  const n = cps.length;
+  const sp = (c) => PASTE_SPACE.indexOf(c) !== -1;
+  const out = [];
+  let i = 0;
+  while (i < n) {
+    while (i < n && sp(cps[i])) i++;
+    if (i >= n) break;
+    const start = i;
+    let end = i;
+    while (i < n) {
+      if (sp(cps[i])) {
+        let j = i;
+        while (j < n && sp(cps[j])) j++;
+        if (j - i >= 2 || j >= n) break;
+        i = j;
+        continue;
+      }
+      i++;
+      end = i;
+    }
+    out.push({ start, end, text: clean(cps.slice(start, end).join('')) });
+  }
+  return out;
+}
+
+// The cells of one row under the headings `ref`, or null when it cannot be told: a word under the
+// text of two headings, or two words under one. A word under one heading's text goes there (a
+// right-aligned number wider than its heading too); a word under none goes to the last heading
+// that starts at or before it (a left-aligned value in the gap after a short heading).
+export function alignWords(words, ref) {
+  const cells = ref.map(() => '');
+  for (const w of words) {
+    let hit = -1;
+    let hits = 0;
+    for (let k = 0; k < ref.length; k++) {
+      if (Math.min(w.end, ref[k].end) - Math.max(w.start, ref[k].start) > 0) { hits++; hit = k; }
+    }
+    if (hits > 1) return null;
+    if (hits === 0) {
+      hit = 0;
+      for (let k = 0; k < ref.length; k++) if (ref[k].start <= w.start) hit = k;
+    }
+    if (cells[hit] !== '') return null;
+    cells[hit] = w.text;
+  }
+  return cells;
+}
 
 export function fromPaste(text) {
   text = String(text);
-  if (text.length > LIMITS.MAX_BYTES) fail('E_TOO_LARGE');
+  if (text.length > LIMITS.MAX_PASTE_CHARS) fail('E_PASTE_TOO_LARGE');
   if (clean(text) === '') fail('E_EMPTY');
   const lines = text.split(/\r\n|\n|\r/);
   const tabs = lines.some((l) => l.indexOf('\t') !== -1);
   const out = [];
-  let wide = 0;
-  for (let k = 0; k < lines.length; k++) {
-    if (clean(lines[k]) === '') continue;
-    const parts = tabs ? lines[k].split('\t') : lines[k].replace(WS_EDGE, '').split(PASTE_GAP);
-    const cells = parts.map(clean);
-    if (cells.filter((c) => c !== '').length >= 2) wide++;
+  const push = (k, cells) => {
     out.push({ row: k + 1, cells, swallow: 0, ml: [], broken: false });
     if (out.length > LIMITS.MAX_ROWS + 1) fail('E_TOO_LARGE');
+  };
+  if (tabs) {
+    let wide = 0;
+    for (let k = 0; k < lines.length; k++) {
+      if (clean(lines[k]) === '') continue;
+      const cells = lines[k].split('\t').map(clean);
+      if (cells.filter((c) => c !== '').length >= 2) wide++;
+      push(k, cells);
+    }
+    if (wide === 0) fail('E_PASTE_FORMAT');
+    return out;
   }
-  if (wide === 0) fail('E_PASTE_FORMAT');
+  const words = lines.map((l) => (clean(l) === '' ? null : spaceWords(l)));
+  let refAt = -1;
+  for (let k = 0; k < lines.length; k++) {
+    if (words[k] && words[k].length >= 2 && (refAt < 0 || words[k].length > words[refAt].length)) refAt = k;
+  }
+  if (refAt < 0) fail('E_PASTE_FORMAT');
+  const ref = words[refAt];
+  for (let k = 0; k < lines.length; k++) {
+    const w = words[k];
+    if (!w) continue;
+    if (k <= refAt) { push(k, w.map((x) => x.text)); continue; }
+    const cells = alignWords(w, ref);
+    if (cells) push(k, cells);
+    else if (w.length * 2 <= ref.length) push(k, w.map((x) => x.text));
+    else fail('E_PASTE_ALIGN', '', k + 1);
+  }
   return out;
 }
