@@ -23,7 +23,7 @@
       sits in this section. The method sentences moved into "How the results work". -#}
   {%- set sr = sample_report %}
   {%- set short = {"hold_gap": "Held losers longer", "revenge": "Re-entry after a loss", "size_up": "Size after a loss",
-                   "tilt": "After a losing run", "oversized_loss": "Unusually large losses"} %}
+                   "tilt": "After a losing run", "oversized_loss": "Large losses"} %}
   {%- set pill = {"distinguishable": ("pill pill-hit", "Distinguishable from noise"),
                   "not_distinguishable": ("pill", "Not distinguishable"),
                   "few": ("pill pill-few", "Not enough trades")} %}
@@ -46,7 +46,7 @@
           <tbody>
           {%- for h in sr.habits %}
             {%- set d = h.dollars or {} %}
-            {%- set pc = pill.get(h.verdict, ("pill pill-muted", "Described, not tested")) %}
+            {%- set pc = pill.get(h.verdict, ("pill pill-muted", "Luck check coming")) %}
             <tr><th scope="row">{{ short.get(h.id, h.name) }}</th>
               <td class="num">{{ d.n_trades if d else "–" }}</td>
               <td class="num {{ 'loss' if d and d.amount < 0 else 'gain' }}">{% if d %}{{ "−" if d.amount < 0 else "" }}${{ "{:,.2f}".format(d.amount|abs) }}{% else %}–{% endif %}</td>

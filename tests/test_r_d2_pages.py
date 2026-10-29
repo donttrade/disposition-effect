@@ -30,12 +30,13 @@ STALE_R_D2 = ["tests up to four", "of the 4 patterns", "jusqu’à quatre", "tes
               "whether your size changes after a loss",
               # R-D3 addendum I-6 (the report page's old citation prefix)
               "Published research on this pattern"]
-ROW = "Did you hold losing trades longer than winning ones? (described, not tested in this version)"
-SIZE_ROW = "Was the trade after a loss larger than the trade after a win? (described, not tested in this version)"
+# 29 Oct (owner): "described, not tested" leaves the site; an uncalibrated habit says "luck check coming".
+ROW = "Did you hold losing trades longer than winning ones? (luck check coming)"
+SIZE_ROW = "Was the trade after a loss larger than the trade after a win? (luck check coming)"
 COUNT = "tests up to two of these habits against chance in this version."
 COUNT_SOON = "test up to two of these habits against chance in this version."
-FR = ("par rapport aux gagnantes (décrite, non testée dans cette version); ",
-      "l’augmentation de la taille après des pertes (décrite, non testée dans cette version); ",
+FR = ("par rapport aux gagnantes (vérification du hasard à venir); ",
+      "l’augmentation de la taille après des pertes (vérification du hasard à venir);",
       "Il en teste jusqu’à deux par rapport au hasard")
 
 
@@ -83,13 +84,12 @@ def test_habit_tables_and_ledes(builds, flavour):
         if rel == "index.html" and flavour == "free":
             continue   # the flag-off home is not the trader home
         if 'class="habit-rows"' in raw(out, rel):   # sweep 2: the paid /for-traders/ shows the habits as table rows
-            assert t.count("Described, not tested") == 3 and t.count("Tested against chance") == 2, (flavour, rel)
-            assert "(described, not tested in this version)" not in t, (flavour, rel)
+            assert t.count("Luck check coming") == 3 and t.count("Tested against chance") == 2, (flavour, rel)
+            assert "described" not in t.lower() and "not tested" not in t.lower(), (flavour, rel)
             continue
         assert "Hold gap " + ROW in t, (flavour, rel)
         assert "Size after a loss " + SIZE_ROW in t, (flavour, rel)   # R-D3
-        assert t.count("(described, not tested in this version)") == 2, (flavour, rel)
-        assert "(described, not tested)" in t, (flavour, rel)   # the oversized-loss row, in parallel
+        assert t.count("(luck check coming)") == 3, (flavour, rel)   # hold gap, size after a loss, large losses
     ft = text_of(out, os.path.join("for-traders", "index.html"))
     assert COUNT in ft or COUNT_SOON in ft
     if flavour == "paid":   # QA 25 Oct: the home lede glosses "against chance" on first use
@@ -119,14 +119,14 @@ RETEST = ("Your re-test runs on the version of the test that is live when you ru
 RETEST_HTML = ('Your re-test runs on the version of the test that is live when you run it; every change is dated on the '
                '<a href="/corrections/">corrections page</a>.')
 # QA 25 Oct: "plan" and "tested against chance" glossed on first use
-HOME_LEDE = ("Drop your broker export. Get a report on up to five habits in your trades, with the dollar total of each.")   # sweep 2 hero
+HOME_LEDE = ("Drop your broker export. Test up to five habits in your trades, with the dollar total of each.")   # sweep 2 hero
 FT_LEDE = ("It measures and describes up to five habits in your own past trades, like opening a new trade soon after a loss, with the "
            "dollar totals of the matching trades, and tests up to two of these habits against chance in this version. It "
            "includes one re-test 30 to 60 days after your first result. It doesn’t tell you what to trade.")
 FT_LEDE_SOON = ("It will measure and describe up to five habits in your own past trades, like opening a new trade soon after a loss, "
                 "with the dollar totals of the matching trades, and test up to two of these habits against chance in this "
                 "version. It will include one re-test 30 to 60 days after your first result. It will not tell you what to trade.")
-PRODUCT = ("Up to five habits measured and described in your own trades, with the dollar totals of the matching trades; up to two of "
+PRODUCT = ("Up to five habits measured in your own trades, with the dollar totals of the matching trades; up to two of "
            "them tested against chance in this version; plus one re-test 30 to 60 days after your first result.")
 BYP = ("a report on habits in your own past trades, built from a trade file you choose. It measures and describes up to five "
        "habits, with the dollar totals of the matching trades, and tests up to two of them against chance in this version. "
@@ -209,7 +209,7 @@ def test_i3b_product_text_is_the_same_everywhere(builds):
         for f in files:
             if f.endswith((".html", ".json", ".js", ".xml", ".txt")):
                 t = open(os.path.join(root, f), encoding="utf-8", errors="replace").read()
-                if "five habits measured and described" in t.lower():
+                if "five habits measured in your own trades, with the dollar" in t.lower():
                     seen.append(os.path.relpath(os.path.join(root, f), builds["paid"]))
                     assert "Five habits measured in your own trades, with historical dollar figures" not in t
     # merge into delivery-39 (24 Oct): v3's /help/ page and its answers index quote /pricing/ word for word

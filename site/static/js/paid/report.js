@@ -11,7 +11,8 @@ import { ics, retestLine, RETEST_LINE } from './retest-copy.js';
 import { pgrPlrCounts } from '../engine/pgr.js';
 import { stripRows, spanLine } from './strip.js';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js';
-import { habitSentences, methodLine, page1Lines, coverageLines, mergedLine, checkReport, SENTENCE_HABITS, RESEARCH, RESEARCH_PREFIX, holdDays } from './wording.js';
+import { habitSentences, methodLine, page1Lines, coverageLines, mergedLine, checkReport, SENTENCE_HABITS, RESEARCH, RESEARCH_PREFIX, holdDays,
+  V_LAUNCH, V_LAUNCH_SIZE, V_NO } from './wording.js';
 
 const $ = (id) => document.getElementById(id);
 const MINUS = '−';
@@ -65,22 +66,52 @@ const wordingFmt = (unit) => ({ money: (x) => money(x, unit), duration, ratio: (
 // oversized_loss shows its measures list.
 const TESTED = SENTENCE_HABITS;
 
+// 29 Oct (owner): every habit in two layers, "What happened" and "Real or luck?". A habit whose luck check is not
+// calibrated yet (withheld as not_calibrated, or the descriptive oversized_loss) carries the neutral "Luck check
+// coming"; a habit that cannot be checked on this particular file (dates only, the spread rule) says so.
+// The words "described" and "not tested" are never shown (plain() below rewords wording.js's lines for display).
 const VERDICT = {
   distinguishable: ['badge badge-real', 'distinguishable from noise'],
   not_distinguishable: ['badge badge-noise', 'not distinguishable from noise'],
   too_few: ['badge badge-few', 'not enough trades to tell'],
-  withheld: ['badge badge-few', 'not tested'],
-  descriptive: ['badge badge-noise', 'described, not tested'],
+  withheld: ['badge badge-few', 'can’t check on this file'],
+  coming: ['badge badge-coming', 'Luck check coming'],
 };
 
+const luckComing = (h) => h.verdict === 'descriptive' || (h.verdict === 'withheld' && h.withheld === 'not_calibrated');
+
 function badge(v, h) {
-  // QA 25 Oct: one label for the not-tested state. A habit withheld as not calibrated is still
-  // described (V-launch / V-launch-size), so it carries the descriptive label.
-  if (v === 'withheld' && h && h.withheld === 'not_calibrated') v = 'descriptive';
+  if (h && luckComing(h)) v = 'coming';
   if (!VERDICT[v]) throw new Error(`report: unknown verdict ${v}`);
   const [cls, text] = VERDICT[v];
   return el('span', { class: cls, text });
 }
+
+// Visible labels (owner, 29 Oct): the engine's name for oversized_loss is shown as "Large losses".
+const NAMES = { oversized_loss: 'Large losses' };
+export const nameOf = (h) => NAMES[h.id] || h.name;
+
+// wording.js's sentences, as shown: its exports stay word for word (the wording tests pin them); the page drops
+// the "described …" sentences and rewords the "Not tested" / "Not described" openings.
+const LAUNCH_TAIL = ' So this pattern is described here without a verdict.';
+export function plain(s) {
+  return s.replace(LAUNCH_TAIL, '')
+    .replace('Some are described below without a verdict.', 'Some are shown below without a verdict.')
+    .replace(/^Not tested: /, 'No luck check on this file: ')
+    .replace(/^Not described: /, 'No figure for this file: ')
+    .replace(', so it is not tested on files like that.', ', so files like that get no luck check.')
+    .replace(', so it is not described for files like that.', ', so files like that get no figure.')
+    .replace('are not tested, and size after a loss is not described.', 'get no luck check, and size after a loss gets no figure.');
+}
+// Why a habit's luck check is not on yet (the tap-to-open line), from V_LAUNCH / V_LAUNCH_SIZE.
+function whyComing(h) {
+  if (h.id === 'hold_gap') return plain(V_LAUNCH);
+  if (h.id === 'size_up') return plain(V_LAUNCH_SIZE);
+  return 'A luck check for this habit is still being designed.';
+}
+// A wording.js line that belongs to "Real or luck?" (the verdict, or why there is none) rather than "What happened".
+const isVerdictLine = (s) => s === V_LAUNCH || s === V_LAUNCH_SIZE || s === V_NO || s.startsWith('This gap is distinguishable')
+  || s.startsWith('Not enough trades to tell') || s.startsWith('Not tested');
 
 // What each habit's two measures mean, in plain words. Only the descriptive habit
 // (oversized_loss) shows this list; a tested habit shows the §7.1 sentences and detailLine().
@@ -107,11 +138,6 @@ function detailLine(h, unit) {
 // "after adjusting for the N patterns tested": the count is the report's own n_tested (at most 2 under stats2c).
 const testedPhrase = (n) => `the ${n} pattern${n === 1 ? '' : 's'} tested`;
 
-function dollarsLine(h, unit) {
-  if (h.dollars === null) return null;   // R-D3 addendum 3: a dates-only file's order-based habits have no dollar figure
-  return `${h.dollars.label}: ${h.dollars.n_trades} trades, totalling ${money(h.dollars.amount, unit)} (historical).`;
-}
-
 // Two bars from zero with direct labels; the table below it holds the same numbers.
 function twoBarChart(h, unit, report) {
   if (h.measure_a === null || h.measure_b === null || h.id === 'oversized_loss') return null;
@@ -129,7 +155,7 @@ function twoBarChart(h, unit, report) {
   const svg = document.createElementNS(ns, 'svg');
   svg.setAttribute('viewBox', `0 0 ${W} ${rowH * 2 + 10}`);
   svg.setAttribute('role', 'img');
-  svg.setAttribute('aria-label', `${h.name}: ${labels[0]} ${fmt(vals[0])}, ${labels[1]} ${fmt(vals[1])}`);
+  svg.setAttribute('aria-label', `${nameOf(h)}: ${labels[0]} ${fmt(vals[0])}, ${labels[1]} ${fmt(vals[1])}`);
   const hasNeg = vals.some((v) => v < 0);
   const zero = hasNeg ? x0 + span / 2 : x0;
   const scale = (hasNeg ? span / 2 : span) / maxAbs;
@@ -149,44 +175,78 @@ function twoBarChart(h, unit, report) {
   axis.setAttribute('y2', String(rowH * 2 + 6)); axis.setAttribute('class', 'grid-line');
   svg.append(axis);
   const table = el('table', {},
-    el('caption', { class: 'visually-hidden', text: h.name + ' as a table' }),
+    el('caption', { class: 'visually-hidden', text: nameOf(h) + ' as a table' }),
     el('thead', {}, el('tr', {}, el('th', { scope: 'col', text: 'Group' }), el('th', { scope: 'col', class: 'num', text: 'Trades' }), el('th', { scope: 'col', class: 'num', text: 'Value' }))),
     el('tbody', {},
       el('tr', {}, el('th', { scope: 'row', text: labels[0] }), el('td', { class: 'num', text: String(h.n_a) }), el('td', { class: 'num', text: fmt(vals[0]) })),
       el('tr', {}, el('th', { scope: 'row', text: labels[1] }), el('td', { class: 'num', text: String(h.n_b) }), el('td', { class: 'num', text: fmt(vals[1]) }))));
   return el('figure', { class: 'chart chart-bars' }, svg,
     el('figcaption', { text: `n = ${h.n_a} and ${h.n_b} trades · from your file · historical` }),
-    el('details', {}, el('summary', { text: 'Show as a table' }), el('div', { class: 'table-wrap', tabindex: '0', role: 'region', 'aria-label': h.name + ' table' }, table)));
+    el('details', {}, el('summary', { text: 'Show as a table' }), el('div', { class: 'table-wrap', tabindex: '0', role: 'region', 'aria-label': nameOf(h) + ' table' }, table)));
+}
+
+// Layer 1, "What happened": the figures the server already computed (matching trades and their total, the two
+// group values and the gap between them), as a short list; the chart shows the same two values.
+function happenedList(h, unit, report) {
+  const items = [];
+  if (h.dollars) items.push([h.dollars.label, `${count(h.dollars.n_trades)} trades, totalling ${money(h.dollars.amount, unit)} (historical)`]);
+  const a = h.measure_a, b = h.measure_b;
+  if (a !== null && b !== null && h.id !== 'oversized_loss') {
+    const lab = { hold_gap: ['Median hold, losing trades', 'Median hold, winning trades'],
+      revenge: ['Average, trades soon after a loss', 'Average, other trades'], size_up: ['Median size after a loss (× usual)', 'Median size after a win (× usual)'],
+      tilt: ['Average after 2+ losses in a row', 'Average, other trades'] }[h.id];
+    const f = (v) => (h.id === 'hold_gap' ? (report.dates_only ? holdDays(v) : duration(v)) : (h.id === 'size_up' ? num(v) : money(v, unit)));
+    items.push([lab[0], f(a)], [lab[1], f(b)]);
+    if (h.id === 'revenge' || h.id === 'tilt') items.push(['Gap per trade', money(a - b, unit)]);
+    else if (h.id === 'hold_gap') items.push(['Gap', (a >= b ? '' : MINUS) + (report.dates_only ? holdDays(Math.abs(a - b)) : duration(Math.abs(a - b)))]);
+    else if (h.effect !== null) items.push(['Gap', `${num(h.effect)}× size after a win`]);
+  } else if (h.id === 'oversized_loss') {
+    items.push(['Share of all trades', pct(h.measure_a)], ['Share of all loss dollars', pct(h.measure_b)]);
+    if (h.effect !== null) items.push(['Your median loss', money(-h.effect, unit)]);
+  }
+  if (!items.length) return null;
+  const dl = el('dl', { class: 'happened' });
+  for (const [k, v] of items) dl.append(el('div', {}, el('dt', { text: k }), el('dd', { text: v })));
+  return dl;
+}
+
+// Layer 2, "Real or luck?": the result pill with its plain gloss, the verdict line; or "Luck check coming" with why.
+const GLOSS = { distinguishable: 'unlikely to be luck', not_distinguishable: 'could be luck' };
+function luckLayer(h, lines) {
+  const box = el('div', { class: 'layer layer-luck' }, el('h4', { text: 'Real or luck?' }));
+  const pill = el('p', { class: 'luck-pill' }, badge(h.verdict, h));
+  if (GLOSS[h.verdict]) pill.append(' ', el('span', { class: 'luck-gloss', text: GLOSS[h.verdict] }));
+  box.append(pill);
+  const shown = lines.filter((s) => s !== V_LAUNCH && s !== V_LAUNCH_SIZE);   // those two are the "Why not yet" text
+  for (const s of shown) box.append(el('p', { class: 'habit-sentence', text: plain(s) }));
+  if (luckComing(h)) {
+    box.append(el('details', { class: 'how-more luck-why' }, el('summary', { text: 'Why not yet' }), el('p', { class: 'small', text: whyComing(h) })));
+  }
+  return box;
 }
 
 function habitSection(h, unit, report) {
   const sec = el('section', { class: 'habit', id: 'habit-' + h.id, 'aria-labelledby': 'h-' + h.id });
+  const lines = TESTED.includes(h.id) ? habitSentences(h, report, wordingFmt(unit)) : [];
+  const verdictLines = lines.filter(isVerdictLine), happenedLines = lines.filter((x) => !isVerdictLine(x));
   if (report.dates_only && ['revenge', 'tilt', 'size_up'].includes(h.id)) {
-    // R-D3 addendum 3: the badge and the one line, nothing else (no question with its 15-minute figure, no
-    // measure, no dollars, no chart, no research line)
-    sec.append(el('h3', { id: 'h-' + h.id, text: h.name }), el('p', {}, badge(h.verdict, h)));
-    for (const s of habitSentences(h, report, wordingFmt(unit))) sec.append(el('p', { class: 'habit-sentence', text: s }));
+    // R-D3 addendum 3: no question with its 15-minute figure, no measure, no dollars, no chart, no research line
+    const what = el('div', { class: 'layer layer-what' }, el('h4', { text: 'What happened' }));
+    if (happenedLines.length) for (const x of happenedLines) what.append(el('p', { class: 'habit-sentence', text: plain(x) }));
+    else what.append(el('p', { class: 'muted', text: 'No figure for this file.' }));
+    sec.append(el('h3', { id: 'h-' + h.id, text: nameOf(h) }), what, luckLayer(h, verdictLines));
     return sec;
   }
-  sec.append(el('h3', { id: 'h-' + h.id, text: h.name }), el('p', { class: 'muted', text: h.question }), el('p', {}, badge(h.verdict, h)));
-  // sweep 3 (29 Oct): the chart first, then the result sentences; the method line and the related research sit
-  // behind one tap ("How this was measured"), word for word
+  sec.append(el('h3', { id: 'h-' + h.id, text: nameOf(h) }), el('p', { class: 'muted', text: h.question }));
+  const what = el('div', { class: 'layer layer-what' }, el('h4', { text: 'What happened' }));
   const chart = twoBarChart(h, unit, report);
-  if (chart) sec.append(chart);
-  if (TESTED.includes(h.id)) {
-    // ARCHITECT-STATS-AMENDMENT-R2 §9.2: the habit's lines in order (measures, the comparison
-    // shares, the 12-hour count, the verdict; too_few / withheld lines replace the share and the
-    // verdict), from wording.js.
-    for (const s of habitSentences(h, report, wordingFmt(unit))) sec.append(el('p', { class: 'habit-sentence', text: s }));
-    const extra = detailLine(h, unit);
-    if (extra) sec.append(el('p', { text: extra }));
-  } else {
-    const ul = el('ul');
-    for (const line of measures(h, unit)) if (line) ul.append(el('li', { text: line }));
-    sec.append(ul);
-  }
-  const dl = dollarsLine(h, unit);
-  if (dl) sec.append(el('p', { text: dl }));
+  if (chart) what.append(chart);
+  const list = happenedList(h, unit, report);
+  if (list) what.append(list);
+  for (const x of happenedLines) what.append(el('p', { class: 'habit-sentence', text: plain(x) }));
+  const extra = detailLine(h, unit);
+  if (extra) what.append(el('p', { text: extra }));
+  sec.append(what, luckLayer(h, verdictLines));
   const how = el('div', {});
   // The method line carries the habit's own n_perm (it scales with the file size, D-4).
   const method = methodLine(h, wordingFmt(unit));
@@ -210,8 +270,6 @@ function habitSection(h, unit, report) {
 // the trade count as a badge), each row a link to its section below. Still a table (the rows' cells are the
 // numbers screen readers and the tests read); CSS lays each row out as a card. The verdict labels are report.js's
 // own (VERDICT); the totals are the habits' dollars, historical, as the sections below say.
-const GLOSS = { distinguishable: 'unlikely to be luck', not_distinguishable: 'could be luck' };
-
 function habitsSummary(report, unit) {
   const sec = el('section', { class: 'section habits-sum', id: 'all-habits', 'aria-labelledby': 'all-h' }, el('h2', { id: 'all-h', text: 'All habits measured' }));
   const tested = report.habits.filter((h) => GLOSS[h.verdict]);
@@ -219,7 +277,7 @@ function habitsSummary(report, unit) {
     const top = el('div', { class: 'hs-top' });
     for (const h of tested) {
       top.append(el('p', { class: 'hs-verdict' + (h.verdict === 'distinguishable' ? ' is-hit' : '') },
-        badge(h.verdict, h), ' ', el('span', { class: 'hs-gloss', text: GLOSS[h.verdict] }), el('span', { class: 'hs-of', text: h.name })));
+        badge(h.verdict, h), ' ', el('span', { class: 'hs-gloss', text: GLOSS[h.verdict] }), el('span', { class: 'hs-of', text: nameOf(h) })));
     }
     sec.append(top);
   }
@@ -234,7 +292,7 @@ function habitsSummary(report, unit) {
       fill.style.width = (100 * Math.abs(h.dollars.amount) / maxAbs).toFixed(1) + '%';   // CSSOM, allowed by the CSP
       amt.append(el('span', { class: 'hs-bar', 'aria-hidden': 'true' }, fill));
     } else amt.textContent = '—';
-    tbody.append(el('tr', { class: 'hs-row' }, el('th', { scope: 'row' }, el('a', { href: '#habit-' + h.id, text: h.name })),
+    tbody.append(el('tr', { class: 'hs-row' }, el('th', { scope: 'row' }, el('a', { href: '#habit-' + h.id, text: nameOf(h) })),
       el('td', { class: 'hs-res' }, badge(h.verdict, h)), amt,
       el('td', { class: 'num hs-n' }, h.dollars ? el('span', { class: 'hs-count', text: String(h.dollars.n_trades) }) : '—')));
   }
@@ -243,7 +301,7 @@ function habitsSummary(report, unit) {
     el('thead', {}, el('tr', {}, el('th', { scope: 'col', text: 'Habit' }), el('th', { scope: 'col', text: 'Result' }),
       el('th', { scope: 'col', class: 'num', text: 'Total' }), el('th', { scope: 'col', class: 'num', text: 'Trades' }))), tbody));
   sec.append(el('details', { class: 'how-more hs-note' }, el('summary', { text: 'What “Total” means' }),
-    el('p', { text: 'The dollar total of the trades that match each habit, from your file. Historical: it describes what happened. Tap a habit to see it in detail.' })));
+    el('p', { text: 'The dollar total of the trades that match each habit, from your file. Historical: it shows what happened. Tap a habit to see it in detail.' })));
   return sec;
 }
 
@@ -284,13 +342,16 @@ export function renderReport(report, out, meta) {
   const p1 = el('section', { class: 'section', id: 'focus', 'aria-labelledby': 'focus-h' });
   p1.append(el('h2', { id: 'focus-h', text: 'Summary' }));   // sweep 2: a heading that says what it is
   const head = el('div', { class: focus ? 'notice notice-gap' : 'notice', id: 'focus-lines' });
-  for (const line of page1Lines(report, wordingFmt(unit))) head.append(el('p', { text: line }));
+  for (const line of page1Lines(report, wordingFmt(unit))) head.append(el('p', { text: plain(line) }));
   if (focus) head.append(el('p', { class: 'muted', text: focus.question }), el('p', {}, badge(focus.verdict, focus)));
   p1.append(head);
-  // sweep 2: the coverage lines (each "… is described, not tested …") fold under one tap instead of repeating
+  // 29 Oct (owner): the coverage line says how many habits could be checked for luck, then which ones have a luck
+  // check coming; wording.js's fixed "… is described, not tested …" lines are not shown.
   const cov = el('div', { id: 'coverage' });
-  for (const line of coverageLines(report)) cov.append(el('p', { class: 'small', text: line }));
-  p1.append(cov.childNodes.length > 1 ? el('details', { class: 'how-more', id: 'coverage-more' }, el('summary', { text: 'What was tested, and what was only described' }), cov) : cov);
+  cov.append(el('p', { class: 'small', text: coverageLines(report)[0] }));
+  const coming = report.habits.filter(luckComing).map(nameOf);
+  if (coming.length) cov.append(el('p', { class: 'small', text: `Luck check coming: ${coming.join(', ')}.` }));
+  p1.append(cov);
   p1.append(el('p', { class: 'small muted', text: `${report.n_trades} trades over about ${report.period_weeks} week${report.period_weeks === 1 ? '' : 's'}.${unitLine(unit)}${meta && meta.span_left_out ? ' ' + spanLine(meta.span_left_out) : ''}${meta && meta.limited ? ' Only the most recent 20,000 trades were used.' : ''}` }));
   const merged = mergedLine(report, wordingFmt(unit));   // R-D3 addendum I-5: only when rows were merged
   if (merged) p1.append(el('p', { class: 'small', id: 'merged-rows', text: merged }));

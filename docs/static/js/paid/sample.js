@@ -1,6 +1,6 @@
 // sample.js — /sample-report/ in paid builds (delivery plan C-12 final): renders the committed sample report
 // (a real analyse() output, embedded by the build) with the report page's own renderer, in static mode.
-import { renderReport } from './report.js?v=32f6fbca';
+import { renderReport } from './report.js?v=89ec7ee0';
 
 const data = document.getElementById('sample-data');
 const out = document.getElementById('sample-out');

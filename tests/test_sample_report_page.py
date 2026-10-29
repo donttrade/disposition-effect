@@ -118,17 +118,21 @@ def test_chromium_draws_the_sample_with_the_report_pages_own_sentences(paid, bro
     page.wait_for_selector("#sample-out #focus-lines")
     p1 = [p.strip() for p in page.locator("#focus-lines p").all_inner_texts()]
     cov = [p.strip() for p in page.locator("#coverage p").all_text_contents()]   # sweep 2: folded under one tap
-    text = page.inner_text("#sample-out")
+    text = page.locator("#sample-out").text_content()   # 29 Oct: folded "Why not yet" lines count too
     ctx.close()
     assert errors == []
     # wording.js's own lines; money and durations use the page's formatters, so lines are compared up to the first figure
     head = lambda line: re.split(r"[\d−]|-\d", line)[0]  # noqa: E731
     assert len(p1) >= len(want["p1"]) and all(head(w) == head(g) for w, g in zip(want["p1"], p1)), (want["p1"], p1)
     assert p1[0] == want["p1"][0]
-    assert cov == want["cov"]
+    # 29 Oct (owner): the coverage shows wording.js's first line, then which habits have a luck check coming;
+    # its fixed "… is described, not tested …" lines are not shown (report.js plain())
+    assert cov[0] == want["cov"][0] and cov[1].startswith("Luck check coming: ") and len(cov) == 2
     n = 0
     for lines in want["h"]:
         for line in lines:
+            if line.endswith(" So this pattern is described here without a verdict."):   # under "Why not yet", word for word but the tail
+                line = line[:-len(" So this pattern is described here without a verdict.")]
             assert head(line) in text, line
             n += 1
     assert n >= 8

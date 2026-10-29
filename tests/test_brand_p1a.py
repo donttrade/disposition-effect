@@ -71,7 +71,7 @@ def test_reworded_firm_copy_and_the_build_lint_clean(built_site):
     ff = L.readable_text(page(built_site, "/for-firms/"))
     assert "A method fixed in advance." in ff
     assert "That test is fingerprinted with a SHA-256 hash, recorded, and then run once, as written." in ff
-    assert "runs the same pre-registered test again on a later period." in ff
+    assert "Price: scoped and priced in writing before any data is seen; not part of the monthly plan." in ff   # 29 Oct (one product)
     pr = L.readable_text(page(built_site, "/pricing/"))
     assert "pre-registered" not in pr   # 25 Oct sweep: /pricing/ is for traders; the firm tests are on /for-firms/
     probs = [p for p in L.lint_build(str(built_site["out"])) if p[0] in ("banned:seal_words", "banned:skill_claims")]
