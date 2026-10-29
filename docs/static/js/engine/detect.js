@@ -72,14 +72,17 @@ export const SIGNATURES = {
     required: [['side'], ['contract'], ['status'], ['qty'], ['price'], ['time']],
   },
   // TradingView Order History export (Trading Panel → History → Export data). Column names
-  // confirmed against one real paper-trading export (29 Oct 2026); see PROVENANCE.txt.
+  // match one real paper-trading export (29 Oct 2026), but no broker-connected export has been
+  // seen, so it stays beta like IBKR and Tradovate (owner, 29 Oct); see PROVENANCE.txt.
   tradingview: {
-    verified: true,
+    verified: false,
     fields: {
       symbol: ['symbol'], side: ['side'], qty: ['quantity', 'qty'], price: ['fillprice'], status: ['status'],
       commission: ['commission'], time: ['closingtime'],
     },
     required: [['symbol'], ['side'], ['qty'], ['price'], ['status'], ['time']],
+    // The export's own column names, for E_MISSING_COLUMN.
+    labels: { symbol: 'Symbol', side: 'Side', qty: 'Quantity', price: 'Fill price', status: 'Status', time: 'Closing time' },
   },
   // The TradeZella-style round-trip layout we also accept.
   generic_roundtrip: {
@@ -222,7 +225,11 @@ export function detectCsv(rows) {
     }
   }
   if (best && best.m.ok >= 3 && best.m.ok / best.m.total >= 0.5) {
-    fail('E_MISSING_COLUMN', `"${best.m.missing[0]}" was not found`, rows[best.i].row, best.m.missing[0]);
+    // A signature with labels names the column as its export spells it ("Closing time", not "time").
+    const f = best.m.missing[0];
+    const labels = SIGNATURES[best.m.name].labels;
+    const col = labels && labels[f] ? labels[f] : f;
+    fail('E_MISSING_COLUMN', `"${col}" was not found`, rows[best.i].row, col);
   }
   fail('E_UNKNOWN_FORMAT');
 }

@@ -5,14 +5,14 @@
 // survive into executions and trades.
 
 import { decodeBytes, isHtml, parseCsv, sniffDelimiter, resolveNumberStyle, checkQuoting } from './csv.js?v=09ecf6e4';
-import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS, checkCurrencyColumn } from './detect.js?v=5ecad5bf';
+import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS, checkCurrencyColumn } from './detect.js?v=82af9fc8';
 import { fail, LIMITS } from './errors.js?v=31d80675';
 import { htmlRows, parseMt, isEmptyRow } from './mt.js?v=39256871';
 import { parseGeneric, parseGenericRoundtrip } from './generic.js?v=9c60e210';
 import { parseIbkr } from './ibkr.js?v=f6948b1c';
 import { parseTradovate } from './tradovate.js?v=1928f2b1';
-import { parseTradingView } from './tradingview.js?v=3d4610c2';
-import { finish } from './trades.js?v=93bb21f8';
+import { parseTradingView, stripCurrencyCells } from './tradingview.js?v=7c5b71f3';
+import { finish } from './trades.js?v=dc047e95';
 
 export { EngineError } from './errors.js?v=31d80675';
 
@@ -73,6 +73,7 @@ export function parseFile(bytes) {
   if (dataRows === 0) fail('E_HEADER_ONLY');
   if (dataRows > LIMITS.MAX_ROWS) fail('E_TOO_LARGE');
   checkQuoting(rows, hi, det.map);
+  if (name === 'tradingview') stripCurrencyCells(rows.slice(hi + 1), m);
   resolveNumberStyle([{ rows: rows.slice(hi + 1), map: m, fields: NUMERIC_FIELDS[name] }], delim === ',' ? 'dot' : null);
   const verified = SIGNATURES[name].verified;
   const dup = countDuplicateRows(rows.slice(hi + 1), m);

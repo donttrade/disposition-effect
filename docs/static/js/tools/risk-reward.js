@@ -10,7 +10,7 @@
 
 import { parsePositive, parseNonNegative, InputError } from './num.js?v=8df99e34';
 import { el, plain, pct, MINUS } from './format.js?v=acb0db51';
-import { clearFieldErrors, fieldError, showProblems } from './tool-state.js?v=7534a30f';
+import { clearFieldErrors, fieldError, showProblems } from './tool-state.js?v=eb893892';
 
 const $ = (id) => document.getElementById(id);
 const LABELS = {

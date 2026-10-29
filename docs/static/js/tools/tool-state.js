@@ -17,7 +17,7 @@
 //    blank page or an endless "Reading…" (R2). settled() resolves when no read is in flight,
 //    whichever way the latest one ended, so "Run" can wait for it without hanging (R1).
 
-import { readTradeFile, startProgress, workerError } from './read-file.js?v=c35c6023';
+import { readTradeFile, startProgress, workerError } from './read-file.js?v=b66c8463';
 import { LIMITS, MESSAGES } from '../engine/errors.js?v=31d80675';
 import { el } from './format.js?v=acb0db51';
 
