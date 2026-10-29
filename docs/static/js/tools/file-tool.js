@@ -5,7 +5,7 @@
 // worker parse path. Nothing is stored, logged or sent: these pages' CSP is connect-src 'none'.
 // No noise checks run here (noise: false), whatever the build's free_badges flag.
 
-import { createFileSlot, renderReadError } from './tool-state.js?v=7534a30f';
+import { createFileSlot, renderReadError } from './tool-state.js?v=eb893892';
 import { el, unitNote, day, intText } from './format.js?v=acb0db51';
 
 export const SAMPLE_LABEL = 'the synthetic sample file';

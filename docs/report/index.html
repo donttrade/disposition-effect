@@ -32,7 +32,7 @@
 <link rel="stylesheet" href="/static/css/site.css?v=08b3fe6b">
 <script src="/static/js/theme.js?v=74363ef7"></script>
 <script src="/static/js/nav.js?v=cd8f3405" defer></script>
-<script src="/static/js/paid/report.js?v=c57072a7" type="module"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cdac673936b54f08beb5991aaae13975"}'></script>
+<script src="/static/js/paid/report.js?v=4bbfbadf" type="module"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cdac673936b54f08beb5991aaae13975"}'></script>
 
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "name": "Your habit report", "position": 2}]}]}</script>
 </head>
@@ -106,6 +106,7 @@
     <details class="how-more"><summary>MetaTrader 4</summary><p>Account History tab, right-click, choose All History, then Save as Detailed Report.</p></details>
     <details class="how-more"><summary>IBKR</summary><p>A Flex Query with the Trades section at execution level, as CSV. IBKR allows up to 365 days per export, so pick the last 365 days.</p></details>
     <details class="how-more"><summary>Tradovate</summary><p>The Orders export as CSV, with the date range set to cover all your trades.</p></details>
+    <details class="how-more"><summary>TradingView</summary><p>Trading Panel → History → ⋯ → Export data. It saves your order history as CSV.</p></details>
   </li>
   <li class="how-step">
     <h2 class="rs-h"><span class="how-n">2</span> Drop the file in</h2>
@@ -122,7 +123,7 @@
     <p id="rp-access" class="muted"></p>
     <div class="dropzone" id="rp-drop">
       <p><strong>Drop your trade file here</strong>, or choose it:</p>
-      <label for="rp-file">Trade file (MT5/MT4 report, IBKR Flex, Tradovate Orders, or the CSV template)</label>
+      <label for="rp-file">Trade file (MT5/MT4 report, IBKR Flex, Tradovate Orders, TradingView Order History, or the CSV template)</label>
       <input id="rp-file" type="file" accept=".csv,.htm,.html,.txt">
     </div>
     <details class="how-more"><summary>What is sent</summary><p>Your browser sends our server only stripped trade numbers: open and close times, buy or sell, relative size, the realised result, a random symbol number and a scrambled fingerprint of each row. No name, account number or ticker is sent. The numbers are not kept; we keep only a scrambled fingerprint of each trade row from your first report, so a re-test can be matched to the same history, and we delete it on the dates in our privacy notice.</p></details>
