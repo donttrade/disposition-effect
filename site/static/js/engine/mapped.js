@@ -333,7 +333,7 @@ export function parseMapped(rows, mp, sideFrom, kind, delimiter) {
   }
   let dup = 0;
   {
-    const idx = Object.values(cm);
+    const idx = Object.values(cm).concat(idColumns(header));
     const seen = new Set();
     for (const r of kept) {
       const key = idx.map((i) => cellAt(r, i)).join('\u0001');
@@ -438,12 +438,40 @@ export function mappedTzLabel(extra) {
 // Two overlapping exports (IBKR's 365-day cap, yearly Trading 212 or Binance files, a paste of
 // page 1 and then pages 1-2) count each fill once: a key is kept as many times as it occurs in
 // any ONE file, so two identical fills inside one file both survive, as they always have.
+// The key holds the row's ID cells (trade, order, fill or deal ID) and account cells when the file
+// has such columns (Tester F3): the same fill in two accounts that copy each other, or two fills
+// with different IDs, are different fills. Those cells are only compared here, as an internal _id
+// on each row: they never reach a result, a message or the page.
+export const DEDUP_IDS = Object.freeze(['id', 'tradeid', 'orderid', 'fillid', 'execid', 'executionid', 'ibexecid',
+  'dealid', 'deal', 'dealnumber', 'ticket', 'txid', 'tid', 'oid', 'ordertxid', 'ordernumber', 'orderno',
+  'transactionid', 'tradenumber', 'fillnumber', 'internalorderid', 'serviceorderid', 'fillexecutionserviceid']);
+
+export function idColumns(header) {
+  const out = [];
+  header.forEach((h, i) => {
+    const n = normHeader(h);
+    if (DEDUP_IDS.includes(n) || n.indexOf('account') !== -1 || n.indexOf('acct') !== -1) out.push(i);
+  });
+  return out;
+}
+
+// rows of one file and its heading(s) → row number → the identifying cells, joined
+export function idLookup(rows, headerOf) {
+  const at = new Map();
+  for (const r of rows) {
+    const idx = headerOf(r);
+    if (!idx || !idx.length) continue;
+    at.set(r.row, idx.map((i) => (i < r.cells.length ? r.cells[i] : '')).join('\u0002'));
+  }
+  return (row) => (at.has(row) ? at.get(row) : '');
+}
+
 export function execKey(e) {
-  return [e.ts, e.symbol, e.side, e.qty, e.price, e.fee].join('\u0001');
+  return [e.ts, e.symbol, e.side, e.qty, e.price, e.fee, e._id || ''].join('\u0001');
 }
 
 export function rtKey(r) {
-  return [r.symbol, r.dir, r.open_ts, r.close_ts, r.qty, r.entry, r.exit].join('\u0001');
+  return [r.symbol, r.dir, r.open_ts, r.close_ts, r.qty, r.entry, r.exit, r._id || ''].join('\u0001');
 }
 
 // lists: one array per file, in reading order → {out, dropped}

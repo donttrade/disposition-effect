@@ -8,7 +8,7 @@ import { decodeBytes, isHtml, parseCsv, sniffDelimiter, resolveNumberStyle, chec
   wideRows } from './csv.js';
 import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS, checkCurrencyColumn, ISO_CURRENCIES } from './detect.js';
 import { fail, inFile, LIMITS } from './errors.js';
-import { checkMapping, parseMapped, mappedTzLabel, mergeParsed, firstTs } from './mapped.js';
+import { checkMapping, parseMapped, mappedTzLabel, mergeParsed, firstTs, idColumns, idLookup } from './mapped.js';
 import { htmlRows, parseMt, isEmptyRow } from './mt.js';
 import { parseGeneric, parseGenericRoundtrip } from './generic.js';
 import { parseIbkr } from './ibkr.js';
@@ -26,9 +26,10 @@ export const TZ_LABELS = Object.freeze({
 
 // Rows whose whitelisted cells all equal an earlier row's (e.g. two overlapping exports
 // pasted together). They are kept, since two identical fills can be real, and counted
-// for W_DUPLICATE_ROWS (Tester D6). Columns outside the whitelist are not looked at.
-function countDuplicateRows(rows, map) {
-  const idx = Object.values(map);
+// for W_DUPLICATE_ROWS (Tester D6). Columns outside the whitelist are not looked at, except the
+// ID and account columns (mapped.js idColumns): rows with different IDs are not copies (Tester F3).
+function countDuplicateRows(rows, map, ids = []) {
+  const idx = Object.values(map).concat(ids);
   const seen = new Set();
   let n = 0;
   for (const r of rows) {
@@ -92,8 +93,11 @@ function readAuto(src) {
     let dup = 0;
     let nData = 0;
     for (const g of groups) { dup += countDuplicateRows(g.rows, g.map); nData += g.rows.length; }
+    const tableOf = new Map();
+    for (const t of det.tables) { const idx = idColumns(t.header.cells); for (const r of t.rows) tableOf.set(r.row, idx); }
     return { fmt: det.format, verified: false, res: withDuplicates(parseMt(det.tables), dup), mode: 'gross',
-      tz: TZ_LABELS[det.format], nData, shape: det.format };
+      tz: TZ_LABELS[det.format], nData, shape: det.format,
+      idOf: idLookup(det.tables.flatMap((t) => t.rows), (r) => tableOf.get(r.row)) };
   }
   const { delimiter: delim } = src;
   let rows = src.rows;
@@ -113,12 +117,14 @@ function readAuto(src) {
   if (name === 'tradingview') stripCurrencyCells(rows.slice(hi + 1), m);
   resolveNumberStyle([{ rows: rows.slice(hi + 1), map: m, fields: NUMERIC_FIELDS[name] }], delim === ',' ? 'dot' : null);
   const verified = SIGNATURES[name].verified;
-  const dup = countDuplicateRows(rows.slice(hi + 1), m);
+  const dup = countDuplicateRows(rows.slice(hi + 1), m, idColumns(rows[hi].cells));
   const out = (fmt, res, mode) => {
     withDuplicates(res, dup, curIgnored);
     if (wr.split.length) res.skipped.split_number = (res.skipped.split_number || 0) + wr.split.length;
     res.extra.wide_rows = wr.wide;
-    return { fmt, verified, res, mode, tz: TZ_LABELS[fmt], nData: dataRows, shape: fmt };
+    const idx = idColumns(rows[hi].cells);
+    return { fmt, verified, res, mode, tz: TZ_LABELS[fmt], nData: dataRows, shape: fmt,
+      idOf: idLookup(rows.slice(hi + 1), () => idx) };
   };
   if (name === 'mt5_deals') {
     const table = { kind: 'mt5_deals', section: 'deals', map: m,
@@ -149,7 +155,10 @@ function readMappedItem(src, mp, sideFrom, expect) {
   const shape = headerShape(rows, mp);
   if (expect !== null && shape !== expect) fail('E_MIXED_FILES');
   const { res, nData } = parseMapped(rows, mp, sideFrom, src.kind, src.delimiter);
-  return { fmt: 'mapped', verified: false, res, mode: null, tz: mappedTzLabel(res.extra), nData, shape };
+  const h = rows.findIndex((r) => r.row === mp.header_row + 1);
+  const idx = idColumns(rows[h].cells);
+  return { fmt: 'mapped', verified: false, res, mode: null, tz: mappedTzLabel(res.extra), nData, shape,
+    idOf: idLookup(rows.slice(h + 1), () => idx) };
 }
 
 // Several files (or pastes) of one platform, read as one history. Every file is read the same way:
@@ -184,6 +193,10 @@ export function parseFiles(items, opts = {}) {
   if (n === 1) {
     const p = parts[0];
     return finish(p.fmt, p.verified, p.res, p.mode, p.tz);
+  }
+  for (const p of parts) {
+    for (const x of p.res.executions) x._id = p.idOf(x.row);
+    for (const x of p.res.roundtrips) x._id = p.idOf(x.row);
   }
   const order = parts.map((p, k) => k).sort((a, b) => (parts[a].first - parts[b].first) || (a - b));
   const sorted = order.map((k) => parts[k]);

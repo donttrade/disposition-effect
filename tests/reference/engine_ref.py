@@ -2076,9 +2076,9 @@ def _strip(d):
     return {k: v for k, v in d.items() if not k.startswith("_")}
 
 
-def count_duplicate_rows(rows, m):
-    """Rows whose whitelisted cells all equal an earlier row's. Mirrors countDuplicateRows()."""
-    idx = list(m.values())
+def count_duplicate_rows(rows, m, ids=()):
+    """Rows whose whitelisted (and ID/account) cells all equal an earlier row's. Mirrors countDuplicateRows()."""
+    idx = list(m.values()) + list(ids)
     seen = set()
     n = 0
     for r in rows:
@@ -2594,7 +2594,7 @@ def parse_mapped(rows, mp, side_from, kind, delimiter):
                 elif chosen == "comma" and re.match(r"^[+-]?\d+,\d{3}$", bare, re.ASCII):
                     r["cells"][i] = bare.replace(",", ".", 1)
     dup = 0
-    idx = list(cm.values())
+    idx = list(cm.values()) + id_columns(header)
     seen_keys = set()
     for r in kept:
         key = "\u0001".join(_cell_at(r, i) for i in idx)
@@ -2715,12 +2715,36 @@ def mapped_tz_label(extra):
     return MAPPED_TZ["zone"] if extra.get("zone_ignored") else MAPPED_TZ["plain"]
 
 
+DEDUP_IDS = ["id", "tradeid", "orderid", "fillid", "execid", "executionid", "ibexecid", "dealid", "deal", "dealnumber",
+             "ticket", "txid", "tid", "oid", "ordertxid", "ordernumber", "orderno", "transactionid", "tradenumber",
+             "fillnumber", "internalorderid", "serviceorderid", "fillexecutionserviceid"]
+
+
+def id_columns(header):
+    out = []
+    for i, h in enumerate(header):
+        n = norm_header(h)
+        if n in DEDUP_IDS or "account" in n or "acct" in n:
+            out.append(i)
+    return out
+
+
+def id_lookup(rows, header_of):
+    at = {}
+    for r in rows:
+        idx = header_of(r)
+        if not idx:
+            continue
+        at[r["row"]] = "\u0002".join(r["cells"][i] if i < len(r["cells"]) else "" for i in idx)
+    return lambda row: at.get(row, "")
+
+
 def _exec_key(e):
-    return (e["ts"], e["symbol"], e["side"], e["qty"], e["price"], e["fee"])
+    return (e["ts"], e["symbol"], e["side"], e["qty"], e["price"], e["fee"], e.get("_id") or "")
 
 
 def _rt_key(r):
-    return (r["symbol"], r["dir"], r["open_ts"], r["close_ts"], r["qty"], r["entry"], r["exit"])
+    return (r["symbol"], r["dir"], r["open_ts"], r["close_ts"], r["qty"], r["entry"], r["exit"], r.get("_id") or "")
 
 
 def drop_overlap(lists, key_of):
@@ -2821,8 +2845,14 @@ def _read_auto(src):
         res = parse_mt(det["tables"])
         res["extra"]["duplicate_rows"] = dup
         res["extra"]["currency_ignored"] = False
+        table_of = {}
+        for t in det["tables"]:
+            idx = id_columns(t["header"]["cells"])
+            for r in t["rows"]:
+                table_of[r["row"]] = idx
         return {"fmt": det["format"], "verified": False, "res": res, "mode": "gross",
-                "tz": TZ_LABELS[det["format"]], "n_data": n_data, "shape": det["format"]}
+                "tz": TZ_LABELS[det["format"]], "n_data": n_data, "shape": det["format"],
+                "id_of": id_lookup([r for t in det["tables"] for r in t["rows"]], lambda r: table_of.get(r["row"]))}
     delim = src["delimiter"]
     if not rows:
         fail("E_EMPTY")
@@ -2844,7 +2874,7 @@ def _read_auto(src):
     resolve_number_style([{"rows": rows[hi + 1:], "map": m, "fields": NUMERIC_FIELDS[name]}],
                          "dot" if delim == "," else None)
     verified = SIGNATURES[name]["verified"]
-    dup = count_duplicate_rows(rows[hi + 1:], m)
+    dup = count_duplicate_rows(rows[hi + 1:], m, id_columns(rows[hi]["cells"]))
     if name == "mt5_deals":
         fmt = "mt5"
         res = parse_mt([{"kind": "mt5_deals", "section": "deals", "map": m,
@@ -2865,8 +2895,9 @@ def _read_auto(src):
     if wr["split"]:
         res["skipped"]["split_number"] = res["skipped"].get("split_number", 0) + len(wr["split"])
     res["extra"]["wide_rows"] = wr["wide"]
+    idx = id_columns(rows[hi]["cells"])
     return {"fmt": fmt, "verified": verified, "res": res, "mode": mode, "tz": TZ_LABELS[fmt],
-            "n_data": len(data_rows), "shape": fmt}
+            "n_data": len(data_rows), "shape": fmt, "id_of": id_lookup(rows[hi + 1:], lambda r: idx)}
 
 
 def _header_shape(rows, mp):
@@ -2890,8 +2921,10 @@ def _read_mapped(src, mp, side_from, expect):
     if expect is not None and shape != expect:
         fail("E_MIXED_FILES")
     res, n_data = parse_mapped(rows, mp, side_from, src["kind"], src["delimiter"])
+    h = next(k for k, r in enumerate(rows) if r["row"] == mp["header_row"] + 1)
+    idx = id_columns(rows[h]["cells"])
     return {"fmt": "mapped", "verified": False, "res": res, "mode": None, "tz": mapped_tz_label(res["extra"]),
-            "n_data": n_data, "shape": shape}
+            "n_data": n_data, "shape": shape, "id_of": id_lookup(rows[h + 1:], lambda r: idx)}
 
 
 def parse_files(items, mapping=None):
@@ -2929,6 +2962,11 @@ def parse_files(items, mapping=None):
     p = parts[0]
     if n == 1:
         return finish(p["fmt"], p["verified"], p["res"], p["mode"], p["tz"])
+    for p in parts:
+        for x in p["res"]["executions"]:
+            x["_id"] = p["id_of"](x["row"])
+        for x in p["res"]["roundtrips"]:
+            x["_id"] = p["id_of"](x["row"])
     order = sorted(range(n), key=lambda k: (parts[k]["first"], k))
     res = merge_parsed([parts[k] for k in order])
     return finish(p["fmt"], p["verified"], res, p["mode"], mapped_tz_label(res["extra"]) if mapping is not None else p["tz"])
