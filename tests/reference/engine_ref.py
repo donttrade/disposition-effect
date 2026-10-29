@@ -2351,11 +2351,13 @@ def finish(fmt, verified, res, mode, tz_label):
 
 BLOCKED = {
     "contains": ["account", "acct", "wallet", "email", "phone", "hash", "address", "iban", "customer", "client",
-                 "passport", "password", "cardnumber", "comment", "remark", "memo"],
+                 "passport", "password", "cardnumber", "comment", "remark", "memo", "beneficiary", "counterparty",
+                 "sender", "login", "bank", "routing", "telegram", "discord", "contact", "referral"],
     "exact": ["name", "fullname", "firstname", "lastname", "surname", "tradername", "legalname", "displayname",
               "nickname", "username", "owner", "user", "uid", "userid", "traderid", "note", "notes", "mail",
               "transactionid", "swift", "bic", "ssn", "sin", "tin", "taxid", "nationalid", "dob", "dateofbirth",
-              "birthdate", "publickey", "pubkey", "signature", "description", "mobile", "ip"],
+              "birthdate", "publickey", "pubkey", "signature", "description", "mobile", "ip", "orderid",
+              "sortcode", "handle", "cell"],
 }
 
 

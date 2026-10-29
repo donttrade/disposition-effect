@@ -40,14 +40,16 @@ export function readRows(item, delimiter = null) {
 // `contains` (normalised: lowercase, letters and digits only). "Account Display Name", "Trade
 // Account", "acct_no", "Wallet address", "Deposit address", "E-mail", "Client name", "IBAN" are all
 // caught. Any hash is blocked (an on-chain transaction hash leads to the wallet), and every address
-// (to, from, deposit, IP). Kraken's txid stays readable: an exchange's own trade ID, not on-chain.
+// (to, from, deposit, IP). Kraken's txid stays readable: an exchange's own trade ID, not on-chain;
+// so does MetaTrader's Position ID, which the MT5 reader needs for hedged legs.
 export const BLOCKED = Object.freeze({
   contains: ['account', 'acct', 'wallet', 'email', 'phone', 'hash', 'address', 'iban', 'customer', 'client', 'passport',
-    'password', 'cardnumber', 'comment', 'remark', 'memo'],
+    'password', 'cardnumber', 'comment', 'remark', 'memo', 'beneficiary', 'counterparty', 'sender', 'login', 'bank',
+    'routing', 'telegram', 'discord', 'contact', 'referral'],
   exact: ['name', 'fullname', 'firstname', 'lastname', 'surname', 'tradername', 'legalname', 'displayname', 'nickname',
     'username', 'owner', 'user', 'uid', 'userid', 'traderid', 'note', 'notes', 'mail', 'transactionid', 'swift', 'bic',
     'ssn', 'sin', 'tin', 'taxid', 'nationalid', 'dob', 'dateofbirth', 'birthdate', 'publickey', 'pubkey', 'signature',
-    'description', 'mobile', 'ip'],
+    'description', 'mobile', 'ip', 'orderid', 'sortcode', 'handle', 'cell'],
 });
 
 export function isBlocked(norm) {
