@@ -1766,23 +1766,28 @@ def usd_fr(n):
     return "{:,}".format(int(n)).replace(",", "\u00a0") + ",00\u00a0$\u00a0US"
 
 
+BEACON_CONNECT = "https://cloudflareinsights.com"   # the analytics beacon's one connect-src host
+
+
 def csp_for(page, cfg):
     if os.path.join(page["path"].strip("/"), "index.html") in PASSTHROUGH_CSP_PAGES:
         # Manager C4 after the merge of steps 28–29: the lifted old calculators keep the strict
         # no-network policy they had as passthrough pages (connect, worker and form-action 'none'),
         # now without 'unsafe-inline'. With analytics on, the beacon host is the only addition,
         # as on every other tool page (plan DoD: "connect-src 'none' (or the beacon host only)").
+        # 29 Oct: 'none' may not stand beside a host (CSP3; the browser ignores it and logs a console error on
+        # every page), so with the beacon the directive is the beacon host alone, which is the same policy.
         a = cfg["flags"]["analytics"]
         return ("default-src 'self'; script-src 'self'" + (" https://static.cloudflareinsights.com" if a else "") +
-                "; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'" +
-                (" https://cloudflareinsights.com" if a else "") +
+                "; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src " +
+                (BEACON_CONNECT if a else "'none'") +
                 "; worker-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'")
     connect = page.get("connect_src", "'none'")
     if page.get("connect_worker"):
         connect = "'self' " + cfg["worker"]["api_base"]
     beacon = cfg["flags"]["analytics"] and not page.get("no_analytics")   # D12: never on the journal
-    if beacon:
-        connect += " https://cloudflareinsights.com"
+    if beacon:   # never "'none' <host>": the browser ignores 'none' there and logs an error (CSP3)
+        connect = BEACON_CONNECT if connect == "'none'" else connect + " " + BEACON_CONNECT
     script = "'self'" + (" https://static.cloudflareinsights.com" if beacon else "")
     forms = ("'none'" if page.get("no_forms") else
              "'self' https://api.web3forms.com" + "".join(" " + a for a in page.get("form_action", [])))

@@ -318,7 +318,7 @@ def test_a3_a7_lazy_no_network_no_storage(browser, built_site):
     assert pg.evaluate("JSON.stringify([Object.keys(localStorage), document.cookie])") == before
     assert pg.evaluate("indexedDB.databases ? indexedDB.databases().then(d => d.length) : 0") == 0
     csp = pg.get_attribute("meta[http-equiv='Content-Security-Policy']", "content")
-    assert "connect-src 'none'" in csp
+    assert "connect-src 'none';" in csp or "connect-src https://cloudflareinsights.com;" in csp   # 29 Oct: CSP3
     ctx.close()
 
 
