@@ -1184,3 +1184,46 @@ svg.tp { padding: 8px 10px; }
   .tool-cards-all .tp-stats .tp-tile:nth-child(3) { display: none; }
   .tool-cards-all .tp-tile { padding: 2px 6px; } .tool-cards-all .tp-tile b { font-size: 0.78rem; }
   .tool-cards-all .tp-prop { gap: 4px; } .tool-cards-all .tp-legend { font-size: 0.62rem; } }
+
+/* "All habits measured" (29 Oct, owner; static/js/paid/report.js habitsSummary): the tested results as big pills,
+   then each habit as a card row: result pill, dollar total with a bar scaled to the largest, trade count badge.
+   The whole row is the link to the habit's section. A real table underneath (thead kept for screen readers). */
+.habits-sum .hs-top { display: flex; flex-wrap: wrap; gap: var(--s2); margin: 0 0 var(--s3); }
+.hs-verdict { flex: 1 1 15rem; max-width: 26rem; margin: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  padding: var(--s2) var(--s3); border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+.hs-verdict.is-hit { border: 2px solid var(--rust); }
+.hs-verdict .badge { font-size: var(--fs-1); min-height: 34px; padding: 4px 14px; background: var(--bg); }
+.hs-verdict.is-hit .badge { background: var(--rust); color: var(--on-rust); border-color: var(--rust); }
+.hs-gloss { font-size: var(--fs-2); font-weight: 600; }
+.hs-of { font-size: var(--fs-0); color: var(--muted); }
+.hs-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.hs-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.hs-table tbody { display: grid; gap: var(--s1); }
+.hs-row { position: relative; display: grid; grid-template-columns: minmax(0, 1.4fr) auto minmax(9rem, 1fr) auto; align-items: center;
+  gap: var(--s1) var(--s2); padding: 12px var(--s2); border: 1px solid var(--border); border-radius: 12px; background: var(--bg); }
+.hs-row:hover { border-color: var(--rust); }
+.hs-row:focus-within { outline: 3px solid var(--rust); outline-offset: 2px; }
+.hs-row > * { padding: 0; border: 0; text-align: left; }
+.hs-row th a { font-weight: 600; color: var(--text); text-decoration: none; }
+.hs-row th a:focus-visible { outline: none; }
+.hs-row th a::after { content: ""; position: absolute; inset: 0; border-radius: 12px; }   /* the whole row is the link */
+.hs-row:hover th a { color: var(--rust); text-decoration: underline; }
+.hs-total { display: flex; flex-direction: column; align-items: stretch; gap: 4px; }
+.hs-amt { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+.hs-bar { display: block; height: 8px; border-radius: 4px; background: var(--surface); overflow: hidden; }
+.hs-fill { display: block; height: 100%; border-radius: 4px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.hs-fill.is-loss { background: var(--loss); } .hs-fill.is-gain { background: var(--gain); } .hs-fill.is-flag { background: var(--rust); }
+.hs-count { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border);
+  font-family: var(--font-mono); font-size: 0.78rem; white-space: nowrap; }
+.hs-count::after { content: "trades"; margin-left: 0.3em; font-family: var(--font-sans); }
+.hs-note { margin-top: var(--s1); }
+@media (max-width: 700px) {
+  .hs-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "name name" "res n" "total total"; }
+  .hs-row th { grid-area: name; } .hs-res { grid-area: res; } .hs-n { grid-area: n; } .hs-total { grid-area: total; }
+}
+.habit-how { margin-top: var(--s1); }
+@media print {
+  .hs-row { break-inside: avoid; border-color: #999; }
+  .hs-row th a::after { content: none; }
+  .report-out details > summary { display: none; }
+}
