@@ -12,7 +12,9 @@
    "format": "dmy",
    "reason": "seen",
    "seen": "31/12/2026 11:21:05",
-   "seen2": null
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": 7
   },
   "futures_offer": false,
   "layout": "fills",

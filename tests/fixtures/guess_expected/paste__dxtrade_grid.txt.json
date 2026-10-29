@@ -14,7 +14,9 @@
    "format": "dmy",
    "reason": "seen",
    "seen": "16/03/2026 09:31:05",
-   "seen2": null
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": 5
   },
   "futures_offer": false,
   "layout": "orders",

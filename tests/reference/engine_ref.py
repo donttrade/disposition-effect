@@ -853,6 +853,7 @@ def date_shape(raw):
 
 def detect_date_format(values):
     kinds = []
+    first_at = {}
     dmy_at = mdy_at = -1
     for i, v in enumerate(values):
         if clean(v) == "":
@@ -860,6 +861,7 @@ def detect_date_format(values):
         kind, a, b = date_shape(v)
         if kind not in kinds:
             kinds.append(kind)
+            first_at[kind] = i
         if kind == "dm":
             if a > 12 and dmy_at < 0:
                 dmy_at = i
@@ -868,7 +870,8 @@ def detect_date_format(values):
     if not kinds:
         return {"format": None, "reason": "empty", "at": -1, "at2": -1}
     if len(kinds) > 1 or kinds[0] == "other":
-        return {"format": None, "reason": "mixed", "at": -1, "at2": -1}
+        return {"format": None, "reason": "mixed", "at": first_at["other"] if "other" in kinds else first_at[kinds[1]],
+                "at2": -1}
     if kinds[0] != "dm":
         return {"format": kinds[0], "reason": None, "at": -1, "at2": -1}
     if dmy_at >= 0 and mdy_at >= 0:

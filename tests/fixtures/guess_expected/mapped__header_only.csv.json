@@ -12,7 +12,9 @@
    "format": null,
    "reason": "empty",
    "seen": null,
-   "seen2": null
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": null
   },
   "futures_offer": false,
   "layout": "fills",
@@ -66,10 +68,7 @@
    {
     "error": "empty",
     "q": "date_order",
-    "rows": [
-     -1,
-     -1
-    ]
+    "rows": []
    }
   ],
   "side_checks": {},

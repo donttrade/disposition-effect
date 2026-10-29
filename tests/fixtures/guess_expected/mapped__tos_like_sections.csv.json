@@ -4,15 +4,17 @@
    "date": "check",
    "price": "choose",
    "qty": "check",
-   "side": "matched",
+   "side": "check",
    "symbol": "choose"
   },
   "currency_offer": true,
   "date": {
    "format": null,
    "reason": "mixed",
-   "seen": null,
-   "seen2": null
+   "seen": "Notes",
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": 8
   },
   "futures_offer": false,
   "layout": "fills",
@@ -54,7 +56,6 @@
    "side_rules": null,
    "side_values": {
     "10": "skip",
-    "bal": "buy",
     "qty": "skip",
     "spread": "sell",
     "stock": "sell"
@@ -71,21 +72,18 @@
     "error": "mixed",
     "q": "date_order",
     "rows": [
-     -1,
-     -1
+     8
     ]
    }
   ],
   "side_checks": {
    "10": "unknown",
-   "bal": "unknown",
    "qty": "unknown",
    "spread": "unknown",
    "stock": "unknown"
   },
   "side_counts": {
    "10": 1,
-   "bal": 1,
    "qty": 1,
    "spread": 1,
    "stock": 16

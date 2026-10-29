@@ -12,7 +12,9 @@
    "format": null,
    "reason": "ask",
    "seen": null,
-   "seen2": null
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": null
   },
   "futures_offer": false,
   "layout": "fills",
@@ -72,7 +74,8 @@
     "readings": {
      "dmy": "2026-03-02",
      "mdy": "2026-02-03"
-    }
+    },
+    "row": 2
    }
   ],
   "side_checks": {},

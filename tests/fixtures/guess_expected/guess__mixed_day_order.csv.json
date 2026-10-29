@@ -12,7 +12,9 @@
    "format": null,
    "reason": "mixed_order",
    "seen": "13/04/2026",
-   "seen2": "04/13/2026"
+   "seen2": "04/13/2026",
+   "seen2_row": 7,
+   "seen_row": 4
   },
   "futures_offer": false,
   "layout": "fills",
@@ -70,8 +72,8 @@
     "error": "mixed_order",
     "q": "date_order",
     "rows": [
-     2,
-     5
+     4,
+     7
     ]
    }
   ],
