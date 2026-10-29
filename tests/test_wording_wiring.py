@@ -124,7 +124,7 @@ SU_LINE = "Size after a loss is described, not tested, in this version of the re
 # "Why not yet" without their last sentence; the fixed coverage lines give way to one "Luck check coming" line.
 TAIL = " So this pattern is described here without a verdict."
 V_LAUNCH_SHOWN, V_LAUNCH_SIZE_SHOWN = V_LAUNCH[:-len(TAIL)], V_LAUNCH_SIZE[:-len(TAIL)]
-COMING = "Luck check coming: Holding losers longer than winners, Size after a loss, Large losses."
+COMING = "Luck check coming: Size after a loss."   # stats round 2: hold gap and large losses are "Your numbers"
 STALE = ["10,000 shuffles", "Holm correction for testing four", "testing four habits", "Permutation test on past data"]
 
 
@@ -194,7 +194,7 @@ def test_each_habit_shows_its_sentences(rendered):
     assert "Trades opened within 15 minutes of a losing trade's close averaged −$12.50 per trade; your other trades averaged +$3.25." in h["revenge"]
     assert "This gap is distinguishable from noise, after adjusting for the 2 patterns tested." in h["revenge"]
     assert "Your losing trades were held a median of 1h 30m; your winning trades a median of 30m 0s." in h["hold_gap"]
-    assert V_LAUNCH_SHOWN in h["hold_gap"] and "Luck check coming" in h["hold_gap"]    # pill and V-launch (under "Why not yet")
+    assert V_LAUNCH_SHOWN not in h["hold_gap"] and "Luck check coming" not in h["hold_gap"]   # stats round 2: facts only, no pill
     assert "Compared with similar trades opened just before it" not in h["hold_gap"]    # no M2 (R-D2)
     assert "distinguishable from noise" not in h["hold_gap"] and "Held 12 hours" not in h["hold_gap"]
     assert "Losing trades held longer than your median winning hold\n40 trades, totalling" in h["hold_gap"]   # dollars stay ("What happened")
@@ -207,7 +207,7 @@ def test_each_habit_shows_its_sentences(rendered):
     assert "Losers were held 3.00 times as long as winners." not in h["hold_gap"]      # shown only when tested
     assert "After 3 or more losses in a row: 12 trades" in h["tilt"]
     assert "Share of all loss dollars\n30.0%" in h["oversized_loss"]                  # 29 Oct: "What happened" list; shown as "Large losses"
-    assert h["oversized_loss"].startswith("Large losses") and "Luck check coming" in h["oversized_loss"]
+    assert h["oversized_loss"].startswith("Large losses") and "Luck check coming" not in h["oversized_loss"] and "Real or luck?" not in h["oversized_loss"]
     assert "Not tested" not in h["oversized_loss"] and "reshuffled" not in h["oversized_loss"]
     t = rendered["mid_opposite"]["habit"]["tilt"]
     assert "It runs the opposite way to this pattern's name." in t
@@ -217,8 +217,8 @@ def test_each_habit_shows_its_sentences(rendered):
     assert "Not enough trades to tell" not in tf["size_up"] and V_LAUNCH_SIZE_SHOWN in tf["size_up"]
     assert "averaged" not in tf["revenge"]                                             # the too_few sentence replaces both
     w = rendered["launch_m3"]["habit"]["hold_gap"]
-    assert V_LAUNCH_SHOWN in w and "Held 12 hours or more: 2 of your 40 losing trades and 1 of your 90 winning trades." in w
-    assert w.index("held a median of") < w.index("Held 12 hours or more") < w.index(V_LAUNCH_SHOWN)   # 29 Oct: M1, M3 ("What happened"), then V-launch ("Real or luck?")
+    assert V_LAUNCH_SHOWN not in w and "Held 12 hours or more: 2 of your 40 losing trades and 1 of your 90 winning trades." in w
+    assert w.index("held a median of") < w.index("Held 12 hours or more") and "Real or luck?" not in w   # stats round 2: "Your numbers"
     assert "Losers were held" not in w and "reshuffled" not in w                       # no test ran: no ratio line, no method line
     assert "Not tested" not in rendered["launch_m3"]["coverage"] and COMING in rendered["launch_m3"]["coverage"]   # 29 Oct (owner)
 

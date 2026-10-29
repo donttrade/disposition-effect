@@ -216,14 +216,22 @@ def test_example_report_shows_two_layers_and_never_described_or_not_tested(brows
         assert bad not in t, bad
     n = pg.locator("#sample-out .habit").count()
     assert n == 5
-    assert pg.locator("#sample-out .habit .layer-what h4").count() == n and pg.locator("#sample-out .habit .layer-luck h4").count() == n
+    assert pg.locator("#sample-out .habit .layer-what h4").count() == 5 and pg.locator("#sample-out .habit .layer-luck h4").count() == 3
     assert "Large losses" in t and "Luck check coming" in t and "unlikely to be luck" in t and "could be luck" in t
-    for hid in ("hold_gap", "size_up", "oversized_loss"):
-        sec = pg.locator(f"#habit-{hid}")
-        assert sec.locator(".badge-coming").inner_text() == "Luck check coming"
-        assert sec.locator(".luck-why summary").inner_text() == "Why not yet"
-    why = pg.locator("#habit-hold_gap .luck-why p").text_content()
+    # stats round 2: size after a loss keeps "Luck check coming"; the hold gap and large losses are "Your numbers", no pill
+    sec = pg.locator("#habit-size_up")
+    assert sec.locator(".badge-coming").inner_text() == "Luck check coming" and sec.locator(".luck-why summary").inner_text() == "Why not yet"
+    why = sec.locator(".luck-why p").text_content()
     assert why.startswith("In our tests on files built to have no real pattern") and "described" not in why
+    assert pg.locator("#your-numbers h2").inner_text() == "Your numbers"
+    assert pg.locator("#your-numbers .yn-why p").text_content() == ("These are facts from your file. We have not found a fair way "
+                                                                   "to test them against luck yet.")
+    for hid in ("hold_gap", "oversized_loss"):
+        s2 = pg.locator(f"#your-numbers #habit-{hid}")
+        assert s2.count() == 1 and s2.locator(".badge").count() == 0 and s2.locator(".layer-luck").count() == 0
+    assert pg.locator("#sample-out .badge-coming").count() == 1 + 1   # the size-up section and its summary row
+    tested = pg.evaluate("[...document.querySelectorAll('#sample-out .habit')].map(s => s.id)")
+    assert tested.index("habit-tilt") < tested.index("habit-hold_gap")   # the tested habits come first
     # print shows every folded part, then folds them back
     pg.evaluate("window.dispatchEvent(new Event('beforeprint'))")
     assert pg.locator("#sample-out details:not([open])").count() == 0
