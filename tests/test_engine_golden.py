@@ -185,7 +185,7 @@ def test_currency_column_never_echoes_a_name(engine_page):
             assert word not in raw, (rel, word)
         res = json.loads(raw)["result"]
         assert res["currency_groups"] == {"points": 40}
-        assert [w["code"] for w in res["warnings"]] == ["W_CURRENCY_IGNORED"]
+        assert [w["code"] for w in res["warnings"]] == ["W_CURRENCY_IGNORED", "W_WIDE_ROWS"]
 
 
 def test_expectancy_guard_vectors_match_reference(engine_page):

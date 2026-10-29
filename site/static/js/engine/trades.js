@@ -459,6 +459,7 @@ export function finish(fmt, verified, res, mode, tzLabel) {
   if (extra.duplicate_rows) warnings.push(warning('W_DUPLICATE_ROWS', extra.duplicate_rows, `${extra.duplicate_rows} found.`));
   if (extra.overlap_rows) warnings.push(warning('W_OVERLAP_ROWS', extra.overlap_rows, `${extra.overlap_rows} found.`));
   if (extra.currency_ignored) warnings.push(warning('W_CURRENCY_IGNORED', 0));
+  if (extra.wide_rows) warnings.push(warning('W_WIDE_ROWS', extra.wide_rows, `${extra.wide_rows} found.`));
   let executions = res.executions;
   let openN = extra.open_positions || 0;
   let hedging = 0;

@@ -86,6 +86,8 @@ export const WARNING_TEXT = Object.freeze({
     "In some rows the profit's sign does not match the prices and direction: the long/short column may be swapped.",
   W_DATES_ONLY:
     'Your file has dates but no times. Results that depend on the time of day are not available; day-level results still are.',
+  W_WIDE_ROWS:
+    'Some rows have more cells than the headings, as when a name or note holds a comma without quotes, so cells after it may be in the wrong column. Check these rows, or export the file again with quotes.',
   W_DST:
     'Some trades were open during a daylight-saving clock change (US or EU dates). The file\'s times have no time zone, so the hold time of these trades may be off by one hour, and a buy and a sell in the repeated hour may be in the wrong order.',
 });

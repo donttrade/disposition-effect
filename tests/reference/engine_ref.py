@@ -415,6 +415,90 @@ def html_rows(text):
     return p.rows
 
 
+# ----------------------------------------------------------------- rows wider than the heading
+# Mirrors wideRows() in csv.js: a split number in a read number column is refused (split_number);
+# other wide rows are counted for W_WIDE_ROWS.
+
+_RE_SPLIT_HEAD = re.compile(r"^[+\-−(]?[$€£¥₹]?\d{1,3}$", re.ASCII)
+_RE_SPLIT_TAIL = re.compile(r"^\d{3}(\.\d+)?\)?$", re.ASCII)
+_RE_DATEISH = re.compile(r"^[0-9][0-9 .:/\-T;,+Z]*([AaPp][Mm])?( ?[A-Za-z]{2,5})?$", re.ASCII)
+_RE_LEAD_ZERO = re.compile(r"^[+-]?0\d", re.ASCII)
+
+
+def _money_clean_lite(v):
+    v = re.sub(r"^[(+\-−]+|[)\-−]+$", "", v)
+    return re.sub(r"^[$€£¥₹] ?|[ ]?[$€£¥₹]$|^[A-Za-z]{3} |[ ][A-Za-z]{3}$", "", v, flags=re.ASCII)
+
+
+def _cell_fits(kind, v, iso_set):
+    if v == "":
+        return True
+    if kind == "num":
+        s = _money_clean_lite(v)
+        return number_shape(s) != "other" and not _RE_LEAD_ZERO.match(s)
+    if kind == "date":
+        return bool(_RE_DATEISH.match(v))
+    if kind == "ccy":
+        return v.upper() in iso_set
+    return True
+
+
+def wide_rows(rows, width, kinds, iso_set=frozenset()):
+    """Mirrors wideRows(): a split number in a read number column is refused (split_number);
+    other wide rows are counted for W_WIDE_ROWS."""
+    split = []
+    wide = 0
+    idx = sorted(kinds)
+
+    def num_split(cells, j):
+        return kinds.get(j) == "num" and _RE_SPLIT_HEAD.match(cells[j]) and _RE_SPLIT_TAIL.match(cells[j + 1])
+
+    for r in rows:
+        cells = r["cells"]
+        last = len(cells) - 1
+        while last >= 0 and cells[last] == "":
+            last -= 1
+        surplus = last + 1 - width
+        if surplus <= 0:
+            continue
+        if surplus > 1:
+            if any(j + 1 < len(cells) and num_split(cells, j) for j in idx):
+                split.append(r["row"])
+            else:
+                wide += 1
+            continue
+        best = -1
+        best_at = []
+        for j in range(last):
+            score = 0
+            for c in idx:
+                if c < j:
+                    v = cells[c]
+                elif c == j:
+                    v = cells[j] + "," + cells[j + 1]
+                else:
+                    v = cells[c + 1] if c + 1 < len(cells) else ""
+                if _cell_fits(kinds[c], v, iso_set):
+                    score += 1
+            if score > best:
+                best, best_at = score, [j]
+            elif score == best:
+                best_at.append(j)
+        if any(num_split(cells, j) for j in best_at):
+            split.append(r["row"])
+        else:
+            wide += 1
+    return {"split": split, "wide": wide}
+
+
+def _read_kinds(m, numeric):
+    kinds = {}
+    for f, i in m.items():
+        kinds[i] = "num" if f in numeric else "ccy" if f == "currency" else \
+            "date" if re.search("time|date", f) else "text"
+    return kinds
+
+
 # ----------------------------------------------------------------- numbers
 
 _RE_PLAIN = re.compile(r"^[+-]?(\d+\.?\d*|\.\d+)$", re.ASCII)
@@ -2044,6 +2128,8 @@ def finish(fmt, verified, res, mode, tz_label):
         warnings.append(warning("W_OVERLAP_ROWS", extra["overlap_rows"]))
     if extra.get("currency_ignored"):
         warnings.append(warning("W_CURRENCY_IGNORED", 0))
+    if extra.get("wide_rows"):
+        warnings.append(warning("W_WIDE_ROWS", extra["wide_rows"]))
 
     executions = res["executions"]
     open_n = extra.get("open_positions", 0)
@@ -2449,6 +2535,11 @@ def parse_mapped(rows, mp, side_from, kind, delimiter):
     req = [f for f in _LAYOUT_FIELDS[layout]["required"] if not (f == "side" and side_from == "sign")]
     kept = []
     n_data = 0
+    kinds = {}
+    for f, i in m.items():
+        kinds[i] = "num" if f in _NUMERIC[layout] or f.startswith("fee") else "ccy" if f == "currency" else \
+            "date" if f in ("date", "time", "open_time", "close_time") else "text"
+    wide = 0
     for r in data:
         if _empty(r["cells"]):
             continue
@@ -2459,6 +2550,11 @@ def parse_mapped(rows, mp, side_from, kind, delimiter):
         if is_no_data(r["cells"], len(header)) or all(_cell_at(r, m.get(f)) == "" for f in req):
             _skip(skipped, "no_data")
             continue
+        wr = wide_rows([r], len(header), kinds, _ISO_SET)
+        if wr["split"]:
+            _skip(skipped, "split_number")
+            continue
+        wide += wr["wide"]
         kept.append(r)
     if n_data == 0:
         fail("E_HEADER_ONLY")
@@ -2606,7 +2702,7 @@ def parse_mapped(rows, mp, side_from, kind, delimiter):
         execs.append({"row": row, "ts": ts, "symbol": symbol, "side": side, "qty": q, "price": price, "fee": fee,
                       "currency": cur, "oc": None, "pos_id": None, "pnl_reported": None, "multiplier": mult,
                       "_unit": unit, "_fx": None})
-    extra = {"duplicate_rows": dup, "currency_ignored": cur_ignored, "mapped": not mp.get("preset"),
+    extra = {"duplicate_rows": dup, "currency_ignored": cur_ignored, "wide_rows": wide, "mapped": not mp.get("preset"),
              "preset": mp.get("preset") or None, "orders_averaged": layout == "orders",
              "futures_sizes": mp.get("futures_sizes") is True, "pnl_sign": pnl_sign, "zone_ignored": seen["zone"],
              "tz": mp.get("tz") or None}
@@ -2662,7 +2758,7 @@ def first_ts(res):
     return t
 
 
-_SUM_EXTRA = ["duplicate_rows", "open_positions", "pnl_sign"]
+_SUM_EXTRA = ["duplicate_rows", "open_positions", "pnl_sign", "wide_rows"]
 _OR_EXTRA = ["currency_ignored", "has_closed_positions", "has_deals", "zone_ignored"]
 
 
@@ -2740,6 +2836,9 @@ def _read_auto(src):
     if len(data_rows) > MAX_ROWS:
         fail("E_TOO_LARGE")
     check_quoting(rows, hi, det["map"])
+    wr = wide_rows(rows[hi + 1:], len(rows[hi]["cells"]), _read_kinds(m, NUMERIC_FIELDS[name]), _ISO_SET)
+    if wr["split"]:
+        rows = rows[:hi + 1] + [r for r in rows[hi + 1:] if r["row"] not in wr["split"]]
     if name == "tradingview":
         strip_currency_cells(rows[hi + 1:], m)
     resolve_number_style([{"rows": rows[hi + 1:], "map": m, "fields": NUMERIC_FIELDS[name]}],
@@ -2763,6 +2862,9 @@ def _read_auto(src):
         fmt, res, mode = "generic", parse_generic(rows, hi, m), None
     res["extra"]["duplicate_rows"] = dup
     res["extra"]["currency_ignored"] = currency_ignored
+    if wr["split"]:
+        res["skipped"]["split_number"] = res["skipped"].get("split_number", 0) + len(wr["split"])
+    res["extra"]["wide_rows"] = wr["wide"]
     return {"fmt": fmt, "verified": verified, "res": res, "mode": mode, "tz": TZ_LABELS[fmt],
             "n_data": len(data_rows), "shape": fmt}
 

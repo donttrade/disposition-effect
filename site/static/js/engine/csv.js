@@ -234,6 +234,67 @@ export function checkQuoting(rows, hi, map) {
   }
 }
 
+// ---------------------------------------------------------------- rows wider than the heading
+// A non-empty cell past the heading's last column means an unquoted comma split a cell, and every
+// cell after the split is one column to the right (Tester F2). For a row one cell too wide, each
+// place where two neighbouring cells may have been one is tried, and the read cells it gives are
+// scored (a date column holds a date, a number column a number without a leading-zero "000", a
+// currency column an ISO code). If the best place is a read number column holding the first part
+// of a number like 1,000 or $1,235.60 (and the next cell its last three digits), the row is
+// refused (skip reason split_number), never read as 1 and 000. Any other wide row (a name or note
+// with a comma) is read as it is and counted for W_WIDE_ROWS. kinds: {index: 'num' | 'date' |
+// 'ccy' | 'text'} for the read columns. → {split: [row numbers], wide: n}
+const RE_SPLIT_HEAD = /^[+\-−(]?[$€£¥₹]?\d{1,3}$/;
+const RE_SPLIT_TAIL = /^\d{3}(\.\d+)?\)?$/;
+const RE_DATEISH = /^[0-9][0-9 .:\/\-T;,+Z]*([AaPp][Mm])?( ?[A-Za-z]{2,5})?$/;
+const RE_LEAD_ZERO = /^[+-]?0\d/;
+
+function cellFits(kind, v, isoSet) {
+  if (v === '') return true;
+  if (kind === 'num') {
+    const s = moneyCleanLite(v);
+    return numberShape(s) !== 'other' && !RE_LEAD_ZERO.test(s);
+  }
+  if (kind === 'date') return RE_DATEISH.test(v);
+  if (kind === 'ccy') return isoSet.has(v.toUpperCase());
+  return true;
+}
+
+// Enough of mapped.js moneyClean for scoring ("$1", "(12.30)", "1,235.60 USD"); csv.js cannot import it.
+function moneyCleanLite(v) {
+  return v.replace(/^[(+\-−]+|[)\-−]+$/g, '').replace(/^[$€£¥₹] ?|[ ]?[$€£¥₹]$|^[A-Za-z]{3} |[ ][A-Za-z]{3}$/g, '');
+}
+
+export function wideRows(rows, width, kinds, isoSet = new Set()) {
+  const split = [];
+  let wide = 0;
+  const idx = Object.keys(kinds).map(Number).sort((a, b) => a - b);
+  const numSplit = (cells, j) => kinds[j] === 'num' && RE_SPLIT_HEAD.test(cells[j]) && RE_SPLIT_TAIL.test(cells[j + 1]);
+  for (const r of rows) {
+    const cells = r.cells;
+    let last = cells.length - 1;
+    while (last >= 0 && cells[last] === '') last--;
+    const surplus = last + 1 - width;
+    if (surplus <= 0) continue;
+    if (surplus > 1) {
+      if (idx.some((j) => j + 1 < cells.length && numSplit(cells, j))) split.push(r.row); else wide++;
+      continue;
+    }
+    let best = -1;
+    let bestAt = [];
+    for (let j = 0; j < last; j++) {
+      let score = 0;
+      for (const c of idx) {
+        const v = c < j ? cells[c] : c === j ? cells[j] + ',' + cells[j + 1] : (c + 1 < cells.length ? cells[c + 1] : '');
+        if (cellFits(kinds[c], v, isoSet)) score++;
+      }
+      if (score > best) { best = score; bestAt = [j]; } else if (score === best) bestAt.push(j);
+    }
+    if (bestAt.some((j) => numSplit(cells, j))) split.push(r.row); else wide++;
+  }
+  return { split, wide };
+}
+
 // ---------------------------------------------------------------- numbers
 
 const RE_PLAIN = /^[+-]?(\d+\.?\d*|\.\d+)$/;
