@@ -1,0 +1,823 @@
+{
+ "guess": {
+  "badges": {
+   "currency": "matched",
+   "date": "matched",
+   "price": "matched",
+   "qty": "matched",
+   "side": "matched",
+   "symbol": "matched"
+  },
+  "currency_offer": false,
+  "date": {
+   "format": "ymd",
+   "reason": null,
+   "seen": null,
+   "seen2": null
+  },
+  "futures_offer": false,
+  "layout": "fills",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": 7,
+    "date": 1,
+    "direction": null,
+    "fees": null,
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 6,
+    "qty": 5,
+    "side": 0,
+    "status": null,
+    "symbol": 3,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "ymd",
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "0": "action",
+    "1": "time",
+    "3": "ticker",
+    "5": "noofshares",
+    "6": "priceshare",
+    "7": "currencypriceshare"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": null,
+   "side_values": {
+    "deposit": "skip",
+    "dividend (ordinary)": "skip",
+    "interest on cash": "skip",
+    "limit buy": "buy",
+    "market buy": "buy",
+    "market sell": "sell",
+    "stop sell": "sell"
+   },
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1
+  },
+  "questions": [],
+  "side_checks": {},
+  "side_counts": {
+   "deposit": 1,
+   "dividend (ordinary)": 1,
+   "interest on cash": 1,
+   "limit buy": 4,
+   "market buy": 8,
+   "market sell": 4,
+   "stop sell": 8
+  },
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": null
+ },
+ "peek": {
+  "blocked": [
+   false,
+   false,
+   false,
+   false,
+   true,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   true,
+   false
+  ],
+  "delimiter": ",",
+  "header_hits": 7,
+  "header_row": 0,
+  "headers": [
+   "Action",
+   "Time",
+   "ISIN",
+   "Ticker",
+   "Name",
+   "No. of shares",
+   "Price / share",
+   "Currency (Price / share)",
+   "Exchange rate",
+   "Result",
+   "Currency (Result)",
+   "Total",
+   "Currency (Total)",
+   "Notes",
+   "ID"
+  ],
+  "kind": "csv",
+  "labels": [
+   "Action",
+   "Time",
+   "ISIN",
+   "Ticker",
+   "Name",
+   "No. of shares",
+   "Price / share",
+   "Currency (Price / share)",
+   "Exchange rate",
+   "Result",
+   "Currency (Result)",
+   "Total",
+   "Currency (Total)",
+   "Notes",
+   "ID"
+  ],
+  "n_rows": 27,
+  "options": [
+   {
+    "example": "Deposit",
+    "index": 0,
+    "label": "Action"
+   },
+   {
+    "example": "2026-03-15 09:31:05",
+    "index": 1,
+    "label": "Time"
+   },
+   {
+    "example": "US0000000000",
+    "index": 2,
+    "label": "ISIN"
+   },
+   {
+    "example": "AAA",
+    "index": 3,
+    "label": "Ticker"
+   },
+   {
+    "example": "1.0000000000",
+    "index": 5,
+    "label": "No. of shares"
+   },
+   {
+    "example": "100.0000",
+    "index": 6,
+    "label": "Price / share"
+   },
+   {
+    "example": "USD",
+    "index": 7,
+    "label": "Currency (Price / share)"
+   },
+   {
+    "example": "1.00000",
+    "index": 8,
+    "label": "Exchange rate"
+   },
+   {
+    "example": "",
+    "index": 9,
+    "label": "Result"
+   },
+   {
+    "example": "GBP",
+    "index": 10,
+    "label": "Currency (Result)"
+   },
+   {
+    "example": "1000.00",
+    "index": 11,
+    "label": "Total"
+   },
+   {
+    "example": "GBP",
+    "index": 12,
+    "label": "Currency (Total)"
+   },
+   {
+    "example": "D1",
+    "index": 14,
+    "label": "ID"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     "Deposit",
+     "2026-03-15 09:31:05",
+     "",
+     "",
+     null,
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "1000.00",
+     "GBP",
+     null,
+     "D1"
+    ],
+    "row": 2
+   },
+   {
+    "cells": [
+     "Market buy",
+     "2026-03-16 09:31:05",
+     "US0000000000",
+     "AAA",
+     null,
+     "1.0000000000",
+     "100.0000",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "100.00",
+     "GBP",
+     null,
+     "EOF1000"
+    ],
+    "row": 3
+   },
+   {
+    "cells": [
+     "Stop sell",
+     "2026-03-16 09:54:05",
+     "US0000000000",
+     "AAA",
+     null,
+     "1.0000000000",
+     "98.0000",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "98.00",
+     "GBP",
+     null,
+     "EOF1001"
+    ],
+    "row": 4
+   },
+   {
+    "cells": [
+     "Market sell",
+     "2026-03-16 10:08:05",
+     "US0000000000",
+     "BBB",
+     null,
+     "3.0000000000",
+     "113.2500",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "339.75",
+     "GBP",
+     null,
+     "EOF1002"
+    ],
+    "row": 5
+   },
+   {
+    "cells": [
+     "Limit buy",
+     "2026-03-16 10:36:05",
+     "US0000000000",
+     "BBB",
+     null,
+     "3.0000000000",
+     "112.2500",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "336.75",
+     "GBP",
+     null,
+     "EOF1003"
+    ],
+    "row": 6
+   },
+   {
+    "cells": [
+     "Market buy",
+     "2026-03-16 10:48:05",
+     "US0000000000",
+     "CCC",
+     null,
+     "5.0000000000",
+     "109.5000",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "547.50",
+     "GBP",
+     null,
+     "EOF1004"
+    ],
+    "row": 7
+   },
+   {
+    "cells": [
+     "Stop sell",
+     "2026-03-16 11:21:05",
+     "US0000000000",
+     "CCC",
+     null,
+     "5.0000000000",
+     "110.2500",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "551.25",
+     "GBP",
+     null,
+     "EOF1005"
+    ],
+    "row": 8
+   },
+   {
+    "cells": [
+     "Dividend (Ordinary)",
+     "2026-03-17 09:31:05",
+     "US0000000000",
+     "AAA",
+     null,
+     "10.0000000000",
+     "0.2200",
+     "USD",
+     "1.00000",
+     "",
+     "",
+     "2.20",
+     "GBP",
+     null,
+     "V1"
+    ],
+    "row": 9
+   },
+   {
+    "cells": [
+     "Market buy",
+     "2026-03-16 11:31:05",
+     "US0000000000",
+     "AAA",
+     null,
+     "2.0000000000",
+     "105.7500",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "211.50",
+     "GBP",
+     null,
+     "EOF1006"
+    ],
+    "row": 10
+   },
+   {
+    "cells": [
+     "Interest on cash",
+     "2026-03-17 09:31:05",
+     "",
+     "",
+     null,
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "0.12",
+     "GBP",
+     null,
+     "I1"
+    ],
+    "row": 11
+   },
+   {
+    "cells": [
+     "Stop sell",
+     "2026-03-16 12:09:05",
+     "US0000000000",
+     "AAA",
+     null,
+     "2.0000000000",
+     "106.7500",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "213.50",
+     "GBP",
+     null,
+     "EOF1007"
+    ],
+    "row": 12
+   },
+   {
+    "cells": [
+     "Market sell",
+     "2026-03-16 12:17:05",
+     "US0000000000",
+     "BBB",
+     null,
+     "4.0000000000",
+     "101.0000",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "404.00",
+     "GBP",
+     null,
+     "EOF1008"
+    ],
+    "row": 13
+   },
+   {
+    "cells": [
+     "Limit buy",
+     "2026-03-16 12:40:05",
+     "US0000000000",
+     "BBB",
+     null,
+     "4.0000000000",
+     "103.0000",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "412.00",
+     "GBP",
+     null,
+     "EOF1009"
+    ],
+    "row": 14
+   },
+   {
+    "cells": [
+     "Market buy",
+     "2026-03-16 13:06:05",
+     "US0000000000",
+     "CCC",
+     null,
+     "1.0000000000",
+     "114.2500",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "114.25",
+     "GBP",
+     null,
+     "EOF1010"
+    ],
+    "row": 15
+   },
+   {
+    "cells": [
+     "Stop sell",
+     "2026-03-16 13:34:05",
+     "US0000000000",
+     "CCC",
+     null,
+     "1.0000000000",
+     "112.7500",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "112.75",
+     "GBP",
+     null,
+     "EOF1011"
+    ],
+    "row": 16
+   },
+   {
+    "cells": [
+     "Market buy",
+     "2026-03-16 13:43:05",
+     "US0000000000",
+     "AAA",
+     null,
+     "3.0000000000",
+     "110.5000",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "331.50",
+     "GBP",
+     null,
+     "EOF1012"
+    ],
+    "row": 17
+   },
+   {
+    "cells": [
+     "Stop sell",
+     "2026-03-16 14:16:05",
+     "US0000000000",
+     "AAA",
+     null,
+     "3.0000000000",
+     "110.0000",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "330.00",
+     "GBP",
+     null,
+     "EOF1013"
+    ],
+    "row": 18
+   },
+   {
+    "cells": [
+     "Market sell",
+     "2026-03-16 14:23:05",
+     "US0000000000",
+     "BBB",
+     null,
+     "5.0000000000",
+     "106.7500",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "533.75",
+     "GBP",
+     null,
+     "EOF1014"
+    ],
+    "row": 19
+   },
+   {
+    "cells": [
+     "Limit buy",
+     "2026-03-16 15:01:05",
+     "US0000000000",
+     "BBB",
+     null,
+     "5.0000000000",
+     "107.2500",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "536.25",
+     "GBP",
+     null,
+     "EOF1015"
+    ],
+    "row": 20
+   },
+   {
+    "cells": [
+     "Market buy",
+     "2026-03-17 09:31:05",
+     "US0000000000",
+     "CCC",
+     null,
+     "2.0000000000",
+     "102.0000",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "204.00",
+     "GBP",
+     null,
+     "EOF1016"
+    ],
+    "row": 21
+   },
+   {
+    "cells": [
+     "Stop sell",
+     "2026-03-17 09:54:05",
+     "US0000000000",
+     "CCC",
+     null,
+     "2.0000000000",
+     "103.5000",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "207.00",
+     "GBP",
+     null,
+     "EOF1017"
+    ],
+    "row": 22
+   },
+   {
+    "cells": [
+     "Market buy",
+     "2026-03-17 10:17:05",
+     "US0000000000",
+     "AAA",
+     null,
+     "4.0000000000",
+     "115.2500",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "461.00",
+     "GBP",
+     null,
+     "EOF1018"
+    ],
+    "row": 23
+   },
+   {
+    "cells": [
+     "Stop sell",
+     "2026-03-17 10:45:05",
+     "US0000000000",
+     "AAA",
+     null,
+     "4.0000000000",
+     "113.2500",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "453.00",
+     "GBP",
+     null,
+     "EOF1019"
+    ],
+    "row": 24
+   },
+   {
+    "cells": [
+     "Market sell",
+     "2026-03-17 11:06:05",
+     "US0000000000",
+     "BBB",
+     null,
+     "1.0000000000",
+     "111.5000",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "111.50",
+     "GBP",
+     null,
+     "EOF1020"
+    ],
+    "row": 25
+   },
+   {
+    "cells": [
+     "Limit buy",
+     "2026-03-17 11:39:05",
+     "US0000000000",
+     "BBB",
+     null,
+     "1.0000000000",
+     "110.5000",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "110.50",
+     "GBP",
+     null,
+     "EOF1021"
+    ],
+    "row": 26
+   },
+   {
+    "cells": [
+     "Market buy",
+     "2026-03-17 11:43:05",
+     "US0000000000",
+     "CCC",
+     null,
+     "3.0000000000",
+     "107.7500",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "323.25",
+     "GBP",
+     null,
+     "EOF1022"
+    ],
+    "row": 27
+   },
+   {
+    "cells": [
+     "Stop sell",
+     "2026-03-17 12:21:05",
+     "US0000000000",
+     "CCC",
+     null,
+     "3.0000000000",
+     "108.5000",
+     "USD",
+     "1.00000",
+     "",
+     "GBP",
+     "325.50",
+     "GBP",
+     null,
+     "EOF1023"
+    ],
+    "row": 28
+   }
+  ],
+  "table": null,
+  "tables": null
+ },
+ "preset": {
+  "id": "trading212_history",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": 7,
+    "date": 1,
+    "direction": null,
+    "fees": null,
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 6,
+    "qty": 5,
+    "side": 0,
+    "status": null,
+    "symbol": 3,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "ymd",
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "0": "action",
+    "1": "time",
+    "3": "ticker",
+    "5": "noofshares",
+    "6": "priceshare",
+    "7": "currencypriceshare"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": "trading212_history",
+   "section": false,
+   "side_default": "skip",
+   "side_from": "column",
+   "side_rules": [
+    [
+     "contains",
+     "buy",
+     "buy"
+    ],
+    [
+     "contains",
+     "sell",
+     "sell"
+    ]
+   ],
+   "side_values": null,
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1
+  },
+  "name": "Trading 212 history",
+  "questions": []
+ },
+ "signature": "b527349cbef5865f1d097f912c62f4cc"
+}

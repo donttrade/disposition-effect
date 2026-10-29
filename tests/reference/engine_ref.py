@@ -2076,7 +2076,8 @@ def finish(fmt, verified, res, mode, tz_label):
 BLOCKED = {
     "contains": ["account", "acct", "wallet", "email", "phone"],
     "exact": ["name", "fullname", "firstname", "lastname", "owner", "user", "uid", "userid", "username", "address",
-              "clientid", "traderid", "comment", "comments", "note", "notes", "remark", "remarks"],
+              "clientid", "traderid", "comment", "comments", "note", "notes", "remark", "remarks", "hash", "txhash",
+              "transactionhash"],
 }
 
 

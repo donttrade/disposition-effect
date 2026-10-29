@@ -1,0 +1,345 @@
+{
+ "guess": {
+  "badges": {
+   "date": "matched",
+   "price": "matched",
+   "qty": "matched",
+   "side": "matched",
+   "symbol": "matched",
+   "time": "matched"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": null,
+   "reason": "ask",
+   "seen": null,
+   "seen2": null
+  },
+  "futures_offer": false,
+  "layout": "fills",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 0,
+    "direction": null,
+    "fees": null,
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 8,
+    "qty": 7,
+    "side": 6,
+    "status": null,
+    "symbol": 5,
+    "time": 2
+   },
+   "currency": null,
+   "date_format": null,
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "0": "date",
+    "2": "time",
+    "5": "ticker",
+    "6": "buysell",
+    "7": "qty",
+    "8": "fillprice"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": null,
+   "side_values": {
+    "buy": "buy",
+    "sell": "sell"
+   },
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1
+  },
+  "questions": [
+   {
+    "example": "03/02/2026",
+    "q": "date_order",
+    "readings": {
+     "dmy": "2026-02-03",
+     "mdy": "2026-03-02"
+    }
+   }
+  ],
+  "side_checks": {},
+  "side_counts": {
+   "buy": 6,
+   "sell": 6
+  },
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": null
+ },
+ "peek": {
+  "blocked": [
+   false,
+   false,
+   false,
+   false,
+   true,
+   false,
+   false,
+   false,
+   false
+  ],
+  "delimiter": ",",
+  "header_hits": 7,
+  "header_row": 0,
+  "headers": [
+   "Date",
+   "<img src=x onerror=alert(1)>",
+   "Time",
+   "Time",
+   "Account",
+   "Ticker",
+   "Buy/Sell",
+   "Qty",
+   "Fill Price"
+  ],
+  "kind": "csv",
+  "labels": [
+   "Date",
+   "<img src=x onerror=alert(1)>",
+   "Time (1)",
+   "Time (2)",
+   "Account",
+   "Ticker",
+   "Buy/Sell",
+   "Qty",
+   "Fill Price"
+  ],
+  "n_rows": 12,
+  "options": [
+   {
+    "example": "03/02/2026",
+    "index": 0,
+    "label": "Date"
+   },
+   {
+    "example": "<b>bold</b><script>alert(2)</script>",
+    "index": 1,
+    "label": "<img src=x onerror=alert(1)>"
+   },
+   {
+    "example": "09:31:05",
+    "index": 2,
+    "label": "Time (1)"
+   },
+   {
+    "example": "09:31:05",
+    "index": 3,
+    "label": "Time (2)"
+   },
+   {
+    "example": "AAA",
+    "index": 5,
+    "label": "Ticker"
+   },
+   {
+    "example": "BUY",
+    "index": 6,
+    "label": "Buy/Sell"
+   },
+   {
+    "example": "1",
+    "index": 7,
+    "label": "Qty"
+   },
+   {
+    "example": "100.0",
+    "index": 8,
+    "label": "Fill Price"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     "03/02/2026",
+     "<b>bold</b><script>alert(2)</script>",
+     "09:31:05",
+     "09:31:05",
+     null,
+     "AAA",
+     "BUY",
+     "1",
+     "100.0"
+    ],
+    "row": 2
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     "<b>bold</b><script>alert(2)</script>",
+     "09:54:05",
+     "09:54:05",
+     null,
+     "AAA",
+     "SELL",
+     "1",
+     "98.0"
+    ],
+    "row": 3
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     "<b>bold</b><script>alert(2)</script>",
+     "10:08:05",
+     "10:08:05",
+     null,
+     "BBB",
+     "SELL",
+     "3",
+     "113.25"
+    ],
+    "row": 4
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     "<b>bold</b><script>alert(2)</script>",
+     "10:36:05",
+     "10:36:05",
+     null,
+     "BBB",
+     "BUY",
+     "3",
+     "112.25"
+    ],
+    "row": 5
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     "<b>bold</b><script>alert(2)</script>",
+     "10:48:05",
+     "10:48:05",
+     null,
+     "CCC",
+     "BUY",
+     "5",
+     "109.5"
+    ],
+    "row": 6
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     "<b>bold</b><script>alert(2)</script>",
+     "11:21:05",
+     "11:21:05",
+     null,
+     "CCC",
+     "SELL",
+     "5",
+     "110.25"
+    ],
+    "row": 7
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     "<b>bold</b><script>alert(2)</script>",
+     "11:31:05",
+     "11:31:05",
+     null,
+     "AAA",
+     "BUY",
+     "2",
+     "105.75"
+    ],
+    "row": 8
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     "<b>bold</b><script>alert(2)</script>",
+     "12:09:05",
+     "12:09:05",
+     null,
+     "AAA",
+     "SELL",
+     "2",
+     "106.75"
+    ],
+    "row": 9
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     "<b>bold</b><script>alert(2)</script>",
+     "12:17:05",
+     "12:17:05",
+     null,
+     "BBB",
+     "SELL",
+     "4",
+     "101.0"
+    ],
+    "row": 10
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     "<b>bold</b><script>alert(2)</script>",
+     "12:40:05",
+     "12:40:05",
+     null,
+     "BBB",
+     "BUY",
+     "4",
+     "103.0"
+    ],
+    "row": 11
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     "<b>bold</b><script>alert(2)</script>",
+     "13:06:05",
+     "13:06:05",
+     null,
+     "CCC",
+     "BUY",
+     "1",
+     "114.25"
+    ],
+    "row": 12
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     "<b>bold</b><script>alert(2)</script>",
+     "13:34:05",
+     "13:34:05",
+     null,
+     "CCC",
+     "SELL",
+     "1",
+     "112.75"
+    ],
+    "row": 13
+   }
+  ],
+  "table": null,
+  "tables": null
+ },
+ "preset": null,
+ "signature": "0cf4e0aee7ddcea5a6a4ba27eed41044"
+}

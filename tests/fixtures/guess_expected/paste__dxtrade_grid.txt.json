@@ -1,0 +1,583 @@
+{
+ "guess": {
+  "badges": {
+   "date": "matched",
+   "fees": "matched",
+   "price": "matched",
+   "qty": "matched",
+   "side": "matched",
+   "status": "matched",
+   "symbol": "matched"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": "dmy",
+   "reason": "seen",
+   "seen": "16/03/2026 09:31:05",
+   "seen2": null
+  },
+  "futures_offer": false,
+  "layout": "orders",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 0,
+    "direction": null,
+    "fees": [
+     6
+    ],
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 5,
+    "qty": 4,
+    "side": 3,
+    "status": 2,
+    "symbol": 1,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "dmy",
+   "delimiter": null,
+   "futures_sizes": false,
+   "header_row": 3,
+   "headers": {
+    "0": "dateandtime",
+    "1": "symbol",
+    "2": "status",
+    "3": "side",
+    "4": "filledvolume",
+    "5": "fillprice",
+    "6": "commission"
+   },
+   "keep_partial": false,
+   "layout": "orders",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": null,
+   "side_values": {
+    "buy": "buy",
+    "sell": "sell"
+   },
+   "source": null,
+   "status_rules": null,
+   "status_values": {
+    "cancelled": "skip",
+    "filled": "keep",
+    "rejected": "skip"
+   },
+   "trim_ragged": true,
+   "tz": null,
+   "v": 1
+  },
+  "questions": [],
+  "side_checks": {},
+  "side_counts": {
+   "buy": 11,
+   "sell": 11
+  },
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": {
+   "cancelled": 1,
+   "filled": 20,
+   "rejected": 1
+  }
+ },
+ "peek": {
+  "blocked": [
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "delimiter": "\t",
+  "header_hits": 7,
+  "header_row": 3,
+  "headers": [
+   "Date and Time",
+   "Symbol",
+   "Status",
+   "Side",
+   "Filled Volume",
+   "Fill Price",
+   "Commission",
+   "Take profit",
+   "Stop loss"
+  ],
+  "kind": "paste",
+  "labels": [
+   "Date and Time",
+   "Symbol",
+   "Status",
+   "Side",
+   "Filled Volume",
+   "Fill Price",
+   "Commission",
+   "Take profit",
+   "Stop loss"
+  ],
+  "n_rows": 23,
+  "options": [
+   {
+    "example": "16/03/2026 09:31:05",
+    "index": 0,
+    "label": "Date and Time"
+   },
+   {
+    "example": "EURUSD",
+    "index": 1,
+    "label": "Symbol"
+   },
+   {
+    "example": "Filled",
+    "index": 2,
+    "label": "Status"
+   },
+   {
+    "example": "Buy",
+    "index": 3,
+    "label": "Side"
+   },
+   {
+    "example": "1000",
+    "index": 4,
+    "label": "Filled Volume"
+   },
+   {
+    "example": "1.18000",
+    "index": 5,
+    "label": "Fill Price"
+   },
+   {
+    "example": "-0.30",
+    "index": 6,
+    "label": "Commission"
+   },
+   {
+    "example": "1.10000",
+    "index": 7,
+    "label": "Take profit"
+   },
+   {
+    "example": "1.07000",
+    "index": 8,
+    "label": "Stop loss"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     "16/03/2026 09:31:05",
+     "EURUSD",
+     "Filled",
+     "Buy",
+     "1000",
+     "1.18000",
+     "-0.30",
+     "",
+     ""
+    ],
+    "row": 5
+   },
+   {
+    "cells": [
+     "16/03/2026 09:54:05",
+     "EURUSD",
+     "Filled",
+     "Sell",
+     "1000",
+     "1.17800",
+     "-0.30",
+     "",
+     ""
+    ],
+    "row": 6
+   },
+   {
+    "cells": [
+     "16/03/2026 10:08:05",
+     "XAUUSD",
+     "Filled",
+     "Sell",
+     "3000",
+     "1.19325",
+     "-0.30",
+     "",
+     ""
+    ],
+    "row": 7
+   },
+   {
+    "cells": [
+     "16/03/2026 10:36:05",
+     "XAUUSD",
+     "Filled",
+     "Buy",
+     "3000",
+     "1.19225",
+     "-0.30",
+     "",
+     ""
+    ],
+    "row": 8
+   },
+   {
+    "cells": [
+     "16/03/2026 09:31:05",
+     "EURUSD",
+     "Cancelled",
+     "Buy",
+     "0",
+     "",
+     "",
+     "1.10000",
+     "1.07000"
+    ],
+    "row": 9
+   },
+   {
+    "cells": [
+     "16/03/2026 10:48:05",
+     "EURUSD",
+     "Filled",
+     "Buy",
+     "5000",
+     "1.18950",
+     "-0.30",
+     "",
+     ""
+    ],
+    "row": 10
+   },
+   {
+    "cells": [
+     "16/03/2026 11:21:05",
+     "EURUSD",
+     "Filled",
+     "Sell",
+     "5000",
+     "1.19025",
+     "-0.30",
+     "",
+     ""
+    ],
+    "row": 11
+   },
+   {
+    "cells": [
+     "16/03/2026 09:31:05",
+     "EURUSD",
+     "Rejected",
+     "Sell",
+     "0",
+     "",
+     "",
+     "",
+     ""
+    ],
+    "row": 12
+   },
+   {
+    "cells": [
+     "16/03/2026 11:31:05",
+     "XAUUSD",
+     "Filled",
+     "Buy",
+     "2000",
+     "1.18575",
+     "-0.30",
+     "",
+     ""
+    ],
+    "row": 13
+   },
+   {
+    "cells": [
+     "16/03/2026 12:09:05",
+     "XAUUSD",
+     "Filled",
+     "Sell",
+     "2000",
+     "1.18675",
+     "-0.30",
+     "",
+     ""
+    ],
+    "row": 14
+   },
+   {
+    "cells": [
+     "16/03/2026 12:17:05",
+     "EURUSD",
+     "Filled",
+     "Sell",
+     "4000",
+     "1.18100",
+     "-0.30",
+     "",
+     ""
+    ],
+    "row": 15
+   },
+   {
+    "cells": [
+     "16/03/2026 12:40:05",
+     "EURUSD",
+     "Filled",
+     "Buy",
+     "4000",
+     "1.18300",
+     "-0.30",
+     "",
+     ""
+    ],
+    "row": 16
+   },
+   {
+    "cells": [
+     "16/03/2026 13:06:05",
+     "XAUUSD",
+     "Filled",
+     "Buy",
+     "1000",
+     "1.19425",
+     "-0.30",
+     "",
+     ""
+    ],
+    "row": 17
+   },
+   {
+    "cells": [
+     "16/03/2026 13:34:05",
+     "XAUUSD",
+     "Filled",
+     "Sell",
+     "1000",
+     "1.19275",
+     "-0.30",
+     "",
+     ""
+    ],
+    "row": 18
+   },
+   {
+    "cells": [
+     "16/03/2026 13:43:05",
+     "EURUSD",
+     "Filled",
+     "Buy",
+     "3000",
+     "1.19050",
+     "-0.30",
+     "",
+     ""
+    ],
+    "row": 19
+   },
+   {
+    "cells": [
+     "16/03/2026 14:16:05",
+     "EURUSD",
+     "Filled",
+     "Sell",
+     "3000",
+     "1.19000",
+     "-0.30",
+     "",
+     ""
+    ],
+    "row": 20
+   },
+   {
+    "cells": [
+     "16/03/2026 14:23:05",
+     "XAUUSD",
+     "Filled",
+     "Sell",
+     "5000",
+     "1.18675",
+     "-0.30",
+     "",
+     ""
+    ],
+    "row": 21
+   },
+   {
+    "cells": [
+     "16/03/2026 15:01:05",
+     "XAUUSD",
+     "Filled",
+     "Buy",
+     "5000",
+     "1.18725",
+     "-0.30",
+     "",
+     ""
+    ],
+    "row": 22
+   },
+   {
+    "cells": [
+     "17/03/2026 09:31:05",
+     "EURUSD",
+     "Filled",
+     "Buy",
+     "2000",
+     "1.18200",
+     "-0.30",
+     "",
+     ""
+    ],
+    "row": 23
+   },
+   {
+    "cells": [
+     "17/03/2026 09:54:05",
+     "EURUSD",
+     "Filled",
+     "Sell",
+     "2000",
+     "1.18350",
+     "-0.30",
+     "",
+     ""
+    ],
+    "row": 24
+   },
+   {
+    "cells": [
+     "17/03/2026 10:17:05",
+     "XAUUSD",
+     "Filled",
+     "Buy",
+     "4000",
+     "1.19525",
+     "-0.30",
+     "",
+     ""
+    ],
+    "row": 25
+   },
+   {
+    "cells": [
+     "17/03/2026 10:45:05",
+     "XAUUSD",
+     "Filled",
+     "Sell",
+     "4000",
+     "1.19325",
+     "-0.30",
+     "",
+     ""
+    ],
+    "row": 26
+   },
+   {
+    "cells": [
+     "Showing 1-10 of 10",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     ""
+    ],
+    "row": 27
+   }
+  ],
+  "table": null,
+  "tables": null
+ },
+ "preset": {
+  "id": "dxtrade_orders",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 0,
+    "direction": null,
+    "fees": [
+     6
+    ],
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 5,
+    "qty": 4,
+    "side": 3,
+    "status": 2,
+    "symbol": 1,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "dmy",
+   "delimiter": null,
+   "futures_sizes": false,
+   "header_row": 3,
+   "headers": {
+    "0": "dateandtime",
+    "1": "symbol",
+    "2": "status",
+    "3": "side",
+    "4": "filledvolume",
+    "5": "fillprice",
+    "6": "commission"
+   },
+   "keep_partial": true,
+   "layout": "orders",
+   "number_style": null,
+   "preset": "dxtrade_orders",
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": [
+    [
+     "prefix",
+     "buy",
+     "buy"
+    ],
+    [
+     "prefix",
+     "sell",
+     "sell"
+    ]
+   ],
+   "side_values": null,
+   "source": null,
+   "status_rules": [
+    [
+     "eq",
+     "filled",
+     "keep"
+    ],
+    [
+     "eq",
+     "partially filled",
+     "keep"
+    ]
+   ],
+   "status_values": null,
+   "trim_ragged": true,
+   "tz": null,
+   "v": 1
+  },
+  "name": "DXtrade order history (pasted)",
+  "questions": []
+ },
+ "signature": "23ec93971d4715dc8a83a3f926420810"
+}

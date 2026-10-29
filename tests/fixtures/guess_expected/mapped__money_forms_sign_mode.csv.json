@@ -1,0 +1,296 @@
+{
+ "guess": {
+  "badges": {
+   "date": "matched",
+   "fees": "matched",
+   "price": "matched",
+   "qty": "matched",
+   "side": "check",
+   "symbol": "matched"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": "ymd",
+   "reason": null,
+   "seen": null,
+   "seen2": null
+  },
+  "futures_offer": false,
+  "layout": "fills",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 0,
+    "direction": null,
+    "fees": [
+     4
+    ],
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 3,
+    "qty": 2,
+    "side": null,
+    "status": null,
+    "symbol": 1,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "ymd",
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "0": "date",
+    "1": "symbol",
+    "2": "quantity",
+    "3": "price",
+    "4": "fees"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "sign",
+   "side_rules": null,
+   "side_values": null,
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1
+  },
+  "questions": [],
+  "side_checks": {},
+  "side_counts": null,
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": null
+ },
+ "peek": {
+  "blocked": [
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "delimiter": ",",
+  "header_hits": 5,
+  "header_row": 0,
+  "headers": [
+   "Date",
+   "Symbol",
+   "Quantity",
+   "Price",
+   "Fees"
+  ],
+  "kind": "csv",
+  "labels": [
+   "Date",
+   "Symbol",
+   "Quantity",
+   "Price",
+   "Fees"
+  ],
+  "n_rows": 16,
+  "options": [
+   {
+    "example": "2026-03-02 09:31:05",
+    "index": 0,
+    "label": "Date"
+   },
+   {
+    "example": "AAA",
+    "index": 1,
+    "label": "Symbol"
+   },
+   {
+    "example": "1",
+    "index": 2,
+    "label": "Quantity"
+   },
+   {
+    "example": "$2,000.00",
+    "index": 3,
+    "label": "Price"
+   },
+   {
+    "example": "(1.30)",
+    "index": 4,
+    "label": "Fees"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     "2026-03-02 09:31:05",
+     "AAA",
+     "1",
+     "$2,000.00",
+     "(1.30)"
+    ],
+    "row": 2
+   },
+   {
+    "cells": [
+     "2026-03-02 09:54:05",
+     "AAA",
+     "(1)",
+     "$1,960.00",
+     "1.30-"
+    ],
+    "row": 3
+   },
+   {
+    "cells": [
+     "2026-03-02 10:08:05",
+     "BBB",
+     "(3)",
+     "$2,265.00",
+     "−1.30"
+    ],
+    "row": 4
+   },
+   {
+    "cells": [
+     "2026-03-02 10:36:05",
+     "BBB",
+     "3",
+     "$2,245.00",
+     "$1.30"
+    ],
+    "row": 5
+   },
+   {
+    "cells": [
+     "2026-03-02 10:48:05",
+     "CCC",
+     "5",
+     "$2,190.00",
+     "-$1.30"
+    ],
+    "row": 6
+   },
+   {
+    "cells": [
+     "2026-03-02 11:21:05",
+     "CCC",
+     "(5)",
+     "$2,205.00",
+     "1.30 USD"
+    ],
+    "row": 7
+   },
+   {
+    "cells": [
+     "2026-03-02 11:31:05",
+     "AAA",
+     "2",
+     "$2,115.00",
+     "USD 1.30"
+    ],
+    "row": 8
+   },
+   {
+    "cells": [
+     "2026-03-02 12:09:05",
+     "AAA",
+     "(2)",
+     "$2,135.00",
+     "(1.30)"
+    ],
+    "row": 9
+   },
+   {
+    "cells": [
+     "2026-03-02 12:17:05",
+     "BBB",
+     "(4)",
+     "$2,020.00",
+     "1.30-"
+    ],
+    "row": 10
+   },
+   {
+    "cells": [
+     "2026-03-02 12:40:05",
+     "BBB",
+     "4",
+     "$2,060.00",
+     "−1.30"
+    ],
+    "row": 11
+   },
+   {
+    "cells": [
+     "2026-03-02 13:06:05",
+     "CCC",
+     "1",
+     "$2,285.00",
+     "$1.30"
+    ],
+    "row": 12
+   },
+   {
+    "cells": [
+     "2026-03-02 13:34:05",
+     "CCC",
+     "(1)",
+     "$2,255.00",
+     "-$1.30"
+    ],
+    "row": 13
+   },
+   {
+    "cells": [
+     "2026-03-02 13:43:05",
+     "AAA",
+     "3",
+     "$2,210.00",
+     "1.30 USD"
+    ],
+    "row": 14
+   },
+   {
+    "cells": [
+     "2026-03-02 14:16:05",
+     "AAA",
+     "(3)",
+     "$2,200.00",
+     "USD 1.30"
+    ],
+    "row": 15
+   },
+   {
+    "cells": [
+     "2026-03-02 14:23:05",
+     "BBB",
+     "(5)",
+     "$2,135.00",
+     "(1.30)"
+    ],
+    "row": 16
+   },
+   {
+    "cells": [
+     "2026-03-02 15:01:05",
+     "BBB",
+     "5",
+     "$2,145.00",
+     "1.30-"
+    ],
+    "row": 17
+   }
+  ],
+  "table": null,
+  "tables": null
+ },
+ "preset": null,
+ "signature": "12966f02f4c5a7b6e0f159f2f88505f7"
+}

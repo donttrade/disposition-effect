@@ -638,9 +638,10 @@ def guess_fixtures():
     start = dt.datetime(2026, 3, 2, 9, 31, 5)
     rts = trades(6, start)
     # A heading that is HTML, a duplicate heading, a blocked column holding the canary, day order ask.
-    hdr = ["<img src=x onerror=alert(1)>", "Date", "Time", "Time", "Account", "Ticker", "Buy/Sell", "Qty", "Fill Price"]
-    rows = [[CANARY, d.strftime("%m/%d/%Y"), d.strftime("%H:%M:%S"), d.strftime("%H:%M:%S"), CANARY, sym,
-             side.upper(), q, p] for d, sym, side, q, p in fills(rts)]
+    # (not first: a file starting with "<" is read as HTML, as it always has been)
+    hdr = ["Date", "<img src=x onerror=alert(1)>", "Time", "Time", "Account", "Ticker", "Buy/Sell", "Qty", "Fill Price"]
+    rows = [[d.strftime("%m/%d/%Y"), "<b>bold</b><script>alert(2)</script>", d.strftime("%H:%M:%S"), d.strftime("%H:%M:%S"), CANARY,
+             sym, side.upper(), q, p] for d, sym, side, q, p in fills(rts)]
     put("guess/xss_and_duplicates.csv", table(hdr, rows))
     # Day-first and month-first in one column.
     hdr = ["Date", "Symbol", "Side", "Qty", "Price"]
