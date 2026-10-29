@@ -7,9 +7,10 @@
 // crosses zero closes the trade at that time and opens the opposite trade with
 // the remainder. Positions still open at the end of the file are left out.
 
-import { fail, warning } from './errors.js?v=31d80675';
-import { spansDstNight } from './csv.js?v=09ecf6e4';
+import { fail, warning } from './errors.js?v=eef16098';
+import { spansDstNight } from './csv.js?v=e5cb6d8a';
 
+const DAY_MS = 86400000;
 const UNIT = 1e8; // positions tracked in 1e-8 lots, so 0.1 + 0.2 - 0.3 is exactly flat
 
 function roundHalfAway(x) {
@@ -444,7 +445,10 @@ const cmpStr = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 export function finish(fmt, verified, res, mode, tzLabel) {
   const extra = res.extra;
   const warnings = [];
-  if (!verified) warnings.push(warning('W_UNVERIFIED_FORMAT', 0));
+  // A mapping the user made says so instead of "beta"; a preset keeps the beta note (mapped.js).
+  if (extra.mapped) warnings.push(warning('W_MAPPED', 0));
+  else if (!verified) warnings.push(warning('W_UNVERIFIED_FORMAT', 0));
+  if (extra.orders_averaged) warnings.push(warning('W_ORDERS_AVERAGED', 0));
   const skipped = res.skipped;
   const skipKeys = Object.keys(skipped);
   if (skipKeys.length) {
@@ -453,6 +457,7 @@ export function finish(fmt, verified, res, mode, tzLabel) {
     warnings.push(warning('W_SKIPPED_ROWS', n, skipKeys.map((k) => `${k.replace(/_/g, ' ')}: ${skipped[k]}`).join(', ') + '.'));
   }
   if (extra.duplicate_rows) warnings.push(warning('W_DUPLICATE_ROWS', extra.duplicate_rows, `${extra.duplicate_rows} found.`));
+  if (extra.overlap_rows) warnings.push(warning('W_OVERLAP_ROWS', extra.overlap_rows, `${extra.overlap_rows} found.`));
   if (extra.currency_ignored) warnings.push(warning('W_CURRENCY_IGNORED', 0));
   let executions = res.executions;
   let openN = extra.open_positions || 0;
@@ -479,7 +484,8 @@ export function finish(fmt, verified, res, mode, tzLabel) {
   if (openN) warnings.push(warning('W_OPEN_POSITIONS', openN, `${openN} left out.`));
   if (openAtStart) warnings.push(warning('W_OPEN_AT_START', openAtStart, `${openAtStart} left out.`));
   if (ambiguous) warnings.push(warning('W_AMBIGUOUS_FILLS', ambiguous, `${ambiguous} ${ambiguous === 1 ? 'symbol' : 'symbols'} affected.`));
-  if (fmt === 'tradovate_orders') {
+  if (extra.pnl_sign) warnings.push(warning('W_PNL_SIGN', extra.pnl_sign, `${extra.pnl_sign} found.`));
+  if (fmt === 'tradovate_orders' || extra.futures_sizes) {
     let pts = 0;
     for (const t of trades) if (t.pnl_unit === 'points') pts++;
     if (pts) warnings.push(warning('W_POINTS_ONLY', pts));
@@ -517,7 +523,13 @@ export function finish(fmt, verified, res, mode, tzLabel) {
   if (reordered) warnings.push(warning('W_CLOSE_BEFORE_OPEN', reordered, `${reordered} found.`));
   trades.sort((a, b) => (a.close_ts - b.close_ts) || (a.open_ts - b.open_ts) || cmpStr(a.symbol, b.symbol) || (a._seq - b._seq));
   if (!trades.length) fail('E_NO_CLOSED_TRADES', noTradesReason(openN, openAtStart, ambiguous, skipped));
-  return {
+  // Dates but no times: the paid server's rule (habits.mjs isDateOnlyRow, DATES_ONLY_SHARE): a trade
+  // opened at midnight and held whole days is date-only; the file is when they are 5% of trades or more.
+  let nDateOnly = 0;
+  for (const t of trades) if (t.open_ts % DAY_MS === 0 && t.hold_s % 86400 === 0) nDateOnly++;
+  const datesOnly = 20 * nDateOnly >= trades.length;
+  if (datesOnly) warnings.push(warning('W_DATES_ONLY', nDateOnly));
+  const out = {
     format: fmt,
     verified_format: verified,
     executions: executions.map(strip),
@@ -526,5 +538,9 @@ export function finish(fmt, verified, res, mode, tzLabel) {
     warnings,
     tz_label: tzLabel,
     currency_groups: groups,
+    dates_only: datesOnly,
+    n_date_only: nDateOnly,
   };
+  if (fmt === 'mapped') out.preset = extra.preset || null;
+  return out;
 }

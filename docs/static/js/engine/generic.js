@@ -2,9 +2,9 @@
 // TradeZella-style round-trip layout. Mirrors parse_generic() and
 // parse_generic_roundtrip() in tests/reference/engine_ref.py.
 
-import { parseDate, fallBackClose } from './csv.js?v=09ecf6e4';
-import { fail } from './errors.js?v=31d80675';
-import { cell, reqNumber, optNumber, skip, isEmptyRow } from './mt.js?v=39256871';
+import { parseDate, fallBackClose } from './csv.js?v=e5cb6d8a';
+import { fail } from './errors.js?v=eef16098';
+import { cell, reqNumber, optNumber, skip, isEmptyRow } from './mt.js?v=d38d008e';
 
 export function sideLetter(v) {
   // Like Tradervue: anything starting with B is a buy, with S a sell ("Short" too).
