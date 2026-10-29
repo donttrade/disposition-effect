@@ -1169,3 +1169,18 @@ svg.tp { padding: 8px 10px; }
   html.pd-open .pay-dialog { position: static; width: auto; max-width: none; max-height: none; margin: 0; border: 0; box-shadow: none; overflow: visible; }
   html.pd-open .pay-dialog::backdrop { display: none; }
 }
+/* /tools/ (29 Oct, owner): all eight tools on one screen; every preview box the same height, so the grid is even */
+.tool-cards-all { margin-top: var(--s4); }
+.tool-cards-all .tool-card-link { padding: var(--s2); }
+.tool-cards-all .tp-wrap > .tp { height: 84px; box-sizing: border-box; }
+.tool-cards-all .tp-icon { height: 84px; }
+.tool-cards-all .tc-name { font-size: var(--fs-1); margin-top: 4px; }
+@media (max-width: 600px) { .tool-cards-all { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s1); }
+  .tool-cards-all .tool-card-link { padding: 10px; } .tool-cards-all .tc-line { font-size: 0.8rem; }
+  .tool-cards-all .tp-wrap > .tp, .tool-cards-all .tp-icon { height: 72px; }
+  .tool-cards-all .tp-wrap > .tp:not(.tp-icon) { padding-top: 24px; }   /* the "Example" tag sits above the preview */
+  .tool-cards-all .tp-tag { font-size: 0.62rem; top: 3px; right: 3px; }
+  .tool-cards-all .tp-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); padding-bottom: 4px; }
+  .tool-cards-all .tp-stats .tp-tile:nth-child(3) { display: none; }
+  .tool-cards-all .tp-tile { padding: 2px 6px; } .tool-cards-all .tp-tile b { font-size: 0.78rem; }
+  .tool-cards-all .tp-prop { gap: 4px; } .tool-cards-all .tp-legend { font-size: 0.62rem; } }

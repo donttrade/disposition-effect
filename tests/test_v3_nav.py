@@ -47,7 +47,7 @@ def test_n1_order_plain_links_and_no_journal(built_site):
     assert [re.sub(r"<[^>]+>", "", t) for t in re.findall(r"<li><a [^>]*>(.*?)</a></li>", row)] == ORDER
     assert "<details" not in row and "nav-dd" not in head and "nav-pop" not in head
     menu = head[head.index('<details class="nav-menu"'):]
-    links = re.findall(r'class="nav-links">(.*?)</ul>', menu, re.S)[0]
+    links = re.findall(r'class="nav-links">(.*?)</ul>', menu, re.S)[0]   # the home page: no Home link (a)
     assert [re.sub(r"<[^>]+>", "", t) for t in re.findall(r"<li><a [^>]*>(.*?)</a></li>", links)] == ORDER
     assert head.count("<details") == 1   # the phone Menu only
     assert _cfg()["flags"]["journal"] is False

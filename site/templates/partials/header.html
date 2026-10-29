@@ -2,7 +2,7 @@
     sticky bar: brand · the four [[nav]] links as plain links (no drop-down: /tools/ shows every tool) · in paid
     builds one compact "Get report — $39" button (a[data-pay]: pay.js opens the pay dialog on this page; without
     JavaScript it is a plain link to /pricing/#last-step) · the theme toggle as a 44 px icon button with its name for
-    screen readers. Below 900 px the links and the button move into one "Menu" <details> (works without
+    screen readers. Below 900 px the links (with Home first off the home page: Home link (a)) and the button move into one "Menu" <details> (works without
     JavaScript; nav.js adds Escape and click-outside). The [[nav]] labels never hold a price, % or study number
     (build.nav_problem); the button's price is the offer itself and sits beside no finding. Not printed. -#}
 {%- import "partials/icons.html" as ic %}
@@ -22,6 +22,9 @@
     <summary><svg class="i-menu" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg><svg class="i-close" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>Menu</summary>
     <div class="nav-panel">
       <ul class="nav-links">
+      {%- if page.path != "/" %}
+        <li><a href="/">Home</a></li>
+      {%- endif %}
       {%- for g in nav %}
         <li>{{ plain_link(g) }}</li>
       {%- endfor %}

@@ -79,11 +79,11 @@ def test_menu_keyboard_escape_and_click_outside(browser, built_site, width):
     pg.keyboard.press("Enter")
     pg.wait_for_timeout(100)   # the accessibility tree updates after the toggle event
     assert pg.is_visible(".nav-panel") and _expanded(cdp) is True
-    pg.keyboard.press("Tab")   # 29 Oct (owner): the menu holds the four links, then the buy button
-    assert pg.evaluate("document.activeElement.textContent") == "Sample report"
+    pg.keyboard.press("Tab")   # 29 Oct (owner): the menu holds Home (off the home page), the four links, then the buy button
+    assert pg.evaluate("document.activeElement.textContent") == "Home"
     assert pg.eval_on_selector_all(".nav-panel .nav-acc", "ss => ss.length") == 0
     links = pg.eval_on_selector_all(".nav-panel .nav-links a", "as => as.map(a => [a.textContent, a.getBoundingClientRect().height])")
-    assert [t for t, _ in links] == ["Sample report", "Free tools", "Pricing", "For firms"]   # 29 Oct (owner): the same four links
+    assert [t for t, _ in links] == ["Home", "Sample report", "Free tools", "Pricing", "For firms"]   # Home link (a); 29 Oct (owner): the same four links
     assert all(h >= 44 for _, h in links)
     cta = pg.locator(".nav-panel a[data-pay]")
     assert cta.inner_text() == "Get report — $39" and cta.bounding_box()["height"] >= 44
