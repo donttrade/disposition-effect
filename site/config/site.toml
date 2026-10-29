@@ -54,6 +54,11 @@ show_seller_for_pilot = false
 # Set it on push day and keep it: a date after the build date fails the build, and
 # ./site/run.sh bundle refuses an empty one. Change it again with any later legal edit.
 launch_date = "2026-10-29"
+# The version of the terms (/terms/, /fr/conditions/) and, with cloudflare_pages_since, of the privacy notice,
+# YYYY-MM-DD (29 Oct, one product). Set it to the day of any later legal edit; launch_date stays as it is, so
+# "called 'Trial' before <launch_date>" never moves. On or after launch_date, not after the build date;
+# empty = the build date, and ./site/run.sh bundle refuses an empty one.
+terms_date = "2026-10-29"
 # T0: the day the site moved from GitHub Pages to Cloudflare Pages (the zone became Active, runbook
 # step 83), YYYY-MM-DD. Stated on /privacy/ and /fr/confidentialite/. Required: empty or a date after
 # the build date fails the build. The privacy notice's version is the later of this and launch_date.

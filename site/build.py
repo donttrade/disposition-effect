@@ -28,7 +28,7 @@ Environment:
   DT_PRIVATE_TOML=path     read private.toml from elsewhere (flag-on test builds)
   DT_PRICES_JSON=path      read prices.json from elsewhere (test builds plant a test link)
   DT_REPORT_METHODS_JSON=path  read report_methods.json from elsewhere (tests plant a missing entry)
-  DT_REQUIRE_LAUNCH_DATE=1 fail if [legal] launch_date is empty (./site/run.sh bundle sets it)
+  DT_REQUIRE_LAUNCH_DATE=1 fail if [legal] launch_date or terms_date is empty (./site/run.sh bundle sets it)
   DT_PREVIEW=<name>        a preview build (delivery plan C-17; name = the Pages branch, e.g. paid-preview,
                            live-check): every page gets <meta name="robots" content="noindex,nofollow"> and a
                            "Preview, not the live site" band, and robots.txt disallows everything
@@ -550,8 +550,8 @@ PAGES += [
     {"template": "pages/terms.html", "path": "/terms/", "requires_flag": None, "updated": "2026-10-21",
      "crumb": "Terms", "alternates_if_paid": [("en", "/terms/"), ("fr", "/fr/conditions/"), ("x-default", "/terms/")],
      "title": "Terms, Refunds and the Pilot — donttrade",
-     "description": "Payment, delivery, refund and Pilot terms for donttrade engagements, and the current status of "
-                    "the donttrade test, in plain language."},
+     "description": "Payment, delivery and refund terms for the donttrade test, the Pilot and the monthly plan for "
+                    "firms, in plain language."},
 ]
 
 # French versions (FRENCH-LEGAL-AND-CHECKOUT-DRAFTS §8.1), donttrade test only, behind the same
@@ -1468,8 +1468,8 @@ SITE_SCHEMA = {
     "stripe": ({"mode"}, {"mode"}),
     "forms": ({"endpoint", "firm_key", "trader_key", "redirect_firm", "redirect_trader"}, None),
     "worker": ({"api_base"}, {"api_base"}),
-    "legal": ({"launch_date", "cloudflare_pages_since", "disclaimer_short", "disclaimer_long"},
-              {"launch_date", "cloudflare_pages_since", "disclaimer_short", "disclaimer_long",
+    "legal": ({"launch_date", "terms_date", "cloudflare_pages_since", "disclaimer_short", "disclaimer_long"},
+              {"launch_date", "terms_date", "cloudflare_pages_since", "disclaimer_short", "disclaimer_long",
                "show_seller_for_pilot"}),
 }  # table: (required keys, every allowed key or None when the table is open)
 
@@ -1625,6 +1625,38 @@ def set_launch_date(legal, toml_path, today=None):
     return d
 
 
+def set_terms_date(legal, toml_path, today=None):
+    """29 Oct (one product): [legal] terms_date (YYYY-MM-DD; empty = the build date) is the version of /terms/,
+    /fr/conditions/ and (with cloudflare_pages_since) /privacy/, so a later legal edit moves the version without
+    moving launch_date, which keeps dating "Pilot (called 'Trial' before <date>)". It must be on or after
+    launch_date and not after the build date; DT_REQUIRE_LAUNCH_DATE=1 (./site/run.sh bundle) refuses an empty one.
+    Call it after set_launch_date: it replaces legal.terms_version."""
+    import datetime as dt
+    today = today or dt.date.today()
+    raw = legal.get("terms_date")
+    if not isinstance(raw, str):
+        die(f"[legal] terms_date must be a string, YYYY-MM-DD or empty ({toml_path})")
+    if raw == "":
+        if os.environ.get("DT_REQUIRE_LAUNCH_DATE") == "1":
+            die(f"[legal] terms_date is empty: set it to the day of the terms change (YYYY-MM-DD) before bundling ({toml_path})")
+        d = today
+    else:
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", raw):
+            die(f"[legal] terms_date {raw!r} is not YYYY-MM-DD ({toml_path})")
+        try:
+            d = dt.date.fromisoformat(raw)
+        except ValueError:
+            die(f"[legal] terms_date {raw!r} is not a real date ({toml_path})")
+        if d > today:
+            die(f"[legal] terms_date {raw} is after the build date {today.isoformat()}: pages would state a "
+                f"date that has not come yet ({toml_path})")
+    if legal.get("launch_date") and d.isoformat() < legal["launch_date"]:
+        die(f"[legal] terms_date {d.isoformat()} is before launch_date {legal['launch_date']} ({toml_path})")
+    legal["terms_version"] = d.isoformat()
+    legal["terms_human"] = f"{d.day} {MONTHS[d.month - 1]} {d.year}"
+    return d
+
+
 MONTHS_FR = ("janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre",
              "novembre", "décembre")
 
@@ -1701,6 +1733,7 @@ def load_config():
     check_schema(cfg, toml_path)
     load_channels(cfg, toml_path)
     set_launch_date(cfg["legal"], toml_path)
+    set_terms_date(cfg["legal"], toml_path)
     set_hosting_date(cfg["legal"], toml_path)
     cfg["site"].setdefault("manual_restore", True)
     if type(cfg["site"]["manual_restore"]) is not bool:

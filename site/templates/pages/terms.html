@@ -1,33 +1,49 @@
 {% extends "base.html" %}
-{#- /terms/ (plan step 17). Old ids kept: prices payment delivery trial cancellation refunds
-    traders publication not-advice liability agreement law contact. Consumer clauses for the
-    donttrade test (seller block, EU/UK withdrawal, Quebec carve-out) render only with
-    paid_report on; the Pilot card-before-scope clause only with pilot_checkout on. The
-    Habit Tracker renewal clause is drafted in partials/terms_tracker_renewal.html and is
-    not rendered anywhere: the Tracker is not built (V2 NOT IN SCOPE). #}
+{#- /terms/ (plan step 17; 29 Oct, one product). Old ids kept: prices payment delivery trial cancellation refunds
+    traders publication not-advice liability agreement law contact; new: plan (the monthly plan for firms).
+    Consumer clauses for the donttrade test (seller block, EU/UK withdrawal, Quebec carve-out) render only with
+    paid_report on; the Pilot card-before-scope clause only with pilot_checkout on. The version is
+    [legal] terms_date; "called Trial before" keeps [legal] launch_date.
+    LAWYER (deferred, 29 Oct): the #plan clauses (arrears, due date, prepaid year and its early-end refund, price
+    change notice, month-end termination), the Pilot credit, the liability cap for a recurring plan, and the name
+    "test" (Competition Act s. 74.01(1)(b)). Lines carry a LAWYER note where they were written. #}
 {% block content %}
 {%- import "partials/pilot_terms.html" as pt with context %}
 {%- from "partials/seller.html" import seller_rows %}
-{%- set pilot = products["pilot"] %}{%- from "partials/pilot_refund.html" import pilot_refund %}{%- set r = products["report39"] %}{%- set t = products["tracker79"] %}
-{%- set pct = prices.rules.recheck.percent_of_engagement %}
-{%- set ex = products[prices.rules.recheck.example_product] %}
+{%- set pilot = products["pilot"] %}{%- from "partials/pilot_refund.html" import pilot_refund %}{%- set r = products["report39"] %}{%- set plan = products["plan"] %}
 <div class="wrap"><div class="prose">
   {% include "partials/crumbs.html" %}
   <h1>Terms, refunds and the {{ pilot.name }}</h1>
-  <p class="notice">Plain-language terms, version {{ legal.terms_version }}. Where a signed engagement agreement differs, the agreement governs.{% if flags.paid_report %} <a href="/fr/conditions/" hreflang="fr" lang="fr">Version française</a>{% endif %}</p>
+  <p class="notice">Plain-language terms, version {{ legal.terms_version }}. Where a signed agreement differs, the agreement governs.{% if flags.paid_report %} <a href="/fr/conditions/" hreflang="fr" lang="fr">Version française</a>{% endif %}</p>
 
   <details class="legal-sec">
     <summary><h2 id="prices">Prices</h2><span class="ls-sum">Firm prices are in US dollars, before sales tax.</span></summary>
   <p>Firm prices are in US dollars (USD), before any applicable sales tax. <a href="/pricing/">Pricing</a></p>
+  <p>Fixed-price firm engagements (Snapshot, Memo, Outcomes pack) were withdrawn on {{ legal.terms_human }}; a scope accepted before then keeps its agreed price and terms.</p>
+  </details>
+
+  <details class="legal-sec">
+    <summary><h2 id="plan">The monthly plan for firms</h2><span class="ls-sum">{{ plan.price_usd|usd }} per trader account a month, {{ plan.minimum_usd|usd }} minimum, invoiced after each month. Cancel at any month end.</span></summary>
+  {#- LAWYER (deferred): every item in this list. -#}
+  <ul>
+    <li><strong>What it is:</strong> the {{ plan.name }}, run each month on your own records by your own staff with the published script. Today it measures one habit, the disposition effect; habits added later are dated on the <a href="/corrections/">corrections page</a>.</li>
+    <li><strong>Price:</strong> {{ plan.price_usd|usd }} per trader account per month, with a minimum of {{ plan.minimum_usd|usd }} a month. The number of trader accounts for a month is the number on the <code>accounts:</code> line of that month’s clean run of the script.</li>
+    <li><strong>Invoices:</strong> monthly in arrears, by email, in USD, due within {{ prices.rules.plan_payment_days }} days of the invoice date.</li>
+    <li><strong>Paying a year upfront:</strong> {{ prices.rules.plan_prepay_discount_percent }}% off the monthly plan price, minimum included. The upfront amount is based on an account count agreed in writing, never less than the minimum; a month whose count is higher is invoiced in arrears for the difference, at the same discount. If the plan ends before the year is over, the months used are charged at the price without the discount and the rest is refunded within 10 business days.</li>
+    <li><strong>Delivery:</strong> each month’s result within {{ plan.turnaround_days }} business days of that month’s clean run.</li>
+    <li><strong>Reproduction:</strong> if your own re-run of the same published script version on the same export does not reproduce a month’s figure, that month is not charged.</li>
+    <li><strong>Ending the plan:</strong> either side may end the monthly plan by email at any time. It ends at the end of the calendar month in which notice is given. That month is invoiced as usual, minimum included. No cancellation fee. If donttrade ends it, only months with a delivered result are invoiced.</li>
+    <li><strong>Price changes:</strong> only with {{ prices.rules.plan_price_notice_days }} days’ written notice; you may end the plan before the change applies.</li>
+    <li><strong>Licence:</strong> the commercial licence for the script runs for as long as the plan does.</li>
+  </ul>
   </details>
 
   <details class="legal-sec">
     <summary><h2 id="payment">Payment</h2><span class="ls-sum">Firms pay by invoice. We never ask for card details by email.</span></summary>
   <ul>
-    <li>Every firm engagement is invoiced by email.</li>
-    <li>Snapshot, Memo and Outcomes pack: {{ products.memo.payment_terms }}.</li>
+    <li>The {{ pilot.name }} and the monthly plan are invoiced by email.</li>
     <li>{{ pilot.name }}: {{ pilot.payment_terms }}.</li>
-    <li>Quarterly re-check: {{ pct }}% of the price of the engagement being repeated (for example {{ (ex.price_usd * pct / 100)|usd }} for a {{ ex.name }}), payable in advance.</li>
+    <li>Monthly plan: invoiced monthly in arrears by email, {{ plan.price_usd|usd }} per trader account counted in that month’s run, minimum {{ plan.minimum_usd|usd }} a month, due within {{ prices.rules.plan_payment_days }} days.</li>
     <li>Invoices are in USD. Pay by bank transfer, or, in Canada, the CAD equivalent by Interac e-Transfer at the Bank of Canada daily rate on the invoice date. Transfer and bank fees are paid by the sender. {% include "partials/card_timing.html" %}</li>
     <li>We never ask for card details by email.</li>
   </ul>
@@ -39,16 +55,17 @@
     <li>Delivery times are in business days.</li>
     <li>The clock starts when payment is received and the script’s output comes back without validation errors.</li>
     <li>The clock pauses while a question to you is open.</li>
+    <li>Each monthly result: within {{ plan.turnaround_days }} business days of that month’s clean run.</li>
   </ul>
   </details>
 
   <details class="legal-sec">
-    <summary><h2 id="trial">The {{ pilot.name }}</h2><span class="ls-sum">One figure, one per firm; its fee can count toward a Memo.</span></summary>
+    <summary><h2 id="trial">The {{ pilot.name }}</h2><span class="ls-sum">The plan’s first month, one per firm; its fee is credited against the plan.</span></summary>
   <p class="small muted">{{ pilot.name }} (called “{{ pilot.former_name }}” before {{ legal.launch_human }}).</p>
   <ul>
-    <li>One disposition figure; one per firm; {{ pilot.turnaround_days }} business days.</li>
-    <li>What result would make a Memo worth doing is agreed in writing before work starts.</li>
-    <li>The fee is credited in full toward a Memo signed within {{ prices.rules.pilot_credit_days }} days of {{ pilot.name }} delivery. The credit has no cash value and cannot be transferred.</li>
+    <li>The {{ pilot.name }} is the first month of the monthly plan: one run on your book, one per firm, {{ pilot.price_usd|usd }}, delivered in {{ pilot.turnaround_days }} business days.</li>
+    {#- LAWYER (deferred): the credit. #}
+    <li>If the monthly plan starts within {{ prices.rules.pilot_credit_days }} days of {{ pilot.name }} delivery, the {{ pilot.price_usd|usd }} is credited in full against the plan’s invoices, starting with the first, until it is used up. The credit has no cash value and cannot be transferred.</li>
     <li><strong>Extract refund:</strong> {{ pt.extract() }}</li>
     <li><strong>Reproduction refund:</strong> {{ pt.reproduction() }}</li>
     {%- if flags.pilot_checkout %}
@@ -64,7 +81,7 @@
   <h3 id="refunds">Firms</h3>
   <ul>
     <li>{{ pt.kickoff(pilot) }}</li>
-    <li>Snapshot, Memo and Outcomes pack are paid 50% on acceptance and 50% within 7 days of delivery. Either side may stop in writing. If either side stops, completed work is billed pro rata.</li>
+    <li>The monthly plan ends at the end of the calendar month in which either side gives notice by email; that month is invoiced as usual, minimum included (<a href="#plan">the monthly plan</a>). A month whose result does not reproduce is not charged.</li>
     <li>A “no measurable effect” answer is a finished deliverable.</li>
   </ul>
 
@@ -74,7 +91,7 @@
     <p>These terms apply to the {{ r.name|lower }} bought for personal use. The “Before you pay” summary shown before checkout is part of them.</p>
     <dl class="byp">{{ seller_rows(private, site, "en") }}</dl>
     <ul>
-      <li><strong>What you buy:</strong> a one-off measurement of your own past trades, from a file you export (MetaTrader 5/4 report, IBKR Flex Query, Tradovate orders or TradingView order history, all four in beta until real exports confirm the columns, or the donttrade CSV template), with one free re-test.</li>
+      <li><strong>What you buy:</strong> the donttrade test, a habit test on your own trades: a one-off measurement of your own past trades, from a file you export (MetaTrader 5/4 report, IBKR Flex Query, Tradovate orders or TradingView order history, all four in beta until real exports confirm the columns, or the donttrade CSV template), with one free re-test.</li>
       <li><strong>Price:</strong> {{ r.price_usd|usd }} USD, one time; {{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers. No sales tax is charged. Your card issuer may add a currency conversion fee; donttrade does not receive it. The price you accept at checkout is the price that applies.</li>
       <li><strong>Payment:</strong> in full at checkout, by card, on Stripe’s payment page.</li>
       <li><strong>Delivery:</strong> online only, on donttrade.ca, right after payment. Your access key is saved in your browser. Keep the restore link and file shown after payment: they are the only {% if site.manual_restore %}automatic {% endif %}way to reopen your purchase in another browser.{% if site.manual_restore %} <span id="manual-restore">If your access link stops working, email us from the address you paid with and we’ll send a new one. We send it by hand, and only to the email address on the payment.</span>{% endif %}</li>
@@ -93,14 +110,14 @@
     <p>If you live in the European Union or the United Kingdom, you have in principle a 14-day legal right of withdrawal. If you ask for immediate access to the digital content and acknowledge that you lose this right (the field shown at checkout), it ends once your test result is supplied. Our voluntary {{ prices.rules.trader_refund_days }}-day refund still applies.</p>
   </div>
   {%- else %}
-  <p>The donttrade test is waitlist only for now: nothing is sold and no money is taken. {{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers, in USD. A yearly {{ t.name|lower }} comes later and is not sold until it exists.</p>
+  <p>The donttrade test is waitlist only for now: nothing is sold and no money is taken. {{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers, in USD.</p>
   <p>Before anything is sold, these terms will be updated, and the seller’s details, the full terms and a printable summary will be shown before anyone pays. When the test launches, a full refund is available if you ask within {{ prices.rules.trader_refund_days }} days of buying.</p>
   {%- endif %}
   </details>
 
   <details class="legal-sec">
     <summary><h2 id="publication">Publication and use of our name</h2><span class="ls-sum">Nothing about your data is published without your consent.</span></summary>
-  <p>Nothing about your data is published without your consent. You may say a figure was “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a fixed-scope agreement”, and nothing stronger: never audited, certified or verified.</p>
+  <p>Nothing about your data is published without your consent. You may say a figure was “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a written agreement”, and nothing stronger: never audited, certified or verified.</p>
   </details>
 
   <details class="legal-sec">
@@ -112,7 +129,8 @@
   <details class="legal-sec">
     <summary><h2 id="liability">Liability</h2><span class="ls-sum">Capped at the fees paid. Consumer law rights stay.</span></summary>
   {%- if flags.paid_report %}
-  <p><strong>This paragraph does not apply to consumers in Quebec.</strong> Our liability is capped at the fees paid for the product or engagement concerned. We are not responsible for trading decisions you make or their results.</p>
+  {#- LAWYER (deferred): the cap for a recurring firm plan ("fees paid" over which period). #}
+  <p><strong>This paragraph does not apply to consumers in Quebec.</strong> Our liability is capped at the fees paid for the product or service concerned. We are not responsible for trading decisions you make or their results.</p>
   <p>For everyone: nothing in these terms limits rights you have under consumer protection law that cannot be excluded.</p>
   {%- else %}
   <p>Our liability is capped at the fees paid. Nothing in these terms limits rights you have under consumer protection law that cannot be excluded.</p>
@@ -120,8 +138,8 @@
   </details>
 
   <details class="legal-sec">
-    <summary><h2 id="agreement">The engagement agreement</h2><span class="ls-sum">Each firm engagement has a short written agreement.</span></summary>
-  <p>Every firm engagement is governed by a short written agreement (scope, data terms and the licence for the engagement), sent with the scope for you to review before you pay. A blank template is available on request by email.</p>
+    <summary><h2 id="agreement">The written agreement</h2><span class="ls-sum">The {{ pilot.name }} and the monthly plan each have a short written agreement.</span></summary>
+  <p>Every monthly plan and {{ pilot.name }} is governed by a short written agreement (scope, data terms and the commercial licence for the plan’s term), sent with the scope for you to review before you pay. A blank template is available on request by email.</p>
   </details>
 
   <details class="legal-sec">
