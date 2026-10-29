@@ -28,7 +28,7 @@ export const MESSAGES = Object.freeze({
   E_EMPTY: 'The file is empty.',
   E_HEADER_ONLY: 'The file has column headings but no trade rows under them.',
   E_UNKNOWN_FORMAT:
-    'This file was not recognised as an MT5/MT4 report, an IBKR Flex Query, a Tradovate Orders export or the generic template. Use the generic template (Date, Time, Symbol, Side, Quantity, Price).',
+    'This file was not recognised as an MT5/MT4 report, an IBKR Flex Query, a Tradovate Orders export, a TradingView Order History export or the generic template. Use the generic template (Date, Time, Symbol, Side, Quantity, Price).',
   E_MISSING_COLUMN: 'A required column is missing',
   E_BAD_DATE: 'A date or time could not be read',
   E_AMBIGUOUS_DATE:

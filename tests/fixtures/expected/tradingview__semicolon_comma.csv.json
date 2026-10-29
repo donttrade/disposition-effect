@@ -1,0 +1,196 @@
+{
+ "noise": {
+  "checks": [
+   {
+    "extreme": null,
+    "guard": null,
+    "label": "not enough trades to tell",
+    "method": "bootstrap-t",
+    "n_a": 2,
+    "n_b": null,
+    "n_needed": null,
+    "p": null,
+    "p_unguarded": null,
+    "skew": null,
+    "stat": "expectancy",
+    "value": null
+   },
+   {
+    "label": "not enough trades to tell",
+    "method": "label permutation",
+    "n_a": 0,
+    "n_b": 2,
+    "p": null,
+    "stat": "hold_gap_s",
+    "value": null
+   },
+   {
+    "label": "not enough trades to tell",
+    "method": "order shuffle",
+    "n_a": 2,
+    "n_b": null,
+    "p": null,
+    "stat": "longest_losing_streak",
+    "value": null
+   }
+  ],
+  "limited": false,
+  "n_used": 2
+ },
+ "pgr_plr": {
+  "coverage_pct": null,
+  "pg": 0,
+  "pl": 0,
+  "rg": 2,
+  "rl": 0
+ },
+ "result": {
+  "currency_groups": {
+   "points": 2
+  },
+  "executions": [
+   {
+    "currency": null,
+    "fee": 0.5,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 79.6,
+    "qty": 20.0,
+    "row": 2,
+    "side": "buy",
+    "symbol": "XETR:BMW",
+    "ts": 1790164800000
+   },
+   {
+    "currency": null,
+    "fee": 0.5,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 80.1,
+    "qty": 20.0,
+    "row": 3,
+    "side": "sell",
+    "symbol": "XETR:BMW",
+    "ts": 1790157600000
+   },
+   {
+    "currency": null,
+    "fee": 1.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 203.25,
+    "qty": 10.0,
+    "row": 4,
+    "side": "sell",
+    "symbol": "XETR:SAP",
+    "ts": 1790090400000
+   },
+   {
+    "currency": null,
+    "fee": 1.0,
+    "multiplier": 1,
+    "oc": null,
+    "pnl_reported": null,
+    "pos_id": null,
+    "price": 201.5,
+    "qty": 10.0,
+    "row": 5,
+    "side": "buy",
+    "symbol": "XETR:SAP",
+    "ts": 1790067900000
+   }
+  ],
+  "format": "tradingview",
+  "skipped": {},
+  "trades": [
+   {
+    "close_ts": 1790090400000,
+    "currency": null,
+    "dir": "long",
+    "entry_vwap": 201.5,
+    "exit_vwap": 203.25,
+    "fees": 2.0,
+    "fills_n": 2,
+    "hold_s": 22500,
+    "id": "t1",
+    "open_ts": 1790067900000,
+    "pnl": 15.5,
+    "pnl_gross": 17.5,
+    "pnl_source": "computed",
+    "pnl_unit": "points",
+    "qty": 10.0,
+    "symbol": "XETR:SAP"
+   },
+   {
+    "close_ts": 1790164800000,
+    "currency": null,
+    "dir": "short",
+    "entry_vwap": 80.1,
+    "exit_vwap": 79.6,
+    "fees": 1.0,
+    "fills_n": 2,
+    "hold_s": 7200,
+    "id": "t2",
+    "open_ts": 1790157600000,
+    "pnl": 9.0,
+    "pnl_gross": 10.0,
+    "pnl_source": "computed",
+    "pnl_unit": "points",
+    "qty": 20.0,
+    "symbol": "XETR:BMW"
+   }
+  ],
+  "tz_label": "as exported, with no time zone stated",
+  "verified_format": true,
+  "warnings": []
+ },
+ "stats": {
+  "avg_loss": null,
+  "avg_win": 12.25,
+  "expectancy": 12.25,
+  "gross_loss": 0.0,
+  "gross_profit": 24.5,
+  "hold_median_loss_s": null,
+  "hold_median_win_s": 14850.0,
+  "hold_ratio": null,
+  "largest_loss": null,
+  "largest_win": 15.5,
+  "long": {
+   "losses": 0,
+   "n": 1,
+   "pnl": 15.5,
+   "win_rate": 1.0,
+   "wins": 1
+  },
+  "losses": 0,
+  "max_consec_losses": {
+   "n": 0,
+   "pnl": 0.0
+  },
+  "max_consec_wins": {
+   "n": 2,
+   "pnl": 24.5
+  },
+  "max_drawdown_abs": 0.0,
+  "max_drawdown_pct": null,
+  "n": 2,
+  "net_pnl": 24.5,
+  "profit_factor": "no losing trades",
+  "scratch": 0,
+  "short": {
+   "losses": 0,
+   "n": 1,
+   "pnl": 9.0,
+   "win_rate": 1.0,
+   "wins": 1
+  },
+  "win_rate": 1.0,
+  "wins": 2
+ }
+}

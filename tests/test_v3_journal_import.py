@@ -13,7 +13,7 @@ FIX = os.path.join(REPO, "tests", "fixtures")
 
 def _fixtures():
     out = []
-    for fmt in ("mt5", "mt4", "ibkr", "tradovate", "generic", "generic_roundtrip"):
+    for fmt in ("mt5", "mt4", "ibkr", "tradovate", "tradingview", "generic", "generic_roundtrip"):
         for name in sorted(os.listdir(os.path.join(FIX, fmt))):
             if name.endswith((".csv", ".htm", ".html")):
                 out.append(f"tests/fixtures/{fmt}/{name}")
@@ -110,8 +110,15 @@ def test_j2_worker_gives_the_same_keys_as_the_page(jctx):
     assert html.get("needsPage") is True
 
 
+# The engine commits made after the journal (motion), each a new reader the journal did not need to change.
+ENGINE_COMMITS_SINCE_MOTION = ("Engine: TradingView Order History parser",)
+
+
 def test_j13_engine_and_file_worker_untouched():
     import subprocess
-    r = subprocess.run(["git", "-C", REPO, "diff", "--stat", "motion", "--", "site/static/js/engine", "site/static/js/tools/file-worker.js"],
-                       capture_output=True, text=True)
+    paths = ["--", "site/static/js/engine", "site/static/js/tools/file-worker.js"]
+    r = subprocess.run(["git", "-C", REPO, "diff", "--stat", "HEAD"] + paths, capture_output=True, text=True)
     assert r.returncode == 0 and r.stdout.strip() == "", r.stdout
+    r = subprocess.run(["git", "-C", REPO, "log", "--format=%s", "motion..HEAD"] + paths, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    assert all(s.startswith(ENGINE_COMMITS_SINCE_MOTION) for s in r.stdout.splitlines()), r.stdout

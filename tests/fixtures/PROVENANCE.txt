@@ -71,6 +71,19 @@ Format: Tradovate Orders report (CSV)
      trims " Buy"/" Sell", reads Fill Time and a Date that may have a 2-digit
      year. Month-first dates are UNVERIFIED. No commissions in this report.
 
+Format: TradingView Order History (CSV; Trading Panel > History > Export data)
+  Column names checked 29 Oct 2026 against one real paper-trading export from
+  the owner (kept out of the repo; none of its rows is copied): Symbol, Side,
+  Type, Quantity, Limit price, Stop price, Fill price, Status, Commission,
+  Placing time, Closing time, Order ID, Level ID, Leverage, Margin. Symbols
+  are EXCHANGE:TICKER, times "yyyy-mm-dd HH:MM:SS" with no zone, one row per
+  order, statuses Filled / Rejected seen. So the format is verified_format =
+  true. UNVERIFIED: exports from broker-connected accounts (same columns
+  assumed), the "Cancelled" spelling, and whether a partly filled order shows
+  as Filled. Fixtures: written by make_tradingview.py, all orders made up;
+  numbers_bom.csv mimics a re-save from Apple Numbers (BOM, CRLF, quoted
+  cells, "10.0" floats, no seconds), as the owner's file had "123.0" IDs.
+
 Format: generic template and round-trip layout
   Ours (TRADER-REPORT-INPUT-FORMATS §2D), aligned with Tradervue's generic
   format (tradervue.com/help/generic) and TradeZella's generic CSV help

@@ -1,0 +1,3 @@
+Symbol,Side,Type,Quantity,Limit price,Stop price,Fill price,Status,Commission,Placing time,Closing time,Order ID,Level ID,Leverage,Margin
+NASDAQ:AAPL,Sell,Market,10,,,231.00,Filled,,9/14/2026 10:05,9/14/2026 10:05,3469300001,,1:1,
+NASDAQ:AAPL,Buy,Market,10,,,230.50,Filled,,9/14/2026 9:31,9/14/2026 9:31,3469300000,,1:1,

@@ -668,6 +668,14 @@ SIGNATURES = {
         },
         "required": [["side"], ["contract"], ["status"], ["qty"], ["price"], ["time"]],
     },
+    "tradingview": {
+        "verified": True,
+        "fields": {
+            "symbol": ["symbol"], "side": ["side"], "qty": ["quantity", "qty"], "price": ["fillprice"],
+            "status": ["status"], "commission": ["commission"], "time": ["closingtime"],
+        },
+        "required": [["symbol"], ["side"], ["qty"], ["price"], ["status"], ["time"]],
+    },
     "generic_roundtrip": {
         "verified": False,
         "fields": {
@@ -698,6 +706,7 @@ NUMERIC_FIELDS = {
     "mt4": ["size", "open_price", "close_price", "commission", "taxes", "swap", "profit"],
     "ibkr_flex": ["quantity", "price", "commission", "realized", "multiplier", "fx"],
     "tradovate_orders": ["qty", "price"],
+    "tradingview": ["qty", "price", "commission"],
     "generic_roundtrip": ["qty", "open_price", "close_price", "fees"],
     "generic": ["qty", "price", "fees"],
 }
@@ -735,7 +744,7 @@ def check_currency_column(rows, m):
     return m, False
 
 
-CSV_ORDER = ["mt5_deals", "ibkr_flex", "tradovate_orders", "generic_roundtrip", "generic"]
+CSV_ORDER = ["mt5_deals", "ibkr_flex", "tradovate_orders", "tradingview", "generic_roundtrip", "generic"]
 HTML_ORDER = ["mt5_deals", "mt5_positions", "mt4"]
 HEADER_TITLES = ["trade history report", "statement", "detailed statement", "account statement"]
 SECTION_TITLES = ["positions", "open positions", "orders", "deals", "working orders", "summary", "results",
@@ -1199,6 +1208,47 @@ def parse_tradovate(rows, hi, m):
     return {"executions": execs, "roundtrips": [], "skipped": skipped, "extra": {}}
 
 
+def _tv_skip_reason(status):
+    if status == "rejected":
+        return "rejected"
+    if status in ("cancelled", "canceled"):
+        return "cancelled"
+    return "not_filled"
+
+
+def parse_tradingview(rows, hi, m):
+    """TradingView Order History: one row per order; each Filled order is one execution at its
+    Closing time. Mirrors parseTradingView() in tradingview.js."""
+    execs, skipped = [], {}
+    for r in rows[hi + 1:]:
+        if _empty(r["cells"]):
+            continue
+        row = r["row"]
+        status = cell(r, m, "status").strip().lower()
+        if status != "filled":
+            _skip(skipped, _tv_skip_reason(status))
+            continue
+        side = _side_letter(cell(r, m, "side"))
+        if side is None:
+            _skip(skipped, "bad_side")
+            continue
+        symbol = cell(r, m, "symbol")
+        if symbol == "":
+            _skip(skipped, "no_symbol")
+            continue
+        qty = abs(req_number(cell(r, m, "qty"), row, "qty"))
+        if qty == 0:
+            _skip(skipped, "zero_qty")
+            continue
+        price = req_number(cell(r, m, "price"), row, "price")
+        fee = abs(opt_number(cell(r, m, "commission"), row, "commission"))
+        ts = parse_date(cell(r, m, "time"), "generic", row, "time")
+        execs.append({"row": row, "ts": ts, "symbol": symbol, "side": side, "qty": qty, "price": price,
+                      "fee": fee, "currency": None, "oc": None, "pos_id": None, "pnl_reported": None,
+                      "multiplier": 1, "_unit": "points", "_fx": None})
+    return {"executions": execs, "roundtrips": [], "skipped": skipped, "extra": {}}
+
+
 # ----------------------------------------------------------------- trades
 
 UNIT = 1e8  # positions are tracked in 1e-8 lots so 0.1 + 0.2 - 0.3 is exactly flat
@@ -1581,7 +1631,8 @@ def roundtrip_executions(rts):
 
 
 TZ_LABELS = {"mt5": "broker server time", "mt4": "broker server time", "ibkr_flex": "as exported",
-             "tradovate_orders": "local time, as exported", "generic": "as in the file",
+             "tradovate_orders": "local time, as exported",
+             "tradingview": "as exported, with no time zone stated", "generic": "as in the file",
              "generic_roundtrip": "as in the file"}
 
 
@@ -1658,6 +1709,8 @@ def parse_file(data):
             fmt, res, mode = "ibkr_flex", parse_ibkr(rows, hi, m), "net"
         elif name == "tradovate_orders":
             fmt, res, mode = "tradovate_orders", parse_tradovate(rows, hi, m), None
+        elif name == "tradingview":
+            fmt, res, mode = "tradingview", parse_tradingview(rows, hi, m), None
         elif name == "generic_roundtrip":
             fmt, res, mode = "generic_roundtrip", parse_generic_roundtrip(rows, hi, m), None
         else:
@@ -2193,7 +2246,7 @@ def strip_rows(trades, salt, perm=None):
 
 # ----------------------------------------------------------------- CLI / expected files
 
-FIXTURE_DIRS = ["generic", "generic_roundtrip", "mt5", "mt4", "ibkr", "tradovate", "errors"]
+FIXTURE_DIRS = ["generic", "generic_roundtrip", "mt5", "mt4", "ibkr", "tradovate", "tradingview", "errors"]
 
 
 def run_fixture(data):
