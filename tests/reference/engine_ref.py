@@ -3837,7 +3837,7 @@ def fixture_paths(root):
 # The universal importer's fixtures (tests/fixtures/make_mapped.py): each case is one or more files
 # or pastes, with a mapping (mapped/, paste/ with a .map.json, multi/ with a map.json), through the
 # presets (presets/, paste/ without one), or known formats only (auto/, multi/ without one).
-CASE_DIRS = ["mapped", "presets", "paste", "multi", "auto", "tester", "tester_multi"]
+CASE_DIRS = ["mapped", "presets", "paste", "multi", "auto", "tester", "tester_multi", "tester2", "tester2_multi"]
 
 
 def case_paths(root):
@@ -3868,7 +3868,7 @@ def case_spec(root, rel):
         with open(path, encoding="utf-8") as f:
             return json.load(f)
 
-    if d in ("multi", "tester_multi"):
+    if d in ("multi", "tester_multi", "tester2_multi"):
         base = os.path.join(root, rel)
         names = sorted(n for n in os.listdir(base) if n != "map.json")
         return {"items": [item(os.path.join(base, n)) for n in names],

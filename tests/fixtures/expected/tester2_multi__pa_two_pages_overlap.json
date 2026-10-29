@@ -1,0 +1,8 @@
+{
+ "error": {
+  "code": "E_MISSING_COLUMN",
+  "column": "time",
+  "file": 1,
+  "row": 1
+ }
+}

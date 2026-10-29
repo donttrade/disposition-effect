@@ -20,11 +20,11 @@ from test_engine_golden import comparable, same  # noqa: E402
 
 FIX = os.path.join(HERE, "fixtures")
 TDIR = os.path.join(FIX, "tester")
-FILES = sorted(os.listdir(TDIR))
+FILES = sorted(os.listdir(TDIR)) + ["../tester2/" + n for n in sorted(os.listdir(os.path.join(FIX, "tester2")))]
 
 
 def item(name):
-    path = os.path.join(TDIR, name)
+    path = os.path.normpath(os.path.join(TDIR, name))
     if name.endswith(".paste.txt"):
         with open(path, encoding="utf-8") as f:
             return {"paste": f.read()}
@@ -150,3 +150,46 @@ def test_f8_one_column_one_field_and_other_languages(page):
         g = inspect(page, name)["guess"]
         assert all(g["mapping"]["cols"][f] is not None for f in ("date", "time", "symbol", "side", "qty", "price")), name
         assert g["mapping"]["side_values"] == side, name
+
+
+# ----------------------------------------------------------------- round 2 (TESTER-REPORT-IMPORTER-ENGINE-R2)
+R2 = "../tester2/"
+
+
+def test_r2_n1_a_refused_fill_never_leaves_a_phantom_short(page):
+    for mapping in (None, guessed(page, R2 + "w_one_refused_buy.csv")[1]):
+        r = run_js(page, [item(R2 + "w_one_refused_buy.csv")], mapping)["result"]
+        assert [t["dir"] for t in r["trades"]] == ["long"], mapping
+        codes = {w["code"]: w["n"] for w in r["warnings"]}
+        assert codes["W_REFUSED_FILLS"] == 5 and r["skipped"] == {"split_number": 1}
+        assert "W_OPEN_POSITIONS" not in codes
+
+
+def test_r2_n2_summary_rows_of_any_width_stay_out_of_the_guess(page):
+    for name in ("ft_4cells_date.csv", "ft_5cells_dates.csv", "ft_disclaimer.csv", "ft_subtotal_midfile.csv",
+                 "ft_two_footers.csv", "ft_total_fills.csv", "ft_3cells_numbers.csv", "ft_4.csv", "ft_sub.csv"):
+        g = inspect(page, R2 + name)["guess"]
+        cols = g["mapping"]["cols"]
+        assert (cols["date"], cols["time"], g["mapping"]["date_format"]) == (0, 1, "ymd"), name
+        assert g["questions"] == [], (name, g["questions"])
+
+
+def test_r2_n3_durations_by_value_and_midnight_clocks_kept(page):
+    clock = inspect(page, R2 + "du_real_midnight_clock.csv")["guess"]
+    assert clock["mapping"]["cols"]["time"] == 1 and clock["questions"] == []
+    _, m = guessed(page, R2 + "du_real_midnight_clock.csv")
+    r = run_js(page, [item(R2 + "du_real_midnight_clock.csv")], m)["result"]
+    assert r["dates_only"] is False and r["trades"][0]["hold_s"] == 60
+    for name in ("du_hours_1_to_5.csv", "du_00mmss_after_qty.csv"):
+        g = inspect(page, R2 + name)["guess"]
+        assert g["mapping"]["cols"]["time"] is None and g["badges"]["time"] == "check", name
+        assert g["questions"][0]["q"] == "time_or_duration" and g["questions"][0]["row"] == 2, name
+    assert inspect(page, R2 + "du_units.csv")["guess"]["mapping"]["cols"]["time"] is None
+    assert inspect(page, R2 + "du_duration_header.csv")["guess"]["mapping"]["cols"]["time"] == 1
+
+
+def test_r2_n4_identifiers_blocked():
+    for h in ("orderid", "beneficiary", "counterparty", "sender", "login", "bank", "routingnumber", "sortcode",
+              "telegram", "discord", "handle", "cell", "contact", "referralcode"):
+        assert E.is_blocked(h), h
+    assert not E.is_blocked("txid") and not E.is_blocked("positionid") and not E.is_blocked("cancelled")
