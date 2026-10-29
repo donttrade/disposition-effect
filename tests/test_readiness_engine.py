@@ -410,6 +410,31 @@ def test_ranked_is_off_by_default(page):
     assert "enabled: WHATIF_RANKED" in src and "enabled: true" not in src
 
 
+RANKED_SRC = "export const WHATIF_RANKED = false;"
+
+
+def test_ranked_flag_comes_from_site_toml(built_site, tmp_path):
+    """[flags] whatif_ranked (default false) is written into the built engine; true only when the flag is."""
+    core = os.path.join(REPO, "site", "static", "js", "tools", "prop-sim-core.js")
+    assert open(core, encoding="utf-8").read().count(RANKED_SRC) == 1
+    toml = open(os.path.join(REPO, "site", "config", "site.toml"), encoding="utf-8").read()
+    assert re.search(r"^whatif_ranked = false\b", toml, re.M)
+    off = (built_site["out"] / "static" / "js" / "tools" / "prop-sim-core.js").read_text(encoding="utf-8")
+    assert RANKED_SRC in off and "WHATIF_RANKED = true" not in off
+    on_toml = tmp_path / "site.toml"
+    on_toml.write_text(re.sub(r"^whatif_ranked = false", "whatif_ranked = true", toml, flags=re.M), encoding="utf-8")
+    out = tmp_path / "_site"
+    env = {**os.environ, "DT_OUT": str(out), "DT_SITE_TOML": str(on_toml)}
+    env.pop("DT_DEV", None)
+    r = subprocess.run([sys.executable, os.path.join(REPO, "site", "build.py")], env=env, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    on = (out / "static" / "js" / "tools" / "prop-sim-core.js").read_text(encoding="utf-8")
+    assert "export const WHATIF_RANKED = true;" in on and RANKED_SRC not in on
+    worker = (out / "static" / "js" / "tools" / "prop-sim-worker.js").read_text(encoding="utf-8")
+    worker_off = (built_site["out"] / "static" / "js" / "tools" / "prop-sim-worker.js").read_text(encoding="utf-8")
+    assert worker != worker_off   # the worker imports the engine with its own cache-busting version
+
+
 def test_ranked_only_max_one_trade_changes_the_result(page):
     days = [[50, -10, 5]] * 4
     p = {"mode": "file", "days": days, "open_s": [[0, 100000, 200000]] * 4, "close_s": [[10, 100010, 200010]] * 4,
