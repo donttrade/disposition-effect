@@ -39,7 +39,7 @@
       </ul>
       <p><a class="more" href="/sample-report/">See the full sample report <span aria-hidden="true">→</span></a></p>
     </div>
-    <figure class="showcase-shot" aria-label="Part of a sample habit report, on a demo file">
+    <figure class="showcase-shot" aria-label="Part of an example habit report">
       <div class="shot-card">
         <table class="shot-table">
           <thead><tr><th scope="col">Habit</th><th scope="col" class="num">Trades</th><th scope="col" class="num">Total</th><th scope="col">Result</th></tr></thead>
@@ -57,7 +57,7 @@
       </div>
       <p class="toast toast-a"><span class="toast-k">File read</span> {{ sr.n_trades }} trades · {{ sr.period_weeks }} weeks</p>
       <p class="toast toast-b"><span class="toast-k">Tested against chance</span> {{ sr.n_distinguishable }} of {{ sr.n_tested }} distinguishable from noise</p>
-      <figcaption>Sample report on a demo file. Not a real trader.</figcaption>
+      <figcaption>Example report.</figcaption>
     </figure>
     <details class="how">
       <summary>What the results mean</summary>
@@ -87,7 +87,7 @@
         <details class="how-more"><summary>What we keep</summary><p>{{ strings.p5.short }} <a href="/privacy/#report">Exactly what is sent and kept</a></p></details>
       </li>
       <li class="how-step">
-        <div class="how-shot how-shot-tagged" aria-hidden="true"><span class="tp-tag">Sample report</span>
+        <div class="how-shot how-shot-tagged" aria-hidden="true"><span class="tp-tag">Example report</span>
           {%- for h in sr.habits if h.verdict in pill %}<p class="how-row"><span>{{ short.get(h.id, h.name) }}</span> <span class="{{ pill[h.verdict][0] }}">{{ pill[h.verdict][1] }}</span></p>{% endfor %}
         </div>
         <h3><span class="how-n">3</span> See your habits</h3>

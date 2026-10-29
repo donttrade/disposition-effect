@@ -46,7 +46,7 @@ export function readSection(prefix, r, fileLabel) {
       `${plural(r.trades.length, 'closed trade', 'closed trades')} from ${plural(r.n_fills, 'fill', 'fills')}, closed ${day(first.close_ts)} to ${day(last.close_ts)}. `,
       `Times are ${r.tz_label}. ${unitNote(unit)}`));
   if (fileLabel === SAMPLE_LABEL) {
-    sec.append(el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Sample data' }), 'Demo file, not a real trader.'));
+    sec.append(el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Example data' })));
   }
   if (r.warnings.length) {
     sec.append(el('div', { class: 'notice notice-caution', id: `${prefix}-warnings` },

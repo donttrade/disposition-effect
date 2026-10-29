@@ -35,10 +35,10 @@
 {%- macro tool_cards(items, h="h3", cls="") -%}
 <ul class="tool-cards{{ ' ' ~ cls if cls }}"{% if page.path in mkt_pages %} data-reveal data-reveal-stagger{% endif %}>
 {%- for t in items %}
-  <li class="tool-card"><a class="tool-card-link" href="{{ t.href }}"><span class="tp-wrap">{{ preview(t) }}{% if t.preview %}<span class="tp-tag" aria-hidden="true">Sample</span>{% endif %}</span><{{ h }} class="tc-name">{{ t.name }}</{{ h }}><span class="tc-line">{{ t.short }}{% if t.preview %}<span class="visually-hidden"> Preview: the tool's output on a demo file, not a real trader.</span>{% endif %}</span></a></li>
+  <li class="tool-card"><a class="tool-card-link" href="{{ t.href }}"><span class="tp-wrap">{{ preview(t) }}{% if t.preview %}<span class="tp-tag" aria-hidden="true">Example</span>{% endif %}</span><{{ h }} class="tc-name">{{ t.name }}</{{ h }}><span class="tc-line">{{ t.short }}{% if t.preview %}<span class="visually-hidden"> Preview: the tool's output on example data.</span>{% endif %}</span></a></li>
 {%- endfor %}
 </ul>
 {%- if items | selectattr("preview") | list %}
-<p class="tp-note">Previews: each tool on a demo file, not a real trader.</p>
+<p class="tp-note">Previews: each tool on example data.</p>
 {%- endif %}
 {%- endmacro %}

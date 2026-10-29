@@ -79,7 +79,7 @@ function render(focus = true) {
   const d = drawdowns(trades, bal);
   state.dd = d;
   const out = $('dd-out');
-  out.replaceChildren(el('h2', { id: 'dd-out-h', tabindex: '-1', text: state.fileLabel === SAMPLE_LABEL ? 'Results: synthetic sample file' : 'Results: your file' }),
+  out.replaceChildren(el('h2', { id: 'dd-out-h', tabindex: '-1', text: state.fileLabel === SAMPLE_LABEL ? 'Results: example data' : 'Results: your file' }),
     readSection('dd', r, state.fileLabel));
 
   // Headline numbers
@@ -182,7 +182,7 @@ function chart(d) {
   return el('section', { 'aria-labelledby': 'dd-chart-h' },
     el('h3', { id: 'dd-chart-h', text: 'Underwater chart' }),
     el('figure', { class: 'chart' }, svg,
-      el('figcaption', { text: `Distance below the previous high after each closed trade · n = ${plural(n, 'closed trade', 'closed trades')} · ${state.fileLabel === SAMPLE_LABEL ? 'synthetic sample data, not a real trader' : 'from your file'}` }),
+      el('figcaption', { text: `Distance below the previous high after each closed trade · n = ${plural(n, 'closed trade', 'closed trades')} · ${state.fileLabel === SAMPLE_LABEL ? 'example data' : 'from your file'}` }),
       el('details', {}, el('summary', { text: 'Show the chart as a table' }), tableWrap('Drawdown as a table', table))));
 }
 

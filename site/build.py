@@ -1010,6 +1010,15 @@ PAID_LIFTED_SWAPS = {
     "/code/": [("There is no name on this site; the scripts are what you check instead.",
                 "No author name is published on this site (" + _SELLER_WHERE + "); the scripts are what you check "
                 "instead.")],
+    # 29 Oct (owner): sample data is labelled with the one word "Example", never "made-up"
+    "/tools/disposition-calculator/": [
+        ('id="dc-example">Fill a made-up example</button>', 'id="dc-example">Try with example data</button>'),
+        ("The example (420, 1,780, 260, 2,240) is made-up. It is not real trading data.",
+         "Example data: 420, 1,780, 260 and 2,240.")],
+    "/tools/pass-rate-calculator/": [
+        ('id="pr-example">Fill a made-up example</button>', 'id="pr-example">Try with example data</button>'),
+        ("The example (1,000 started, 150 open, 170 passed, 40 paid, 800 traders) is made-up. It is not a real firm’s data.",
+         "Example data: 1,000 started, 150 open, 170 passed, 40 paid, 800 traders.")],
 }
 PAID_LIFTED_DESCRIPTIONS = {   # the same, for the page description (head only, outside the frozen body)
     "/about/": "Who writes donttrade, what the plan gap is and how it is measured, why no author name is published, "
@@ -1066,9 +1075,9 @@ PAID_REPLACES_LIFTED = ("/sample-report/",)
 SAMPLE_REPORT_JSON = os.path.join(SITE, "config", "sample-report.report.json")
 SAMPLE_PAGE = {"template": "pages/sample-report.html", "path": "/sample-report/", "requires_flag": None,
                "modules": ["/static/js/paid/sample.js"], "crumb": "Sample habit report", "og_image": "/assets/og/sample-report.png",
-               "title": "Sample habit report, on a demo file — donttrade", "sample_report": True,
-               "description": "A sample of the paid habit report: the report's own engine and page run on a demo file. "
-                              "Not a real trader. Not advice.", "updated": "2026-10-23"}
+               "title": "Example habit report — donttrade", "sample_report": True,
+               "description": "An example of the paid habit report: the report's own engine and page, run on example data. "
+                              "Not advice.", "updated": "2026-10-23"}
 
 
 def lifted_paths_for(paid):

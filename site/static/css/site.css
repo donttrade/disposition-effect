@@ -1154,3 +1154,8 @@ svg.tp { padding: 8px 10px; }
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .shot-card, :root:not([data-theme="light"]) .toast { box-shadow: 0 16px 36px -16px rgb(0 0 0 / 0.7); } }
 :root[data-theme="dark"] .shot-card, :root[data-theme="dark"] .toast { box-shadow: 0 16px 36px -16px rgb(0 0 0 / 0.7); }
+
+/* ------------------------------------------------------------------ sweep 3 (29 Oct, owner) */
+/* the one-word "Example" label above the sample report's H1 */
+.sr-tag { margin: var(--s3) 0 0; }
+.sr-tag + h1 { margin-top: var(--s1); }
