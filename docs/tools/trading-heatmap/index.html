@@ -25,11 +25,11 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=620363ac">
+<link rel="stylesheet" href="/static/css/site.css?v=b9ddcd79">
 <script src="/static/js/theme.js?v=7e47c1a9"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
 <script src="/static/js/pay.js?v=7eb376c2" defer></script>
-<script src="/static/js/tools/heatmap.js?v=61991bb1" type="module"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cdac673936b54f08beb5991aaae13975"}'></script>
+<script src="/static/js/tools/heatmap.js?v=316116d4" type="module"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cdac673936b54f08beb5991aaae13975"}'></script>
 
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "item": "https://donttrade.ca/tools/", "name": "Free tools", "position": 2}, {"@type": "ListItem", "name": "Your trades by hour and weekday", "position": 3}]}, {"@id": "https://donttrade.ca/tools/trading-heatmap/#app", "@type": "WebApplication", "applicationCategory": "FinanceApplication", "browserRequirements": "Requires JavaScript", "description": "See your own results, win rate and trade count by the hour and weekday each trade opened, from your trade file, in the time zone you choose. Free.", "isAccessibleForFree": true, "name": "Your trades by hour and weekday", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "operatingSystem": "Any (runs in a web browser)", "publisher": {"@id": "https://donttrade.ca/#org"}, "url": "https://donttrade.ca/tools/trading-heatmap/"}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Trades spread over up to 168 weekday and hour cells, and many hours simply have few. Choose two-, three- or four-hour blocks to put more trades in each cell."}, "name": "Why do some cells hold so few trades?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "When you compare many cells at once, some will look unusual by luck alone. The top or bottom cell of a large grid is often one of those lucky cells, so this page describes every cell and picks none of them out."}, "name": "Why does the page not mark the best and worst hours?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "MT5 and MT4 reports use the broker’s server time, which is often two or three hours ahead of UTC and can shift with daylight saving. The page reads times exactly as written in the file; the shift moves them by whole hours, and the page shows the first and last open times so you can check them against what you remember."}, "name": "Which time zone are my trades in?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. It describes when your own past trades did better or worse. A cell that looks good or bad is a description of your history, not a forecast, and this page does not recommend when to trade."}, "name": "Does this tell me the best time to trade?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. The analysis runs in your browser tab. Your file’s contents are never sent; the only request this page makes is an anonymous page-view count."}, "name": "Is my file uploaded?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. It measures your own past trades and does not recommend any security, trade, size or exit. Past results do not predict future results."}, "name": "Is this investment advice?"}]}]}</script>
 </head>
@@ -39,7 +39,7 @@
 <header class="site-header"><div class="wrap">
   <a class="brand" href="/">donttrade</a>
   <nav class="site-nav" aria-label="Main"><ul class="nav-row">
-    <li><a href="/sample-report/">Sample report</a></li>
+    <li><a href="/sample-report/">Example report</a></li>
     <li><a href="/tools/" aria-current="true">Free tools</a></li>
     <li><a href="/pricing/">Pricing</a></li>
     <li><a href="/for-firms/">For firms</a></li>
@@ -49,15 +49,15 @@
     <div class="nav-panel">
       <ul class="nav-links">
         <li><a href="/">Home</a></li>
-        <li><a href="/sample-report/">Sample report</a></li>
+        <li><a href="/sample-report/">Example report</a></li>
         <li><a href="/tools/" aria-current="true">Free tools</a></li>
         <li><a href="/pricing/">Pricing</a></li>
         <li><a href="/for-firms/">For firms</a></li>
       </ul>
-      <p class="nav-cta"><a class="btn " href="/pricing/#last-step" data-pay>Get report — $39</a></p>
+      <p class="nav-cta"><a class="btn " href="/pricing/#last-step" data-pay>Take the test — $39</a></p>
     </div>
   </details></nav>
-  <a class="btn hdr-cta" href="/pricing/#last-step" data-pay>Get report — $39</a>
+  <a class="btn hdr-cta" href="/pricing/#last-step" data-pay>Take the test — $39</a>
   <button class="theme-toggle" type="button" data-theme-toggle hidden><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg><span class="tt-label">Dark mode</span></button>
 </div></header>
 
@@ -150,9 +150,9 @@
 
   <div id="hm-out" class="tool-out" hidden></div>
 <aside class="notice notice-gap next-step" aria-labelledby="next-step-h" data-requires-flag="paid_report">
-  <h2 id="next-step-h">The habit report reads this same file</h2>
-  <p>It looks for up to five habits in your own trades, testing up to two of them against chance. $39, one re-test included, refund within 14 days.</p>
-  <p class="btn-row"><a class="btn" href="/pricing/#last-step">Get the habit report — $39</a> <a href="/sample-report/">See a sample report</a></p>
+  <h2 id="next-step-h">Is this habit real, or luck?</h2>
+  <p>The donttrade test checks your own trades against chance. $39, re-test included.</p>
+  <p class="btn-row"><a class="btn" href="/pricing/#last-step">Take the test — $39</a> <a href="/sample-report/">See the example report</a></p>
 </aside>
 
 
@@ -508,7 +508,7 @@ Date,Time,Symbol,Side,Quantity,Price,Currency,Fees
 
 </main>
 <footer class="site-footer"><div class="wrap"><div class="cols">
-    <nav aria-label="Traders"><h2>Traders</h2><ul><li><a href="/sample-report/">Sample report</a></li><li><a href="/pricing/">Pricing</a></li><li><a href="/tools/">Free tools</a></li><li><a href="/for-traders/">For traders</a></li>
+    <nav aria-label="Traders"><h2>Traders</h2><ul><li><a href="/sample-report/">Example report</a></li><li><a href="/pricing/">Pricing</a></li><li><a href="/tools/">Free tools</a></li><li><a href="/for-traders/">For traders</a></li>
     </ul></nav>
     <nav aria-label="Firms"><h2>Firms</h2><ul><li><a href="/for-firms/">For firms</a></li><li><a href="/for-platforms/">Journals &amp; platforms</a></li><li><a href="/sample-memo/">Sample memo</a></li>
     </ul></nav>
@@ -522,7 +522,7 @@ Date,Time,Symbol,Side,Quantity,Price,Currency,Fees
   <p class="legal" data-business-id="short">donttrade · Ontario, Canada · <a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a> · <a href="/terms/#seller">Business details</a></p>
   <p class="legal">donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.</p>
   <details class="legal legal-more"><summary>No cookies. What this site stores and sends</summary>
-    <p>This site sets no cookies. Visits are counted with Cloudflare Web Analytics, which sets no cookie. It stores your light/dark choice in your own browser and, if you buy the habit report, your access key there too. For that report your browser sends our server only stripped trade numbers. The server does not keep them: of those numbers it keeps only a scrambled fingerprint of each trade row from your first report, to match a re-test to the same history. Your file itself is not uploaded. Card payments are handled by Stripe. Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; their privacy policies apply. <a href="/privacy/">Privacy</a></p>
+    <p>This site sets no cookies. Visits are counted with Cloudflare Web Analytics, which sets no cookie. It stores your light/dark choice in your own browser and, if you buy the donttrade test, your access key there too. For that test your browser sends our server only stripped trade numbers. The server does not keep them: of those numbers it keeps only a scrambled fingerprint of each trade row from your first result, to match a re-test to the same history. Your file itself is not uploaded. Card payments are handled by Stripe. Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; their privacy policies apply. <a href="/privacy/">Privacy</a></p>
   </details>
   <p class="legal">&copy; 2026 donttrade · <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
 </div></footer>
@@ -531,12 +531,12 @@ Date,Time,Symbol,Side,Quantity,Price,Currency,Fees
 <dialog class="pay-dialog" id="pay-dialog" aria-labelledby="pd-h" data-pay-dialog>
   <div class="pd-inner">
     <div class="pd-top">
-      <h2 id="pd-h">Get the habit report</h2>
+      <h2 id="pd-h">Get the donttrade test</h2>
       <button class="pd-close no-print" type="button" data-pay-close aria-label="Close"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg></button>
     </div>
     <ul class="pay-facts">
   <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M3 10.5 9.5 4H16v6.5L9.5 17z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="13" cy="7" r="1.3" fill="currentColor"/></svg><span>US$39 once</span></li>
-  <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M11 2 4 11.5h5L8 18l7-9.5h-5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span>Report right after payment</span></li>
+  <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M11 2 4 11.5h5L8 18l7-9.5h-5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span>Result right after payment</span></li>
   <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M4.5 8.5A6 6 0 1 1 4 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 4.5v4.5h4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Full refund within 14 days</span></li>
 </ul>
     <details class="pay-more" data-pay-more>
