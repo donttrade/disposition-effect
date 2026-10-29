@@ -10,7 +10,10 @@
 {#- [flags] ask_box = false: no Ask popover and no "Ask a question" Menu link (launch, 25 Oct) #}
 {%- set cur = nav_current(page) %}
 {%- macro plain_link(g) %}<a href="{{ g.href }}"{% if page.path == g.href %} aria-current="page"{% elif cur == g.label %} aria-current="true"{% endif %}>{{ g.label }}</a>{% endmacro %}
-{#- No buy button on the research study pages: never a study finding next to an offer (tests/test_oldpages.py). -#}
+{#- No buy button on the research study pages: never a study finding next to an offer (tests/test_oldpages.py).
+    Re-checked 29 Oct (owner asked for it on /research/ where no study figure is on screen): every /research/ page
+    opens with one (the index's featured 76.1%, each study's headline result), and the header is sticky, so the
+    button would sit beside a finding on every screen of every research page. It stays off all of /research/. -#}
 {%- set show_cta = flags.paid_report and not page.path.startswith("/research/") %}
 {%- macro cta(cls) %}<a class="btn {{ cls }}" href="/pricing/#last-step" data-pay>Get report — {{ products["report39"].price_usd|usd }}</a>{% endmacro %}
 <header class="site-header"><div class="wrap">
