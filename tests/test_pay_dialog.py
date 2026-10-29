@@ -126,7 +126,8 @@ def test_details_page_is_the_block_alone_without_analytics(built_site):
     page = (out / "before-you-pay" / "index.html").read_text(encoding="utf-8")
     pricing = (out / "pricing" / "index.html").read_text(encoding="utf-8")
     block = lambda h: re.search(r'(?s)<section class="notice" id="before-you-pay".*?</section>', h).group(0)
-    assert block(page) == block(pricing)
+    # the same block; only the heading's tag differs (h2 under the page's h1, h3 in /pricing/'s panel: axe heading-order)
+    assert block(page).replace('<h2 id="byp-h">', '<h3 id="byp-h">').replace("</h2>", "</h3>") == block(pricing)
     assert "cloudflareinsights" not in page   # with analytics on, every other page has it (lint flags_of_build)
     assert '<meta name="robots" content="noindex">' in page
     assert "/before-you-pay/" not in (out / "sitemap.xml").read_text(encoding="utf-8")
@@ -152,6 +153,7 @@ def test_opening_the_details_requests_no_pricing_page(browser, built_site, start
     assert not any(p.startswith("/pricing/") for p in paths), paths
     assert not any("cloudflareinsights" in u for u in seen), seen
     assert pg.locator('#pay-dialog a[href="/pricing/#before-you-pay"]').count() == 0   # replaced by the block
+    assert pg.locator("#pd-byp-h").evaluate("h => h.tagName") == "H3"   # under the dialog's h2
     ctx.close()
 
 
@@ -178,4 +180,16 @@ def test_last_step_open_without_js_closed_with_js_unless_targeted(browser, built
         if not want_open:   # the summary still opens it
             pg.click("#last-step > summary")
             assert pg.locator("#last-step a[href*='buy.stripe.com']").is_visible()
+    ctx.close()
+
+
+@pytest.mark.parametrize("scheme", ["light", "dark"])
+@pytest.mark.parametrize("width", [390, 1280])
+def test_details_page_axe_clean_with_heading_order(browser, built_site, width, scheme):
+    """Tester sweep 3 #6: h1 then the block's h2; axe (moderate included) finds nothing."""
+    ctx = browser.new_context(viewport={"width": width, "height": 844}, color_scheme=scheme, bypass_csp=True)
+    pg = ctx.new_page()
+    pg.goto(built_site["url"] + "/before-you-pay/")
+    pg.wait_for_load_state("networkidle")
+    assert axe_violations(pg, impacts=("minor", "moderate", "serious", "critical")) == []
     ctx.close()

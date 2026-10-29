@@ -41,6 +41,14 @@
       if (v) n.setAttribute('aria-labelledby', v.split(/\s+/).map(function (x) { return 'pd-' + x; }).join(' '));
     });
     copy.removeAttribute('data-requires-flag');
+    // /before-you-pay/ gives the heading as an h2 (under its h1); in the dialog it sits under the dialog's h2
+    var hd = copy.querySelector('#pd-byp-h');
+    if (hd && hd.tagName !== 'H3') {
+      var h3 = document.createElement('h3');
+      [].slice.call(hd.attributes).forEach(function (a) { h3.setAttribute(a.name, a.value); });
+      while (hd.firstChild) h3.appendChild(hd.firstChild);
+      hd.replaceWith(h3);
+    }
     full.replaceChildren(copy);
     loaded = true;
   }
