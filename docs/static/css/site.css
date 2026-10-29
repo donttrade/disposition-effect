@@ -395,6 +395,10 @@ fieldset { border: 0; padding: 0; margin: 0 0 var(--s3); }
 .tool-out h3 { margin-top: var(--s5); }
 .tool-out .soon-list { margin-top: var(--s4); }   /* C1: the neutral lines where the badges were */
 .teaser { margin-top: var(--s4); }
+/* CLS (29 Oct): theme.js sets html.dt-js before first paint, so a tool's form takes its space at once and its
+   "needs JavaScript" notice is never painted; without that class the attributes do nothing */
+.dt-js [data-js-hide] { display: none !important; }
+.dt-js [data-js-show][hidden] { display: block; }
 .next-step { margin-top: var(--s4); }
 /* QA 25 Oct: a short label table (the /pricing/ trader rows) stacks on a phone: one row per card */
 @media (max-width: 600px) {

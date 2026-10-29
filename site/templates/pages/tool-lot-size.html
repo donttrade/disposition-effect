@@ -26,8 +26,8 @@
 
   <section class="tool" aria-labelledby="ls-tool-h">
     <h2 id="ls-tool-h">Your numbers</h2>
-    <p id="ls-js-needed" class="notice notice-caution">This calculator runs in your browser and needs JavaScript turned on.</p>
-    <form id="ls-form" novalidate hidden>
+    <p id="ls-js-needed" class="notice notice-caution" data-js-hide>This calculator runs in your browser and needs JavaScript turned on.</p>
+    <form id="ls-form" novalidate hidden data-js-show>
       <fieldset>
         <legend>How you state the risk</legend>
         <div class="check"><input type="radio" id="ls-mode-amount" name="ls-mode" value="amount" checked><label for="ls-mode-amount">As an amount of money</label></div>

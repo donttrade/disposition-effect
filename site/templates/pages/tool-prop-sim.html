@@ -27,8 +27,8 @@
 
   <section class="tool" aria-labelledby="ps-tool-h">
     <h2 id="ps-tool-h">Your trades and your rules</h2>
-    <p id="ps-js-needed" class="notice notice-caution">This tool runs in your browser and needs JavaScript turned on.</p>
-    <form id="ps-form" novalidate hidden>
+    <p id="ps-js-needed" class="notice notice-caution" data-js-hide>This tool runs in your browser and needs JavaScript turned on.</p>
+    <form id="ps-form" novalidate hidden data-js-show>
       <fieldset>
         <legend>Where the trades come from</legend>
         <div class="check"><input type="radio" id="ps-mode-file" name="ps-mode" value="file" checked><label for="ps-mode-file">From my trade file (whole trading days, in their real order within each day)</label></div>
