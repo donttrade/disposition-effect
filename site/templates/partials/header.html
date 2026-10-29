@@ -13,7 +13,10 @@
 {#- No buy button on the research study pages: never a study finding next to an offer (tests/test_oldpages.py).
     Re-checked 29 Oct (owner asked for it on /research/ where no study figure is on screen): every /research/ page
     opens with one (the index's featured 76.1%, each study's headline result), and the header is sticky, so the
-    button would sit beside a finding on every screen of every research page. It stays off all of /research/. -#}
+    button would sit beside a finding on every screen of every research page. It stays off all of /research/.
+    Decision 29 Oct (coordinator, on Tester sweep 3 #3): everywhere else the button stays, including /sample-report/
+    and the tool pages beside example results. It is site navigation in the sticky bar, not an offer placed next
+    to page content; the sample's and the tools' figures are example data, not study findings. -#}
 {%- set show_cta = flags.paid_report and not page.path.startswith("/research/") %}
 {%- macro cta(cls) %}<a class="btn {{ cls }}" href="/pricing/#last-step" data-pay>Get report — {{ products["report39"].price_usd|usd }}</a>{% endmacro %}
 <header class="site-header"><div class="wrap">
