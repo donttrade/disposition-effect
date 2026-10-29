@@ -4,12 +4,13 @@
 // cookies or storage, and raw rows are never kept: only whitelisted fields
 // survive into executions and trades.
 
-import { decodeBytes, isHtml, parseCsv, sniffDelimiter, resolveNumberStyle, checkQuoting, normHeader, fromPaste,
-  wideRows } from './csv.js';
+import { resolveNumberStyle, checkQuoting, normHeader, wideRows } from './csv.js';
 import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS, checkCurrencyColumn, ISO_CURRENCIES } from './detect.js';
 import { fail, inFile, LIMITS } from './errors.js';
-import { checkMapping, parseMapped, mappedTzLabel, mergeParsed, firstTs, idColumns, idLookup } from './mapped.js';
-import { htmlRows, parseMt, isEmptyRow } from './mt.js';
+import { checkMapping, parseMapped, mappedTzLabel, mergeParsed, firstTs, idColumns, idLookup, readRows,
+  isPaste } from './mapped.js';
+import { matchPreset, presetById, PRESET_AFTER } from './presets.js';
+import { parseMt, isEmptyRow } from './mt.js';
 import { parseGeneric, parseGenericRoundtrip } from './generic.js';
 import { parseIbkr } from './ibkr.js';
 import { parseTradovate } from './tradovate.js';
@@ -55,23 +56,11 @@ function htmlNumberGroup(t) {
 }
 
 // ---------------------------------------------------------------- reading one file or paste
-// An item is the bytes of a file (Uint8Array) or a pasted table ({paste: text}).
-
-export function isPaste(item) {
-  return item !== null && typeof item === 'object' && !(item instanceof Uint8Array) && typeof item.paste === 'string';
-}
+// An item is the bytes of a file (Uint8Array) or a pasted table ({paste: text}); mapped.js readRows.
+export { readRows, isPaste };
 
 function sizeOf(item) {
   return isPaste(item) ? item.paste.length : item.length;
-}
-
-// → {kind: 'csv' | 'html' | 'paste', delimiter, rows, text}
-export function readRows(item, delimiter = null) {
-  if (isPaste(item)) return { kind: 'paste', delimiter: '\t', rows: fromPaste(item.paste), text: null };
-  const text = decodeBytes(item);
-  if (isHtml(text)) return { kind: 'html', delimiter: null, rows: htmlRows(text), text };
-  const delim = delimiter || sniffDelimiter(text);
-  return { kind: 'csv', delimiter: delim, rows: parseCsv(text, delim), text };
 }
 
 // The read columns of a signature map by kind, for wideRows: numbers, dates and times, currency.
@@ -165,9 +154,69 @@ function readMappedItem(src, mp, sideFrom, expect) {
 // all recognised as one format, or all through the same mapping. Files are taken in the order of
 // their first time; rows that are in more than one file are counted once (mapped.js dropOverlap).
 // An error in one of several files names it by its place: "file 2 of 3, row 14".
+//
+// With no mapping, the presets that ship with the site take part (presets.js), on every page that
+// reads a file, so every page gives one read (Tester F4): a preset marked before_known first (a
+// Sierra Chart log, whose headings also fit the IBKR Flex signature), then the known formats as
+// they always were, then the other presets for a file those cannot read. A preset with an open
+// question (the date order, a number style) cannot be answered here: it ends in the error the
+// pages already show for it. readWithPresets returns the question instead, for the mapper.
 export function parseFiles(items, opts = {}) {
+  if (opts && opts.mapping) return parseWith(items, opts.mapping);
+  const r = readWithPresetsRaw(items);
+  if (r.error) throw r.error;
+  if (r.question) {
+    const q = r.question.questions[0];
+    const name = presetById(r.question.preset).name;
+    let e;
+    try {
+      if (q.q === 'number_style') fail('E_BAD_NUMBER', `read as ${name}: a number like 1,234 or 1.500 could be read two ways, and no other number in the file shows which.`);
+      if (q.reason === 'ask') fail('E_AMBIGUOUS_DATE', `Read as ${name}, every day and month in the file is 12 or less.`);
+      fail('E_BAD_DATE', `read as ${name}: the date column mixes date forms`);
+    } catch (x) { e = x; }
+    throw items.length > 1 ? inFile(e, 0, items.length) : e;
+  }
+  return r.result;
+}
+
+function tryParse(items, mapping) {
+  try {
+    return { result: parseWith(items, mapping) };
+  } catch (e) {
+    if (e && e.name === 'EngineError') return { error: e };
+    throw e;
+  }
+}
+
+// → {result} | {error: EngineError} | {question}
+function readWithPresetsRaw(items) {
   if (!Array.isArray(items) || items.length === 0) fail('E_EMPTY');
-  const mp = opts && opts.mapping ? opts.mapping : null;
+  let src = null;
+  try { src = readRows(items[0]); } catch (e) { if (!e || e.name !== 'EngineError') throw e; }
+  const use = (p) => (p.questions.length ? { question: { preset: p.preset, questions: p.questions } }
+    : tryParse(items, p.mapping));
+  if (src) {
+    const p = matchPreset(src, (x) => x.before_known);
+    if (p) return use(p);
+  }
+  const auto = tryParse(items, null);
+  const e = auto.error;
+  if (!e || !PRESET_AFTER.includes(e.code) || !src || (e.file !== undefined && e.file !== null && e.file !== 1)) return auto;
+  const p = matchPreset(src);
+  return p ? use(p) : auto;
+}
+
+// The flow parseFiles uses, for the mapper: → {result} | {error} | {question: {preset, questions}}.
+// The page puts a mapping saved in this browser before it (plan §2.1).
+export function readWithPresets(items) {
+  const r = readWithPresetsRaw(items);
+  return r.error ? { error: r.error.toJSON() } : r;
+}
+
+// Known formats (mapping null) or one mapping, for every file.
+function parseWith(items, mapping) {
+  if (!Array.isArray(items) || items.length === 0) fail('E_EMPTY');
+  const mp = mapping || null;
   const sideFrom = mp ? checkMapping(mp) : null;
   const n = items.length;
   let total = 0;

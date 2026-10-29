@@ -12,12 +12,28 @@
 // Mirrors parse_mapped(), parse_files() and the helpers around them in tests/reference/engine_ref.py.
 
 import { clean, normHeader, parseNumber, resolveNumberStyle, checkQuoting, parseDateFmt, fallBackClose,
-  numberShape, DATE_FORMATS, wideRows } from './csv.js';
+  numberShape, DATE_FORMATS, wideRows, decodeBytes, isHtml, sniffDelimiter, parseCsv, fromPaste } from './csv.js';
 import { ISO_CURRENCIES, checkCurrencyColumn } from './detect.js';
 import { fail, LIMITS } from './errors.js';
-import { reqNumber, optNumber, skip, isEmptyRow } from './mt.js';
+import { reqNumber, optNumber, skip, isEmptyRow, htmlRows } from './mt.js';
 import { sideLetter } from './generic.js';
 import { CME_MULTIPLIERS } from './tradovate.js';
+
+// ---------------------------------------------------------------- reading one file or paste
+// An item is the bytes of a file (Uint8Array) or a pasted table ({paste: text}).
+
+export function isPaste(item) {
+  return item !== null && typeof item === 'object' && !(item instanceof Uint8Array) && typeof item.paste === 'string';
+}
+
+// → {kind: 'csv' | 'html' | 'paste', delimiter, rows, text}
+export function readRows(item, delimiter = null) {
+  if (isPaste(item)) return { kind: 'paste', delimiter: '\t', rows: fromPaste(item.paste), text: null };
+  const text = decodeBytes(item);
+  if (isHtml(text)) return { kind: 'html', delimiter: null, rows: htmlRows(text), text };
+  const delim = delimiter || sniffDelimiter(text);
+  return { kind: 'csv', delimiter: delim, rows: parseCsv(text, delim), text };
+}
 
 // ---------------------------------------------------------------- the block list
 // Never offered in a dropdown, never read: a heading that is one of `exact`, or holds one of

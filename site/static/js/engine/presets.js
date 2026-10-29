@@ -10,7 +10,6 @@
 
 import { normHeader, detectDateFormat } from './csv.js';
 import { MAP_FIELDS, dataRowsAfter, numberQuestion, isBlocked, isNoData, isRagged } from './mapped.js';
-import { readRows, runFiles } from './index.js';
 
 export const PRESET_SEARCH_ROWS = 50; // the heading row must be within the first 50 non-empty rows
 
@@ -242,23 +241,6 @@ export function matchPreset(src, only = null) {
   return null;
 }
 
-// The codes after which a file that the known formats cannot read is offered to the presets.
+// The codes after which a file that the known formats cannot read is offered to the presets
+// (index.js parseFiles, readWithPresets).
 export const PRESET_AFTER = Object.freeze(['E_UNKNOWN_FORMAT', 'E_MISSING_COLUMN', 'E_AMBIGUOUS_DATE']);
-
-// A preset marked before_known first, then the known formats, then the other presets.
-// → {result} | {error} | {question: {preset, questions}}.
-// The page puts a mapping saved in this browser before all of them (plan §2.1); this is the rest.
-export function readWithPresets(items) {
-  let src = null;
-  try { src = readRows(items[0]); } catch (e) { if (!e || e.name !== 'EngineError') throw e; }
-  const use = (p) => (p.questions.length ? { question: { preset: p.preset, questions: p.questions } }
-    : runFiles(items, { mapping: p.mapping }));
-  if (src) {
-    const p = matchPreset(src, (x) => x.before_known);
-    if (p) return use(p);
-  }
-  const auto = runFiles(items);
-  if (!auto.error || !PRESET_AFTER.includes(auto.error.code) || !src) return auto;
-  const p = matchPreset(src);
-  return p ? use(p) : auto;
-}

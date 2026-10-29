@@ -15,9 +15,8 @@
 
 import { clean, normHeader, numberShape, dateShape, detectDateFormat, wideRows } from './csv.js';
 import { ISO_CURRENCIES } from './detect.js';
-import { readRows } from './index.js';
 import { isBlocked, moneyClean, normValue, numberQuestion, futuresRoot, STATUS_KEEP, MAP_FIELDS, isNoData,
-  isRagged, dataRowsAfter } from './mapped.js';
+  isRagged, dataRowsAfter, readRows } from './mapped.js';
 import { CME_MULTIPLIERS } from './tradovate.js';
 import { matchPreset, presetById } from './presets.js';
 

@@ -2928,7 +2928,61 @@ def _read_mapped(src, mp, side_from, expect):
 
 
 def parse_files(items, mapping=None):
-    """Mirrors parseFiles() in index.js: several files (bytes) or pastes ({"paste": text})."""
+    """Mirrors parseFiles() in index.js: several files (bytes) or pastes ({"paste": text}); with no
+    mapping, through the presets (before_known first, then known formats, then the others)."""
+    if mapping is not None:
+        return _parse_with(items, mapping)
+    r = _read_with_presets_raw(items)
+    if "error" in r:
+        raise r["error"]
+    if "question" in r:
+        q = r["question"]["questions"][0]
+        try:
+            if q["q"] == "number_style":
+                fail("E_BAD_NUMBER", "preset: number style open")
+            if q["reason"] == "ask":
+                fail("E_AMBIGUOUS_DATE", "preset: date order open")
+            fail("E_BAD_DATE", "preset: mixed date forms")
+        except EngineError as e:
+            if len(items) > 1:
+                e.file = 1
+            raise
+    return r["result"]
+
+
+def _try_parse(items, mapping):
+    try:
+        return {"result": _parse_with(items, mapping)}
+    except EngineError as e:
+        return {"error": e}
+
+
+def _read_with_presets_raw(items):
+    if not items:
+        fail("E_EMPTY")
+    try:
+        src = read_rows(items[0])
+    except EngineError:
+        src = None
+
+    def use(p):
+        if p["questions"]:
+            return {"question": {"preset": p["preset"], "questions": p["questions"]}}
+        return _try_parse(items, p["mapping"])
+
+    if src is not None:
+        p = match_preset(src, lambda x: x["before_known"])
+        if p:
+            return use(p)
+    auto = _try_parse(items, None)
+    e = auto.get("error")
+    if e is None or e.code not in PRESET_AFTER or src is None or (e.file is not None and e.file != 1):
+        return auto
+    p = match_preset(src)
+    return use(p) if p else auto
+
+
+def _parse_with(items, mapping):
     if not items:
         fail("E_EMPTY")
     side_from = check_mapping(mapping) if mapping is not None else None
@@ -3143,26 +3197,9 @@ def run_files(items, mapping=None):
 
 
 def read_with_presets(items):
-    """Mirrors readWithPresets(): before_known presets, then known formats, then the other presets."""
-    try:
-        src = read_rows(items[0])
-    except EngineError:
-        src = None
-
-    def use(p):
-        if p["questions"]:
-            return {"question": {"preset": p["preset"], "questions": p["questions"]}}
-        return run_files(items, p["mapping"])
-
-    if src is not None:
-        p = match_preset(src, lambda x: x["before_known"])
-        if p:
-            return use(p)
-    auto = run_files(items)
-    if "error" not in auto or auto["error"]["code"] not in PRESET_AFTER or src is None:
-        return auto
-    p = match_preset(src)
-    return use(p) if p else auto
+    """Mirrors readWithPresets(): the flow parse_files uses, returning an open question."""
+    r = _read_with_presets_raw(items)
+    return {"error": r["error"].to_json()} if "error" in r else r
 
 
 # ----------------------------------------------------------------- FreeStats
