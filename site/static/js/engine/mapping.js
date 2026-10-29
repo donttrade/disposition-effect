@@ -226,18 +226,97 @@ function sample(rows, i) {
 
 const isNumberCell = (v) => { const s = numberShape(moneyClean(v)); return s !== 'other'; };
 
-// A Time column that holds durations (a hold time) and not the time of day: hours over 23, or
-// every hour 00 when not every value is 00:00 (Tester F6). It is never joined to the date.
-function looksLikeDuration(vs) {
-  const hours = vs.map((v) => Number(clean(v).split(':')[0]));
-  if (hours.some((h) => h > 23)) return true;
-  return hours.length > 0 && hours.every((h) => h === 0) && !vs.every((v) => /^0?0:00(:00)?([.,]0+)?$/.test(clean(v)));
+// A time-only column that is plainly a duration (a hold time), from its values alone: an hour part
+// over 23, a minutes part of 3 or more digits, or an m:ss.f form (Tester F6, N3). Never joined.
+// Units ("1m 30s") and day parts never match RE_TIME_ONLY, so they are never read as a time at all.
+function plainlyDuration(vs) {
+  return vs.some((v) => {
+    const c = clean(v);
+    const parts = c.replace(/ ?[AaPp][Mm]$/, '').split(':');
+    return Number(parts[0]) > 23 || parts[0].length > 2 || (parts.length === 2 && /[.,]\d/.test(parts[1]));
+  });
+}
+
+const secondsOf = (v) => {
+  const p = clean(v).replace(/ ?[AaPp][Mm]$/, '').split(':').map((x) => parseFloat(x.replace(',', '.')));
+  return (p[0] || 0) * 3600 + (p[1] || 0) * 60 + (p[2] || 0);
+};
+
+// A time column next to its date, as a clock or a duration: 'clock' | 'duration' | 'unsure'.
+// Unsure when the times run both up and down within one date (a clock moves one way through a day,
+// a hold time does not), or when every hour is 00 and the column is not next to the date (a hold of
+// minutes reads just like trades in the first hour after midnight; next to the date it is a clock,
+// Tester N3). The guess asks then (time_or_duration) and leaves the time out until the user says.
+export function timeKind(rows, ti, di) {
+  const vs = rows.map((r) => (ti < r.cells.length ? clean(r.cells[ti]) : '')).filter((v) => v !== '');
+  if (plainlyDuration(vs)) return 'duration';
+  let up = 0;
+  let down = 0;
+  let prevDate = null;
+  let prev = null;
+  for (const r of rows) {
+    const d = di < r.cells.length ? clean(r.cells[di]) : '';
+    const t = ti < r.cells.length ? clean(r.cells[ti]) : '';
+    if (t === '') continue;
+    const sec = secondsOf(t);
+    if (d === prevDate && prev !== null) { if (sec > prev) up++; else if (sec < prev) down++; }
+    prevDate = d;
+    prev = sec;
+  }
+  if (up > 0 && down > 0) return 'unsure';
+  const allZeroHour = vs.length > 0 && vs.every((v) => secondsOf(v) < 3600) && !vs.every((v) => secondsOf(v) === 0);
+  if (allZeroHour && Math.abs(ti - di) !== 1) return 'unsure';
+  return 'clock';
+}
+
+// What kind of value a cell holds, for telling a summary row from a data row.
+function cellKind(v) {
+  const c = clean(v);
+  if (c === '') return '';
+  if (RE_TIME_ONLY.test(c)) return 'time';
+  if (numberShape(moneyClean(c)) !== 'other') return 'num';
+  if (dateShape(c).kind !== 'other') return 'date';
+  return 'text';
+}
+
+// Totals, report lines and footers, by what they hold rather than how many cells (Tester N2): a
+// cell that starts with a summary word, or more than half of the usually-filled columns blank or
+// holding another kind of value than the column does in the rows around it.
+const RE_SUMMARY = /^((sub|grand) ?)?totals?\b|^summary\b|^report\b|^page \d|^showing\b|^generated\b|^printed\b|^period\b|^from$|^to$|^note\b|^notes\b|^disclaimer\b|^balance\b|^count\b|^average\b|^sum\b/i;
+
+export function summaryRows(rows, width) {
+  const fill = new Array(width).fill(0);
+  const kinds = Array.from({ length: width }, () => ({}));
+  for (const r of rows) {
+    for (let i = 0; i < width; i++) {
+      const k = cellKind(i < r.cells.length ? r.cells[i] : '');
+      if (k === '') continue;
+      fill[i]++;
+      kinds[i][k] = (kinds[i][k] || 0) + 1;
+    }
+  }
+  const usual = [];
+  const dominant = [];
+  for (let i = 0; i < width; i++) {
+    if (rows.length && fill[i] >= 0.8 * rows.length) {
+      usual.push(i);
+      dominant[i] = Object.entries(kinds[i]).sort((a, b) => (b[1] - a[1]) || (a[0] < b[0] ? -1 : 1))[0][0];
+    }
+  }
+  const out = new Set();
+  for (const r of rows) {
+    if (r.cells.some((c) => RE_SUMMARY.test(clean(c)))) { out.add(r); continue; }
+    let bad = 0;
+    for (const i of usual) if (cellKind(i < r.cells.length ? r.cells[i] : '') !== dominant[i]) bad++;
+    if (usual.length && bad * 2 > usual.length) out.add(r);
+  }
+  return out;
 }
 
 const CONTENT = {
   datetime: (vs) => vs.length > 0 && vs.every((v) => dateShape(v).kind !== 'other'),
   date: (vs) => vs.length > 0 && vs.every((v) => dateShape(v).kind !== 'other'),
-  time: (vs) => vs.length > 0 && vs.every((v) => RE_TIME_ONLY.test(clean(v))) && !looksLikeDuration(vs),
+  time: (vs) => vs.length > 0 && vs.every((v) => RE_TIME_ONLY.test(clean(v))) && !plainlyDuration(vs),
   symbol: (vs) => vs.length > 0 && vs.every((v) => v.length <= 40 && !/^[+-]?[\d.,]+$/.test(v)),
   side: (vs) => {
     const all = [...new Set(vs.map(normValue))];
@@ -307,15 +386,18 @@ export function guessMapping(peek, dataRows, opts = {}) {
   const width = peek.headers.length;
   const valueRows = dataRows.filter((r) => !r.cells.every((c) => c === '') && !isNoData(r.cells, width) &&
     !(peek.kind === 'paste' && isRagged(r.cells, width)));
-  // Footers, totals and page lines ("Total fills,20", "Page 1 of 3") are left out of every content
-  // test and question (Tester F5): a row with at most half the median number of filled cells.
+  // Footers, totals and page lines ("Total fills,20", "Page 1 of 3", "Report date,2026-10-29,
+  // Total,20") are left out of every content test and question (Tester F5, N2): a row with at most
+  // half the median number of filled cells, or a summary row by what it holds (summaryRows).
   const filled = (r) => r.cells.filter((c) => c !== '').length;
   const counts = valueRows.map(filled).sort((a, b) => a - b);
   const median = counts.length ? counts[Math.floor(counts.length / 2)] : 0;
-  const rows = valueRows.filter((r) => filled(r) * 2 > median);
-  const shortRows = valueRows.filter((r) => filled(r) * 2 <= median);
+  const summary = summaryRows(valueRows, width);
+  const rows = valueRows.filter((r) => filled(r) * 2 > median && !summary.has(r));
+  const shortRows = valueRows.filter((r) => filled(r) * 2 <= median || summary.has(r));
   const vals = (i) => sample(rows, i);
   const used = new Set();
+  let timeQuestion = null;
   const cols = {};
   for (const f of MAP_FIELDS) cols[f] = null;
   const badges = {};
@@ -340,8 +422,16 @@ export function guessMapping(peek, dataRows, opts = {}) {
     if (d && d.badge === 'matched' && vals(d.index).every((v) => dateShape(v).kind !== 'other' && !/\d:\d{2}/.test(v))) {
       used.add(d.index);
       const t = pick(syn, blocked, used, SYNONYMS.time, (i) => CONTENT.time(vals(i)));
-      if (t && t.badge === 'matched') {
+      const tk = t && t.badge === 'matched' ? timeKind(rows, t.index, d.index) : null;
+      if (tk === 'clock') {
         cols.date = d.index; badges.date = 'matched'; cols.time = t.index; badges.time = 'matched'; used.add(t.index);
+        dateDone = true;
+      } else if (tk === 'unsure') {
+        // A clock or a hold time: the date alone until the user says (never a time dropped unasked).
+        cols.date = d.index; badges.date = 'matched'; badges.time = 'check';
+        const k = rows.findIndex((r) => t.index < r.cells.length && r.cells[t.index] !== '');
+        timeQuestion = { q: 'time_or_duration', column: t.index, label: peek.labels[t.index],
+          example: k >= 0 ? short(rows[k].cells[t.index]) : '', row: k >= 0 ? rows[k].row : null };
         dateDone = true;
       } else used.delete(d.index);
     }
@@ -414,6 +504,7 @@ export function guessMapping(peek, dataRows, opts = {}) {
   }
   // Questions the data leaves open.
   const questions = [];
+  if (timeQuestion) questions.push(timeQuestion);
   let dateInfo = null;
   const dateCols = layout === 'roundtrips' ? [cols.open_time, cols.close_time] : [cols.date];
   if (dateCols.every((i) => i !== null)) {

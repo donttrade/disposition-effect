@@ -11,10 +11,10 @@
   "date": {
    "format": null,
    "reason": "mixed",
-   "seen": "Notes",
+   "seen": "Exec Time",
    "seen2": null,
    "seen2_row": null,
-   "seen_row": 8
+   "seen_row": 12
   },
   "futures_offer": false,
   "layout": "fills",
@@ -55,7 +55,6 @@
    "side_from": "column",
    "side_rules": null,
    "side_values": {
-    "10": "skip",
     "qty": "skip",
     "spread": "sell",
     "stock": "sell"
@@ -73,18 +72,16 @@
     "error": "mixed",
     "q": "date_order",
     "rows": [
-     8
+     12
     ]
    }
   ],
   "side_checks": {
-   "10": "unknown",
    "qty": "unknown",
    "spread": "unknown",
    "stock": "unknown"
   },
   "side_counts": {
-   "10": 1,
    "qty": 1,
    "spread": 1,
    "stock": 16
