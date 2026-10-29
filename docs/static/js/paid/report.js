@@ -78,9 +78,16 @@ const VERDICT = {
   coming: ['badge badge-coming', 'Luck check coming'],
 };
 
-const luckComing = (h) => h.verdict === 'descriptive' || (h.verdict === 'withheld' && h.withheld === 'not_calibrated');
+// Stats round 2 (29 Oct): no fair luck test exists yet for the hold gap or large losses, so they promise none.
+// They are shown as "Your numbers": Layer 1 only, no pill. Size after a loss has a test a few days away, so it
+// keeps the neutral "Luck check coming".
+export const FACTS_ONLY = Object.freeze(['hold_gap', 'oversized_loss']);
+const factsOnly = (h) => FACTS_ONLY.includes(h.id);
+const luckComing = (h) => !factsOnly(h) && (h.verdict === 'descriptive' || (h.verdict === 'withheld' && h.withheld === 'not_calibrated'));
+export const FACTS_LINE = 'These are facts from your file. We have not found a fair way to test them against luck yet.';
 
 function badge(v, h) {
+  if (h && factsOnly(h)) return null;
   if (h && luckComing(h)) v = 'coming';
   if (!VERDICT[v]) throw new Error(`report: unknown verdict ${v}`);
   const [cls, text] = VERDICT[v];
@@ -105,9 +112,8 @@ export function plain(s) {
 }
 // Why a habit's luck check is not on yet (the tap-to-open line), from V_LAUNCH / V_LAUNCH_SIZE.
 function whyComing(h) {
-  if (h.id === 'hold_gap') return plain(V_LAUNCH);
   if (h.id === 'size_up') return plain(V_LAUNCH_SIZE);
-  return 'A luck check for this habit is still being designed.';
+  return 'A luck check for this habit is being calibrated.';
 }
 // A wording.js line that belongs to "Real or luck?" (the verdict, or why there is none) rather than "What happened".
 const isVerdictLine = (s) => s === V_LAUNCH || s === V_LAUNCH_SIZE || s === V_NO || s.startsWith('This gap is distinguishable')
@@ -246,7 +252,8 @@ function habitSection(h, unit, report) {
   for (const x of happenedLines) what.append(el('p', { class: 'habit-sentence', text: plain(x) }));
   const extra = detailLine(h, unit);
   if (extra) what.append(el('p', { text: extra }));
-  sec.append(what, luckLayer(h, verdictLines));
+  sec.append(what);
+  if (!factsOnly(h)) sec.append(luckLayer(h, verdictLines));
   const how = el('div', {});
   // The method line carries the habit's own n_perm (it scales with the file size, D-4).
   const method = methodLine(h, wordingFmt(unit));
@@ -293,7 +300,7 @@ function habitsSummary(report, unit) {
       amt.append(el('span', { class: 'hs-bar', 'aria-hidden': 'true' }, fill));
     } else amt.textContent = '—';
     tbody.append(el('tr', { class: 'hs-row' }, el('th', { scope: 'row' }, el('a', { href: '#habit-' + h.id, text: nameOf(h) })),
-      el('td', { class: 'hs-res' }, badge(h.verdict, h)), amt,
+      el('td', { class: 'hs-res' }, badge(h.verdict, h) || el('span', { class: 'small muted', text: 'Your numbers' })), amt,
       el('td', { class: 'num hs-n' }, h.dollars ? el('span', { class: 'hs-count', text: String(h.dollars.n_trades) }) : '—')));
   }
   sec.append(el('table', { class: 'hs-table' },
@@ -349,7 +356,7 @@ export function renderReport(report, out, meta) {
   // check coming; wording.js's fixed "… is described, not tested …" lines are not shown.
   const cov = el('div', { id: 'coverage' });
   cov.append(el('p', { class: 'small', text: coverageLines(report)[0] }));
-  const coming = report.habits.filter(luckComing).map(nameOf);
+  const coming = report.habits.filter(luckComing).map(nameOf);   // stats round 2: size after a loss only
   if (coming.length) cov.append(el('p', { class: 'small', text: `Luck check coming: ${coming.join(', ')}.` }));
   p1.append(cov);
   p1.append(el('p', { class: 'small muted', text: `${report.n_trades} trades over about ${report.period_weeks} week${report.period_weeks === 1 ? '' : 's'}.${unitLine(unit)}${meta && meta.span_left_out ? ' ' + spanLine(meta.span_left_out) : ''}${meta && meta.limited ? ' Only the most recent 20,000 trades were used.' : ''}` }));
@@ -360,8 +367,16 @@ export function renderReport(report, out, meta) {
   out.append(habitsSummary(report, unit));
 
   const details = el('section', { class: 'section', 'aria-labelledby': 'det-h' }, el('h2', { id: 'det-h', text: 'Each habit' }));
-  for (const h of report.habits) details.append(habitSection(h, unit, report));
+  for (const h of report.habits) if (!factsOnly(h)) details.append(habitSection(h, unit, report));
   out.append(details);
+  // stats round 2: the habits with no fair luck test yet, as plain facts, below the tested ones
+  const facts = report.habits.filter(factsOnly);
+  if (facts.length) {
+    const yn = el('section', { class: 'section your-numbers', id: 'your-numbers', 'aria-labelledby': 'yn-h' }, el('h2', { id: 'yn-h', text: 'Your numbers' }),
+      el('details', { class: 'how-more yn-why' }, el('summary', { text: 'About these numbers' }), el('p', { class: 'small', text: FACTS_LINE })));
+    for (const h of facts) yn.append(habitSection(h, unit, report));
+    out.append(yn);
+  }
 
   if (report.pgr_plr) {
     const c = report.pgr_plr;

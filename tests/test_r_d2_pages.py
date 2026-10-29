@@ -31,11 +31,11 @@ STALE_R_D2 = ["tests up to four", "of the 4 patterns", "jusqu’à quatre", "tes
               # R-D3 addendum I-6 (the report page's old citation prefix)
               "Published research on this pattern"]
 # 29 Oct (owner): "described, not tested" leaves the site; an uncalibrated habit says "luck check coming".
-ROW = "Did you hold losing trades longer than winning ones? (luck check coming)"
+ROW = "Did you hold losing trades longer than winning ones? (facts from your file)"   # stats round 2: no luck test yet
 SIZE_ROW = "Was the trade after a loss larger than the trade after a win? (luck check coming)"
 COUNT = "tests up to two of these habits against chance in this version."
 COUNT_SOON = "test up to two of these habits against chance in this version."
-FR = ("par rapport aux gagnantes (vérification du hasard à venir); ",
+FR = ("par rapport aux gagnantes (faits tirés de votre fichier);",
       "l’augmentation de la taille après des pertes (vérification du hasard à venir);",
       "Il en teste jusqu’à deux par rapport au hasard")
 
@@ -84,12 +84,12 @@ def test_habit_tables_and_ledes(builds, flavour):
         if rel == "index.html" and flavour == "free":
             continue   # the flag-off home is not the trader home
         if 'class="habit-rows"' in raw(out, rel):   # sweep 2: the paid /for-traders/ shows the habits as table rows
-            assert t.count("Luck check coming") == 3 and t.count("Tested against chance") == 2, (flavour, rel)
+            assert t.count("Luck check coming") == 1 and t.count("Your numbers") == 2 and t.count("Tested against chance") == 2, (flavour, rel)
             assert "described" not in t.lower() and "not tested" not in t.lower(), (flavour, rel)
             continue
         assert "Hold gap " + ROW in t, (flavour, rel)
         assert "Size after a loss " + SIZE_ROW in t, (flavour, rel)   # R-D3
-        assert t.count("(luck check coming)") == 3, (flavour, rel)   # hold gap, size after a loss, large losses
+        assert t.count("(luck check coming)") == 1 and t.count("(facts from your file)") == 2, (flavour, rel)   # stats round 2
     ft = text_of(out, os.path.join("for-traders", "index.html"))
     assert COUNT in ft or COUNT_SOON in ft
     if flavour == "paid":   # QA 25 Oct: the home lede glosses "against chance" on first use
