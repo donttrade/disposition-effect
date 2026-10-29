@@ -134,13 +134,19 @@ def test_a_preset_with_an_ambiguous_date_asks_and_never_guesses():
     assert want == {"question": {"preset": "ninjatrader_exec", "questions": [{"q": "date_order", "reason": "ask"}]}}
 
 
-def test_sierra_log_reads_as_ibkr_today_but_its_preset_goes_first():
-    """Its headings fit the IBKR Flex signature (checked before generic): the known-format reader keeps
-    that (no detection change), the preset flow reads it as Sierra fills."""
+def test_sierra_log_is_read_by_its_preset_on_every_path(engine_page):
+    """Its headings fit the IBKR Flex signature (checked before generic). Tester F4: runFile, which
+    every page calls, now goes through the preset flow, so the log is Sierra fills everywhere; the
+    known formats alone (E._parse_with, no mapping) still read it as IBKR, unchanged."""
     with open(os.path.join(FIX, "presets", "sierra_fills.txt"), "rb") as f:
         data = f.read()
-    assert E.run_files([data])["result"]["format"] == "ibkr_flex"
-    assert expected("presets/sierra_fills.txt")["result"]["preset"] == "sierra_fills"
+    assert E._parse_with([data], None)["format"] == "ibkr_flex"
+    want = expected("presets/sierra_fills.txt")
+    assert want["result"]["preset"] == "sierra_fills" and E.run_files([data]) == {"result": want["result"]}
+    got = json.loads(engine_page.evaluate("b => window.parseOnly(b)", base64.b64encode(data).decode()))
+    assert comparable(got) == comparable({"result": want["result"]})
+    first = got["result"]["trades"][0]
+    assert first["qty"] == 1 and first["entry_vwap"] == 5900
 
 
 # ----------------------------------------------------------------- what the cases show
