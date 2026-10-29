@@ -6,7 +6,7 @@
 // Messages: the simulate() parameters (as before), or {op: 'whatif', p, personal}, or
 // {op: 'rank', p}. Ranking runs only while WHATIF_RANKED is on (it is off).
 
-import { simulate, whatIf, rankRules, WHATIF_RANKED } from './prop-sim-core.js?v=f43cff48';
+import { simulate, whatIf, rankRules, WHATIF_RANKED } from './prop-sim-core.js?v=e603160f';
 
 self.onmessage = (ev) => {
   try {

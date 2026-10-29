@@ -7,7 +7,7 @@
 // connect-src 'none', nothing is stored, nothing is logged.
 
 import { createFileSlot, renderReadError, whileBusy, clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js?v=eb893892';
-import { RUNS, DEFAULT_SEED, tradingDays } from './prop-sim-core.js?v=f43cff48';
+import { RUNS, DEFAULT_SEED, tradingDays } from './prop-sim-core.js?v=e603160f';
 import { money, unitNote, pct, intText, el, DASH } from './format.js?v=acb0db51';
 import { parseStrict, parsePositive, parseWhole, InputError } from './num.js?v=8df99e34';
 
@@ -119,7 +119,7 @@ async function run(ev) {
     st.textContent = 'The simulation could not run in this browser. Press Run to try again.';
     st.hidden = false;
   };
-  worker = new Worker(new URL('./prop-sim-worker.js?v=30e923ce', import.meta.url), { type: 'module' });
+  worker = new Worker(new URL('./prop-sim-worker.js?v=0d8f59e2', import.meta.url), { type: 'module' });
   worker.onmessage = (e) => {
     worker.terminate(); worker = null;
     btn.disabled = false;
