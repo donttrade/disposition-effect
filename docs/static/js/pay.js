@@ -3,7 +3,7 @@
 // /pricing/#last-step) opens the <dialog> on the current page instead of leaving it; without JavaScript, or in a
 // browser without <dialog>, the link works as before. Esc and the close button close it; focus goes back to the
 // link that opened it. "Full details before you pay" copies the #before-you-pay block from /pricing/ on demand
-// (from this page when it is /pricing/, else from a same-origin frame that runs no scripts), so no page but
+// (from this page when it is /pricing/, else from a hidden same-origin frame of /pricing/, removed once read), so no page but
 // /pricing/ carries the seller's address in its HTML and no page needs connect-src. Stores and sends nothing.
 (function () {
   'use strict';
@@ -38,7 +38,6 @@
     var here = location.pathname === '/pricing/' && document.getElementById('before-you-pay');
     if (here) { place(here); return; }
     var f = document.createElement('iframe');
-    f.setAttribute('sandbox', 'allow-same-origin');   // read by this page; nothing in it runs
     f.setAttribute('aria-hidden', 'true');
     f.setAttribute('tabindex', '-1');
     f.title = 'Before you pay';

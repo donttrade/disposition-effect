@@ -57,6 +57,9 @@
 {%- endif %}
 <script src="/static/js/theme.js"></script>
 <script src="/static/js/nav.js" defer></script>
+{%- if flags.paid_report %}
+<script src="/static/js/pay.js" defer></script>
+{%- endif %}
 {%- if flags.ask_box %}
 <script src="/static/js/ask.js" defer></script>
 {%- endif %}
@@ -80,5 +83,8 @@
 {% block content %}{% endblock %}
 </main>
 {% include "partials/footer.html" %}
+{%- if flags.paid_report %}
+{% include "partials/pay_dialog.html" %}
+{%- endif %}
 </body>
 </html>

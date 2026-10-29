@@ -6,6 +6,7 @@
     history questions. #}
 {% block content %}
 {%- import "partials/pilot_terms.html" as pt with context %}
+{%- from "partials/pay_facts.html" import pay_facts %}
 {%- set pilot = products["pilot"] %}{%- set r = products["report39"] %}{%- set t = products["tracker79"] %}
 {%- set firm_ids = ["pilot", "snapshot", "memo", "outcomes"] %}
 {%- set pct = prices.rules.recheck.percent_of_engagement %}
@@ -114,14 +115,21 @@
       </ul>
       <details class="pay-step" id="last-step">
         <summary class="btn">Get the habit report — {{ r.price_usd|usd }}</summary>
+        {#- 29 Oct (owner): one click. Three facts, the complete Before-you-pay block one tap away (unchanged, on
+            this page, before the Stripe button, printable: Ontario CPA s. 38 / O. Reg. 17/05 s. 32), then the button.
+            The binding acceptance is the terms tick on Stripe's checkout; no second required tick here (Baymard). -#}
         <div class="pay-panel" role="group" aria-labelledby="last-step-h">
           <h3 id="last-step-h">Last step</h3>
-          <p class="no-print">{% if link %}<a class="btn" href="{{ link }}" rel="noopener">Pay {{ r.price_usd|usd }} on Stripe</a>{% else %}<span class="muted">Payment link not set yet</span>{% endif %}</p>
-          {% include "partials/before_you_pay.html" %}
-          <p class="no-print">{% if link %}<a class="btn" href="{{ link }}" rel="noopener">Pay {{ r.price_usd|usd }} on Stripe</a>{% endif %}</p>
+          {{ pay_facts(r, prices.rules) }}
+          <details class="pay-more" id="byp-more">
+            <summary>Full details before you pay</summary>
+            {% include "partials/before_you_pay.html" %}
+          </details>
+          <p class="pay-go no-print">{% if link %}<a class="btn" href="{{ link }}" rel="noopener">Continue to secure payment</a>{% else %}<span class="muted">Payment link not set yet</span>{% endif %}</p>
+          <p class="small muted pay-links no-print"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a> · <a href="/terms/#seller">Business details</a></p>
         </div>
       </details>
-      <p class="small muted">Total {{ r.price_usd|usd }} USD. The button shows the terms first, then Stripe.</p>
+      <p class="small muted">Total {{ r.price_usd|usd }} USD, paid on Stripe’s page.</p>
       <p class="small" id="refunds">Full refund if you ask within {{ prices.rules.trader_refund_days }} days, even after your report runs.</p>
       <p class="small"><a href="/sample-report/">See a sample report</a> · <a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a></p>
       {% if stripe_mode == "test" %}<p class="notice notice-caution"><strong>Test mode</strong> Payments here use Stripe's test mode. No real card is charged.</p>{% endif %}
