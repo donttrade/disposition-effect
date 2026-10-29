@@ -29,11 +29,11 @@
           <label for="ps-wi-rule{{ n }}">{% if n == 1 %}Pick a rule to replay{% else %}A second rule (optional){% endif %}</label>
           <select id="ps-wi-rule{{ n }}">
             {%- if n == 2 %}<option value="">None</option>{% endif %}
-            <option value="stop_after_losses">Stop for the day after a number of losing trades</option>
-            <option value="stop_at_day_loss">Stop for the day at a share of the daily loss limit</option>
-            <option value="max_trades">At most a number of trades a day</option>
-            <option value="cooldown_s">No new trade for some minutes after a loss</option>
-            <option value="after_loss_factor">Count each trade after a loss at a part of its result</option>
+            <option value="stop_after_losses">Stop after N losing trades</option>
+            <option value="stop_at_day_loss">Stop at X% of daily loss</option>
+            <option value="max_trades">At most N trades a day</option>
+            <option value="cooldown_s">Pause N minutes after a loss</option>
+            <option value="after_loss_factor">Smaller trades after a loss</option>
           </select>
         </div>
         <div class="field" data-wi-num>
@@ -57,7 +57,7 @@
       {% include "partials/crumbs.html" %}
       <h1>Challenge Readiness Check</h1>
       <p class="lede">Your past days, their published rules.</p>
-      <p>Your file never leaves this tab.{% if flags.analytics %} The page counts visits and finished checks with Cloudflare Web Analytics, without cookies. Nothing from your file goes with it.{% endif %}</p>
+      <p>{% if flags.analytics %}Only anonymous counts of visits and finished steps are sent; your file is never sent.{% else %}Your file never leaves this tab.{% endif %}</p>
       <p><strong>A replay of your past trades, not a prediction.</strong></p>
     </div>
     {{ shot("prop", t) }}
@@ -218,7 +218,7 @@
       <li>A replay that neither passes nor breaks a rule within the time limit runs out of time.</li>
     </ol>
     <p>“In their real order” replays your days once, as they happened. “Try a rule” runs the same replays again with one or two rules from a fixed list, so only the rule differs.</p>
-    <p>It runs entirely in your browser. {% if flags.analytics %}Your file’s contents are never sent; the only requests this page makes are anonymous page-view counts, one for the visit and one for each step you finish.{% else %}The page’s security policy blocks every outgoing network request, so your file is not uploaded anywhere.{% endif %}</p>
+    <p>It runs entirely in your browser. {% if flags.analytics %}Only anonymous counts of visits and finished steps are sent; your file is never sent.{% else %}The page’s security policy blocks every outgoing network request, so your file is not uploaded anywhere.{% endif %}</p>
     </details>
   </section>
 
@@ -229,7 +229,7 @@
     <details><summary>Which firms’ rules are in the list?</summary><p>{{ presets.presets|length }} rule sets from {{ presets.firms|length }} firms, as each firm publishes them, with the date they were read and a link to the firm’s rules page. A value a firm’s page does not state is marked “not stated by the firm” and runs with the default shown. Rules change and vary by account type, so every box stays editable.</p></details>
     <details><summary>What does “Habits on breach days” mean?</summary><p>Four habits, with the same definitions as the habit report, counted on the days a daily limit broke and on your other losing days. It counts how often a habit was there, not whether it caused anything.</p></details>
     <details><summary>How many trading days do I need in the file?</summary><p>The check runs with any number, but with fewer than 30 trading days the result leans heavily on a few days. More history gives a steadier picture.</p></details>
-    <details><summary>Is my file uploaded?</summary><p>No. The file is read in this tab and all 10,000 replays happen in your browser. {% if flags.analytics %}Your file’s contents are never sent; the only requests this page makes are anonymous page-view counts, one for the visit and one for each step you finish.{% else %}The page’s security policy blocks outgoing requests.{% endif %}</p></details>
+    <details><summary>Is my file uploaded?</summary><p>No. The file is read in this tab and all 10,000 replays happen in your browser. {% if flags.analytics %}Only anonymous counts of visits and finished steps are sent; your file is never sent.{% else %}The page’s security policy blocks outgoing requests.{% endif %}</p></details>
   </section>
 
   <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR, Tradovate and TradingView are trademarks of their owners. {{ presets.firms|join(", ") }} are trademarks of their owners. donttrade is not affiliated with any of them and is paid by none of them.</p>

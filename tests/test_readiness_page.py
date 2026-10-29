@@ -285,7 +285,7 @@ def test_card_strings_and_image(browser, built_site):
     pg.check("#ps-wi-card")
     pg.wait_for_timeout(300)
     alt = pg.get_attribute("#ps-card-canvas", "aria-label")
-    assert alt.startswith("Passed in 6% of 10,000 replays.") and "Example data, not a real trader." in alt
+    assert alt.startswith("Passed in 6% of 10,000 replays.") and "Example data." in alt and "not a real" not in alt.lower()
     assert "With stop after 1 loss: passed 6% →" in alt and "3% target · 0.4% daily · 3% max (fixed floor)" in alt
     firms = {p["firm"] for p in C.load()["presets"]}
     for bad in ["$", "USD", "buy", "purchase", "challenge fee", "funded", "price", *firms]:
@@ -421,4 +421,19 @@ def test_no_overflow_other_widths(browser, built_site, width):
     run(pg)
     pg.evaluate("document.querySelectorAll('details').forEach((d) => d.open = true)")
     assert horizontal_overflow(pg) == []
+    ctx.close()
+
+
+def test_rule_labels_short_and_headings_clear_the_header(browser, built_site):
+    ctx, pg, _ = open_page(browser, built_site, width=1280)
+    for t in pg.eval_on_selector_all("#ps-wi-rule1 option, #ps-wi-rule2 option", "os => os.map((o) => o.textContent.trim())"):
+        assert words(t) <= 6, t
+    sample(pg)
+    run(pg)
+    whatif(pg)
+    for sel in ("#ps-whatif-h", "#ps-out-h", "#ps-wi-h", "#ps-limits-h"):
+        top, hb = pg.evaluate(f"""() => {{ const h = document.querySelector('{sel}'); h.scrollIntoView();
+            return [h.getBoundingClientRect().top, document.querySelector('.site-header').getBoundingClientRect().bottom]; }}""")
+        assert top >= hb, (sel, top, hb)   # scroll-margin-top keeps it below the sticky header
+    assert pg.evaluate("getComputedStyle(document.querySelector('h2')).scrollMarginTop") == "73px"
     ctx.close()

@@ -23,7 +23,7 @@
     <li>The site is hosted on Cloudflare Pages; before {{ legal.cloudflare_pages_since_human }} it was hosted on GitHub Pages. Cloudflare receives visitors’ IP addresses to deliver the pages and protect the site; see <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare’s privacy policy</a>.</li>
     <li>This site sets no cookies.</li>
     {%- if flags.analytics %}
-    <li>Visits are counted with Cloudflare Web Analytics, which sets no cookie and does not follow you from site to site. Your trade file’s contents are never sent; on the free tools the only request the page makes is that page-view count. On the Challenge Readiness Check, a finished step (a check, a rule tried, the details opened, an export or a card) is also counted, once per visit, as a view of a small counting page; nothing from your file goes with it.</li>
+    <li>Visits are counted with Cloudflare Web Analytics, which sets no cookie and does not follow you from site to site. On the free tools, only anonymous counts of visits and finished steps are sent; your file is never sent. On the Challenge Readiness Check, a finished step (a check, a rule tried, the details opened, an export or a card) is counted once per visit, as a view of a small counting page.</li>
     {%- else %}
     <li>This site runs no analytics.</li>
     {%- endif %}
@@ -33,7 +33,7 @@
 
   <details class="legal-sec">
     <summary><h2 id="tools">The free tools</h2><span class="ls-sum">The free tools read your file in your browser. It is not uploaded.</span></summary>
-  <p>The free tools (trade stats, the Challenge Readiness Check and the calculators) read your file and your numbers inside your browser tab. {% if flags.analytics %}Your file’s contents are never sent; the only requests those pages make are anonymous page-view counts (on the Challenge Readiness Check, also one per finished step), so your file is not uploaded and we never see it.{% else %}Those pages block outgoing requests, so your file is not uploaded and we never see it.{% endif %}</p>
+  <p>The free tools (trade stats, the Challenge Readiness Check and the calculators) read your file and your numbers inside your browser tab. {% if flags.analytics %}Only anonymous counts of visits and finished steps are sent; your file is never sent, so it is not uploaded and we never see it.{% else %}Those pages block outgoing requests, so your file is not uploaded and we never see it.{% endif %}</p>
   </details>
   {%- if flags.paid_report %}
 

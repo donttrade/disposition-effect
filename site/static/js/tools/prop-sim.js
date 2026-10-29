@@ -422,7 +422,7 @@ function render() {
     el('h2', { id: 'ps-out-h', tabindex: '-1', text: headline }),
     el('p', { class: 'notice' }, el('strong', { text: 'A replay of past trades, not a prediction' }),
       `Each replay is built from ${source}. ${unitNote(last.unit)}`),
-    last.example ? el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Example data' }), 'Not a real trader.') : null,
+    last.example ? el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Example data' })) : null,
     warn.length ? el('div', { class: 'notice notice-caution' }, el('strong', { text: 'Note' }), el('ul', {}, ...warn.map((w) => el('li', { text: w })))) : null,
     el('div', { class: 'rc-visuals' }, outcome, ruleCard(res), last.file ? habitsCard(last.real, p.rules) : null),
   ].filter(Boolean));
@@ -472,7 +472,7 @@ function renderWhatIfForm() {
   for (const n of [1, 2]) {
     const opt = $(`ps-wi-rule${n}`).querySelector('option[value="cooldown_s"]');
     opt.disabled = noTimes;
-    opt.textContent = noTimes ? `No new trade for some minutes after a loss (${last.file ? 'not available for files with dates but no times' : 'needs a file'})` : 'No new trade for some minutes after a loss';
+    opt.textContent = noTimes ? `Pause after a loss (${last.file ? 'needs times' : 'needs a file'})` : 'Pause N minutes after a loss';
     if (noTimes && $(`ps-wi-rule${n}`).value === 'cooldown_s') { $(`ps-wi-rule${n}`).value = n === 1 ? 'stop_after_losses' : ''; syncWiRow(n, true); }
   }
 }
