@@ -4,7 +4,7 @@
 // cookies or storage, and raw rows are never kept: only whitelisted fields
 // survive into executions and trades.
 
-import { resolveNumberStyle, checkQuoting, normHeader, wideRows } from './csv.js';
+import { resolveNumberStyle, checkQuoting, normHeader, wideRows, splitCell, parseDate } from './csv.js';
 import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS, checkCurrencyColumn, ISO_CURRENCIES } from './detect.js';
 import { fail, inFile, LIMITS } from './errors.js';
 import { checkMapping, parseMapped, mappedTzLabel, mergeParsed, firstTs, idColumns, idLookup, readRows,
@@ -73,6 +73,31 @@ function readKinds(m, numeric) {
   return kinds;
 }
 
+// A fill refused as a split number (wideRows) has a side and a size the file does not show, so the
+// count of its symbol is unknown from then on (Tester N1: a refused buy left its sell as a phantom
+// short). → [{symbol, ts}] for trades.js, which leaves that symbol's dependent fills out; ts is
+// null when the row's time cannot be read (then every fill of the symbol is left out).
+// A round-trip row is whole on its own, so nothing depends on it.
+const TIME_OF = {
+  generic: (c, m) => ('datetime' in m ? parseDate(c('datetime'), 'generic') : parseDate(c('time') ? c('date') + ' ' + c('time') : c('date'), 'generic')),
+  tradingview: (c) => parseDate(c('time'), 'generic'),
+  tradovate_orders: (c) => parseDate(c('time'), 'tradovate'),
+  ibkr_flex: (c, m) => parseDate('datetime' in m ? c('datetime') : c('tradetime') ? c('tradedate') + ';' + c('tradetime') : c('tradedate'), 'ibkr'),
+  mt5_deals: (c) => parseDate(c('time'), 'mt'),
+};
+
+function refusedFills(name, m, rows, split) {
+  if (!split.length || !TIME_OF[name]) return [];
+  const byRow = new Map(rows.map((r) => [r.row, r]));
+  return split.map((sp) => {
+    const cells = byRow.get(sp.row).cells;
+    const c = (f) => (f in m ? splitCell(cells, m[f], sp) : '');
+    let ts = null;
+    try { ts = TIME_OF[name](c, m); } catch (e) { if (!e || e.name !== 'EngineError') throw e; }
+    return { symbol: c(name === 'tradovate_orders' ? 'contract' : 'symbol'), ts };
+  });
+}
+
 // A recognised format (no mapping) → {fmt, verified, res, mode, tz, nData, shape}
 function readAuto(src) {
   if (src.kind === 'html') {
@@ -102,7 +127,11 @@ function readAuto(src) {
   checkQuoting(rows, hi, det.map);
   // Rows an unquoted comma made wider than the heading (csv.js wideRows): a split number is refused.
   const wr = wideRows(rows.slice(hi + 1), rows[hi].cells.length, readKinds(m, NUMERIC_FIELDS[name]), ISO_SET);
-  if (wr.split.length) rows = rows.slice(0, hi + 1).concat(rows.slice(hi + 1).filter((r) => !wr.split.includes(r.row)));
+  const refused = refusedFills(name, m, rows, wr.split);
+  if (wr.split.length) {
+    const gone = new Set(wr.split.map((x) => x.row));
+    rows = rows.slice(0, hi + 1).concat(rows.slice(hi + 1).filter((r) => !gone.has(r.row)));
+  }
   if (name === 'tradingview') stripCurrencyCells(rows.slice(hi + 1), m);
   resolveNumberStyle([{ rows: rows.slice(hi + 1), map: m, fields: NUMERIC_FIELDS[name] }], delim === ',' ? 'dot' : null);
   const verified = SIGNATURES[name].verified;
@@ -111,6 +140,7 @@ function readAuto(src) {
     withDuplicates(res, dup, curIgnored);
     if (wr.split.length) res.skipped.split_number = (res.skipped.split_number || 0) + wr.split.length;
     res.extra.wide_rows = wr.wide;
+    res.extra.refused = refused;
     const idx = idColumns(rows[hi].cells);
     return { fmt, verified, res, mode, tz: TZ_LABELS[fmt], nData: dataRows, shape: fmt,
       idOf: idLookup(rows.slice(hi + 1), () => idx) };

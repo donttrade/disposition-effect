@@ -463,7 +463,7 @@ export function guessMapping(peek, dataRows, opts = {}) {
       for (const i of Array.isArray(v) ? v : [v]) kinds[i] = kind;
     }
     const wr = wideRows(rows, width, kinds, ISO);
-    if (wr.split.length) questions.push({ q: 'split_number', rows: wr.split.slice(0, 5), n: wr.split.length });
+    if (wr.split.length) questions.push({ q: 'split_number', rows: wr.split.slice(0, 5).map((x) => x.row), n: wr.split.length });
   }
   // Futures sizes: offered when the symbols are CME contracts the size table knows.
   let futuresOffer = false;

@@ -12,7 +12,7 @@
 // Mirrors parse_mapped(), parse_files() and the helpers around them in tests/reference/engine_ref.py.
 
 import { clean, normHeader, parseNumber, resolveNumberStyle, checkQuoting, parseDateFmt, fallBackClose,
-  numberShape, DATE_FORMATS, wideRows, decodeBytes, isHtml, sniffDelimiter, parseCsv, fromPaste } from './csv.js';
+  numberShape, DATE_FORMATS, wideRows, splitCell, decodeBytes, isHtml, sniffDelimiter, parseCsv, fromPaste } from './csv.js';
 import { ISO_CURRENCIES, checkCurrencyColumn } from './detect.js';
 import { fail, LIMITS } from './errors.js';
 import { reqNumber, optNumber, skip, isEmptyRow, htmlRows } from './mt.js';
@@ -317,13 +317,29 @@ export function parseMapped(rows, mp, sideFrom, kind, delimiter) {
       : ['date', 'time', 'open_time', 'close_time'].includes(f) ? 'date' : 'text';
   }
   let wide = 0;
+  const refused = [];
   for (const r of data) {
     if (isEmptyRow(r.cells)) continue;
     nData++;
     if (mp.trim_ragged && isRagged(r.cells, header.length)) { skip(skipped, 'no_data'); continue; }
     if (isNoData(r.cells, header.length) || reqKeys.every((f) => cellAt(r, m[f]) === '')) { skip(skipped, 'no_data'); continue; }
     const wr = wideRows([r], header.length, kinds, ISO);
-    if (wr.split.length) { skip(skipped, 'split_number'); continue; }
+    if (wr.split.length) {
+      skip(skipped, 'split_number');
+      if (layout !== 'roundtrips') {
+        // Its symbol's later fills depend on it (trades.js leaves them out); see index.js refusedFills.
+        const sp = wr.split[0];
+        const c = (f) => (has(m, f) ? splitCell(r.cells, m[f], sp) : '');
+        let ts = null;
+        try {
+          const d = c('date');
+          const t = c('time');
+          ts = parseDateFmt(t !== '' && d !== '' ? d + ' ' + t : d, mp.date_format, r.row, 'date', { yearBase: mp.year_base || null });
+        } catch (e) { if (!e || e.name !== 'EngineError') throw e; }
+        refused.push({ symbol: c('symbol'), ts });
+      }
+      continue;
+    }
     wide += wr.wide;
     kept.push(r);
   }
@@ -472,7 +488,7 @@ export function parseMapped(rows, mp, sideFrom, kind, delimiter) {
     delete x._ooff;
     delete x._coff;
   }
-  const extra = { duplicate_rows: dup, currency_ignored: cc.ignored, wide_rows: wide, mapped: !mp.preset, preset: mp.preset || null,
+  const extra = { duplicate_rows: dup, currency_ignored: cc.ignored, wide_rows: wide, refused, mapped: !mp.preset, preset: mp.preset || null,
     orders_averaged: layout === 'orders', futures_sizes: mp.futures_sizes === true, pnl_sign: pnlSign,
     zone_ignored: seen.zone && !offsets, offsets, tz: mp.tz || null };
   return { res: { executions: execs, roundtrips: rts, skipped, extra }, nData };
@@ -577,6 +593,8 @@ export function mergeParsed(parts) {
     for (const k of SUM_EXTRA) if (has(p.res.extra, k)) extra[k] = (extra[k] || 0) + p.res.extra[k];
     for (const k of OR_EXTRA) if (has(p.res.extra, k)) extra[k] = extra[k] || p.res.extra[k];
   }
+  extra.refused = [];
+  for (const p of parts) if (p.res.extra.refused) extra.refused = extra.refused.concat(p.res.extra.refused);
   const ex = dropOverlap(parts.map((p) => p.res.executions), execKey);
   const rt = dropOverlap(parts.map((p) => p.res.roundtrips), rtKey);
   extra.overlap_rows = ex.dropped + rt.dropped;
