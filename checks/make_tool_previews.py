@@ -4,7 +4,7 @@
     python3 checks/make_tool_previews.py
 
 Builds the site to a temp dir, serves it on 127.0.0.1, opens trade stats, the heatmap, the drawdown
-calculator and the prop-challenge simulator, clicks "Try a sample file" (and, for the simulator, its
+calculator and the prop-challenge simulator, clicks "Try with example data" (and, for the simulator, its
 "Run" button with the page's default rules), and reads the tools' own results from the page. Writes
 site/config/tool_previews.json with the sample file's SHA-256: tests/test_tool_previews.py fails when
 the sample file changes and this has not been re-run. The cards draw these numbers as small inline

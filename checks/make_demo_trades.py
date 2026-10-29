@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Write site/static/samples/demo-trades.csv: the synthetic "Try a sample file" for the
+"""Write site/static/samples/demo-trades.csv: the synthetic "Try with example data" for the
 free dashboard (and the homepage screenshot).
 
     python3 checks/make_demo_trades.py          # rewrite the file

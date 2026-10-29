@@ -167,7 +167,7 @@ def test_home_hero_is_the_real_dashboard_capture(browser, built_site):
     html = html_of(built_site, "/")
     assert html.count('class="hero-dash"') == 1 and "<picture" not in html and "<source" not in html
     assert f'role="img" aria-label="{OLD_HERO_ALT}"' in html
-    assert "Sample data, not a real trader." in html
+    assert "run on example data." in html   # 29 Oct (owner): the one word "Example" labels sample data
     assert not (built_site["out"] / "static" / "img").exists(), "the old hero .webp images are gone"
     hero = re.findall(r"<dd data-count[^>]*>([^<]*)</dd>", html)
     ctx = browser.new_context(viewport={"width": 1280, "height": 900})

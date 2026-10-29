@@ -80,7 +80,7 @@ function read() {
   const seed = get('ps-seed', (v, l) => parseWhole(v, l, 0, 4294967295));
   const p = { rules, seed, runs: RUNS, mode: mode() };
   if (p.mode === 'file') {
-    if (!loaded) problems.push({ id: 'ps-file', message: 'Choose a trade file, or try the sample file, or switch to manual numbers.' });
+    if (!loaded) problems.push({ id: 'ps-file', message: 'Choose a trade file, or try the example data, or switch to manual numbers.' });
     else p.days = loaded.days;
   } else {
     const wr = get('ps-wr', parseStrict);
@@ -194,7 +194,7 @@ function render(p, res) {
       `Each run is built from ${source}. ${unitNote(unit)}`),
     warn.length ? el('div', { class: 'notice notice-caution' }, el('strong', { text: 'Note' }), el('ul', {}, ...warn.map((w) => el('li', { text: w })))) : null,
     el('figure', { class: 'chart chart-bars' }, bars(rows),
-      el('figcaption', { text: `n = ${intText(res.runs)} runs · ${p.mode === 'file' && loaded.label === 'the synthetic sample file' ? 'synthetic sample data, not a real trader' : 'from your inputs'}` })),
+      el('figcaption', { text: `n = ${intText(res.runs)} runs · ${p.mode === 'file' && loaded.label === 'the synthetic sample file' ? 'example data' : 'from your inputs'}` })),
     el('div', { class: 'table-wrap', tabindex: '0', role: 'region', 'aria-label': 'Outcomes as a table' }, table),
     el('dl', { class: 'stats' }, ...facts.map(([l, v, k]) => el('div', { class: 'stat' }, el('dt', { text: l }), el('dd', { text: v, 'data-k': k })))),
     el('p', { id: 'ps-streak', 'data-busts': String(res.bust), text: streakLine(res) }),

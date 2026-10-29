@@ -12,7 +12,7 @@
 import { heatmap, level, WEEKDAYS, MIN_CELL, blockLabel } from './heatmap-core.js?v=e62634a0';
 import { money, pct, intText, el, signClass, MINUS } from './format.js?v=acb0db51';
 import { revealResult } from './tool-state.js?v=fd4af716';
-import { wireFileTool, readSection, tableWrap, rowsTable, plural, reportLead, SAMPLE_LABEL } from './file-tool.js?v=801f66e4';
+import { wireFileTool, readSection, tableWrap, rowsTable, plural, reportLead, SAMPLE_LABEL } from './file-tool.js?v=54629050';
 
 const $ = (id) => document.getElementById(id);
 let state = null; // {result, unit, fileLabel}; never persisted
@@ -34,7 +34,7 @@ function render(focus = true) {
   const h = heatmap(r.trades, o);
   state.hm = h;
   const out = $('hm-out');
-  out.replaceChildren(el('h2', { id: 'hm-out-h', tabindex: '-1', text: state.fileLabel === SAMPLE_LABEL ? 'Results: synthetic sample file' : 'Results: your file' }),
+  out.replaceChildren(el('h2', { id: 'hm-out-h', tabindex: '-1', text: state.fileLabel === SAMPLE_LABEL ? 'Results: example data' : 'Results: your file' }),
     readSection('hm', r, state.fileLabel));
   out.append(el('p', { id: 'hm-range', 'data-k': 'range' },
     `Open times ${shiftText(o.shiftHours)}: first trade opened ${stamp(h.first_open)}, last opened ${stamp(h.last_open)}. If these do not match what you remember, change the shift above.`));
