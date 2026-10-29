@@ -72,6 +72,7 @@ async (cases) => {
     const div = document.createElement('div');
     document.body.append(div);
     renderReport(R(c), div, {});
+    div.querySelectorAll('.habit details').forEach((d) => { d.open = true; });   // 29 Oct: "Why not yet" is folded
     const sec = (id) => (div.querySelector('#' + id) || { innerText: '' }).innerText;
     out[k] = { text: div.innerText, page1: sec('focus'), coverage: sec('coverage'),
       habit: Object.fromEntries(all.concat(['oversized_loss']).map((id) => [id, sec('habit-' + id)])),
@@ -119,6 +120,11 @@ V_LAUNCH_SIZE = ("In our tests on files built to have no real pattern, this test
                  "reported a gap in more than 1 file in 20, the rate it is designed for, in files that mix several symbols whose "
                  "sizes and results both follow the time of day. So this pattern is described here without a verdict.")
 SU_LINE = "Size after a loss is described, not tested, in this version of the report."
+# 29 Oct (owner): the page never shows "described" or "not tested". V-launch and V-launch-size appear under
+# "Why not yet" without their last sentence; the fixed coverage lines give way to one "Luck check coming" line.
+TAIL = " So this pattern is described here without a verdict."
+V_LAUNCH_SHOWN, V_LAUNCH_SIZE_SHOWN = V_LAUNCH[:-len(TAIL)], V_LAUNCH_SIZE[:-len(TAIL)]
+COMING = "Luck check coming: Holding losers longer than winners, Size after a loss, Large losses."
 STALE = ["10,000 shuffles", "Holm correction for testing four", "testing four habits", "Permutation test on past data"]
 
 
@@ -162,9 +168,9 @@ def test_page_one_uses_the_amendment_lines(rendered):
     assert ("Shown first: Re-entering soon after a loss. Trades opened within 15 minutes of a losing trade's close totalled "
             "−$500.00 (historical).") in p1
     assert [x for x in rendered["big_focus"]["coverage"].splitlines() if x.strip()] == [
-        "2 of the 2 habits could be tested. Each one compares two groups of at least 30 trades.", HG_LINE, SU_LINE]
-    for k, case in rendered.items():        # every stats2c page 1 carries the fixed hold-gap and size-up lines once each
-        assert case["page1"].count(HG_LINE) == 1 and case["page1"].count(SU_LINE) == 1, k
+        "2 of the 2 habits could be tested. Each one compares two groups of at least 30 trades.", COMING]
+    for k, case in rendered.items():        # every page 1 says once which habits have a luck check coming, never "described"
+        assert case["page1"].count(COMING) == 1 and HG_LINE not in case["page1"] and SU_LINE not in case["page1"], k
     # the old page said "No pattern ... distinguishable" whenever focus was null: false here
     opp = rendered["mid_opposite"]["page1"]
     assert "No pattern in this file is distinguishable from noise." not in opp
@@ -179,9 +185,8 @@ def test_page_one_uses_the_amendment_lines(rendered):
     none = rendered["none"]["page1"]
     assert "No pattern in this file is distinguishable from noise." in none
     assert "That does not show the patterns are absent; it means this file cannot tell them apart from chance." in none
-    assert "Not tested: Re-entering soon after a loss." in rendered["too_few"]["coverage"]
     assert "1 of the 2 habits could be tested." in rendered["too_few"]["coverage"]
-    assert "Size after a loss" not in rendered["too_few"]["coverage"].replace(SU_LINE, "")
+    assert "not tested" not in rendered["too_few"]["coverage"].lower() and COMING in rendered["too_few"]["coverage"]
 
 
 def test_each_habit_shows_its_sentences(rendered):
@@ -189,32 +194,33 @@ def test_each_habit_shows_its_sentences(rendered):
     assert "Trades opened within 15 minutes of a losing trade's close averaged −$12.50 per trade; your other trades averaged +$3.25." in h["revenge"]
     assert "This gap is distinguishable from noise, after adjusting for the 2 patterns tested." in h["revenge"]
     assert "Your losing trades were held a median of 1h 30m; your winning trades a median of 30m 0s." in h["hold_gap"]
-    assert V_LAUNCH in h["hold_gap"] and "not tested" in h["hold_gap"]                 # badge and V-launch
+    assert V_LAUNCH_SHOWN in h["hold_gap"] and "Luck check coming" in h["hold_gap"]    # pill and V-launch (under "Why not yet")
     assert "Compared with similar trades opened just before it" not in h["hold_gap"]    # no M2 (R-D2)
     assert "distinguishable from noise" not in h["hold_gap"] and "Held 12 hours" not in h["hold_gap"]
-    assert "Losing trades held longer than your median winning hold: 40 trades, totalling" in h["hold_gap"]   # dollars stay
+    assert "Losing trades held longer than your median winning hold\n40 trades, totalling" in h["hold_gap"]   # dollars stay ("What happened")
     # R-D3: size_up shows M1, the "not tested" badge, V-launch-size and its dollar figure; no M2, no verdict
     assert "Your median size after a loss was 1.60× your median size after a win." in h["size_up"]
-    assert V_LAUNCH_SIZE in h["size_up"] and "not tested" in h["size_up"]
-    assert h["size_up"].index("median size after a loss was") < h["size_up"].index(V_LAUNCH_SIZE)
+    assert V_LAUNCH_SIZE_SHOWN in h["size_up"] and "Luck check coming" in h["size_up"]
+    assert h["size_up"].index("median size after a loss was") < h["size_up"].index(V_LAUNCH_SIZE_SHOWN)
     assert "size rank" not in h["size_up"] and "distinguishable from noise" not in h["size_up"] and "reshuffled" not in h["size_up"]
-    assert "Trades after a loss at 1.5 times your usual size or more: 40 trades, totalling" in h["size_up"]   # dollars stay
+    assert "Trades after a loss at 1.5 times your usual size or more\n40 trades, totalling" in h["size_up"]   # dollars stay
     assert "Losers were held 3.00 times as long as winners." not in h["hold_gap"]      # shown only when tested
     assert "After 3 or more losses in a row: 12 trades" in h["tilt"]
-    assert "Share of all loss dollars: 30.0%" in h["oversized_loss"]                   # descriptive habit unchanged
+    assert "Share of all loss dollars\n30.0%" in h["oversized_loss"]                  # 29 Oct: "What happened" list; shown as "Large losses"
+    assert h["oversized_loss"].startswith("Large losses") and "Luck check coming" in h["oversized_loss"]
     assert "Not tested" not in h["oversized_loss"] and "reshuffled" not in h["oversized_loss"]
     t = rendered["mid_opposite"]["habit"]["tilt"]
     assert "It runs the opposite way to this pattern's name." in t
     tf = rendered["too_few"]["habit"]
     assert ("Not enough trades to tell: this pattern compares two groups of at least 30 trades each, and this file has 12 "
             "and 90.") in tf["revenge"]
-    assert "Not enough trades to tell" not in tf["size_up"] and V_LAUNCH_SIZE in tf["size_up"]
+    assert "Not enough trades to tell" not in tf["size_up"] and V_LAUNCH_SIZE_SHOWN in tf["size_up"]
     assert "averaged" not in tf["revenge"]                                             # the too_few sentence replaces both
     w = rendered["launch_m3"]["habit"]["hold_gap"]
-    assert V_LAUNCH in w and "Held 12 hours or more: 2 of your 40 losing trades and 1 of your 90 winning trades." in w
-    assert w.index("held a median of") < w.index(V_LAUNCH) < w.index("Held 12 hours or more")   # M1, V-launch, M3
+    assert V_LAUNCH_SHOWN in w and "Held 12 hours or more: 2 of your 40 losing trades and 1 of your 90 winning trades." in w
+    assert w.index("held a median of") < w.index("Held 12 hours or more") < w.index(V_LAUNCH_SHOWN)   # 29 Oct: M1, M3 ("What happened"), then V-launch ("Real or luck?")
     assert "Losers were held" not in w and "reshuffled" not in w                       # no test ran: no ratio line, no method line
-    assert "Not tested: Holding losers" not in rendered["launch_m3"]["coverage"] and HG_LINE in rendered["launch_m3"]["coverage"]
+    assert "Not tested" not in rendered["launch_m3"]["coverage"] and COMING in rendered["launch_m3"]["coverage"]   # 29 Oct (owner)
 
 
 def test_i5_page_one_shows_the_merged_rows_line_only_when_rows_were_merged(rendered):
@@ -363,7 +369,7 @@ async (reps) => {
     document.body.append(div);
     renderReport(rep, div, {});
     const sec = (id) => (div.querySelector('#' + id) || { innerText: '' }).innerText;
-    const paras = (id) => [...div.querySelectorAll('#habit-' + id + ' p')].map((p) => p.textContent.trim());
+    const paras = (id) => [...div.querySelectorAll('#habit-' + id + ' p, #habit-' + id + ' dd')].map((p) => p.textContent.trim());
     out[k] = { page1: [...div.querySelectorAll('#focus-lines p')].map((p) => p.textContent), coverage: sec('coverage'),
       text: div.innerText, habits: Object.fromEntries(['hold_gap', 'revenge', 'size_up', 'tilt', 'oversized_loss'].map((id) => [id, paras(id)])),
       table: [...div.querySelectorAll('tbody tr')].filter((tr) => tr.querySelector('a[href^="#habit-"]'))
@@ -373,7 +379,7 @@ async (reps) => {
   return out;
 }
 """
-NONE_TESTED = "None of the patterns could be tested in this file. Some are described below without a verdict."
+NONE_TESTED = "None of the patterns could be tested in this file. Some are shown below without a verdict."   # as shown (report.js plain())
 DATED = "open at exactly 00:00 and were held a whole number of days, as in exports with dates but no times"
 
 
@@ -397,14 +403,16 @@ def rendered_real(browser, repo_server):
 def test_i9_dates_only_page_shows_exactly_the_ruled_lines(rendered_real, name, T):
     c = rendered_real[name]
     assert c["page1"] == [NONE_TESTED, T + " " + DATED + ", so the patterns that depend on the order and timing of trades "
-                          "within a day are not tested, and size after a loss is not described."]
+                          "within a day get no luck check, and size after a loss gets no figure."]
     assert "No pattern in this file is distinguishable" not in c["text"] and "were counted as one trade" not in c["text"]
-    assert "Size after a loss is described" not in c["text"] and "Size after a loss is not described or tested for this file." in c["coverage"]
+    assert "described" not in c["text"] and "not tested" not in c["text"].lower()   # 29 Oct (owner)
+    assert COMING in c["coverage"]
     for hid in ("revenge", "tilt"):
-        assert c["habits"][hid] == ["not tested", "Not tested: " + T[0].lower() + T[1:] + " " + DATED + "; this pattern depends on the timing of "
-                                    "trades within a day, so it is not tested on files like that."], (hid, c["habits"][hid])
-    assert c["habits"]["size_up"] == ["not tested", "Not described: " + T[0].lower() + T[1:] + " " + DATED + "; this pattern depends on which "
-                                      "trade came after a loss, so it is not described for files like that."]
+        assert c["habits"][hid] == ["No figure for this file.", "can’t check on this file", "No luck check on this file: " + T[0].lower() + T[1:]
+                                    + " " + DATED + "; this pattern depends on the timing of trades within a day, so files like that get no "
+                                    "luck check."], (hid, c["habits"][hid])
+    assert c["habits"]["size_up"] == ["No figure for this file: " + T[0].lower() + T[1:] + " " + DATED + "; this pattern depends on which "
+                                      "trade came after a loss, so files like that get no figure.", "Luck check coming", plain_launch_size()]
     for hid in ("revenge", "tilt", "size_up"):
         joined = " ".join(c["habits"][hid])
         assert "15 minutes" not in joined and "averaged" not in joined and "totalling" not in joined and "$" not in joined, hid
@@ -418,8 +426,12 @@ def test_i9_dates_only_page_shows_exactly_the_ruled_lines(rendered_real, name, T
     assert L.lint_text(c["text"], "dates", paid=True) == []
 
 
+def plain_launch_size():
+    return V_LAUNCH_SIZE_SHOWN
+
+
 def test_i9_a_timed_report_with_nothing_tested_says_so(rendered_real):
     t = rendered_real["too_few"]
     assert t["page1"] == [NONE_TESTED]
     assert "No pattern in this file is distinguishable" not in t["text"] and DATED not in t["text"]
-    assert "Size after a loss is described, not tested, in this version of the report." in t["coverage"]
+    assert "Luck check coming: " in t["coverage"] and "described" not in t["coverage"]   # 29 Oct (owner)

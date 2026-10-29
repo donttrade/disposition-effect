@@ -493,7 +493,7 @@ PAGES += [
 FORM_JS = "/static/js/form-ref.js"
 # The Product JSON-LD description (paid_report only): the same words as the pricing table row.
 # R-D3 I-3b: the same text as the /pricing/ row (the JSON-LD Product description; tests/test_r_d2_pages.py checks both)
-PRODUCT_TEXT = "Up to five habits measured and described in your own trades, with the dollar totals of the matching trades; up to two of them tested against chance in this version; plus one re-test 30 to 60 days after your first result."
+PRODUCT_TEXT = "Up to five habits measured in your own trades, with the dollar totals of the matching trades; up to two of them tested against chance in this version; plus one re-test 30 to 60 days after your first result."
 PAGES += [
     {"template": "pages/for-traders.html", "path": "/for-traders/", "requires_flag": None, "updated": "2026-10-21",
      "crumb": "Individual traders", "og_image": "/assets/og/traders.png", "scripts": [FORM_JS, MOTION_JS],
@@ -501,13 +501,13 @@ PAGES += [
      "description": "The donttrade test, a habit test on your own MT5, IBKR, Tradovate or TradingView file, with a "
                     "real-or-noise check for each tested habit. Coming soon; join the waitlist.",
      "if_paid": {"title": "The donttrade Test for Traders",
-                 "description": "The donttrade test, a habit test on your own MT5, IBKR, Tradovate or TradingView file, with a "
-                                "real-or-noise check for each tested habit. One price, re-test included."}},
+                 "description": "The donttrade test, a habit test on your own MT5, IBKR, Tradovate or TradingView file, "
+                                "with a real-or-noise check. One price, re-test included."}},
     {"template": "pages/for-firms.html", "path": "/for-firms/", "requires_flag": None, "updated": "2026-10-21",
      "crumb": "Prop firms & brokers", "og_image": "/assets/og/firms.png", "scripts": [FORM_JS, MOTION_JS],
      "title": "The donttrade Test for Prop Firms and Brokers",
-     "description": "The donttrade test on your whole book: one habit today, the disposition effect, more being added. "
-                    "A published script, run inside your own systems. Pilot, then monthly."},
+     "description": "The donttrade test on your whole book: one habit today, more being added. A published script, "
+                    "run inside your own systems. A Pilot, then monthly."},
 ]
 
 # Forms and the pages around them (step 16). Thank-you pages are noindex and stay out of the sitemap.

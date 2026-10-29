@@ -202,3 +202,51 @@ def test_word_budgets_on_new_strings(built_site):
         assert len(b.replace("—", "").split()) <= 4, b
     strip = text(re.search(r'(?s)<section class="free-strip".*?</section>', h).group(0))
     assert L.lint_text(strip) == []
+
+
+# ------------------------------------------------------------------ the report in two layers (owner, 29 Oct)
+@pytest.mark.parametrize("width", [1280, 390])
+def test_example_report_shows_two_layers_and_never_described_or_not_tested(browser, built_site, width):
+    ctx = browser.new_context(viewport={"width": width, "height": 900})
+    pg = ctx.new_page()
+    pg.goto(built_site["url"] + "/sample-report/")
+    pg.wait_for_selector("#sample-out .habit")
+    t = pg.inner_text("main")
+    for bad in ("described", "Described", "not tested", "Not tested", "Unusually large"):
+        assert bad not in t, bad
+    n = pg.locator("#sample-out .habit").count()
+    assert n == 5
+    assert pg.locator("#sample-out .habit .layer-what h4").count() == n and pg.locator("#sample-out .habit .layer-luck h4").count() == n
+    assert "Large losses" in t and "Luck check coming" in t and "unlikely to be luck" in t and "could be luck" in t
+    for hid in ("hold_gap", "size_up", "oversized_loss"):
+        sec = pg.locator(f"#habit-{hid}")
+        assert sec.locator(".badge-coming").inner_text() == "Luck check coming"
+        assert sec.locator(".luck-why summary").inner_text() == "Why not yet"
+    why = pg.locator("#habit-hold_gap .luck-why p").text_content()
+    assert why.startswith("In our tests on files built to have no real pattern") and "described" not in why
+    # print shows every folded part, then folds them back
+    pg.evaluate("window.dispatchEvent(new Event('beforeprint'))")
+    assert pg.locator("#sample-out details:not([open])").count() == 0
+    pg.evaluate("window.dispatchEvent(new Event('afterprint'))")
+    assert pg.locator("#sample-out .luck-why[open]").count() == 0
+    ctx.close()
+
+
+def test_plain_rewords_every_described_or_not_tested_line(browser, built_site):
+    """Every wording.js line that says "described" or "not tested" (V-launch, V-launch-size, the dates-only and
+    spread lines, NONE_TESTED) comes out of report.js's plain() without those words; wording.js is unchanged."""
+    ctx = browser.new_context()
+    pg = ctx.new_page()
+    pg.goto(built_site["url"] + "/sample-report/")
+    pg.wait_for_selector("#sample-out .habit")
+    out = pg.evaluate("""async () => {
+      const r = await import('/static/js/paid/report.js'), w = await import('/static/js/paid/wording.js');
+      const T = 'All 12 trades in this file';
+      const lines = [w.V_LAUNCH, w.V_LAUNCH_SIZE, w.NONE_TESTED, w.V_SPREAD0, w.vDatesOnly(T), w.sizeNotDescribed(T), w.datesP1(T),
+        'Not tested: the holds of your losing and winning trades are spread very differently (x).'];
+      return lines.map((s) => [s, r.plain(s)]);
+    }""")
+    ctx.close()
+    for before, after in out:
+        assert not re.search(r"(?i)\bdescribed\b|\bnot tested\b", after), (before, after)
+        assert re.search(r"(?i)described|not tested", before), before

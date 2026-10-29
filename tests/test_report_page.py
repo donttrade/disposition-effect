@@ -66,9 +66,9 @@ def test_focus_page_one(three_reports):
     # the 40-trade MT5 file has groups under 30, so nothing is tested (R-D3 addendum 3: the None line replaces H0a/H0b).
     # Its opens are 10 each at 09:00, 09:05, 09:10 and 09:15: it is NOT dates-only (stats2f), so no dates line.
     t = three_reports[FILES[0]]["text"]
-    assert "None of the patterns could be tested in this file. Some are described below without a verdict." in t
+    assert "None of the patterns could be tested in this file. Some are shown below without a verdict." in t   # 29 Oct: report.js plain()
     assert "open at exactly 00:00" not in t and "No pattern in this file is distinguishable from noise." not in t
-    assert "Size after a loss is described, not tested, in this version of the report." in t
+    assert "Luck check coming: " in t and "described" not in t and "not tested" not in t.lower()
     assert three_reports[FILES[0]]["text"].lstrip().startswith("donttrade measures your own past trades.")
 
 
