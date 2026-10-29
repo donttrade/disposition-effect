@@ -1189,10 +1189,11 @@ svg.tp { padding: 8px 10px; }
    then each habit as a card row: result pill, dollar total with a bar scaled to the largest, trade count badge.
    The whole row is the link to the habit's section. A real table underneath (thead kept for screen readers). */
 .habits-sum .hs-top { display: flex; flex-wrap: wrap; gap: var(--s2); margin: 0 0 var(--s3); }
-.hs-verdict { flex: 1 1 15rem; max-width: 26rem; margin: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+.hs-verdict { flex: 1 1 15rem; max-width: 26rem; min-width: 0; box-sizing: border-box; margin: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
   padding: var(--s2) var(--s3); border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
 .hs-verdict.is-hit { border: 2px solid var(--rust); }
-.hs-verdict .badge { font-size: var(--fs-1); min-height: 34px; padding: 4px 14px; background: var(--bg); }
+.hs-verdict .badge { font-size: var(--fs-1); min-height: 34px; padding: 4px 14px; background: var(--bg); white-space: normal; max-width: 100%; }
+@media (max-width: 400px) { .hs-verdict { flex-basis: 100%; padding: var(--s2); } .hs-verdict .badge { font-size: var(--fs-0); } }
 .hs-verdict.is-hit .badge { background: var(--rust); color: var(--on-rust); border-color: var(--rust); }
 .hs-gloss { font-size: var(--fs-2); font-weight: 600; }
 .hs-of { font-size: var(--fs-0); color: var(--muted); }
@@ -1262,3 +1263,9 @@ details.legal-sec > summary:hover h2 { color: var(--rust); }
 details.legal-sec[open] > summary { color: var(--text); }
 details.legal-sec[open] { padding-bottom: var(--s2); }
 @media print { details.legal-sec > summary::after, .ls-sum { display: none; } }
+/* print in the light palette whatever the screen theme (sweep 3: the dark report cards printed dark) */
+@media print {
+  :root, :root:not([data-theme="light"]), :root[data-theme="dark"] {
+    --bg: #FFFFFF; --surface: #F4F5F7; --text: #16181C; --muted: #5B606A; --rust: #9A3B1C; --rust-hover: #7C2F16; --on-rust: #FFFFFF;
+    --border: #DADCE0; --field-border: #6B717B; --plan: #4A6A94; --gain: #1F7A52; --loss: #A3264F; --caution: #8C6A1E; color-scheme: light; }
+}
