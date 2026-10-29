@@ -338,10 +338,10 @@ def account_window(trades, window=WINDOW):
     w_idx = sorted(order[:window])               # W in input order (the engine's first-appearance order)
     w = [merged[i] for i in w_idx]
     rows = strip_window(w)
-    if is_dates_only(rows):
-        return {"status": "dates_only"}
-    f, counts = features_from_rows(rows)
     t0 = merged[order[window - 1]]["close_s"]
+    if is_dates_only(rows):
+        return {"status": "dates_only", "t0": t0}
+    f, counts = features_from_rows(rows)
     after = [merged[i] for i in order[window:]]
     w_close = [merged[i] for i in order[:window]]
     return {"status": "ok", "rows": rows, "features": f, "counts": counts, "t0": t0, "window": w_close,
