@@ -28,8 +28,8 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=80625a32">
-<script src="/static/js/theme.js?v=74363ef7"></script>
+<link rel="stylesheet" href="/static/css/site.css?v=4bb4cbe4">
+<script src="/static/js/theme.js?v=fd1ba361"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
 <script src="/static/js/pay.js?v=d20a3680" defer></script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "name": "Privacy", "position": 2}]}]}</script>
@@ -70,26 +70,33 @@
   <h1>Privacy</h1>
   <p class="notice">Plain-language notice, version 2026-10-25. Where a signed engagement agreement differs, the agreement governs. <a href="/fr/confidentialite/" hreflang="fr" lang="fr">Version française</a></p>
 
-  <h2 id="who">Who we are</h2>
+  <details class="legal-sec">
+    <summary><h2 id="who">Who we are</h2><span class="ls-sum">Who is responsible for your information.</span></summary>
   <dl class="byp">
     <dt data-seller-block>Seller</dt><dd>Cindy-Anne Starr, doing business as donttrade (Ontario, Canada)</dd>
     <dt>Business address</dt><dd>2284 Calloway Drive, Oakville ON L6M 4X3</dd>
     <dt>Phone</dt><dd>437-600-3946</dd>
     <dt>Email</dt><dd><a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a>. We reply within 1 business day (Eastern Time, Monday to Friday).</dd></dl>
   <p>The person responsible for personal information is the seller named above, at the same address and email.</p>
+  </details>
 
-  <h2 id="site">This site</h2>
+  <details class="legal-sec">
+    <summary><h2 id="site">This site</h2><span class="ls-sum">Hosted on Cloudflare. No cookies. No analytics.</span></summary>
   <ul>
     <li>The site is hosted on Cloudflare Pages; before 24 Oct 2026 it was hosted on GitHub Pages. Cloudflare receives visitors’ IP addresses to deliver the pages and protect the site; see <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare’s privacy policy</a>.</li>
     <li>This site sets no cookies.</li>
     <li>This site runs no analytics.</li>
     <li>Your light/dark choice is stored only in your own browser. If you buy the habit report, your access key is stored there too; keep your restore link, because clearing the site’s data removes the key.</li>
   </ul>
+  </details>
 
-  <h2 id="tools">The free tools</h2>
+  <details class="legal-sec">
+    <summary><h2 id="tools">The free tools</h2><span class="ls-sum">The free tools read your file in your browser. It is not uploaded.</span></summary>
   <p>The free tools (trade stats, the challenge simulator and the calculators) read your file and your numbers inside your browser tab. Those pages block outgoing requests, so your file is not uploaded and we never see it.</p>
+  </details>
 
-  <h2 id="report">The paid habit report</h2>
+  <details class="legal-sec">
+    <summary><h2 id="report">The paid habit report</h2><span class="ls-sum">Only stripped numbers are sent: no name, account number or ticker.</span></summary>
   <p>Your browser sends our server only a stripped list of numbers: open and close times, buy or sell, relative size, the realised result, a random symbol number and a scrambled fingerprint of each row. It contains no name, account number or ticker. The server runs on Cloudflare and may be outside Canada. It uses the numbers to build your report, sends the report back, and does not keep the numbers: of those numbers it keeps only a scrambled fingerprint of each trade row from your first report, as described below. Request logging is off.</p>
   <p>What the server keeps:</p>
   <ul>
@@ -100,8 +107,10 @@
   </ul>
   <p id="fingerprints">To check that a re-test uses the same trading history as your first report, we keep a scrambled fingerprint of each trade row (a keyed hash: it cannot be turned back into your trades without our secret key, but it is still linked to your purchase). We delete these fingerprints as soon as your included re-test has run, or 75 days after your first report, whichever comes first. If you have an active Habit Tracker, we keep them while it is active and delete them 15 days after it ends.</p>
   <p>The report analyses your trading habits, which may count as profiling. It runs only when you start an analysis with your own file. The results are shown to you only: they are not used for advertising, not compared with other people, and not used to make any decision about you.</p>
+  </details>
 
-  <h2 id="forms">Forms, email and payments</h2>
+  <details class="legal-sec">
+    <summary><h2 id="forms">Forms, email and payments</h2><span class="ls-sum">Forms, email, the newsletter and card payments use outside services.</span></summary>
   <ul>
     <li><strong>Forms</strong> are sent through Web3Forms, which emails each submission to us; it is hosted on AWS and keeps a 30-day history. The firm and partner forms ask for a work email and firm (required), and your role and what you want measured (optional).  No phone numbers are collected.</li>
     <li><strong>Email</strong> is handled by Gmail (Google). We keep form emails there.</li>
@@ -110,8 +119,10 @@
     <li id="buyer-details"><strong>If you buy the habit report:</strong> Stripe shows us the name and email address you enter at checkout. We use them only to send you the copy of your agreement, to answer your emails (a refund, a new access link) and to deal with a payment dispute. If you dispute the payment with your card issuer, we may give Stripe the dates of your purchase and of your analyses, and the number of analyses used, as evidence. Our emails with you stay in our Gmail inbox, and a private list of sales (the checkout code, the date, your name and email, and the dates we sent the copy of your agreement or a refund) is kept on our own computer, not on our server. Both are kept for the same period as purchase records (below).</li>
     <li>Web3Forms, Google, GitHub, Stripe, Substack and Cloudflare are mostly in the United States, so what you send may be stored or processed outside Canada, and the authorities there may access it under their laws.</li>
   </ul>
+  </details>
 
-  <h2 id="use">What we do with what you send</h2>
+  <details class="legal-sec">
+    <summary><h2 id="use">What we do with what you send</h2><span class="ls-sum">Used to reply, scope and invoice. Nothing is sold.</span></summary>
   <ul>
     <li>We use it to reply, scope the work and invoice.</li>
     <li>Enquiries that don’t lead to an engagement are deleted within 12 months.</li>
@@ -119,12 +130,17 @@
     <li>Addresses given before launch for the one launch email are used for that email only, then deleted unless the person buys.</li>
     <li>Nothing is sold. We use these providers only to run the site, email, the newsletter, forms and card payments.</li>
   </ul>
+  </details>
 
-  <h2 id="client-data">Client data</h2>
+  <details class="legal-sec">
+    <summary><h2 id="client-data">Client data</h2><span class="ls-sum">For firms we receive only aggregate counts.</span></summary>
   <p>For firm engagements we never receive account records, only the aggregate counts the script prints.</p>
+  </details>
 
-  <h2 id="rights">Your rights</h2>
+  <details class="legal-sec">
+    <summary><h2 id="rights">Your rights</h2><span class="ls-sum">Ask to see, correct or delete your information.</span></summary>
   <p>You can ask by email to see, correct or delete your information, or for a copy in a common format. We reply within 30 days. You can also complain to the <a href="https://www.priv.gc.ca/en/">Office of the Privacy Commissioner of Canada</a>, in Quebec to the Commission d’accès à l’information, in the EU to your country’s data protection authority, and in the UK to the Information Commissioner’s Office. If a privacy breach creates a real risk of significant harm to you, we tell you.</p>
+  </details>
   <p class="small muted">Version 2026-10-25.</p>
 </div></div>
 

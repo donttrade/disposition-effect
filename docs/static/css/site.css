@@ -1246,3 +1246,19 @@ svg.tp { padding: 8px 10px; }
 .rr-v { font: 14px var(--font-mono); fill: var(--text); }
 .rr-big { font: 600 44px var(--font-sans); fill: var(--text); }
 @media (max-width: 899.98px) { .tool-hero .tool-shot { display: none; } }   /* phones: the tool itself comes first */
+
+/* /terms/ and /privacy/ (29 Oct, owner: presentation only): each section folds under its heading with a one-line
+   summary; the text inside is unchanged. A link to any id inside opens its fold (theme.js); print opens them all. */
+details.legal-sec { border-bottom: 1px solid var(--border); }
+details.legal-sec > summary { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--s2); align-items: center;
+  padding: var(--s2) 0; list-style: none; font-weight: 400; color: var(--text); }
+details.legal-sec > summary::-webkit-details-marker { display: none; }
+details.legal-sec > summary::after { content: "+"; grid-column: 2; grid-row: 1 / span 2; font: 400 var(--fs-3) var(--font-mono); color: var(--rust); }
+details.legal-sec[open] > summary::after { content: "−"; }
+details.legal-sec > summary h2 { margin: 0; font-size: var(--fs-3); }
+details.legal-sec > summary h2::before { display: none; }
+details.legal-sec > summary:hover h2 { color: var(--rust); }
+.ls-sum { grid-column: 1; color: var(--muted); font-size: var(--fs-1); margin-top: 4px; }
+details.legal-sec[open] > summary { color: var(--text); }
+details.legal-sec[open] { padding-bottom: var(--s2); }
+@media print { details.legal-sec > summary::after, .ls-sum { display: none; } }
