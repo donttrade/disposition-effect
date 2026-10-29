@@ -4,20 +4,22 @@
 // cookies or storage, and raw rows are never kept: only whitelisted fields
 // survive into executions and trades.
 
-import { decodeBytes, isHtml, parseCsv, sniffDelimiter, resolveNumberStyle, checkQuoting } from './csv.js?v=ad87ab8b';
-import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS, checkCurrencyColumn } from './detect.js?v=e8bb7c80';
-import { fail, LIMITS } from './errors.js?v=a49d9d6e';
-import { htmlRows, parseMt, isEmptyRow } from './mt.js?v=393f72f5';
-import { parseGeneric, parseGenericRoundtrip } from './generic.js?v=88696a8d';
-import { parseIbkr } from './ibkr.js?v=e6e4e65f';
-import { parseTradovate } from './tradovate.js?v=2c8847b9';
-import { finish } from './trades.js?v=9f8ff039';
+import { decodeBytes, isHtml, parseCsv, sniffDelimiter, resolveNumberStyle, checkQuoting } from './csv.js?v=09ecf6e4';
+import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS, checkCurrencyColumn } from './detect.js?v=5ecad5bf';
+import { fail, LIMITS } from './errors.js?v=31d80675';
+import { htmlRows, parseMt, isEmptyRow } from './mt.js?v=39256871';
+import { parseGeneric, parseGenericRoundtrip } from './generic.js?v=9c60e210';
+import { parseIbkr } from './ibkr.js?v=f6948b1c';
+import { parseTradovate } from './tradovate.js?v=1928f2b1';
+import { parseTradingView } from './tradingview.js?v=3d4610c2';
+import { finish } from './trades.js?v=93bb21f8';
 
-export { EngineError } from './errors.js?v=a49d9d6e';
+export { EngineError } from './errors.js?v=31d80675';
 
 export const TZ_LABELS = Object.freeze({
   mt5: 'broker server time', mt4: 'broker server time', ibkr_flex: 'as exported',
-  tradovate_orders: 'local time, as exported', generic: 'as in the file', generic_roundtrip: 'as in the file',
+  tradovate_orders: 'local time, as exported', tradingview: 'as exported, with no time zone stated',
+  generic: 'as in the file', generic_roundtrip: 'as in the file',
 });
 
 // Rows whose whitelisted cells all equal an earlier row's (e.g. two overlapping exports
@@ -81,6 +83,7 @@ export function parseFile(bytes) {
   }
   if (name === 'ibkr_flex') return finish(name, verified, withDuplicates(parseIbkr(rows, hi, m), dup, curIgnored), 'net', TZ_LABELS[name]);
   if (name === 'tradovate_orders') return finish(name, verified, withDuplicates(parseTradovate(rows, hi, m), dup, curIgnored), null, TZ_LABELS[name]);
+  if (name === 'tradingview') return finish(name, verified, withDuplicates(parseTradingView(rows, hi, m), dup, curIgnored), null, TZ_LABELS[name]);
   if (name === 'generic_roundtrip') return finish(name, verified, withDuplicates(parseGenericRoundtrip(rows, hi, m), dup, curIgnored), null, TZ_LABELS[name]);
   return finish('generic', verified, withDuplicates(parseGeneric(rows, hi, m), dup, curIgnored), null, TZ_LABELS.generic);
 }

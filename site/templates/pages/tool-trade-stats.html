@@ -9,7 +9,7 @@
   <div class="tool-hero">
     <div>
       <h1>Trade stats from your own trade file</h1>
-      <p class="lede">Drop your MT5, MT4, IBKR or Tradovate export. Get your win rate, profit factor, drawdown and streaks in seconds.</p>
+      <p class="lede">Drop your MT5, MT4, IBKR, Tradovate or TradingView export. Get your win rate, profit factor, drawdown and streaks in seconds.</p>
       <p class="small muted">No account. Your file is read in this tab and not uploaded.{% if flags.free_badges %} Three of the numbers get a real-or-noise check. With fewer than 30 trades it says there are not enough trades to tell, because a figure from 12 trades can swing a long way on one result.{% endif %}</p>
     </div>
     {% include "partials/ts_mock.html" %}
@@ -22,7 +22,7 @@
     <div id="ts-controls" hidden>
       <div class="dropzone" id="ts-drop">
         <p><strong>Drop a trade file here</strong>, or choose one from your computer.</p>
-        <p class="small muted">MT5 or MT4 report (.htm, .html), IBKR Flex Query (.csv), Tradovate Orders (.csv), or the CSV template. Up to 50 MB and 200,000 rows.</p>
+        <p class="small muted">MT5 or MT4 report (.htm, .html), IBKR Flex Query (.csv), Tradovate Orders (.csv), TradingView Order History (.csv), or the CSV template. Up to 50 MB and 200,000 rows.</p>
         <div class="file-pick">
           <label for="ts-file">Your trade file</label>
           <input id="ts-file" type="file" accept=".csv,.htm,.html,.txt">
@@ -65,6 +65,7 @@
         <tr><th scope="row">MetaTrader 4</th><td>The account history statement, saved as a detailed report (HTML).</td><td>Beta</td></tr>
         <tr><th scope="row">Interactive Brokers</th><td>A Flex Query with the Trades section at execution level, as CSV.</td><td>Beta</td></tr>
         <tr><th scope="row">Tradovate</th><td>The Orders export, as CSV. Only filled orders are counted.</td><td>Beta</td></tr>
+        <tr><th scope="row">TradingView</th><td>Trading Panel → History → ⋯ → Export data. Only filled orders are counted.</td><td>Ready</td></tr>
         <tr><th scope="row">Any other platform</th><td>The CSV template below.</td><td>Ready</td></tr>
       </tbody>
     </table>
@@ -86,7 +87,7 @@
   <section class="section" aria-labelledby="faq-h">
     <h2 id="faq-h">Questions</h2>
     <details><summary>Is my trade file uploaded?</summary><p>No. The file is read and analysed by code running in this browser tab, and the page’s security policy blocks it from making network requests. Open your browser’s developer tools, choose the Network tab, and watch it stay empty during the analysis.</p></details>
-    <details><summary>Which files does it read?</summary><p>MT5 and MT4 history reports saved as HTML, IBKR Flex Query trade files and Tradovate order exports (all in beta), and a CSV with one row per fill or per round trip. If your platform is not listed, copy your trades into the CSV template above.</p></details>
+    <details><summary>Which files does it read?</summary><p>MT5 and MT4 history reports saved as HTML, IBKR Flex Query trade files and Tradovate order exports (all in beta), TradingView order history, and a CSV with one row per fill or per round trip. If your platform is not listed, copy your trades into the CSV template above.</p></details>
     {%- if flags.free_badges %}
     <details><summary>What does the real-or-noise result mean?</summary><p>It says whether a pattern in your file is larger than chance would give with the same trades. The page makes 10,000 random copies of your own trades, shuffled for the hold-time and streak checks and resampled for the mean result, and counts how often a copy is as extreme as the real file. Under 30 trades in a group the check is not run and the result says there are not enough trades to tell. The mean-result check also says so when a few very large trades make up most of a short file’s gains or losses, because one more such trade could move the average a lot.</p></details>
     {%- endif %}
@@ -95,7 +96,7 @@
     <details><summary>Is this investment advice?</summary><p>No. It measures your own past trades and does not recommend any security, trade, size or exit. Past results do not predict future results.</p></details>
   </section>
 
-  <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR and Tradovate are trademarks of their owners. donttrade is not affiliated with any of them.</p>
+  <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR, Tradovate and TradingView are trademarks of their owners. donttrade is not affiliated with any of them.</p>
 </div>
 <script type="text/csv" id="ts-sample">
 {{ sample_csv|safe }}</script>

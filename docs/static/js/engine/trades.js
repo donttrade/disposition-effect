@@ -7,8 +7,8 @@
 // crosses zero closes the trade at that time and opens the opposite trade with
 // the remainder. Positions still open at the end of the file are left out.
 
-import { fail, warning } from './errors.js?v=a49d9d6e';
-import { spansDstNight } from './csv.js?v=ad87ab8b';
+import { fail, warning } from './errors.js?v=31d80675';
+import { spansDstNight } from './csv.js?v=09ecf6e4';
 
 const UNIT = 1e8; // positions tracked in 1e-8 lots, so 0.1 + 0.2 - 0.3 is exactly flat
 

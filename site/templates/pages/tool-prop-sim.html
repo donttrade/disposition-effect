@@ -40,7 +40,7 @@
         <p id="ps-file-status" class="small muted" role="status" hidden></p>
         <p id="ps-progress" class="progress-line small muted" hidden><progress aria-label="Reading your file"></progress> <span data-elapsed aria-hidden="true"></span></p>
         <div id="ps-file-error" class="notice notice-error" role="alert" tabindex="-1" hidden></div>
-        <p class="small muted">Same formats as <a href="/tools/trade-stats/">trade stats</a>: MT5/MT4 report, IBKR Flex Query, Tradovate Orders (all beta) or the CSV template. The sample is synthetic, not a real trader. It also fills in example rules where the boxes are empty, not any firm’s.</p>
+        <p class="small muted">Same formats as <a href="/tools/trade-stats/">trade stats</a>: MT5/MT4 report, IBKR Flex Query, Tradovate Orders (all beta), TradingView Order History or the CSV template. The sample is synthetic, not a real trader. It also fills in example rules where the boxes are empty, not any firm’s.</p>
       </div>
       <div id="ps-manual-fields" class="field-grid" hidden>
         {{ field("ps-wr", "Win rate (%)", "Between 0 and 100. Break-even trades are not modelled.") }}
@@ -111,7 +111,7 @@
       <li><a href="/tools/pass-rate-calculator/">Pass-rate calculator</a>, for firm operators: a cohort’s pass and payout rates.</li>
     </ul>
   </section>
-  <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR and Tradovate are trademarks of their owners. donttrade is not affiliated with any of them.</p>
+  <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR, Tradovate and TradingView are trademarks of their owners. donttrade is not affiliated with any of them.</p>
 </div>
 <script type="text/csv" id="ps-sample">
 {{ sample_csv|safe }}</script>

@@ -11,8 +11,8 @@
 
 import { heatmap, level, WEEKDAYS, MIN_CELL, blockLabel } from './heatmap-core.js?v=e62634a0';
 import { money, pct, intText, el, signClass, MINUS } from './format.js?v=acb0db51';
-import { revealResult } from './tool-state.js?v=fd4af716';
-import { wireFileTool, readSection, tableWrap, rowsTable, plural, reportLead, SAMPLE_LABEL } from './file-tool.js?v=801f66e4';
+import { revealResult } from './tool-state.js?v=7534a30f';
+import { wireFileTool, readSection, tableWrap, rowsTable, plural, reportLead, SAMPLE_LABEL } from './file-tool.js?v=cea9c740';
 
 const $ = (id) => document.getElementById(id);
 let state = null; // {result, unit, fileLabel}; never persisted

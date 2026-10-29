@@ -5,14 +5,15 @@
 // worker parse path. Nothing is stored, logged or sent: these pages' CSP is connect-src 'none'.
 // No noise checks run here (noise: false), whatever the build's free_badges flag.
 
-import { createFileSlot, renderReadError } from './tool-state.js?v=fd4af716';
+import { createFileSlot, renderReadError } from './tool-state.js?v=7534a30f';
 import { el, unitNote, day, intText } from './format.js?v=acb0db51';
 
 export const SAMPLE_LABEL = 'the synthetic sample file';
 
 export const FORMAT_NAMES = {
   mt5: 'MetaTrader 5 report', mt4: 'MetaTrader 4 statement', ibkr_flex: 'Interactive Brokers Flex Query',
-  tradovate_orders: 'Tradovate Orders export', generic: 'donttrade CSV template (one row per fill)',
+  tradovate_orders: 'Tradovate Orders export', tradingview: 'TradingView Order History export',
+  generic: 'donttrade CSV template (one row per fill)',
   generic_roundtrip: 'CSV with one row per round trip',
 };
 
