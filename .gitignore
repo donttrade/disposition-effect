@@ -16,3 +16,9 @@ worker/.dev.vars
 .pytest_cache/
 tests/fixtures/generated/
 checks/tests/anon_terms.txt
+
+# prediction study: the internal Hyperliquid dry run never enters a repo (ARCHITECT-PREDICTION-STUDY 5.2)
+hl-dryrun/
+derived*.csv
+prereg-internal.md
+INTERNAL-RESULT.txt
