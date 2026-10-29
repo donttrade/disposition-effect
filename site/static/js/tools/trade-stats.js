@@ -295,7 +295,7 @@ function renderNoise(noise, total) {
 }
 
 // R5: the teaser box says data-on-sale="true" when the build sells the report (partials/trader_offer.html).
-const reportLead = () => ($('ts-teaser').dataset.onSale === 'true' ? 'The habit report' : "We're building a habit report that");
+const reportLead = () => ($('ts-teaser').dataset.onSale === 'true' ? 'The donttrade test' : "We're building a test that");
 
 // The teaser states only figures computed above: the hold gap (and, with badges, its check result).
 function teaser(noise) {

@@ -71,7 +71,7 @@ disclaimer_long = "donttrade measures your own past trades. It is not investment
 # 25 Oct sweep (owner): four items. Research, About and For traders are in the footer.
 # 29 Oct (owner): four plain links, no drop-down; /tools/ shows every tool with a preview.
 [[nav]]
-label = "Sample report"
+label = "Sample result"
 href = "/sample-report/"
 
 [[nav]]
@@ -138,7 +138,7 @@ rel_me = true
 # 25 Oct sweep (owner: "way too much writing"): four short columns
 [[footer]]
 heading = "Traders"
-links = [["Sample report", "/sample-report/"], ["Pricing", "/pricing/"], ["Free tools", "/tools/"], ["For traders", "/for-traders/"]]
+links = [["Sample result", "/sample-report/"], ["Pricing", "/pricing/"], ["Free tools", "/tools/"], ["For traders", "/for-traders/"]]
 [[footer]]
 heading = "Firms"
 links = [["For firms", "/for-firms/"], ["Journals & platforms", "/for-platforms/"], ["Sample memo", "/sample-memo/"]]

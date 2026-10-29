@@ -19,7 +19,7 @@ import build as B  # noqa: E402
 import lint as L  # noqa: E402
 from test_c14_legal_copy import _build  # noqa: E402
 
-ROW = ("The founding price of the habit report, $39, is for its first 100 buyers; people on the waitlist are emailed "
+ROW = ("The founding price of the donttrade test, $39, is for its first 100 buyers; people on the waitlist are emailed "
        "first when it goes on sale. No price changed.")
 OLD_ROW = "Founding price for the first 100 on the trader waitlist added."
 

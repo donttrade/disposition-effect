@@ -39,14 +39,14 @@ OUTAGE = ("If our server is down, your purchase is not lost and no analysis is c
 # The first sentence is the one /welcome/ and /restore/ show (tests/test_delta_fixes.py MANUAL), kept word for word.
 RESTORE = ("If your access link stops working, email us from the address you paid with and we’ll send a new one. "
            "We send it by hand, and only to the email address on the payment.")
-BUYER = ("If you buy the habit report: Stripe shows us the name and email address you enter at checkout. We use them "
+BUYER = ("If you buy the donttrade test: Stripe shows us the name and email address you enter at checkout. We use them "
          "only to send you the copy of your agreement, to answer your emails (a refund, a new access link) and to deal "
          "with a payment dispute. If you dispute the payment with your card issuer, we may give Stripe the dates of "
          "your purchase and of your analyses, and the number of analyses used, as evidence. Our emails with you stay "
          "in our Gmail inbox, and a private list of sales (the checkout code, the date, your name and email, and the "
          "dates we sent the copy of your agreement or a refund) is kept on our own computer, not on our server. Both are kept for the "
          "same period as purchase records (below).")
-FOOTER_PAID = ("It stores your light/dark choice in your own browser and, if you buy the habit report, your access key "
+FOOTER_PAID = ("It stores your light/dark choice in your own browser and, if you buy the donttrade test, your access key "
                "there too. For that report your browser sends our server only stripped trade numbers. The server does "
                "not keep them: of those numbers it keeps only a scrambled fingerprint of each trade row from your first "
                "report, to match a re-test to the same history. Your file itself is not uploaded.")
@@ -120,7 +120,7 @@ def test_paid_privacy_buyer_line_pen_name_and_cloudflare(paid):
     # "same period as purchase records (below)": the period it points to is stated below it, once
     assert p.index('id="buyer-details"') < p.index("kept for as long as Canadian tax law requires (six years)")
     # the server paragraph names the fingerprint in the same element as "does not keep"
-    assert "of those numbers it keeps only a scrambled fingerprint of each trade row from your first report" in p
+    assert "of those numbers it keeps only a scrambled fingerprint of each trade row from your first result" in p
 
 
 def test_paid_french_lines(paid):

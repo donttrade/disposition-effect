@@ -493,16 +493,16 @@ PAGES += [
 FORM_JS = "/static/js/form-ref.js"
 # The Product JSON-LD description (paid_report only): the same words as the pricing table row.
 # R-D3 I-3b: the same text as the /pricing/ row (the JSON-LD Product description; tests/test_r_d2_pages.py checks both)
-PRODUCT_TEXT = "Up to five habits measured and described in your own trades, with the dollar totals of the matching trades; up to two of them tested against chance in this version; plus one re-test 30 to 60 days after your first report."
+PRODUCT_TEXT = "Up to five habits measured and described in your own trades, with the dollar totals of the matching trades; up to two of them tested against chance in this version; plus one re-test 30 to 60 days after your first result."
 PAGES += [
     {"template": "pages/for-traders.html", "path": "/for-traders/", "requires_flag": None, "updated": "2026-10-21",
      "crumb": "Individual traders", "og_image": "/assets/og/traders.png", "scripts": [FORM_JS, MOTION_JS],
-     "title": "Trader Habit Report: Waitlist and Founding Price",
-     "description": "A habit report from your own MT5, IBKR, Tradovate or TradingView file, with a real-or-noise "
-                    "check for each tested habit. Coming soon; join the waitlist.",
-     "if_paid": {"title": "Trader Habit Report: Founding Price",
-                 "description": "A habit report from your own MT5, IBKR, Tradovate or TradingView file, with a "
-                                "real-or-noise check for each tested habit. Founding price, one free re-test."}},
+     "title": "The donttrade Test for Traders: Waitlist",
+     "description": "The donttrade test, a habit test on your own MT5, IBKR, Tradovate or TradingView file, with a "
+                    "real-or-noise check for each tested habit. Coming soon; join the waitlist.",
+     "if_paid": {"title": "The donttrade Test for Traders",
+                 "description": "The donttrade test, a habit test on your own MT5, IBKR, Tradovate or TradingView file, with a "
+                                "real-or-noise check for each tested habit. One price, re-test included."}},
     {"template": "pages/for-firms.html", "path": "/for-firms/", "requires_flag": None, "updated": "2026-10-21",
      "crumb": "Prop firms & brokers", "og_image": "/assets/og/firms.png", "scripts": [FORM_JS, MOTION_JS],
      "title": "Disposition-Effect Measurement for Prop Firms and Brokers",
@@ -517,9 +517,9 @@ PAGES += [
      "title": "Start a Pilot, Apply to Partner or Join the Waitlist",
      "description": "Request a Pilot measurement, apply to partner as a journal or platform, or join the trader "
                     "waitlist. A short form or an email; no calls.",
-     "if_paid": {"title": "Start a Pilot, Apply to Partner or Get the Habit Report",
+     "if_paid": {"title": "Start a Pilot, Apply to Partner or Take the Test",
                  "description": "Request a Pilot measurement, apply to partner as a journal or platform, or get "
-                                "the trader habit report. A short form or an email; no calls."}},
+                                "the donttrade test. A short form or an email; no calls."}},
     {"template": "pages/for-platforms.html", "path": "/for-platforms/", "requires_flag": None, "updated": "2026-10-21",
      "crumb": "Journals & platforms", "og_image": "/assets/og/platforms.png", "scripts": [FORM_JS, MOTION_JS],
      "title": "Behavioural Measurement for Trading Journals and Platforms",
@@ -532,7 +532,7 @@ PAGES += [
      "crumb": "Thank you", "title": "You are on the waitlist — donttrade",
      "description": "You joined the donttrade trader waitlist. Nothing is charged; one email when the report launches.",
      "if_paid": {"title": "Thank you — donttrade",
-                 "description": "Thank you. The donttrade habit report for traders is on sale now."}},
+                 "description": "Thank you. The donttrade test for traders is on sale now."}},
     {"template": "pages/thanks.html", "path": "/thanks/", "requires_flag": None, "noindex": True,
      "crumb": "Thank you", "title": "Thank you — donttrade",
      "description": "Your message reached donttrade. Firms get a reply within 1 business day; traders get one email at launch.",
@@ -551,30 +551,30 @@ PAGES += [
      "crumb": "Terms", "alternates_if_paid": [("en", "/terms/"), ("fr", "/fr/conditions/"), ("x-default", "/terms/")],
      "title": "Terms, Refunds and the Pilot — donttrade",
      "description": "Payment, delivery, refund and Pilot terms for donttrade engagements, and the current status of "
-                    "the trader report, in plain language."},
+                    "the donttrade test, in plain language."},
 ]
 
-# French versions (FRENCH-LEGAL-AND-CHECKOUT-DRAFTS §8.1), habit report only, behind the same
+# French versions (FRENCH-LEGAL-AND-CHECKOUT-DRAFTS §8.1), donttrade test only, behind the same
 # commerce flag as the English consumer clauses. Unreviewed drafts: lawyer + legal translator first.
 PAGES += [
     {"template": "pages/fr/avant-de-payer.html", "path": "/fr/avant-de-payer/", "requires_flag": "paid_report",
      "lang": "fr", "crumb": "Avant de payer", "updated": "2026-10-21", "scripts": ["/static/js/print.js"],
      "alternates": [("fr", "/fr/avant-de-payer/"), ("en", "/pricing/"), ("x-default", "/pricing/")],
-     "title": "Avant de payer : Rapport d’habitudes — donttrade",
-     "description": "Ce que vous acceptez avant de payer le Rapport d’habitudes : vendeur, prix en dollars américains, "
+     "title": "Avant de payer : test donttrade — donttrade",
+     "description": "Ce que vous acceptez avant de payer le test donttrade : vendeur, prix en dollars américains, "
                     "exigences techniques, remboursements et restrictions."},
     {"template": "pages/fr/conditions.html", "path": "/fr/conditions/", "requires_flag": "paid_report",
      "lang": "fr", "crumb": "Conditions", "updated": "2026-10-21",
      "alternates": [("fr", "/fr/conditions/"), ("en", "/terms/"), ("x-default", "/terms/")],
      "title": "Conditions de service et de vente — donttrade",
-     "description": "Conditions du Rapport d’habitudes donttrade : prix, paiement, livraison, nouveau test, "
+     "description": "Conditions du test donttrade : prix, paiement, livraison, nouveau test, "
                     "remboursements et droit de rétractation."},
     {"template": "pages/fr/confidentialite.html", "path": "/fr/confidentialite/", "requires_flag": "paid_report",
      "lang": "fr", "crumb": "Confidentialité", "updated": "2026-10-21",
      "alternates": [("fr", "/fr/confidentialite/"), ("en", "/privacy/"), ("x-default", "/privacy/")],
      "title": "Politique de confidentialité — donttrade",
      "description": "Ce que donttrade recueille et pourquoi : aucun témoin, fichier lu dans votre navigateur, "
-                    "chiffres épurés pour le rapport payant, et vos droits."},
+                    "chiffres épurés pour le test payant, et vos droits."},
 ]
 PAID_ONLY_PATHS_FR = ["/fr/avant-de-payer/", "/fr/conditions/", "/fr/confidentialite/"]
 
@@ -712,8 +712,21 @@ def page_method_version():
     return m.group(1)
 
 
+def report_methods_renamed():
+    """The dated rename line under the method table (29 Oct: the habit report became the donttrade test), or None."""
+    path = os.environ.get("DT_REPORT_METHODS_JSON") or REPORT_METHODS_JSON
+    with open(path, encoding="utf-8") as f:
+        r = json.load(f).get("renamed")
+    if r is None:
+        return None
+    if sorted(r) != ["date", "text"] or not re.fullmatch(r"2[0-9]{3}-[0-9]{2}-[0-9]{2}", r["date"]) or not r["text"].strip():
+        die(f"report methods: malformed renamed {r!r} ({path})")
+    y, mo, d = (int(x) for x in r["date"].split("-"))
+    return {**r, "date_text": f"{d} {MONTHS[mo - 1]} {y}"}
+
+
 def report_methods():
-    """The habit report's dated method versions for /corrections/#report-method (the Lead's decision, 23 Oct:
+    """The donttrade test's dated method versions for /corrections/#report-method (the Lead's decision, 23 Oct:
     the re-test sentence says every change is dated there). DT_REPORT_METHODS_JSON reads another file (tests).
     Fails when the page's METHOD_VERSION has no entry, so no build can promise a dated log it does not show."""
     path = os.environ.get("DT_REPORT_METHODS_JSON") or REPORT_METHODS_JSON
@@ -721,8 +734,11 @@ def report_methods():
         entries = json.load(f)["entries"]
     out = []
     for e in entries:
-        if sorted(e) != ["date", "method", "text"] or not re.fullmatch(r"2[0-9]{3}-[0-9]{2}-[0-9]{2}", e["date"]) \
-                or not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}\.[a-z0-9]+", e["method"]) or not e["text"].strip():
+        # 29 Oct (owner): a method version may carry a short public name, "DT-1"; the page always pairs it
+        # with a descriptor of the test (lint: claim:dt_name_alone).
+        if sorted(set(e) - {"name"}) != ["date", "method", "text"] or not re.fullmatch(r"2[0-9]{3}-[0-9]{2}-[0-9]{2}", e["date"]) \
+                or not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}\.[a-z0-9]+", e["method"]) or not e["text"].strip() \
+                or ("name" in e and not re.fullmatch(r"DT-[1-9][0-9]*", e["name"])):
             die(f"report methods: malformed entry {e!r} ({path})")
         y, mo, d = (int(x) for x in e["date"].split("-"))
         out.append({**e, "date_text": f"{d} {MONTHS[mo - 1]} {y}"})
@@ -730,6 +746,9 @@ def report_methods():
         die(f"report methods: entries must be newest first ({path})")
     if len({e["method"] for e in out}) != len(out):
         die(f"report methods: a method is listed twice ({path})")
+    names = [e["name"] for e in out if "name" in e]
+    if len(set(names)) != len(names):
+        die(f"report methods: a method name is used twice ({path})")
     mv = page_method_version()
     if mv not in {e["method"] for e in out}:
         die(f"report methods: the report page's METHOD_VERSION {mv} has no dated entry in {path} "
@@ -968,13 +987,13 @@ def unversioned_problem(html):
 PAID_PAGES = [
     {"template": "pages/welcome.html", "path": "/welcome/", "requires_flag": "paid_report", "connect_worker": True,
      "noindex": True, "crumb": "Thank you", "modules": ["/static/js/paid/welcome.js"], "title": "Thank you — donttrade",
-     "description": "Your donttrade habit report is ready."},
+     "description": "Your donttrade test result is ready."},
     {"template": "pages/restore.html", "path": "/restore/", "requires_flag": "paid_report", "connect_worker": True,
      "noindex": True, "crumb": "Restore access", "modules": ["/static/js/paid/restore.js"], "title": "Restore access — donttrade",
-     "description": "Reopen your donttrade habit report on this browser."},
+     "description": "Reopen your donttrade test result on this browser."},
     {"template": "pages/report.html", "path": "/report/", "requires_flag": "paid_report", "connect_worker": True,
-     "noindex": True, "crumb": "Your habit report", "modules": ["/static/js/paid/report.js"], "title": "Your habit report — donttrade",
-     "description": "Your donttrade habit report, built from your own trade file."},
+     "noindex": True, "crumb": "Your test result", "modules": ["/static/js/paid/report.js"], "title": "Your test result — donttrade",
+     "description": "Your donttrade test result, from your own trade file."},
 ]
 PAGES += PAID_PAGES
 # /pricing/ (step 15): one template. Flag off: sections stacked, firms first. Flag on:
@@ -995,7 +1014,7 @@ PAID_DETAILS_PATHS = ["/before-you-pay/"]
 PAGES.append({"template": "pages/before-you-pay.html", "path": "/before-you-pay/", "requires_flag": "paid_report",
               "noindex": True, "no_analytics": True, "no_ask": True, "scripts": ["/static/js/print.js"],
               "crumb": "Before you pay", "title": "Before you pay — donttrade",
-              "description": "What you agree to before paying for the donttrade habit report: seller, price, "
+              "description": "What you agree to before paying for the donttrade test: seller, price, "
                              "files, restrictions and refunds."})
 
 # Lifted pages (plan steps 28–29): the 20 pages that passed through from docs/ in the old design.
@@ -1081,15 +1100,15 @@ PAGES += LIFTED
 LIFTED_PATHS = [p["path"] for p in LIFTED]
 
 # Delivery plan C-12 final (Tester T-3 T3-E): with paid_report on, /sample-report/ is no longer the lifted research
-# figure but a real habit report: dt-private's analyse() on a committed synthetic file
+# figure but a real donttrade test: dt-private's analyse() on a committed synthetic file
 # (site/config/sample-report.report.json, made by tests/fixtures/paid/make_sample_report.py), rendered by the real
-# report.js. The lifted page stays in flag-off builds, where its lead already says it is not the trader report.
+# report.js. The lifted page stays in flag-off builds, where its lead already says it is not the donttrade test.
 PAID_REPLACES_LIFTED = ("/sample-report/",)
 SAMPLE_REPORT_JSON = os.path.join(SITE, "config", "sample-report.report.json")
 SAMPLE_PAGE = {"template": "pages/sample-report.html", "path": "/sample-report/", "requires_flag": None,
-               "modules": ["/static/js/paid/sample.js"], "crumb": "Sample habit report", "og_image": "/assets/og/sample-report.png",
-               "title": "Example habit report — donttrade", "sample_report": True,
-               "description": "An example of the paid habit report: the report's own engine and page, run on example data. "
+               "modules": ["/static/js/paid/sample.js"], "crumb": "Sample test result", "og_image": "/assets/og/sample-report.png",
+               "title": "Sample test result — donttrade", "sample_report": True,
+               "description": "A sample result of the donttrade test: the test's own engine and page, run on example data. "
                               "Not advice.", "updated": "2026-10-23"}
 
 
@@ -1124,10 +1143,10 @@ def footer_privacy(flags):
         # NIT 13: complete, matching /privacy/#report (the fingerprints kept for the re-test match)
         # C-14: the server keeps more than fingerprints (a purchase record, hourly counters; /privacy/#report),
         # so "only" now bounds what is kept OF the trade numbers, not what the server keeps.
-        parts.append("It stores your light/dark choice in your own browser and, if you buy the habit report, your "
-                     "access key there too. For that report your browser sends our server only stripped trade "
+        parts.append("It stores your light/dark choice in your own browser and, if you buy the donttrade test, your "
+                     "access key there too. For that test your browser sends our server only stripped trade "
                      "numbers. The server does not keep them: of those numbers it keeps only a scrambled fingerprint "
-                     "of each trade row from your first report, to match a re-test to the same history. Your file "
+                     "of each trade row from your first result, to match a re-test to the same history. Your file "
                      "itself is not uploaded.")
     else:
         parts.append("It stores only your light/dark choice, in your own browser.")
@@ -1235,7 +1254,7 @@ PASSTHROUGH_CHROME = [
     ("Firms: start a trial</a>", "Firms: start a Pilot</a>", 2),        # desktop nav + mobile menu
     (">Firms: trial</a>", ">Firms: Pilot</a>", 1),                       # mobile header button
     ('<a href="/start/">Start a trial</a>', '<a href="/start/">Start a Pilot</a>', None),  # footer (+ 404 body)
-    # R5: the old nav says the trader report is "coming soon"; with paid_report on it is sold
+    # R5: the old nav says the donttrade test is "coming soon"; with paid_report on it is sold
     ('Individual traders <span class="soon">coming soon</span></a>', trader_nav_label, 2),  # desktop nav + mobile menu
 ]
 
@@ -1541,7 +1560,7 @@ def warn(msg):
 ESCAPES = {
     "DT_ALLOW_PLACEHOLDERS": "private.toml values that look like placeholders",
     "DT_ALLOW_LOCAL_API": "a loopback http [worker] api_base",
-    "DT_ALLOW_NO_STRIPE_LINK": "no Stripe Payment Link for the habit report",
+    "DT_ALLOW_NO_STRIPE_LINK": "no Stripe Payment Link for the donttrade test",
 }
 # Stripe Payment Links: https://buy.stripe.com/<id>; test-mode links carry "test_" (UNVERIFIED
 # beyond the links seen so far; a link that differs fails loudly and this pattern is the place to fix).
@@ -2287,6 +2306,7 @@ def build():
                 "tool_previews": tool_previews(), "evidence": evidence(), "latest": latest(), "footer_privacy": footer_privacy(flags), "show_seller": show_seller(cfg),
                 "strings": read_toml(os.path.join(SITE, "config", "strings.toml"), "strings.toml"),
                 "paid_method": paid_method(),
+                "method_name": next((e.get("name") for e in report_methods() if e["method"] == page_method_version()), None),
                 "report_link_fr": report_link_fr(products["report39"], cfg["stripe"]["mode"]),
                 "preview": preview_name()}
     built, rendered = [], []
@@ -2311,6 +2331,7 @@ def build():
             extra["lifted_html"] = Markup(paid_lifted(page["path"], lifted_fragment(page["lifted"]), flags["paid_report"]))
             if page["path"] == "/corrections/":
                 extra["report_methods"] = report_methods()
+                extra["report_methods_renamed"] = report_methods_renamed()
         line = Markup(business_id_line(cfg, private, "legal", url=page["path"], lang=page["lang"]))
         html = env.get_template(page["template"]).render(page=page, csp=csp_for(page, cfg), business_id_line=line,
                                                          **base_ctx, **extra, **more)

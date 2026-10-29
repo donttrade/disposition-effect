@@ -8,7 +8,7 @@
 {%- set a = f.measure_a | abs %}{% set b = f.measure_b | abs %}{% set top = [a, b] | max %}
 <figure class="hero-shot report-card" aria-labelledby="rc-cap">
   <div class="rc">
-    <p class="rc-top"><span>Summary</span><span class="pill pill-muted">Example report</span></p>
+    <p class="rc-top"><span>Summary</span><span class="pill pill-muted">Example result</span></p>
     <p class="rc-k">Shown first</p>
     <p class="rc-h">{{ f.name }}</p>
     {%- set lab = {"distinguishable": ("pill pill-hit", "Distinguishable from noise", "unlikely to be luck"),
@@ -22,5 +22,5 @@
     <p class="rc-note">{% if f.measure_a < 0 and f.measure_b < 0 %}Average loss per trade. Longer bar, bigger loss.{% else %}Average result per trade, scaled to each other.{% endif %}</p>
     <p class="rc-more">{{ sr.n_tested }} habits tested against chance · {{ sr.habits | length - sr.n_tested }} described</p>
   </div>
-  <figcaption id="rc-cap">Example report: the summary page.</figcaption>
+  <figcaption id="rc-cap">Example result: the summary page.</figcaption>
 </figure>

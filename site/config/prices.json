@@ -28,7 +28,7 @@
      "founding": false, "credit_rule": null, "turnaround_days": 20,
      "payment_terms": "50% on acceptance; 50% within 7 days of delivery", "anchor": "firms", "cta_label": "Ask about an Outcomes pack",
      "stripe_link_live": null, "stripe_link_test": null, "requires_flag": null},
-    {"id": "report39", "audience": "trader", "name": "Habit report", "former_name": null, "price_usd": 39, "interval": "once",
+    {"id": "report39", "audience": "trader", "name": "donttrade test", "former_name": null, "price_usd": 39, "interval": "once",
      "founding": true, "credit_rule": null, "turnaround_days": null, "payment_terms": null,
      "anchor": "traders", "cta_label": "Join the waitlist", "stripe_link_live": "https://buy.stripe.com/eVq14m66H9Jw15a0Rwdwc04", "stripe_link_test": null,
      "stripe_link_live_fr": null, "stripe_link_test_fr": null,

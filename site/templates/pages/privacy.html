@@ -27,7 +27,7 @@
     {%- else %}
     <li>This site runs no analytics.</li>
     {%- endif %}
-    <li>Your light/dark choice is stored only in your own browser.{% if flags.paid_report %} If you buy the habit report, your access key is stored there too; keep your restore link, because clearing the site’s data removes the key.{% endif %}</li>
+    <li>Your light/dark choice is stored only in your own browser.{% if flags.paid_report %} If you buy the donttrade test, your access key is stored there too; keep your restore link, because clearing the site’s data removes the key.{% endif %}</li>
   </ul>
   </details>
 
@@ -38,19 +38,19 @@
   {%- if flags.paid_report %}
 
   <details class="legal-sec">
-    <summary><h2 id="report">The paid habit report</h2><span class="ls-sum">Only stripped numbers are sent: no name, account number or ticker.</span></summary>
-  <p>Your browser sends our server only a stripped list of numbers: open and close times, buy or sell, relative size, the realised result, a random symbol number and a scrambled fingerprint of each row. It contains no name, account number or ticker. The server runs on Cloudflare and may be outside Canada. It uses the numbers to build your report, sends the report back, and does not keep the numbers: of those numbers it keeps only a scrambled fingerprint of each trade row from your first report, as described below. Request logging is off.</p>
+    <summary><h2 id="report">The donttrade test (paid)</h2><span class="ls-sum">Only stripped numbers are sent: no name, account number or ticker.</span></summary>
+  <p>Your browser sends our server only a stripped list of numbers: open and close times, buy or sell, relative size, the realised result, a random symbol number and a scrambled fingerprint of each row. It contains no name, account number or ticker. The server runs on Cloudflare and may be outside Canada. It uses the numbers to build your result, sends the result back, and does not keep the numbers: of those numbers it keeps only a scrambled fingerprint of each trade row from your first result, as described below. Request logging is off.</p>
   <p>What the server keeps:</p>
   <ul>
     <li>a purchase record under a scrambled code: the product, the number of analyses used, the dates and the refund status, without your name or email;</li>
-    <li>scrambled fingerprints of the trades in your first report, to check that a re-test is on the same history;</li>
+    <li>scrambled fingerprints of the trades in your first result, to check that a re-test is on the same history;</li>
     <li>hourly use counters tied to your key and to a scrambled version of your IP address, to limit abuse;</li>
     <li>if you agree (the box starts unticked), a bare count of the firm name you enter, not linked to you.</li>
   </ul>
   {#- Decision 21 Oct ~09:00 (DECISIONS-RESEARCH-2026-10-21 §3), word for word. The server enforces the
       same rule (dt-private PRINTS_KEEP_DAYS, TRACKER_PRINTS_GRACE_DAYS; a parity test there reads this
       sentence). The French page (/fr/confidentialite/) does not have it yet: translation pending. #}
-  <p id="fingerprints">To check that a re-test uses the same trading history as your first report, we keep a scrambled fingerprint of each trade row (a keyed hash: it cannot be turned back into your trades without our secret key, but it is still linked to your purchase). We delete these fingerprints as soon as your included re-test has run, or 75 days after your first report, whichever comes first. If you have an active Habit Tracker, we keep them while it is active and delete them 15 days after it ends.</p>
+  <p id="fingerprints">To check that a re-test uses the same trading history as your first result, we keep a scrambled fingerprint of each trade row (a keyed hash: it cannot be turned back into your trades without our secret key, but it is still linked to your purchase). We delete these fingerprints as soon as your included re-test has run, or 75 days after your first result, whichever comes first. If you have an active Habit Tracker, we keep them while it is active and delete them 15 days after it ends.</p>
   <p>The report analyses your trading habits, which may count as profiling. It runs only when you start an analysis with your own file. The results are shown to you only: they are not used for advertising, not compared with other people, and not used to make any decision about you.</p>
   </details>
   {%- endif %}
@@ -61,13 +61,13 @@
     <li><strong>Forms</strong> are sent through Web3Forms, which emails each submission to us; it is hosted on AWS and keeps a 30-day history. The firm and partner forms ask for a work email and firm (required), and your role and what you want measured (optional). {% if not flags.paid_report %}The trader waitlist asks for an email, the founding price you would use, and an unticked launch-email consent; the platform you use is optional.{% endif %} No phone numbers are collected.</li>
     <li><strong>Email</strong> is handled by Gmail (Google). We keep form emails there.</li>
     <li><strong>The newsletter</strong> runs on Substack; see <a href="https://substack.com/privacy">Substack’s privacy policy</a>.</li>
-    <li><strong>Card payments</strong> (the firm {{ products.pilot.name }}{% if flags.paid_report %}, and the habit report{% endif %}) are handled by Stripe; donttrade never sees full card numbers. For payment data Stripe acts as an independent controller; see <a href="https://stripe.com/privacy">Stripe’s privacy policy</a>.</li>
+    <li><strong>Card payments</strong> (the firm {{ products.pilot.name }}{% if flags.paid_report %}, and the donttrade test{% endif %}) are handled by Stripe; donttrade never sees full card numbers. For payment data Stripe acts as an independent controller; see <a href="https://stripe.com/privacy">Stripe’s privacy policy</a>.</li>
     {%- if flags.paid_report %}
     {#- C-14 (G14). LAWYER (Q10–Q12, with the CPA record-keeping question): the uses listed, the dispute evidence,
         and the period ("the same period as purchase records" = the six years under "What we do with what you
         send"). The ledger is the C-13 sales list (dt-private scripts/agreement-copy.mjs check mode), kept
         outside every repository. #}
-    <li id="buyer-details"><strong>If you buy the habit report:</strong> Stripe shows us the name and email address you enter at checkout. We use them only to send you the copy of your agreement, to answer your emails (a refund, a new access link) and to deal with a payment dispute. If you dispute the payment with your card issuer, we may give Stripe the dates of your purchase and of your analyses, and the number of analyses used, as evidence. Our emails with you stay in our Gmail inbox, and a private list of sales (the checkout code, the date, your name and email, and the dates we sent the copy of your agreement or a refund) is kept on our own computer, not on our server. Both are kept for the same period as purchase records (below).</li>
+    <li id="buyer-details"><strong>If you buy the donttrade test:</strong> Stripe shows us the name and email address you enter at checkout. We use them only to send you the copy of your agreement, to answer your emails (a refund, a new access link) and to deal with a payment dispute. If you dispute the payment with your card issuer, we may give Stripe the dates of your purchase and of your analyses, and the number of analyses used, as evidence. Our emails with you stay in our Gmail inbox, and a private list of sales (the checkout code, the date, your name and email, and the dates we sent the copy of your agreement or a refund) is kept on our own computer, not on our server. Both are kept for the same period as purchase records (below).</li>
     {%- endif %}
     {#- T0: Cloudflare hosts every build now, so it is always listed (as on /fr/confidentialite/) #}
     {%- set abroad = ["Web3Forms", "Google", "GitHub", "Stripe", "Substack", "Cloudflare"] %}

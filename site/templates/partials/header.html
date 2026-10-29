@@ -1,6 +1,6 @@
 {#- The shared header (29 Oct, owner; research §6: real links, one action, nothing hidden behind hover). A slim
     sticky bar: brand · the four [[nav]] links as plain links (no drop-down: /tools/ shows every tool) · in paid
-    builds one compact "Get report — $39" button (a[data-pay]: pay.js opens the pay dialog on this page; without
+    builds one compact "Take the test — $39" button (a[data-pay]: pay.js opens the pay dialog on this page; without
     JavaScript it is a plain link to /pricing/#last-step) · the theme toggle as a 44 px icon button with its name for
     screen readers. Below 900 px the links (with Home first off the home page: Home link (a)) and the button move into one "Menu" <details> (works without
     JavaScript; nav.js adds Escape and click-outside). The [[nav]] labels never hold a price, % or study number
@@ -18,7 +18,7 @@
     and the tool pages beside example results. It is site navigation in the sticky bar, not an offer placed next
     to page content; the sample's and the tools' figures are example data, not study findings. -#}
 {%- set show_cta = flags.paid_report and not page.path.startswith("/research/") %}
-{%- macro cta(cls) %}<a class="btn {{ cls }}" href="/pricing/#last-step" data-pay>Get report — {{ products["report39"].price_usd|usd }}</a>{% endmacro %}
+{%- macro cta(cls) %}<a class="btn {{ cls }}" href="/pricing/#last-step" data-pay>Take the test — {{ products["report39"].price_usd|usd }}</a>{% endmacro %}
 <header class="site-header"><div class="wrap">
   <a class="brand" href="/">{{ site.name }}</a>
   <nav class="site-nav" aria-label="Main"><ul class="nav-row">

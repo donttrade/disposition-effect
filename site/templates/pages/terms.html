@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {#- /terms/ (plan step 17). Old ids kept: prices payment delivery trial cancellation refunds
     traders publication not-advice liability agreement law contact. Consumer clauses for the
-    habit report (seller block, EU/UK withdrawal, Quebec carve-out) render only with
+    donttrade test (seller block, EU/UK withdrawal, Quebec carve-out) render only with
     paid_report on; the Pilot card-before-scope clause only with pilot_checkout on. The
     Habit Tracker renewal clause is drafted in partials/terms_tracker_renewal.html and is
     not rendered anywhere: the Tracker is not built (V2 NOT IN SCOPE). #}
@@ -78,23 +78,23 @@
       <li><strong>Price:</strong> {{ r.price_usd|usd }} USD, one time; {{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers. No sales tax is charged. Your card issuer may add a currency conversion fee; donttrade does not receive it. The price you accept at checkout is the price that applies.</li>
       <li><strong>Payment:</strong> in full at checkout, by card, on Stripe’s payment page.</li>
       <li><strong>Delivery:</strong> online only, on donttrade.ca, right after payment. Your access key is saved in your browser. Keep the restore link and file shown after payment: they are the only {% if site.manual_restore %}automatic {% endif %}way to reopen your purchase in another browser.{% if site.manual_restore %} <span id="manual-restore">If your access link stops working, email us from the address you paid with and we’ll send a new one. We send it by hand, and only to the email address on the payment.</span>{% endif %}</li>
-      <li><strong>Two analyses:</strong> your report and one re-test, which opens 30 days after your first report and closes 60 days after it. The re-test is for the same trading history: at least half of its trades have to match the first file. Your key is valid for 90 days after purchase, or until 75 days after your first report if that is later. An analysis is counted only when a report is produced.</li>
+      <li><strong>Two analyses:</strong> your test and one re-test, which opens 30 days after your first result and closes 60 days after it. The re-test is for the same trading history: at least half of its trades have to match the first file. Your key is valid for 90 days after purchase, or until 75 days after your first result if that is later. An analysis is counted only when a result is produced.</li>
       <li><strong>Limits:</strong> up to 20,000 rows per file, supported formats only. A tested habit with fewer than 30 trades in either group shows “not enough trades to tell”; that is not a fault in the product.</li>
       {#- C-14 (G15): backed by the outage SOP (delivery plan runbook §3.6: /health is checked when a buyer reports
           an outage or smoke fails) and the C-13 outage-refund reply. LAWYER: the 24-hour line. #}
       <li id="outage"><strong>If our server is down,</strong> your purchase is not lost and no analysis is counted. If the service is down for more than 24 hours, we refund you on request, in full.</li>
-      <li><strong>Refunds:</strong> a full refund if you ask by email within {{ prices.rules.trader_refund_days }} days of buying, even if you have already run your report. The refund goes to the card you paid with, usually within 5 to 10 business days, and the access key then stops working. This adds to your rights under consumer law; it does not replace them.</li>
+      <li><strong>Refunds:</strong> a full refund if you ask by email within {{ prices.rules.trader_refund_days }} days of buying, even if you have already run your test. The refund goes to the card you paid with, usually within 5 to 10 business days, and the access key then stops working. This adds to your rights under consumer law; it does not replace them.</li>
       {#- C-14 (Q11): the Worker ends access on charge.dispute.closed with status "lost" only (dt-private C-6);
           a dispute decided for us changes nothing. LAWYER: wording. #}
       <li id="chargeback"><strong>Payment disputes:</strong> if you dispute the payment with your card issuer and the dispute is decided in your favour, your access key stops working, as after a refund.</li>
       <li><strong>Misuse:</strong> if a key appears to be shared, a person reviews it and writes to you before anything is paused.</li>
     </ul>
     <h4 id="withdrawal">Right of withdrawal (EU and UK)</h4>
-    <p>If you live in the European Union or the United Kingdom, you have in principle a 14-day legal right of withdrawal. If you ask for immediate access to the digital content and acknowledge that you lose this right (the field shown at checkout), it ends once the report is supplied. Our voluntary {{ prices.rules.trader_refund_days }}-day refund still applies.</p>
+    <p>If you live in the European Union or the United Kingdom, you have in principle a 14-day legal right of withdrawal. If you ask for immediate access to the digital content and acknowledge that you lose this right (the field shown at checkout), it ends once your test result is supplied. Our voluntary {{ prices.rules.trader_refund_days }}-day refund still applies.</p>
   </div>
   {%- else %}
-  <p>The trader report is waitlist only for now: nothing is sold and no money is taken. {{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers, in USD. A yearly {{ t.name|lower }} comes later and is not sold until it exists.</p>
-  <p>Before anything is sold, these terms will be updated, and the seller’s details, the full terms and a printable summary will be shown before anyone pays. When the report launches, a full refund is available if you ask within {{ prices.rules.trader_refund_days }} days of buying.</p>
+  <p>The donttrade test is waitlist only for now: nothing is sold and no money is taken. {{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers, in USD. A yearly {{ t.name|lower }} comes later and is not sold until it exists.</p>
+  <p>Before anything is sold, these terms will be updated, and the seller’s details, the full terms and a printable summary will be shown before anyone pays. When the test launches, a full refund is available if you ask within {{ prices.rules.trader_refund_days }} days of buying.</p>
   {%- endif %}
   </details>
 

@@ -31,7 +31,7 @@ def test_the_two_source_strings_are_the_plans_and_pass_the_lint():
     assert S["long"] == ("Your browser sends our server only stripped trade numbers: open and close times, buy or sell, relative "
                          "size, the realised result, a random symbol number and a scrambled fingerprint of each row. No name, "
                          "account number or ticker is sent. The "
-                         "numbers are not kept; we keep only a scrambled fingerprint of each trade row from your first report, so "
+                         "numbers are not kept; we keep only a scrambled fingerprint of each trade row from your first result, so "
                          "a re-test can be matched to the same history, and we delete it on the dates in our privacy notice.")
     assert S["short"] == ("It sends our server only stripped trade numbers. Those are not kept; only a scrambled fingerprint of "
                           "each trade is kept, for the re-test.")

@@ -91,15 +91,15 @@ KEEP, GRACE = TERMS["prints_keep_days_after_first_report"], TERMS["tracker_print
 N = r"(\d+)"
 # page → [(pattern with the numbers as groups, the numbers it must state)]. Each must occur at least once.
 STATEMENTS = {
-    "/terms/": [(rf"one re-test, which opens {N} days after your first report and closes {N} days after it", (OPENS, CLOSES)),
-                (rf"Your key is valid for {N} days after purchase, or until {N} days after your first report", (KEY, KEY_FR))],
-    "/fr/conditions/": [(rf"Le nouveau test est offert de {N} à {N} jours après votre premier rapport", (OPENS, CLOSES)),
-                        (rf"valide {N} jours après l’achat, ou jusqu’à {N} jours après votre premier rapport", (KEY, KEY_FR))],
-    "/fr/avant-de-payer/": [(rf"à partir de {N} jours et jusqu’à {N} jours après votre premier rapport", (OPENS, CLOSES)),
-                            (rf"valide {N} jours après l’achat, ou jusqu’à {N} jours après votre premier rapport", (KEY, KEY_FR))],
-    "/pricing/": [(rf"One re-test is included, to run {N} to {N} days after your first report", (OPENS, CLOSES)),
-                  (rf"Access lasts {N} days after purchase, or until {N} days after your first report", (KEY, KEY_FR))],
-    "/privacy/": [(rf"or {N} days after your first report, whichever comes first", (KEEP,)),
+    "/terms/": [(rf"one re-test, which opens {N} days after your first result and closes {N} days after it", (OPENS, CLOSES)),
+                (rf"Your key is valid for {N} days after purchase, or until {N} days after your first result", (KEY, KEY_FR))],
+    "/fr/conditions/": [(rf"Le nouveau test est offert de {N} à {N} jours après votre premier résultat", (OPENS, CLOSES)),
+                        (rf"valide {N} jours après l’achat, ou jusqu’à {N} jours après votre premier résultat", (KEY, KEY_FR))],
+    "/fr/avant-de-payer/": [(rf"à partir de {N} jours et jusqu’à {N} jours après votre premier résultat", (OPENS, CLOSES)),
+                            (rf"valide {N} jours après l’achat, ou jusqu’à {N} jours après votre premier résultat", (KEY, KEY_FR))],
+    "/pricing/": [(rf"One re-test is included, to run {N} to {N} days after your first result", (OPENS, CLOSES)),
+                  (rf"Access lasts {N} days after purchase, or until {N} days after your first result", (KEY, KEY_FR))],
+    "/privacy/": [(rf"or {N} days after your first result, whichever comes first", (KEEP,)),
                   (rf"delete them {N} days after it ends", (GRACE,))],
 }
 # Anywhere on any page: a stated re-test window must be the server's.
@@ -151,13 +151,13 @@ def test_d3_every_page_states_the_window_and_key_of_paid_terms_json(both_build):
 
 def test_d3_the_checker_catches_the_testers_mutations():
     # mutate.sh terms_close / fr_window: "60→90" on /terms/ and "30 à 60 → 30 à 90" on /fr/conditions/
-    terms = ("one re-test, which opens 30 days after your first report and closes 90 days after it. "
-             "Your key is valid for 90 days after purchase, or until 75 days after your first report")
+    terms = ("one re-test, which opens 30 days after your first result and closes 90 days after it. "
+             "Your key is valid for 90 days after purchase, or until 75 days after your first result")
     assert statement_problems("/terms/", terms)
-    fr = ("Le nouveau test est offert de 30 à 90 jours après votre premier rapport. "
-          "valide 90 jours après l’achat, ou jusqu’à 75 jours après votre premier rapport")
+    fr = ("Le nouveau test est offert de 30 à 90 jours après votre premier résultat. "
+          "valide 90 jours après l’achat, ou jusqu’à 75 jours après votre premier résultat")
     assert statement_problems("/fr/conditions/", fr)
-    assert statement_problems("/home/", "one free re-test 30 to 90 days after your first report")
+    assert statement_problems("/home/", "one free re-test 30 to 90 days after your first result")
     assert statement_problems("/terms/", "") and statement_problems("/terms/", "")[0][1] == "missing"
 
 
