@@ -17,7 +17,7 @@ import { clean, normHeader, numberShape, dateShape, detectDateFormat } from './c
 import { ISO_CURRENCIES } from './detect.js';
 import { readRows } from './index.js';
 import { isBlocked, moneyClean, normValue, numberQuestion, futuresRoot, STATUS_KEEP, MAP_FIELDS, isNoData,
-  dataRowsAfter } from './mapped.js';
+  isRagged, dataRowsAfter } from './mapped.js';
 import { CME_MULTIPLIERS } from './tradovate.js';
 import { matchPreset, presetById } from './presets.js';
 
@@ -275,7 +275,7 @@ export function guessMapping(peek, dataRows, opts = {}) {
   const layout = opts.layout || guessLayout(norm);
   const width = peek.headers.length;
   const rows = dataRows.filter((r) => !r.cells.every((c) => c === '') && !isNoData(r.cells, width) &&
-    !(peek.kind === 'paste' && r.cells.length * 2 < width));
+    !(peek.kind === 'paste' && isRagged(r.cells, width)));
   const vals = (i) => sample(rows, i);
   const used = new Set();
   const cols = {};

@@ -9,7 +9,7 @@
 // tests/test_engine_mapped.py checks this table equals PRESETS in tests/reference/engine_ref.py.
 
 import { normHeader, detectDateFormat } from './csv.js';
-import { MAP_FIELDS, dataRowsAfter, numberQuestion, isBlocked, isNoData } from './mapped.js';
+import { MAP_FIELDS, dataRowsAfter, numberQuestion, isBlocked, isNoData, isRagged } from './mapped.js';
 import { readRows, runFiles } from './index.js';
 
 export const PRESET_SEARCH_ROWS = 50; // the heading row must be within the first 50 non-empty rows
@@ -209,7 +209,7 @@ export function presetMapping(preset, src) {
   const trim = src.kind === 'paste';
   const width = rows[at].cells.length;
   const data = dataRowsAfter(rows, at, preset.section).filter((r) => !r.cells.every((c) => c === '') &&
-    !(trim && r.cells.length * 2 < width) && !isNoData(r.cells, width));
+    !(trim && isRagged(r.cells, width)) && !isNoData(r.cells, width));
   const dateCols = preset.layout === 'roundtrips' ? [cols.open_time, cols.close_time] : [cols.date];
   const values = [];
   for (const r of data) for (const i of dateCols) values.push(i < r.cells.length ? r.cells[i] : '');

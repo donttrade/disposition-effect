@@ -27,6 +27,7 @@ from html.parser import HTMLParser
 
 MAX_BYTES = 50 * 1024 * 1024
 MAX_ROWS = 200000
+MAX_PASTE_CHARS = 5 * 1024 * 1024
 
 # ----------------------------------------------------------------- errors
 
@@ -45,6 +46,8 @@ MESSAGES = {
     "E_BAD_MAPPING": "The saved column choices do not fit this file.",
     "E_MIXED_FILES": "These files have different columns.",
     "E_PASTE_FORMAT": "This paste has no columns we can split.",
+    "E_PASTE_ALIGN": "A row of this paste does not line up under the headings.",
+    "E_PASTE_TOO_LARGE": "This paste is too large.",
 }
 
 
@@ -795,32 +798,105 @@ def detect_date_format(values):
 
 # ----------------------------------------------------------------- a pasted table (mirrors fromPaste)
 
-_PASTE_GAP = re.compile("[ \u00a0\u2000-\u200a\u202f\u205f\u3000]{2,}")
-_WS_EDGE = re.compile("^" + WS_CLASS + "+|" + WS_CLASS + "+$")
+_PASTE_SPACE = " \u00a0" + "".join(chr(c) for c in range(0x2000, 0x200B)) + "\u202f\u205f\u3000"
+
+
+def space_words(line):
+    """Mirrors spaceWords(): words cut at runs of 2+ spaces, positions in code points."""
+    n = len(line)
+    out = []
+    i = 0
+    while i < n:
+        while i < n and line[i] in _PASTE_SPACE:
+            i += 1
+        if i >= n:
+            break
+        start = end = i
+        while i < n:
+            if line[i] in _PASTE_SPACE:
+                j = i
+                while j < n and line[j] in _PASTE_SPACE:
+                    j += 1
+                if j - i >= 2 or j >= n:
+                    break
+                i = j
+                continue
+            i += 1
+            end = i
+        out.append({"start": start, "end": end, "text": clean(line[start:end])})
+    return out
+
+
+def align_words(words, ref):
+    cells = [""] * len(ref)
+    for w in words:
+        hit = -1
+        hits = 0
+        for k, r in enumerate(ref):
+            if min(w["end"], r["end"]) - max(w["start"], r["start"]) > 0:
+                hits += 1
+                hit = k
+        if hits > 1:
+            return None
+        if hits == 0:
+            hit = 0
+            for k, r in enumerate(ref):
+                if r["start"] <= w["start"]:
+                    hit = k
+        if cells[hit] != "":
+            return None
+        cells[hit] = w["text"]
+    return cells
 
 
 def from_paste(text):
     text = str(text)
-    if len(text) > MAX_BYTES:
-        fail("E_TOO_LARGE")
+    if len(text) > MAX_PASTE_CHARS:
+        fail("E_PASTE_TOO_LARGE")
     if clean(text) == "":
         fail("E_EMPTY")
     lines = re.split(r"\r\n|\n|\r", text)
     tabs = any("\t" in l for l in lines)
     out = []
-    wide = 0
-    for k, line in enumerate(lines):
-        if clean(line) == "":
-            continue
-        parts = line.split("\t") if tabs else _PASTE_GAP.split(_WS_EDGE.sub("", line))
-        cells = [clean(c) for c in parts]
-        if len([c for c in cells if c != ""]) >= 2:
-            wide += 1
+
+    def push(k, cells):
         out.append({"row": k + 1, "cells": cells, "swallow": 0, "ml": [], "broken": False})
         if len(out) > MAX_ROWS + 1:
             fail("E_TOO_LARGE")
-    if wide == 0:
+
+    if tabs:
+        wide = 0
+        for k, line in enumerate(lines):
+            if clean(line) == "":
+                continue
+            cells = [clean(c) for c in line.split("\t")]
+            if len([c for c in cells if c != ""]) >= 2:
+                wide += 1
+            push(k, cells)
+        if wide == 0:
+            fail("E_PASTE_FORMAT")
+        return out
+    words = [None if clean(l) == "" else space_words(l) for l in lines]
+    ref_at = -1
+    for k, w in enumerate(words):
+        if w and len(w) >= 2 and (ref_at < 0 or len(w) > len(words[ref_at])):
+            ref_at = k
+    if ref_at < 0:
         fail("E_PASTE_FORMAT")
+    ref = words[ref_at]
+    for k, w in enumerate(words):
+        if not w:
+            continue
+        if k <= ref_at:
+            push(k, [x["text"] for x in w])
+            continue
+        cells = align_words(w, ref)
+        if cells is not None:
+            push(k, cells)
+        elif len(w) * 2 <= len(ref):
+            push(k, [x["text"] for x in w])
+        else:
+            fail("E_PASTE_ALIGN", "", k + 1)
     return out
 
 
@@ -2271,6 +2347,10 @@ def data_rows_after(rows, hdr_at, section):
     return out
 
 
+def is_ragged(cells, width):
+    return len([c for c in cells if c != ""]) * 2 < width
+
+
 def is_no_data(cells, width):
     return width >= 3 and len([c for c in cells if c != ""]) == 1
 
@@ -2373,7 +2453,7 @@ def parse_mapped(rows, mp, side_from, kind, delimiter):
         if _empty(r["cells"]):
             continue
         n_data += 1
-        if mp.get("trim_ragged") and len(r["cells"]) * 2 < len(header):
+        if mp.get("trim_ragged") and is_ragged(r["cells"], len(header)):
             _skip(skipped, "no_data")
             continue
         if is_no_data(r["cells"], len(header)) or all(_cell_at(r, m.get(f)) == "" for f in req):
@@ -2872,7 +2952,7 @@ def preset_mapping(preset, src):
     trim = src["kind"] == "paste"
     width = len(rows[at]["cells"])
     data = [r for r in data_rows_after(rows, at, preset["section"])
-            if not _empty(r["cells"]) and not (trim and len(r["cells"]) * 2 < width) and not is_no_data(r["cells"], width)]
+            if not _empty(r["cells"]) and not (trim and is_ragged(r["cells"], width)) and not is_no_data(r["cells"], width)]
     date_cols = [cols["open_time"], cols["close_time"]] if preset["layout"] == "roundtrips" else [cols["date"]]
     values = []
     for r in data:
