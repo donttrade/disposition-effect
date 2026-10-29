@@ -2133,8 +2133,13 @@
    }
   ],
   "tz_label": "as exported, with no time zone stated",
-  "verified_format": true,
-  "warnings": []
+  "verified_format": false,
+  "warnings": [
+   {
+    "code": "W_UNVERIFIED_FORMAT",
+    "n": 0
+   }
+  ]
  },
  "stats": {
   "avg_loss": -49.51999999999999,

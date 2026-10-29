@@ -561,8 +561,12 @@
    }
   ],
   "tz_label": "as exported, with no time zone stated",
-  "verified_format": true,
+  "verified_format": false,
   "warnings": [
+   {
+    "code": "W_UNVERIFIED_FORMAT",
+    "n": 0
+   },
    {
     "code": "W_SKIPPED_ROWS",
     "n": 6

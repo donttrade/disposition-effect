@@ -669,7 +669,7 @@ SIGNATURES = {
         "required": [["side"], ["contract"], ["status"], ["qty"], ["price"], ["time"]],
     },
     "tradingview": {
-        "verified": True,
+        "verified": False,
         "fields": {
             "symbol": ["symbol"], "side": ["side"], "qty": ["quantity", "qty"], "price": ["fillprice"],
             "status": ["status"], "commission": ["commission"], "time": ["closingtime"],
