@@ -1,5 +1,5 @@
 {
- "sample_sha256": "5f50073e806412742ae55db2d8fa376fbf93976b0009ae83bbf2c34dc60d1f6e",
+ "sample_sha256": "e7b9ebff60d467da1a4a80e8faf20abc0b476371993b0ef4e3b934debae358d5",
  "script": "checks/make_tool_previews.py",
  "trade_stats": {
   "trades": "160",

@@ -36,7 +36,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, "checks"))
 sys.path.insert(0, os.path.join(REPO, "site"))
 OUT = os.path.join(REPO, "site", "templates", "partials", "hero_dashboard.html")
-SAMPLE = os.path.join(REPO, "site", "static", "samples", "demo-trades.csv")
+SAMPLE = os.path.join(REPO, "site", "static", "samples", "example-trades.csv")
 WIDTH = 532            # viewport; the tool's drop zone is then 496 px wide, so W = 496 (measured 21 Oct 2026)
 W_RANGE = (460, 520)   # plan §4.2: labels ~10.8 px on desktop, ~7.7 px at 375
 L = 92                 # the chart's y-label gutter (trade-stats.js chart(): L = 92)

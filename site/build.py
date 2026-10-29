@@ -656,7 +656,7 @@ def tools_for(flags):
             for t in TOOLS]
 
 
-SAMPLE_CSV = os.path.join(SITE, "static", "samples", "demo-trades.csv")
+SAMPLE_CSV = os.path.join(SITE, "static", "samples", "example-trades.csv")
 TOOL_PREVIEWS_JSON = os.path.join(SITE, "config", "tool_previews.json")
 
 
@@ -800,14 +800,14 @@ def latest():
 
 
 def sample_csv():
-    """The synthetic demo file, inlined into the page inside <script type="text/csv">.
+    """The synthetic example file, inlined into the page inside <script type="text/csv">.
 
     Inlined rather than fetched because the page's CSP is connect-src 'none'. The build
     refuses anything that could end the script element early."""
     with open(SAMPLE_CSV, encoding="utf-8") as f:
         text = f.read()
     if "<" in text or "&" in text:
-        die("demo-trades.csv contains '<' or '&'; it cannot be inlined safely")
+        die("example-trades.csv contains '<' or '&'; it cannot be inlined safely")
     return text
 
 

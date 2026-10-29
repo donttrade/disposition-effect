@@ -225,7 +225,7 @@ async function readFile(file) {
 
 function readSample() {
   const text = $('j-sample').textContent.replace(/^\s+/, '');
-  readBytes(new TextEncoder().encode(text), 'demo-trades.csv', true);
+  readBytes(new TextEncoder().encode(text), 'example-trades.csv', true);
 }
 
 // ------------------------------------------------------------------ import: preview and write (§d.4)

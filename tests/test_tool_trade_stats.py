@@ -31,7 +31,7 @@ def built_site(badges_site):
 
 
 FIX = os.path.join(HERE, "fixtures")
-DEMO = os.path.join(REPO, "site", "static", "samples", "demo-trades.csv")
+DEMO = os.path.join(REPO, "site", "static", "samples", "example-trades.csv")
 CANARY = "CANARY-ZQ7X"
 PATH = "/tools/trade-stats/"
 

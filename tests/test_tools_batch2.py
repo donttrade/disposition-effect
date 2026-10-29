@@ -28,7 +28,7 @@ import build as B  # noqa: E402
 RR, DD, HM = "/tools/risk-reward-calculator/", "/tools/drawdown-calculator/", "/tools/trading-heatmap/"
 PATHS = (RR, DD, HM)
 FIX = os.path.join(HERE, "fixtures", "tools2")
-DEMO = os.path.join(REPO, "site", "static", "samples", "demo-trades.csv")
+DEMO = os.path.join(REPO, "site", "static", "samples", "example-trades.csv")
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 MINUS = "−"
 
