@@ -49,6 +49,7 @@
    "USD": 2,
    "points": 1
   },
+  "dates_only": false,
   "executions": [
    {
     "currency": "USD",
@@ -150,6 +151,7 @@
    }
   ],
   "format": "tradovate_orders",
+  "n_date_only": 0,
   "skipped": {
    "not_filled": 1
   },

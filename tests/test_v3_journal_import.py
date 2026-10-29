@@ -111,7 +111,22 @@ def test_j2_worker_gives_the_same_keys_as_the_page(jctx):
 
 
 # The engine commits made after the journal (motion), each a new reader the journal did not need to change.
-ENGINE_COMMITS_SINCE_MOTION = ("Engine: TradingView Order History parser",)
+# The universal importer (B1/B2) adds readers beside it; one file through runFile() reads as before,
+# with dates_only and n_date_only added to the result (the journal does not read them yet).
+ENGINE_COMMITS_SINCE_MOTION = ("Engine: TradingView Order History parser",
+                               "Engine: mapped columns, several files, pasted tables, dates_only",
+                               "Engine: eight timed presets, synthetic importer fixtures",
+                               "Engine: the column guess for the mapper",
+                               # the importer's fix round (Tester report 29 Oct): one file still reads as
+                               # before, except a Sierra log (now its preset) and the wide-row warning
+                               "Paste: fixed-width columns", "Rows wider than the heading",
+                               "Several files: the overlap key", "runFile goes through the preset flow",
+                               "Guess: footers and short rows", "Dates: day level for rows without a time",
+                               "Block list widened",
+                               # round 2 (Tester report 30 Oct)
+                               "A refused wide fill leaves out the fills that depend on it",
+                               "Block list: the identifiers left from round 2",
+                               "Guess: summary rows by what they hold")
 
 
 def test_j13_engine_and_file_worker_untouched():

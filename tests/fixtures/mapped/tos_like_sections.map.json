@@ -1,0 +1,42 @@
+{
+ "cols": {
+  "close_price": null,
+  "close_time": null,
+  "currency": null,
+  "date": 1,
+  "direction": null,
+  "fees": null,
+  "open_price": null,
+  "open_time": null,
+  "pnl": null,
+  "price": 10,
+  "qty": 4,
+  "side": 3,
+  "status": null,
+  "symbol": 6,
+  "time": null
+ },
+ "currency": null,
+ "date_format": "mdy",
+ "delimiter": null,
+ "futures_sizes": false,
+ "header_row": 11,
+ "headers": {
+  "1": "exectime",
+  "10": "price",
+  "3": "side",
+  "4": "qty",
+  "6": "symbol"
+ },
+ "layout": "fills",
+ "number_style": null,
+ "preset": null,
+ "section": true,
+ "side_from": "column",
+ "side_values": {
+  "buy": "buy",
+  "sell": "sell"
+ },
+ "status_values": null,
+ "v": 1
+}

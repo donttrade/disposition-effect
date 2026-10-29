@@ -1,0 +1,497 @@
+{
+ "guess": {
+  "badges": {
+   "date": "matched",
+   "price": "matched",
+   "qty": "matched",
+   "side": "matched",
+   "symbol": "matched"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": "mdy",
+   "reason": "seen",
+   "seen": "3/31/2026",
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": 2
+  },
+  "futures_offer": false,
+  "layout": "fills",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 0,
+    "direction": null,
+    "fees": null,
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 7,
+    "qty": 6,
+    "side": 5,
+    "status": null,
+    "symbol": 3,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "mdy",
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "0": "activitydate",
+    "3": "instrument",
+    "5": "transcode",
+    "6": "quantity",
+    "7": "price"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": null,
+   "side_values": {
+    "bto": "buy",
+    "buy": "buy",
+    "cdiv": "skip",
+    "sell": "sell"
+   },
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1,
+   "year_base": null
+  },
+  "questions": [],
+  "side_checks": {
+   "bto": "options"
+  },
+  "side_counts": {
+   "bto": 1,
+   "buy": 10,
+   "cdiv": 1,
+   "sell": 10
+  },
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": null
+ },
+ "peek": {
+  "blocked": [
+   false,
+   false,
+   false,
+   false,
+   true,
+   false,
+   false,
+   false,
+   false
+  ],
+  "delimiter": ",",
+  "header_hits": 6,
+  "header_row": 0,
+  "headers": [
+   "Activity Date",
+   "Process Date",
+   "Settle Date",
+   "Instrument",
+   "Description",
+   "Trans Code",
+   "Quantity",
+   "Price",
+   "Amount"
+  ],
+  "kind": "csv",
+  "labels": [
+   "Activity Date",
+   "Process Date",
+   "Settle Date",
+   "Instrument",
+   "Description",
+   "Trans Code",
+   "Quantity",
+   "Price",
+   "Amount"
+  ],
+  "n_rows": 23,
+  "options": [
+   {
+    "example": "3/31/2026",
+    "index": 0,
+    "label": "Activity Date"
+   },
+   {
+    "example": "3/31/2026",
+    "index": 1,
+    "label": "Process Date"
+   },
+   {
+    "example": "3/31/2026",
+    "index": 2,
+    "label": "Settle Date"
+   },
+   {
+    "example": "AAA",
+    "index": 3,
+    "label": "Instrument"
+   },
+   {
+    "example": "Sell",
+    "index": 5,
+    "label": "Trans Code"
+   },
+   {
+    "example": "4",
+    "index": 6,
+    "label": "Quantity"
+   },
+   {
+    "example": "$113.25",
+    "index": 7,
+    "label": "Price"
+   },
+   {
+    "example": "$453.00",
+    "index": 8,
+    "label": "Amount"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     "3/31/2026",
+     "3/31/2026",
+     "3/31/2026",
+     "AAA",
+     null,
+     "Sell",
+     "4",
+     "$113.25",
+     "$453.00"
+    ],
+    "row": 2
+   },
+   {
+    "cells": [
+     "3/29/2026",
+     "3/29/2026",
+     "3/29/2026",
+     "AAA",
+     null,
+     "Buy",
+     "4",
+     "$115.25",
+     "($461.00)"
+    ],
+    "row": 4
+   },
+   {
+    "cells": [
+     "3/5/2026",
+     "3/5/2026",
+     "3/5/2026",
+     "AAA",
+     null,
+     "CDIV",
+     "",
+     "",
+     "$1.20"
+    ],
+    "row": 6
+   },
+   {
+    "cells": [
+     "3/28/2026",
+     "3/28/2026",
+     "3/28/2026",
+     "CCC",
+     null,
+     "Sell",
+     "2",
+     "$103.50",
+     "$207.00"
+    ],
+    "row": 7
+   },
+   {
+    "cells": [
+     "3/4/2026",
+     "3/4/2026",
+     "3/6/2026",
+     "AAA",
+     null,
+     "BTO",
+     "1",
+     "$2.10",
+     "($210.04)"
+    ],
+    "row": 9
+   },
+   {
+    "cells": [
+     "3/26/2026",
+     "3/26/2026",
+     "3/26/2026",
+     "CCC",
+     null,
+     "Buy",
+     "2",
+     "$102.00",
+     "($204.00)"
+    ],
+    "row": 10
+   },
+   {
+    "cells": [
+     "3/25/2026",
+     "3/25/2026",
+     "3/25/2026",
+     "BBB",
+     null,
+     "Buy",
+     "5",
+     "$107.25",
+     "($536.25)"
+    ],
+    "row": 12
+   },
+   {
+    "cells": [
+     "3/23/2026",
+     "3/23/2026",
+     "3/23/2026",
+     "BBB",
+     null,
+     "Sell",
+     "5",
+     "$106.75",
+     "$533.75"
+    ],
+    "row": 14
+   },
+   {
+    "cells": [
+     "3/22/2026",
+     "3/22/2026",
+     "3/22/2026",
+     "AAA",
+     null,
+     "Sell",
+     "3",
+     "$110.00",
+     "$330.00"
+    ],
+    "row": 16
+   },
+   {
+    "cells": [
+     "3/20/2026",
+     "3/20/2026",
+     "3/20/2026",
+     "AAA",
+     null,
+     "Buy",
+     "3",
+     "$110.50",
+     "($331.50)"
+    ],
+    "row": 18
+   },
+   {
+    "cells": [
+     "3/19/2026",
+     "3/19/2026",
+     "3/19/2026",
+     "CCC",
+     null,
+     "Sell",
+     "1",
+     "$112.75",
+     "$112.75"
+    ],
+    "row": 20
+   },
+   {
+    "cells": [
+     "3/17/2026",
+     "3/17/2026",
+     "3/17/2026",
+     "CCC",
+     null,
+     "Buy",
+     "1",
+     "$114.25",
+     "($114.25)"
+    ],
+    "row": 22
+   },
+   {
+    "cells": [
+     "3/16/2026",
+     "3/16/2026",
+     "3/16/2026",
+     "BBB",
+     null,
+     "Buy",
+     "4",
+     "$103.00",
+     "($412.00)"
+    ],
+    "row": 24
+   },
+   {
+    "cells": [
+     "3/14/2026",
+     "3/14/2026",
+     "3/14/2026",
+     "BBB",
+     null,
+     "Sell",
+     "4",
+     "$101.00",
+     "$404.00"
+    ],
+    "row": 26
+   },
+   {
+    "cells": [
+     "3/13/2026",
+     "3/13/2026",
+     "3/13/2026",
+     "AAA",
+     null,
+     "Sell",
+     "2",
+     "$106.75",
+     "$213.50"
+    ],
+    "row": 28
+   },
+   {
+    "cells": [
+     "3/11/2026",
+     "3/11/2026",
+     "3/11/2026",
+     "AAA",
+     null,
+     "Buy",
+     "2",
+     "$105.75",
+     "($211.50)"
+    ],
+    "row": 30
+   },
+   {
+    "cells": [
+     "3/10/2026",
+     "3/10/2026",
+     "3/10/2026",
+     "CCC",
+     null,
+     "Sell",
+     "5",
+     "$110.25",
+     "$551.25"
+    ],
+    "row": 32
+   },
+   {
+    "cells": [
+     "3/8/2026",
+     "3/8/2026",
+     "3/8/2026",
+     "CCC",
+     null,
+     "Buy",
+     "5",
+     "$109.50",
+     "($547.50)"
+    ],
+    "row": 34
+   },
+   {
+    "cells": [
+     "3/7/2026",
+     "3/7/2026",
+     "3/7/2026",
+     "BBB",
+     null,
+     "Buy",
+     "3",
+     "$112.25",
+     "($336.75)"
+    ],
+    "row": 36
+   },
+   {
+    "cells": [
+     "3/5/2026",
+     "3/5/2026",
+     "3/5/2026",
+     "BBB",
+     null,
+     "Sell",
+     "3",
+     "$113.25",
+     "$339.75"
+    ],
+    "row": 38
+   },
+   {
+    "cells": [
+     "3/4/2026",
+     "3/4/2026",
+     "3/4/2026",
+     "AAA",
+     null,
+     "Sell",
+     "1",
+     "$98.00",
+     "$98.00"
+    ],
+    "row": 40
+   },
+   {
+    "cells": [
+     "3/2/2026",
+     "3/2/2026",
+     "3/2/2026",
+     "AAA",
+     null,
+     "Buy",
+     "1",
+     "$100.00",
+     "($100.00)"
+    ],
+    "row": 42
+   },
+   {
+    "cells": [
+     "The data provided is for informational purposes only. Please consult a professional tax service.",
+     "",
+     "",
+     "",
+     null,
+     "",
+     "",
+     "",
+     ""
+    ],
+    "row": 45
+   }
+  ],
+  "table": null,
+  "tables": null
+ },
+ "preset": null,
+ "signature": "aae9330d4aa1fc37758359bc5e7f4737"
+}

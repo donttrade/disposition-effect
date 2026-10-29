@@ -1,0 +1,620 @@
+{
+ "guess": {
+  "badges": {
+   "date": "matched",
+   "fees": "matched",
+   "price": "matched",
+   "qty": "matched",
+   "side": "matched",
+   "symbol": "matched"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": null,
+   "reason": "ask",
+   "seen": null,
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": null
+  },
+  "futures_offer": false,
+  "layout": "fills",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 0,
+    "direction": null,
+    "fees": [
+     7,
+     8
+    ],
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 6,
+    "qty": 5,
+    "side": 2,
+    "status": null,
+    "symbol": 3,
+    "time": null
+   },
+   "currency": null,
+   "date_format": null,
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 6,
+   "headers": {
+    "0": "rundate",
+    "2": "action",
+    "3": "symbol",
+    "5": "quantity",
+    "6": "price",
+    "7": "commission",
+    "8": "fees"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": null,
+   "side_values": {
+    "dividend received aaa (cash)": "skip",
+    "electronic funds transfer received (cash)": "skip",
+    "you bought aaa (cash)": "buy",
+    "you bought bbb (cash)": "buy",
+    "you bought ccc (cash)": "buy",
+    "you sold aaa (cash)": "sell",
+    "you sold bbb (cash)": "sell",
+    "you sold ccc (cash)": "sell"
+   },
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1,
+   "year_base": null
+  },
+  "questions": [
+   {
+    "example": "03/02/2026",
+    "q": "date_order",
+    "readings": {
+     "dmy": "2026-02-03",
+     "mdy": "2026-03-02"
+    },
+    "row": 8
+   }
+  ],
+  "side_checks": {},
+  "side_counts": {
+   "dividend received aaa (cash)": 1,
+   "electronic funds transfer received (cash)": 1,
+   "you bought aaa (cash)": 4,
+   "you bought bbb (cash)": 4,
+   "you bought ccc (cash)": 4,
+   "you sold aaa (cash)": 4,
+   "you sold bbb (cash)": 4,
+   "you sold ccc (cash)": 4
+  },
+  "side_session_only": true,
+  "status_checks": {},
+  "status_counts": null
+ },
+ "peek": {
+  "blocked": [
+   false,
+   true,
+   false,
+   false,
+   true,
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "delimiter": ",",
+  "header_hits": 8,
+  "header_row": 6,
+  "headers": [
+   "Run Date",
+   "Account",
+   "Action",
+   "Symbol",
+   "Description",
+   "Quantity",
+   "Price ($)",
+   "Commission ($)",
+   "Fees ($)",
+   "Amount ($)"
+  ],
+  "kind": "csv",
+  "labels": [
+   "Run Date",
+   "Account",
+   "Action",
+   "Symbol",
+   "Description",
+   "Quantity",
+   "Price ($)",
+   "Commission ($)",
+   "Fees ($)",
+   "Amount ($)"
+  ],
+  "n_rows": 28,
+  "options": [
+   {
+    "example": "03/02/2026",
+    "index": 0,
+    "label": "Run Date"
+   },
+   {
+    "example": "YOU BOUGHT AAA (Cash)",
+    "index": 2,
+    "label": "Action"
+   },
+   {
+    "example": "AAA",
+    "index": 3,
+    "label": "Symbol"
+   },
+   {
+    "example": "1",
+    "index": 5,
+    "label": "Quantity"
+   },
+   {
+    "example": "$100.00",
+    "index": 6,
+    "label": "Price ($)"
+   },
+   {
+    "example": "",
+    "index": 7,
+    "label": "Commission ($)"
+   },
+   {
+    "example": "$0.03",
+    "index": 8,
+    "label": "Fees ($)"
+   },
+   {
+    "example": "($100.00)",
+    "index": 9,
+    "label": "Amount ($)"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     "03/02/2026",
+     null,
+     "YOU BOUGHT AAA (Cash)",
+     "AAA",
+     null,
+     "1",
+     "$100.00",
+     "",
+     "",
+     "($100.00)"
+    ],
+    "row": 8
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     null,
+     "YOU SOLD AAA (Cash)",
+     "AAA",
+     null,
+     "-1",
+     "$98.00",
+     "",
+     "$0.03",
+     "$98.00"
+    ],
+    "row": 9
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     null,
+     "YOU SOLD BBB (Cash)",
+     "BBB",
+     null,
+     "-3",
+     "$113.25",
+     "",
+     "$0.03",
+     "$339.75"
+    ],
+    "row": 10
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     null,
+     "YOU BOUGHT BBB (Cash)",
+     "BBB",
+     null,
+     "3",
+     "$112.25",
+     "",
+     "",
+     "($336.75)"
+    ],
+    "row": 11
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     null,
+     "YOU BOUGHT CCC (Cash)",
+     "CCC",
+     null,
+     "5",
+     "$109.50",
+     "",
+     "",
+     "($547.50)"
+    ],
+    "row": 12
+   },
+   {
+    "cells": [
+     "03/09/2026",
+     null,
+     "DIVIDEND RECEIVED AAA (Cash)",
+     "AAA",
+     null,
+     "",
+     "",
+     "",
+     "",
+     "$4.10"
+    ],
+    "row": 13
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     null,
+     "YOU SOLD CCC (Cash)",
+     "CCC",
+     null,
+     "-5",
+     "$110.25",
+     "",
+     "$0.03",
+     "$551.25"
+    ],
+    "row": 14
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     null,
+     "YOU BOUGHT AAA (Cash)",
+     "AAA",
+     null,
+     "2",
+     "$105.75",
+     "",
+     "",
+     "($211.50)"
+    ],
+    "row": 15
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     null,
+     "YOU SOLD AAA (Cash)",
+     "AAA",
+     null,
+     "-2",
+     "$106.75",
+     "",
+     "$0.03",
+     "$213.50"
+    ],
+    "row": 16
+   },
+   {
+    "cells": [
+     "03/10/2026",
+     null,
+     "Electronic Funds Transfer Received (Cash)",
+     "",
+     null,
+     "",
+     "",
+     "",
+     "",
+     "$1,000.00"
+    ],
+    "row": 17
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     null,
+     "YOU SOLD BBB (Cash)",
+     "BBB",
+     null,
+     "-4",
+     "$101.00",
+     "",
+     "$0.03",
+     "$404.00"
+    ],
+    "row": 18
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     null,
+     "YOU BOUGHT BBB (Cash)",
+     "BBB",
+     null,
+     "4",
+     "$103.00",
+     "",
+     "",
+     "($412.00)"
+    ],
+    "row": 19
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     null,
+     "YOU BOUGHT CCC (Cash)",
+     "CCC",
+     null,
+     "1",
+     "$114.25",
+     "",
+     "",
+     "($114.25)"
+    ],
+    "row": 20
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     null,
+     "YOU SOLD CCC (Cash)",
+     "CCC",
+     null,
+     "-1",
+     "$112.75",
+     "",
+     "$0.03",
+     "$112.75"
+    ],
+    "row": 21
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     null,
+     "YOU BOUGHT AAA (Cash)",
+     "AAA",
+     null,
+     "3",
+     "$110.50",
+     "",
+     "",
+     "($331.50)"
+    ],
+    "row": 22
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     null,
+     "YOU SOLD AAA (Cash)",
+     "AAA",
+     null,
+     "-3",
+     "$110.00",
+     "",
+     "$0.03",
+     "$330.00"
+    ],
+    "row": 23
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     null,
+     "YOU SOLD BBB (Cash)",
+     "BBB",
+     null,
+     "-5",
+     "$106.75",
+     "",
+     "$0.03",
+     "$533.75"
+    ],
+    "row": 24
+   },
+   {
+    "cells": [
+     "03/02/2026",
+     null,
+     "YOU BOUGHT BBB (Cash)",
+     "BBB",
+     null,
+     "5",
+     "$107.25",
+     "",
+     "",
+     "($536.25)"
+    ],
+    "row": 25
+   },
+   {
+    "cells": [
+     "03/03/2026",
+     null,
+     "YOU BOUGHT CCC (Cash)",
+     "CCC",
+     null,
+     "2",
+     "$102.00",
+     "",
+     "",
+     "($204.00)"
+    ],
+    "row": 26
+   },
+   {
+    "cells": [
+     "03/03/2026",
+     null,
+     "YOU SOLD CCC (Cash)",
+     "CCC",
+     null,
+     "-2",
+     "$103.50",
+     "",
+     "$0.03",
+     "$207.00"
+    ],
+    "row": 27
+   },
+   {
+    "cells": [
+     "03/03/2026",
+     null,
+     "YOU BOUGHT AAA (Cash)",
+     "AAA",
+     null,
+     "4",
+     "$115.25",
+     "",
+     "",
+     "($461.00)"
+    ],
+    "row": 28
+   },
+   {
+    "cells": [
+     "03/03/2026",
+     null,
+     "YOU SOLD AAA (Cash)",
+     "AAA",
+     null,
+     "-4",
+     "$113.25",
+     "",
+     "$0.03",
+     "$453.00"
+    ],
+    "row": 29
+   },
+   {
+    "cells": [
+     "03/03/2026",
+     null,
+     "YOU SOLD BBB (Cash)",
+     "BBB",
+     null,
+     "-1",
+     "$111.50",
+     "",
+     "$0.03",
+     "$111.50"
+    ],
+    "row": 30
+   },
+   {
+    "cells": [
+     "03/03/2026",
+     null,
+     "YOU BOUGHT BBB (Cash)",
+     "BBB",
+     null,
+     "1",
+     "$110.50",
+     "",
+     "",
+     "($110.50)"
+    ],
+    "row": 31
+   },
+   {
+    "cells": [
+     "03/03/2026",
+     null,
+     "YOU BOUGHT CCC (Cash)",
+     "CCC",
+     null,
+     "3",
+     "$107.75",
+     "",
+     "",
+     "($323.25)"
+    ],
+    "row": 32
+   },
+   {
+    "cells": [
+     "03/03/2026",
+     null,
+     "YOU SOLD CCC (Cash)",
+     "CCC",
+     null,
+     "-3",
+     "$108.50",
+     "",
+     "$0.03",
+     "$325.50"
+    ],
+    "row": 33
+   },
+   {
+    "cells": [
+     "The data and information in this spreadsheet is provided to you solely for your use, is not for distribution.",
+     null,
+     "",
+     "",
+     null,
+     "",
+     "",
+     "",
+     "",
+     ""
+    ],
+    "row": 36
+   },
+   {
+    "cells": [
+     "Brokerage services are provided by a made-up firm.",
+     null,
+     "",
+     "",
+     null,
+     "",
+     "",
+     "",
+     "",
+     ""
+    ],
+    "row": 37
+   }
+  ],
+  "table": null,
+  "tables": null
+ },
+ "preset": null,
+ "signature": "0a3271ff84602c66a1c15edcb7e0886b"
+}

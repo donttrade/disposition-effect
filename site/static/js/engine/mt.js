@@ -12,10 +12,14 @@ import { fail, LIMITS } from './errors.js';
 // Rows of an HTML document, like the reference's _Rows parser:
 // every <tr> in document order, each cell's textContent with whitespace
 // collapsed, and colspan expanded into empty cells so columns stay aligned.
+// table: the index (in document order) of the innermost <table> holding the row, or -1; the
+// universal importer offers one table of a statement that is not MetaTrader (cTrader, Match-Trader).
 export function htmlRows(text) {
   const doc = new DOMParser().parseFromString(text, 'text/html');
   const trs = doc.querySelectorAll('tr');
   if (trs.length > LIMITS.MAX_ROWS) fail('E_TOO_LARGE');
+  const tableIndex = new Map();
+  doc.querySelectorAll('table').forEach((t, i) => tableIndex.set(t, i));
   const rows = [];
   let n = 0;
   for (const tr of trs) {
@@ -25,7 +29,8 @@ export function htmlRows(text) {
       cells.push(clean(c.textContent));
       for (let k = 1; k < c.colSpan; k++) cells.push('');
     }
-    rows.push({ row: n, cells });
+    const t = tr.closest('table');
+    rows.push({ row: n, cells, table: t && tableIndex.has(t) ? tableIndex.get(t) : -1 });
   }
   return rows;
 }

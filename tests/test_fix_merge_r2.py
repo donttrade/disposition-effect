@@ -361,7 +361,7 @@ def test_r5_passthrough_nav_drops_coming_soon_only_when_paid(paid_site, built_si
     for out in (paid_site["out"], built_site["out"]):
         h = open(os.path.join(out, "about", "index.html"), encoding="utf-8").read()
         nav = h[h.index('<nav class="site-nav"'):h.index("</nav>")]
-        assert "coming soon" not in nav.lower() and 'href="/for-traders/"' in nav
+        assert "coming soon" not in nav.lower()   # 29 Oct (owner): four plain links; For traders is in the footer
     paid = open(os.path.join(paid_site["out"], "about", "index.html"), encoding="utf-8").read()
     assert 'Individual traders <span class="soon">coming soon</span>' not in paid
 

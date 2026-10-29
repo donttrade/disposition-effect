@@ -5,7 +5,7 @@
 // worker parse path. Nothing is stored, logged or sent: these pages' CSP is connect-src 'none'.
 // No noise checks run here (noise: false), whatever the build's free_badges flag.
 
-import { createFileSlot, renderReadError } from './tool-state.js?v=eb893892';
+import { createFileSlot, renderReadError } from './tool-state.js?v=ea217a9e';
 import { el, unitNote, day, intText } from './format.js?v=acb0db51';
 
 export const SAMPLE_LABEL = 'the synthetic sample file';
@@ -47,7 +47,7 @@ export function readSection(prefix, r, fileLabel) {
       `${plural(r.trades.length, 'closed trade', 'closed trades')} from ${plural(r.n_fills, 'fill', 'fills')}, closed ${day(first.close_ts)} to ${day(last.close_ts)}. `,
       `Times are ${r.tz_label}. ${unitNote(unit)}`));
   if (fileLabel === SAMPLE_LABEL) {
-    sec.append(el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Sample data' }), 'Demo file, not a real trader.'));
+    sec.append(el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Example data' })));
   }
   if (r.warnings.length) {
     sec.append(el('div', { class: 'notice notice-caution', id: `${prefix}-warnings` },

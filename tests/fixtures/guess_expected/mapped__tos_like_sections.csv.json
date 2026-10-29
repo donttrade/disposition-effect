@@ -1,0 +1,531 @@
+{
+ "guess": {
+  "badges": {
+   "date": "check",
+   "price": "choose",
+   "qty": "check",
+   "side": "check",
+   "symbol": "choose"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": null,
+   "reason": "mixed",
+   "seen": "Exec Time",
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": 12
+  },
+  "futures_offer": false,
+  "layout": "fills",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 1,
+    "direction": null,
+    "fees": null,
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": null,
+    "qty": 7,
+    "side": 2,
+    "status": null,
+    "symbol": null,
+    "time": null
+   },
+   "currency": null,
+   "date_format": null,
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 3,
+   "headers": {
+    "1": "time",
+    "2": "type",
+    "7": "amount"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": null,
+   "side_values": {
+    "qty": "skip",
+    "spread": "sell",
+    "stock": "sell"
+   },
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1,
+   "year_base": null
+  },
+  "questions": [
+   {
+    "error": "mixed",
+    "q": "date_order",
+    "rows": [
+     12
+    ]
+   }
+  ],
+  "side_checks": {
+   "qty": "unknown",
+   "spread": "unknown",
+   "stock": "unknown"
+  },
+  "side_counts": {
+   "qty": 1,
+   "spread": 1,
+   "stock": 16
+  },
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": null
+ },
+ "peek": {
+  "blocked": [
+   false,
+   false,
+   false,
+   false,
+   true,
+   false,
+   false,
+   false,
+   false
+  ],
+  "delimiter": ",",
+  "header_hits": 4,
+  "header_row": 3,
+  "headers": [
+   "DATE",
+   "TIME",
+   "TYPE",
+   "REF #",
+   "DESCRIPTION",
+   "Misc Fees",
+   "Commissions & Fees",
+   "AMOUNT",
+   "BALANCE"
+  ],
+  "kind": "csv",
+  "labels": [
+   "DATE",
+   "TIME",
+   "TYPE",
+   "REF #",
+   "DESCRIPTION",
+   "Misc Fees",
+   "Commissions & Fees",
+   "AMOUNT",
+   "BALANCE"
+  ],
+  "n_rows": 25,
+  "options": [
+   {
+    "example": "3/2/26",
+    "index": 0,
+    "label": "DATE"
+   },
+   {
+    "example": "09:00:00",
+    "index": 1,
+    "label": "TIME"
+   },
+   {
+    "example": "BAL",
+    "index": 2,
+    "label": "TYPE"
+   },
+   {
+    "example": "Time Placed",
+    "index": 3,
+    "label": "REF #"
+   },
+   {
+    "example": "Side",
+    "index": 5,
+    "label": "Misc Fees"
+   },
+   {
+    "example": "Qty",
+    "index": 6,
+    "label": "Commissions & Fees"
+   },
+   {
+    "example": "Pos Effect",
+    "index": 7,
+    "label": "AMOUNT"
+   },
+   {
+    "example": "10,000.00",
+    "index": 8,
+    "label": "BALANCE"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     "3/2/26",
+     "09:00:00",
+     "BAL",
+     "",
+     null,
+     "",
+     "",
+     "",
+     "10,000.00"
+    ],
+    "row": 5
+   },
+   {
+    "cells": [
+     "Account Order History",
+     "",
+     "",
+     "",
+     null,
+     "",
+     "",
+     "",
+     ""
+    ],
+    "row": 7
+   },
+   {
+    "cells": [
+     "",
+     "Notes",
+     "",
+     "Time Placed",
+     null,
+     "Side",
+     "Qty",
+     "Pos Effect",
+     "Symbol"
+    ],
+    "row": 8
+   },
+   {
+    "cells": [
+     "",
+     "",
+     "",
+     "3/2/26 09:31:00",
+     null,
+     "BUY",
+     "+5",
+     "TO OPEN",
+     "AAA"
+    ],
+    "row": 9
+   },
+   {
+    "cells": [
+     "Account Trade History",
+     "",
+     "",
+     "",
+     null,
+     "",
+     "",
+     "",
+     ""
+    ],
+    "row": 11
+   },
+   {
+    "cells": [
+     "",
+     "Exec Time",
+     "Spread",
+     "Side",
+     null,
+     "Pos Effect",
+     "Symbol",
+     "Exp",
+     "Strike"
+    ],
+    "row": 12
+   },
+   {
+    "cells": [
+     "",
+     "3/2/26 09:31:05",
+     "STOCK",
+     "BUY",
+     null,
+     "TO OPEN",
+     "AAA",
+     "",
+     ""
+    ],
+    "row": 13
+   },
+   {
+    "cells": [
+     "",
+     "3/2/26 09:54:05",
+     "STOCK",
+     "SELL",
+     null,
+     "TO CLOSE",
+     "AAA",
+     "",
+     ""
+    ],
+    "row": 14
+   },
+   {
+    "cells": [
+     "",
+     "3/2/26 10:08:05",
+     "STOCK",
+     "SELL",
+     null,
+     "TO CLOSE",
+     "BBB",
+     "",
+     ""
+    ],
+    "row": 15
+   },
+   {
+    "cells": [
+     "",
+     "3/2/26 10:36:05",
+     "STOCK",
+     "BUY",
+     null,
+     "TO OPEN",
+     "BBB",
+     "",
+     ""
+    ],
+    "row": 16
+   },
+   {
+    "cells": [
+     "",
+     "3/2/26 10:48:05",
+     "STOCK",
+     "BUY",
+     null,
+     "TO OPEN",
+     "CCC",
+     "",
+     ""
+    ],
+    "row": 17
+   },
+   {
+    "cells": [
+     "",
+     "3/2/26 11:21:05",
+     "STOCK",
+     "SELL",
+     null,
+     "TO CLOSE",
+     "CCC",
+     "",
+     ""
+    ],
+    "row": 18
+   },
+   {
+    "cells": [
+     "",
+     "3/2/26 11:31:05",
+     "STOCK",
+     "BUY",
+     null,
+     "TO OPEN",
+     "AAA",
+     "",
+     ""
+    ],
+    "row": 19
+   },
+   {
+    "cells": [
+     "",
+     "3/2/26 12:09:05",
+     "STOCK",
+     "SELL",
+     null,
+     "TO CLOSE",
+     "AAA",
+     "",
+     ""
+    ],
+    "row": 20
+   },
+   {
+    "cells": [
+     "",
+     "3/2/26 12:17:05",
+     "STOCK",
+     "SELL",
+     null,
+     "TO CLOSE",
+     "BBB",
+     "",
+     ""
+    ],
+    "row": 21
+   },
+   {
+    "cells": [
+     "",
+     "3/2/26 12:40:05",
+     "STOCK",
+     "BUY",
+     null,
+     "TO OPEN",
+     "BBB",
+     "",
+     ""
+    ],
+    "row": 22
+   },
+   {
+    "cells": [
+     "",
+     "3/2/26 13:06:05",
+     "STOCK",
+     "BUY",
+     null,
+     "TO OPEN",
+     "CCC",
+     "",
+     ""
+    ],
+    "row": 23
+   },
+   {
+    "cells": [
+     "",
+     "3/2/26 13:34:05",
+     "STOCK",
+     "SELL",
+     null,
+     "TO CLOSE",
+     "CCC",
+     "",
+     ""
+    ],
+    "row": 24
+   },
+   {
+    "cells": [
+     "",
+     "3/2/26 13:43:05",
+     "STOCK",
+     "BUY",
+     null,
+     "TO OPEN",
+     "AAA",
+     "",
+     ""
+    ],
+    "row": 25
+   },
+   {
+    "cells": [
+     "",
+     "3/2/26 14:16:05",
+     "STOCK",
+     "SELL",
+     null,
+     "TO CLOSE",
+     "AAA",
+     "",
+     ""
+    ],
+    "row": 26
+   },
+   {
+    "cells": [
+     "",
+     "3/2/26 14:23:05",
+     "STOCK",
+     "SELL",
+     null,
+     "TO CLOSE",
+     "BBB",
+     "",
+     ""
+    ],
+    "row": 27
+   },
+   {
+    "cells": [
+     "",
+     "3/2/26 15:01:05",
+     "STOCK",
+     "BUY",
+     null,
+     "TO OPEN",
+     "BBB",
+     "",
+     ""
+    ],
+    "row": 28
+   },
+   {
+    "cells": [
+     "Equities",
+     "",
+     "",
+     "",
+     null,
+     "",
+     "",
+     "",
+     ""
+    ],
+    "row": 30
+   },
+   {
+    "cells": [
+     "Symbol",
+     "Description",
+     "Qty",
+     "Trade Price",
+     null,
+     "Mark Value",
+     "",
+     "",
+     ""
+    ],
+    "row": 31
+   },
+   {
+    "cells": [
+     "AAA",
+     "AAA INC",
+     "10",
+     "100.00",
+     null,
+     "1,010.00",
+     "",
+     "",
+     ""
+    ],
+    "row": 32
+   }
+  ],
+  "table": null,
+  "tables": null
+ },
+ "preset": null,
+ "signature": "2e8e9371479b2c1b2890201b4f1b2c28"
+}

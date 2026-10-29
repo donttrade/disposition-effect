@@ -389,6 +389,7 @@ def answer_units(rendered, private=None):
                 end = heads[k + 1].start() if k + 1 < len(heads) else len(main)
                 body = main[h.end():end]
                 body = FAQ_SECTION_RE.sub("", body)
+                body = re.sub(r'(?s)<span class="ls-sum">.*?</span>', "", body)   # sweep 3: the fold's one-line summary is not the answer
                 q = plain(h.group(3))
                 add(page, ANSWER_SECTIONS[path], q, plain(body), h.group(2), f"{crumb}, {q}")
         if path == "/glossary/":
@@ -655,7 +656,7 @@ def tools_for(flags):
             for t in TOOLS]
 
 
-SAMPLE_CSV = os.path.join(SITE, "static", "samples", "demo-trades.csv")
+SAMPLE_CSV = os.path.join(SITE, "static", "samples", "example-trades.csv")
 TOOL_PREVIEWS_JSON = os.path.join(SITE, "config", "tool_previews.json")
 
 
@@ -799,14 +800,14 @@ def latest():
 
 
 def sample_csv():
-    """The synthetic demo file, inlined into the page inside <script type="text/csv">.
+    """The synthetic example file, inlined into the page inside <script type="text/csv">.
 
     Inlined rather than fetched because the page's CSP is connect-src 'none'. The build
     refuses anything that could end the script element early."""
     with open(SAMPLE_CSV, encoding="utf-8") as f:
         text = f.read()
     if "<" in text or "&" in text:
-        die("demo-trades.csv contains '<' or '&'; it cannot be inlined safely")
+        die("example-trades.csv contains '<' or '&'; it cannot be inlined safely")
     return text
 
 
@@ -859,6 +860,8 @@ def vt_css_problem(out):
 def journal_problem(html, path):
     """D12 / J10: the journal pages load no analytics and keep connect-src and form-action 'none'."""
     import html as _h
+    if path in PAID_DETAILS_PATHS and "cloudflareinsights" in html:
+        return f"{path} loads analytics (the pay dialog's details source never does: it is not a pageview)"
     if path not in JOURNAL_PATHS:
         return None
     if "cloudflareinsights" in html:
@@ -994,6 +997,16 @@ PAGES.append({"template": "pages/pricing.html", "path": "/pricing/", "requires_f
               "title": "Pricing: Published Prices for Firms and Traders",
               "description": "Published prices in USD for prop firms, brokers, trading platforms and traders, the "
                              "same for everyone and fixed in writing before anyone sees data."})
+# /before-you-pay/ (29 Oct): the pay dialog's "Full details before you pay" is copied from this page (static/js/pay.js,
+# a hidden same-origin frame), not from /pricing/, so opening it is not counted as a /pricing/ pageview. No analytics
+# (as the journal), noindex, disallowed in robots.txt (PAID_DETAILS_PATHS), on ADDRESS_LINE_PATHS (the block names the
+# seller). The block is partials/before_you_pay.html, the same one /pricing/ shows.
+PAID_DETAILS_PATHS = ["/before-you-pay/"]
+PAGES.append({"template": "pages/before-you-pay.html", "path": "/before-you-pay/", "requires_flag": "paid_report",
+              "noindex": True, "no_analytics": True, "no_ask": True, "scripts": ["/static/js/print.js"],
+              "crumb": "Before you pay", "title": "Before you pay — donttrade",
+              "description": "What you agree to before paying for the donttrade habit report: seller, price, "
+                             "files, restrictions and refunds."})
 
 # Lifted pages (plan steps 28–29): the 20 pages that passed through from docs/ in the old design.
 # checks/lift_pages.py copied each old <main> word for word into site/templates/lifted/<slug>.html
@@ -1020,6 +1033,15 @@ PAID_LIFTED_SWAPS = {
     "/code/": [("There is no name on this site; the scripts are what you check instead.",
                 "No author name is published on this site (" + _SELLER_WHERE + "); the scripts are what you check "
                 "instead.")],
+    # 29 Oct (owner): sample data is labelled with the one word "Example", never "made-up"
+    "/tools/disposition-calculator/": [
+        ('id="dc-example">Fill a made-up example</button>', 'id="dc-example">Try with example data</button>'),
+        ("The example (420, 1,780, 260, 2,240) is made-up. It is not real trading data.",
+         "Example data: 420, 1,780, 260 and 2,240.")],
+    "/tools/pass-rate-calculator/": [
+        ('id="pr-example">Fill a made-up example</button>', 'id="pr-example">Try with example data</button>'),
+        ("The example (1,000 started, 150 open, 170 passed, 40 paid, 800 traders) is made-up. It is not a real firm’s data.",
+         "Example data: 1,000 started, 150 open, 170 passed, 40 paid, 800 traders.")],
 }
 PAID_LIFTED_DESCRIPTIONS = {   # the same, for the page description (head only, outside the frozen body)
     "/about/": "Who writes donttrade, what the plan gap is and how it is measured, why no author name is published, "
@@ -1076,9 +1098,9 @@ PAID_REPLACES_LIFTED = ("/sample-report/",)
 SAMPLE_REPORT_JSON = os.path.join(SITE, "config", "sample-report.report.json")
 SAMPLE_PAGE = {"template": "pages/sample-report.html", "path": "/sample-report/", "requires_flag": None,
                "modules": ["/static/js/paid/sample.js"], "crumb": "Sample habit report", "og_image": "/assets/og/sample-report.png",
-               "title": "Sample habit report, on a demo file — donttrade", "sample_report": True,
-               "description": "A sample of the paid habit report: the report's own engine and page run on a demo file. "
-                              "Not a real trader. Not advice.", "updated": "2026-10-23"}
+               "title": "Example habit report — donttrade", "sample_report": True,
+               "description": "An example of the paid habit report: the report's own engine and page, run on example data. "
+                              "Not advice.", "updated": "2026-10-23"}
 
 
 def lifted_paths_for(paid):
@@ -1097,7 +1119,7 @@ def sample_report():
 
 # Paths that may exist only when paid_report = true.
 PAID_APP_PATHS = ["/welcome/", "/restore/", "/report/"]  # noindex, and disallowed in robots.txt
-PAID_ONLY_PATHS = PAID_APP_PATHS + PAID_ONLY_PATHS_FR
+PAID_ONLY_PATHS = PAID_APP_PATHS + PAID_DETAILS_PATHS + PAID_ONLY_PATHS_FR
 
 
 # The footer's privacy sentences. One wording for template pages (partials/footer.html) and
@@ -1144,7 +1166,9 @@ BUSINESS_REGION = "Ontario, Canada"
 ADDRESS_LINE_PATHS = frozenset({
     # 25 Oct (owner): only where a buyer pays or reads the terms and privacy notice
     "/pricing/", "/terms/", "/privacy/",
-    "/fr/avant-de-payer/", "/fr/conditions/", "/fr/confidentialite/"})
+    "/fr/avant-de-payer/", "/fr/conditions/", "/fr/confidentialite/",
+    # 29 Oct: the pay dialog's details source (PAID_DETAILS_PATHS): the Before-you-pay block, alone
+    "/before-you-pay/"})
 # The short line's link to the seller block: id="seller" in the terms' Contact section (the seller rows
 # whenever show_seller; the full footer line is on that page in any commerce build). French pages exist
 # only with paid_report, so the French link is used only then. verify() checks the target id exists.
@@ -1772,23 +1796,28 @@ def usd_fr(n):
     return "{:,}".format(int(n)).replace(",", "\u00a0") + ",00\u00a0$\u00a0US"
 
 
+BEACON_CONNECT = "https://cloudflareinsights.com"   # the analytics beacon's one connect-src host
+
+
 def csp_for(page, cfg):
     if os.path.join(page["path"].strip("/"), "index.html") in PASSTHROUGH_CSP_PAGES:
         # Manager C4 after the merge of steps 28–29: the lifted old calculators keep the strict
         # no-network policy they had as passthrough pages (connect, worker and form-action 'none'),
         # now without 'unsafe-inline'. With analytics on, the beacon host is the only addition,
         # as on every other tool page (plan DoD: "connect-src 'none' (or the beacon host only)").
+        # 29 Oct: 'none' may not stand beside a host (CSP3; the browser ignores it and logs a console error on
+        # every page), so with the beacon the directive is the beacon host alone, which is the same policy.
         a = cfg["flags"]["analytics"]
         return ("default-src 'self'; script-src 'self'" + (" https://static.cloudflareinsights.com" if a else "") +
-                "; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'" +
-                (" https://cloudflareinsights.com" if a else "") +
+                "; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src " +
+                (BEACON_CONNECT if a else "'none'") +
                 "; worker-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'")
     connect = page.get("connect_src", "'none'")
     if page.get("connect_worker"):
         connect = "'self' " + cfg["worker"]["api_base"]
     beacon = cfg["flags"]["analytics"] and not page.get("no_analytics")   # D12: never on the journal
-    if beacon:
-        connect += " https://cloudflareinsights.com"
+    if beacon:   # never "'none' <host>": the browser ignores 'none' there and logs an error (CSP3)
+        connect = BEACON_CONNECT if connect == "'none'" else connect + " " + BEACON_CONNECT
     script = "'self'" + (" https://static.cloudflareinsights.com" if beacon else "")
     forms = ("'none'" if page.get("no_forms") else
              "'self' https://api.web3forms.com" + "".join(" " + a for a in page.get("form_action", [])))
@@ -1893,7 +1922,7 @@ def write_sitemap_and_robots(out, cfg, built_pages, flags):
         f.write("\n".join(lines) + "\n")
     robots = ["User-agent: *", "Allow: /"]
     if flags["paid_report"]:
-        robots += [f"Disallow: {p}" for p in PAID_APP_PATHS]
+        robots += [f"Disallow: {p}" for p in PAID_APP_PATHS + PAID_DETAILS_PATHS]
     robots.append(f"Sitemap: {base}/sitemap.xml")
     with open(os.path.join(out, "robots.txt"), "w", encoding="utf-8", newline="\n") as f:
         f.write(PREVIEW_ROBOTS_TXT if preview_name() else "\n".join(robots) + "\n")

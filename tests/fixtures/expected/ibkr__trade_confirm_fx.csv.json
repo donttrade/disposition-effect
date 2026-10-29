@@ -48,6 +48,7 @@
   "currency_groups": {
    "base": 2
   },
+  "dates_only": false,
   "executions": [
    {
     "currency": "USD",
@@ -121,6 +122,7 @@
    }
   ],
   "format": "ibkr_flex",
+  "n_date_only": 0,
   "skipped": {
    "not_execution": 1
   },

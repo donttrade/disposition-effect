@@ -1,0 +1,40 @@
+{
+ "cols": {
+  "close_price": null,
+  "close_time": null,
+  "currency": null,
+  "date": 0,
+  "direction": null,
+  "fees": [
+   4
+  ],
+  "open_price": null,
+  "open_time": null,
+  "pnl": null,
+  "price": 3,
+  "qty": 2,
+  "side": null,
+  "status": null,
+  "symbol": 1,
+  "time": null
+ },
+ "currency": null,
+ "date_format": "ymd",
+ "delimiter": null,
+ "futures_sizes": false,
+ "header_row": 0,
+ "headers": {
+  "0": "date",
+  "1": "symbol",
+  "2": "quantity",
+  "3": "price",
+  "4": "fees"
+ },
+ "layout": "fills",
+ "number_style": null,
+ "preset": null,
+ "side_from": "sign",
+ "side_values": null,
+ "status_values": null,
+ "v": 1
+}

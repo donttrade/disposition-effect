@@ -1,0 +1,407 @@
+{
+ "guess": {
+  "badges": {
+   "date": "matched",
+   "price": "matched",
+   "qty": "matched",
+   "side": "matched",
+   "symbol": "matched",
+   "time": "check"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": "ymd",
+   "reason": null,
+   "seen": null,
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": null
+  },
+  "futures_offer": false,
+  "layout": "fills",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 0,
+    "direction": null,
+    "fees": null,
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 5,
+    "qty": 3,
+    "side": 2,
+    "status": null,
+    "symbol": 1,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "ymd",
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "0": "date",
+    "1": "symbol",
+    "2": "side",
+    "3": "qty",
+    "5": "price"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": null,
+   "side_values": {
+    "b": "buy",
+    "s": "sell"
+   },
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1,
+   "year_base": null
+  },
+  "questions": [
+   {
+    "column": 4,
+    "example": "00:30:05",
+    "label": "Time",
+    "q": "time_or_duration",
+    "row": 2
+   }
+  ],
+  "side_checks": {},
+  "side_counts": {
+   "b": 10,
+   "s": 10
+  },
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": null
+ },
+ "peek": {
+  "blocked": [
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "delimiter": ",",
+  "header_hits": 7,
+  "header_row": 0,
+  "headers": [
+   "Date",
+   "Symbol",
+   "Side",
+   "Qty",
+   "Time",
+   "Price",
+   "Avg Price"
+  ],
+  "kind": "csv",
+  "labels": [
+   "Date",
+   "Symbol",
+   "Side",
+   "Qty",
+   "Time",
+   "Price",
+   "Avg Price"
+  ],
+  "n_rows": 20,
+  "options": [
+   {
+    "example": "2026-03-14",
+    "index": 0,
+    "label": "Date"
+   },
+   {
+    "example": "EURUSD",
+    "index": 1,
+    "label": "Symbol"
+   },
+   {
+    "example": "B",
+    "index": 2,
+    "label": "Side"
+   },
+   {
+    "example": "1",
+    "index": 3,
+    "label": "Qty"
+   },
+   {
+    "example": "00:30:05",
+    "index": 4,
+    "label": "Time"
+   },
+   {
+    "example": "1.1",
+    "index": 5,
+    "label": "Price"
+   },
+   {
+    "example": "1.1003",
+    "index": 6,
+    "label": "Avg Price"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     "2026-03-14",
+     "EURUSD",
+     "B",
+     "1",
+     "00:30:05",
+     "1.1",
+     "1.1003"
+    ],
+    "row": 2
+   },
+   {
+    "cells": [
+     "2026-03-14",
+     "EURUSD",
+     "S",
+     "1",
+     "00:42:05",
+     "1.099",
+     "1.0993"
+    ],
+    "row": 3
+   },
+   {
+    "cells": [
+     "2026-03-15",
+     "EURUSD",
+     "B",
+     "2",
+     "00:31:05",
+     "1.101",
+     "1.1013"
+    ],
+    "row": 4
+   },
+   {
+    "cells": [
+     "2026-03-15",
+     "EURUSD",
+     "S",
+     "2",
+     "00:44:05",
+     "1.103",
+     "1.1033"
+    ],
+    "row": 5
+   },
+   {
+    "cells": [
+     "2026-03-16",
+     "EURUSD",
+     "B",
+     "3",
+     "00:32:05",
+     "1.102",
+     "1.1023"
+    ],
+    "row": 6
+   },
+   {
+    "cells": [
+     "2026-03-16",
+     "EURUSD",
+     "S",
+     "3",
+     "00:46:05",
+     "1.101",
+     "1.1013"
+    ],
+    "row": 7
+   },
+   {
+    "cells": [
+     "2026-03-17",
+     "EURUSD",
+     "B",
+     "1",
+     "00:33:05",
+     "1.103",
+     "1.1033"
+    ],
+    "row": 8
+   },
+   {
+    "cells": [
+     "2026-03-17",
+     "EURUSD",
+     "S",
+     "1",
+     "00:48:05",
+     "1.105",
+     "1.1053"
+    ],
+    "row": 9
+   },
+   {
+    "cells": [
+     "2026-03-18",
+     "EURUSD",
+     "B",
+     "2",
+     "00:34:05",
+     "1.104",
+     "1.1043"
+    ],
+    "row": 10
+   },
+   {
+    "cells": [
+     "2026-03-18",
+     "EURUSD",
+     "S",
+     "2",
+     "00:50:05",
+     "1.103",
+     "1.1033"
+    ],
+    "row": 11
+   },
+   {
+    "cells": [
+     "2026-03-19",
+     "EURUSD",
+     "B",
+     "3",
+     "00:35:05",
+     "1.105",
+     "1.1053"
+    ],
+    "row": 12
+   },
+   {
+    "cells": [
+     "2026-03-19",
+     "EURUSD",
+     "S",
+     "3",
+     "00:52:05",
+     "1.107",
+     "1.1073"
+    ],
+    "row": 13
+   },
+   {
+    "cells": [
+     "2026-03-20",
+     "EURUSD",
+     "B",
+     "1",
+     "00:36:05",
+     "1.106",
+     "1.1063"
+    ],
+    "row": 14
+   },
+   {
+    "cells": [
+     "2026-03-20",
+     "EURUSD",
+     "S",
+     "1",
+     "00:54:05",
+     "1.105",
+     "1.1053"
+    ],
+    "row": 15
+   },
+   {
+    "cells": [
+     "2026-03-21",
+     "EURUSD",
+     "B",
+     "2",
+     "00:37:05",
+     "1.107",
+     "1.1073"
+    ],
+    "row": 16
+   },
+   {
+    "cells": [
+     "2026-03-21",
+     "EURUSD",
+     "S",
+     "2",
+     "00:56:05",
+     "1.109",
+     "1.1093"
+    ],
+    "row": 17
+   },
+   {
+    "cells": [
+     "2026-03-22",
+     "EURUSD",
+     "B",
+     "3",
+     "00:38:05",
+     "1.108",
+     "1.1083"
+    ],
+    "row": 18
+   },
+   {
+    "cells": [
+     "2026-03-22",
+     "EURUSD",
+     "S",
+     "3",
+     "00:58:05",
+     "1.107",
+     "1.1073"
+    ],
+    "row": 19
+   },
+   {
+    "cells": [
+     "2026-03-23",
+     "EURUSD",
+     "B",
+     "1",
+     "00:39:05",
+     "1.109",
+     "1.1093"
+    ],
+    "row": 20
+   },
+   {
+    "cells": [
+     "2026-03-23",
+     "EURUSD",
+     "S",
+     "1",
+     "00:00:05",
+     "1.111",
+     "1.1113"
+    ],
+    "row": 21
+   }
+  ],
+  "table": null,
+  "tables": null
+ },
+ "preset": null,
+ "signature": "1a7a7364a53e1735937d44f07e2ceb80"
+}

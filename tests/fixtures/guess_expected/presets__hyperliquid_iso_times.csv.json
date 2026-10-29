@@ -1,0 +1,669 @@
+{
+ "guess": {
+  "badges": {
+   "date": "matched",
+   "fees": "matched",
+   "price": "matched",
+   "qty": "matched",
+   "side": "matched",
+   "symbol": "matched"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": "ymd",
+   "reason": null,
+   "seen": null,
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": null
+  },
+  "futures_offer": false,
+  "layout": "fills",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 4,
+    "direction": null,
+    "fees": [
+     5
+    ],
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 2,
+    "qty": 3,
+    "side": 1,
+    "status": null,
+    "symbol": 0,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "ymd",
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "0": "coin",
+    "1": "side",
+    "2": "px",
+    "3": "sz",
+    "4": "time",
+    "5": "fee"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": null,
+   "side_values": {
+    "a": "sell",
+    "b": "buy"
+   },
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1,
+   "year_base": null
+  },
+  "questions": [],
+  "side_checks": {
+   "a": "ask_side"
+  },
+  "side_counts": {
+   "a": 10,
+   "b": 10
+  },
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": null
+ },
+ "peek": {
+  "blocked": [
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   true,
+   false,
+   false,
+   false,
+   false
+  ],
+  "delimiter": ",",
+  "header_hits": 8,
+  "header_row": 0,
+  "headers": [
+   "coin",
+   "side",
+   "px",
+   "sz",
+   "time",
+   "fee",
+   "feeToken",
+   "dir",
+   "closedPnl",
+   "hash",
+   "oid",
+   "tid",
+   "crossed",
+   "startPosition"
+  ],
+  "kind": "csv",
+  "labels": [
+   "coin",
+   "side",
+   "px",
+   "sz",
+   "time",
+   "fee",
+   "feeToken",
+   "dir",
+   "closedPnl",
+   "hash",
+   "oid",
+   "tid",
+   "crossed",
+   "startPosition"
+  ],
+  "n_rows": 20,
+  "options": [
+   {
+    "example": "BTC",
+    "index": 0,
+    "label": "coin"
+   },
+   {
+    "example": "B",
+    "index": 1,
+    "label": "side"
+   },
+   {
+    "example": "3000.0",
+    "index": 2,
+    "label": "px"
+   },
+   {
+    "example": "0.1000",
+    "index": 3,
+    "label": "sz"
+   },
+   {
+    "example": "2026-03-16 09:31:05",
+    "index": 4,
+    "label": "time"
+   },
+   {
+    "example": "0.030000",
+    "index": 5,
+    "label": "fee"
+   },
+   {
+    "example": "USDC",
+    "index": 6,
+    "label": "feeToken"
+   },
+   {
+    "example": "Open Long",
+    "index": 7,
+    "label": "dir"
+   },
+   {
+    "example": "0.0",
+    "index": 8,
+    "label": "closedPnl"
+   },
+   {
+    "example": "0",
+    "index": 10,
+    "label": "oid"
+   },
+   {
+    "example": "0",
+    "index": 11,
+    "label": "tid"
+   },
+   {
+    "example": "true",
+    "index": 12,
+    "label": "crossed"
+   },
+   {
+    "example": "0.0",
+    "index": 13,
+    "label": "startPosition"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     "BTC",
+     "B",
+     "3000.0",
+     "0.1000",
+     "2026-03-16 09:31:05",
+     "0.030000",
+     "USDC",
+     "Open Long",
+     "0.0",
+     null,
+     "0",
+     "0",
+     "true",
+     "0.0"
+    ],
+    "row": 2
+   },
+   {
+    "cells": [
+     "BTC",
+     "A",
+     "2940.0",
+     "0.1000",
+     "2026-03-16 09:54:05",
+     "0.029400",
+     "USDC",
+     "Close Long",
+     "0.0",
+     null,
+     "1",
+     "1",
+     "true",
+     "0.0"
+    ],
+    "row": 3
+   },
+   {
+    "cells": [
+     "ETH",
+     "A",
+     "3397.5",
+     "0.3000",
+     "2026-03-16 10:08:05",
+     "0.101925",
+     "USDC",
+     "Close Long",
+     "0.0",
+     null,
+     "2",
+     "2",
+     "true",
+     "0.0"
+    ],
+    "row": 4
+   },
+   {
+    "cells": [
+     "ETH",
+     "B",
+     "3367.5",
+     "0.3000",
+     "2026-03-16 10:36:05",
+     "0.101025",
+     "USDC",
+     "Open Long",
+     "0.0",
+     null,
+     "3",
+     "3",
+     "true",
+     "0.0"
+    ],
+    "row": 5
+   },
+   {
+    "cells": [
+     "BTC",
+     "B",
+     "3285.0",
+     "0.5000",
+     "2026-03-16 10:48:05",
+     "0.164250",
+     "USDC",
+     "Open Long",
+     "0.0",
+     null,
+     "4",
+     "4",
+     "true",
+     "0.0"
+    ],
+    "row": 6
+   },
+   {
+    "cells": [
+     "BTC",
+     "A",
+     "3307.5",
+     "0.5000",
+     "2026-03-16 11:21:05",
+     "0.165375",
+     "USDC",
+     "Close Long",
+     "0.0",
+     null,
+     "5",
+     "5",
+     "true",
+     "0.0"
+    ],
+    "row": 7
+   },
+   {
+    "cells": [
+     "ETH",
+     "B",
+     "3172.5",
+     "0.2000",
+     "2026-03-16 11:31:05",
+     "0.063450",
+     "USDC",
+     "Open Long",
+     "0.0",
+     null,
+     "6",
+     "6",
+     "true",
+     "0.0"
+    ],
+    "row": 8
+   },
+   {
+    "cells": [
+     "ETH",
+     "A",
+     "3202.5",
+     "0.2000",
+     "2026-03-16 12:09:05",
+     "0.064050",
+     "USDC",
+     "Close Long",
+     "0.0",
+     null,
+     "7",
+     "7",
+     "true",
+     "0.0"
+    ],
+    "row": 9
+   },
+   {
+    "cells": [
+     "BTC",
+     "A",
+     "3030.0",
+     "0.4000",
+     "2026-03-16 12:17:05",
+     "0.121200",
+     "USDC",
+     "Close Long",
+     "0.0",
+     null,
+     "8",
+     "8",
+     "true",
+     "0.0"
+    ],
+    "row": 10
+   },
+   {
+    "cells": [
+     "BTC",
+     "B",
+     "3090.0",
+     "0.4000",
+     "2026-03-16 12:40:05",
+     "0.123600",
+     "USDC",
+     "Open Long",
+     "0.0",
+     null,
+     "9",
+     "9",
+     "true",
+     "0.0"
+    ],
+    "row": 11
+   },
+   {
+    "cells": [
+     "ETH",
+     "B",
+     "3427.5",
+     "0.1000",
+     "2026-03-16 13:06:05",
+     "0.034275",
+     "USDC",
+     "Open Long",
+     "0.0",
+     null,
+     "10",
+     "10",
+     "true",
+     "0.0"
+    ],
+    "row": 12
+   },
+   {
+    "cells": [
+     "ETH",
+     "A",
+     "3382.5",
+     "0.1000",
+     "2026-03-16 13:34:05",
+     "0.033825",
+     "USDC",
+     "Close Long",
+     "0.0",
+     null,
+     "11",
+     "11",
+     "true",
+     "0.0"
+    ],
+    "row": 13
+   },
+   {
+    "cells": [
+     "BTC",
+     "B",
+     "3315.0",
+     "0.3000",
+     "2026-03-16 13:43:05",
+     "0.099450",
+     "USDC",
+     "Open Long",
+     "0.0",
+     null,
+     "12",
+     "12",
+     "true",
+     "0.0"
+    ],
+    "row": 14
+   },
+   {
+    "cells": [
+     "BTC",
+     "A",
+     "3300.0",
+     "0.3000",
+     "2026-03-16 14:16:05",
+     "0.099000",
+     "USDC",
+     "Close Long",
+     "0.0",
+     null,
+     "13",
+     "13",
+     "true",
+     "0.0"
+    ],
+    "row": 15
+   },
+   {
+    "cells": [
+     "ETH",
+     "A",
+     "3202.5",
+     "0.5000",
+     "2026-03-16 14:23:05",
+     "0.160125",
+     "USDC",
+     "Close Long",
+     "0.0",
+     null,
+     "14",
+     "14",
+     "true",
+     "0.0"
+    ],
+    "row": 16
+   },
+   {
+    "cells": [
+     "ETH",
+     "B",
+     "3217.5",
+     "0.5000",
+     "2026-03-16 15:01:05",
+     "0.160875",
+     "USDC",
+     "Open Long",
+     "0.0",
+     null,
+     "15",
+     "15",
+     "true",
+     "0.0"
+    ],
+    "row": 17
+   },
+   {
+    "cells": [
+     "BTC",
+     "B",
+     "3060.0",
+     "0.2000",
+     "2026-03-17 09:31:05",
+     "0.061200",
+     "USDC",
+     "Open Long",
+     "0.0",
+     null,
+     "16",
+     "16",
+     "true",
+     "0.0"
+    ],
+    "row": 18
+   },
+   {
+    "cells": [
+     "BTC",
+     "A",
+     "3105.0",
+     "0.2000",
+     "2026-03-17 09:54:05",
+     "0.062100",
+     "USDC",
+     "Close Long",
+     "0.0",
+     null,
+     "17",
+     "17",
+     "true",
+     "0.0"
+    ],
+    "row": 19
+   },
+   {
+    "cells": [
+     "ETH",
+     "B",
+     "3457.5",
+     "0.4000",
+     "2026-03-17 10:17:05",
+     "0.138300",
+     "USDC",
+     "Open Long",
+     "0.0",
+     null,
+     "18",
+     "18",
+     "true",
+     "0.0"
+    ],
+    "row": 20
+   },
+   {
+    "cells": [
+     "ETH",
+     "A",
+     "3397.5",
+     "0.4000",
+     "2026-03-17 10:45:05",
+     "0.135900",
+     "USDC",
+     "Close Long",
+     "0.0",
+     null,
+     "19",
+     "19",
+     "true",
+     "0.0"
+    ],
+    "row": 21
+   }
+  ],
+  "table": null,
+  "tables": null
+ },
+ "preset": {
+  "id": "hyperliquid_fills",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 4,
+    "direction": null,
+    "fees": [
+     5
+    ],
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 2,
+    "qty": 3,
+    "side": 1,
+    "status": null,
+    "symbol": 0,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "ymd",
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "0": "coin",
+    "1": "side",
+    "2": "px",
+    "3": "sz",
+    "4": "time",
+    "5": "fee"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": "hyperliquid_fills",
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": [
+    [
+     "eq",
+     "b",
+     "buy"
+    ],
+    [
+     "eq",
+     "a",
+     "sell"
+    ],
+    [
+     "eq",
+     "buy",
+     "buy"
+    ],
+    [
+     "eq",
+     "sell",
+     "sell"
+    ]
+   ],
+   "side_values": null,
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1
+  },
+  "name": "Hyperliquid fills",
+  "questions": []
+ },
+ "signature": "84793510f31e9f0c27bce906b5b24329"
+}

@@ -1,0 +1,144 @@
+{
+ "guess": {
+  "badges": {
+   "date": "check",
+   "price": "check",
+   "qty": "check",
+   "side": "check",
+   "symbol": "check"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": null,
+   "reason": "empty",
+   "seen": null,
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": null
+  },
+  "futures_offer": false,
+  "layout": "fills",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 0,
+    "direction": null,
+    "fees": null,
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 5,
+    "qty": 4,
+    "side": 3,
+    "status": null,
+    "symbol": 2,
+    "time": null
+   },
+   "currency": null,
+   "date_format": null,
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "0": "date",
+    "2": "symbol",
+    "3": "side",
+    "4": "qty",
+    "5": "price"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": null,
+   "side_values": {},
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1,
+   "year_base": null
+  },
+  "questions": [
+   {
+    "error": "empty",
+    "q": "date_order",
+    "rows": []
+   }
+  ],
+  "side_checks": {},
+  "side_counts": {},
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": null
+ },
+ "peek": {
+  "blocked": [
+   false,
+   true,
+   false,
+   false,
+   false,
+   false
+  ],
+  "delimiter": ",",
+  "header_hits": 5,
+  "header_row": 0,
+  "headers": [
+   "Date",
+   "Account",
+   "Symbol",
+   "Side",
+   "Qty",
+   "Price"
+  ],
+  "kind": "csv",
+  "labels": [
+   "Date",
+   "Account",
+   "Symbol",
+   "Side",
+   "Qty",
+   "Price"
+  ],
+  "n_rows": 0,
+  "options": [
+   {
+    "example": "",
+    "index": 0,
+    "label": "Date"
+   },
+   {
+    "example": "",
+    "index": 2,
+    "label": "Symbol"
+   },
+   {
+    "example": "",
+    "index": 3,
+    "label": "Side"
+   },
+   {
+    "example": "",
+    "index": 4,
+    "label": "Qty"
+   },
+   {
+    "example": "",
+    "index": 5,
+    "label": "Price"
+   }
+  ],
+  "rows": [],
+  "table": null,
+  "tables": null
+ },
+ "preset": null,
+ "signature": "12d31a11703fba8d6838afb4e5606e37"
+}

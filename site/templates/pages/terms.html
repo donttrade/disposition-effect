@@ -16,10 +16,13 @@
   <h1>Terms, refunds and the {{ pilot.name }}</h1>
   <p class="notice">Plain-language terms, version {{ legal.terms_version }}. Where a signed engagement agreement differs, the agreement governs.{% if flags.paid_report %} <a href="/fr/conditions/" hreflang="fr" lang="fr">Version française</a>{% endif %}</p>
 
-  <h2 id="prices">Prices</h2>
+  <details class="legal-sec">
+    <summary><h2 id="prices">Prices</h2><span class="ls-sum">Firm prices are in US dollars, before sales tax.</span></summary>
   <p>Firm prices are in US dollars (USD), before any applicable sales tax. <a href="/pricing/">Pricing</a></p>
+  </details>
 
-  <h2 id="payment">Payment</h2>
+  <details class="legal-sec">
+    <summary><h2 id="payment">Payment</h2><span class="ls-sum">Firms pay by invoice. We never ask for card details by email.</span></summary>
   <ul>
     <li>Every firm engagement is invoiced by email.</li>
     <li>Snapshot, Memo and Outcomes pack: {{ products.memo.payment_terms }}.</li>
@@ -28,15 +31,19 @@
     <li>Invoices are in USD. Pay by bank transfer, or, in Canada, the CAD equivalent by Interac e-Transfer at the Bank of Canada daily rate on the invoice date. Transfer and bank fees are paid by the sender. {% include "partials/card_timing.html" %}</li>
     <li>We never ask for card details by email.</li>
   </ul>
+  </details>
 
-  <h2 id="delivery">Delivery</h2>
+  <details class="legal-sec">
+    <summary><h2 id="delivery">Delivery</h2><span class="ls-sum">Counted in business days, from payment and a clean run.</span></summary>
   <ul>
     <li>Delivery times are in business days.</li>
     <li>The clock starts when payment is received and the script’s output comes back without validation errors.</li>
     <li>The clock pauses while a question to you is open.</li>
   </ul>
+  </details>
 
-  <h2 id="trial">The {{ pilot.name }}</h2>
+  <details class="legal-sec">
+    <summary><h2 id="trial">The {{ pilot.name }}</h2><span class="ls-sum">One figure, one per firm; its fee can count toward a Memo.</span></summary>
   <p class="small muted">{{ pilot.name }} (called “{{ pilot.former_name }}” before {{ legal.launch_human }}).</p>
   <ul>
     <li>One disposition figure; one per firm; {{ pilot.turnaround_days }} business days.</li>
@@ -49,8 +56,10 @@
     <li id="pilot-refund"><strong>Automatic refund if the scope isn’t confirmed:</strong> {{ pilot_refund(products) }}</li>
     {%- endif %}
   </ul>
+  </details>
 
-  <h2 id="cancellation">Cancellations and refunds</h2>
+  <details class="legal-sec">
+    <summary><h2 id="cancellation">Cancellations and refunds</h2><span class="ls-sum">No cancellation fees.{% if flags.paid_report %} Traders: full refund within {{ prices.rules.trader_refund_days }} days.{% endif %}</span></summary>
   <p>No cancellation fees, for firms or traders.</p>
   <h3 id="refunds">Firms</h3>
   <ul>
@@ -87,34 +96,47 @@
   <p>The trader report is waitlist only for now: nothing is sold and no money is taken. {{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers, in USD. A yearly {{ t.name|lower }} comes later and is not sold until it exists.</p>
   <p>Before anything is sold, these terms will be updated, and the seller’s details, the full terms and a printable summary will be shown before anyone pays. When the report launches, a full refund is available if you ask within {{ prices.rules.trader_refund_days }} days of buying.</p>
   {%- endif %}
+  </details>
 
-  <h2 id="publication">Publication and use of our name</h2>
+  <details class="legal-sec">
+    <summary><h2 id="publication">Publication and use of our name</h2><span class="ls-sum">Nothing about your data is published without your consent.</span></summary>
   <p>Nothing about your data is published without your consent. You may say a figure was “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a fixed-scope agreement”, and nothing stronger: never audited, certified or verified.</p>
+  </details>
 
-  <h2 id="not-advice">What this is not</h2>
+  <details class="legal-sec">
+    <summary><h2 id="not-advice">What this is not</h2><span class="ls-sum">Not investment advice.</span></summary>
   <p>It is not investment advice. It is not an audit, and we issue no badge or seal.</p>
   <p class="disclaimer">{{ legal.disclaimer_long }}</p>
+  </details>
 
-  <h2 id="liability">Liability</h2>
+  <details class="legal-sec">
+    <summary><h2 id="liability">Liability</h2><span class="ls-sum">Capped at the fees paid. Consumer law rights stay.</span></summary>
   {%- if flags.paid_report %}
   <p><strong>This paragraph does not apply to consumers in Quebec.</strong> Our liability is capped at the fees paid for the product or engagement concerned. We are not responsible for trading decisions you make or their results.</p>
   <p>For everyone: nothing in these terms limits rights you have under consumer protection law that cannot be excluded.</p>
   {%- else %}
   <p>Our liability is capped at the fees paid. Nothing in these terms limits rights you have under consumer protection law that cannot be excluded.</p>
   {%- endif %}
+  </details>
 
-  <h2 id="agreement">The engagement agreement</h2>
+  <details class="legal-sec">
+    <summary><h2 id="agreement">The engagement agreement</h2><span class="ls-sum">Each firm engagement has a short written agreement.</span></summary>
   <p>Every firm engagement is governed by a short written agreement (scope, data terms and the licence for the engagement), sent with the scope for you to review before you pay. A blank template is available on request by email.</p>
+  </details>
 
-  <h2 id="law">Governing law</h2>
+  <details class="legal-sec">
+    <summary><h2 id="law">Governing law</h2><span class="ls-sum">Ontario law and courts.{% if flags.paid_report %} Consumers keep their local protections.{% endif %}</span></summary>
   <p>These terms are governed by the laws of the Province of Ontario and the federal laws of Canada applicable there, and disputes go to the courts of Ontario.{% if flags.paid_report %} If you are a consumer, this does not take away the protection of the mandatory rules of the law where you live, or your right to go to the courts there.{% endif %}</p>
+  </details>
 
-  <h2 id="contact">Contact</h2>
+  <details class="legal-sec">
+    <summary><h2 id="contact">Contact</h2><span class="ls-sum">Who the seller is, and how to reach us.</span></summary>
   {%- if show_seller %}
   <dl class="byp" id="seller">{{ seller_rows(private, site, "en") }}</dl>
   {%- else %}
   <p id="seller">Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>. {{ site.reply_promise }}</p>
   {%- endif %}
+  </details>
   <p class="small muted">Version {{ legal.terms_version }}.</p>
 </div></div>
 {% endblock %}
