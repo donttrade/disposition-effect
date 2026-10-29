@@ -26,7 +26,7 @@ import engine_ref as E  # noqa: E402
 import readiness_ref as R  # noqa: E402
 from test_tool_prop_sim import RULES, simulate_py, demo_days  # noqa: E402
 
-DEMO = os.path.join(REPO, "site", "static", "samples", "demo-trades.csv")
+DEMO = os.path.join(REPO, "site", "static", "samples", "example-trades.csv")
 CORE = "/site/static/js/tools/prop-sim-core.js"
 HAB = "/site/static/js/tools/habit-flags.js"
 
@@ -749,3 +749,24 @@ BAD_INPUT = [
 def test_bad_input_is_rejected_in_both_engines(page, bad, msg):
     p = {"mode": "file", "days": [[1]], "rules": R_OK, "runs": 10, **bad}
     assert js_error(page, "simulate", p) == msg == py_error(R.simulate, p)
+
+
+# ------------------------------------------------------------------ Expert details: uncertainty
+def test_mc_error_formula(page):
+    for p_, n in ((0.5, 10000), (0.31, 10000), (0.02, 2000)):
+        want = 1.96 * math.sqrt(p_ * (1 - p_) / n)
+        assert abs(js(page, "mcError", p_, n) - want) < 1e-15 and abs(R.mc_error(p_, n) - want) < 1e-15
+    assert round(R.mc_error(0.5, 10000), 4) == 0.0098
+
+
+def test_day_resample_range_js_equals_python_and_holds_the_point(page):
+    _, g = demo_grouped()
+    p = {"mode": "file", "days": g["days"], "open_s": g["open_s"], "close_s": g["close_s"], "seed": 4, "rules": GRID[0]}
+    a = js(page, "dayResampleRange", p, {"B": 20, "inner": 300, "personal": {"stop_after_losses": 1}})
+    b = R.day_resample_range(p, B=20, inner=300, personal={"stop_after_losses": 1})
+    assert a == json.loads(json.dumps(b))
+    assert a == js(page, "dayResampleRange", p, {"B": 20, "inner": 300, "personal": {"stop_after_losses": 1}})  # reproducible
+    point = R.simulate({**p, "runs": 3000, "stream": "paired"})
+    for k in ("pass", "bust", "timeout"):
+        lo, hi = a["shares"][k]
+        assert lo <= hi and lo - 0.02 <= point[k] / 3000 <= hi + 0.02, (k, lo, point[k] / 3000, hi)

@@ -557,3 +557,47 @@ export function groupDays(trades, opts = {}) {
 export function tradingDays(trades, opts) {
   return groupDays(trades, opts).days;
 }
+
+// ------------------------------------------------------------------ Expert details: uncertainty (§2.8)
+// Monte Carlo error of a share from n runs: the 95% half-width 1.96·√(p(1−p)/n).
+export function mcError(share, n) {
+  return 1.96 * Math.sqrt(share * (1 - share) / n);
+}
+
+// File uncertainty: B outer resamples of the file's days (with replacement, each the file's length),
+// `inner` paired runs each; 90% percentile intervals of the pass / bust / time-out shares and, with a
+// what-if rule, of its change in each. Deterministic: resample b draws from mulberry32(mix32(seed ^
+// RANGE_SALT, b)). Percentile q of B sorted values: the value at index round(q·(B − 1)).
+export const RANGE_SALT = 0x5bd1e995;
+export const RANGE_B = 200;
+export const RANGE_INNER = 1000;
+export function dayResampleRange(p, opts = {}) {
+  const B = opts.B || RANGE_B, inner = opts.inner || RANGE_INNER;
+  const seed = p.seed === undefined ? DEFAULT_SEED : p.seed;
+  const personal = opts.personal || null;
+  checkInput(p);
+  if (p.mode === 'manual') throw new Error('range: needs a file');
+  const n = p.days.length;
+  const keys = ['pass', 'bust', 'timeout'];
+  const vals = { pass: [], bust: [], timeout: [] }, diffs = { pass: [], bust: [], timeout: [] };
+  for (let b = 0; b < B; b++) {
+    const rand = mulberry32(mix32((seed ^ RANGE_SALT) >>> 0, b));
+    const pick = [];
+    for (let i = 0; i < n; i++) pick.push(Math.floor(rand() * n));
+    const q = { ...p, mode: 'file', runs: inner, stream: 'paired', personal: null, days: pick.map((i) => p.days[i]) };
+    if (p.open_s) { q.open_s = pick.map((i) => p.open_s[i]); q.close_s = pick.map((i) => p.close_s[i]); }
+    const a = simulate(q);
+    const w = personal ? simulate({ ...q, personal }) : null;
+    for (const k of keys) {
+      vals[k].push(a[k] / inner);
+      if (w) diffs[k].push((w[k] - a[k]) / inner);
+    }
+  }
+  const at = (arr, qq) => { const s = arr.slice().sort((x, y) => x - y); return s[Math.round(qq * (s.length - 1))]; };
+  const out = { B, inner, level: 0.9, shares: {}, change: personal ? {} : null };
+  for (const k of keys) {
+    out.shares[k] = [at(vals[k], 0.05), at(vals[k], 0.95)];
+    if (personal) out.change[k] = [at(diffs[k], 0.05), at(diffs[k], 0.95)];
+  }
+  return out;
+}

@@ -729,3 +729,49 @@ def preset_rules(preset, account_size=None):
     day_start = r.pop("day_start")
     return {"rules": r, "dayStart": day_start, "accountSize": preset["account_size"] if k == 1 else account_size,
             "notStated": not_stated, "notModelled": list(preset["not_modelled"])}
+
+
+# ------------------------------------------------------------------ Expert details: uncertainty (prop-sim-core.js)
+RANGE_SALT = 0x5BD1E995
+
+
+def mc_error(share, n):
+    return 1.96 * math.sqrt(share * (1 - share) / n)
+
+
+def day_resample_range(p, B=200, inner=1000, personal=None):
+    check_input(p)
+    seed = DEFAULT_SEED if "seed" not in p else p["seed"]
+    n = len(p["days"])
+    keys = ("pass", "bust", "timeout")
+    vals = {k: [] for k in keys}
+    diffs = {k: [] for k in keys}
+    for b in range(B):
+        rand = E.mulberry32(mix32((seed ^ RANGE_SALT) & M32, b))
+        pick = [math.floor(rand() * n) for _ in range(n)]
+        q = {**p, "mode": "file", "runs": inner, "stream": "paired", "personal": None, "days": [p["days"][i] for i in pick]}
+        if p.get("open_s"):
+            q["open_s"] = [p["open_s"][i] for i in pick]
+            q["close_s"] = [p["close_s"][i] for i in pick]
+        a = simulate(q)
+        w = simulate({**q, "personal": personal}) if personal else None
+        for k in keys:
+            vals[k].append(a[k] / inner)
+            if w:
+                diffs[k].append((w[k] - a[k]) / inner)
+
+    def at(arr, qq):
+        s = sorted(arr)
+        return s[round_half_even_safe(qq * (len(s) - 1))]
+
+    out = {"B": B, "inner": inner, "level": 0.9, "shares": {}, "change": {} if personal else None}
+    for k in keys:
+        out["shares"][k] = [at(vals[k], 0.05), at(vals[k], 0.95)]
+        if personal:
+            out["change"][k] = [at(diffs[k], 0.05), at(diffs[k], 0.95)]
+    return out
+
+
+def round_half_even_safe(x):
+    """JS Math.round: half up (x is never negative here)."""
+    return math.floor(x + 0.5)
