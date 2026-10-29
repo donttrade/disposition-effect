@@ -94,7 +94,15 @@ def test_pricing_traders_only_axe_and_pay_panel(browser, built_site, color):
     assert page.locator('[role="tab"]').count() == 0 and page.locator("#panel-firms").count() == 0
     assert page.is_hidden("#before-you-pay")   # in the "Last step" panel
     page.click("#last-step > summary")
-    assert page.is_visible("#before-you-pay") and page.locator("#last-step a[href*='buy.stripe.com']").count() == 2
+    # 29 Oct (owner): one click to the pay step. Three facts and one Stripe button; the full "Before you pay" block,
+    # unchanged, opens with one more tap ("Full details before you pay") and sits above the button. This pinned the
+    # layout (two Pay buttons around an always-open block), not the content, so it follows the new layout.
+    assert page.is_visible("#last-step .pay-facts") and page.is_hidden("#before-you-pay")
+    assert page.locator("#last-step a[href*='buy.stripe.com']").count() == 1
+    assert page.inner_text("#last-step a[href*='buy.stripe.com']") == "Continue to secure payment"
+    page.click("#byp-more > summary")
+    assert page.is_visible("#before-you-pay")
+    assert page.evaluate("document.getElementById('before-you-pay').compareDocumentPosition(document.querySelector(\"#last-step a[href*='buy.stripe.com']\")) & Node.DOCUMENT_POSITION_FOLLOWING")
     assert horizontal_overflow(page) == []
     assert axe_violations(page) == []
     for anchor in ("firms", "copy-leader", "claims-test", "platforms", "researchers", "payment"):

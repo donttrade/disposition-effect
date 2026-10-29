@@ -31,9 +31,10 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=dae97652">
+<link rel="stylesheet" href="/static/css/site.css?v=f49f54d3">
 <script src="/static/js/theme.js?v=74363ef7"></script>
-<script src="/static/js/nav.js?v=cd8f3405" defer></script>
+<script src="/static/js/nav.js?v=9c8cacb8" defer></script>
+<script src="/static/js/pay.js?v=d20a3680" defer></script>
 <script src="/static/js/lifted.js?v=ea2af7c3" defer></script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "item": "https://donttrade.ca/research/", "name": "Research", "position": 2}, {"@type": "ListItem", "name": "Portfolio-driven disposition effect", "position": 3}]}, {"@type": "Article", "author": {"@id": "https://donttrade.ca/#org"}, "dateModified": "2026-10-17", "datePublished": "2026-10-16", "description": "A pre-registered replication of the portfolio-driven disposition effect on public CC0 data; its headline was corrected on 17 Oct 2026.", "headline": "Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)", "image": "https://donttrade.ca/assets/og/pdde.png", "isAccessibleForFree": true, "license": "https://creativecommons.org/licenses/by-nc/4.0/", "mainEntityOfPage": "https://donttrade.ca/research/portfolio-driven-disposition-effect/", "publisher": {"@id": "https://donttrade.ca/#org"}, "url": "https://donttrade.ca/research/portfolio-driven-disposition-effect/"}]}</script>
 </head>
@@ -44,56 +45,23 @@
   <a class="brand" href="/">donttrade</a>
   <nav class="site-nav" aria-label="Main"><ul class="nav-row">
     <li><a href="/sample-report/">Sample report</a></li>
-    <li class="nav-dd-li"><details name="nav" class="nav-dd" data-nav-dd>
-      <summary>Free tools<svg class="chev" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg></summary>
-      <div class="nav-pop nav-pop-2 nav-pop-end">
-      <ul class="nav-items">
-        <li><a class="nav-item" href="/tools/trade-stats/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-9l5 6-5 6h9"/></svg><span class="ni-text"><span class="ni-t">Trade stats</span> <span class="ni-d">Totals from your trade file</span></span></a></li>
-        <li><a class="nav-item" href="/tools/trading-heatmap/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h10v10H3z"/><path d="M7 13v4h10V7h-4"/></svg><span class="ni-text"><span class="ni-t">Trading heatmap</span> <span class="ni-d">Your results by hour and weekday</span></span></a></li>
-        <li><a class="nav-item" href="/tools/drawdown-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h14v12H3z"/><path d="M10 4v12"/></svg><span class="ni-text"><span class="ni-t">Drawdown calculator</span> <span class="ni-d">What gain recovers a drawdown</span></span></a></li>
-        <li><a class="nav-item" href="/tools/prop-challenge-simulator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18V3"/><path d="M5 4h10l-2.5 3.5L15 11H5"/></svg><span class="ni-text"><span class="ni-t">Prop challenge simulator</span> <span class="ni-d">Your past days under a challenge’s rules</span></span></a></li>
-        <li><a class="nav-item" href="/tools/lot-size-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v14M6 17h8M4 6h12"/><path d="M4 6l-2 5h4zM16 6l-2 5h4z"/></svg><span class="ni-text"><span class="ni-t">Lot size calculator</span> <span class="ni-d">Lots for the risk you chose</span></span></a></li>
-        <li><a class="nav-item" href="/tools/risk-reward-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15L15 5"/><circle cx="6" cy="6" r="1.75"/><circle cx="14" cy="14" r="1.75"/></svg><span class="ni-text"><span class="ni-t">Risk-reward calculator</span> <span class="ni-d">Break-even win rate for a ratio</span></span></a></li>
-        <li><a class="nav-item" href="/tools/disposition-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h10M5 17h10"/><path d="M6.5 3v2.5L13.5 14.5V17M13.5 3v2.5L6.5 14.5V17"/></svg><span class="ni-text"><span class="ni-t">Disposition calculator</span> <span class="ni-d">Winners vs losers sold, from four counts</span></span></a></li>
-        <li><a class="nav-item" href="/tools/pass-rate-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg><span class="ni-text"><span class="ni-t">Pass-rate calculator</span> <span class="ni-d">One cohort’s pass and payout rate</span></span></a></li>
-      </ul>
-      <ul class="nav-foot">
-        <li><a href="/tools/">All free tools</a></li>
-        <li><a href="/for-traders/">For traders: the habit report</a></li>
-      </ul>
-      </div>
-    </details></li>
+    <li><a href="/tools/">Free tools</a></li>
     <li><a href="/pricing/">Pricing</a></li>
     <li><a href="/for-firms/">For firms</a></li>
   </ul>
   <details class="nav-menu" data-nav-menu>
     <summary><svg class="i-menu" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg><svg class="i-close" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>Menu</summary>
     <div class="nav-panel">
-      <details name="m" class="nav-acc">
-        <summary>Free tools<svg class="chev" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg></summary>
-      <ul class="nav-items">
-        <li><a class="nav-item" href="/tools/trade-stats/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-9l5 6-5 6h9"/></svg><span class="ni-text"><span class="ni-t">Trade stats</span> <span class="ni-d">Totals from your trade file</span></span></a></li>
-        <li><a class="nav-item" href="/tools/trading-heatmap/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h10v10H3z"/><path d="M7 13v4h10V7h-4"/></svg><span class="ni-text"><span class="ni-t">Trading heatmap</span> <span class="ni-d">Your results by hour and weekday</span></span></a></li>
-        <li><a class="nav-item" href="/tools/drawdown-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h14v12H3z"/><path d="M10 4v12"/></svg><span class="ni-text"><span class="ni-t">Drawdown calculator</span> <span class="ni-d">What gain recovers a drawdown</span></span></a></li>
-        <li><a class="nav-item" href="/tools/prop-challenge-simulator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18V3"/><path d="M5 4h10l-2.5 3.5L15 11H5"/></svg><span class="ni-text"><span class="ni-t">Prop challenge simulator</span> <span class="ni-d">Your past days under a challenge’s rules</span></span></a></li>
-        <li><a class="nav-item" href="/tools/lot-size-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v14M6 17h8M4 6h12"/><path d="M4 6l-2 5h4zM16 6l-2 5h4z"/></svg><span class="ni-text"><span class="ni-t">Lot size calculator</span> <span class="ni-d">Lots for the risk you chose</span></span></a></li>
-        <li><a class="nav-item" href="/tools/risk-reward-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15L15 5"/><circle cx="6" cy="6" r="1.75"/><circle cx="14" cy="14" r="1.75"/></svg><span class="ni-text"><span class="ni-t">Risk-reward calculator</span> <span class="ni-d">Break-even win rate for a ratio</span></span></a></li>
-        <li><a class="nav-item" href="/tools/disposition-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h10M5 17h10"/><path d="M6.5 3v2.5L13.5 14.5V17M13.5 3v2.5L6.5 14.5V17"/></svg><span class="ni-text"><span class="ni-t">Disposition calculator</span> <span class="ni-d">Winners vs losers sold, from four counts</span></span></a></li>
-        <li><a class="nav-item" href="/tools/pass-rate-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg><span class="ni-text"><span class="ni-t">Pass-rate calculator</span> <span class="ni-d">One cohort’s pass and payout rate</span></span></a></li>
-      </ul>
-      <ul class="nav-foot">
-        <li><a href="/tools/">All free tools</a></li>
-        <li><a href="/for-traders/">For traders: the habit report</a></li>
-      </ul>
-      </details>
       <ul class="nav-links">
-        <li><a href="/">Home</a></li>
         <li><a href="/sample-report/">Sample report</a></li>
+        <li><a href="/tools/">Free tools</a></li>
         <li><a href="/pricing/">Pricing</a></li>
         <li><a href="/for-firms/">For firms</a></li>
       </ul>
+      <p class="nav-cta"><a class="btn " href="/pricing/#last-step" data-pay>Get report — $39</a></p>
     </div>
   </details></nav>
+  <a class="btn hdr-cta" href="/pricing/#last-step" data-pay>Get report — $39</a>
   <button class="theme-toggle" type="button" data-theme-toggle hidden><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg><span class="tt-label">Dark mode</span></button>
 </div></header>
 
@@ -566,6 +534,28 @@ above matched its output to the printed precision.</p>
   </details>
   <p class="legal">&copy; 2026 donttrade · <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
 </div></footer>
+
+
+<dialog class="pay-dialog" id="pay-dialog" aria-labelledby="pd-h" data-pay-dialog>
+  <div class="pd-inner">
+    <div class="pd-top">
+      <h2 id="pd-h">Get the habit report</h2>
+      <button class="pd-close no-print" type="button" data-pay-close aria-label="Close"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg></button>
+    </div>
+    <ul class="pay-facts">
+  <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M3 10.5 9.5 4H16v6.5L9.5 17z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="13" cy="7" r="1.3" fill="currentColor"/></svg><span>US$39 once</span></li>
+  <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M11 2 4 11.5h5L8 18l7-9.5h-5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span>Report right after payment</span></li>
+  <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M4.5 8.5A6 6 0 1 1 4 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 4.5v4.5h4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Full refund within 14 days</span></li>
+</ul>
+    <details class="pay-more" data-pay-more>
+      <summary>Full details before you pay</summary>
+      <div class="pd-full" data-pay-full><p class="small"><a href="/pricing/#before-you-pay">Read the full details on the pricing page</a></p></div>
+    </details>
+    <p class="pay-go no-print"><a class="btn" href="https://buy.stripe.com/eVq14m66H9Jw15a0Rwdwc04" rel="noopener">Continue to secure payment</a></p>
+    <p class="small muted pd-links no-print"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a> · <a href="/terms/#seller">Business details</a></p>
+    
+  </div>
+</dialog>
 
 </body>
 </html>

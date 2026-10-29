@@ -1,0 +1,27 @@
+{#- 29 Oct (owner: "the whole website always one click away from paying"). Paid builds only. Every buy link
+    (a[data-pay] and every link to /pricing/#last-step) opens this <dialog> on the page it is on (static/js/pay.js);
+    without JavaScript it stays a plain link to /pricing/#last-step, where the same step sits in the price card.
+    It holds the three facts (partials/pay_facts.html), "Full details before you pay" and the Stripe link, in that
+    order, so the full disclosure is one tap away and sits above the link once open. The disclosure itself is NOT in
+    this page's HTML: the seller's address is only on build.ADDRESS_LINE_PATHS (lint). pay.js copies the
+    #before-you-pay block from /pricing/ when the expander opens (a hidden same-origin frame of /pricing/: no fetch, so
+    every page keeps connect-src 'none'); if that fails, the link below takes the buyer to it. No study finding and
+    no sample figure in here. -#}
+{%- from "partials/pay_facts.html" import pay_facts %}
+{%- set r = products["report39"] %}{%- set link = r["stripe_link_" + stripe_mode] %}
+<dialog class="pay-dialog" id="pay-dialog" aria-labelledby="pd-h" data-pay-dialog>
+  <div class="pd-inner">
+    <div class="pd-top">
+      <h2 id="pd-h">Get the {{ r.name|lower }}</h2>
+      <button class="pd-close no-print" type="button" data-pay-close aria-label="Close"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg></button>
+    </div>
+    {{ pay_facts(r, prices.rules) }}
+    <details class="pay-more" data-pay-more>
+      <summary>Full details before you pay</summary>
+      <div class="pd-full" data-pay-full><p class="small"><a href="/pricing/#before-you-pay">Read the full details on the pricing page</a></p></div>
+    </details>
+    <p class="pay-go no-print">{% if link %}<a class="btn" href="{{ link }}" rel="noopener">Continue to secure payment</a>{% else %}<span class="muted">Payment link not set yet</span>{% endif %}</p>
+    <p class="small muted pd-links no-print"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a> · <a href="/terms/#seller">Business details</a></p>
+    {% if stripe_mode == "test" %}<p class="notice notice-caution"><strong>Test mode</strong> Payments here use Stripe's test mode. No real card is charged.</p>{% endif %}
+  </div>
+</dialog>
