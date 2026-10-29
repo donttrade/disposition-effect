@@ -24,7 +24,14 @@
 //                     the best single day's P&L is at most c × equity. Reaching the target while a
 //                     day count or the consistency share is short is not a bust: the run goes on
 //                     (counted once per run in held_min_days / held_consistency).
+//     target_check 'intraday': the same pass test also runs after every trade, so a run passes the
+//                     moment its closed-trade balance reaches the target (the rest of that day is not
+//                     replayed); 'eod' (the default, as before) tests at the end of the day only.
+//     count_day_if 'nonzero': a day counts toward min_days only with a trade whose result is not
+//                     zero; 'any' (the default) counts every traded day.
 //   no pass and no bust → time-out (sequence mode: 'end' when the file's days run out first).
+// Every input is checked (normRules, checkInput): NaN, a missing required value, a negative amount
+// or an out-of-range count throws an error with the rule it breaks.
 // "Reaching" a limit counts as a breach (<=), so a loss exactly equal to the limit busts.
 // Closed-trade granularity: what happens inside a trade (open P&L) is not in the file.
 //
@@ -91,20 +98,67 @@ export function mix32(a, b) {
   return (h ^ (h >>> 16)) >>> 0;
 }
 
+const isNum = (v) => typeof v === 'number' && Number.isFinite(v);
+const isWhole = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
+const fail = (msg) => { throw new Error(msg); };
+const opt = (r, k, dflt) => (r[k] === undefined ? dflt : r[k]);
+
+// Checks and fills in the rules. Every value is checked here, not only on the page: NaN, a missing
+// required value, a negative amount or an out-of-range count is an error, never a silent result.
 export function normRules(r) {
+  if (!r || typeof r !== 'object') fail('rules: missing');
+  if (!isNum(r.target) || r.target <= 0) fail('rules: target is an amount above zero');
+  if (!isNum(r.max_loss) || r.max_loss <= 0) fail('rules: max_loss is an amount above zero');
+  if (r.daily_loss === undefined || (r.daily_loss !== null && (!isNum(r.daily_loss) || r.daily_loss <= 0))) {
+    fail('rules: daily_loss is an amount above zero, or null for none');
+  }
+  if (r.time_limit === undefined || (r.time_limit !== null && !isWhole(r.time_limit, 1, 365))) {
+    fail('rules: time_limit is a whole number of days from 1 to 365, or null for none');
+  }
+  if (r.trailing !== undefined && typeof r.trailing !== 'boolean') fail('rules: trailing is true or false');
   const drawdown = r.drawdown === undefined || r.drawdown === null ? (r.trailing ? 'trailing_eod' : 'static') : r.drawdown;
-  if (!DRAWDOWNS.includes(drawdown)) throw new Error(`rules: unknown drawdown ${drawdown}`);
-  const kind = r.min_days_kind || 'trading';
-  if (kind !== 'trading' && kind !== 'profitable') throw new Error(`rules: unknown min_days_kind ${kind}`);
-  const c = r.consistency === undefined ? null : r.consistency;
-  if (c !== null && !(c > 0 && c <= 1)) throw new Error('rules: consistency is a share in (0, 1]');
-  const noLimit = r.time_limit === null || r.time_limit === undefined;
+  if (!DRAWDOWNS.includes(drawdown)) fail('rules: drawdown is static, trailing_eod or trailing_trade');
+  const stop = opt(r, 'trail_stop_at', null);
+  if (stop !== null && (!isNum(stop) || stop < 0)) fail('rules: trail_stop_at is an amount of zero or more, or null');
+  const c = opt(r, 'consistency', null);
+  if (c !== null && (!isNum(c) || !(c > 0 && c <= 1))) fail('rules: consistency is a share above 0 and at most 1, or null');
+  const minDays = opt(r, 'min_days', 0);
+  if (!isWhole(minDays, 0, 365)) fail('rules: min_days is a whole number from 0 to 365');
+  const kind = opt(r, 'min_days_kind', 'trading');
+  if (kind !== 'trading' && kind !== 'profitable') fail('rules: min_days_kind is trading or profitable');
+  const profMin = opt(r, 'profitable_day_min', 0);
+  if (!isNum(profMin) || profMin < 0) fail('rules: profitable_day_min is an amount of zero or more');
+  const countIf = opt(r, 'count_day_if', 'any');
+  if (countIf !== 'any' && countIf !== 'nonzero') fail('rules: count_day_if is any or nonzero');
+  const targetCheck = opt(r, 'target_check', 'eod');
+  if (targetCheck !== 'eod' && targetCheck !== 'intraday') fail('rules: target_check is eod or intraday');
+  const noLimit = r.time_limit === null;
   return {
-    target: r.target, daily_loss: r.daily_loss === undefined ? null : r.daily_loss, max_loss: r.max_loss, drawdown,
-    trail_stop_at: r.trail_stop_at === undefined ? null : r.trail_stop_at, consistency: c, min_days: r.min_days || 0,
-    min_days_kind: kind, profitable_day_min: r.profitable_day_min || 0,
+    target: r.target, daily_loss: r.daily_loss, max_loss: r.max_loss, drawdown, trail_stop_at: stop, consistency: c,
+    min_days: minDays, min_days_kind: kind, profitable_day_min: profMin, count_day_if: countIf, target_check: targetCheck,
     limit: noLimit ? NO_LIMIT_CAP : r.time_limit, no_limit: noLimit,
   };
+}
+
+// The rest of the input: mode, counts, seed and every replayed number.
+export function checkInput(p) {
+  if (!p || typeof p !== 'object') fail('simulate: missing input');
+  if (p.mode !== 'file' && p.mode !== 'sequence' && p.mode !== 'manual') fail('simulate: mode is file, sequence or manual');
+  if (p.runs !== undefined && !isWhole(p.runs, 1, 1000000)) fail('simulate: runs is a whole number from 1 to 1,000,000');
+  if (p.seed !== undefined && !isWhole(p.seed, 0, 4294967295)) fail('simulate: seed is a whole number from 0 to 4294967295');
+  if (p.stream !== undefined && p.stream !== 'legacy' && p.stream !== 'paired') fail('simulate: stream is legacy or paired');
+  if (p.mode === 'manual') {
+    if (!isNum(p.win_rate) || p.win_rate < 0 || p.win_rate > 1) fail('simulate: win_rate is a share from 0 to 1');
+    if (!isNum(p.avg_win) || p.avg_win <= 0) fail('simulate: avg_win is an amount above zero');
+    if (!isNum(p.avg_loss) || p.avg_loss <= 0) fail('simulate: avg_loss is an amount above zero');
+    if (!isWhole(p.trades_per_day, 1, 50)) fail('simulate: trades_per_day is a whole number from 1 to 50');
+    return;
+  }
+  if (!Array.isArray(p.days) || !p.days.length) fail('simulate: no trading days');
+  for (const d of p.days) {
+    if (!Array.isArray(d)) fail('simulate: each day is a list of trade results');
+    for (const x of d) if (!isNum(x)) fail('simulate: every trade result is a finite number');
+  }
 }
 
 // Why a what-if rule cannot run on this input (a code), or null. Never runs silently (case W7).
@@ -132,13 +186,13 @@ export function normPersonal(x, r) {
     q.stopLosses = x.stop_after_losses;
   }
   if (x.stop_at_day_loss != null) {
-    if (!(x.stop_at_day_loss >= 0.1 && x.stop_at_day_loss <= 0.95)) throw new Error('personal: stop_at_day_loss is a share from 0.1 to 0.95');
+    if (!isNum(x.stop_at_day_loss) || !(x.stop_at_day_loss >= 0.1 && x.stop_at_day_loss <= 0.95)) throw new Error('personal: stop_at_day_loss is a share from 0.1 to 0.95');
     if (r.daily_loss === null) throw new Error('personal: stop_at_day_loss needs a daily loss limit');
     q.stopAt = x.stop_at_day_loss * r.daily_loss;
   }
   if (x.stop_at_day_loss_amount != null) {
     if (x.stop_at_day_loss != null) throw new Error('personal: a share or an amount, not both');
-    if (!(x.stop_at_day_loss_amount > 0)) throw new Error('personal: stop_at_day_loss_amount is above zero');
+    if (!isNum(x.stop_at_day_loss_amount) || x.stop_at_day_loss_amount <= 0) throw new Error('personal: stop_at_day_loss_amount is an amount above zero');
     q.stopAt = x.stop_at_day_loss_amount;
   }
   if (x.max_trades != null) {
@@ -160,11 +214,10 @@ export function simulate(p) {
   const seqMode = p.mode === 'sequence';
   const fileMode = p.mode === 'file';
   const manual = p.mode === 'manual';
-  if (!seqMode && !fileMode && !manual) throw new Error(`simulate: unknown mode ${p.mode}`);
+  checkInput(p);
   const runs = seqMode ? 1 : (p.runs || RUNS);
   const seed = p.seed === undefined ? DEFAULT_SEED : p.seed;
   const stream = seqMode ? 'none' : (p.stream || 'legacy');
-  if (stream !== 'legacy' && stream !== 'paired' && stream !== 'none') throw new Error(`simulate: unknown stream ${stream}`);
   const shared = stream === 'legacy' ? mulberry32(seed) : null;
   const r = normRules(p.rules);
   const why0 = personalUnavailable(p, p.personal, r);
@@ -172,9 +225,12 @@ export function simulate(p) {
   const pers = normPersonal(p.personal, r);
   const days = manual ? null : p.days;
   const nDays = days ? days.length : 0;
-  if (!manual && !nDays) throw new Error('simulate: no trading days');
   const openS = pers && pers.cooldown >= 0 ? p.open_s : null;
   const closeS = pers && pers.cooldown >= 0 ? p.close_s : null;
+  if (openS) {
+    const same = (x) => Array.isArray(x) && x.length === nDays && x.every((t, i) => Array.isArray(t) && t.length === days[i].length && t.every(isNum));
+    if (!same(openS) || !same(closeS)) fail('simulate: open_s and close_s hold one finite time per trade, day by day');
+  }
   const daily = r.daily_loss;
   const maxLoss = r.max_loss;
   const stopAt = r.trail_stop_at;
@@ -202,9 +258,12 @@ export function simulate(p) {
   const lossCloses = [];
   const target = r.target, minDays = r.min_days, cons = r.consistency, profMin = r.profitable_day_min, limit = r.limit;
   const floor0 = floorOf(0);
+  const intraday = r.target_check === 'intraday';
+  const countAny = r.count_day_if === 'any';
+  const plain = !pers && !intraday && countAny;   // the hot path below applies
   for (let k = 0; k < runs; k++) {
     const rand = stream === 'paired' ? mulberry32(mix32(seed, k)) : shared;
-    let eq = 0, peak = 0, floor = floor0, lossRun = 0, outcome = 'timeout', best = -Infinity, prof = 0;
+    let eq = 0, peak = 0, floor = floor0, lossRun = 0, outcome = 'timeout', best = -Infinity, prof = 0, tdays = 0;
     let heldC = false, heldM = false, d = 0, bustDay = 0, why = null, bi = -1, bdi = -1, bpnl = 0;
     run: for (d = 1; d <= limit; d++) {
       let di = -1, n, day = null;
@@ -213,7 +272,8 @@ export function simulate(p) {
       else n = p.trades_per_day;
       const dayStart = eq;
       const dl = daily === null ? -Infinity : dayStart - daily;   // bust when equity <= dl
-      if (day && !pers) {
+      let nz = false;   // a taken trade with a non-zero result today (count_day_if 'nonzero')
+      if (day && plain) {
         // the plain replay (no what-if rule): the hot path
         for (let i = 0; i < n; i++) {
           const pnl = day[i];
@@ -252,6 +312,7 @@ export function simulate(p) {
           const before = lossRun;
           eq += pnl;
           lossRun = pnl < 0 ? lossRun + 1 : 0;
+          if (pnl !== 0) nz = true;
           if (eq <= dl || eq <= floor) {
             why = eq <= dl ? 'daily' : 'max';
             if (before >= STREAK_MIN) out.bust_after_streak++;
@@ -266,6 +327,17 @@ export function simulate(p) {
             if (pers.stopLosses && losses >= pers.stopLosses) stopped = true;
             if (pers.stopAt !== null && eq - dayStart <= -pers.stopAt) stopped = true;
           }
+          if (intraday && eq >= target) {
+            // target_check 'intraday': the target counts the moment the closed-trade balance reaches it,
+            // with today counted as a day so far (the end-of-day check below then passes the run)
+            if (seqMode && seqTarget === null) seqTarget = d;
+            const cur = eq - dayStart;
+            const okM = (profitable ? prof + (cur > 0 && cur >= profMin ? 1 : 0) : tdays + (countAny || nz ? 1 : 0)) >= minDays;
+            const okC = cons === null || (cur > best ? cur : best) <= cons * eq;
+            if (okM && okC) break;   // passed: the rest of the day is not replayed
+            if (!okM) heldM = true;
+            if (!okC) heldC = true;
+          }
         }
       }
       const dayPnl = eq - dayStart;
@@ -274,9 +346,10 @@ export function simulate(p) {
       if (eodTrail && eq > peak) { peak = eq; floor = floorOf(peak); }
       if (dayPnl > best) best = dayPnl;
       if (dayPnl > 0 && dayPnl >= profMin) prof++;
+      if (countAny || nz) tdays++;
       if (eq >= target) {
         if (seqMode && seqTarget === null) seqTarget = d;
-        const okM = (profitable ? prof : d) >= minDays;
+        const okM = (profitable ? prof : tdays) >= minDays;
         const okC = cons === null || best <= cons * eq;
         if (okM && okC) { outcome = 'pass'; passDays.push(d); break; }
         if (!okM) heldM = true;
@@ -396,7 +469,7 @@ export function rankRules(p, opts = {}) {
 // of the naive file time, as before.
 //   fileTz:   'UTC' (or null) | an IANA name | {offset_min} | 'broker' (New York time + 7 hours:
 //             GMT+2, and GMT+3 while New York is on summer time)
-//   dayStart: null | {tz: 'file' (the file's own clock) | 'UTC' | IANA name, hour: 0-23}
+//   dayStart: null | {tz: 'file' (the file's own clock) | 'broker' (as fileTz) | 'UTC' | IANA name, hour: 0-23}
 const DAY = 86400000;
 const HOUR = 3600000;
 const BUCKET = 900000; // offsets are read at the start of each 15-minute UTC bucket
@@ -453,7 +526,8 @@ export function dayKey(naiveMs, fileTz, dayStart) {
   const h = dayStart.hour * HOUR;
   if (dayStart.tz === 'file') return Math.floor((naiveMs - h) / DAY);
   const utc = fileToUtc(naiveMs, fileTz);
-  return Math.floor((utc + tzOffset(dayStart.tz, utc) - h) / DAY);
+  const off = dayStart.tz === 'broker' ? tzOffset('America/New_York', utc) + 7 * HOUR : tzOffset(dayStart.tz, utc);
+  return Math.floor((utc + off - h) / DAY);
 }
 
 // {days: P&L per day, open_s / close_s: seconds from the day's first close (habits.mjs's clock:
@@ -463,7 +537,10 @@ export function groupDays(trades, opts = {}) {
   const dayStart = opts.dayStart || null;
   const days = [], openS = [], closeS = [], index = [], keys = [];
   let key = null, base = 0;
-  trades.forEach((t, i) => {
+  // close-time order (the parser's order already; a stable sort keeps it and repairs any other)
+  const order = trades.map((t, i) => i).sort((a, b) => (trades[a].close_ts - trades[b].close_ts) || (a - b));
+  order.forEach((i) => {
+    const t = trades[i];
     const k = dayKey(t.close_ts, fileTz, dayStart);
     const o = 60 * Math.floor(t.open_ts / 60000);
     const c = o + (t.hold_s === undefined ? Math.floor((t.close_ts - t.open_ts) / 1000) : t.hold_s);
