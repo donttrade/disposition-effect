@@ -6,9 +6,9 @@
 // documentation only (UNVERIFIED). The Account column is never read.
 // Mirrors parse_tradovate() in tests/reference/engine_ref.py.
 
-import { parseDate, parseNumber } from './csv.js?v=c0193c2a';
-import { cell, reqNumber, skip, isEmptyRow } from './mt.js?v=ec30543d';
-import { sideLetter } from './generic.js?v=128dbf64';
+import { parseDate, parseNumber } from './csv.js?v=7dca0e6f';
+import { cell, reqNumber, skip, isEmptyRow } from './mt.js?v=3f5ee677';
+import { sideLetter } from './generic.js?v=b28059a4';
 
 // UNVERIFIED: dollars per point per contract. Check each against CME contract specs.
 export const CME_MULTIPLIERS = Object.freeze({
