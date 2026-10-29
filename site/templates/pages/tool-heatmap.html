@@ -21,7 +21,7 @@
     <div id="hm-controls" hidden>
       <div class="dropzone" id="hm-drop">
         <p><strong>Drop a trade file here</strong>, or choose one from your computer.</p>
-        <p class="small muted">MT5 or MT4 report (.htm, .html), IBKR Flex Query (.csv), Tradovate Orders (.csv), or the CSV template. Up to 50 MB and 200,000 rows.</p>
+        <p class="small muted">MT5 or MT4 report (.htm, .html), IBKR Flex Query (.csv), Tradovate Orders (.csv), TradingView Order History (.csv), or the CSV template. Up to 50 MB and 200,000 rows.</p>
         <div class="file-pick">
           <label for="hm-file">Your trade file</label>
           <input id="hm-file" type="file" accept=".csv,.htm,.html,.txt">
@@ -71,7 +71,7 @@
     <h2 id="count-h">How it works</h2>
     <details class="how-group"><summary>How the grid is built, and why it picks no best hour</summary>
     <p>Drop a trade file and see your results laid out by the hour and the day of the week each trade opened: the number of trades, the total and average result, and the win rate in each cell, with a shift for the time zone your file uses.</p>
-    <p>Most heatmaps stop there, and that is where they can mislead. A grid of 24 hours by 5 weekdays is 120 comparisons at once, so a few cells will look unusually good or bad by chance alone. This page says so next to the grid, shows how many cells hold fewer than 30 trades, and does not test, rank or name any cell as a pattern. It reads MT5 and MT4 HTML reports, IBKR Flex Query trade files and Tradovate order exports (all three in beta), and a plain CSV template. {% if flags.analytics %}Your file’s contents are never sent. The only request this page makes is an anonymous page-view count.{% else %}Everything runs in this browser tab, and the page’s security policy blocks every outgoing network request, so your file is not uploaded anywhere.{% endif %} The map describes your own past trades. It does not tell anyone when to trade.</p>
+    <p>Most heatmaps stop there, and that is where they can mislead. A grid of 24 hours by 5 weekdays is 120 comparisons at once, so a few cells will look unusually good or bad by chance alone. This page says so next to the grid, shows how many cells hold fewer than 30 trades, and does not test, rank or name any cell as a pattern. It reads MT5 and MT4 HTML reports, IBKR Flex Query trade files, Tradovate order exports and TradingView order history (all four in beta), and a plain CSV template. {% if flags.analytics %}Your file’s contents are never sent. The only request this page makes is an anonymous page-view count.{% else %}Everything runs in this browser tab, and the page’s security policy blocks every outgoing network request, so your file is not uploaded anywhere.{% endif %} The map describes your own past trades. It does not tell anyone when to trade.</p>
     <ul>
       <li>Each closed trade goes in the cell of the weekday and hour it opened, after the time shift you choose. A trade runs from flat to flat on each symbol, as on the trade-stats page, and its result is net of fees when the file has them.</li>
       <li>The open time is the close time minus the time the trade was held, in whole seconds, which is exact for every supported file format.</li>
@@ -91,7 +91,7 @@
     <details><summary>Is this investment advice?</summary><p>No. It measures your own past trades and does not recommend any security, trade, size or exit. Past results do not predict future results.</p></details>
   </section>
 
-  <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR and Tradovate are trademarks of their owners. donttrade is not affiliated with any of them.</p>
+  <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR, Tradovate and TradingView are trademarks of their owners. donttrade is not affiliated with any of them.</p>
 </div>
 <script type="text/csv" id="hm-sample">
 {{ sample_csv|safe }}</script>

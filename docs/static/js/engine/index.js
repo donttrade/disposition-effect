@@ -4,20 +4,22 @@
 // cookies or storage, and raw rows are never kept: only whitelisted fields
 // survive into executions and trades.
 
-import { decodeBytes, isHtml, parseCsv, sniffDelimiter, resolveNumberStyle, checkQuoting } from './csv.js?v=ad87ab8b';
-import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS, checkCurrencyColumn } from './detect.js?v=e8bb7c80';
-import { fail, LIMITS } from './errors.js?v=a49d9d6e';
-import { htmlRows, parseMt, isEmptyRow } from './mt.js?v=393f72f5';
-import { parseGeneric, parseGenericRoundtrip } from './generic.js?v=88696a8d';
-import { parseIbkr } from './ibkr.js?v=e6e4e65f';
-import { parseTradovate } from './tradovate.js?v=2c8847b9';
-import { finish } from './trades.js?v=9f8ff039';
+import { decodeBytes, isHtml, parseCsv, sniffDelimiter, resolveNumberStyle, checkQuoting } from './csv.js?v=09ecf6e4';
+import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS, checkCurrencyColumn } from './detect.js?v=82af9fc8';
+import { fail, LIMITS } from './errors.js?v=31d80675';
+import { htmlRows, parseMt, isEmptyRow } from './mt.js?v=39256871';
+import { parseGeneric, parseGenericRoundtrip } from './generic.js?v=9c60e210';
+import { parseIbkr } from './ibkr.js?v=f6948b1c';
+import { parseTradovate } from './tradovate.js?v=1928f2b1';
+import { parseTradingView, stripCurrencyCells } from './tradingview.js?v=7c5b71f3';
+import { finish } from './trades.js?v=dc047e95';
 
-export { EngineError } from './errors.js?v=a49d9d6e';
+export { EngineError } from './errors.js?v=31d80675';
 
 export const TZ_LABELS = Object.freeze({
   mt5: 'broker server time', mt4: 'broker server time', ibkr_flex: 'as exported',
-  tradovate_orders: 'local time, as exported', generic: 'as in the file', generic_roundtrip: 'as in the file',
+  tradovate_orders: 'local time, as exported', tradingview: 'as exported, with no time zone stated',
+  generic: 'as in the file', generic_roundtrip: 'as in the file',
 });
 
 // Rows whose whitelisted cells all equal an earlier row's (e.g. two overlapping exports
@@ -71,6 +73,7 @@ export function parseFile(bytes) {
   if (dataRows === 0) fail('E_HEADER_ONLY');
   if (dataRows > LIMITS.MAX_ROWS) fail('E_TOO_LARGE');
   checkQuoting(rows, hi, det.map);
+  if (name === 'tradingview') stripCurrencyCells(rows.slice(hi + 1), m);
   resolveNumberStyle([{ rows: rows.slice(hi + 1), map: m, fields: NUMERIC_FIELDS[name] }], delim === ',' ? 'dot' : null);
   const verified = SIGNATURES[name].verified;
   const dup = countDuplicateRows(rows.slice(hi + 1), m);
@@ -81,6 +84,7 @@ export function parseFile(bytes) {
   }
   if (name === 'ibkr_flex') return finish(name, verified, withDuplicates(parseIbkr(rows, hi, m), dup, curIgnored), 'net', TZ_LABELS[name]);
   if (name === 'tradovate_orders') return finish(name, verified, withDuplicates(parseTradovate(rows, hi, m), dup, curIgnored), null, TZ_LABELS[name]);
+  if (name === 'tradingview') return finish(name, verified, withDuplicates(parseTradingView(rows, hi, m), dup, curIgnored), null, TZ_LABELS[name]);
   if (name === 'generic_roundtrip') return finish(name, verified, withDuplicates(parseGenericRoundtrip(rows, hi, m), dup, curIgnored), null, TZ_LABELS[name]);
   return finish('generic', verified, withDuplicates(parseGeneric(rows, hi, m), dup, curIgnored), null, TZ_LABELS.generic);
 }

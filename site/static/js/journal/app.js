@@ -22,10 +22,11 @@ import { $, el, money, plural, button, confirmInline, debounce } from './ui.js';
 
 export const FORMAT_NAMES = {
   mt5: 'MetaTrader 5 report', mt4: 'MetaTrader 4 statement', ibkr_flex: 'Interactive Brokers Flex Query',
-  tradovate_orders: 'Tradovate Orders export', generic: 'donttrade CSV template (one row per fill)',
+  tradovate_orders: 'Tradovate Orders export', tradingview: 'TradingView Order History export',
+  generic: 'donttrade CSV template (one row per fill)',
   generic_roundtrip: 'CSV with one row per round trip',
 };
-const FORMAT_SHORT = { mt5: 'MT5', mt4: 'MT4', ibkr_flex: 'IBKR', tradovate_orders: 'Tradovate', generic: 'CSV', generic_roundtrip: 'CSV' };
+const FORMAT_SHORT = { mt5: 'MT5', mt4: 'MT4', ibkr_flex: 'IBKR', tradovate_orders: 'Tradovate', tradingview: 'TradingView', generic: 'CSV', generic_roundtrip: 'CSV' };
 export const SAMPLE_NAME = 'Sample (synthetic trades)';
 const PARSE_MS = 180000;
 

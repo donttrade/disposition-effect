@@ -1,0 +1,7 @@
+{
+ "error": {
+  "code": "E_MISSING_COLUMN",
+  "column": "Closing time",
+  "row": 1
+ }
+}

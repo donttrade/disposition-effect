@@ -38,7 +38,8 @@ def test_oracle(rel):
 def test_count_only(rel):
     got = E.parse_file(load(rel))
     assert len(got["trades"]) == ORACLES_COUNT_ONLY[rel]
-    assert got["warnings"] == [] and got["skipped"] == {}
+    beta = [] if got["verified_format"] else [{"code": "W_UNVERIFIED_FORMAT", "n": 0}]  # a beta format's one note
+    assert got["warnings"] == beta and got["skipped"] == {}
 
 
 @pytest.mark.parametrize("rel", sorted(ERRORS))

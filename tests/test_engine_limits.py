@@ -67,7 +67,7 @@ def test_hedging_fixture_warns(page):
 
 def test_canary_absent_from_output_and_console(page):
     pg, console = page
-    for d in ("mt5", "mt4", "ibkr", "tradovate"):
+    for d in ("mt5", "mt4", "ibkr", "tradovate", "tradingview"):
         for name in sorted(os.listdir(os.path.join(FIX, d))):
             with open(os.path.join(FIX, d, name), "rb") as f:
                 out = pg.evaluate("b => window.runEngine(b)", base64.b64encode(f.read()).decode())

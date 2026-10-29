@@ -16,6 +16,7 @@ SAMPLES = {
     "ibkr/activity_flex.csv": ("ibkr_flex", "n/a"),
     "ibkr/trade_confirm_fx.csv": ("ibkr_flex", "n/a"),
     "tradovate/orders.csv": ("tradovate_orders", "n/a"),
+    "tradingview/orders.csv": ("tradingview", "n/a"),
     "generic/basic.csv": ("generic", "n/a"),
     "generic_roundtrip/tradezella.csv": ("generic_roundtrip", "n/a"),
 }

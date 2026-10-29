@@ -432,3 +432,85 @@ ORACLES["ibkr/cnh_offshore_yuan.csv"] = {
     "warnings": {"W_UNVERIFIED_FORMAT": 0},
     "skipped": {},
 }
+
+# TradingView Order History (tests/fixtures/make_tradingview.py; every order made up). One row per
+# order; a Filled order is one execution at its Closing time; P&L in points (no currency column).
+# Beta like IBKR and Tradovate (only a paper-account export seen): W_UNVERIFIED_FORMAT.
+ORACLES["tradingview/orders.csv"] = {
+    # Written newest first. Skipped: Rejected 3, Cancelled + Canceled 2, Expired 1 (not_filled).
+    # AAPL: B10 @230.50 (1.00); S5 @232.00 (0.50); S5 @233.00 (0.50): exit vwap 232.50,
+    #   gross (232.50 - 230.50) x 10 = 20 ; fees 2.00 ; pnl 18 ; 09:31:10 -> 11:20:30 = 6560 s
+    # TSLA short: S4 @250, B4 @245 (no commission): +20 ; 13:00 -> 14:30 = 5400 s
+    # KO: B100 @60 (1.00), B50 @59 (1.00), S150 @61 (1.50): 9150 - 8950 = 200 ; fees 3.50 ; 196.50 ;
+    #   09:45 -> 15:50 = 21900 s
+    # SPY: B10 @500 ; S20 @505 (2.00) closes the long and opens a short of 10 ; B10 @503
+    #   long +50, fee 1.00 (half of 2.00) -> 49, 1800 s ; short (505 - 503) x 10 = 20, fee 1.00 -> 19, 3600 s
+    # BTCUSDT: B0.015 @60000.50 (0.9), S0.015 @60500.25 (0.9075): 499.75 x 0.015 = 7.49625 ;
+    #   fees 1.8075 ; 5.68875 ; 20:00 -> 02:15 next day = 22500 s
+    # EURUSD short 10000: (1.0875 - 1.0850) x 10000 = 25 ; 08:00 -> 12:30 = 16200 s
+    # MSFT short: S6 @410, B2 @405, B4 @400 (0.30 each): 2460 - 2410 = 50 ; fees 0.90 ; 49.10 ;
+    #   09:35 -> 13:10 = 12900 s
+    # AMD: B20 @150, S20 @145 (1.00 each): -100 - 2 = -102 ; 7200 s
+    # AAPL again: B5 @228.00, S5 @229.20 (0.50 each): 6 - 1 = 5 ; 13:00 -> 15:30 = 9000 s
+    # NVDA B3 never closes -> W_OPEN_POSITIONS 1
+    "trades": [dict(symbol="NASDAQ:AAPL", dir="long", qty=10, pnl=18.0, pnl_gross=20.0, fees=2.0, hold_s=6560,
+                    fills_n=3, pnl_unit="points", currency=None),
+               dict(symbol="NASDAQ:TSLA", dir="short", qty=4, pnl=20.0, fees=0.0, hold_s=5400, fills_n=2),
+               dict(symbol="NYSE:KO", dir="long", qty=150, pnl=196.5, fees=3.5, hold_s=21900, fills_n=3),
+               dict(symbol="AMEX:SPY", dir="long", qty=10, pnl=49.0, fees=1.0, hold_s=1800, fills_n=2),
+               dict(symbol="AMEX:SPY", dir="short", qty=10, pnl=19.0, fees=1.0, hold_s=3600, fills_n=2),
+               dict(symbol="BINANCE:BTCUSDT", dir="long", qty=0.015, pnl=5.68875, fees=1.8075, hold_s=22500),
+               dict(symbol="FX:EURUSD", dir="short", qty=10000, pnl=25.0, hold_s=16200),
+               dict(symbol="NASDAQ:MSFT", dir="short", qty=6, pnl=49.1, fees=0.9, hold_s=12900, fills_n=3),
+               dict(symbol="NASDAQ:AMD", dir="long", qty=20, pnl=-102.0, hold_s=7200),
+               dict(symbol="NASDAQ:AAPL", dir="long", qty=5, pnl=5.0, fees=1.0, hold_s=9000)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_SKIPPED_ROWS": 6, "W_OPEN_POSITIONS": 1},
+    "skipped": {"rejected": 3, "cancelled": 2, "not_filled": 1},
+}
+ORACLES["tradingview/numbers_bom.csv"] = {
+    # Re-saved from Numbers/Excel: BOM, CRLF, all cells quoted, "10.0" quantities, times without seconds.
+    # AAPL B10 @230.5, S10 @231.75: 12.50 ; 09:31 -> 10:02 = 1860 s
+    # KO short 50: S @61.2, B @60.7: 25 ; 11:00 -> 11:45 = 2700 s
+    # TSLA 4: B @244.99999999999997, S @246.00000000000003: 4 (to 1e-9) ; 3600 s ; one Rejected row
+    "trades": [dict(symbol="NASDAQ:AAPL", dir="long", qty=10, pnl=12.5, hold_s=1860),
+               dict(symbol="NYSE:KO", dir="short", qty=50, pnl=25.0, hold_s=2700),
+               dict(symbol="NASDAQ:TSLA", dir="long", qty=4, pnl=4.0, hold_s=3600)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0, "W_SKIPPED_ROWS": 1},
+    "skipped": {"rejected": 1},
+}
+ORACLES["tradingview/semicolon_comma.csv"] = {
+    # ";" separators, decimal commas. SAP B10 @201,50 (1,00), S10 @203,25 (1,00): 17.50 - 2 = 15.50,
+    # 09:05 -> 15:20 = 22500 s. BMW short 20: S @80,10, B @79,60 (0,50 each): 10 - 1 = 9, 7200 s.
+    "trades": [dict(symbol="XETR:SAP", dir="long", qty=10, pnl=15.5, fees=2.0, hold_s=22500),
+               dict(symbol="XETR:BMW", dir="short", qty=20, pnl=9.0, fees=1.0, hold_s=7200)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0},
+    "skipped": {},
+}
+ERRORS["errors/tradingview_slash_date.csv"] = ("E_AMBIGUOUS_DATE", 2, "time")      # Excel's m/d/yyyy times
+ERRORS["errors/tradingview_no_closing_time.csv"] = ("E_MISSING_COLUMN", 1, "Closing time")  # named as exported
+# 40 generated TradingView round trips (make_tradingview.history, seed 7), nothing skipped: the paid
+# end-to-end test (tests/test_tradingview.py) sends them to the report server, which needs 30.
+ORACLES_COUNT_ONLY["tradingview/forty_trades.csv"] = 40
+# Tester round 1, items 2 and 4: money cells with a currency, and rebates.
+ORACLES["tradingview/commission_with_currency.csv"] = {
+    # Commission "0.50 USD" (was E_BAD_NUMBER): B10 @100, S10 @102 -> 20 - 1.00 = 19 ; 09:31:10 -> 10:00 = 1730 s
+    "trades": [dict(symbol="NASDAQ:AAPL", dir="long", qty=10, pnl=19.0, pnl_gross=20.0, fees=1.0, hold_s=1730)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0},
+    "skipped": {},
+}
+ORACLES["tradingview/negative_commission.csv"] = {
+    # Commission -0.50 on each fill is a rebate (was abs()'d into a 1.00 cost, pnl 19): like a MetaTrader
+    # net credit, fees stay 0 and the 1.00 credit is in the gross: 20 + 1 = 21
+    "trades": [dict(symbol="NASDAQ:AAPL", dir="long", qty=10, pnl=21.0, pnl_gross=21.0, fees=0.0, hold_s=1730)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0},
+    "skipped": {},
+}
+ORACLES["tradingview/currency_forms.csv"] = {
+    # AAPL: B10 "$230.50" (comm "USD 1.00"), S10 "232.00 USD" (comm "$1.00"): 15 - 2 = 13 ; 3600 s
+    # KO short: S100 @60.00 (comm "-$0.25", a rebate), B100 @59.50 (comm "0.75 usd"):
+    #   gross 50 + 0.25 credit = 50.25 ; fees 0.75 ; pnl 49.50 ; 3600 s
+    "trades": [dict(symbol="NASDAQ:AAPL", dir="long", qty=10, pnl=13.0, pnl_gross=15.0, fees=2.0, hold_s=3600),
+               dict(symbol="NYSE:KO", dir="short", qty=100, pnl=49.5, pnl_gross=50.25, fees=0.75, hold_s=3600)],
+    "warnings": {"W_UNVERIFIED_FORMAT": 0},
+    "skipped": {},
+}

@@ -6,9 +6,9 @@
 // Every number on the page comes from the server's Report or from the file in this
 // tab; the wording only describes past trades (NON-ADVISER A3).
 
-import { runFile } from '../engine/index.js?v=5a8f5f52';
+import { runFile } from '../engine/index.js?v=ec607598';
 import { ics, retestLine, RETEST_LINE } from './retest-copy.js?v=0c170eab';
-import { pgrPlrCounts } from '../engine/pgr.js?v=6a01bfc7';
+import { pgrPlrCounts } from '../engine/pgr.js?v=de6404d2';
 import { stripRows, spanLine } from './strip.js?v=03137080';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js?v=16f6dd26';
 import { habitSentences, methodLine, page1Lines, coverageLines, mergedLine, checkReport, SENTENCE_HABITS, RESEARCH, RESEARCH_PREFIX, holdDays } from './wording.js?v=09f9dd9a';
