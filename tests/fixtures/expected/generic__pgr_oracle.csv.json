@@ -48,6 +48,7 @@
   "currency_groups": {
    "USD": 4
   },
+  "dates_only": false,
   "executions": [
    {
     "currency": "USD",
@@ -177,6 +178,7 @@
    }
   ],
   "format": "generic",
+  "n_date_only": 0,
   "skipped": {},
   "trades": [
    {

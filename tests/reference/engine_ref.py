@@ -42,6 +42,9 @@ MESSAGES = {
     "E_BAD_QUOTE": "A quote mark opens a cell that is never closed.",
     "E_TOO_LARGE": "The file is too large: the limit is 50 MB and 200,000 rows.",
     "E_NO_CLOSED_TRADES": "No closed trades were found.",
+    "E_BAD_MAPPING": "The saved column choices do not fit this file.",
+    "E_MIXED_FILES": "These files have different columns.",
+    "E_PASTE_FORMAT": "This paste has no columns we can split.",
 }
 
 
@@ -51,9 +54,13 @@ class EngineError(Exception):
         self.code = code
         self.row = row
         self.column = column
+        self.file = None  # 1-based place among several files read together (errors.js inFile)
 
     def to_json(self):
-        return {"code": self.code, "row": self.row, "column": self.column}
+        out = {"code": self.code, "row": self.row, "column": self.column}
+        if self.file is not None:
+            out["file"] = self.file
+        return out
 
 
 def fail(code, detail="", row=None, column=None):
@@ -114,6 +121,26 @@ def _sniff_utf16(b):
     return None
 
 
+def is_xlsx(b):
+    """Mirrors isXlsx(): an entry under xl/ in the first local headers, or xl/workbook.xml in the
+    central directory at the end."""
+    off = 0
+    for _ in range(20):
+        if off + 30 > len(b) or b[off:off + 4] != b"PK\x03\x04":
+            break
+        flags = b[off + 6] | (b[off + 7] << 8)
+        comp = int.from_bytes(b[off + 18:off + 22], "little")
+        name_len = b[off + 26] | (b[off + 27] << 8)
+        extra_len = b[off + 28] | (b[off + 29] << 8)
+        at = off + 30
+        if name_len >= 3 and b[at:at + 3] == b"xl/":
+            return True
+        if (flags & 8) and comp == 0:
+            break
+        off = at + name_len + extra_len + comp
+    return b"xl/workbook.xml" in b[max(0, len(b) - 65557):]
+
+
 def decode_bytes(b):
     n = len(b)
     if n == 0:
@@ -121,7 +148,9 @@ def decode_bytes(b):
     if n > MAX_BYTES:
         fail("E_TOO_LARGE")
     if b[:4] == b"PK\x03\x04":
-        fail("E_ENCODING", "xlsx/zip")
+        if is_xlsx(b):
+            fail("E_ENCODING", "xlsx: save it as CSV")
+        fail("E_ENCODING", "zip: open it and drop the CSV inside")
     start = 0
     if b[:3] == b"\xef\xbb\xbf":
         enc, start = "utf-8", 3
@@ -327,6 +356,8 @@ class _Rows(HTMLParser):
         self.cell = None
         self.span = 1
         self.n = 0
+        self.tables = 0   # <table> start tags seen, for the row's table index (htmlRows: tr.closest('table'))
+        self.stack = []
 
     def _end_cell(self):
         if self.cell is not None and self.cur is not None:
@@ -345,22 +376,26 @@ class _Rows(HTMLParser):
         if tag == "tr":
             self._end_row()
             self.n += 1
-            self.cur = {"row": self.n, "cells": []}
+            self.cur = {"row": self.n, "cells": [], "table": self.stack[-1] if self.stack else -1}
         elif tag in ("td", "th"):
             if self.cur is None:
                 self.n += 1
-                self.cur = {"row": self.n, "cells": []}
+                self.cur = {"row": self.n, "cells": [], "table": self.stack[-1] if self.stack else -1}
             self._end_cell()
             self.cell = []
             self.span = _html_int(dict(attrs).get("colspan"))
         elif tag == "table":
             self._end_row()
+            self.stack.append(self.tables)
+            self.tables += 1
 
     def handle_endtag(self, tag):
         if tag in ("td", "th"):
             self._end_cell()
         elif tag in ("tr", "table"):
             self._end_row()
+            if tag == "table" and self.stack:
+                self.stack.pop()
 
     def handle_data(self, data):
         if self.cell is not None:
@@ -613,6 +648,180 @@ def parse_date(raw, kind, row, column):
     if "/" in s:
         fail("E_AMBIGUOUS_DATE", "slash date", row, column)
     fail("E_BAD_DATE", "not a date", row, column)
+
+
+# ----------------------------------------------------------------- dates in a chosen form
+# Mirrors parseDateFmt(), stripZone(), dateShape() and detectDateFormat() in csv.js.
+
+DATE_FORMATS = ["ymd", "mdy", "dmy", "excel", "epoch_s", "epoch_ms"]
+_RE_DF = re.compile(r"^([0-9./-]+)(?:[ T]+(\d{1,2}):(\d{2})(?::(\d{2})(?:[.,]\d+)?)?(?: ?([AaPp][Mm]))?)?$", re.ASCII)
+_RE_ZONE_WORD = re.compile(r"^(.*[0-9AaPpMm]) ([A-Za-z]{2,5})$", re.ASCII)
+_RE_ZONE_OFFSET = re.compile(r"^(.*\d:\d{2}.*?) ?(?:(?:UTC|GMT) ?)?[+-]\d{1,2}(?::?\d{2})?$", re.ASCII)
+_RE_ZONE_Z = re.compile(r"^(.*\d)Z$", re.ASCII)
+_RE_YMD = re.compile(r"^(\d{4})([-/.])(\d{1,2})\2(\d{1,2})$", re.ASCII)
+_RE_YMD8 = re.compile(r"^(\d{4})(\d{2})(\d{2})$", re.ASCII)
+_RE_DMY = re.compile(r"^(\d{1,2})([-/.])(\d{1,2})\2(\d{4}|\d{2})$", re.ASCII)
+_RE_SERIAL = re.compile(r"^\d+(\.\d+)?$", re.ASCII)
+MAX_TS = 4133980800000  # 2101-01-01: utc_ms accepts years 1970-2100
+
+
+def strip_zone(s):
+    zone = False
+    m = _RE_ZONE_WORD.match(s)
+    if m and not re.match(r"^[AaPp][Mm]$", m.group(2)) and re.search(r"\d", m.group(1), re.ASCII):
+        s, zone = m.group(1), True
+    m = _RE_ZONE_OFFSET.match(s)
+    if m and re.search(r"[0-9AaPpMm]$", m.group(1), re.ASCII):
+        s, zone = m.group(1), True
+    m = _RE_ZONE_Z.match(s)
+    if m:
+        s, zone = m.group(1), True
+    return s, zone
+
+
+def _in_range(ms, row, column):
+    if not (0 <= ms < MAX_TS):
+        fail("E_BAD_DATE", "out of range", row, column)
+    return ms
+
+
+def parse_date_fmt(raw, fmt, row, column, seen=None):
+    s, zone = strip_zone(clean(raw))
+    if s == "":
+        fail("E_BAD_DATE", "empty", row, column)
+    m = _RE_DF.match(s)
+    if not m:
+        fail("E_BAD_DATE", "does not fit the chosen form", row, column)
+    if zone and seen is not None:
+        seen["zone"] = True
+    d = m.group(1)
+    timed = m.group(2) is not None
+    h = int(m.group(2)) if timed else 0
+    mi = int(m.group(3)) if timed else 0
+    sec = int(m.group(4)) if m.group(4) is not None else 0
+    if m.group(5) is not None:
+        if h < 1 or h > 12:
+            fail("E_BAD_DATE", "out of range", row, column)
+        h = (h % 12) + (12 if m.group(5).upper() == "PM" else 0)
+    if fmt in ("epoch_s", "epoch_ms"):
+        if timed or not _RE_SERIAL.match(d):
+            fail("E_BAD_DATE", "does not fit the chosen form", row, column)
+        v = float(d)
+        return _in_range(math.floor(v) * 1000 if fmt == "epoch_s" else math.floor(v / 1000) * 1000, row, column)
+    if fmt == "excel":
+        if not _RE_SERIAL.match(d):
+            fail("E_BAD_DATE", "does not fit the chosen form", row, column)
+        v = float(d)
+        if v < 61:
+            fail("E_BAD_DATE", "out of range", row, column)
+        if timed:
+            if "." in d:
+                fail("E_BAD_DATE", "does not fit the chosen form", row, column)
+            if mi > 59 or sec > 59 or h > 23:
+                fail("E_BAD_DATE", "out of range", row, column)
+            return _in_range((int(d) - 25569) * 86400000 + ((h * 60 + mi) * 60 + sec) * 1000, row, column)
+        return _in_range((math.floor(v * 86400 + 0.5) - 25569 * 86400) * 1000, row, column)
+    if fmt == "ymd":
+        x = _RE_YMD.match(d)
+        if x:
+            y, mo, dd = int(x.group(1)), int(x.group(3)), int(x.group(4))
+        else:
+            x = _RE_YMD8.match(d)
+            if not x:
+                fail("E_BAD_DATE", "does not fit the chosen form", row, column)
+            y, mo, dd = int(x.group(1)), int(x.group(2)), int(x.group(3))
+    elif fmt in ("mdy", "dmy"):
+        x = _RE_DMY.match(d)
+        if not x:
+            fail("E_BAD_DATE", "does not fit the chosen form", row, column)
+        a, b = int(x.group(1)), int(x.group(3))
+        y = int(x.group(4)) + (2000 if len(x.group(4)) == 2 else 0)
+        mo, dd = (a, b) if fmt == "mdy" else (b, a)
+        if mo > 12:
+            fail("E_BAD_DATE", "does not fit the chosen form", row, column)
+    else:
+        fail("E_BAD_DATE", "no date form", row, column)
+    return utc_ms(y, mo, dd, h, mi, sec, row, column)
+
+
+def date_shape(raw):
+    m = _RE_DF.match(strip_zone(clean(raw))[0])
+    if not m:
+        return "other", 0, 0
+    d = m.group(1)
+    timed = m.group(2) is not None
+    if _RE_YMD.match(d) or re.match(r"^(19|20)\d{6}$", d, re.ASCII):
+        return "ymd", 0, 0
+    x = _RE_DMY.match(d)
+    if x:
+        return "dm", int(x.group(1)), int(x.group(3))
+    if not timed and re.match(r"^\d{12,13}$", d, re.ASCII):
+        return "epoch_ms", 0, 0
+    if not timed and re.match(r"^\d{9,10}(\.\d+)?$", d, re.ASCII):
+        return "epoch_s", 0, 0
+    if re.match(r"^\d{5}(\.\d+)?$", d, re.ASCII) and 20000 <= float(d) <= 80000:
+        return "excel", 0, 0
+    return "other", 0, 0
+
+
+def detect_date_format(values):
+    kinds = []
+    dmy_at = mdy_at = -1
+    for i, v in enumerate(values):
+        if clean(v) == "":
+            continue
+        kind, a, b = date_shape(v)
+        if kind not in kinds:
+            kinds.append(kind)
+        if kind == "dm":
+            if a > 12 and dmy_at < 0:
+                dmy_at = i
+            if b > 12 and mdy_at < 0:
+                mdy_at = i
+    if not kinds:
+        return {"format": None, "reason": "empty", "at": -1, "at2": -1}
+    if len(kinds) > 1 or kinds[0] == "other":
+        return {"format": None, "reason": "mixed", "at": -1, "at2": -1}
+    if kinds[0] != "dm":
+        return {"format": kinds[0], "reason": None, "at": -1, "at2": -1}
+    if dmy_at >= 0 and mdy_at >= 0:
+        return {"format": None, "reason": "mixed_order", "at": dmy_at, "at2": mdy_at}
+    if dmy_at >= 0:
+        return {"format": "dmy", "reason": "seen", "at": dmy_at, "at2": -1}
+    if mdy_at >= 0:
+        return {"format": "mdy", "reason": "seen", "at": mdy_at, "at2": -1}
+    return {"format": None, "reason": "ask", "at": -1, "at2": -1}
+
+
+# ----------------------------------------------------------------- a pasted table (mirrors fromPaste)
+
+_PASTE_GAP = re.compile("[ \u00a0\u2000-\u200a\u202f\u205f\u3000]{2,}")
+_WS_EDGE = re.compile("^" + WS_CLASS + "+|" + WS_CLASS + "+$")
+
+
+def from_paste(text):
+    text = str(text)
+    if len(text) > MAX_BYTES:
+        fail("E_TOO_LARGE")
+    if clean(text) == "":
+        fail("E_EMPTY")
+    lines = re.split(r"\r\n|\n|\r", text)
+    tabs = any("\t" in l for l in lines)
+    out = []
+    wide = 0
+    for k, line in enumerate(lines):
+        if clean(line) == "":
+            continue
+        parts = line.split("\t") if tabs else _PASTE_GAP.split(_WS_EDGE.sub("", line))
+        cells = [clean(c) for c in parts]
+        if len([c for c in cells if c != ""]) >= 2:
+            wide += 1
+        out.append({"row": k + 1, "cells": cells, "swallow": 0, "ml": [], "broken": False})
+        if len(out) > MAX_ROWS + 1:
+            fail("E_TOO_LARGE")
+    if wide == 0:
+        fail("E_PASTE_FORMAT")
+    return out
 
 
 # ----------------------------------------------------------------- whitelist / detection
@@ -1700,7 +1909,7 @@ def roundtrip_executions(rts):
 TZ_LABELS = {"mt5": "broker server time", "mt4": "broker server time", "ibkr_flex": "as exported",
              "tradovate_orders": "local time, as exported",
              "tradingview": "as exported, with no time zone stated", "generic": "as in the file",
-             "generic_roundtrip": "as in the file"}
+             "generic_roundtrip": "as in the file", "mapped": "as in the file"}
 
 
 def _strip(d):
@@ -1733,71 +1942,31 @@ def _html_number_group(t):
     return {"rows": rows, "map": t["map"], "fields": NUMERIC_FIELDS[kind]}
 
 
-def parse_file(data):
-    text = decode_bytes(data)
-    currency_ignored = False
-    if is_html(text):
-        rows = html_rows(text)
-        det = detect_html(rows)
-        groups = [_html_number_group(t) for t in det["tables"]]
-        resolve_number_style(groups, "dot")
-        dup = 0
-        for g in groups:
-            dup += count_duplicate_rows(g["rows"], g["map"])
-        fmt = det["format"]
-        verified = False
-        res = parse_mt(det["tables"])
-        mode = "gross"
-    else:
-        delim = sniff_delimiter(text)
-        rows = parse_csv(text, delim)
-        if not rows:
-            fail("E_EMPTY")
-        det = detect_csv(rows)
-        name, hi = det["format"], det["header_index"]
-        # a Currency column whose cells are not all ISO codes is not read at all (F-D3)
-        m, currency_ignored = check_currency_column(rows[hi + 1:], det["map"])
-        data_rows = [r for r in rows[hi + 1:] if not _empty(r["cells"])]
-        if not data_rows:
-            fail("E_HEADER_ONLY")
-        if len(data_rows) > MAX_ROWS:
-            fail("E_TOO_LARGE")
-        check_quoting(rows, hi, det["map"])
-        if name == "tradingview":
-            strip_currency_cells(rows[hi + 1:], m)
-        resolve_number_style([{"rows": rows[hi + 1:], "map": m, "fields": NUMERIC_FIELDS[name]}],
-                             "dot" if delim == "," else None)
-        verified = SIGNATURES[name]["verified"]
-        dup = count_duplicate_rows(rows[hi + 1:], m)
-        if name == "mt5_deals":
-            fmt = "mt5"
-            res = parse_mt([{"kind": "mt5_deals", "section": "deals", "map": m,
-                             "rows": [dict(r, section="deals") for r in rows[hi + 1:]]}])
-            mode = "gross"
-        elif name == "ibkr_flex":
-            fmt, res, mode = "ibkr_flex", parse_ibkr(rows, hi, m), "net"
-        elif name == "tradovate_orders":
-            fmt, res, mode = "tradovate_orders", parse_tradovate(rows, hi, m), None
-        elif name == "tradingview":
-            fmt, res, mode = "tradingview", parse_tradingview(rows, hi, m), None
-        elif name == "generic_roundtrip":
-            fmt, res, mode = "generic_roundtrip", parse_generic_roundtrip(rows, hi, m), None
-        else:
-            fmt, res, mode = "generic", parse_generic(rows, hi, m), None
+def parse_file(data, mapping=None):
+    return parse_files([data], mapping)
 
+
+def finish(fmt, verified, res, mode, tz_label):
+    """Everything after parsing: trades, warnings, currency groups, order, ids. Mirrors finish()."""
     extra = res["extra"]
     warnings = []
-    if not verified:
+    if extra.get("mapped"):
+        warnings.append(warning("W_MAPPED", 0))
+    elif not verified:
         warnings.append(warning("W_UNVERIFIED_FORMAT", 0))
+    if extra.get("orders_averaged"):
+        warnings.append(warning("W_ORDERS_AVERAGED", 0))
     skipped = res["skipped"]
     if skipped:
         n = 0
         for v in skipped.values():
             n += v
         warnings.append(warning("W_SKIPPED_ROWS", n))
-    if dup:
-        warnings.append(warning("W_DUPLICATE_ROWS", dup))
-    if currency_ignored:
+    if extra.get("duplicate_rows"):
+        warnings.append(warning("W_DUPLICATE_ROWS", extra["duplicate_rows"]))
+    if extra.get("overlap_rows"):
+        warnings.append(warning("W_OVERLAP_ROWS", extra["overlap_rows"]))
+    if extra.get("currency_ignored"):
         warnings.append(warning("W_CURRENCY_IGNORED", 0))
 
     executions = res["executions"]
@@ -1824,8 +1993,10 @@ def parse_file(data):
         warnings.append(warning("W_OPEN_AT_START", open_at_start))
     if ambiguous:
         warnings.append(warning("W_AMBIGUOUS_FILLS", ambiguous))
+    if extra.get("pnl_sign"):
+        warnings.append(warning("W_PNL_SIGN", extra["pnl_sign"]))
     pts = 0
-    if fmt == "tradovate_orders":
+    if fmt == "tradovate_orders" or extra.get("futures_sizes"):
         for t in trades:
             if t["pnl_unit"] == "points":
                 pts += 1
@@ -1868,21 +2039,712 @@ def parse_file(data):
     trades.sort(key=lambda t: (t["close_ts"], t["open_ts"], t["symbol"], t["_seq"]))
     if not trades:
         fail("E_NO_CLOSED_TRADES")
+    # dates but no times: the paid server's rule (habits.mjs isDateOnlyRow, DATES_ONLY_SHARE)
+    n_date_only = 0
+    for t in trades:
+        if t["open_ts"] % DAY_MS_ == 0 and t["hold_s"] % 86400 == 0:
+            n_date_only += 1
+    dates_only = 20 * n_date_only >= len(trades)
+    if dates_only:
+        warnings.append(warning("W_DATES_ONLY", n_date_only))
     out_trades = []
     for i, t in enumerate(trades):
         d = {"id": "t%d" % (i + 1)}
         d.update(_strip(t))
         out_trades.append(d)
-    return {
+    out = {
         "format": fmt,
         "verified_format": verified,
         "executions": [_strip(e) for e in executions],
         "trades": out_trades,
         "skipped": skipped,
         "warnings": warnings,
-        "tz_label": TZ_LABELS[fmt],
+        "tz_label": tz_label,
         "currency_groups": groups,
+        "dates_only": dates_only,
+        "n_date_only": n_date_only,
     }
+    if fmt == "mapped":
+        out["preset"] = extra.get("preset")
+    return out
+
+
+# ----------------------------------------------------------------- the universal importer
+# Mirrors site/static/js/engine/mapped.js: the block list, money cells, the mapping's checks,
+# parse_mapped() and the several-files merge.
+
+BLOCKED = {
+    "contains": ["account", "acct", "wallet", "email", "phone"],
+    "exact": ["name", "fullname", "firstname", "lastname", "owner", "user", "uid", "userid", "username", "address",
+              "clientid", "traderid", "comment", "comments", "note", "notes", "remark", "remarks"],
+}
+
+
+def is_blocked(norm):
+    return norm in BLOCKED["exact"] or any(w in norm for w in BLOCKED["contains"])
+
+
+_MONEY_SYMBOLS = "$€£¥₹"
+_MONEY_SIGNS = "+-−"
+
+
+def money_clean(raw):
+    orig = clean(raw)
+    s = orig
+    if s == "":
+        return s
+    neg = False
+    if len(s) > 2 and s[0] == "(" and s[-1] == ")":
+        neg, s = True, clean(s[1:-1])
+    elif len(s) > 1 and s[-1] in ("-", "−"):
+        neg, s = True, clean(s[:-1])
+    sign = ""
+    if s != "" and s[0] in _MONEY_SIGNS:
+        sign, s = s[0], clean(s[1:])
+    if s != "" and s[0] in _MONEY_SYMBOLS:
+        s = clean(s[1:])
+    elif len(s) > 3 and re.match(r"^[A-Za-z]{3} ?[0-9.,]", s, re.ASCII) and s[:3].upper() in _ISO_SET:
+        s = clean(s[3:])
+    if s != "" and s[-1] in _MONEY_SYMBOLS:
+        s = clean(s[:-1])
+    elif len(s) > 3 and re.search(r"[0-9.,] ?[A-Za-z]{3}$", s, re.ASCII) and s[-3:].upper() in _ISO_SET:
+        s = clean(s[:-3])
+    if sign == "" and s != "" and s[0] in _MONEY_SIGNS:
+        sign, s = s[0], clean(s[1:])
+    if s == "" or (neg and sign != ""):
+        return orig
+    return ("-" if neg or sign in ("-", "−") else "") + s
+
+
+LAYOUTS = ["fills", "orders", "roundtrips"]
+MAP_FIELDS = ["date", "time", "symbol", "side", "qty", "price", "fees", "currency", "status",
+              "open_time", "close_time", "direction", "open_price", "close_price", "pnl"]
+_LAYOUT_FIELDS = {
+    "fills": {"required": ["date", "symbol", "side", "qty", "price"], "optional": ["time", "fees", "currency", "status"]},
+    "roundtrips": {"required": ["open_time", "close_time", "symbol", "direction", "qty", "open_price", "close_price"],
+                   "optional": ["fees", "currency", "pnl"]},
+}
+_LAYOUT_FIELDS["orders"] = _LAYOUT_FIELDS["fills"]
+_NUMERIC = {"fills": ["qty", "price"], "orders": ["qty", "price"], "roundtrips": ["qty", "open_price", "close_price", "pnl"]}
+_RULE_KINDS = ["eq", "prefix", "contains"]
+STATUS_KEEP = ["filled", "fully filled", "executed", "complete", "completed", "partially filled", "partial fill",
+               "partially executed"]
+MAX_FEE_COLUMNS = 3
+MAPPED_TZ = {"plain": "as in the file", "zone": "as in the file; time zone labels ignored", "utc": "UTC, as exported"}
+
+
+def _bad(field):
+    fail("E_BAD_MAPPING", "bad " + field, None, field)
+
+
+def _is_idx(v):
+    return isinstance(v, int) and not isinstance(v, bool) and v >= 0
+
+
+def norm_value(v):
+    return clean(v).lower()
+
+
+def _check_values(o, allowed, field):
+    if o is None:
+        return
+    if not isinstance(o, dict):
+        _bad(field)
+    for k, v in o.items():
+        if len(k) > 40 or v not in allowed:
+            _bad(field)
+
+
+def _check_rules(lst, allowed, field):
+    if lst is None:
+        return
+    if not isinstance(lst, list) or len(lst) > 40:
+        _bad(field)
+    for r in lst:
+        if (not isinstance(r, list) or len(r) != 3 or r[0] not in _RULE_KINDS or not isinstance(r[1], str)
+                or len(r[1]) > 40 or r[2] not in allowed):
+            _bad(field)
+
+
+def check_mapping(mp):
+    """The mapping's own shape. -> side_from ('column' | 'sign'). Mirrors checkMapping()."""
+    if not isinstance(mp, dict) or mp.get("v") != 1:
+        _bad("v")
+    if mp.get("layout") not in LAYOUTS:
+        _bad("layout")
+    if not _is_idx(mp.get("header_row")):
+        _bad("header_row")
+    if mp.get("delimiter") is not None and mp["delimiter"] not in (",", ";", "\t"):
+        _bad("delimiter")
+    if not isinstance(mp.get("cols"), dict):
+        _bad("cols")
+    if not isinstance(mp.get("headers"), dict):
+        _bad("headers")
+    lf = _LAYOUT_FIELDS[mp["layout"]]
+    for k in mp["cols"]:
+        if k not in MAP_FIELDS:
+            _bad(k)
+    for f in MAP_FIELDS:
+        v = mp["cols"].get(f)
+        if v is None or (f == "fees" and isinstance(v, list) and len(v) == 0):
+            continue
+        if f not in lf["required"] and f not in lf["optional"]:
+            _bad(f)
+        if f == "fees":
+            if not isinstance(v, list) or len(v) > MAX_FEE_COLUMNS or not all(_is_idx(i) for i in v):
+                _bad(f)
+        elif not _is_idx(v):
+            _bad(f)
+    side_from = "column" if mp.get("side_from") is None else mp["side_from"]
+    if side_from not in ("column", "sign"):
+        _bad("side_from")
+    if side_from == "sign" and mp["layout"] == "roundtrips":
+        _bad("side_from")
+    for f in lf["required"]:
+        if f == "side" and side_from == "sign":
+            continue
+        if mp["cols"].get(f) is None:
+            _bad(f)
+    _check_values(mp.get("side_values"), ["buy", "sell", "skip"], "side_values")
+    _check_rules(mp.get("side_rules"), ["buy", "sell", "skip"], "side_rules")
+    if mp.get("side_default") is not None and mp["side_default"] != "skip":
+        _bad("side_default")
+    _check_values(mp.get("status_values"), ["keep", "skip"], "status_values")
+    _check_rules(mp.get("status_rules"), ["keep", "skip"], "status_rules")
+    if mp.get("date_format") not in DATE_FORMATS:
+        _bad("date_format")
+    if mp.get("number_style") is not None and mp["number_style"] not in ("dot", "comma"):
+        _bad("number_style")
+    if mp.get("currency") is not None and mp["currency"] not in _ISO_SET:
+        _bad("currency")
+    if mp.get("tz") is not None and mp["tz"] != "utc":
+        _bad("tz")
+    if mp.get("preset") is not None and not (isinstance(mp["preset"], str)
+                                            and re.match(r"^[a-z0-9_]{1,40}$", mp["preset"], re.ASCII)):
+        _bad("preset")
+    for f in ("futures_sizes", "section", "trim_ragged", "keep_partial"):
+        if mp.get(f) is not None and not isinstance(mp[f], bool):
+            _bad(f)
+    if mp.get("futures_sizes") and mp["layout"] == "roundtrips":
+        _bad("futures_sizes")
+    src = mp.get("source")
+    if src is not None:
+        if not isinstance(src, dict) or src.get("kind") != "html" or not _is_idx(src.get("table")):
+            _bad("source")
+    return side_from
+
+
+def bind_mapping(mp, header):
+    m = {}
+
+    def use(key, field, i):
+        if i >= len(header):
+            _bad(field)
+        h = norm_header(header[i])
+        if mp["headers"].get(str(i)) != h:
+            _bad(field)
+        if is_blocked(h):
+            _bad(field)
+        m[key] = i
+
+    for f in MAP_FIELDS:
+        v = mp["cols"].get(f)
+        if v is None:
+            continue
+        if f == "fees":
+            for k, i in enumerate(v):
+                use("fee%d" % k, "fees", i)
+        else:
+            use(f, f, v)
+    return m
+
+
+def data_rows_after(rows, hdr_at, section):
+    out = []
+    prev = rows[hdr_at]["row"]
+    for r in rows[hdr_at + 1:]:
+        if section and (r["row"] != prev + 1 or len([c for c in r["cells"] if c != ""]) == 1):
+            break
+        out.append(r)
+        prev = r["row"]
+    return out
+
+
+def _cell_at(r, i):
+    return "" if i is None or i >= len(r["cells"]) else r["cells"][i]
+
+
+def _lookup(raw, values, rules):
+    k = norm_value(raw)
+    if values is not None and k in values:
+        return values[k]
+    if rules is not None:
+        for kind, text, res in rules:
+            if (kind == "eq" and k == text) or (kind == "prefix" and k.startswith(text)) or \
+                    (kind == "contains" and text in k):
+                return res
+    return None
+
+
+def _side_of(raw, mp):
+    listed = mp.get("side_values") is not None or mp.get("side_rules") is not None
+    v = _lookup(raw, mp.get("side_values"), mp.get("side_rules"))
+    if v is not None:
+        return v
+    if listed:
+        return "skip" if mp.get("side_default") == "skip" else None
+    if mp["layout"] == "roundtrips":
+        d = clean(raw).lower()
+        if d.startswith("l") or d.startswith("b"):
+            return "buy"
+        if d.startswith("s"):
+            return "sell"
+        return None
+    return _side_letter(raw)
+
+
+def _status_kept(raw, mp):
+    listed = mp.get("status_values") is not None or mp.get("status_rules") is not None
+    v = _lookup(raw, mp.get("status_values"), mp.get("status_rules"))
+    if v is not None:
+        return v == "keep"
+    if listed:
+        return False
+    return norm_value(raw) in STATUS_KEEP
+
+
+def _status_reason(raw):
+    v = norm_value(raw)
+    if "reject" in v:
+        return "rejected"
+    if "cancel" in v:
+        return "cancelled"
+    return "not_filled"
+
+
+def futures_root(symbol):
+    c = clean(symbol).upper().split(" ")[0]
+    mm = _RE_CONTRACT.match(c)
+    return mm.group(1) if mm else c
+
+
+def number_question(rows, idxs, delimiter):
+    dot = comma = dot3 = lone = False
+    for r in rows:
+        for i in idxs:
+            if i >= len(r["cells"]):
+                continue
+            c = money_clean(r["cells"][i])
+            sh = number_shape(c)
+            if sh == "dot":
+                dot = True
+            elif sh == "comma":
+                comma = True
+            elif sh == "dot3":
+                dot3 = True
+            elif sh == "neutral" and re.match(r"^[+-]?\d+,\d{3}$", c.replace("−", "-"), re.ASCII):
+                lone = True
+    if dot or comma:
+        return "number_style" if lone else None
+    if lone or (dot3 and delimiter != ","):
+        return "number_style"
+    return None
+
+
+def parse_mapped(rows, mp, side_from, kind, delimiter):
+    """One file's rows through a checked mapping -> (parser result, data row count)."""
+    hdr_at = next((k for k, r in enumerate(rows) if r["row"] == mp["header_row"] + 1), -1)
+    if hdr_at < 0:
+        _bad("header_row")
+    header = rows[hdr_at]["cells"]
+    m = bind_mapping(mp, header)
+    layout = mp["layout"]
+    data = data_rows_after(rows, hdr_at, mp.get("section") is True)
+    skipped = {}
+    req = [f for f in _LAYOUT_FIELDS[layout]["required"] if not (f == "side" and side_from == "sign")]
+    kept = []
+    n_data = 0
+    for r in data:
+        if _empty(r["cells"]):
+            continue
+        n_data += 1
+        if mp.get("trim_ragged") and len(r["cells"]) * 2 < len(header):
+            _skip(skipped, "no_data")
+            continue
+        if all(_cell_at(r, m.get(f)) == "" for f in req):
+            _skip(skipped, "no_data")
+            continue
+        kept.append(r)
+    if n_data == 0:
+        fail("E_HEADER_ONLY")
+    if n_data > MAX_ROWS:
+        fail("E_TOO_LARGE")
+    if kind == "csv":
+        check_quoting([rows[hdr_at]] + data, 0, m)
+    cm, cur_ignored = check_currency_column(kept, m)
+    num_map = {}
+    for f in _NUMERIC[layout]:
+        if f in cm:
+            num_map[f] = cm[f]
+    for k in ("fee0", "fee1", "fee2"):
+        if k in cm:
+            num_map[k] = cm[k]
+    num_idx = list(num_map.values())
+    for r in kept:
+        for i in num_idx:
+            if i < len(r["cells"]):
+                r["cells"][i] = money_clean(r["cells"][i])
+    chosen = mp.get("number_style")
+    if chosen is not None:
+        fallback = chosen
+    else:
+        fallback = "dot" if (kind == "csv" and delimiter == ",") or kind == "html" else None
+    style = resolve_number_style([{"rows": kept, "map": num_map, "fields": list(num_map.keys())}], fallback)
+    if chosen is not None and style != chosen:
+        fail("E_BAD_NUMBER", "does not fit the chosen number style")
+    if chosen is not None:
+        for r in kept:
+            for i in num_idx:
+                if i >= len(r["cells"]):
+                    continue
+                bare = r["cells"][i].replace("−", "-")
+                if chosen == "dot" and re.match(r"^[+-]?\d{1,3},\d{3}$", bare, re.ASCII):
+                    r["cells"][i] = bare.replace(",", "", 1)
+                elif chosen == "comma" and re.match(r"^[+-]?\d+,\d{3}$", bare, re.ASCII):
+                    r["cells"][i] = bare.replace(",", ".", 1)
+    dup = 0
+    idx = list(cm.values())
+    seen_keys = set()
+    for r in kept:
+        key = "\u0001".join(_cell_at(r, i) for i in idx)
+        if key in seen_keys:
+            dup += 1
+        else:
+            seen_keys.add(key)
+    seen = {"zone": False}
+    fmt = mp["date_format"]
+    execs, rts = [], []
+    pnl_sign = 0
+
+    def fee_of(r, row):
+        fee = 0
+        for k in ("fee0", "fee1", "fee2"):
+            if k in cm:
+                fee += abs(opt_number(_cell_at(r, cm[k]), row, "fees"))
+        return fee
+
+    for r in kept:
+        row = r["row"]
+        if layout == "roundtrips":
+            d = _side_of(_cell_at(r, cm.get("direction")), mp)
+            if d == "skip":
+                _skip(skipped, "not_a_trade")
+                continue
+            if d is None:
+                _skip(skipped, "bad_side")
+                continue
+            dr = "long" if d == "buy" else "short"
+            symbol = _cell_at(r, cm.get("symbol"))
+            if symbol == "":
+                _skip(skipped, "no_symbol")
+                continue
+            ot = parse_date_fmt(_cell_at(r, cm.get("open_time")), fmt, row, "open_time", seen)
+            ct = parse_date_fmt(_cell_at(r, cm.get("close_time")), fmt, row, "close_time", seen)
+            reordered = ct < ot
+            if reordered:
+                ct = fall_back_close(ot, ct)
+                if ct is None:
+                    fail("E_BAD_DATE", "close before open", row, "close_time")
+            qty = abs(req_number(_cell_at(r, cm.get("qty")), row, "qty"))
+            if qty == 0:
+                _skip(skipped, "zero_qty")
+                continue
+            op = req_number(_cell_at(r, cm.get("open_price")), row, "open_price")
+            cp = req_number(_cell_at(r, cm.get("close_price")), row, "close_price")
+            fee = fee_of(r, row)
+            if "pnl" in cm:
+                pv = opt_number(_cell_at(r, cm["pnl"]), row, "pnl")
+                g = (cp - op) * (1 if dr == "long" else -1)
+                if pv != 0 and g != 0 and (pv > 0) != (g > 0):
+                    pnl_sign += 1
+            cur = _cell_at(r, cm.get("currency")).upper() or (mp.get("currency") or None)
+            rts.append({"row": row, "symbol": symbol, "dir": dr, "open_ts": ot, "close_ts": ct, "qty": qty,
+                        "entry": op, "exit": cp, "fees": fee, "pnl_gross": None, "reported": False,
+                        "currency": cur, "unit": cur if cur else "points", "pos_id": None, "reordered": reordered})
+            continue
+        side = None
+        if side_from == "column":
+            side = _side_of(_cell_at(r, cm.get("side")), mp)
+            if side == "skip":
+                _skip(skipped, "not_a_trade")
+                continue
+        if "status" in cm:
+            st = _cell_at(r, cm["status"])
+            if not _status_kept(st, mp):
+                v = norm_value(st)
+                partial = mp.get("keep_partial") is True and ("cancel" in v or "expire" in v) and \
+                    (parse_number(_cell_at(r, cm.get("qty")), row, "qty") or 0) != 0
+                if not partial:
+                    _skip(skipped, _status_reason(st))
+                    continue
+        if side_from == "column" and side is None:
+            _skip(skipped, "bad_side")
+            continue
+        symbol = _cell_at(r, cm.get("symbol"))
+        if symbol == "":
+            _skip(skipped, "no_symbol")
+            continue
+        d = _cell_at(r, cm.get("date"))
+        t = _cell_at(r, cm.get("time"))
+        ts = parse_date_fmt(d + " " + t if t != "" and d != "" else d, fmt, row, "date", seen)
+        q = req_number(_cell_at(r, cm.get("qty")), row, "qty")
+        if side_from == "sign" and q != 0:
+            side = "sell" if q < 0 else "buy"
+        q = abs(q)
+        if q == 0:
+            _skip(skipped, "zero_qty")
+            continue
+        price = req_number(_cell_at(r, cm.get("price")), row, "price")
+        fee = fee_of(r, row)
+        cur = _cell_at(r, cm.get("currency")).upper() or (mp.get("currency") or None)
+        mult = 1
+        unit = cur if cur else "points"
+        if mp.get("futures_sizes"):
+            root = futures_root(symbol)
+            if root in CME_MULTIPLIERS:
+                mult = CME_MULTIPLIERS[root]
+                cur = cur or "USD"
+                unit = cur
+            else:
+                cur = None
+                unit = "points"
+        execs.append({"row": row, "ts": ts, "symbol": symbol, "side": side, "qty": q, "price": price, "fee": fee,
+                      "currency": cur, "oc": None, "pos_id": None, "pnl_reported": None, "multiplier": mult,
+                      "_unit": unit, "_fx": None})
+    extra = {"duplicate_rows": dup, "currency_ignored": cur_ignored, "mapped": not mp.get("preset"),
+             "preset": mp.get("preset") or None, "orders_averaged": layout == "orders",
+             "futures_sizes": mp.get("futures_sizes") is True, "pnl_sign": pnl_sign, "zone_ignored": seen["zone"],
+             "tz": mp.get("tz") or None}
+    return {"executions": execs, "roundtrips": rts, "skipped": skipped, "extra": extra}, n_data
+
+
+def mapped_tz_label(extra):
+    if extra.get("tz") == "utc":
+        return MAPPED_TZ["utc"]
+    return MAPPED_TZ["zone"] if extra.get("zone_ignored") else MAPPED_TZ["plain"]
+
+
+def _exec_key(e):
+    return (e["ts"], e["symbol"], e["side"], e["qty"], e["price"], e["fee"])
+
+
+def _rt_key(r):
+    return (r["symbol"], r["dir"], r["open_ts"], r["close_ts"], r["qty"], r["entry"], r["exit"])
+
+
+def drop_overlap(lists, key_of):
+    keep = {}
+    for lst in lists:
+        c = {}
+        for x in lst:
+            k = key_of(x)
+            c[k] = c.get(k, 0) + 1
+        for k, n in c.items():
+            if n > keep.get(k, 0):
+                keep[k] = n
+    used = {}
+    out = []
+    dropped = 0
+    for lst in lists:
+        for x in lst:
+            k = key_of(x)
+            used[k] = used.get(k, 0) + 1
+            if used[k] <= keep[k]:
+                out.append(x)
+            else:
+                dropped += 1
+    return out, dropped
+
+
+def first_ts(res):
+    t = math.inf
+    for e in res["executions"]:
+        if e["ts"] < t:
+            t = e["ts"]
+    for r in res["roundtrips"]:
+        if r["open_ts"] < t:
+            t = r["open_ts"]
+    return t
+
+
+_SUM_EXTRA = ["duplicate_rows", "open_positions", "pnl_sign"]
+_OR_EXTRA = ["currency_ignored", "has_closed_positions", "has_deals", "zone_ignored"]
+
+
+def merge_parsed(parts):
+    extra = dict(parts[0]["res"]["extra"])
+    for k in _SUM_EXTRA:
+        if k in extra:
+            extra[k] = 0
+    for k in _OR_EXTRA:
+        if k in extra:
+            extra[k] = False
+    skipped = {}
+    offset = 0
+    for p in parts:
+        for e in p["res"]["executions"]:
+            e["row"] += offset
+        for r in p["res"]["roundtrips"]:
+            r["row"] += offset
+        offset += p["last_row"]
+        for k, n in p["res"]["skipped"].items():
+            skipped[k] = skipped.get(k, 0) + n
+        for k in _SUM_EXTRA:
+            if k in p["res"]["extra"]:
+                extra[k] = extra.get(k, 0) + p["res"]["extra"][k]
+        for k in _OR_EXTRA:
+            if k in p["res"]["extra"]:
+                extra[k] = extra.get(k) or p["res"]["extra"][k]
+    ex, d1 = drop_overlap([p["res"]["executions"] for p in parts], _exec_key)
+    rt, d2 = drop_overlap([p["res"]["roundtrips"] for p in parts], _rt_key)
+    extra["overlap_rows"] = d1 + d2
+    return {"executions": ex, "roundtrips": rt, "skipped": skipped, "extra": extra}
+
+
+def is_paste(item):
+    return isinstance(item, dict) and isinstance(item.get("paste"), str)
+
+
+def read_rows(item, delimiter=None):
+    """-> {kind, delimiter, rows}. Mirrors readRows() in index.js."""
+    if is_paste(item):
+        return {"kind": "paste", "delimiter": "\t", "rows": from_paste(item["paste"])}
+    text = decode_bytes(item)
+    if is_html(text):
+        return {"kind": "html", "delimiter": None, "rows": html_rows(text)}
+    delim = delimiter or sniff_delimiter(text)
+    return {"kind": "csv", "delimiter": delim, "rows": parse_csv(text, delim)}
+
+
+def _read_auto(src):
+    rows = src["rows"]
+    if src["kind"] == "html":
+        det = detect_html(rows)
+        groups = [_html_number_group(t) for t in det["tables"]]
+        resolve_number_style(groups, "dot")
+        dup = 0
+        n_data = 0
+        for g in groups:
+            dup += count_duplicate_rows(g["rows"], g["map"])
+            n_data += len(g["rows"])
+        res = parse_mt(det["tables"])
+        res["extra"]["duplicate_rows"] = dup
+        res["extra"]["currency_ignored"] = False
+        return {"fmt": det["format"], "verified": False, "res": res, "mode": "gross",
+                "tz": TZ_LABELS[det["format"]], "n_data": n_data, "shape": det["format"]}
+    delim = src["delimiter"]
+    if not rows:
+        fail("E_EMPTY")
+    det = detect_csv(rows)
+    name, hi = det["format"], det["header_index"]
+    # a Currency column whose cells are not all ISO codes is not read at all (F-D3)
+    m, currency_ignored = check_currency_column(rows[hi + 1:], det["map"])
+    data_rows = [r for r in rows[hi + 1:] if not _empty(r["cells"])]
+    if not data_rows:
+        fail("E_HEADER_ONLY")
+    if len(data_rows) > MAX_ROWS:
+        fail("E_TOO_LARGE")
+    check_quoting(rows, hi, det["map"])
+    if name == "tradingview":
+        strip_currency_cells(rows[hi + 1:], m)
+    resolve_number_style([{"rows": rows[hi + 1:], "map": m, "fields": NUMERIC_FIELDS[name]}],
+                         "dot" if delim == "," else None)
+    verified = SIGNATURES[name]["verified"]
+    dup = count_duplicate_rows(rows[hi + 1:], m)
+    if name == "mt5_deals":
+        fmt = "mt5"
+        res = parse_mt([{"kind": "mt5_deals", "section": "deals", "map": m,
+                         "rows": [dict(r, section="deals") for r in rows[hi + 1:]]}])
+        mode = "gross"
+    elif name == "ibkr_flex":
+        fmt, res, mode = "ibkr_flex", parse_ibkr(rows, hi, m), "net"
+    elif name == "tradovate_orders":
+        fmt, res, mode = "tradovate_orders", parse_tradovate(rows, hi, m), None
+    elif name == "tradingview":
+        fmt, res, mode = "tradingview", parse_tradingview(rows, hi, m), None
+    elif name == "generic_roundtrip":
+        fmt, res, mode = "generic_roundtrip", parse_generic_roundtrip(rows, hi, m), None
+    else:
+        fmt, res, mode = "generic", parse_generic(rows, hi, m), None
+    res["extra"]["duplicate_rows"] = dup
+    res["extra"]["currency_ignored"] = currency_ignored
+    return {"fmt": fmt, "verified": verified, "res": res, "mode": mode, "tz": TZ_LABELS[fmt],
+            "n_data": len(data_rows), "shape": fmt}
+
+
+def _header_shape(rows, mp):
+    for r in rows:
+        if r["row"] == mp["header_row"] + 1:
+            return "\u0001".join(norm_header(c) for c in r["cells"])
+    return None
+
+
+def _read_mapped(src, mp, side_from, expect):
+    rows = src["rows"]
+    if src["kind"] == "html":
+        if not mp.get("source"):
+            _bad("source")
+        rows = [r for r in rows if r["table"] == mp["source"]["table"]]
+    elif mp.get("source"):
+        _bad("source")
+    if not rows:
+        fail("E_EMPTY")
+    shape = _header_shape(rows, mp)
+    if expect is not None and shape != expect:
+        fail("E_MIXED_FILES")
+    res, n_data = parse_mapped(rows, mp, side_from, src["kind"], src["delimiter"])
+    return {"fmt": "mapped", "verified": False, "res": res, "mode": None, "tz": mapped_tz_label(res["extra"]),
+            "n_data": n_data, "shape": shape}
+
+
+def parse_files(items, mapping=None):
+    """Mirrors parseFiles() in index.js: several files (bytes) or pastes ({"paste": text})."""
+    if not items:
+        fail("E_EMPTY")
+    side_from = check_mapping(mapping) if mapping is not None else None
+    n = len(items)
+    total = 0
+    for it in items:
+        total += len(it["paste"]) if is_paste(it) else len(it)
+    if total > MAX_BYTES:
+        fail("E_TOO_LARGE")
+    parts = []
+    n_rows = 0
+    for k, item in enumerate(items):
+        try:
+            src = read_rows(item, (mapping.get("delimiter") or None) if mapping is not None else None)
+            if mapping is not None:
+                p = _read_mapped(src, mapping, side_from, None if k == 0 else parts[0]["shape"])
+            else:
+                p = _read_auto(src)
+            if k > 0 and p["shape"] != parts[0]["shape"]:
+                fail("E_MIXED_FILES")
+            p["last_row"] = src["rows"][-1]["row"] if src["rows"] else 0
+            p["first"] = first_ts(p["res"])
+            n_rows += p["n_data"]
+            parts.append(p)
+        except EngineError as e:
+            if n > 1:
+                e.file = k + 1
+            raise
+    if n_rows > MAX_ROWS:
+        fail("E_TOO_LARGE")
+    p = parts[0]
+    if n == 1:
+        return finish(p["fmt"], p["verified"], p["res"], p["mode"], p["tz"])
+    order = sorted(range(n), key=lambda k: (parts[k]["first"], k))
+    res = merge_parsed([parts[k] for k in order])
+    return finish(p["fmt"], p["verified"], res, p["mode"], mapped_tz_label(res["extra"]) if mapping is not None else p["tz"])
 
 
 # ----------------------------------------------------------------- FreeStats

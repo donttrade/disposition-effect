@@ -31,7 +31,8 @@ export function decodeBytes(bytes) {
   if (n === 0) fail('E_EMPTY');
   if (n > LIMITS.MAX_BYTES) fail('E_TOO_LARGE');
   if (n >= 4 && bytes[0] === 0x50 && bytes[1] === 0x4b && bytes[2] === 0x03 && bytes[3] === 0x04) {
-    fail('E_ENCODING', 'It looks like an Excel (.xlsx) or zip file. Export the report as HTML or CSV instead.');
+    if (isXlsx(bytes)) fail('E_ENCODING', 'It is an Excel (.xlsx) file. Save it as CSV (File → Save as → CSV), then drop it here.');
+    fail('E_ENCODING', 'It is a zip file. Open it and drop the CSV inside.');
   }
   let enc = null;
   let start = 0;
@@ -58,6 +59,34 @@ export function decodeBytes(bytes) {
   if (text.indexOf('\u0000') !== -1) fail('E_ENCODING', 'The file contains binary data.');
   if (clean(text) === '') fail('E_EMPTY');
   return text;
+}
+
+// A zip and an .xlsx both start with PK\x03\x04. An .xlsx holds entries under xl/: one of the first
+// local headers names one, or the central directory at the end lists xl/workbook.xml.
+function u16(b, i) { return b[i] | (b[i + 1] << 8); }
+function u32(b, i) { return (b[i] | (b[i + 1] << 8) | (b[i + 2] << 16)) + b[i + 3] * 16777216; }
+const XL_WORKBOOK = [...'xl/workbook.xml'].map((c) => c.charCodeAt(0));
+
+export function isXlsx(bytes) {
+  let off = 0;
+  for (let k = 0; k < 20 && off + 30 <= bytes.length; k++) {
+    if (!(bytes[off] === 0x50 && bytes[off + 1] === 0x4b && bytes[off + 2] === 0x03 && bytes[off + 3] === 0x04)) break;
+    const flags = u16(bytes, off + 6);
+    const comp = u32(bytes, off + 18);
+    const nameLen = u16(bytes, off + 26);
+    const extraLen = u16(bytes, off + 28);
+    const at = off + 30;
+    if (nameLen >= 3 && at + 3 <= bytes.length && bytes[at] === 0x78 && bytes[at + 1] === 0x6c && bytes[at + 2] === 0x2f) return true;
+    if ((flags & 8) && comp === 0) break; // sizes come after the data: the walk cannot go on
+    off = at + nameLen + extraLen + comp;
+  }
+  const w = XL_WORKBOOK;
+  for (let i = Math.max(0, bytes.length - 65557); i + w.length <= bytes.length; i++) {
+    let j = 0;
+    while (j < w.length && bytes[i + j] === w[j]) j++;
+    if (j === w.length) return true;
+  }
+  return false;
 }
 
 function sniffUtf16(bytes) {
@@ -414,4 +443,169 @@ export function parseDate(raw, kind, row, column) {
   }
   if (s.indexOf('/') !== -1) fail('E_AMBIGUOUS_DATE', '', row, column);
   fail('E_BAD_DATE', 'the cell is not a date and time in a form this format uses (for example 2026-09-01 09:30:00)', row, column);
+}
+
+// ---------------------------------------------------------------- dates in a format the user chose
+// The universal importer (mapped.js) never guesses a date order: the mapping names one, and every
+// cell must fit it. Forms: ymd = 2026-10-02, 2026/10/02, 2026.10.02, 20261002; mdy = 10/2/2026,
+// 10-2-26, 10.2.2026; dmy = 2/10/2026 (and the same separators); excel = Excel date numbers (a
+// fraction is the time); epoch_s / epoch_ms = seconds / milliseconds since 1970.
+// Times: H:MM[:SS][.fff] with an optional AM/PM. Seconds fractions are dropped, as RE_ISO does.
+// A trailing time zone label (EST, UTC, Z, +02:00, GMT+2) is ignored: times are read as written,
+// like every other format; `seen.zone` records it for the time zone label.
+
+export const DATE_FORMATS = Object.freeze(['ymd', 'mdy', 'dmy', 'excel', 'epoch_s', 'epoch_ms']);
+const DATE_FORMAT_LABELS = {
+  ymd: 'year-month-day', mdy: 'month/day/year', dmy: 'day/month/year', excel: 'Excel date numbers',
+  epoch_s: 'seconds since 1970', epoch_ms: 'milliseconds since 1970',
+};
+const RE_DF = /^([0-9./-]+)(?:[ T]+(\d{1,2}):(\d{2})(?::(\d{2})(?:[.,]\d+)?)?(?: ?([AaPp][Mm]))?)?$/;
+const RE_ZONE_WORD = /^(.*[0-9AaPpMm]) ([A-Za-z]{2,5})$/;
+const RE_ZONE_OFFSET = /^(.*\d:\d{2}.*?) ?(?:(?:UTC|GMT) ?)?[+-]\d{1,2}(?::?\d{2})?$/;
+const RE_ZONE_Z = /^(.*\d)Z$/;
+const RE_YMD = /^(\d{4})([-/.])(\d{1,2})\2(\d{1,2})$/;
+const RE_YMD8 = /^(\d{4})(\d{2})(\d{2})$/;
+const RE_DMY = /^(\d{1,2})([-/.])(\d{1,2})\2(\d{4}|\d{2})$/;
+const RE_SERIAL = /^\d+(\.\d+)?$/;
+const MAX_TS = Date.UTC(2101, 0, 1); // utcMs accepts years 1970-2100
+
+// → [text without a trailing zone label, whether one was removed]
+export function stripZone(s) {
+  let zone = false;
+  let m = RE_ZONE_WORD.exec(s);
+  if (m && !/^[AaPp][Mm]$/.test(m[2]) && /\d/.test(m[1])) { s = m[1]; zone = true; }
+  m = RE_ZONE_OFFSET.exec(s);
+  if (m && /[0-9AaPpMm]$/.test(m[1])) { s = m[1]; zone = true; }
+  m = RE_ZONE_Z.exec(s);
+  if (m) { s = m[1]; zone = true; }
+  return [s, zone];
+}
+
+function badOrder(fmt, row, column) {
+  fail('E_BAD_DATE', `it does not fit the date form you chose (${DATE_FORMAT_LABELS[fmt]})`, row, column);
+}
+
+function inRange(ms, row, column) {
+  if (!(ms >= 0 && ms < MAX_TS)) fail('E_BAD_DATE', 'the date or time is out of range', row, column);
+  return ms;
+}
+
+export function parseDateFmt(raw, fmt, row, column, seen) {
+  const [s, zone] = stripZone(clean(raw));
+  if (s === '') fail('E_BAD_DATE', 'the date is empty', row, column);
+  const m = RE_DF.exec(s);
+  if (!m) badOrder(fmt, row, column);
+  if (zone && seen) seen.zone = true;
+  const d = m[1];
+  const timed = m[2] !== undefined;
+  let h = timed ? Number(m[2]) : 0;
+  const mi = timed ? Number(m[3]) : 0;
+  const sec = m[4] === undefined ? 0 : Number(m[4]);
+  if (m[5] !== undefined) {
+    if (h < 1 || h > 12) fail('E_BAD_DATE', 'the date or time is out of range', row, column);
+    h = (h % 12) + (m[5].toUpperCase() === 'PM' ? 12 : 0);
+  }
+  if (fmt === 'epoch_s' || fmt === 'epoch_ms') {
+    if (timed || !RE_SERIAL.test(d)) badOrder(fmt, row, column);
+    const v = Number(d);
+    return inRange(fmt === 'epoch_s' ? Math.floor(v) * 1000 : Math.floor(v / 1000) * 1000, row, column);
+  }
+  if (fmt === 'excel') {
+    if (!RE_SERIAL.test(d)) badOrder(fmt, row, column);
+    const v = Number(d);
+    // Serial 60 is Excel's 29 Feb 1900, a day that never was; everything before 61 is before 1970 anyway.
+    if (v < 61) fail('E_BAD_DATE', 'the date or time is out of range', row, column);
+    if (timed) {
+      if (d.indexOf('.') !== -1) badOrder(fmt, row, column);
+      if (mi > 59 || sec > 59 || h > 23) fail('E_BAD_DATE', 'the date or time is out of range', row, column);
+      return inRange((v - 25569) * 86400000 + ((h * 60 + mi) * 60 + sec) * 1000, row, column);
+    }
+    return inRange((Math.floor(v * 86400 + 0.5) - 25569 * 86400) * 1000, row, column);
+  }
+  let y, mo, dd, x;
+  if (fmt === 'ymd') {
+    if ((x = RE_YMD.exec(d))) { y = Number(x[1]); mo = Number(x[3]); dd = Number(x[4]); }
+    else if ((x = RE_YMD8.exec(d))) { y = Number(x[1]); mo = Number(x[2]); dd = Number(x[3]); }
+    else badOrder(fmt, row, column);
+  } else if (fmt === 'mdy' || fmt === 'dmy') {
+    x = RE_DMY.exec(d);
+    if (!x) badOrder(fmt, row, column);
+    const a = Number(x[1]), b = Number(x[3]);
+    y = Number(x[4]) + (x[4].length === 2 ? 2000 : 0);
+    if (fmt === 'mdy') { mo = a; dd = b; } else { dd = a; mo = b; }
+    if (mo > 12) badOrder(fmt, row, column);
+  } else {
+    fail('E_BAD_DATE', 'no date form was chosen', row, column);
+  }
+  return utcMs(y, mo, dd, h, mi, sec, row, column);
+}
+
+// The form of one date cell, for detectDateFormat: 'ymd' | 'dm' (day and month in some order)
+// | 'excel' | 'epoch_s' | 'epoch_ms' | 'other'.
+export function dateShape(raw) {
+  const m = RE_DF.exec(stripZone(clean(raw))[0]);
+  if (!m) return { kind: 'other', a: 0, b: 0 };
+  const d = m[1];
+  const timed = m[2] !== undefined;
+  if (RE_YMD.test(d) || /^(19|20)\d{6}$/.test(d)) return { kind: 'ymd', a: 0, b: 0 };
+  const x = RE_DMY.exec(d);
+  if (x) return { kind: 'dm', a: Number(x[1]), b: Number(x[3]) };
+  if (!timed && /^\d{12,13}$/.test(d)) return { kind: 'epoch_ms', a: 0, b: 0 };
+  if (!timed && /^\d{9,10}(\.\d+)?$/.test(d)) return { kind: 'epoch_s', a: 0, b: 0 };
+  if (/^\d{5}(\.\d+)?$/.test(d) && Number(d) >= 20000 && Number(d) <= 80000) return { kind: 'excel', a: 0, b: 0 };
+  return { kind: 'other', a: 0, b: 0 };
+}
+
+// The date form of a column, from its cells, or a reason it cannot be told:
+// {format, reason, at, at2}: reason null (one form), 'seen' (a day part over 12 showed the order;
+// at = that cell's index), 'ask' (every day and month part is 12 or less), 'mixed' (more than one
+// form, or a cell that is no date), 'mixed_order' (day-first at `at` and month-first at `at2`),
+// 'empty'. Nothing is ever guessed: 'ask' means the user chooses.
+export function detectDateFormat(values) {
+  const kinds = [];
+  let dmyAt = -1;
+  let mdyAt = -1;
+  for (let i = 0; i < values.length; i++) {
+    if (clean(values[i]) === '') continue;
+    const sh = dateShape(values[i]);
+    if (!kinds.includes(sh.kind)) kinds.push(sh.kind);
+    if (sh.kind === 'dm') {
+      if (sh.a > 12 && dmyAt < 0) dmyAt = i;
+      if (sh.b > 12 && mdyAt < 0) mdyAt = i;
+    }
+  }
+  if (kinds.length === 0) return { format: null, reason: 'empty', at: -1, at2: -1 };
+  if (kinds.length > 1 || kinds[0] === 'other') return { format: null, reason: 'mixed', at: -1, at2: -1 };
+  if (kinds[0] !== 'dm') return { format: kinds[0], reason: null, at: -1, at2: -1 };
+  if (dmyAt >= 0 && mdyAt >= 0) return { format: null, reason: 'mixed_order', at: dmyAt, at2: mdyAt };
+  if (dmyAt >= 0) return { format: 'dmy', reason: 'seen', at: dmyAt, at2: -1 };
+  if (mdyAt >= 0) return { format: 'mdy', reason: 'seen', at: mdyAt, at2: -1 };
+  return { format: null, reason: 'ask', at: -1, at2: -1 };
+}
+
+// ---------------------------------------------------------------- a pasted table
+// Copying an HTML table or a web grid gives tab-separated text in Chrome, Firefox and Safari. A
+// paste with a tab anywhere is split on tabs; otherwise on runs of two or more spaces (never one:
+// "2026-10-02 09:31:05" holds one). Rows are like parseCsv's: {row: the 1-based line, cells}.
+// Nothing here is kept: the pasted text lives only in the caller's memory.
+const PASTE_GAP = /[ \u00a0\u2000-\u200a\u202f\u205f\u3000]{2,}/;
+
+export function fromPaste(text) {
+  text = String(text);
+  if (text.length > LIMITS.MAX_BYTES) fail('E_TOO_LARGE');
+  if (clean(text) === '') fail('E_EMPTY');
+  const lines = text.split(/\r\n|\n|\r/);
+  const tabs = lines.some((l) => l.indexOf('\t') !== -1);
+  const out = [];
+  let wide = 0;
+  for (let k = 0; k < lines.length; k++) {
+    if (clean(lines[k]) === '') continue;
+    const parts = tabs ? lines[k].split('\t') : lines[k].replace(WS_EDGE, '').split(PASTE_GAP);
+    const cells = parts.map(clean);
+    if (cells.filter((c) => c !== '').length >= 2) wide++;
+    out.push({ row: k + 1, cells, swallow: 0, ml: [], broken: false });
+    if (out.length > LIMITS.MAX_ROWS + 1) fail('E_TOO_LARGE');
+  }
+  if (wide === 0) fail('E_PASTE_FORMAT');
+  return out;
 }

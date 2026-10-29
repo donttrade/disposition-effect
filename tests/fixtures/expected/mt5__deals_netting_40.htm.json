@@ -48,6 +48,7 @@
   "currency_groups": {
    "account": 40
   },
+  "dates_only": false,
   "executions": [
    {
     "currency": null,
@@ -1171,6 +1172,7 @@
    }
   ],
   "format": "mt5",
+  "n_date_only": 0,
   "skipped": {
    "balance": 1
   },
