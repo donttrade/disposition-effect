@@ -85,8 +85,8 @@ def test_menu_keyboard_escape_and_click_outside(browser, built_site, width):
     links = pg.eval_on_selector_all(".nav-panel .nav-links a", "as => as.map(a => [a.textContent, a.getBoundingClientRect().height])")
     assert [t for t, _ in links] == ["Home", "Sample report", "Free tools", "Pricing", "For firms"]   # Home link (a); 29 Oct (owner): the same four links
     assert all(h >= 44 for _, h in links)
-    cta = pg.locator(".nav-panel a[data-pay]")
-    assert cta.inner_text() == "Get report — $39" and cta.bounding_box()["height"] >= 44
+    # no buy button on a research page (never a study finding next to an offer); /pricing/ shows the Menu's one below
+    assert pg.locator(".nav-panel a[data-pay]").count() == 0
     assert axe_violations(pg) == []
     pg.keyboard.press("Escape")
     assert not pg.is_visible(".nav-panel")

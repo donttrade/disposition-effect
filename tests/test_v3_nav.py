@@ -186,7 +186,8 @@ def test_n7_menu_motion(browser, built_site, motion):
     if motion == "reduce":
         assert anims == [], anims
     else:
-        assert anims, "the panel fades in"
+        # 29 Oct: the phone menu opens at once (an entrance animation made a click on its links wait for it);
+        # anything that does animate there may move only transform and opacity
         for a in anims:
             assert set(a["props"]) <= {"opacity", "transform"} and a["iter"] == 1 and a["end"] <= 240, a
     ctx.close()

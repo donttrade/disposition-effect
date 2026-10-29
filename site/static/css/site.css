@@ -187,7 +187,7 @@ html { scroll-padding-top: 72px; }
 .site-nav .nav-row { display: flex; flex-wrap: nowrap; align-items: center; gap: 0 var(--s3); }
 .site-nav a { display: inline-flex; align-items: center; min-height: var(--target); color: var(--text); text-decoration: none; white-space: nowrap; }
 .site-nav a:hover, .site-nav a[aria-current="page"], .site-nav a[aria-current="true"] { color: var(--rust); text-decoration: underline; text-underline-offset: 4px; }
-.site-header .hdr-cta { padding: 0 14px; font-size: var(--fs-0); white-space: nowrap; flex: none; }
+.site-header .hdr-cta { width: 10.5rem; padding: 0 8px; font-size: var(--fs-0); white-space: nowrap; flex: none; }   /* a fixed width: the web font loading moves nothing (CLS) */
 .chev { flex: none; width: 16px; height: 16px; }
 details[open] > summary > .chev { transform: rotate(180deg); }
 @keyframes dt-pop { from { opacity: 0; transform: translateY(-6px); } }
@@ -215,6 +215,8 @@ details.nav-menu[open] > summary { color: var(--text); background: var(--surface
 .theme-toggle svg { display: block; flex: none; }
 .theme-toggle { display: inline-flex; align-items: center; gap: var(--s1); white-space: nowrap; }
 .theme-toggle[hidden] { display: none; }
+/* in the header the toggle keeps its 44 px while theme.js unhides it, so the links and the button never jump (CLS) */
+.site-header .theme-toggle[hidden] { display: inline-flex; visibility: hidden; }
 @media (max-width: 899.98px) {
   .site-header .wrap { gap: var(--s1); }
   .site-nav .nav-row, .site-header .hdr-cta { display: none; }
@@ -222,7 +224,6 @@ details.nav-menu[open] > summary { color: var(--text); background: var(--surface
 }
 .nav-panel .nav-cta { margin: var(--s2) 0 0; }
 .site-nav .nav-panel .nav-cta .btn { width: 100%; color: var(--on-rust); text-decoration: none; }
-@media (prefers-reduced-motion: no-preference) { .nav-menu[open] > .nav-panel { animation: dt-pop 200ms var(--ease-nav) both; } }
 /* 25 Oct sweep: the theme toggle is an icon button at every width; its name stays for screen readers */
 .site-header .theme-toggle { justify-content: center; padding: 0; width: var(--target); }
 .site-header .theme-toggle .tt-label { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
