@@ -1,0 +1,511 @@
+{
+ "guess": {
+  "badges": {
+   "date": "matched",
+   "fees": "matched",
+   "price": "matched",
+   "qty": "matched",
+   "side": "matched",
+   "symbol": "matched"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": null,
+   "reason": "ask",
+   "seen": null,
+   "seen2": null
+  },
+  "futures_offer": true,
+  "layout": "fills",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 4,
+    "direction": null,
+    "fees": [
+     10
+    ],
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 3,
+    "qty": 2,
+    "side": 1,
+    "status": null,
+    "symbol": 0,
+    "time": null
+   },
+   "currency": null,
+   "date_format": null,
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "0": "instrument",
+    "1": "action",
+    "10": "commission",
+    "2": "quantity",
+    "3": "price",
+    "4": "time"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": null,
+   "side_values": {
+    "buy": "buy",
+    "sell": "sell"
+   },
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1
+  },
+  "questions": [
+   {
+    "example": "3/2/2026 9:31:05 AM",
+    "q": "date_order",
+    "readings": {
+     "dmy": "2026-02-03",
+     "mdy": "2026-03-02"
+    }
+   }
+  ],
+  "side_checks": {},
+  "side_counts": {
+   "buy": 6,
+   "sell": 6
+  },
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": null
+ },
+ "peek": {
+  "blocked": [
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   true,
+   false,
+   false,
+   true,
+   false
+  ],
+  "delimiter": ",",
+  "header_hits": 7,
+  "header_row": 0,
+  "headers": [
+   "Instrument",
+   "Action",
+   "Quantity",
+   "Price",
+   "Time",
+   "ID",
+   "E/X",
+   "Position",
+   "Order ID",
+   "Name",
+   "Commission",
+   "Rate",
+   "Account Display Name",
+   "Connection"
+  ],
+  "kind": "csv",
+  "labels": [
+   "Instrument",
+   "Action",
+   "Quantity",
+   "Price",
+   "Time",
+   "ID",
+   "E/X",
+   "Position",
+   "Order ID",
+   "Name",
+   "Commission",
+   "Rate",
+   "Account Display Name",
+   "Connection"
+  ],
+  "n_rows": 12,
+  "options": [
+   {
+    "example": "ES 12-26",
+    "index": 0,
+    "label": "Instrument"
+   },
+   {
+    "example": "Buy",
+    "index": 1,
+    "label": "Action"
+   },
+   {
+    "example": "1",
+    "index": 2,
+    "label": "Quantity"
+   },
+   {
+    "example": "5900.00",
+    "index": 3,
+    "label": "Price"
+   },
+   {
+    "example": "3/2/2026 9:31:05 AM",
+    "index": 4,
+    "label": "Time"
+   },
+   {
+    "example": "1",
+    "index": 5,
+    "label": "ID"
+   },
+   {
+    "example": "Entry",
+    "index": 6,
+    "label": "E/X"
+   },
+   {
+    "example": "1 L",
+    "index": 7,
+    "label": "Position"
+   },
+   {
+    "example": "1",
+    "index": 8,
+    "label": "Order ID"
+   },
+   {
+    "example": "$1.04",
+    "index": 10,
+    "label": "Commission"
+   },
+   {
+    "example": "1",
+    "index": 11,
+    "label": "Rate"
+   },
+   {
+    "example": "Live",
+    "index": 13,
+    "label": "Connection"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     "ES 12-26",
+     "Buy",
+     "1",
+     "5900.00",
+     "3/2/2026 9:31:05 AM",
+     "1",
+     "Entry",
+     "1 L",
+     "1",
+     null,
+     "$1.04",
+     "1",
+     null,
+     "Live"
+    ],
+    "row": 2
+   },
+   {
+    "cells": [
+     "ES 12-26",
+     "Sell",
+     "1",
+     "5898.00",
+     "3/2/2026 9:54:05 AM",
+     "1",
+     "Entry",
+     "1 L",
+     "1",
+     null,
+     "$1.04",
+     "1",
+     null,
+     "Live"
+    ],
+    "row": 3
+   },
+   {
+    "cells": [
+     "ES 12-26",
+     "Sell",
+     "3",
+     "5913.25",
+     "3/2/2026 10:08:05 AM",
+     "1",
+     "Entry",
+     "1 L",
+     "1",
+     null,
+     "$1.04",
+     "1",
+     null,
+     "Live"
+    ],
+    "row": 4
+   },
+   {
+    "cells": [
+     "ES 12-26",
+     "Buy",
+     "3",
+     "5912.25",
+     "3/2/2026 10:36:05 AM",
+     "1",
+     "Entry",
+     "1 L",
+     "1",
+     null,
+     "$1.04",
+     "1",
+     null,
+     "Live"
+    ],
+    "row": 5
+   },
+   {
+    "cells": [
+     "ES 12-26",
+     "Buy",
+     "5",
+     "5909.50",
+     "3/2/2026 10:48:05 AM",
+     "1",
+     "Entry",
+     "1 L",
+     "1",
+     null,
+     "$1.04",
+     "1",
+     null,
+     "Live"
+    ],
+    "row": 6
+   },
+   {
+    "cells": [
+     "ES 12-26",
+     "Sell",
+     "5",
+     "5910.25",
+     "3/2/2026 11:21:05 AM",
+     "1",
+     "Entry",
+     "1 L",
+     "1",
+     null,
+     "$1.04",
+     "1",
+     null,
+     "Live"
+    ],
+    "row": 7
+   },
+   {
+    "cells": [
+     "ES 12-26",
+     "Buy",
+     "2",
+     "5905.75",
+     "3/2/2026 11:31:05 AM",
+     "1",
+     "Entry",
+     "1 L",
+     "1",
+     null,
+     "$1.04",
+     "1",
+     null,
+     "Live"
+    ],
+    "row": 8
+   },
+   {
+    "cells": [
+     "ES 12-26",
+     "Sell",
+     "2",
+     "5906.75",
+     "3/2/2026 12:09:05 PM",
+     "1",
+     "Entry",
+     "1 L",
+     "1",
+     null,
+     "$1.04",
+     "1",
+     null,
+     "Live"
+    ],
+    "row": 9
+   },
+   {
+    "cells": [
+     "ES 12-26",
+     "Sell",
+     "4",
+     "5901.00",
+     "3/2/2026 12:17:05 PM",
+     "1",
+     "Entry",
+     "1 L",
+     "1",
+     null,
+     "$1.04",
+     "1",
+     null,
+     "Live"
+    ],
+    "row": 10
+   },
+   {
+    "cells": [
+     "ES 12-26",
+     "Buy",
+     "4",
+     "5903.00",
+     "3/2/2026 12:40:05 PM",
+     "1",
+     "Entry",
+     "1 L",
+     "1",
+     null,
+     "$1.04",
+     "1",
+     null,
+     "Live"
+    ],
+    "row": 11
+   },
+   {
+    "cells": [
+     "ES 12-26",
+     "Buy",
+     "1",
+     "5914.25",
+     "3/2/2026 1:06:05 PM",
+     "1",
+     "Entry",
+     "1 L",
+     "1",
+     null,
+     "$1.04",
+     "1",
+     null,
+     "Live"
+    ],
+    "row": 12
+   },
+   {
+    "cells": [
+     "ES 12-26",
+     "Sell",
+     "1",
+     "5912.75",
+     "3/2/2026 1:34:05 PM",
+     "1",
+     "Entry",
+     "1 L",
+     "1",
+     null,
+     "$1.04",
+     "1",
+     null,
+     "Live"
+    ],
+    "row": 13
+   }
+  ],
+  "table": null,
+  "tables": null
+ },
+ "preset": {
+  "id": "ninjatrader_exec",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 4,
+    "direction": null,
+    "fees": [
+     10
+    ],
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 3,
+    "qty": 2,
+    "side": 1,
+    "status": null,
+    "symbol": 0,
+    "time": null
+   },
+   "currency": null,
+   "date_format": null,
+   "delimiter": ",",
+   "futures_sizes": true,
+   "header_row": 0,
+   "headers": {
+    "0": "instrument",
+    "1": "action",
+    "10": "commission",
+    "2": "quantity",
+    "3": "price",
+    "4": "time"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": "ninjatrader_exec",
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": [
+    [
+     "prefix",
+     "buy",
+     "buy"
+    ],
+    [
+     "prefix",
+     "sell",
+     "sell"
+    ]
+   ],
+   "side_values": null,
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1
+  },
+  "name": "NinjaTrader 8 executions",
+  "questions": [
+   {
+    "q": "date_order",
+    "reason": "ask"
+   }
+  ]
+ },
+ "signature": "294dae74ff4699122f00a4f1f3e6f75e"
+}

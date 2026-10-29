@@ -1,0 +1,339 @@
+{
+ "guess": {
+  "badges": {
+   "date": "matched",
+   "price": "matched",
+   "qty": "matched",
+   "side": "matched",
+   "symbol": "matched"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": "epoch_s",
+   "reason": null,
+   "seen": null,
+   "seen2": null
+  },
+  "futures_offer": false,
+  "layout": "fills",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 0,
+    "direction": null,
+    "fees": null,
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 4,
+    "qty": 3,
+    "side": 2,
+    "status": null,
+    "symbol": 1,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "epoch_s",
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "0": "date",
+    "1": "symbol",
+    "2": "side",
+    "3": "qty",
+    "4": "price"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": null,
+   "side_values": {
+    "buy": "buy",
+    "sell": "sell"
+   },
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1
+  },
+  "questions": [],
+  "side_checks": {},
+  "side_counts": {
+   "buy": 10,
+   "sell": 10
+  },
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": null
+ },
+ "peek": {
+  "blocked": [
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "delimiter": ",",
+  "header_hits": 5,
+  "header_row": 0,
+  "headers": [
+   "Date",
+   "Symbol",
+   "Side",
+   "Qty",
+   "Price"
+  ],
+  "kind": "csv",
+  "labels": [
+   "Date",
+   "Symbol",
+   "Side",
+   "Qty",
+   "Price"
+  ],
+  "n_rows": 20,
+  "options": [
+   {
+    "example": "1772443865",
+    "index": 0,
+    "label": "Date"
+   },
+   {
+    "example": "AAA",
+    "index": 1,
+    "label": "Symbol"
+   },
+   {
+    "example": "Buy",
+    "index": 2,
+    "label": "Side"
+   },
+   {
+    "example": "1",
+    "index": 3,
+    "label": "Qty"
+   },
+   {
+    "example": "100.0",
+    "index": 4,
+    "label": "Price"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     "1772443865",
+     "AAA",
+     "Buy",
+     "1",
+     "100.0"
+    ],
+    "row": 2
+   },
+   {
+    "cells": [
+     "1772445245",
+     "AAA",
+     "Sell",
+     "1",
+     "98.0"
+    ],
+    "row": 3
+   },
+   {
+    "cells": [
+     "1772446085",
+     "BBB",
+     "Sell",
+     "3",
+     "113.25"
+    ],
+    "row": 4
+   },
+   {
+    "cells": [
+     "1772447765",
+     "BBB",
+     "Buy",
+     "3",
+     "112.25"
+    ],
+    "row": 5
+   },
+   {
+    "cells": [
+     "1772448485",
+     "CCC",
+     "Buy",
+     "5",
+     "109.5"
+    ],
+    "row": 6
+   },
+   {
+    "cells": [
+     "1772450465",
+     "CCC",
+     "Sell",
+     "5",
+     "110.25"
+    ],
+    "row": 7
+   },
+   {
+    "cells": [
+     "1772451065",
+     "AAA",
+     "Buy",
+     "2",
+     "105.75"
+    ],
+    "row": 8
+   },
+   {
+    "cells": [
+     "1772453345",
+     "AAA",
+     "Sell",
+     "2",
+     "106.75"
+    ],
+    "row": 9
+   },
+   {
+    "cells": [
+     "1772453825",
+     "BBB",
+     "Sell",
+     "4",
+     "101.0"
+    ],
+    "row": 10
+   },
+   {
+    "cells": [
+     "1772455205",
+     "BBB",
+     "Buy",
+     "4",
+     "103.0"
+    ],
+    "row": 11
+   },
+   {
+    "cells": [
+     "1772456765",
+     "CCC",
+     "Buy",
+     "1",
+     "114.25"
+    ],
+    "row": 12
+   },
+   {
+    "cells": [
+     "1772458445",
+     "CCC",
+     "Sell",
+     "1",
+     "112.75"
+    ],
+    "row": 13
+   },
+   {
+    "cells": [
+     "1772458985",
+     "AAA",
+     "Buy",
+     "3",
+     "110.5"
+    ],
+    "row": 14
+   },
+   {
+    "cells": [
+     "1772460965",
+     "AAA",
+     "Sell",
+     "3",
+     "110.0"
+    ],
+    "row": 15
+   },
+   {
+    "cells": [
+     "1772461385",
+     "BBB",
+     "Sell",
+     "5",
+     "106.75"
+    ],
+    "row": 16
+   },
+   {
+    "cells": [
+     "1772463665",
+     "BBB",
+     "Buy",
+     "5",
+     "107.25"
+    ],
+    "row": 17
+   },
+   {
+    "cells": [
+     "1772530265",
+     "CCC",
+     "Buy",
+     "2",
+     "102.0"
+    ],
+    "row": 18
+   },
+   {
+    "cells": [
+     "1772531645",
+     "CCC",
+     "Sell",
+     "2",
+     "103.5"
+    ],
+    "row": 19
+   },
+   {
+    "cells": [
+     "1772533025",
+     "AAA",
+     "Buy",
+     "4",
+     "115.25"
+    ],
+    "row": 20
+   },
+   {
+    "cells": [
+     "1772534705",
+     "AAA",
+     "Sell",
+     "4",
+     "113.25"
+    ],
+    "row": 21
+   }
+  ],
+  "table": null,
+  "tables": null
+ },
+ "preset": null,
+ "signature": "cf03bf534a12d44f88f47a6c55c4b6a0"
+}

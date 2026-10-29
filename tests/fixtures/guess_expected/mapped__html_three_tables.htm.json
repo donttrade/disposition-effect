@@ -1,0 +1,271 @@
+{
+ "guess": {
+  "badges": {
+   "close_price": "matched",
+   "close_time": "matched",
+   "direction": "matched",
+   "open_price": "matched",
+   "open_time": "matched",
+   "qty": "matched",
+   "symbol": "matched"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": "ymd",
+   "reason": null,
+   "seen": null,
+   "seen2": null
+  },
+  "futures_offer": false,
+  "layout": "roundtrips",
+  "mapping": {
+   "cols": {
+    "close_price": 6,
+    "close_time": 1,
+    "currency": null,
+    "date": null,
+    "direction": 3,
+    "fees": null,
+    "open_price": 5,
+    "open_time": 0,
+    "pnl": null,
+    "price": null,
+    "qty": 4,
+    "side": null,
+    "status": null,
+    "symbol": 2,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "ymd",
+   "delimiter": null,
+   "futures_sizes": false,
+   "header_row": 4,
+   "headers": {
+    "0": "open",
+    "1": "close",
+    "2": "symbol",
+    "3": "side",
+    "4": "volume",
+    "5": "openprice",
+    "6": "closeprice"
+   },
+   "keep_partial": false,
+   "layout": "roundtrips",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": null,
+   "side_values": {
+    "buy": "buy",
+    "sell": "sell"
+   },
+   "source": {
+    "kind": "html",
+    "table": 2
+   },
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1
+  },
+  "questions": [],
+  "side_checks": {},
+  "side_counts": {
+   "buy": 5,
+   "sell": 3
+  },
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": null
+ },
+ "peek": {
+  "blocked": [
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "delimiter": null,
+  "header_hits": 7,
+  "header_row": 4,
+  "headers": [
+   "Open",
+   "Close",
+   "Symbol",
+   "Side",
+   "Volume",
+   "Open price",
+   "Close price"
+  ],
+  "kind": "html",
+  "labels": [
+   "Open",
+   "Close",
+   "Symbol",
+   "Side",
+   "Volume",
+   "Open price",
+   "Close price"
+  ],
+  "n_rows": 8,
+  "options": [
+   {
+    "example": "2026-03-02 09:31:05",
+    "index": 0,
+    "label": "Open"
+   },
+   {
+    "example": "2026-03-02 09:54:05",
+    "index": 1,
+    "label": "Close"
+   },
+   {
+    "example": "AAA",
+    "index": 2,
+    "label": "Symbol"
+   },
+   {
+    "example": "Buy",
+    "index": 3,
+    "label": "Side"
+   },
+   {
+    "example": "1",
+    "index": 4,
+    "label": "Volume"
+   },
+   {
+    "example": "100.0",
+    "index": 5,
+    "label": "Open price"
+   },
+   {
+    "example": "98.0",
+    "index": 6,
+    "label": "Close price"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     "2026-03-02 09:31:05",
+     "2026-03-02 09:54:05",
+     "AAA",
+     "Buy",
+     "1",
+     "100.0",
+     "98.0"
+    ],
+    "row": 6
+   },
+   {
+    "cells": [
+     "2026-03-02 10:08:05",
+     "2026-03-02 10:36:05",
+     "BBB",
+     "Sell",
+     "3",
+     "113.25",
+     "112.25"
+    ],
+    "row": 7
+   },
+   {
+    "cells": [
+     "2026-03-02 10:48:05",
+     "2026-03-02 11:21:05",
+     "CCC",
+     "Buy",
+     "5",
+     "109.5",
+     "110.25"
+    ],
+    "row": 8
+   },
+   {
+    "cells": [
+     "2026-03-02 11:31:05",
+     "2026-03-02 12:09:05",
+     "AAA",
+     "Buy",
+     "2",
+     "105.75",
+     "106.75"
+    ],
+    "row": 9
+   },
+   {
+    "cells": [
+     "2026-03-02 12:17:05",
+     "2026-03-02 12:40:05",
+     "BBB",
+     "Sell",
+     "4",
+     "101.0",
+     "103.0"
+    ],
+    "row": 10
+   },
+   {
+    "cells": [
+     "2026-03-02 13:06:05",
+     "2026-03-02 13:34:05",
+     "CCC",
+     "Buy",
+     "1",
+     "114.25",
+     "112.75"
+    ],
+    "row": 11
+   },
+   {
+    "cells": [
+     "2026-03-02 13:43:05",
+     "2026-03-02 14:16:05",
+     "AAA",
+     "Buy",
+     "3",
+     "110.5",
+     "110.0"
+    ],
+    "row": 12
+   },
+   {
+    "cells": [
+     "2026-03-02 14:23:05",
+     "2026-03-02 15:01:05",
+     "BBB",
+     "Sell",
+     "5",
+     "106.75",
+     "107.25"
+    ],
+    "row": 13
+   }
+  ],
+  "table": 2,
+  "tables": [
+   {
+    "rows": 2,
+    "table": 0
+   },
+   {
+    "rows": 2,
+    "table": 1
+   },
+   {
+    "rows": 9,
+    "table": 2
+   }
+  ]
+ },
+ "preset": null,
+ "signature": "deff1fc2b54d35c56131a8706204b041"
+}

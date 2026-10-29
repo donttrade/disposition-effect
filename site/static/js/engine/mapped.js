@@ -22,11 +22,13 @@ import { CME_MULTIPLIERS } from './tradovate.js';
 // ---------------------------------------------------------------- the block list
 // Never offered in a dropdown, never read: a heading that is one of `exact`, or holds one of
 // `contains` (normalised: lowercase, letters and digits only). "Account Display Name", "Trade
-// Account", "acct_no", "Wallet address", "E-mail" are all caught.
+// Account", "acct_no", "Wallet address", "E-mail" are all caught. An on-chain transaction hash is
+// blocked too: it can be looked up to find the wallet.
 export const BLOCKED = Object.freeze({
   contains: ['account', 'acct', 'wallet', 'email', 'phone'],
   exact: ['name', 'fullname', 'firstname', 'lastname', 'owner', 'user', 'uid', 'userid', 'username', 'address',
-    'clientid', 'traderid', 'comment', 'comments', 'note', 'notes', 'remark', 'remarks'],
+    'clientid', 'traderid', 'comment', 'comments', 'note', 'notes', 'remark', 'remarks', 'hash', 'txhash',
+    'transactionhash'],
 });
 
 export function isBlocked(norm) {

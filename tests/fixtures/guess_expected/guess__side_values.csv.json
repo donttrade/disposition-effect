@@ -1,0 +1,272 @@
+{
+ "guess": {
+  "badges": {
+   "date": "matched",
+   "price": "matched",
+   "qty": "matched",
+   "side": "matched",
+   "symbol": "matched"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": "ymd",
+   "reason": null,
+   "seen": null,
+   "seen2": null
+  },
+  "futures_offer": false,
+  "layout": "fills",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 0,
+    "direction": null,
+    "fees": null,
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 4,
+    "qty": 3,
+    "side": 2,
+    "status": null,
+    "symbol": 1,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "ymd",
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "0": "date",
+    "1": "symbol",
+    "2": "code",
+    "3": "qty",
+    "4": "price"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": null,
+   "side_values": {
+    "ach": "skip",
+    "bought": "buy",
+    "bto": "buy",
+    "buy": "buy",
+    "cdiv": "skip",
+    "sell": "sell",
+    "stc": "sell"
+   },
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1
+  },
+  "questions": [],
+  "side_checks": {
+   "bto": "options",
+   "stc": "options"
+  },
+  "side_counts": {
+   "ach": 1,
+   "bought": 1,
+   "bto": 2,
+   "buy": 2,
+   "cdiv": 2,
+   "sell": 2,
+   "stc": 2
+  },
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": null
+ },
+ "peek": {
+  "blocked": [
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "delimiter": ",",
+  "header_hits": 5,
+  "header_row": 0,
+  "headers": [
+   "Date",
+   "Symbol",
+   "Code",
+   "Qty",
+   "Price"
+  ],
+  "kind": "csv",
+  "labels": [
+   "Date",
+   "Symbol",
+   "Code",
+   "Qty",
+   "Price"
+  ],
+  "n_rows": 12,
+  "options": [
+   {
+    "example": "2026-03-02 09:31:05",
+    "index": 0,
+    "label": "Date"
+   },
+   {
+    "example": "AAA",
+    "index": 1,
+    "label": "Symbol"
+   },
+   {
+    "example": "Buy",
+    "index": 2,
+    "label": "Code"
+   },
+   {
+    "example": "1",
+    "index": 3,
+    "label": "Qty"
+   },
+   {
+    "example": "100.0",
+    "index": 4,
+    "label": "Price"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     "2026-03-02 09:31:05",
+     "AAA",
+     "Buy",
+     "1",
+     "100.0"
+    ],
+    "row": 2
+   },
+   {
+    "cells": [
+     "2026-03-02 09:54:05",
+     "AAA",
+     "Sell",
+     "1",
+     "98.0"
+    ],
+    "row": 3
+   },
+   {
+    "cells": [
+     "2026-03-02 10:08:05",
+     "BBB",
+     "BTO",
+     "3",
+     "113.25"
+    ],
+    "row": 4
+   },
+   {
+    "cells": [
+     "2026-03-02 10:36:05",
+     "BBB",
+     "STC",
+     "3",
+     "112.25"
+    ],
+    "row": 5
+   },
+   {
+    "cells": [
+     "2026-03-02 10:48:05",
+     "CCC",
+     "CDIV",
+     "5",
+     "109.5"
+    ],
+    "row": 6
+   },
+   {
+    "cells": [
+     "2026-03-02 11:21:05",
+     "CCC",
+     "ACH",
+     "5",
+     "110.25"
+    ],
+    "row": 7
+   },
+   {
+    "cells": [
+     "2026-03-02 11:31:05",
+     "AAA",
+     "Bought",
+     "2",
+     "105.75"
+    ],
+    "row": 8
+   },
+   {
+    "cells": [
+     "2026-03-02 12:09:05",
+     "AAA",
+     "Buy",
+     "2",
+     "106.75"
+    ],
+    "row": 9
+   },
+   {
+    "cells": [
+     "2026-03-02 12:17:05",
+     "BBB",
+     "Sell",
+     "4",
+     "101.0"
+    ],
+    "row": 10
+   },
+   {
+    "cells": [
+     "2026-03-02 12:40:05",
+     "BBB",
+     "BTO",
+     "4",
+     "103.0"
+    ],
+    "row": 11
+   },
+   {
+    "cells": [
+     "2026-03-02 13:06:05",
+     "CCC",
+     "STC",
+     "1",
+     "114.25"
+    ],
+    "row": 12
+   },
+   {
+    "cells": [
+     "2026-03-02 13:34:05",
+     "CCC",
+     "CDIV",
+     "1",
+     "112.75"
+    ],
+    "row": 13
+   }
+  ],
+  "table": null,
+  "tables": null
+ },
+ "preset": null,
+ "signature": "1a113ddafa50386a0585945f4eef22c1"
+}

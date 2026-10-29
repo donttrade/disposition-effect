@@ -1,0 +1,547 @@
+{
+ "guess": {
+  "badges": {
+   "close_price": "matched",
+   "close_time": "matched",
+   "direction": "matched",
+   "fees": "matched",
+   "open_price": "matched",
+   "open_time": "matched",
+   "pnl": "matched",
+   "qty": "matched",
+   "symbol": "matched"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": "dmy",
+   "reason": "seen",
+   "seen": "16/03/2026 09:31:05",
+   "seen2": null
+  },
+  "futures_offer": false,
+  "layout": "roundtrips",
+  "mapping": {
+   "cols": {
+    "close_price": 7,
+    "close_time": 5,
+    "currency": null,
+    "date": null,
+    "direction": 2,
+    "fees": [
+     11
+    ],
+    "open_price": 6,
+    "open_time": 4,
+    "pnl": 13,
+    "price": null,
+    "qty": 8,
+    "side": null,
+    "status": null,
+    "symbol": 1,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "dmy",
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "1": "symbol",
+    "11": "commissions",
+    "13": "gross",
+    "2": "openingdirection",
+    "4": "openingtime",
+    "5": "closingtime",
+    "6": "entryprice",
+    "7": "closingprice",
+    "8": "closingquantity"
+   },
+   "keep_partial": false,
+   "layout": "roundtrips",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": null,
+   "side_values": {
+    "buy": "buy",
+    "sell": "sell"
+   },
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1
+  },
+  "questions": [],
+  "side_checks": {},
+  "side_counts": {
+   "buy": 7,
+   "sell": 3
+  },
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": null
+ },
+ "peek": {
+  "blocked": [
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   true,
+   false
+  ],
+  "delimiter": ",",
+  "header_hits": 11,
+  "header_row": 0,
+  "headers": [
+   "Deal ID",
+   "Symbol",
+   "Opening direction",
+   "Closing direction",
+   "Opening time",
+   "Closing time",
+   "Entry price",
+   "Closing price",
+   "Closing quantity",
+   "Closing volume",
+   "Swap",
+   "Commissions",
+   "Pips",
+   "Gross",
+   "Net",
+   "Label",
+   "Comment",
+   "Balance"
+  ],
+  "kind": "csv",
+  "labels": [
+   "Deal ID",
+   "Symbol",
+   "Opening direction",
+   "Closing direction",
+   "Opening time",
+   "Closing time",
+   "Entry price",
+   "Closing price",
+   "Closing quantity",
+   "Closing volume",
+   "Swap",
+   "Commissions",
+   "Pips",
+   "Gross",
+   "Net",
+   "Label",
+   "Comment",
+   "Balance"
+  ],
+  "n_rows": 10,
+  "options": [
+   {
+    "example": "70000",
+    "index": 0,
+    "label": "Deal ID"
+   },
+   {
+    "example": "EURUSD",
+    "index": 1,
+    "label": "Symbol"
+   },
+   {
+    "example": "Buy",
+    "index": 2,
+    "label": "Opening direction"
+   },
+   {
+    "example": "Sell",
+    "index": 3,
+    "label": "Closing direction"
+   },
+   {
+    "example": "16/03/2026 09:31:05",
+    "index": 4,
+    "label": "Opening time"
+   },
+   {
+    "example": "16/03/2026 09:54:05",
+    "index": 5,
+    "label": "Closing time"
+   },
+   {
+    "example": "1.08108",
+    "index": 6,
+    "label": "Entry price"
+   },
+   {
+    "example": "1.07908",
+    "index": 7,
+    "label": "Closing price"
+   },
+   {
+    "example": "1000",
+    "index": 8,
+    "label": "Closing quantity"
+   },
+   {
+    "example": "1000",
+    "index": 9,
+    "label": "Closing volume"
+   },
+   {
+    "example": "-0.12",
+    "index": 10,
+    "label": "Swap"
+   },
+   {
+    "example": "-0.30",
+    "index": 11,
+    "label": "Commissions"
+   },
+   {
+    "example": "1.0",
+    "index": 12,
+    "label": "Pips"
+   },
+   {
+    "example": "-2.00",
+    "index": 13,
+    "label": "Gross"
+   },
+   {
+    "example": "-2.42",
+    "index": 14,
+    "label": "Net"
+   },
+   {
+    "example": "",
+    "index": 15,
+    "label": "Label"
+   },
+   {
+    "example": "10000.00",
+    "index": 17,
+    "label": "Balance"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     "70000",
+     "EURUSD",
+     "Buy",
+     "Sell",
+     "16/03/2026 09:31:05",
+     "16/03/2026 09:54:05",
+     "1.08108",
+     "1.07908",
+     "1000",
+     "1000",
+     "-0.12",
+     "-0.30",
+     "1.0",
+     "-2.00",
+     "-2.42",
+     "",
+     null,
+     "10000.00"
+    ],
+    "row": 2
+   },
+   {
+    "cells": [
+     "70001",
+     "GBPUSD",
+     "Sell",
+     "Buy",
+     "16/03/2026 10:08:05",
+     "16/03/2026 10:36:05",
+     "1.09433",
+     "1.09333",
+     "3000",
+     "3000",
+     "-0.12",
+     "-0.30",
+     "1.0",
+     "3.00",
+     "2.58",
+     "",
+     null,
+     "10000.00"
+    ],
+    "row": 3
+   },
+   {
+    "cells": [
+     "70002",
+     "EURUSD",
+     "Buy",
+     "Sell",
+     "16/03/2026 10:48:05",
+     "16/03/2026 11:21:05",
+     "1.09058",
+     "1.09133",
+     "5000",
+     "5000",
+     "-0.12",
+     "-0.30",
+     "1.0",
+     "3.75",
+     "3.33",
+     "",
+     null,
+     "10000.00"
+    ],
+    "row": 4
+   },
+   {
+    "cells": [
+     "70003",
+     "GBPUSD",
+     "Buy",
+     "Sell",
+     "16/03/2026 11:31:05",
+     "16/03/2026 12:09:05",
+     "1.08683",
+     "1.08783",
+     "2000",
+     "2000",
+     "-0.12",
+     "-0.30",
+     "1.0",
+     "2.00",
+     "1.58",
+     "",
+     null,
+     "10000.00"
+    ],
+    "row": 5
+   },
+   {
+    "cells": [
+     "70004",
+     "EURUSD",
+     "Sell",
+     "Buy",
+     "16/03/2026 12:17:05",
+     "16/03/2026 12:40:05",
+     "1.08208",
+     "1.08408",
+     "4000",
+     "4000",
+     "-0.12",
+     "-0.30",
+     "1.0",
+     "-8.00",
+     "-8.42",
+     "",
+     null,
+     "10000.00"
+    ],
+    "row": 6
+   },
+   {
+    "cells": [
+     "70005",
+     "GBPUSD",
+     "Buy",
+     "Sell",
+     "16/03/2026 13:06:05",
+     "16/03/2026 13:34:05",
+     "1.09533",
+     "1.09383",
+     "1000",
+     "1000",
+     "-0.12",
+     "-0.30",
+     "1.0",
+     "-1.50",
+     "-1.92",
+     "",
+     null,
+     "10000.00"
+    ],
+    "row": 7
+   },
+   {
+    "cells": [
+     "70006",
+     "EURUSD",
+     "Buy",
+     "Sell",
+     "16/03/2026 13:43:05",
+     "16/03/2026 14:16:05",
+     "1.09158",
+     "1.09108",
+     "3000",
+     "3000",
+     "-0.12",
+     "-0.30",
+     "1.0",
+     "-1.50",
+     "-1.92",
+     "",
+     null,
+     "10000.00"
+    ],
+    "row": 8
+   },
+   {
+    "cells": [
+     "70007",
+     "GBPUSD",
+     "Sell",
+     "Buy",
+     "16/03/2026 14:23:05",
+     "16/03/2026 15:01:05",
+     "1.08783",
+     "1.08833",
+     "5000",
+     "5000",
+     "-0.12",
+     "-0.30",
+     "1.0",
+     "-2.50",
+     "-2.92",
+     "",
+     null,
+     "10000.00"
+    ],
+    "row": 9
+   },
+   {
+    "cells": [
+     "70008",
+     "EURUSD",
+     "Buy",
+     "Sell",
+     "17/03/2026 09:31:05",
+     "17/03/2026 09:54:05",
+     "1.08308",
+     "1.08458",
+     "2000",
+     "2000",
+     "-0.12",
+     "-0.30",
+     "1.0",
+     "3.00",
+     "2.58",
+     "",
+     null,
+     "10000.00"
+    ],
+    "row": 10
+   },
+   {
+    "cells": [
+     "70009",
+     "GBPUSD",
+     "Buy",
+     "Sell",
+     "17/03/2026 10:17:05",
+     "17/03/2026 10:45:05",
+     "1.09633",
+     "1.09433",
+     "4000",
+     "4000",
+     "-0.12",
+     "-0.30",
+     "1.0",
+     "-8.00",
+     "-8.42",
+     "",
+     null,
+     "10000.00"
+    ],
+    "row": 11
+   }
+  ],
+  "table": null,
+  "tables": null
+ },
+ "preset": {
+  "id": "ctrader_history",
+  "mapping": {
+   "cols": {
+    "close_price": 7,
+    "close_time": 5,
+    "currency": null,
+    "date": null,
+    "direction": 2,
+    "fees": [
+     11,
+     10
+    ],
+    "open_price": 6,
+    "open_time": 4,
+    "pnl": 13,
+    "price": null,
+    "qty": 8,
+    "side": null,
+    "status": null,
+    "symbol": 1,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "dmy",
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "1": "symbol",
+    "10": "swap",
+    "11": "commissions",
+    "13": "gross",
+    "2": "openingdirection",
+    "4": "openingtime",
+    "5": "closingtime",
+    "6": "entryprice",
+    "7": "closingprice",
+    "8": "closingquantity"
+   },
+   "keep_partial": false,
+   "layout": "roundtrips",
+   "number_style": null,
+   "preset": "ctrader_history",
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": [
+    [
+     "prefix",
+     "b",
+     "buy"
+    ],
+    [
+     "prefix",
+     "s",
+     "sell"
+    ]
+   ],
+   "side_values": null,
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1
+  },
+  "name": "cTrader history",
+  "questions": []
+ },
+ "signature": "7a94883c97a0c9be90583a84c894863e"
+}
