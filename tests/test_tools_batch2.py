@@ -552,12 +552,12 @@ def test_paid_build_sells_and_teasers_follow(browser, paid_tools_site):
     before = pg.inner_text(".next-step")
     pg.click("#dd-sample-btn")
     pg.wait_for_selector("#dd-out:not([hidden])")
-    assert pg.inner_text(".next-step") == before and "reads your trade file" in before
+    assert pg.inner_text(".next-step") == before and before.startswith("Is this habit real, or luck?")
     pg.goto(paid_tools_site["url"] + HM)
     before = pg.inner_text(".next-step")
     pg.click("#hm-sample-btn")
     pg.wait_for_selector("#hm-out:not([hidden])")
-    assert pg.inner_text(".next-step") == before and "reads this same file" in before
+    assert pg.inner_text(".next-step") == before and before.startswith("Is this habit real, or luck?")   # 29 Oct: the same words on every tool
     ctx.close()
 
 
