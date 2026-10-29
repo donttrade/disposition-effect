@@ -1,7 +1,7 @@
 {
  "citation": [],
  "crumb": "Disposition-effect calculator",
- "description": "Free: enter four position counts and get PGR, PLR, their ratio and a significance test. Runs in your browser; nothing is sent.",
+ "description": "Free: enter four position counts and get PGR, PLR, their ratio and a significance test. Runs in your browser; your numbers are never sent.",
  "og_image": "/assets/og/default.png",
  "parent": [
   "Free tools",
