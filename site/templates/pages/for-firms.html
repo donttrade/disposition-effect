@@ -1,22 +1,22 @@
 {% extends "base.html" %}
 {% block content %}
 {%- import "partials/pilot_terms.html" as pt with context %}
-{%- set pilot = products["pilot"] %}
-{%- set firm_ids = ["pilot", "snapshot", "memo", "outcomes"] %}
-{%- set pct = prices.rules.recheck.percent_of_engagement %}
+{%- set pilot = products["pilot"] %}{%- set plan = products["plan"] %}
 <div class="wrap">
   {% include "partials/crumbs.html" %}
-  {#- 1. Hero. Sweep 3 (29 Oct): an 8-word H1 and one line; the old lede and paragraph, word for word, under one tap. #}
+  {#- 1. Hero. 29 Oct (owner: one product): the firm package of the donttrade test. Firms are told what it measures
+      today: one habit, the disposition effect, with more being added. The old H1 and paragraph sit under one tap. #}
   <section class="hero" aria-labelledby="ff-h">
     <div class="grid">
       <div class="span-7">
-        <h1 id="ff-h">Do your traders sell winners sooner than losers?</h1>
-        <p class="lede">Your staff run our public script on your records. You get one figure and a one-page memo.</p>
+        <h1 id="ff-h">The donttrade test, on your whole book</h1>
+        <p class="lede">One habit today, more being added. Your staff run our public script on your records.</p>
         <details class="how-more"><summary>What we measure, in full</summary>
-        <p>We measure the plan gap: the difference between how your traders plan to handle wins and losses and how they actually trade. One measure is available today: the disposition effect, which is whether your traders close winning positions more readily than losing ones.</p>
-        <p>Tell us the population and the period. Your staff run a published script inside your systems. You get back <a href="/glossary/#pgr">PGR</a>, <a href="/glossary/#plr">PLR</a>, their pooled ratio and a <a href="/glossary/#t">t statistic</a>, the counts and period behind them, and a one-page memo. The price is fixed before anyone sees data.</p>
+        <p>Do your traders sell winners sooner than losers? We measure the plan gap: the difference between how your traders plan to handle wins and losses and how they actually trade. One measure is available today: the disposition effect, which is whether your traders close winning positions more readily than losing ones.</p>
+        <p>Tell us the population and the period. Your staff run a published script inside your systems. You get back <a href="/glossary/#pgr">PGR</a>, <a href="/glossary/#plr">PLR</a>, their pooled ratio and a <a href="/glossary/#t">t statistic</a>, the counts and period behind them, and a one-page memo, each month. The price is published and the same for every firm.</p>
         </details>
         <p class="btn-row"><a class="btn" href="#request">Start a {{ pilot.name }} — {{ pilot.price_usd|usd }} USD</a> <a class="btn btn-secondary" href="/sample-memo/">See a sample memo</a></p>
+        <p class="small">Then {{ plan.price_usd|usd }} per trader account a month, {{ plan.minimum_usd|usd }} minimum.</p>
         <p class="small muted">Email only, no calls. <a href="#what-it-costs">See what it costs</a></p>
         <p class="small">Here as a trader? See <a href="/for-traders/">Individual traders</a> or the free <a href="/tools/">tools</a>. We can’t help with disputes about a firm.</p>
       </div>
@@ -27,7 +27,7 @@
           <li><strong>Aggregate counts</strong> are all that comes back to us</li>
           <li><strong>Number, t statistic, period and memo</strong> returned to you</li>
         </ol>
-        <p class="small muted">partner_disposition.py is public: free for non-commercial use from v2; engagements include a commercial licence. <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/partner_disposition.py">Read the code</a></p>
+        <p class="small muted">partner_disposition.py is public: free for non-commercial use from v2; the {{ pilot.name }} and the monthly plan include a commercial licence. <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/partner_disposition.py">Read the code</a></p>
       </div>
     </div>
   </section>
@@ -54,47 +54,44 @@
   <section class="section" aria-labelledby="what-it-costs" data-reveal>
     <h2 id="what-it-costs">What it costs</h2>
     <p><strong>Prices in USD, before any applicable sales tax.</strong></p>
-    {%- set what = {
-      "pilot": "Your first Snapshot at an introductory price, one per firm: the records behind one disposition figure, measured with the public script on your own records. The figure, its denominator and period, the t statistic, the script version and a one-page memo. " ~ pilot.credit_rule ~ " of delivery.",
-      "snapshot": "One disposition figure for one population and period you name: pooled PGR, PLR, their ratio and a t statistic, the counts and period behind them, the script version and the one-page memo.",
-      "memo": "Everything in a Snapshot, plus your pooled ratio set beside the public study’s pooled ratio, with the differences explained in writing. Only the ratios are roughly comparable, and neither sets a target for yours. A private report; an optional co-published study.",
-      "outcomes": "Everything in a Memo, for your whole book and for each split you agree in the scope (for example by account size or instrument), run by the same script.",
-    } %}
-    <div class="table-wrap" tabindex="0" role="region" aria-label="Prices and scope of each engagement">
+    <div class="table-wrap" tabindex="0" role="region" aria-label="The Pilot and the monthly plan">
     <table class="price-table">
-      <thead><tr><th scope="col">Engagement</th><th scope="col">What you get</th><th scope="col">Delivery</th><th scope="col">Payment</th><th scope="col" class="num">Price (USD)</th></tr></thead>
+      <thead><tr><th scope="col">Package</th><th scope="col">What you get</th><th scope="col">Payment</th><th scope="col" class="num">Price (USD)</th></tr></thead>
       <tbody>
-      {%- for id in firm_ids %}{% set p = products[id] %}
-        <tr><th scope="row">{{ p.name }}</th>
-          <td data-label="What you get">{{ what[id] }}</td><td data-label="Delivery">{{ p.turnaround_days }} business days</td><td data-label="Payment">{{ p.payment_terms }}</td><td class="num" data-label="Price (USD)">{{ p.price_usd|usd }}</td></tr>
-      {%- endfor %}
+        <tr><th scope="row">{{ pilot.name }}</th>
+          <td data-label="What you get">The first month, one per firm: one run of the public script on your own records, then the figure, its denominator and period, the t statistic, the script version and a one-page memo, within {{ pilot.turnaround_days }} business days. {{ pilot.credit_rule }} of delivery.</td>
+          <td data-label="Payment">{{ pilot.payment_terms }}</td><td class="num" data-label="Price (USD)">{{ pilot.price_usd|usd }}</td></tr>
+        <tr><th scope="row">Monthly plan</th>
+          <td data-label="What you get">Each month your staff run the script on that month’s extract; you get the figure and a one-page memo within {{ plan.turnaround_days }} business days of a clean run. The billed count is the <code>accounts:</code> line that run prints.</td>
+          <td data-label="Payment">Invoiced monthly in arrears, due within {{ prices.rules.plan_payment_days }} days; {{ prices.rules.plan_prepay_discount_percent }}% off when you pay a year upfront</td>
+          <td class="num" data-label="Price (USD)">{{ plan.price_usd|usd }} per trader account a month; {{ plan.minimum_usd|usd }} minimum</td></tr>
       </tbody>
     </table>
     </div>
-    <details class="how-more"><summary>What each engagement measures, refunds, payment and privacy</summary>
-    <p>The standard engagement measures one thing today: the disposition effect, reported as PGR, PLR, their pooled ratio and a t statistic, with the counts behind them. If the figure you publish is a different one, write anyway; we’ll tell you plainly whether the published script can compute it.</p>
-    <p>{{ pilot.name }} refunds, from the <a href="/terms/#trial">terms</a>: {{ pt.both() }}</p>
-    <p>Before starting, we agree with you in writing what result would make a Memo worth doing.</p>
-    <p><strong>Optional quarterly re-check:</strong> the same measurement on a fresh extract, at {{ pct }}% of the tier price, payable in advance, delivered in {{ prices.rules.recheck.turnaround_days }} business days.</p>
-    <p>Every engagement is invoiced in USD; pay by bank transfer, or, in Canada, the CAD equivalent by Interac e-Transfer. {% include "partials/card_timing.html" %} One-off engagement, fixed scope, no subscription.</p>
+    <details class="how-more"><summary>What it measures, refunds, payment and privacy</summary>
+    <p>The test for firms measures one habit today: the disposition effect, reported as PGR, PLR, their pooled ratio and a t statistic, with the counts behind them. More habits are being added to the same script; each addition is dated. If the figure you publish is a different one, write anyway; we’ll tell you plainly whether the published script can compute it.</p>
+    <p>{{ pilot.name }} refunds, from the <a href="/terms/#trial">terms</a>: {{ pt.both() }} On the monthly plan, a month whose result does not reproduce is not charged.</p>
+    <p>Every invoice is in USD; pay by bank transfer, or, in Canada, the CAD equivalent by Interac e-Transfer. {% include "partials/card_timing.html" %} Cancel at the end of any month, by email; that month is invoiced as usual. <a href="/terms/#plan">Plan terms</a></p>
     <p>Delivery times are in business days. The clock starts when payment is received and the script’s output comes back without validation errors, and it pauses while a clarifying question is open.</p>
-    <p><strong>If you don’t like the number, no one else sees it.</strong> You can decline publication outright, and we publish nothing from the engagement. The fee is the same either way. The method is the same for every firm and for the free research. Paying buys scope and privacy, never a result. <a href="/independence/">Independence policy</a></p>
+    <p><strong>If you don’t like the number, no one else sees it.</strong> You can decline publication outright, and we publish nothing from your results. The fee is the same either way. The method is the same for every firm and for the free research. Paying buys scope and privacy, never a result. <a href="/independence/">Independence policy</a></p>
     </details>
   </section>
 
   {#- 4. Timeline (FIRM-INBOUND-KIT §2). #}
   <section class="section" aria-labelledby="timeline-h" data-reveal>
-    <h2 id="timeline-h">From first email to memo</h2>
+    <h2 id="timeline-h">From first email to monthly memo</h2>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Timeline">
     <table>
       <thead><tr><th scope="col">Step</th><th scope="col">Who</th><th scope="col">When</th></tr></thead>
       <tbody>
         <tr><th scope="row">Email or form: which traders, which dates</th><td>You</td><td>Day 0</td></tr>
         <tr><th scope="row">Reply</th><td>donttrade</td><td>Within 1 business day</td></tr>
-        <tr><th scope="row">Written scope and fixed price, free (nothing owed until you accept)</th><td>donttrade</td><td>After your reply</td></tr>
+        <tr><th scope="row">Written scope, free (nothing owed until you accept)</th><td>donttrade</td><td>After your reply</td></tr>
         <tr><th scope="row">Accept, sign the agreement, pay</th><td>You</td><td>When ready</td></tr>
         <tr><th scope="row">Your staff run the script and send back what it prints</th><td>Your staff</td><td>Your pace</td></tr>
-        <tr><th scope="row">Memo delivered</th><td>donttrade</td><td>Within the tier’s business days of payment and a clean run</td></tr>
+        <tr><th scope="row">Result and one-page memo</th><td>donttrade</td><td>Within {{ pilot.turnaround_days }} business days of payment and a clean run</td></tr>
+        <tr><th scope="row">Each month: your staff re-run the script on the new month’s extract</th><td>Your staff</td><td>Monthly</td></tr>
+        <tr><th scope="row">Monthly result and memo; the invoice follows, in arrears</th><td>donttrade</td><td>Within {{ plan.turnaround_days }} business days of each clean run</td></tr>
       </tbody>
     </table>
     </div>
@@ -105,15 +102,15 @@
   <section class="section" aria-labelledby="copy-leader" data-reveal>
     <h2 id="copy-leader">Copy-trading platforms: the copy-leader persistence test</h2>
     <p><strong>Sold to platforms only, never to followers.</strong> For copy-trading apps, social trading networks, crypto exchanges with copy features and vault front-ends.</p>
-    <details class="how-more"><summary>How the test works, and which engagement</summary>
+    <details class="how-more"><summary>How the test works, and its price</summary>
     <p>Does your leader ranking predict what followers actually earn after copying costs and delay? The test answers that out of sample: leaders are ranked on one period and judged on a later period the ranking never saw. It is adjusted for luck, so a ranking counts only if it does better than chance would.</p>
     <ul>
       <li><strong>A method fixed in advance.</strong> The ranking rule, the periods, the cost and delay assumptions and the pass mark are fixed in writing before anyone sees data, and they don’t change afterwards.</li>
       <li><strong>Run on your systems.</strong> Your engineers run a script we send with the scope, and can read every line of it first. Only aggregate results come back. We hold no follower, leader or account record.</li>
-      <li><strong>About your ranking, not about people.</strong> The result names no leader and scores no one.</li>
+      <li><strong>About your ranking, not about people.</strong> The result names no leader and rates no one.</li>
       <li><strong>Not advice.</strong> It does not recommend any trader or leader, to you or to your followers, and makes no promise about future results. It is not an audit: please don’t call any leader or ranking audited, certified or verified.</li>
     </ul>
-    <p>Which engagement: the {{ pilot.name }} ({{ pilot.price_usd|usd }} USD) covers one ranking rule and one period, one per platform; a Snapshot ({{ products.snapshot.price_usd|usd }}) the same; a Memo ({{ products.memo.price_usd|usd }}) every rule and period agreed in the scope; an Outcomes pack ({{ products.outcomes.price_usd|usd }}) adds a re-check on a later period. Payment, delivery and refunds are those of the engagement.</p>
+    <p>Price: scoped and priced in writing before any data is seen; not part of the monthly plan.</p>
     </details>
     <p><a class="btn btn-secondary" href="?product=copy-leader#request">Ask about the copy-leader test</a></p>
   </section>
@@ -122,7 +119,7 @@
   <section class="section" aria-labelledby="claims-test" data-reveal>
     <h2 id="claims-test">Firms that make behaviour claims: the claims substantiation test</h2>
     <p><strong>We report the result whether it supports the claim or not.</strong> For trading journals, education sellers, prop firms and brokers whose marketing says their product changes how traders behave, such as “our journal makes you more disciplined”.</p>
-    <details class="how-more"><summary>How the test works, the law, and which engagement</summary>
+    <details class="how-more"><summary>How the test works, the law, and its price</summary>
     <p>Before anyone sees data, the claim is written down as a test: which behaviour, which users, which periods, what comparison, and what result would support it. That test is fingerprinted with a SHA-256 hash, recorded, and then run once, as written.</p>
     <ul>
       <li><strong>Run on your systems.</strong> Your engineers run a script we send with the scope; only aggregate results come back.</li>
@@ -131,7 +128,7 @@
       <li><strong>A test, with its result and its limits.</strong> It is not an audit. Please don’t call the claim or the product certified, verified or audited.</li>
     </ul>
     <p><strong>The law, in neutral terms (not legal advice).</strong> In Canada, the Competition Act treats as reviewable conduct a representation to the public, made to promote a product or a business interest, in the form of “a statement, warranty or guarantee of the performance, efficacy or length of life of a product that is not based on an adequate and proper test thereof, the proof of which lies on the person making the representation” (<a href="https://laws-lois.justice.gc.ca/eng/acts/C-34/section-74.01.html">s. 74.01(1)(b)</a>). Whether a particular test is adequate and proper for a particular claim is for you and your legal advisers to judge. We give no legal advice, and we don’t say that our test meets that standard.</p>
-    <p>Which engagement: the {{ pilot.name }} ({{ pilot.price_usd|usd }} USD) covers one claim, one measure and one comparison, one per firm; a Snapshot ({{ products.snapshot.price_usd|usd }}) the same; a Memo ({{ products.memo.price_usd|usd }}) every measure and comparison agreed in the scope; an Outcomes pack ({{ products.outcomes.price_usd|usd }}) runs the same pre-registered test again on a later period.</p>
+    <p>Price: scoped and priced in writing before any data is seen; not part of the monthly plan.</p>
     </details>
     <p><a class="btn btn-secondary" href="?product=claims-test#request">Ask about a claims test</a></p>
   </section>
@@ -152,14 +149,14 @@ a7f3,2026-03-04,p91,1,240.00</pre>
       {% include "partials/client_output.html" %}
       <p>That block is the whole of it. No account IDs, position IDs, dates or individual P&amp;L values are printed. The script is one Python file using only the standard library; it makes no network calls.</p>
     </details>
-    <p>Retention: we keep the returned aggregates for the life of the engagement record, and never receive the extract.</p>
+    <p>Retention: we keep the returned aggregates for the life of your agreement record, and never receive the extract.</p>
     </details>
   </section>
 
   {#- 8. What you receive. #}
   <section class="section" aria-labelledby="receive-h" data-reveal>
     <h2 id="receive-h">What you receive</h2>
-    <p>A one-page memo with these fields, every time:</p>
+    <p>Each month, a one-page memo with these fields:</p>
     <dl class="split" data-reveal data-reveal-stagger>
       <div><dt>The figure</dt><dd>Pooled PGR, PLR and their ratio, with the counts behind them, and the same comparison holding position age fixed, with its 95% interval</dd></div>
       <div><dt>Precision</dt><dd>The t statistic and the counts behind it</dd></div>
@@ -174,16 +171,16 @@ a7f3,2026-03-04,p91,1,240.00</pre>
   {#- 9. Agreement and independence. #}
   <section class="section" aria-labelledby="agree-h" data-reveal>
     <h2 id="agree-h">The agreement, in brief</h2>
-    <details class="how-more"><summary>Fixed scope and price. Publication only with your consent.</summary>
+    <details class="how-more"><summary>Published price, written scope. Publication only with your consent.</summary>
     <ul>
-      <li><strong>Fixed scope and price,</strong> in writing before any data is seen.</li>
+      <li><strong>Published price and a written scope,</strong> agreed before any data is seen.</li>
       <li><strong>Publication only with your consent.</strong> You review anything describing your data first and may decline outright.</li>
-      <li><strong>Use of the name.</strong> You may say a figure was “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a fixed-scope agreement”, and nothing stronger: never audited, certified or verified.</li>
-      <li><strong>Liability</strong> is capped at the fees paid. Either side can stop in writing; no cancellation fees. <a href="/terms/#trial">{{ pilot.name }} terms</a></li>
+      <li><strong>Use of the name.</strong> You may say a figure was “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a written agreement”, and nothing stronger: never audited, certified or verified.</li>
+      <li><strong>Liability</strong> is capped at the fees paid. Either side may end the monthly plan by email; it ends at the end of that calendar month. No cancellation fee. <a href="/terms/#plan">Plan terms</a></li>
     </ul>
     <h3>What the money does not buy</h3>
     <ul>
-      <li><strong>No signals, no picks, no predictions.</strong> Nothing here tells anyone what to buy.</li>
+      <li><strong>No picks, no predictions.</strong> Nothing here tells anyone what to buy.</li>
       <li><strong>No flattering version.</strong> If the number comes out against your marketing, that is the number.</li>
       <li><strong>Not an audit and not an assurance engagement.</strong> No regulatory status, no badge or seal.</li>
     </ul>
@@ -196,11 +193,11 @@ a7f3,2026-03-04,p91,1,240.00</pre>
     <h2 id="faq-h">For your compliance team</h2>
     <details><summary>Who will we contract with?</summary><p>One person. {% include "partials/contracting_party.html" %} We provide whatever identity checks your due diligence needs. The pen name is how the research is published, not a contract term.</p></details>
     <details><summary>Does any account data leave our systems?</summary><p>No. Your staff run the script inside your systems; we receive only what it prints. We never need access to your systems.</p></details>
-    <details><summary>What if the number is bad for us?</summary><p>Then that is the number. You can keep it private, and we publish nothing from the engagement. The fee is unchanged.</p></details>
-    <details><summary>Can you publish without our consent?</summary><p>No. You review anything describing your data first and may decline publication outright. We may say only that an engagement took place, without naming you or the figure.</p></details>
+    <details><summary>What if the number is bad for us?</summary><p>Then that is the number. You can keep it private, and we publish nothing from it. The fee is unchanged.</p></details>
+    <details><summary>Can you publish without our consent?</summary><p>No. You review anything describing your data first and may decline publication outright. We may say only that a measurement took place, without naming you or the figure.</p></details>
     <details><summary>Isn’t this a kind of audit?</summary><p>No. It is a measurement with its limits stated. Please don’t describe it as audited, certified or verified.</p></details>
-    <details><summary>What if we stop halfway?</summary><p>No cancellation fees. {{ pt.kickoff(pilot, "") }} Snapshot, Memo and Outcomes pack are paid 50% on acceptance and 50% within 7 days of delivery; if either side stops, completed work is billed pro rata.</p></details>
-    <details><summary>How do we pay?</summary><p>Invoiced in USD; bank transfer, or in Canada the CAD equivalent by Interac e-Transfer. {% include "partials/card_timing.html" %}</p></details>
+    <details><summary>What if we stop?</summary><p>No cancellation fee. {{ pt.kickoff(pilot, "") }} The monthly plan ends at the end of the calendar month in which either side gives notice by email; that month is invoiced as usual.</p></details>
+    <details><summary>How do we pay?</summary><p>Invoiced monthly in USD, in arrears, due within {{ prices.rules.plan_payment_days }} days; bank transfer, or in Canada the CAD equivalent by Interac e-Transfer. {% include "partials/card_timing.html" %}</p></details>
     <details><summary>Can we talk on a call?</summary><p>We work by email only, so every answer is in writing and can go straight to your compliance file.</p></details>
     <details><summary>Why is there no client list?</summary><p>There are no paying clients yet. A firm that chooses to publish its result will be listed, with its consent.</p></details>
     <details><summary>Can we test it first?</summary><p>Yes. The licence lets any organisation run it on synthetic or test data for 32 days, and the folder includes a generator that writes a test file. <a href="https://github.com/donttrade/disposition-effect/tree/main/partner">partner/ on GitHub</a></p></details>
@@ -210,17 +207,17 @@ a7f3,2026-03-04,p91,1,240.00</pre>
   <section class="section" aria-labelledby="press-h" data-reveal>
     <h2 id="press-h">For press and partners</h2>
     <details class="how-more"><summary>How to describe donttrade and its results.</summary>
-    <p>donttrade is independent research on how traders handle winning and losing positions. It publishes its studies, scripts and corrections, and measures firms’ own records on their systems under a fixed-scope agreement. Paying buys scope and privacy, never a result. When describing a result, please use the wording under “Use of the name” above. Method and code: <a href="/code/">/code/</a>; corrections: <a href="/corrections/">/corrections/</a>.</p>
+    <p>donttrade is independent research on how traders handle winning and losing positions. It publishes its studies, scripts and corrections, and measures firms’ own records on their systems under a written agreement. Paying buys scope and privacy, never a result. When describing a result, please use the wording under “Use of the name” above. Method and code: <a href="/code/">/code/</a>; corrections: <a href="/corrections/">/corrections/</a>.</p>
     </details>
   </section>
 
   {#- 12. Request (the form). #}
   <section class="section" aria-labelledby="request" data-reveal>
     <h2 id="request">Start a {{ pilot.name }}, or ask a question</h2>
-    <p>Tell us which traders and which dates. You get a written scope and a fixed price back, free. Nothing is owed until you accept the scope.</p>
+    <p>Tell us which traders and which dates. You get a written scope back, free. Nothing is owed until you accept it.</p>
     {%- if flags.pilot_checkout %}
     {%- with heading_id = "request" %}{% include "partials/pilot_block.html" %}{% endwith %}
-    <details><summary id="ff-other-h">Asking about a Snapshot, Memo, Outcomes pack or another test?</summary>
+    <details><summary id="ff-other-h">Asking about the monthly plan or another test?</summary>
     {%- with fid = "ff", product = "enquiry", heading_id = "ff-other-h" %}{% include "partials/form_firm.html" %}{% endwith %}
     </details>
     {%- else %}

@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.join(REPO, "site"))
 from a11y import axe_violations, horizontal_overflow  # noqa: E402
 import build as B  # noqa: E402
 
-ORDER = ["Sample result", "Free tools", "Pricing", "For firms"]
+ORDER = ["Example report", "Free tools", "Pricing", "For firms"]
 HEADER_H = "Math.round(document.querySelector('.site-header').getBoundingClientRect().height)"
 CTA_RE = re.compile(r'<a class="btn[^"]*" href="/pricing/#last-step" data-pay>Take the test — \$39</a>')
 

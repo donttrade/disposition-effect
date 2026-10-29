@@ -103,7 +103,7 @@ def test_sample_report_lead_and_fr_page(builds):
             "your own file, tests up to two of them against chance, and shows no percentile.")
     assert lead in text_of(builds["free"], os.path.join("sample-report", "index.html"))
     # C-12 final (T-3 T3-E): the paid build's /sample-report/ is a real sample report (tests/test_sample_report_page.py)
-    assert "Sample test result" in text_of(builds["paid"], os.path.join("sample-report", "index.html"))   # sweep 2 lead
+    assert "Example report" in text_of(builds["paid"], os.path.join("sample-report", "index.html"))   # sweep 2 lead
     fr = open(os.path.join(builds["paid"], "fr", "avant-de-payer", "index.html"), encoding="utf-8").read()
     for s in FR:
         assert s in fr

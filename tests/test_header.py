@@ -83,7 +83,7 @@ def test_menu_keyboard_escape_and_click_outside(browser, built_site, width):
     assert pg.evaluate("document.activeElement.textContent") == "Home"
     assert pg.eval_on_selector_all(".nav-panel .nav-acc", "ss => ss.length") == 0
     links = pg.eval_on_selector_all(".nav-panel .nav-links a", "as => as.map(a => [a.textContent, a.getBoundingClientRect().height])")
-    assert [t for t, _ in links] == ["Home", "Sample result", "Free tools", "Pricing", "For firms"]   # Home link (a); 29 Oct (owner): the same four links
+    assert [t for t, _ in links] == ["Home", "Example report", "Free tools", "Pricing", "For firms"]   # Home link (a); 29 Oct (owner): the same four links
     assert all(h >= 44 for _, h in links)
     # no buy button on a research page (never a study finding next to an offer); /pricing/ shows the Menu's one below
     assert pg.locator(".nav-panel a[data-pay]").count() == 0

@@ -6,14 +6,14 @@
 {% block content %}
 <div class="wrap page-head">
   {#- sweep 2 (25 Oct): the lead in two short lines -#}
-  <p class="sr-tag"><span class="pill pill-muted">Example result</span></p>
-  <h1>Sample test result</h1>
+  <p class="sr-tag"><span class="pill pill-muted">Example report</span></p>
+  <h1>Example report</h1>
   <p class="lede">The test’s real engine, run on example data: {{ sample_report.n_trades }} trades over about {{ sample_report.period_weeks }} weeks.</p>
   <p>We built a re-entry habit into the data, so there is a result to show.</p>
   <p class="small muted">{% if method_name %}Method {{ method_name }} of the donttrade test, a habit test on your own trades (engine {{ sample_report.method_version }}){% else %}Engine method {{ sample_report.method_version }}{% endif %}, as listed on the <a href="/corrections/#report-method">corrections page</a>. Not investment advice.</p>
 </div>
 <div class="wrap">
-  <div id="sample-out" aria-live="polite"><noscript><p class="notice notice-caution">This sample is drawn by the result page’s own script, so it needs JavaScript turned on.</p></noscript></div>
+  <div id="sample-out" aria-live="polite"><noscript><p class="notice notice-caution">This example report is drawn by the result page’s own script, so it needs JavaScript turned on.</p></noscript></div>
   <script type="application/json" id="sample-data">{{ sample_report_json }}</script>
 </div>
 {% endblock %}

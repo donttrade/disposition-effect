@@ -738,6 +738,9 @@ a.choice-link:hover { border-color: var(--rust); background: var(--surface); col
 .choice { display: none; max-width: 46rem; }
 .choice:target { display: block; }
 .start-flow:has(> .choice:target) > .chooser { display: none; }
+/* 29 Oct: the retired products' anchors (#snapshot, #memo, #outcomes) land on the monthly plan */
+.choice:has(> .old-anchor:target) { display: block; }
+.start-flow:has(> .choice > .old-anchor:target) > .chooser { display: none; }
 /* QA 25 Oct: the partner and trader sections show only when asked for (#platform, #trader or their
    ?product=); a browser without :has() shows them, as before */
 .start-extra:not(:has(:target)) { display: none; }
@@ -878,6 +881,18 @@ svg.tp { padding: 8px 10px; }
 .price-card .pay-step { border: 0; margin: var(--s2) 0; }
 .price-card .more { font-weight: 600; text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 2px; }
 @media (max-width: 899.98px) { .price-cards { grid-template-columns: minmax(0, 1fr); } .price-card-main { order: -1; } .price-card { padding: var(--s3); } }
+/* 29 Oct (one product): the donttrade test's two packages, Traders (main) then Firms; one card alone in the flag-off build */
+.price-cards-2 { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); }
+.price-cards-1 { grid-template-columns: minmax(0, 1fr); max-width: 34rem; }
+.pc-value { margin: var(--s1) 0 0; font-size: var(--fs-2); }
+@media (max-width: 899.98px) { .price-cards-2 { grid-template-columns: minmax(0, 1fr); } }
+/* "Free for everyone": links only, no button, no price */
+.free-strip { margin: var(--s4) 0; padding: var(--s3); border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
+.free-strip h2 { margin-top: 0; font-size: var(--fs-3); }
+.free-strip h2::before { display: none; }
+.free-list { list-style: none; padding: 0; margin: var(--s2) 0 0; display: flex; flex-wrap: wrap; gap: var(--s1) var(--s3); }
+.free-list li { margin: 0; }
+.free-list a, .free-list span { display: inline-flex; align-items: center; min-height: var(--target); }
 
 /* /tools/ and the trade-stats page (sweep 1): the tool's own sample output as a card with two notes */
 .tools-show { margin-top: var(--s2); }
