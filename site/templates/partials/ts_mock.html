@@ -3,10 +3,10 @@
     with two floating notes. Labelled as sample data. lint: the amounts pass the price check only because
     they are the tool's own sample output (checks/lint.py without_tool_previews). -#}
 {%- set ts = tool_previews.trade_stats %}
-<figure class="showcase-shot ts-mock" aria-label="Trade stats on the synthetic sample file">
+<figure class="showcase-shot ts-mock" aria-label="Trade stats on example data">
   <!--sample-out--><div class="shot-card">
     <table class="mini-shot">
-      <caption class="visually-hidden">Trade stats on the synthetic sample file</caption>
+      <caption class="visually-hidden">Trade stats on example data</caption>
       <tbody>
         <tr><th scope="row">Closed trades</th><td class="num">{{ ts.trades }}</td></tr>
         <tr><th scope="row">Net result</th><td class="num">{{ ts.net }}</td></tr>
@@ -19,5 +19,5 @@
   </div><!--/sample-out-->
   <p class="toast toast-a"><span class="toast-k">File read</span> {{ ts.trades }} trades from {{ ts.fills }} fills</p>
   <p class="toast toast-b"><span class="toast-k">Read in this tab</span> Your file is not uploaded</p>
-  <figcaption>Demo file, not a real trader.</figcaption>
+  <figcaption>Example data.</figcaption>
 </figure>

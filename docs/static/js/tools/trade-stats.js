@@ -139,7 +139,7 @@ async function render(focus = true) {
   if (!state || state.result !== r) return; // another file arrived meanwhile
   state.stats = s; // the hold-time figures do not depend on the balance; the teaser reuses them
   const out = $('ts-out');
-  out.replaceChildren(el('h2', { id: 'ts-out-h', tabindex: '-1', text: state.fileLabel === 'the synthetic sample file' ? 'Results: synthetic sample file' : 'Results: your file' }));
+  out.replaceChildren(el('h2', { id: 'ts-out-h', tabindex: '-1', text: state.fileLabel === 'the synthetic sample file' ? 'Results: example data' : 'Results: your file' }));
 
   // What was read
   const first = r.trades[0], last = r.trades[r.trades.length - 1];
@@ -150,7 +150,7 @@ async function render(focus = true) {
       `Times are ${r.tz_label}. ${unitNote(state.unit)}`),
   );
   if (state.fileLabel === 'the synthetic sample file') {
-    read.append(el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Sample data' }), 'Demo file, not a real trader.'));
+    read.append(el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Example data' })));
   }
   if (r.warnings.length) {
     read.append(el('div', { class: 'notice notice-caution', id: 'ts-warnings' },
@@ -274,7 +274,7 @@ function chart(points) {
   return el('section', { 'aria-labelledby': 'ts-chart-h' },
     el('h3', { id: 'ts-chart-h', text: 'Equity and drawdown' }),
     el('figure', { class: 'chart' }, svg,
-      el('figcaption', { text: `n = ${plural(n, 'closed trade', 'closed trades')}, in closing order · ${state.fileLabel === 'the synthetic sample file' ? 'synthetic sample data, not a real trader' : 'from your file'} · equity starts at 0` }),
+      el('figcaption', { text: `n = ${plural(n, 'closed trade', 'closed trades')}, in closing order · ${state.fileLabel === 'the synthetic sample file' ? 'example data' : 'from your file'} · equity starts at 0` }),
       el('details', {}, el('summary', { text: 'Show the chart as a table' }), tableWrap('Equity and drawdown as a table', table))));
 }
 

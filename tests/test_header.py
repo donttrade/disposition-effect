@@ -7,8 +7,9 @@ brand · nav row · theme toggle. Checked on template pages and lifted pages, li
   * keyboard: Tab reaches Menu, Enter/Space opens it, Tab enters the links, Escape closes it and
     focus returns to Menu; a click outside closes it; the expanded state is exposed;
   * axe: 0 serious/critical with the menu open; every target at least 44 px;
-  * the toggle is named by its action ("Dark mode" / "Light mode", QA 25 Oct), the header holds no button and one plain
-    offer (25 Oct sweep: four items, no "Start a Pilot"). v3 nav tests: test_v3_nav.py.
+  * the toggle is named by its action ("Dark mode" / "Light mode", QA 25 Oct); 29 Oct (owner): four plain links, no
+    drop-down, and one button, "Get report — $39" (twice in the markup: the bar's and the Menu's). v3 nav tests:
+    test_v3_nav.py.
 """
 import os
 import re
@@ -78,19 +79,14 @@ def test_menu_keyboard_escape_and_click_outside(browser, built_site, width):
     pg.keyboard.press("Enter")
     pg.wait_for_timeout(100)   # the accessibility tree updates after the toggle event
     assert pg.is_visible(".nav-panel") and _expanded(cdp) is True
-    pg.keyboard.press("Tab")   # 25 Oct sweep: the menu holds the Free tools group, then the plain links
-    assert pg.evaluate("document.activeElement.matches('.nav-acc > summary')")
-    assert pg.evaluate("document.activeElement.textContent") == "Free tools"
-    groups = pg.eval_on_selector_all(".nav-panel .nav-acc > summary", "ss => ss.map(s => [s.textContent, s.classList.contains('is-current'), s.getBoundingClientRect().height])")
-    assert [t for t, _, _ in groups] == ["Free tools"]
-    assert [t for t, c, _ in groups if c] == []   # Research is in the footer (25 Oct sweep)
+    pg.keyboard.press("Tab")   # 29 Oct (owner): the menu holds Home (off the home page), the four links, then the buy button
+    assert pg.evaluate("document.activeElement.textContent") == "Home"
+    assert pg.eval_on_selector_all(".nav-panel .nav-acc", "ss => ss.length") == 0
     links = pg.eval_on_selector_all(".nav-panel .nav-links a", "as => as.map(a => [a.textContent, a.getBoundingClientRect().height])")
-    assert [t for t, _ in links] == ["Home", "Sample report", "Pricing", "For firms"]   # Home link (a): first in .nav-links off the homepage; no "Ask a question" with ask_box = false; 25 Oct sweep: four items
-    assert all(h >= 44 for _, _, h in groups) and all(h >= 44 for _, h in links)
-    pg.click(".nav-acc > summary")
-    items = pg.eval_on_selector_all(".nav-acc[open] a", "as => as.map(a => a.getBoundingClientRect().height)")
-    assert len(items) == 10 and all(h >= 48 for h in items)   # 8 tools (journal off) + All free tools + For traders
-    pg.click(".nav-acc > summary")   # closed again, so the click-outside below lands outside the panel
+    assert [t for t, _ in links] == ["Home", "Sample report", "Free tools", "Pricing", "For firms"]   # Home link (a); 29 Oct (owner): the same four links
+    assert all(h >= 44 for _, h in links)
+    # no buy button on a research page (never a study finding next to an offer); /pricing/ shows the Menu's one below
+    assert pg.locator(".nav-panel a[data-pay]").count() == 0
     assert axe_violations(pg) == []
     pg.keyboard.press("Escape")
     assert not pg.is_visible(".nav-panel")
@@ -154,8 +150,11 @@ def test_header_markup(built_site):
         f = built_site["out"] / (os.path.join(path.strip("/"), "index.html") if path.endswith("/") else path.strip("/"))
         html = f.read_text(encoding="utf-8")
         header = re.search(r"(?s)<header class=\"site-header\">.*?</header>", html).group(0)
-        # 25 Oct sweep: one drop-down (Free tools) + the phone Menu + its one accordion group; no offer
-        assert header.count("<nav ") == 1 and header.count("<details") == 3, path   # no "Ask" popover: ask_box = false (launch, 25 Oct)
-        assert 'class="btn' not in header and not re.search(r"\$\d", header), path
+        # 29 Oct (owner): no drop-down, only the phone Menu; one offer, the "Get report — $39" button (bar + Menu)
+        assert header.count("<nav ") == 1 and header.count("<details") == 1, path   # no "Ask" popover: ask_box = false (launch, 25 Oct)
+        cta = re.findall(r'<a class="btn[^"]*" href="/pricing/#last-step" data-pay>Get report — \$39</a>', header)
+        rest = re.sub(r'<a class="btn[^"]*" href="/pricing/#last-step" data-pay>Get report — \$39</a>', "", header)
+        assert len(cta) == (0 if path.startswith("/research/") else 2), path   # no offer beside a study finding
+        assert 'class="btn' not in rest and not re.search(r"\$\d", rest), path
         assert "Start a Pilot" not in header, path
         assert re.search(r'<script src="/static/js/nav\.js\?v=[0-9a-f]{8}" defer></script>', html), path  # N5: versioned

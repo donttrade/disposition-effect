@@ -19,7 +19,7 @@ TP = json.load(open(os.path.join(REPO, "site", "config", "tool_previews.json"), 
 
 
 def test_previews_were_captured_from_the_committed_sample_file():
-    with open(os.path.join(REPO, "site", "static", "samples", "demo-trades.csv"), "rb") as f:
+    with open(os.path.join(REPO, "site", "static", "samples", "example-trades.csv"), "rb") as f:
         assert TP["sample_sha256"] == hashlib.sha256(f.read()).hexdigest(), "rerun checks/make_tool_previews.py"
 
 

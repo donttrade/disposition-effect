@@ -28,7 +28,7 @@ import build as B  # noqa: E402
 RR, DD, HM = "/tools/risk-reward-calculator/", "/tools/drawdown-calculator/", "/tools/trading-heatmap/"
 PATHS = (RR, DD, HM)
 FIX = os.path.join(HERE, "fixtures", "tools2")
-DEMO = os.path.join(REPO, "site", "static", "samples", "demo-trades.csv")
+DEMO = os.path.join(REPO, "site", "static", "samples", "example-trades.csv")
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 MINUS = "−"
 
@@ -323,7 +323,7 @@ def test_dd_sample_equals_python_mirror_and_teaser(browser, built_site):
     assert k(pg, "summary", s).startswith(f"{len(eps)} drawdowns in {len(trades)} closed trades; {sum(e['recovered'] for e in eps)} recovered")
     cur = eps[-1]
     assert k(pg, "current", s) == ("none: at the high" if cur["recovered"] else money(-(cur["high"] - final)))
-    assert "Demo file, not a real trader" in pg.inner_text(s)
+    assert "Example data" in pg.inner_text(s)   # 29 Oct (owner)
     assert hits > 0
     want = (f"Your deepest drawdown ran {len(inside)} trades, and {round(100 * hits / len(inside))}% of the trades inside it "
             "were opened within 15 minutes of a loss. We're building a habit report that tests whether trades opened within "
@@ -564,9 +564,10 @@ def test_paid_build_sells_and_teasers_follow(browser, paid_tools_site):
 def test_analytics_build_switches_the_privacy_sentence(tmp_path):
     from test_merge_oldpages import _flag_build
     out, _ = _flag_build(tmp_path, "a", launch="2026-10-21", analytics=True)
-    for path in (DD, HM):
+    # 29 Oct (Tester sweep 3 #5): one sentence on every file tool, in the FAQ and in "How it works"
+    for path in (DD, HM, "/tools/trade-stats/", "/tools/prop-challenge-simulator/"):
         h = (out / path.strip("/") / "index.html").read_text(encoding="utf-8")
-        assert "The only request this page makes is an anonymous page-view count." in h, path
+        assert "Your file’s contents are never sent; the only request this page makes is an anonymous page-view count." in h, path
         assert "blocks every outgoing network request" not in h and "blocks it from making network requests" not in h, path
 
 

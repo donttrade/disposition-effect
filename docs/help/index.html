@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src &#39;self&#39;; script-src &#39;self&#39; https://static.cloudflareinsights.com; style-src &#39;self&#39;; img-src &#39;self&#39; data:; font-src &#39;self&#39;; connect-src &#39;none&#39; https://cloudflareinsights.com; worker-src &#39;self&#39;; form-action &#39;self&#39; https://api.web3forms.com; base-uri &#39;none&#39;; object-src &#39;none&#39;">
+<meta http-equiv="Content-Security-Policy" content="default-src &#39;self&#39;; script-src &#39;self&#39; https://static.cloudflareinsights.com; style-src &#39;self&#39;; img-src &#39;self&#39; data:; font-src &#39;self&#39;; connect-src https://cloudflareinsights.com; worker-src &#39;self&#39;; form-action &#39;self&#39; https://api.web3forms.com; base-uri &#39;none&#39;; object-src &#39;none&#39;">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#16181C" media="(prefers-color-scheme: dark)">
@@ -25,9 +25,10 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=08b3fe6b">
-<script src="/static/js/theme.js?v=74363ef7"></script>
-<script src="/static/js/nav.js?v=cd8f3405" defer></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cdac673936b54f08beb5991aaae13975"}'></script>
+<link rel="stylesheet" href="/static/css/site.css?v=620363ac">
+<script src="/static/js/theme.js?v=7e47c1a9"></script>
+<script src="/static/js/nav.js?v=9c8cacb8" defer></script>
+<script src="/static/js/pay.js?v=7eb376c2" defer></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cdac673936b54f08beb5991aaae13975"}'></script>
 
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "name": "Questions", "position": 2}]}]}</script>
 </head>
@@ -38,56 +39,24 @@
   <a class="brand" href="/">donttrade</a>
   <nav class="site-nav" aria-label="Main"><ul class="nav-row">
     <li><a href="/sample-report/">Sample report</a></li>
-    <li class="nav-dd-li"><details name="nav" class="nav-dd" data-nav-dd>
-      <summary>Free tools<svg class="chev" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg></summary>
-      <div class="nav-pop nav-pop-2 nav-pop-end">
-      <ul class="nav-items">
-        <li><a class="nav-item" href="/tools/trade-stats/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-9l5 6-5 6h9"/></svg><span class="ni-text"><span class="ni-t">Trade stats</span> <span class="ni-d">Totals from your trade file</span></span></a></li>
-        <li><a class="nav-item" href="/tools/trading-heatmap/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h10v10H3z"/><path d="M7 13v4h10V7h-4"/></svg><span class="ni-text"><span class="ni-t">Trading heatmap</span> <span class="ni-d">Your results by hour and weekday</span></span></a></li>
-        <li><a class="nav-item" href="/tools/drawdown-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h14v12H3z"/><path d="M10 4v12"/></svg><span class="ni-text"><span class="ni-t">Drawdown calculator</span> <span class="ni-d">What gain recovers a drawdown</span></span></a></li>
-        <li><a class="nav-item" href="/tools/prop-challenge-simulator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18V3"/><path d="M5 4h10l-2.5 3.5L15 11H5"/></svg><span class="ni-text"><span class="ni-t">Prop challenge simulator</span> <span class="ni-d">Your past days under a challenge’s rules</span></span></a></li>
-        <li><a class="nav-item" href="/tools/lot-size-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v14M6 17h8M4 6h12"/><path d="M4 6l-2 5h4zM16 6l-2 5h4z"/></svg><span class="ni-text"><span class="ni-t">Lot size calculator</span> <span class="ni-d">Lots for the risk you chose</span></span></a></li>
-        <li><a class="nav-item" href="/tools/risk-reward-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15L15 5"/><circle cx="6" cy="6" r="1.75"/><circle cx="14" cy="14" r="1.75"/></svg><span class="ni-text"><span class="ni-t">Risk-reward calculator</span> <span class="ni-d">Break-even win rate for a ratio</span></span></a></li>
-        <li><a class="nav-item" href="/tools/disposition-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h10M5 17h10"/><path d="M6.5 3v2.5L13.5 14.5V17M13.5 3v2.5L6.5 14.5V17"/></svg><span class="ni-text"><span class="ni-t">Disposition calculator</span> <span class="ni-d">Winners vs losers sold, from four counts</span></span></a></li>
-        <li><a class="nav-item" href="/tools/pass-rate-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg><span class="ni-text"><span class="ni-t">Pass-rate calculator</span> <span class="ni-d">One cohort’s pass and payout rate</span></span></a></li>
-      </ul>
-      <ul class="nav-foot">
-        <li><a href="/tools/">All free tools</a></li>
-        <li><a href="/for-traders/">For traders: the habit report</a></li>
-      </ul>
-      </div>
-    </details></li>
+    <li><a href="/tools/">Free tools</a></li>
     <li><a href="/pricing/">Pricing</a></li>
     <li><a href="/for-firms/">For firms</a></li>
   </ul>
   <details class="nav-menu" data-nav-menu>
     <summary><svg class="i-menu" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg><svg class="i-close" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>Menu</summary>
     <div class="nav-panel">
-      <details name="m" class="nav-acc">
-        <summary>Free tools<svg class="chev" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8l4.5 4.5L14.5 8"/></svg></summary>
-      <ul class="nav-items">
-        <li><a class="nav-item" href="/tools/trade-stats/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-9l5 6-5 6h9"/></svg><span class="ni-text"><span class="ni-t">Trade stats</span> <span class="ni-d">Totals from your trade file</span></span></a></li>
-        <li><a class="nav-item" href="/tools/trading-heatmap/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h10v10H3z"/><path d="M7 13v4h10V7h-4"/></svg><span class="ni-text"><span class="ni-t">Trading heatmap</span> <span class="ni-d">Your results by hour and weekday</span></span></a></li>
-        <li><a class="nav-item" href="/tools/drawdown-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h14v12H3z"/><path d="M10 4v12"/></svg><span class="ni-text"><span class="ni-t">Drawdown calculator</span> <span class="ni-d">What gain recovers a drawdown</span></span></a></li>
-        <li><a class="nav-item" href="/tools/prop-challenge-simulator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18V3"/><path d="M5 4h10l-2.5 3.5L15 11H5"/></svg><span class="ni-text"><span class="ni-t">Prop challenge simulator</span> <span class="ni-d">Your past days under a challenge’s rules</span></span></a></li>
-        <li><a class="nav-item" href="/tools/lot-size-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v14M6 17h8M4 6h12"/><path d="M4 6l-2 5h4zM16 6l-2 5h4z"/></svg><span class="ni-text"><span class="ni-t">Lot size calculator</span> <span class="ni-d">Lots for the risk you chose</span></span></a></li>
-        <li><a class="nav-item" href="/tools/risk-reward-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15L15 5"/><circle cx="6" cy="6" r="1.75"/><circle cx="14" cy="14" r="1.75"/></svg><span class="ni-text"><span class="ni-t">Risk-reward calculator</span> <span class="ni-d">Break-even win rate for a ratio</span></span></a></li>
-        <li><a class="nav-item" href="/tools/disposition-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h10M5 17h10"/><path d="M6.5 3v2.5L13.5 14.5V17M13.5 3v2.5L6.5 14.5V17"/></svg><span class="ni-text"><span class="ni-t">Disposition calculator</span> <span class="ni-d">Winners vs losers sold, from four counts</span></span></a></li>
-        <li><a class="nav-item" href="/tools/pass-rate-calculator/"><svg class="ni" aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg><span class="ni-text"><span class="ni-t">Pass-rate calculator</span> <span class="ni-d">One cohort’s pass and payout rate</span></span></a></li>
-      </ul>
-      <ul class="nav-foot">
-        <li><a href="/tools/">All free tools</a></li>
-        <li><a href="/for-traders/">For traders: the habit report</a></li>
-      </ul>
-      </details>
       <ul class="nav-links">
         <li><a href="/">Home</a></li>
         <li><a href="/sample-report/">Sample report</a></li>
+        <li><a href="/tools/">Free tools</a></li>
         <li><a href="/pricing/">Pricing</a></li>
         <li><a href="/for-firms/">For firms</a></li>
       </ul>
+      <p class="nav-cta"><a class="btn " href="/pricing/#last-step" data-pay>Get report — $39</a></p>
     </div>
   </details></nav>
+  <a class="btn hdr-cta" href="/pricing/#last-step" data-pay>Get report — $39</a>
   <button class="theme-toggle" type="button" data-theme-toggle hidden><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg><span class="tt-label">Dark mode</span></button>
 </div></header>
 
@@ -97,7 +66,7 @@
   <nav class="crumb small" aria-label="Breadcrumb"><ol class="crumbs"><li><a href="/">Home</a><span class="crumb-sep" aria-hidden="true">›</span></li><li><span aria-current="page">Questions</span></li></ol></nav>
 
   <h1>Questions</h1>
-  <p class="lede">Every answer on this site in one place. Each one is quoted from its page, with a link to it.</p>
+  <p class="lede">Every answer on this site, quoted from its page.</p>
   <nav class="help-jump" aria-label="Groups"><ul>
     <li><a href="#g-faq">Common questions</a></li>
     <li><a href="#g-price">Prices and payment</a></li>
@@ -105,9 +74,9 @@
     <li><a href="#g-privacy">Privacy</a></li>
     <li><a href="#g-tool">The free tools</a></li>
     <li><a href="#g-glossary">Words the studies use</a></li>
-  </ul></nav>
-  <section class="section help-group" aria-labelledby="g-faq">
-    <h2 id="g-faq">Common questions</h2>
+  </ul></nav><section class="help-group" aria-labelledby="g-faq">
+    <details class="legal-sec" open>
+    <summary><h2 id="g-faq">Common questions</h2><span class="ls-sum">27 questions</span></summary>
     <details id="u-faq-for-firms-who-will-we-contract-with"><summary>Who will we contract with?</summary>
       <blockquote cite="https://donttrade.ca/for-firms/#q-who-will-we-contract-with"><p>One person. The legal contracting party is named in writing, in the engagement agreement, before anything is paid. We provide whatever identity checks your due diligence needs. The pen name is how the research is published, not a contract term.</p></blockquote>
       <p class="small">From: <a href="/for-firms/#q-who-will-we-contract-with">Prop firms &amp; brokers, Questions</a></p>
@@ -216,9 +185,10 @@
       <blockquote cite="https://donttrade.ca/start/#pilot"><p>Within 1 business day you get a reply with a one-page scope, our data terms and the fixed price. Nothing is owed until you accept the scope. Then pay by bank transfer, or Interac e-Transfer in Canada. Card payments are accepted through a secure Stripe link, sent only after you accept the scope. Your staff run the published script and send back what it prints; you get the result within 5 business days of payment and a clean run.</p></blockquote>
       <p class="small">From: <a href="/start/#pilot">Start here, What happens next</a></p>
     </details>
-  </section>
-  <section class="section help-group" aria-labelledby="g-price">
-    <h2 id="g-price">Prices and payment</h2>
+    </details>
+  </section><section class="help-group" aria-labelledby="g-price">
+    <details class="legal-sec">
+    <summary><h2 id="g-price">Prices and payment</h2><span class="ls-sum">3 questions</span></summary>
     <details id="u-price-pricing-free-tools"><summary>Free tools</summary>
       <blockquote cite="https://donttrade.ca/pricing/#pc-free-h"><p>$0 Trade stats, heatmap, drawdown and more No account, no card Your file is read in your browser Try the free tools →</p></blockquote>
       <p class="small">From: <a href="/pricing/#pc-free-h">Pricing, Free tools</a></p>
@@ -228,12 +198,13 @@
       <p class="small">From: <a href="/pricing/#pc-report-h">Pricing, Habit report</a></p>
     </details>
     <details id="u-price-pricing-last-step"><summary>Last step</summary>
-      <blockquote cite="https://donttrade.ca/pricing/#last-step-h"><p>Pay $39 on Stripe</p></blockquote>
+      <blockquote cite="https://donttrade.ca/pricing/#last-step-h"><p>US$39 once Report right after payment Full refund within 14 days Full details before you pay</p></blockquote>
       <p class="small">From: <a href="/pricing/#last-step-h">Pricing, Last step</a></p>
     </details>
-  </section>
-  <section class="section help-group" aria-labelledby="g-terms">
-    <h2 id="g-terms">Terms and refunds</h2>
+    </details>
+  </section><section class="help-group" aria-labelledby="g-terms">
+    <details class="legal-sec">
+    <summary><h2 id="g-terms">Terms and refunds</h2><span class="ls-sum">10 questions</span></summary>
     <details id="u-terms-terms-prices"><summary>Prices</summary>
       <blockquote cite="https://donttrade.ca/terms/#prices"><p>Firm prices are in US dollars (USD), before any applicable sales tax. Pricing</p></blockquote>
       <p class="small">From: <a href="/terms/#prices">Terms, Prices</a></p>
@@ -274,15 +245,16 @@
       <blockquote cite="https://donttrade.ca/terms/#law"><p>These terms are governed by the laws of the Province of Ontario and the federal laws of Canada applicable there, and disputes go to the courts of Ontario. If you are a consumer, this does not take away the protection of the mandatory rules of the law where you live, or your right to go to the courts there.</p></blockquote>
       <p class="small">From: <a href="/terms/#law">Terms, Governing law</a></p>
     </details>
-  </section>
-  <section class="section help-group" aria-labelledby="g-privacy">
-    <h2 id="g-privacy">Privacy</h2>
+    </details>
+  </section><section class="help-group" aria-labelledby="g-privacy">
+    <details class="legal-sec">
+    <summary><h2 id="g-privacy">Privacy</h2><span class="ls-sum">7 questions</span></summary>
     <details id="u-privacy-privacy-this-site"><summary>This site</summary>
       <blockquote cite="https://donttrade.ca/privacy/#site"><p>The site is hosted on Cloudflare Pages; before 24 Oct 2026 it was hosted on GitHub Pages. Cloudflare receives visitors’ IP addresses to deliver the pages and protect the site; see Cloudflare’s privacy policy. This site sets no cookies. Visits are counted with Cloudflare Web Analytics, which sets no cookie and does not follow you from site to site. Your trade file’s contents are never sent; on the free tools the only request the page makes is that page-view count. Your light/dark choice is stored only in your own browser. If you buy the habit report, your access key is stored there too; keep your restore link, because clearing the site’s data removes the key.</p></blockquote>
       <p class="small">From: <a href="/privacy/#site">Privacy, This site</a></p>
     </details>
     <details id="u-privacy-privacy-the-free-tools"><summary>The free tools</summary>
-      <blockquote cite="https://donttrade.ca/privacy/#tools"><p>The free tools (trade stats, the challenge simulator and the calculators) read your file and your numbers inside your browser tab. Those pages block outgoing requests, so your file is not uploaded and we never see it.</p></blockquote>
+      <blockquote cite="https://donttrade.ca/privacy/#tools"><p>The free tools (trade stats, the challenge simulator and the calculators) read your file and your numbers inside your browser tab. Your file’s contents are never sent; the only request those pages make is an anonymous page-view count, so your file is not uploaded and we never see it.</p></blockquote>
       <p class="small">From: <a href="/privacy/#tools">Privacy, The free tools</a></p>
     </details>
     <details id="u-privacy-privacy-the-paid-habit-report"><summary>The paid habit report</summary>
@@ -305,9 +277,10 @@
       <blockquote cite="https://donttrade.ca/privacy/#rights"><p>You can ask by email to see, correct or delete your information, or for a copy in a common format. We reply within 30 days. You can also complain to the Office of the Privacy Commissioner of Canada, in Quebec to the Commission d’accès à l’information, in the EU to your country’s data protection authority, and in the UK to the Information Commissioner’s Office. If a privacy breach creates a real risk of significant harm to you, we tell you. Version 2026-10-29.</p></blockquote>
       <p class="small">From: <a href="/privacy/#rights">Privacy, Your rights</a></p>
     </details>
-  </section>
-  <section class="section help-group" aria-labelledby="g-tool">
-    <h2 id="g-tool">The free tools</h2>
+    </details>
+  </section><section class="help-group" aria-labelledby="g-tool">
+    <details class="legal-sec">
+    <summary><h2 id="g-tool">The free tools</h2><span class="ls-sum">34 questions</span></summary>
     <details id="u-tool-tools-drawdown-calculator-how-much-gain-recovers-a-drawdown"><summary>How much gain recovers a drawdown?</summary>
       <blockquote cite="https://donttrade.ca/tools/drawdown-calculator/#q-how-much-gain-recovers-a-drawdown"><p>Divide the drawdown by one minus the drawdown. A 10 percent drawdown takes about an 11.1 percent gain to recover, 20 percent takes 25 percent, 30 percent takes about 42.9 percent, and 50 percent takes 100 percent.</p></blockquote>
       <p class="small">From: <a href="/tools/drawdown-calculator/#q-how-much-gain-recovers-a-drawdown">Drawdown and recovery calculator, Questions</a></p>
@@ -325,7 +298,7 @@
       <p class="small">From: <a href="/tools/drawdown-calculator/#q-how-is-the-length-of-a-drawdown-counted">Drawdown and recovery calculator, Questions</a></p>
     </details>
     <details id="u-tool-tools-drawdown-calculator-is-my-file-uploaded"><summary>Is my file uploaded?</summary>
-      <blockquote cite="https://donttrade.ca/tools/drawdown-calculator/#q-is-my-file-uploaded"><p>No. The analysis runs in your browser tab, and your file’s contents are never sent. The only request this page makes is an anonymous page-view count.</p></blockquote>
+      <blockquote cite="https://donttrade.ca/tools/drawdown-calculator/#q-is-my-file-uploaded"><p>No. The analysis runs in your browser tab. Your file’s contents are never sent; the only request this page makes is an anonymous page-view count.</p></blockquote>
       <p class="small">From: <a href="/tools/drawdown-calculator/#q-is-my-file-uploaded">Drawdown and recovery calculator, Questions</a></p>
     </details>
     <details id="u-tool-tools-drawdown-calculator-is-this-investment-advice"><summary>Is this investment advice?</summary>
@@ -373,7 +346,7 @@
       <p class="small">From: <a href="/tools/prop-challenge-simulator/#q-which-firms-rules-does-it-include">Prop-firm challenge simulator, Questions</a></p>
     </details>
     <details id="u-tool-tools-prop-challenge-simulator-is-my-file-uploaded"><summary>Is my file uploaded?</summary>
-      <blockquote cite="https://donttrade.ca/tools/prop-challenge-simulator/#q-is-my-file-uploaded"><p>No. The file is read in this tab and all 10,000 runs happen in your browser. The page’s security policy blocks outgoing requests.</p></blockquote>
+      <blockquote cite="https://donttrade.ca/tools/prop-challenge-simulator/#q-is-my-file-uploaded"><p>No. The file is read in this tab and all 10,000 runs happen in your browser. Your file’s contents are never sent; the only request this page makes is an anonymous page-view count.</p></blockquote>
       <p class="small">From: <a href="/tools/prop-challenge-simulator/#q-is-my-file-uploaded">Prop-firm challenge simulator, Questions</a></p>
     </details>
     <details id="u-tool-tools-risk-reward-calculator-how-do-you-calculate-risk-reward-ratio"><summary>How do you calculate risk-reward ratio?</summary>
@@ -401,7 +374,7 @@
       <p class="small">From: <a href="/tools/risk-reward-calculator/#q-is-this-investment-advice">Risk-reward calculator, Questions</a></p>
     </details>
     <details id="u-tool-tools-trade-stats-is-my-trade-file-uploaded"><summary>Is my trade file uploaded?</summary>
-      <blockquote cite="https://donttrade.ca/tools/trade-stats/#q-is-my-trade-file-uploaded"><p>No. The file is read and analysed by code running in this browser tab, and the page’s security policy blocks it from making network requests. Open your browser’s developer tools, choose the Network tab, and watch it stay empty during the analysis.</p></blockquote>
+      <blockquote cite="https://donttrade.ca/tools/trade-stats/#q-is-my-trade-file-uploaded"><p>No. The file is read and analysed by code running in this browser tab. Your file’s contents are never sent; the only request this page makes is an anonymous page-view count. Open your browser’s developer tools, choose the Network tab, and watch: nothing is sent during the analysis.</p></blockquote>
       <p class="small">From: <a href="/tools/trade-stats/#q-is-my-trade-file-uploaded">Trade stats from your own trade file, Questions</a></p>
     </details>
     <details id="u-tool-tools-trade-stats-which-files-does-it-read"><summary>Which files does it read?</summary>
@@ -437,16 +410,17 @@
       <p class="small">From: <a href="/tools/trading-heatmap/#q-does-this-tell-me-the-best-time-to-trade">Your trades by hour and weekday, Questions</a></p>
     </details>
     <details id="u-tool-tools-trading-heatmap-is-my-file-uploaded"><summary>Is my file uploaded?</summary>
-      <blockquote cite="https://donttrade.ca/tools/trading-heatmap/#q-is-my-file-uploaded"><p>No. The analysis runs in your browser tab, and your file’s contents are never sent. The only request this page makes is an anonymous page-view count.</p></blockquote>
+      <blockquote cite="https://donttrade.ca/tools/trading-heatmap/#q-is-my-file-uploaded"><p>No. The analysis runs in your browser tab. Your file’s contents are never sent; the only request this page makes is an anonymous page-view count.</p></blockquote>
       <p class="small">From: <a href="/tools/trading-heatmap/#q-is-my-file-uploaded">Your trades by hour and weekday, Questions</a></p>
     </details>
     <details id="u-tool-tools-trading-heatmap-is-this-investment-advice"><summary>Is this investment advice?</summary>
       <blockquote cite="https://donttrade.ca/tools/trading-heatmap/#q-is-this-investment-advice"><p>No. It measures your own past trades and does not recommend any security, trade, size or exit. Past results do not predict future results.</p></blockquote>
       <p class="small">From: <a href="/tools/trading-heatmap/#q-is-this-investment-advice">Your trades by hour and weekday, Questions</a></p>
     </details>
-  </section>
-  <section class="section help-group" aria-labelledby="g-glossary">
-    <h2 id="g-glossary">Words the studies use</h2>
+    </details>
+  </section><section class="help-group" aria-labelledby="g-glossary">
+    <details class="legal-sec">
+    <summary><h2 id="g-glossary">Words the studies use</h2><span class="ls-sum">11 questions</span></summary>
     <details id="u-glossary-glossary-disposition-effect"><summary>Disposition effect</summary>
       <blockquote cite="https://donttrade.ca/glossary/#disposition-effect"><p>The tendency to sell positions that are up more readily than positions that are down. Named by Shefrin and Statman (1985); measured on brokerage records by Odean (1998). Source: Shefrin &amp; Statman (1985); Odean (1998)</p></blockquote>
       <p class="small">From: <a href="/glossary/#disposition-effect">Glossary, Disposition effect</a></p>
@@ -491,6 +465,7 @@
       <blockquote cite="https://donttrade.ca/glossary/#form4"><p>The filing a company insider makes with the SEC after buying or selling the company’s shares. Source: Investor.gov</p></blockquote>
       <p class="small">From: <a href="/glossary/#form4">Glossary, Form 4</a></p>
     </details>
+    </details>
   </section>
   
 </div>
@@ -515,6 +490,28 @@
   </details>
   <p class="legal">&copy; 2026 donttrade · <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
 </div></footer>
+
+
+<dialog class="pay-dialog" id="pay-dialog" aria-labelledby="pd-h" data-pay-dialog>
+  <div class="pd-inner">
+    <div class="pd-top">
+      <h2 id="pd-h">Get the habit report</h2>
+      <button class="pd-close no-print" type="button" data-pay-close aria-label="Close"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg></button>
+    </div>
+    <ul class="pay-facts">
+  <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M3 10.5 9.5 4H16v6.5L9.5 17z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="13" cy="7" r="1.3" fill="currentColor"/></svg><span>US$39 once</span></li>
+  <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M11 2 4 11.5h5L8 18l7-9.5h-5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span>Report right after payment</span></li>
+  <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M4.5 8.5A6 6 0 1 1 4 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 4.5v4.5h4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Full refund within 14 days</span></li>
+</ul>
+    <details class="pay-more" data-pay-more>
+      <summary>Full details before you pay</summary>
+      <div class="pd-full" data-pay-full><p class="small"><a href="/pricing/#before-you-pay">Read the full details on the pricing page</a></p></div>
+    </details>
+    <p class="pay-go no-print"><a class="btn" href="https://buy.stripe.com/eVq14m66H9Jw15a0Rwdwc04" rel="noopener">Continue to secure payment</a></p>
+    <p class="small muted pd-links no-print"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a> · <a href="/terms/#seller">Business details</a></p>
+    
+  </div>
+</dialog>
 
 </body>
 </html>

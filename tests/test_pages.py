@@ -159,7 +159,7 @@ def test_home_hero_is_the_real_dashboard_capture(browser, built_site):
     import hashlib
     from lint import FREE_BADGE_STRINGS
     part = open(os.path.join(REPO, "site", "templates", "partials", "hero_dashboard.html"), encoding="utf-8").read()
-    sha = hashlib.sha256(open(os.path.join(REPO, "site", "static", "samples", "demo-trades.csv"), "rb").read()).hexdigest()
+    sha = hashlib.sha256(open(os.path.join(REPO, "site", "static", "samples", "example-trades.csv"), "rb").read()).hexdigest()
     assert re.search(r"sample-sha256: ([0-9a-f]{64})", part).group(1) == sha
     body = part.split("#}", 1)[1]
     assert " id=" not in body and not [x for x in FREE_BADGE_STRINGS if x in body]
@@ -167,7 +167,7 @@ def test_home_hero_is_the_real_dashboard_capture(browser, built_site):
     html = html_of(built_site, "/")
     assert html.count('class="hero-dash"') == 1 and "<picture" not in html and "<source" not in html
     assert f'role="img" aria-label="{OLD_HERO_ALT}"' in html
-    assert "Sample data, not a real trader." in html
+    assert "run on example data." in html   # 29 Oct (owner): the one word "Example" labels sample data
     assert not (built_site["out"] / "static" / "img").exists(), "the old hero .webp images are gone"
     hero = re.findall(r"<dd data-count[^>]*>([^<]*)</dd>", html)
     ctx = browser.new_context(viewport={"width": 1280, "height": 900})
@@ -287,7 +287,8 @@ def test_for_firms_pilot_rename_and_prices(built_site):
     assert "Trial" not in text   # QA 25 Oct: the rename note is only in the terms
     assert "Start a Pilot — $745 USD" in text
     assert "Card payments are accepted through a secure Stripe link, sent only after you accept the scope." in text
-    assert "buy.stripe.com" not in html  # pilot_checkout off
+    # pilot_checkout off: no Pilot card link. 29 Oct: the trader pay dialog (paid builds) holds the report's link only
+    assert "buy.stripe.com" not in re.sub(r'(?s)<dialog class="pay-dialog".*?</dialog>', "", html)
 
 
 def test_for_traders_waitlist_and_privacy_wording(built_site):

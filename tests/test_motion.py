@@ -595,7 +595,7 @@ def test_build_guard_motion_scope():
 
 
 def test_build_guard_stale_hero_capture(tmp_path, monkeypatch):
-    other = tmp_path / "demo-trades.csv"
+    other = tmp_path / "example-trades.csv"
     other.write_bytes(open(B.SAMPLE_CSV, "rb").read() + b"\n")
     monkeypatch.setattr(B, "SAMPLE_CSV", str(other))
     with pytest.raises(B.BuildError, match="different sample"):

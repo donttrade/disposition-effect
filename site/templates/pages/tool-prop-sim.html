@@ -11,21 +11,24 @@
 {%- import "partials/trader_offer.html" as offer with context %}
 {%- set r = products["report39"] %}
 <div class="wrap">
-  <div class="grid">
-    <div class="span-8">
+  {#- sweep 3 (29 Oct, owner: show, don't tell): one line and a picture; the longer explanation is under
+      "How it works" below, word for word. -#}
+  {%- from "partials/tool_shot.html" import shot with context %}{% set t = tools | selectattr("href", "equalto", "/tools/prop-challenge-simulator/") | first %}
+  <div class="tool-hero">
+    <div>
       {% include "partials/crumbs.html" %}
       <h1>Prop-firm challenge simulator</h1>
-      <p class="lede">Most challenge simulators ask for a win rate and an average win and loss, then invent trades from them. This one can start from your own record.</p>
-      <p>Drop a trade file and it builds 10,000 simulated challenges by drawing whole trading days from your history at random, so a day with three quick losses stays a day with three quick losses, which is what daily loss limits react to. Enter the rules you face: profit target, daily loss limit, maximum loss as a static or trailing limit, time limit and minimum trading days. The result shows the share of runs that passed, busted or ran out of time, and how many busts came after two or more losses in a row. No file? A manual mode takes the usual summary numbers instead. The random seed is fixed, so the same inputs always give the same answer.</p>
-      <p><strong>This is a simulation of your past trades, not a prediction.</strong> It runs entirely in your browser: your file is never sent.</p>
+      <p class="lede">Replay 10,000 challenges from your own trading days, under your firm’s rules.</p>
+      <p><strong>This is a simulation of your past trades, not a prediction.</strong></p>
     </div>
+    {{ shot("prop", t) }}
   </div>
   {% include "partials/disclaimer.html" %}
 
   <section class="tool" aria-labelledby="ps-tool-h">
     <h2 id="ps-tool-h">Your trades and your rules</h2>
-    <p id="ps-js-needed" class="notice notice-caution">This tool runs in your browser and needs JavaScript turned on.</p>
-    <form id="ps-form" novalidate hidden>
+    <p id="ps-js-needed" class="notice notice-caution" data-js-hide>This tool runs in your browser and needs JavaScript turned on.</p>
+    <form id="ps-form" novalidate hidden data-js-show>
       <fieldset>
         <legend>Where the trades come from</legend>
         <div class="check"><input type="radio" id="ps-mode-file" name="ps-mode" value="file" checked><label for="ps-mode-file">From my trade file (whole trading days, in their real order within each day)</label></div>
@@ -36,11 +39,11 @@
           <label for="ps-file">Your trade file</label>
           <input id="ps-file" type="file" accept=".csv,.htm,.html,.txt" aria-describedby="ps-file-status ps-file-error">
         </div>
-        <p class="btn-row"><span class="muted">No file to hand?</span> <button class="btn btn-secondary" id="ps-sample-btn" type="button">Try a sample file</button></p>
+        <p class="btn-row"><span class="muted">No file to hand?</span> <button class="btn btn-secondary" id="ps-sample-btn" type="button">Try with example data</button></p>
         <p id="ps-file-status" class="small muted" role="status" hidden></p>
         <p id="ps-progress" class="progress-line small muted" hidden><progress aria-label="Reading your file"></progress> <span data-elapsed aria-hidden="true"></span></p>
         <div id="ps-file-error" class="notice notice-error" role="alert" tabindex="-1" hidden></div>
-        <p class="small muted">Same formats as <a href="/tools/trade-stats/">trade stats</a>: MT5/MT4 report, IBKR Flex Query, Tradovate Orders, TradingView Order History (all beta) or the CSV template. The sample is synthetic, not a real trader. It also fills in example rules where the boxes are empty, not any firm’s.</p>
+        <p class="small muted">Same formats as <a href="/tools/trade-stats/">trade stats</a>: MT5/MT4 report, IBKR Flex Query, Tradovate Orders, TradingView Order History (all beta) or the CSV template. The example data also fills in example rules where the boxes are empty, not any firm’s.</p>
       </div>
       <div id="ps-manual-fields" class="field-grid" hidden>
         {{ field("ps-wr", "Win rate (%)", "Between 0 and 100. Break-even trades are not modelled.") }}
@@ -83,7 +86,11 @@
   {%- endif %}
 
   <section class="section" aria-labelledby="how-h">
-    <h2 id="how-h">How each run works</h2>
+    <h2 id="how-h">How it works</h2>
+    <details class="how-group"><summary>How each run works</summary>
+    <p>Most challenge simulators ask for a win rate and an average win and loss, then invent trades from them. This one can start from your own record.</p>
+    <p>Drop a trade file and it builds 10,000 simulated challenges by drawing whole trading days from your history at random, so a day with three quick losses stays a day with three quick losses, which is what daily loss limits react to. Enter the rules you face: profit target, daily loss limit, maximum loss as a static or trailing limit, time limit and minimum trading days. The result shows the share of runs that passed, busted or ran out of time, and how many busts came after two or more losses in a row. No file? A manual mode takes the usual summary numbers instead. The random seed is fixed, so the same inputs always give the same answer.</p>
+    <p>It runs entirely in your browser: your file is never sent.</p>
     <ol>
       <li>Each simulated day is one of your past trading days, drawn at random (a day can be drawn more than once), with its trades replayed in their real order. In manual mode each day is the number of trades you entered, each a win or a loss at your win rate.</li>
       <li>After every trade, the run busts if the day’s loss reaches the daily limit, or if the balance reaches the maximum-loss floor. Reaching a limit counts as breaking it.</li>
@@ -91,6 +98,7 @@
       <li>A run that neither passes nor busts within the time limit has run out of time.</li>
     </ol>
     <p>Only closed trades are in a trade file, so the simulation sees each trade’s final result, not how far it went against you while open. A limit that a firm checks on open positions can break earlier than shown here.</p>
+    </details>
   </section>
 
   <section class="section" aria-labelledby="faq-h">
@@ -100,17 +108,9 @@
     <details><summary>How many trading days do I need in the file?</summary><p>The simulation runs with any number, but with fewer than 30 trading days the page warns that the results lean heavily on a few days. More history gives a steadier picture.</p></details>
     <details><summary>Why are my results the same every time?</summary><p>The random number generator uses a fixed seed, so anyone can reproduce a result from the same inputs. Change the seed to see how much the answer moves.</p></details>
     <details><summary>Which firms’ rules does it include?</summary><p>None are built in or named. Enter the numbers from your own firm’s current rules, because rules change and vary by account type.</p></details>
-    <details><summary>Is my file uploaded?</summary><p>No. The file is read in this tab and all 10,000 runs happen in your browser. The page’s security policy blocks outgoing requests.</p></details>
+    <details><summary>Is my file uploaded?</summary><p>No. The file is read in this tab and all 10,000 runs happen in your browser. {% if flags.analytics %}Your file’s contents are never sent; the only request this page makes is an anonymous page-view count.{% else %}The page’s security policy blocks outgoing requests.{% endif %}</p></details>
   </section>
 
-  <section class="section" aria-labelledby="more-h">
-    <h2 id="more-h">Related</h2>
-    <ul>
-      <li><a href="/tools/trade-stats/">Trade stats</a>: win rate, profit factor and drawdown from the same file.</li>
-      <li><a href="/tools/lot-size-calculator/">Lot size calculator</a>: the arithmetic from balance, risk amount and stop distance.</li>
-      <li><a href="/tools/pass-rate-calculator/">Pass-rate calculator</a>, for firm operators: a cohort’s pass and payout rates.</li>
-    </ul>
-  </section>
   <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR, Tradovate and TradingView are trademarks of their owners. donttrade is not affiliated with any of them.</p>
 </div>
 <script type="text/csv" id="ps-sample">

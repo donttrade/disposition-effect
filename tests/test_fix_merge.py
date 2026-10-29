@@ -562,7 +562,7 @@ def rows_file(path, trades):
         a, b = t0 + dt.timedelta(minutes=10 * i), t0 + dt.timedelta(minutes=10 * i + 5)  # never overlapping
         px = round(100 + rnd.uniform(-5, 5), 2)
         out = round(px + rnd.uniform(-2, 2), 2)
-        sym = "DEMO-" + "ABC"[i % 3]
+        sym = "EX-" + "ABC"[i % 3]
         lines.append(f"{a:%Y-%m-%d},{a:%H:%M:%S},{sym},Buy,10,{px},USD,1.00")
         lines.append(f"{b:%Y-%m-%d},{b:%H:%M:%S},{sym},Sell,10,{out},USD,1.00")
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -600,7 +600,7 @@ def test_d7_100k_rows_keep_the_main_thread_free(browser, built_site, tmp_path, t
 def test_d7_200001_rows_refused_without_freezing(browser, built_site, tmp_path):
     p = tmp_path / "rows200001.csv"
     p.write_text("Date,Time,Symbol,Side,Quantity,Price,Currency,Fees\n" +
-                 "".join(f"2025-01-02,09:30:00,DEMO-A,{'Buy' if i % 2 == 0 else 'Sell'},10,100.00,USD,1.00\n" for i in range(200_001)),
+                 "".join(f"2025-01-02,09:30:00,EX-A,{'Buy' if i % 2 == 0 else 'Sell'},10,100.00,USD,1.00\n" for i in range(200_001)),
                  encoding="utf-8")
     ctx = browser.new_context()
     page = ctx.new_page()

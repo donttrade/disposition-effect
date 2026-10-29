@@ -6,15 +6,18 @@
   <h1>Privacy</h1>
   <p class="notice">Plain-language notice, version {{ legal.privacy_version }}. Where a signed engagement agreement differs, the agreement governs.{% if flags.paid_report %} <a href="/fr/confidentialite/" hreflang="fr" lang="fr">Version française</a>{% endif %}</p>
 
-  <h2 id="who">Who we are</h2>
+  <details class="legal-sec">
+    <summary><h2 id="who">Who we are</h2><span class="ls-sum">Who is responsible for your information.</span></summary>
   {%- if show_seller %}
   <dl class="byp">{{ seller_rows(private, site, "en") }}</dl>
   <p>The person responsible for personal information is the seller named above, at the same address and email.</p>
   {%- else %}
   <p>donttrade, a one-person research practice in Canada, published under a pen name. Contact: <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>. {% include "partials/contracting_party.html" %}</p>
   {%- endif %}
+  </details>
 
-  <h2 id="site">This site</h2>
+  <details class="legal-sec">
+    <summary><h2 id="site">This site</h2><span class="ls-sum">Hosted on Cloudflare. No cookies.{% if not flags.analytics %} No analytics.{% endif %}</span></summary>
   <ul>
     {#- T0 (QUICKWINS §4 P-1): [legal] cloudflare_pages_since #}
     <li>The site is hosted on Cloudflare Pages; before {{ legal.cloudflare_pages_since_human }} it was hosted on GitHub Pages. Cloudflare receives visitors’ IP addresses to deliver the pages and protect the site; see <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare’s privacy policy</a>.</li>
@@ -26,12 +29,16 @@
     {%- endif %}
     <li>Your light/dark choice is stored only in your own browser.{% if flags.paid_report %} If you buy the habit report, your access key is stored there too; keep your restore link, because clearing the site’s data removes the key.{% endif %}</li>
   </ul>
+  </details>
 
-  <h2 id="tools">The free tools</h2>
-  <p>The free tools (trade stats, the challenge simulator and the calculators) read your file and your numbers inside your browser tab. Those pages block outgoing requests, so your file is not uploaded and we never see it.</p>
+  <details class="legal-sec">
+    <summary><h2 id="tools">The free tools</h2><span class="ls-sum">The free tools read your file in your browser. It is not uploaded.</span></summary>
+  <p>The free tools (trade stats, the challenge simulator and the calculators) read your file and your numbers inside your browser tab. {% if flags.analytics %}Your file’s contents are never sent; the only request those pages make is an anonymous page-view count, so your file is not uploaded and we never see it.{% else %}Those pages block outgoing requests, so your file is not uploaded and we never see it.{% endif %}</p>
+  </details>
   {%- if flags.paid_report %}
 
-  <h2 id="report">The paid habit report</h2>
+  <details class="legal-sec">
+    <summary><h2 id="report">The paid habit report</h2><span class="ls-sum">Only stripped numbers are sent: no name, account number or ticker.</span></summary>
   <p>Your browser sends our server only a stripped list of numbers: open and close times, buy or sell, relative size, the realised result, a random symbol number and a scrambled fingerprint of each row. It contains no name, account number or ticker. The server runs on Cloudflare and may be outside Canada. It uses the numbers to build your report, sends the report back, and does not keep the numbers: of those numbers it keeps only a scrambled fingerprint of each trade row from your first report, as described below. Request logging is off.</p>
   <p>What the server keeps:</p>
   <ul>
@@ -45,9 +52,11 @@
       sentence). The French page (/fr/confidentialite/) does not have it yet: translation pending. #}
   <p id="fingerprints">To check that a re-test uses the same trading history as your first report, we keep a scrambled fingerprint of each trade row (a keyed hash: it cannot be turned back into your trades without our secret key, but it is still linked to your purchase). We delete these fingerprints as soon as your included re-test has run, or 75 days after your first report, whichever comes first. If you have an active Habit Tracker, we keep them while it is active and delete them 15 days after it ends.</p>
   <p>The report analyses your trading habits, which may count as profiling. It runs only when you start an analysis with your own file. The results are shown to you only: they are not used for advertising, not compared with other people, and not used to make any decision about you.</p>
+  </details>
   {%- endif %}
 
-  <h2 id="forms">Forms, email and payments</h2>
+  <details class="legal-sec">
+    <summary><h2 id="forms">Forms, email and payments</h2><span class="ls-sum">Forms, email, the newsletter and card payments use outside services.</span></summary>
   <ul>
     <li><strong>Forms</strong> are sent through Web3Forms, which emails each submission to us; it is hosted on AWS and keeps a 30-day history. The firm and partner forms ask for a work email and firm (required), and your role and what you want measured (optional). {% if not flags.paid_report %}The trader waitlist asks for an email, the founding price you would use, and an unticked launch-email consent; the platform you use is optional.{% endif %} No phone numbers are collected.</li>
     <li><strong>Email</strong> is handled by Gmail (Google). We keep form emails there.</li>
@@ -64,8 +73,10 @@
     {%- set abroad = ["Web3Forms", "Google", "GitHub", "Stripe", "Substack", "Cloudflare"] %}
     <li>{{ abroad[:-1]|join(", ") }} and {{ abroad[-1] }} are mostly in the United States, so what you send may be stored or processed outside Canada, and the authorities there may access it under their laws.</li>
   </ul>
+  </details>
 
-  <h2 id="use">What we do with what you send</h2>
+  <details class="legal-sec">
+    <summary><h2 id="use">What we do with what you send</h2><span class="ls-sum">Used to reply, scope and invoice. Nothing is sold.</span></summary>
   <ul>
     <li>We use it to reply, scope the work and invoice.</li>
     <li>Enquiries that don’t lead to an engagement are deleted within 12 months.</li>
@@ -77,12 +88,17 @@
     {%- endif %}
     <li>Nothing is sold. We use these providers only to run the site, email, the newsletter, forms and card payments.</li>
   </ul>
+  </details>
 
-  <h2 id="client-data">Client data</h2>
+  <details class="legal-sec">
+    <summary><h2 id="client-data">Client data</h2><span class="ls-sum">For firms we receive only aggregate counts.</span></summary>
   <p>For firm engagements we never receive account records, only the aggregate counts the script prints.</p>
+  </details>
 
-  <h2 id="rights">Your rights</h2>
+  <details class="legal-sec">
+    <summary><h2 id="rights">Your rights</h2><span class="ls-sum">Ask to see, correct or delete your information.</span></summary>
   <p>You can ask by email to see, correct or delete your information, or for a copy in a common format. We reply within 30 days. You can also complain to the <a href="https://www.priv.gc.ca/en/">Office of the Privacy Commissioner of Canada</a>{% if flags.paid_report %}, in Quebec to the Commission d’accès à l’information, in the EU to your country’s data protection authority, and in the UK to the Information Commissioner’s Office{% endif %}.{% if flags.paid_report %} If a privacy breach creates a real risk of significant harm to you, we tell you.{% endif %}</p>
+  </details>
   <p class="small muted">Version {{ legal.privacy_version }}.</p>
 </div></div>
 {% endblock %}
