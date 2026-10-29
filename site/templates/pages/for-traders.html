@@ -123,7 +123,7 @@
     <h2 id="files-h">Your file, and what is sent</h2>
     <ul>
       <li><strong>Files:</strong> the MetaTrader 5 or 4 history report, an Interactive Brokers Flex Query, a Tradovate orders export or a TradingView Order History export (all four in beta until real exports confirm the columns), or the donttrade CSV template.</li>
-      <li><strong>The free tools</strong> open your file in your browser. Those pages block outgoing requests, so the file is not uploaded.</li>
+      <li><strong>The free tools</strong> open your file in your browser. {% if flags.analytics %}Your file’s contents are never sent; the only request those pages make is an anonymous page-view count.{% else %}Those pages block outgoing requests, so the file is not uploaded.{% endif %}</li>
       {%- if sale %}
       <li><strong>For the paid report:</strong> {{ strings.p5.long }} <a href="/privacy/#report">Privacy notice</a>.</li>
       {%- else %}
