@@ -8,6 +8,6 @@
 <div class="wrap">
   <h1>Before you pay</h1>
   <p class="small"><a href="/pricing/#last-step">Price and how to pay</a> · <a href="/terms/">Terms</a></p>
-  {% include "partials/before_you_pay.html" %}
+  {%- with byp_h = "h2" %}{% include "partials/before_you_pay.html" %}{% endwith %}
 </div>
 {% endblock %}
