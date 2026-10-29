@@ -155,8 +155,8 @@ def raw(out, rel):
     return open(os.path.join(out, rel), encoding="utf-8").read()
 
 
-NEXT_TYPED = ("The donttrade test reads your trade file It looks for up to five habits in your "   # owner Q3, 25 Oct: the heading names the report
-              "own trades, testing up to two of them against chance. $39, one re-test included, refund within 14 days.")
+NEXT_TYPED = ("Is this habit real, or luck? The donttrade test checks your own trades against chance. "   # 29 Oct (one product)
+              "$39, re-test included.")
 
 
 def test_i3b_exact_offer_lines_on_each_page(builds):

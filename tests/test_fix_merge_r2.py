@@ -383,7 +383,7 @@ def test_r5_tool_teaser_script_wording_follows_the_offer(browser, paid_site, bui
     page.wait_for_selector("#ts-out:not([hidden])", timeout=60000)
     page.wait_for_timeout(300)
     assert page.locator("#ts-teaser").count() == 0
-    assert page.inner_text(".next-step") == before and before.startswith("The donttrade test reads")
+    assert page.inner_text(".next-step") == before and before.startswith("Is this habit real, or luck?")
     assert page.evaluate("document.querySelector('#ts-out').nextElementSibling.classList.contains('next-step')")
     ctx.close()
     ctx = browser.new_context()
