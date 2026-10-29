@@ -565,11 +565,9 @@ def test_analytics_build_switches_the_privacy_sentence(tmp_path):
     from test_merge_oldpages import _flag_build
     out, _ = _flag_build(tmp_path, "a", launch="2026-10-21", analytics=True)
     # 29 Oct (Tester sweep 3 #5): one sentence on every file tool, in the FAQ and in "How it works"
-    one = "Your file’s contents are never sent; the only request this page makes is an anonymous page-view count."
-    # the Readiness Check also counts each finished step (ARCHITECT-CHALLENGE-READINESS §7), so it says so
-    steps = ("Your file’s contents are never sent; the only requests this page makes are anonymous page-view counts, "
-             "one for the visit and one for each step you finish.")
-    for path, sentence in ((DD, one), (HM, one), ("/tools/trade-stats/", one), ("/tools/prop-challenge-simulator/", steps)):
+    # 29 Oct (owner): one sentence wherever the analytics line appears, the Readiness Check included
+    one = "Only anonymous counts of visits and finished steps are sent; your file is never sent."
+    for path, sentence in ((DD, one), (HM, one), ("/tools/trade-stats/", one), ("/tools/prop-challenge-simulator/", one)):
         h = (out / path.strip("/") / "index.html").read_text(encoding="utf-8")
         assert sentence in h, path
         assert "blocks every outgoing network request" not in h and "blocks it from making network requests" not in h, path

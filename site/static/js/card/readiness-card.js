@@ -20,7 +20,7 @@ export const CARD_STRINGS = Object.freeze({
   whatif_short: 'With your rules: passed {a}% → {b}%',
   footer: 'Past trades only. Not investment advice.',
   site: 'donttrade.ca',
-  example: 'Example data, not a real trader',
+  example: 'Example data',
   static: 'fixed floor', moving: 'moving floor', none: 'no',
 });
 // Short names of the what-if rules, so the card's line stays within 12 words.
