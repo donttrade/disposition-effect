@@ -8,7 +8,7 @@
 
 import { parsePositive, InputError } from './num.js?v=8df99e34';
 import { el, plain } from './format.js?v=acb0db51';
-import { clearFieldErrors, fieldError, showProblems } from './tool-state.js?v=208b3ec8';
+import { clearFieldErrors, fieldError, showProblems } from './tool-state.js?v=195e69cc';
 
 const $ = (id) => document.getElementById(id);
 const LABELS = {

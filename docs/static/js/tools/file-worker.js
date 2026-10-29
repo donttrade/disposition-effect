@@ -18,8 +18,8 @@
 // Nothing here touches the network, storage or the console. Only what the pages render is
 // sent back: the trades and counts, never the raw rows.
 
-import { runFile } from '../engine/index.js?v=88f4f043';
-import { decodeBytes, isHtml } from '../engine/csv.js?v=e5cb6d8a';
+import { runFile } from '../engine/index.js?v=ea6af976';
+import { decodeBytes, isHtml } from '../engine/csv.js?v=c0193c2a';
 import { noiseChecks } from '../engine/noise.js?v=d0f6a787';
 
 // The pages need a few labels and five fields per trade. Copying 50,000 trade objects to the
