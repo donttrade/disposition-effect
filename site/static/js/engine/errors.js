@@ -44,7 +44,7 @@ export const MESSAGES = Object.freeze({
   E_TOO_LARGE: 'The file is too large: the limit is 50 MB and 200,000 rows.',
   E_NO_CLOSED_TRADES: 'No closed trades were found.',
   // The universal importer (mapped columns, several files, pasted tables). The detail never repeats a cell.
-  E_BAD_MAPPING: 'The saved column choices do not fit this file. Match the columns again.',
+  E_BAD_MAPPING: 'These column choices do not fit this file. Match the columns again.',
   E_MIXED_FILES: 'These files have different columns. Add files from one platform at a time.',
   E_PASTE_FORMAT:
     'This paste has no columns we can split. Select the table rows, headings included, copy, and paste again.',

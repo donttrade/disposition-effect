@@ -38,13 +38,16 @@ export function readRows(item, delimiter = null) {
 // ---------------------------------------------------------------- the block list
 // Never offered in a dropdown, never read: a heading that is one of `exact`, or holds one of
 // `contains` (normalised: lowercase, letters and digits only). "Account Display Name", "Trade
-// Account", "acct_no", "Wallet address", "E-mail" are all caught. An on-chain transaction hash is
-// blocked too: it can be looked up to find the wallet.
+// Account", "acct_no", "Wallet address", "Deposit address", "E-mail", "Client name", "IBAN" are all
+// caught. Any hash is blocked (an on-chain transaction hash leads to the wallet), and every address
+// (to, from, deposit, IP). Kraken's txid stays readable: an exchange's own trade ID, not on-chain.
 export const BLOCKED = Object.freeze({
-  contains: ['account', 'acct', 'wallet', 'email', 'phone'],
-  exact: ['name', 'fullname', 'firstname', 'lastname', 'owner', 'user', 'uid', 'userid', 'username', 'address',
-    'clientid', 'traderid', 'comment', 'comments', 'note', 'notes', 'remark', 'remarks', 'hash', 'txhash',
-    'transactionhash'],
+  contains: ['account', 'acct', 'wallet', 'email', 'phone', 'hash', 'address', 'iban', 'customer', 'client', 'passport',
+    'password', 'cardnumber', 'comment', 'remark', 'memo'],
+  exact: ['name', 'fullname', 'firstname', 'lastname', 'surname', 'tradername', 'legalname', 'displayname', 'nickname',
+    'username', 'owner', 'user', 'uid', 'userid', 'traderid', 'note', 'notes', 'mail', 'transactionid', 'swift', 'bic',
+    'ssn', 'sin', 'tin', 'taxid', 'nationalid', 'dob', 'dateofbirth', 'birthdate', 'publickey', 'pubkey', 'signature',
+    'description', 'mobile', 'ip'],
 });
 
 export function isBlocked(norm) {
@@ -173,8 +176,11 @@ export function checkMapping(mp) {
 // {field: index}, with fees as fee0..fee2.
 export function bindMapping(mp, header) {
   const m = {};
+  const taken = new Set();
   const use = (key, field, i) => {
     if (i >= header.length) bad(field);
+    if (taken.has(i)) bad(field); // one column, one field (Tester F8: fees [5, 5, 5])
+    taken.add(i);
     const h = normHeader(header[i]);
     if (!has(mp.headers, String(i)) || mp.headers[String(i)] !== h) bad(field);
     if (isBlocked(h)) bad(field);

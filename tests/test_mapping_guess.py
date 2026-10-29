@@ -200,3 +200,5 @@ def test_headings_email_sends_the_heading_row_only(page):
     assert mail(["Date", "x" * 61], "Webull", 5)["reason"] == "long_cell"
     assert mail(["Heading %d" % (i % 9) for i in range(120)], "Webull", 5)["reason"] == "too_long"
     assert mail(["Date", "Symbol", "Side"], "My broker", 5)["reason"] == "platform"
+    assert mail(["Date", "user@x.com", "Side"], "Webull", 5, True)["reason"] == "data_cell"   # Tester F7
+    assert mail(["Date", "Sym\tbol", "Side"], "Webull", 5, True)["reason"] == "data_cell"

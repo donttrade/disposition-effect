@@ -2285,10 +2285,12 @@ def finish(fmt, verified, res, mode, tz_label):
 # parse_mapped() and the several-files merge.
 
 BLOCKED = {
-    "contains": ["account", "acct", "wallet", "email", "phone"],
-    "exact": ["name", "fullname", "firstname", "lastname", "owner", "user", "uid", "userid", "username", "address",
-              "clientid", "traderid", "comment", "comments", "note", "notes", "remark", "remarks", "hash", "txhash",
-              "transactionhash"],
+    "contains": ["account", "acct", "wallet", "email", "phone", "hash", "address", "iban", "customer", "client",
+                 "passport", "password", "cardnumber", "comment", "remark", "memo"],
+    "exact": ["name", "fullname", "firstname", "lastname", "surname", "tradername", "legalname", "displayname",
+              "nickname", "username", "owner", "user", "uid", "userid", "traderid", "note", "notes", "mail",
+              "transactionid", "swift", "bic", "ssn", "sin", "tin", "taxid", "nationalid", "dob", "dateofbirth",
+              "birthdate", "publickey", "pubkey", "signature", "description", "mobile", "ip"],
 }
 
 
@@ -2451,10 +2453,14 @@ def check_mapping(mp):
 
 def bind_mapping(mp, header):
     m = {}
+    taken = set()
 
     def use(key, field, i):
         if i >= len(header):
             _bad(field)
+        if i in taken:
+            _bad(field)
+        taken.add(i)
         h = norm_header(header[i])
         if mp["headers"].get(str(i)) != h:
             _bad(field)
