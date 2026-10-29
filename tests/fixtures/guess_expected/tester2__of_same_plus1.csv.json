@@ -1,0 +1,162 @@
+{
+ "guess": {
+  "badges": {
+   "date": "matched",
+   "price": "matched",
+   "qty": "matched",
+   "side": "matched",
+   "symbol": "matched"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": "ymd",
+   "reason": null,
+   "seen": null,
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": null
+  },
+  "futures_offer": true,
+  "layout": "fills",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 0,
+    "direction": null,
+    "fees": null,
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 4,
+    "qty": 3,
+    "side": 2,
+    "status": null,
+    "symbol": 1,
+    "time": null
+   },
+   "currency": null,
+   "date_format": "ymd",
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "0": "date",
+    "1": "symbol",
+    "2": "side",
+    "3": "qty",
+    "4": "price"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": null,
+   "side_values": {
+    "buy": "buy",
+    "sell": "sell"
+   },
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1,
+   "year_base": null
+  },
+  "questions": [],
+  "side_checks": {},
+  "side_counts": {
+   "buy": 1,
+   "sell": 1
+  },
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": null
+ },
+ "peek": {
+  "blocked": [
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "delimiter": ",",
+  "header_hits": 5,
+  "header_row": 0,
+  "headers": [
+   "Date",
+   "Symbol",
+   "Side",
+   "Qty",
+   "Price"
+  ],
+  "kind": "csv",
+  "labels": [
+   "Date",
+   "Symbol",
+   "Side",
+   "Qty",
+   "Price"
+  ],
+  "n_rows": 2,
+  "options": [
+   {
+    "example": "2026-03-14T09:30:00+01:00",
+    "index": 0,
+    "label": "Date"
+   },
+   {
+    "example": "ES",
+    "index": 1,
+    "label": "Symbol"
+   },
+   {
+    "example": "Buy",
+    "index": 2,
+    "label": "Side"
+   },
+   {
+    "example": "1",
+    "index": 3,
+    "label": "Qty"
+   },
+   {
+    "example": "100",
+    "index": 4,
+    "label": "Price"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     "2026-03-14T09:30:00+01:00",
+     "ES",
+     "Buy",
+     "1",
+     "100"
+    ],
+    "row": 2
+   },
+   {
+    "cells": [
+     "2026-03-14T10:30:00+01:00",
+     "ES",
+     "Sell",
+     "1",
+     "101"
+    ],
+    "row": 3
+   }
+  ],
+  "table": null,
+  "tables": null
+ },
+ "preset": null,
+ "signature": "cf03bf534a12d44f88f47a6c55c4b6a0"
+}

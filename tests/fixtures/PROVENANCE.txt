@@ -143,3 +143,8 @@ Tester round fixtures (tester/, tester_multi/)
   (made by the Tester's gen.py; every row made up, no export copied). tester_multi/<spec>/ holds
   the files of each multi-file spec in order (1.*, 2.*) and its mapping as map.json. They run as
   cases (JS = Python), as pinned guesses, and in tests/test_importer_tester_round.py.
+
+Tester round-2 fixtures (tester2/, tester2_multi/; make_tester_r2.py)
+  The Tester's round-2 files (TESTER-REPORT-IMPORTER-ENGINE-R2-2026-10-30): the f2/ files and the
+  blank-cell pastes copied unchanged, and the variants the Tester built inside v3/v5/v6/v7.mjs
+  rebuilt line for line by make_tester_r2.py. Every row is made up.

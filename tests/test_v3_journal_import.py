@@ -122,7 +122,11 @@ ENGINE_COMMITS_SINCE_MOTION = ("Engine: TradingView Order History parser",
                                "Paste: fixed-width columns", "Rows wider than the heading",
                                "Several files: the overlap key", "runFile goes through the preset flow",
                                "Guess: footers and short rows", "Dates: day level for rows without a time",
-                               "Block list widened")
+                               "Block list widened",
+                               # round 2 (Tester report 30 Oct)
+                               "A refused wide fill leaves out the fills that depend on it",
+                               "Block list: the identifiers left from round 2",
+                               "Guess: summary rows by what they hold")
 
 
 def test_j13_engine_and_file_worker_untouched():

@@ -1,0 +1,273 @@
+{
+ "guess": {
+  "badges": {
+   "date": "matched",
+   "price": "matched",
+   "qty": "matched",
+   "side": "matched",
+   "symbol": "matched",
+   "time": "matched"
+  },
+  "currency_offer": true,
+  "date": {
+   "format": "ymd",
+   "reason": null,
+   "seen": null,
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": null
+  },
+  "futures_offer": false,
+  "layout": "fills",
+  "mapping": {
+   "cols": {
+    "close_price": null,
+    "close_time": null,
+    "currency": null,
+    "date": 0,
+    "direction": null,
+    "fees": null,
+    "open_price": null,
+    "open_time": null,
+    "pnl": null,
+    "price": 5,
+    "qty": 4,
+    "side": 3,
+    "status": null,
+    "symbol": 2,
+    "time": 1
+   },
+   "currency": null,
+   "date_format": "ymd",
+   "delimiter": ",",
+   "futures_sizes": false,
+   "header_row": 0,
+   "headers": {
+    "0": "date",
+    "1": "time",
+    "2": "symbol",
+    "3": "side",
+    "4": "qty",
+    "5": "price"
+   },
+   "keep_partial": false,
+   "layout": "fills",
+   "number_style": null,
+   "preset": null,
+   "section": false,
+   "side_default": null,
+   "side_from": "column",
+   "side_rules": null,
+   "side_values": {
+    "buy": "buy",
+    "sell": "sell"
+   },
+   "source": null,
+   "status_rules": null,
+   "status_values": null,
+   "trim_ragged": false,
+   "tz": null,
+   "v": 1,
+   "year_base": null
+  },
+  "questions": [],
+  "side_checks": {},
+  "side_counts": {
+   "buy": 5,
+   "sell": 5
+  },
+  "side_session_only": false,
+  "status_checks": {},
+  "status_counts": null
+ },
+ "peek": {
+  "blocked": [
+   false,
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "delimiter": ",",
+  "header_hits": 6,
+  "header_row": 0,
+  "headers": [
+   "Date",
+   "Time",
+   "Symbol",
+   "Side",
+   "Qty",
+   "Price"
+  ],
+  "kind": "csv",
+  "labels": [
+   "Date",
+   "Time",
+   "Symbol",
+   "Side",
+   "Qty",
+   "Price"
+  ],
+  "n_rows": 11,
+  "options": [
+   {
+    "example": "2026-03-14",
+    "index": 0,
+    "label": "Date"
+   },
+   {
+    "example": "09:30:00",
+    "index": 1,
+    "label": "Time"
+   },
+   {
+    "example": "EURUSD",
+    "index": 2,
+    "label": "Symbol"
+   },
+   {
+    "example": "Buy",
+    "index": 3,
+    "label": "Side"
+   },
+   {
+    "example": "1",
+    "index": 4,
+    "label": "Qty"
+   },
+   {
+    "example": "1.10",
+    "index": 5,
+    "label": "Price"
+   }
+  ],
+  "rows": [
+   {
+    "cells": [
+     "2026-03-14",
+     "09:30:00",
+     "EURUSD",
+     "Buy",
+     "1",
+     "1.10"
+    ],
+    "row": 2
+   },
+   {
+    "cells": [
+     "2026-03-15",
+     "09:30:01",
+     "EURUSD",
+     "Sell",
+     "2",
+     "1.11"
+    ],
+    "row": 3
+   },
+   {
+    "cells": [
+     "2026-03-16",
+     "09:30:02",
+     "EURUSD",
+     "Buy",
+     "3",
+     "1.12"
+    ],
+    "row": 4
+   },
+   {
+    "cells": [
+     "2026-03-17",
+     "09:30:03",
+     "EURUSD",
+     "Sell",
+     "1",
+     "1.13"
+    ],
+    "row": 5
+   },
+   {
+    "cells": [
+     "2026-03-18",
+     "09:30:04",
+     "EURUSD",
+     "Buy",
+     "2",
+     "1.14"
+    ],
+    "row": 6
+   },
+   {
+    "cells": [
+     "2026-03-19",
+     "09:30:05",
+     "EURUSD",
+     "Sell",
+     "3",
+     "1.15"
+    ],
+    "row": 7
+   },
+   {
+    "cells": [
+     "2026-03-20",
+     "09:30:06",
+     "EURUSD",
+     "Buy",
+     "1",
+     "1.16"
+    ],
+    "row": 8
+   },
+   {
+    "cells": [
+     "2026-03-21",
+     "09:30:07",
+     "EURUSD",
+     "Sell",
+     "2",
+     "1.17"
+    ],
+    "row": 9
+   },
+   {
+    "cells": [
+     "2026-03-22",
+     "09:30:08",
+     "EURUSD",
+     "Buy",
+     "3",
+     "1.18"
+    ],
+    "row": 10
+   },
+   {
+    "cells": [
+     "2026-03-23",
+     "09:30:09",
+     "EURUSD",
+     "Sell",
+     "1",
+     "1.19"
+    ],
+    "row": 11
+   },
+   {
+    "cells": [
+     "Total fills",
+     "20",
+     "",
+     "",
+     "",
+     ""
+    ],
+    "row": 12
+   }
+  ],
+  "table": null,
+  "tables": null
+ },
+ "preset": null,
+ "signature": "dfe1946a260c9a5ac6554d3742dc80bf"
+}

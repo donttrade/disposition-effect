@@ -1,0 +1,9 @@
+Date                 Symbol   Side   Qty   SL      TP      Price   Swap
+2026-03-14 10:00:00  EURUSD   Buy    1                     1.10    -0.5
+2026-03-15 10:00:00  EURUSD   Sell   1                     1.11    -0.5
+2026-03-16 10:00:00  EURUSD   Buy    1                     1.12    -0.5
+2026-03-17 10:00:00  EURUSD   Sell   1                     1.13    -0.5
+2026-03-18 10:00:00  EURUSD   Buy    1                     1.14    -0.5
+2026-03-19 10:00:00  EURUSD   Sell   1                     1.15    -0.5
+2026-03-20 10:00:00  EURUSD   Buy    1                     1.16    -0.5
+2026-03-21 10:00:00  EURUSD   Sell   1                     1.17    -0.5
