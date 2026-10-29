@@ -2,9 +2,10 @@
 // Paid builds only (partials/pay_dialog.html). A click on any buy link (a[data-pay], or a link to
 // /pricing/#last-step) opens the <dialog> on the current page instead of leaving it; without JavaScript, or in a
 // browser without <dialog>, the link works as before. Esc and the close button close it; focus goes back to the
-// link that opened it. "Full details before you pay" copies the #before-you-pay block from /pricing/ on demand
-// (from this page when it is /pricing/, else from a hidden same-origin frame of /pricing/, removed once read), so no page but
-// /pricing/ carries the seller's address in its HTML and no page needs connect-src. Stores and sends nothing.
+// link that opened it. "Full details before you pay" copies the #before-you-pay block on demand (from this page when
+// it has one, as /pricing/ does, else from a hidden same-origin frame of /before-you-pay/, removed once read), so only
+// build.ADDRESS_LINE_PATHS carry the seller's address in their HTML and no page needs connect-src. /before-you-pay/
+// loads no analytics, so opening the details is not counted as a pageview of /pricing/ or any page. Stores and sends nothing.
 (function () {
   'use strict';
   var dlg = document.getElementById('pay-dialog');
@@ -35,7 +36,7 @@
 
   function load() {
     if (loaded) return;
-    var here = location.pathname === '/pricing/' && document.getElementById('before-you-pay');
+    var here = document.getElementById('before-you-pay');   // never the copy: its ids start with pd-
     if (here) { place(here); return; }
     var f = document.createElement('iframe');
     f.setAttribute('aria-hidden', 'true');
@@ -53,7 +54,7 @@
       } catch (e) { /* the link to /pricing/#before-you-pay stays */ }
       f.remove();
     });
-    f.src = '/pricing/';
+    f.src = '/before-you-pay/';
     document.body.append(f);
   }
 

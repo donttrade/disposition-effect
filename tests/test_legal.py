@@ -230,7 +230,8 @@ def test_french_lint_catches_planted_words():
     assert not L.lint_text_fr(L.visible_text(L.strip_disclaimers(html)))
 
 
-@pytest.mark.parametrize("path", ["/fr/conditions/", "/fr/confidentialite/", "/fr/avant-de-payer/", "/terms/", "/privacy/"])
+@pytest.mark.parametrize("path", ["/fr/conditions/", "/fr/confidentialite/", "/fr/avant-de-payer/", "/terms/", "/privacy/",
+                                  "/before-you-pay/"])
 def test_flag_on_legal_pages_axe(browser, paid, path):
     import functools
     import http.server

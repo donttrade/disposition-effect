@@ -860,6 +860,8 @@ def vt_css_problem(out):
 def journal_problem(html, path):
     """D12 / J10: the journal pages load no analytics and keep connect-src and form-action 'none'."""
     import html as _h
+    if path in PAID_DETAILS_PATHS and "cloudflareinsights" in html:
+        return f"{path} loads analytics (the pay dialog's details source never does: it is not a pageview)"
     if path not in JOURNAL_PATHS:
         return None
     if "cloudflareinsights" in html:
@@ -985,6 +987,16 @@ PAGES.append({"template": "pages/pricing.html", "path": "/pricing/", "requires_f
               "title": "Pricing: Published Prices for Firms and Traders",
               "description": "Published prices in USD for prop firms, brokers, trading platforms and traders, the "
                              "same for everyone and fixed in writing before anyone sees data."})
+# /before-you-pay/ (29 Oct): the pay dialog's "Full details before you pay" is copied from this page (static/js/pay.js,
+# a hidden same-origin frame), not from /pricing/, so opening it is not counted as a /pricing/ pageview. No analytics
+# (as the journal), noindex, disallowed in robots.txt (PAID_DETAILS_PATHS), on ADDRESS_LINE_PATHS (the block names the
+# seller). The block is partials/before_you_pay.html, the same one /pricing/ shows.
+PAID_DETAILS_PATHS = ["/before-you-pay/"]
+PAGES.append({"template": "pages/before-you-pay.html", "path": "/before-you-pay/", "requires_flag": "paid_report",
+              "noindex": True, "no_analytics": True, "no_ask": True, "scripts": ["/static/js/print.js"],
+              "crumb": "Before you pay", "title": "Before you pay — donttrade",
+              "description": "What you agree to before paying for the donttrade habit report: seller, price, "
+                             "files, restrictions and refunds."})
 
 # Lifted pages (plan steps 28–29): the 20 pages that passed through from docs/ in the old design.
 # checks/lift_pages.py copied each old <main> word for word into site/templates/lifted/<slug>.html
@@ -1097,7 +1109,7 @@ def sample_report():
 
 # Paths that may exist only when paid_report = true.
 PAID_APP_PATHS = ["/welcome/", "/restore/", "/report/"]  # noindex, and disallowed in robots.txt
-PAID_ONLY_PATHS = PAID_APP_PATHS + PAID_ONLY_PATHS_FR
+PAID_ONLY_PATHS = PAID_APP_PATHS + PAID_DETAILS_PATHS + PAID_ONLY_PATHS_FR
 
 
 # The footer's privacy sentences. One wording for template pages (partials/footer.html) and
@@ -1144,7 +1156,9 @@ BUSINESS_REGION = "Ontario, Canada"
 ADDRESS_LINE_PATHS = frozenset({
     # 25 Oct (owner): only where a buyer pays or reads the terms and privacy notice
     "/pricing/", "/terms/", "/privacy/",
-    "/fr/avant-de-payer/", "/fr/conditions/", "/fr/confidentialite/"})
+    "/fr/avant-de-payer/", "/fr/conditions/", "/fr/confidentialite/",
+    # 29 Oct: the pay dialog's details source (PAID_DETAILS_PATHS): the Before-you-pay block, alone
+    "/before-you-pay/"})
 # The short line's link to the seller block: id="seller" in the terms' Contact section (the seller rows
 # whenever show_seller; the full footer line is on that page in any commerce build). French pages exist
 # only with paid_report, so the French link is used only then. verify() checks the target id exists.
@@ -1892,7 +1906,7 @@ def write_sitemap_and_robots(out, cfg, built_pages, flags):
         f.write("\n".join(lines) + "\n")
     robots = ["User-agent: *", "Allow: /"]
     if flags["paid_report"]:
-        robots += [f"Disallow: {p}" for p in PAID_APP_PATHS]
+        robots += [f"Disallow: {p}" for p in PAID_APP_PATHS + PAID_DETAILS_PATHS]
     robots.append(f"Sitemap: {base}/sitemap.xml")
     with open(os.path.join(out, "robots.txt"), "w", encoding="utf-8", newline="\n") as f:
         f.write(PREVIEW_ROBOTS_TXT if preview_name() else "\n".join(robots) + "\n")

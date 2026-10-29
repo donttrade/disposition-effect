@@ -109,7 +109,7 @@ def test_sitemap_and_robots(built_site):
         else:
             assert page["path"] in paths
             assert dict(zip(paths, (d for _, d in locs)))[page["path"]] == page["updated"]
-    for bad in ("/welcome/", "/restore/", "/report/", "/thanks/", "/404.html"):
+    for bad in ("/welcome/", "/restore/", "/report/", "/before-you-pay/", "/thanks/", "/404.html"):
         assert bad not in paths
     robots = (built_site["out"] / "robots.txt").read_text(encoding="utf-8")
     assert robots.startswith("User-agent: *\nAllow: /\n") and robots.rstrip().endswith("Sitemap: https://donttrade.ca/sitemap.xml")

@@ -3,4 +3,5 @@ Allow: /
 Disallow: /welcome/
 Disallow: /restore/
 Disallow: /report/
+Disallow: /before-you-pay/
 Sitemap: https://donttrade.ca/sitemap.xml
