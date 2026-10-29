@@ -27,29 +27,49 @@ export const MAX_VALUES = 30;      // a value list longer than this is kept for 
 export const MAX_VALUE_LEN = 40;
 
 // Normalised headings per field, best first (research §5.3, plus the engine's aliases).
+// English first, then Spanish and German (headings are compared with accents folded: "Símbolo" →
+// "simbolo", "Stück" → "stuck"; foldHeader).
 export const SYNONYMS = Object.freeze({
   datetime: ['datetime', 'dateandtime', 'timestamp', 'exectime', 'executiontime', 'filltime', 'filledtime', 'filledat',
     'updatetime', 'closingtime', 'transactiontime', 'tradetime', 'time', 'date', 'tradedate', 'activitydate', 'rundate',
-    'transactiondate', 'orderdate', 'when'],
-  date: ['date', 'tradedate', 'activitydate', 'rundate', 'transactiondate', 'orderdate'],
-  time: ['time', 'tradetime', 'exectime', 'executiontime', 'filltime'],
+    'transactiondate', 'orderdate', 'when',
+    'fechahora', 'fechayhora', 'fecha', 'fechadeoperacion', 'zeitpunkt', 'datumuhrzeit', 'datumundzeit', 'datum',
+    'handelsdatum', 'ausfuhrungszeit'],
+  date: ['date', 'tradedate', 'activitydate', 'rundate', 'transactiondate', 'orderdate',
+    'fecha', 'fechadeoperacion', 'datum', 'handelsdatum'],
+  time: ['time', 'tradetime', 'exectime', 'executiontime', 'filltime', 'hora', 'uhrzeit', 'zeit'],
   symbol: ['symbol', 'ticker', 'instrument', 'contract', 'contractname', 'coin', 'pair', 'market', 'product', 'asset',
-    'security'],
-  side: ['side', 'buysell', 'bs', 'action', 'transcode', 'direction', 'dir', 'type', 'transactiontype', 'code'],
+    'security', 'simbolo', 'instrumento', 'activo', 'valor', 'wertpapier', 'basiswert'],
+  side: ['side', 'buysell', 'bs', 'action', 'transcode', 'direction', 'dir', 'type', 'transactiontype', 'code',
+    'operacion', 'tipo', 'lado', 'compraventa', 'sentido', 'typ', 'art', 'richtung', 'kaufverkauf', 'seite', 'transaktion'],
   qty: ['quantity', 'qty', 'filledqty', 'qtyfilled', 'filledquantity', 'filledvolume', 'filled', 'size', 'volume', 'vol',
-    'units', 'sz', 'noofshares', 'shares', 'lots', 'contracts', 'closingquantity', 'closingvolume', 'amount'],
+    'units', 'sz', 'noofshares', 'shares', 'lots', 'contracts', 'closingquantity', 'closingvolume', 'amount',
+    'cantidad', 'volumen', 'titulos', 'acciones', 'contratos', 'lotes', 'menge', 'anzahl', 'stuck', 'stueck', 'kontrakte'],
   price: ['price', 'fillprice', 'avgfillprice', 'avgprice', 'averageprice', 'executionprice', 'tradeprice', 'px',
-    'pricepershare', 'priceshare'],
-  fees: ['commission', 'commissions', 'fee', 'fees', 'feeamount', 'feescomm', 'commissionfees', 'charges'],
-  currency: ['currency', 'ccy', 'currencypriceshare'],
-  status: ['status', 'orderstatus', 'state'],
-  open_time: ['opentime', 'openingtime', 'entrytime', 'opened', 'opendate', 'timeopened', 'entrydate', 'open'],
-  close_time: ['closetime', 'closingtime', 'exittime', 'closed', 'closedate', 'timeclosed', 'exitdate', 'close'],
-  direction: ['direction', 'openingdirection', 'longshort', 'side', 'type', 'tradetype', 'position'],
-  open_price: ['openprice', 'entryprice', 'avgentryprice', 'averageentryprice', 'priceopen'],
-  close_price: ['closeprice', 'closingprice', 'exitprice', 'avgexitprice', 'priceclose'],
-  pnl: ['pnl', 'pl', 'profit', 'profitloss', 'realizedpnl', 'netpnl', 'gross', 'net', 'closedpnl', 'result'],
+    'pricepershare', 'priceshare', 'precio', 'preciomedio', 'preciodeejecucion', 'cotizacion', 'kurs', 'preis',
+    'ausfuhrungskurs', 'durchschnittspreis', 'ausfuhrungspreis'],
+  fees: ['commission', 'commissions', 'fee', 'fees', 'feeamount', 'feescomm', 'commissionfees', 'charges',
+    'comision', 'comisiones', 'gastos', 'gebuhr', 'gebuhren', 'provision', 'kommission', 'spesen'],
+  currency: ['currency', 'ccy', 'currencypriceshare', 'divisa', 'moneda', 'wahrung'],
+  status: ['status', 'orderstatus', 'state', 'estado', 'zustand'],
+  open_time: ['opentime', 'openingtime', 'entrytime', 'opened', 'opendate', 'timeopened', 'entrydate', 'open',
+    'fechaapertura', 'fechadeapertura', 'horaapertura', 'apertura', 'eroffnungszeit', 'eroffnung', 'einstiegszeit'],
+  close_time: ['closetime', 'closingtime', 'exittime', 'closed', 'closedate', 'timeclosed', 'exitdate', 'close',
+    'fechacierre', 'fechadecierre', 'horacierre', 'cierre', 'schliesszeit', 'schlusszeit', 'schliessung', 'ausstiegszeit'],
+  direction: ['direction', 'openingdirection', 'longshort', 'side', 'type', 'tradetype', 'position', 'direccion',
+    'tipo', 'sentido', 'richtung', 'typ'],
+  open_price: ['openprice', 'entryprice', 'avgentryprice', 'averageentryprice', 'priceopen', 'precioapertura',
+    'preciodeapertura', 'preciodeentrada', 'eroffnungskurs', 'einstiegskurs', 'einstiegspreis'],
+  close_price: ['closeprice', 'closingprice', 'exitprice', 'avgexitprice', 'priceclose', 'preciocierre',
+    'preciodecierre', 'preciodesalida', 'schlusskurs', 'ausstiegskurs', 'ausstiegspreis'],
+  pnl: ['pnl', 'pl', 'profit', 'profitloss', 'realizedpnl', 'netpnl', 'gross', 'net', 'closedpnl', 'result',
+    'beneficio', 'ganancia', 'resultado', 'gewinn', 'gewinnverlust', 'ergebnis'],
 });
+
+// Headings compared with accents folded, for the synonyms only (the engine's own checks use normHeader).
+export function foldHeader(h) {
+  return normHeader(String(h).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss'));
+}
 
 // The 23 researched platforms, for the "Send us your headings" dropdown (no free text).
 export const PLATFORMS = Object.freeze(['Robinhood', 'thinkorswim / Schwab', 'Webull', 'Match-Trader', 'cTrader',
@@ -59,7 +79,7 @@ export const PLATFORMS = Object.freeze(['Robinhood', 'thinkorswim / Schwab', 'We
 
 const ISO = new Set(ISO_CURRENCIES);
 const RE_TIME_ONLY = /^\d{1,2}:\d{2}(:\d{2})?([.,]\d+)?( ?[AaPp][Mm])?$/;
-const synonymHits = (norm) => Object.values(SYNONYMS).some((list) => list.includes(norm));
+const synonymHits = (h) => Object.values(SYNONYMS).some((list) => list.includes(foldHeader(h)));
 
 // ---------------------------------------------------------------- the heading row
 
@@ -72,7 +92,7 @@ export function findHeaderRow(rows) {
     const cells = rows[i].cells;
     if (cells.every((c) => c === '')) continue;
     seen++;
-    const hits = cells.filter((c) => { const n = normHeader(c); return n !== '' && !isBlocked(n) && synonymHits(n); }).length;
+    const hits = cells.filter((c) => { const n = normHeader(c); return n !== '' && !isBlocked(n) && synonymHits(c); }).length;
     if (hits >= 3) return { index: i, hits };
     if (widest < 0 || cells.length > rows[widest].cells.length) widest = i;
   }
@@ -124,7 +144,7 @@ export function peekRows(src, opts = {}) {
     at = rows.findIndex((r) => r.row === opts.header_row + 1);
   }
   if (at < 0) ({ index: at, hits } = findHeaderRow(rows));
-  else hits = rows[at].cells.filter((c) => { const n = normHeader(c); return !isBlocked(n) && synonymHits(n); }).length;
+  else hits = rows[at].cells.filter((c) => { const n = normHeader(c); return !isBlocked(n) && synonymHits(c); }).length;
   if (at < 0) return { kind: src.kind, delimiter: src.delimiter, header_row: null, header_hits: 0, headers: [], labels: [],
     blocked: [], options: [], rows: [], n_rows: 0, tables: t.tables, table: t.table };
   const header = rows[at].cells;
@@ -153,7 +173,7 @@ const SKIP_WORDS = ['dividend', 'deposit', 'withdrawal', 'interest', 'fee', 'tax
 
 // → {value: 'buy' | 'sell' | 'skip', check: null | 'unknown' | 'options' | 'ask_side'}
 export function guessSide(raw, all = []) {
-  const k = normValue(raw);
+  const k = normValue(raw).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   const words = k.split(/[^a-z]+/).filter(Boolean);
   if (['bto', 'btc'].includes(k)) return { value: 'buy', check: 'options' };
   if (['sto', 'stc'].includes(k)) return { value: 'sell', check: 'options' };
@@ -161,6 +181,9 @@ export function guessSide(raw, all = []) {
   if (k.indexOf('open long') !== -1 || k.indexOf('close short') !== -1) return { value: 'buy', check: null };
   if (k.indexOf('open short') !== -1 || k.indexOf('close long') !== -1) return { value: 'sell', check: null };
   if (SKIP_WORDS.some((w) => words.includes(w) || k === w)) return { value: 'skip', check: null };
+  // Spanish and German: venta / Verkauf before compra / Kauf ("verkauf" holds "kauf").
+  if (/venta|verkauf|vendido/.test(k)) return { value: 'sell', check: null };
+  if (/compra|kauf|comprado/.test(k)) return { value: 'buy', check: null };
   if (/buy|bought|cover/.test(k) || words.includes('long') || k === 'b') return { value: 'buy', check: null };
   if (/sell|sold/.test(k) || words.includes('short') || k === 's') return { value: 'sell', check: null };
   if (k.startsWith('b')) return { value: 'buy', check: 'unknown' };
@@ -203,10 +226,18 @@ function sample(rows, i) {
 
 const isNumberCell = (v) => { const s = numberShape(moneyClean(v)); return s !== 'other'; };
 
+// A Time column that holds durations (a hold time) and not the time of day: hours over 23, or
+// every hour 00 when not every value is 00:00 (Tester F6). It is never joined to the date.
+function looksLikeDuration(vs) {
+  const hours = vs.map((v) => Number(clean(v).split(':')[0]));
+  if (hours.some((h) => h > 23)) return true;
+  return hours.length > 0 && hours.every((h) => h === 0) && !vs.every((v) => /^0?0:00(:00)?([.,]0+)?$/.test(clean(v)));
+}
+
 const CONTENT = {
   datetime: (vs) => vs.length > 0 && vs.every((v) => dateShape(v).kind !== 'other'),
   date: (vs) => vs.length > 0 && vs.every((v) => dateShape(v).kind !== 'other'),
-  time: (vs) => vs.length > 0 && vs.every((v) => RE_TIME_ONLY.test(clean(v))),
+  time: (vs) => vs.length > 0 && vs.every((v) => RE_TIME_ONLY.test(clean(v))) && !looksLikeDuration(vs),
   symbol: (vs) => vs.length > 0 && vs.every((v) => v.length <= 40 && !/^[+-]?[\d.,]+$/.test(v)),
   side: (vs) => {
     const all = [...new Set(vs.map(normValue))];
@@ -269,19 +300,27 @@ function readings(v) {
 
 // peek + all of the file's rows after the heading → the guess.
 export function guessMapping(peek, dataRows, opts = {}) {
-  const norm = peek.headers.map(normHeader);
+  const norm = peek.headers.map(normHeader);   // what the mapping records (the engine checks it)
+  const syn = peek.headers.map(foldHeader);    // what the synonyms are matched with
   const blocked = peek.blocked;
-  const layout = opts.layout || guessLayout(norm);
+  const layout = opts.layout || guessLayout(syn);
   const width = peek.headers.length;
-  const rows = dataRows.filter((r) => !r.cells.every((c) => c === '') && !isNoData(r.cells, width) &&
+  const valueRows = dataRows.filter((r) => !r.cells.every((c) => c === '') && !isNoData(r.cells, width) &&
     !(peek.kind === 'paste' && isRagged(r.cells, width)));
+  // Footers, totals and page lines ("Total fills,20", "Page 1 of 3") are left out of every content
+  // test and question (Tester F5): a row with at most half the median number of filled cells.
+  const filled = (r) => r.cells.filter((c) => c !== '').length;
+  const counts = valueRows.map(filled).sort((a, b) => a - b);
+  const median = counts.length ? counts[Math.floor(counts.length / 2)] : 0;
+  const rows = valueRows.filter((r) => filled(r) * 2 > median);
+  const shortRows = valueRows.filter((r) => filled(r) * 2 <= median);
   const vals = (i) => sample(rows, i);
   const used = new Set();
   const cols = {};
   for (const f of MAP_FIELDS) cols[f] = null;
   const badges = {};
   const take = (field, synonyms, test) => {
-    const p = pick(norm, blocked, used, synonyms, (i) => test(vals(i)));
+    const p = pick(syn, blocked, used, synonyms, (i) => test(vals(i)));
     if (p) { cols[field] = p.index; badges[field] = p.badge; used.add(p.index); }
     return p;
   };
@@ -296,11 +335,11 @@ export function guessMapping(peek, dataRows, opts = {}) {
     take('pnl', SYNONYMS.pnl, CONTENT.pnl);
   } else {
     // A date column plus a time-only column, or one date-and-time column.
-    const d = pick(norm, blocked, used, SYNONYMS.date, (i) => CONTENT.date(vals(i)));
+    const d = pick(syn, blocked, used, SYNONYMS.date, (i) => CONTENT.date(vals(i)));
     let dateDone = false;
     if (d && d.badge === 'matched' && vals(d.index).every((v) => dateShape(v).kind !== 'other' && !/\d:\d{2}/.test(v))) {
       used.add(d.index);
-      const t = pick(norm, blocked, used, SYNONYMS.time, (i) => CONTENT.time(vals(i)));
+      const t = pick(syn, blocked, used, SYNONYMS.time, (i) => CONTENT.time(vals(i)));
       if (t && t.badge === 'matched') {
         cols.date = d.index; badges.date = 'matched'; cols.time = t.index; badges.time = 'matched'; used.add(t.index);
         dateDone = true;
@@ -318,7 +357,7 @@ export function guessMapping(peek, dataRows, opts = {}) {
   const fees = [];
   for (const s of SYNONYMS.fees) {
     for (let i = 0; i < norm.length && fees.length < 3; i++) {
-      if (norm[i] === s && !blocked[i] && !used.has(i) && CONTENT.fees(vals(i))) { fees.push(i); used.add(i); }
+      if (syn[i] === s && !blocked[i] && !used.has(i) && CONTENT.fees(vals(i))) { fees.push(i); used.add(i); }
     }
   }
   if (fees.length) { cols.fees = fees; badges.fees = 'matched'; }
@@ -340,7 +379,11 @@ export function guessMapping(peek, dataRows, opts = {}) {
   let sideCounts = null;
   let sideSessionOnly = false;
   if (sideCol !== null && sideFrom === 'column') {
+    // Short rows add a value only when it reads as a known word (a Dividend row, not "of 3").
     const counts = valueCounts(rows, sideCol);
+    for (const [v, n] of valueCounts(shortRows, sideCol)) {
+      if (counts.has(v)) counts.set(v, counts.get(v) + n); else if (guessSide(v).check === null) counts.set(v, n);
+    }
     const all = [...counts.keys()];
     sideValues = {};
     sideCounts = {};
@@ -357,6 +400,9 @@ export function guessMapping(peek, dataRows, opts = {}) {
   let statusCounts = null;
   if (layout !== 'roundtrips' && cols.status !== null) {
     const counts = valueCounts(rows, cols.status);
+    for (const [v, n] of valueCounts(shortRows, cols.status)) {
+      if (counts.has(v)) counts.set(v, counts.get(v) + n); else if (guessStatus(v).check === null) counts.set(v, n);
+    }
     statusValues = {};
     statusCounts = {};
     for (const [v, n] of counts) {
@@ -374,12 +420,16 @@ export function guessMapping(peek, dataRows, opts = {}) {
     const values = [];
     for (const r of rows) for (const i of dateCols) values.push(i < r.cells.length ? r.cells[i] : '');
     const det = detectDateFormat(values);
+    // The file's own row numbers, never an index or a -1 (Tester F5).
+    const rowOf = (k) => (k >= 0 ? rows[Math.floor(k / dateCols.length)].row : null);
     dateInfo = { format: det.format, reason: det.reason, seen: det.at >= 0 ? short(values[det.at]) : null,
-      seen2: det.at2 >= 0 ? short(values[det.at2]) : null };
+      seen_row: rowOf(det.at), seen2: det.at2 >= 0 ? short(values[det.at2]) : null, seen2_row: rowOf(det.at2) };
     if (det.reason === 'ask') {
-      const ex = values.find((v) => dateShape(v).kind === 'dm');
-      questions.push({ q: 'date_order', example: short(ex), readings: readings(ex) });
-    } else if (det.format === null) questions.push({ q: 'date_order', error: det.reason, rows: [det.at, det.at2] });
+      const k = values.findIndex((v) => dateShape(v).kind === 'dm');
+      questions.push({ q: 'date_order', example: short(values[k]), row: rowOf(k), readings: readings(values[k]) });
+    } else if (det.format === null) {
+      questions.push({ q: 'date_order', error: det.reason, rows: [rowOf(det.at), rowOf(det.at2)].filter((x) => x !== null) });
+    }
   }
   const numIdx = [];
   for (const f of layout === 'roundtrips' ? ['qty', 'open_price', 'close_price', 'pnl'] : ['qty', 'price']) {

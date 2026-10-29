@@ -15,7 +15,9 @@
    "format": "ymd",
    "reason": null,
    "seen": null,
-   "seen2": null
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": null
   },
   "futures_offer": false,
   "layout": "roundtrips",

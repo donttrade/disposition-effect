@@ -12,7 +12,9 @@
    "format": "mdy",
    "reason": "seen",
    "seen": "3/31/2026",
-   "seen2": null
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": 2
   },
   "futures_offer": false,
   "layout": "fills",

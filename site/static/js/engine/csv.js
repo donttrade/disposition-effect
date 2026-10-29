@@ -627,19 +627,23 @@ export function dateShape(raw) {
 // 'empty'. Nothing is ever guessed: 'ask' means the user chooses.
 export function detectDateFormat(values) {
   const kinds = [];
+  const firstAt = {};
   let dmyAt = -1;
   let mdyAt = -1;
   for (let i = 0; i < values.length; i++) {
     if (clean(values[i]) === '') continue;
     const sh = dateShape(values[i]);
-    if (!kinds.includes(sh.kind)) kinds.push(sh.kind);
+    if (!kinds.includes(sh.kind)) { kinds.push(sh.kind); firstAt[sh.kind] = i; }
     if (sh.kind === 'dm') {
       if (sh.a > 12 && dmyAt < 0) dmyAt = i;
       if (sh.b > 12 && mdyAt < 0) mdyAt = i;
     }
   }
   if (kinds.length === 0) return { format: null, reason: 'empty', at: -1, at2: -1 };
-  if (kinds.length > 1 || kinds[0] === 'other') return { format: null, reason: 'mixed', at: -1, at2: -1 };
+  // mixed: at = the first cell that is no date, else the first of the second form.
+  if (kinds.length > 1 || kinds[0] === 'other') {
+    return { format: null, reason: 'mixed', at: kinds.includes('other') ? firstAt.other : firstAt[kinds[1]], at2: -1 };
+  }
   if (kinds[0] !== 'dm') return { format: kinds[0], reason: null, at: -1, at2: -1 };
   if (dmyAt >= 0 && mdyAt >= 0) return { format: null, reason: 'mixed_order', at: dmyAt, at2: mdyAt };
   if (dmyAt >= 0) return { format: 'dmy', reason: 'seen', at: dmyAt, at2: -1 };

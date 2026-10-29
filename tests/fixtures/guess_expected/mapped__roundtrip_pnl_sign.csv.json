@@ -3,7 +3,7 @@
   "badges": {
    "close_price": "choose",
    "close_time": "matched",
-   "direction": "check",
+   "direction": "matched",
    "open_price": "choose",
    "open_time": "matched",
    "pnl": "matched",
@@ -15,7 +15,9 @@
    "format": "ymd",
    "reason": null,
    "seen": null,
-   "seen2": null
+   "seen2": null,
+   "seen2_row": null,
+   "seen_row": null
   },
   "futures_offer": false,
   "layout": "roundtrips",
