@@ -17,7 +17,7 @@ manual_restore = true
 
 [flags]
 paid_report = true        # the $39 report, its pages and the trader Stripe links
-analytics = false          # Cloudflare Web Analytics beacon
+analytics = true          # Cloudflare Web Analytics beacon
 trader_first_home = true  # must equal paid_report (the build fails otherwise)
 pilot_checkout = false     # "Start a Pilot" block + thanks page with the live Stripe Pilot link
 # R-D2 (23 Oct): the hold-gap check is excluded from any free_badges switch-on until Option B passes
@@ -27,7 +27,7 @@ ask_box = false            # hidden until the answer engine passes a real-questi
 journal = false            # the free Trading Journal + P&L Calendar (/journal/, /tools/pnl-calendar/ and their nav row): off until the Tester passes J1-J38 and the owner approves
 
 [analytics]
-cf_beacon_token = ""       # required when analytics = true
+cf_beacon_token = "cdac673936b54f08beb5991aaae13975"       # required when analytics = true
 
 [stripe]
 mode = "live"              # which prices.json link the paid build renders: "test" or "live"
@@ -53,7 +53,7 @@ show_seller_for_pilot = false
 # the price-history row of the launch changes. Empty = the build date, for builds before launch.
 # Set it on push day and keep it: a date after the build date fails the build, and
 # ./site/run.sh bundle refuses an empty one. Change it again with any later legal edit.
-launch_date = "2026-10-25"
+launch_date = "2026-10-29"
 # T0: the day the site moved from GitHub Pages to Cloudflare Pages (the zone became Active, runbook
 # step 83), YYYY-MM-DD. Stated on /privacy/ and /fr/confidentialite/. Required: empty or a date after
 # the build date fails the build. The privacy notice's version is the later of this and launch_date.

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src &#39;self&#39;; script-src &#39;self&#39;; style-src &#39;self&#39;; img-src &#39;self&#39; data:; font-src &#39;self&#39;; connect-src &#39;none&#39;; worker-src &#39;self&#39;; form-action &#39;self&#39; https://api.web3forms.com; base-uri &#39;none&#39;; object-src &#39;none&#39;">
+<meta http-equiv="Content-Security-Policy" content="default-src &#39;self&#39;; script-src &#39;self&#39; https://static.cloudflareinsights.com; style-src &#39;self&#39;; img-src &#39;self&#39; data:; font-src &#39;self&#39;; connect-src &#39;none&#39; https://cloudflareinsights.com; worker-src &#39;self&#39;; form-action &#39;self&#39; https://api.web3forms.com; base-uri &#39;none&#39;; object-src &#39;none&#39;">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#16181C" media="(prefers-color-scheme: dark)">
@@ -27,7 +27,8 @@
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/static/css/site.css?v=08b3fe6b">
 <script src="/static/js/theme.js?v=74363ef7"></script>
-<script src="/static/js/nav.js?v=cd8f3405" defer></script>
+<script src="/static/js/nav.js?v=cd8f3405" defer></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cdac673936b54f08beb5991aaae13975"}'></script>
+
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "name": "Questions", "position": 2}]}]}</script>
 </head>
 <body>
@@ -277,7 +278,7 @@
   <section class="section help-group" aria-labelledby="g-privacy">
     <h2 id="g-privacy">Privacy</h2>
     <details id="u-privacy-privacy-this-site"><summary>This site</summary>
-      <blockquote cite="https://donttrade.ca/privacy/#site"><p>The site is hosted on Cloudflare Pages; before 24 Oct 2026 it was hosted on GitHub Pages. Cloudflare receives visitors’ IP addresses to deliver the pages and protect the site; see Cloudflare’s privacy policy. This site sets no cookies. This site runs no analytics. Your light/dark choice is stored only in your own browser. If you buy the habit report, your access key is stored there too; keep your restore link, because clearing the site’s data removes the key.</p></blockquote>
+      <blockquote cite="https://donttrade.ca/privacy/#site"><p>The site is hosted on Cloudflare Pages; before 24 Oct 2026 it was hosted on GitHub Pages. Cloudflare receives visitors’ IP addresses to deliver the pages and protect the site; see Cloudflare’s privacy policy. This site sets no cookies. Visits are counted with Cloudflare Web Analytics, which sets no cookie and does not follow you from site to site. Your trade file’s contents are never sent; on the free tools the only request the page makes is that page-view count. Your light/dark choice is stored only in your own browser. If you buy the habit report, your access key is stored there too; keep your restore link, because clearing the site’s data removes the key.</p></blockquote>
       <p class="small">From: <a href="/privacy/#site">Privacy, This site</a></p>
     </details>
     <details id="u-privacy-privacy-the-free-tools"><summary>The free tools</summary>
@@ -301,7 +302,7 @@
       <p class="small">From: <a href="/privacy/#client-data">Privacy, Client data</a></p>
     </details>
     <details id="u-privacy-privacy-your-rights"><summary>Your rights</summary>
-      <blockquote cite="https://donttrade.ca/privacy/#rights"><p>You can ask by email to see, correct or delete your information, or for a copy in a common format. We reply within 30 days. You can also complain to the Office of the Privacy Commissioner of Canada, in Quebec to the Commission d’accès à l’information, in the EU to your country’s data protection authority, and in the UK to the Information Commissioner’s Office. If a privacy breach creates a real risk of significant harm to you, we tell you. Version 2026-10-25.</p></blockquote>
+      <blockquote cite="https://donttrade.ca/privacy/#rights"><p>You can ask by email to see, correct or delete your information, or for a copy in a common format. We reply within 30 days. You can also complain to the Office of the Privacy Commissioner of Canada, in Quebec to the Commission d’accès à l’information, in the EU to your country’s data protection authority, and in the UK to the Information Commissioner’s Office. If a privacy breach creates a real risk of significant harm to you, we tell you. Version 2026-10-29.</p></blockquote>
       <p class="small">From: <a href="/privacy/#rights">Privacy, Your rights</a></p>
     </details>
   </section>
@@ -324,7 +325,7 @@
       <p class="small">From: <a href="/tools/drawdown-calculator/#q-how-is-the-length-of-a-drawdown-counted">Drawdown and recovery calculator, Questions</a></p>
     </details>
     <details id="u-tool-tools-drawdown-calculator-is-my-file-uploaded"><summary>Is my file uploaded?</summary>
-      <blockquote cite="https://donttrade.ca/tools/drawdown-calculator/#q-is-my-file-uploaded"><p>No. The analysis runs in your browser tab, and the page’s security policy blocks it from making network requests. You can watch your browser’s Network tab stay empty while it works.</p></blockquote>
+      <blockquote cite="https://donttrade.ca/tools/drawdown-calculator/#q-is-my-file-uploaded"><p>No. The analysis runs in your browser tab, and your file’s contents are never sent. The only request this page makes is an anonymous page-view count.</p></blockquote>
       <p class="small">From: <a href="/tools/drawdown-calculator/#q-is-my-file-uploaded">Drawdown and recovery calculator, Questions</a></p>
     </details>
     <details id="u-tool-tools-drawdown-calculator-is-this-investment-advice"><summary>Is this investment advice?</summary>
@@ -436,7 +437,7 @@
       <p class="small">From: <a href="/tools/trading-heatmap/#q-does-this-tell-me-the-best-time-to-trade">Your trades by hour and weekday, Questions</a></p>
     </details>
     <details id="u-tool-tools-trading-heatmap-is-my-file-uploaded"><summary>Is my file uploaded?</summary>
-      <blockquote cite="https://donttrade.ca/tools/trading-heatmap/#q-is-my-file-uploaded"><p>No. The analysis runs in your browser tab, and the page’s security policy blocks it from making network requests. You can watch your browser’s Network tab stay empty while it works.</p></blockquote>
+      <blockquote cite="https://donttrade.ca/tools/trading-heatmap/#q-is-my-file-uploaded"><p>No. The analysis runs in your browser tab, and your file’s contents are never sent. The only request this page makes is an anonymous page-view count.</p></blockquote>
       <p class="small">From: <a href="/tools/trading-heatmap/#q-is-my-file-uploaded">Your trades by hour and weekday, Questions</a></p>
     </details>
     <details id="u-tool-tools-trading-heatmap-is-this-investment-advice"><summary>Is this investment advice?</summary>
@@ -510,7 +511,7 @@
   <p class="legal" data-business-id="short">donttrade · Ontario, Canada · <a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a> · <a href="/terms/#seller">Business details</a></p>
   <p class="legal">donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.</p>
   <details class="legal legal-more"><summary>No cookies. What this site stores and sends</summary>
-    <p>This site sets no cookies and runs no analytics. It stores your light/dark choice in your own browser and, if you buy the habit report, your access key there too. For that report your browser sends our server only stripped trade numbers. The server does not keep them: of those numbers it keeps only a scrambled fingerprint of each trade row from your first report, to match a re-test to the same history. Your file itself is not uploaded. Card payments are handled by Stripe. Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; their privacy policies apply. <a href="/privacy/">Privacy</a></p>
+    <p>This site sets no cookies. Visits are counted with Cloudflare Web Analytics, which sets no cookie. It stores your light/dark choice in your own browser and, if you buy the habit report, your access key there too. For that report your browser sends our server only stripped trade numbers. The server does not keep them: of those numbers it keeps only a scrambled fingerprint of each trade row from your first report, to match a re-test to the same history. Your file itself is not uploaded. Card payments are handled by Stripe. Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; their privacy policies apply. <a href="/privacy/">Privacy</a></p>
   </details>
   <p class="legal">&copy; 2026 donttrade · <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
 </div></footer>
