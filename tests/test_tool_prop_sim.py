@@ -19,6 +19,7 @@ sys.path.insert(0, os.path.join(HERE, "reference"))
 from a11y import axe_violations, horizontal_overflow  # noqa: E402
 import lint as L  # noqa: E402
 import engine_ref as E  # noqa: E402
+import readiness_ref as R  # noqa: E402
 
 PATH = "/tools/prop-challenge-simulator/"
 DEMO = os.path.join(REPO, "site", "static", "samples", "example-trades.csv")
@@ -143,6 +144,7 @@ def fill(page, values):
 def run_ui(page):
     page.click("#ps-run")
     page.wait_for_selector("#ps-out:not([hidden])", timeout=60000)
+    page.evaluate("document.getElementById('ps-expert').open = true")   # the raw table is in Expert details
     return {k: page.inner_text(f'tr[data-outcome="{k}"] td:nth-child(2)') for k in ("pass", "bust", "timeout")}
 
 
@@ -180,23 +182,36 @@ def test_hand_checks_in_the_page(browser, built_site):
 def test_sample_run_is_repeatable_local_and_clean(browser, built_site):
     ctx, pg, log = open_tool(browser, built_site)
     pg.click("#ps-sample-btn")
+    pg.evaluate("document.getElementById('ps-more').open = true")
     fill(pg, {"#ps-target": "600", "#ps-daily": "250", "#ps-maxloss": "500", "#ps-days": "60", "#ps-mindays": "5"})
+    pg.wait_for_selector("#ps-file-status:text-matches('^Read')")
     log["requests"].clear()
     first = run_ui(pg)
     text1 = pg.inner_text("#ps-out")
     second = run_ui(pg)
     assert first == second and pg.inner_text("#ps-out") == text1
-    py = simulate_py({"mode": "file", "days": demo_days(), "rules": RULES[0], "seed": 20261022, "runs": 10000})
+    # the check runs paired streams (method 2026-10-29.r1); the example's days on the file's own clock
+    py = R.simulate({"mode": "file", "days": demo_days(), "rules": RULES[0], "seed": 20261022, "runs": 10000, "stream": "paired"})
     assert first == {k: f"{py[k]:,}" for k in ("pass", "bust", "timeout")}
+    beacon = ("https://static.cloudflareinsights.com/", "https://cloudflareinsights.com/cdn-cgi/rum")
     for method, url in log["requests"]:
-        assert method == "GET" and url.startswith(built_site["url"] + "/static/"), url  # same-origin static only
+        if url.startswith(beacon):
+            continue   # the live analytics beacon (the counting page's and this page's): no file data
+        assert url.startswith(built_site["url"] + "/"), url
+        path = url[len(built_site["url"]):]
+        # same-origin static files, or a counting page (a finished example run; Expert details opened), path only
+        assert (method == "GET" and path.startswith("/static/")) or path in (
+            "/tools/prop-challenge-simulator/e/ran-sample/", "/tools/prop-challenge-simulator/e/expert/"), url
     assert ctx.cookies() == [] and pg.evaluate("Object.keys(localStorage).length + Object.keys(sessionStorage).length") == 0
     body = pg.inner_text("main")
     assert not re.search(r"\b(NaN|Infinity|undefined|null)\b", body)
     assert L.lint_text(body, PATH) == []
-    assert log["console"] == []
     assert "not a prediction" in body
-    assert pg.is_visible("#ps-teaser") and "Join the waitlist — $39 founding price" in pg.inner_text("#ps-teaser")
+    assert pg.query_selector("#ps-teaser") is None   # the old teaser (a result next to the offer) is gone
+    # 127.0.0.1 only: the beacon's own report is refused by CORS, and the live CSP's connect-src 'none' next to the
+    # beacon host draws a console warning (pre-existing on main)
+    local_only = ("cloudflareinsights.com/cdn-cgi/rum", "Failed to load resource: net::ERR_FAILED")
+    assert [m for m in log["console"] if not any(x in m for x in local_only)] == []
     ctx.close()
 
 
