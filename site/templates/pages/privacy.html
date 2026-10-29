@@ -4,7 +4,7 @@
 <div class="wrap"><div class="prose">
   {% include "partials/crumbs.html" %}
   <h1>Privacy</h1>
-  <p class="notice">Plain-language notice, version {{ legal.privacy_version }}. Where a signed engagement agreement differs, the agreement governs.{% if flags.paid_report %} <a href="/fr/confidentialite/" hreflang="fr" lang="fr">Version française</a>{% endif %}</p>
+  <p class="notice">Plain-language notice, version {{ legal.privacy_version }}. Where a signed agreement differs, the agreement governs.{% if flags.paid_report %} <a href="/fr/confidentialite/" hreflang="fr" lang="fr">Version française</a>{% endif %}</p>
 
   <details class="legal-sec">
     <summary><h2 id="who">Who we are</h2><span class="ls-sum">Who is responsible for your information.</span></summary>
@@ -50,7 +50,7 @@
   {#- Decision 21 Oct ~09:00 (DECISIONS-RESEARCH-2026-10-21 §3), word for word. The server enforces the
       same rule (dt-private PRINTS_KEEP_DAYS, TRACKER_PRINTS_GRACE_DAYS; a parity test there reads this
       sentence). The French page (/fr/confidentialite/) does not have it yet: translation pending. #}
-  <p id="fingerprints">To check that a re-test uses the same trading history as your first result, we keep a scrambled fingerprint of each trade row (a keyed hash: it cannot be turned back into your trades without our secret key, but it is still linked to your purchase). We delete these fingerprints as soon as your included re-test has run, or 75 days after your first result, whichever comes first. If you have an active Habit Tracker, we keep them while it is active and delete them 15 days after it ends.</p>
+  <p id="fingerprints">To check that a re-test uses the same trading history as your first result, we keep a scrambled fingerprint of each trade row (a keyed hash: it cannot be turned back into your trades without our secret key, but it is still linked to your purchase). We delete these fingerprints as soon as your included re-test has run, or 75 days after your first result, whichever comes first.</p>
   <p>The report analyses your trading habits, which may count as profiling. It runs only when you start an analysis with your own file. The results are shown to you only: they are not used for advertising, not compared with other people, and not used to make any decision about you.</p>
   </details>
   {%- endif %}
@@ -79,7 +79,7 @@
     <summary><h2 id="use">What we do with what you send</h2><span class="ls-sum">Used to reply, scope and invoice. Nothing is sold.</span></summary>
   <ul>
     <li>We use it to reply, scope the work and invoice.</li>
-    <li>Enquiries that don’t lead to an engagement are deleted within 12 months.</li>
+    <li>Enquiries that don’t lead to an agreement are deleted within 12 months.</li>
     <li>Engagement and purchase records are kept for as long as Canadian tax law requires (six years).</li>
     {%- if flags.paid_report %}
     <li>Addresses given before launch for the one launch email are used for that email only, then deleted unless the person buys.</li>
@@ -92,7 +92,7 @@
 
   <details class="legal-sec">
     <summary><h2 id="client-data">Client data</h2><span class="ls-sum">For firms we receive only aggregate counts.</span></summary>
-  <p>For firm engagements we never receive account records, only the aggregate counts the script prints.</p>
+  <p>For firms we never receive account records, only the aggregate counts the script prints.</p>
   </details>
 
   <details class="legal-sec">

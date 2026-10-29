@@ -47,9 +47,9 @@ BUYER = ("If you buy the donttrade test: Stripe shows us the name and email addr
          "dates we sent the copy of your agreement or a refund) is kept on our own computer, not on our server. Both are kept for the "
          "same period as purchase records (below).")
 FOOTER_PAID = ("It stores your light/dark choice in your own browser and, if you buy the donttrade test, your access key "
-               "there too. For that report your browser sends our server only stripped trade numbers. The server does "
+               "there too. For that test your browser sends our server only stripped trade numbers. The server does "
                "not keep them: of those numbers it keeps only a scrambled fingerprint of each trade row from your first "
-               "report, to match a re-test to the same history. Your file itself is not uploaded.")
+               "result, to match a re-test to the same history. Your file itself is not uploaded.")
 
 
 def norm(t):
