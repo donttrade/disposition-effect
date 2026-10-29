@@ -1,4 +1,6 @@
 """/start/ chooser (ARCHITECT-V3 §c.6, steps A3-A4): Tester invariants C1-C9.
+29 Oct (owner: one product): two choices, the Pilot and the monthly plan ("plan"); the retired #snapshot,
+#memo and #outcomes (and ?product= of each) land on the plan.
 
 A3 (JS off): the chooser lists prices.json's firm products in order; #<id> shows only that product's
 section (CSS :target), each with a fixed product. A4 (JS on): start-chooser.js moves the hash inside
@@ -39,24 +41,27 @@ def test_c1_chooser_lists_the_firm_products_in_order_with_their_prices(built_sit
     html = _start(built_site)
     choose = html[html.index('class="choice-list"'):html.index("</ul>", html.index('class="choice-list"'))]
     assert re.findall(r'data-choice="([a-z]+)"', choose) == IDS
+    pl, plan = FIRM
+    assert IDS == ["pilot", "plan"]
+    assert f'<span class="cl-name">{pl["name"]}</span> <span class="cl-price">{B.usd(pl["price_usd"])} USD · first month, credited</span>' in choose
+    assert (f'<span class="cl-name">{plan["short_name"]}</span> <span class="cl-price">{B.usd(plan["price_usd"])} per trader account '
+            f'a month, {B.usd(plan["minimum_usd"])} minimum</span>') in choose
     for p in FIRM:
-        assert f'<span class="cl-name">{p["name"]}</span> <span class="cl-price">{B.usd(p["price_usd"])} USD</span>' in choose
-        assert f'{p["turnaround_days"]} business days' in choose
-        assert f'id="{p["id"]}"' in html and f'<h2 id="{p["id"]}-h" tabindex="-1">{p["name"]} — {B.usd(p["price_usd"])} USD</h2>' in html
+        assert f'id="{p["id"]}"' in html and f'<h2 id="{p["id"]}-h" tabindex="-1">' in html
 
 
 def test_c1_changing_a_price_in_prices_json_changes_the_page(tmp_path):
     from test_legal import build
     d = json.loads(json.dumps(PRICES))
     for p in d["products"]:
-        if p["id"] == "memo":
-            p["price_usd"] = 6100
+        if p["id"] == "plan":
+            p["minimum_usd"] = 510
     (tmp_path / "prices.json").write_text(json.dumps(d), encoding="utf-8")
     r, out = build(tmp_path, "s", DT_PRICES_JSON=str(tmp_path / "prices.json"))
     # lint is the guard for "no other number": a literal $6,000 left anywhere would be caught there
     assert r.returncode == 0, r.stderr
     html = (out / "start" / "index.html").read_text(encoding="utf-8")
-    assert "$6,100 USD" in html and "$6,000" not in html
+    assert "$510 minimum" in html and "$500 minimum" not in html
 
 
 def test_c1_no_literal_price_in_the_template():
@@ -90,9 +95,9 @@ def test_c2_no_js_plain_start_and_old_anchors(browser, built_site):
         assert pg.evaluate(SHOWN) == []
     # a choice is a plain link: clicking it with JS off shows that section; "Change" returns to the list
     pg.goto(built_site["url"] + "/start/")
-    pg.click("a[data-choice=snapshot]")
-    assert pg.evaluate(SHOWN) == ["snapshot"]
-    pg.click("#snapshot .choice-back")
+    pg.click("a[data-choice=plan]")
+    assert pg.evaluate(SHOWN) == ["plan"]
+    pg.click("#plan .choice-back")
     assert pg.evaluate(SHOWN) == [] and pg.evaluate(LIST_SHOWN)
     ctx.close()
 
@@ -100,7 +105,7 @@ def test_c2_no_js_plain_start_and_old_anchors(browser, built_site):
 # ------------------------------------------------------------------ C3: each form posts its own fixed product
 @pytest.mark.parametrize("pid", IDS)
 def test_c3_each_form_posts_its_own_product(browser, built_site, pid):
-    other = "pilot" if pid != "pilot" else "memo"
+    other = "pilot" if pid != "pilot" else "plan"
     ctx = browser.new_context(java_script_enabled=False)
     pg = ctx.new_page()
     posted = []
@@ -123,9 +128,9 @@ def test_c3_each_form_posts_its_own_product(browser, built_site, pid):
 def test_c3_with_js_the_url_never_relabels_a_product_form(browser, built_site):
     ctx = browser.new_context()
     pg = ctx.new_page()
-    pg.goto(built_site["url"] + "/start/?product=pilot#memo")
+    pg.goto(built_site["url"] + "/start/?product=pilot#plan")
     pg.wait_for_load_state("networkidle")
-    assert pg.input_value("#sf-memo input[name=product]") == "memo"
+    assert pg.input_value("#sf-plan input[name=product]") == "plan"
     ctx.close()
 
 
@@ -135,7 +140,7 @@ def test_c4_pilot_checkout_puts_the_card_block_in_pilot(tmp_path):
     r, out = _pilot_build(tmp_path, "pc")
     assert r.returncode == 0, r.stderr
     html = (out / "start" / "index.html").read_text(encoding="utf-8")
-    pilot = html[html.index('id="pilot"'):html.index('id="snapshot"')]
+    pilot = html[html.index('id="pilot"'):html.index('id="plan"')]
     assert 'id="pc"' in pilot and 'data-requires-flag="pilot_checkout"' in pilot and 'id="sf-pilot"' not in pilot
     assert "Automatic refund" in pilot
     for pid in IDS[1:]:
@@ -152,7 +157,7 @@ def test_c5_no_finding_no_badge_no_urgency(built_site):
     text = _main_text(html)
     ev = B.evidence()
     assert ev["finding"]["pct"] not in text and "4,659" not in text and "76.1" not in text
-    for p in FIRM:   # the only % on the page: payment terms ("50% on acceptance; …")
+    for p in FIRM:   # the only % on the page: payment terms ("100% on acceptance")
         text = text.replace(p["payment_terms"], "")
     assert "%" not in text, text
     for bad in ("most popular", "popular", "best value", "limited time", "only today", "hurry", "left at this price",
@@ -165,7 +170,7 @@ def test_c5_no_finding_no_badge_no_urgency(built_site):
 def test_start_axe_and_overflow(browser, built_site, scheme, width):
     ctx = browser.new_context(viewport={"width": width, "height": 800}, color_scheme=scheme, bypass_csp=True)
     pg = ctx.new_page()
-    for h in ("", "#pilot", "#outcomes"):
+    for h in ("", "#pilot", "#plan", "#outcomes"):
         pg.goto(built_site["url"] + "/start/" + h)
         pg.wait_for_load_state("networkidle")
         assert horizontal_overflow(pg) == []
@@ -189,11 +194,11 @@ def test_c6_c7_choice_shows_section_moves_focus_and_back_returns(browser, built_
     pg = ctx.new_page()
     pg.goto(built_site["url"] + "/start/")
     pg.wait_for_load_state("networkidle")
-    pg.click("a[data-choice=memo]")
-    pg.wait_for_function("location.hash === '#memo'")
+    pg.click("a[data-choice=plan]")
+    pg.wait_for_function("location.hash === '#plan'")
     pg.wait_for_timeout(400)   # the view transition (280 ms) ends
-    assert pg.evaluate(SHOWN) == ["memo"] and not pg.evaluate(LIST_SHOWN)
-    assert pg.evaluate("document.activeElement.id") == "memo-h"
+    assert pg.evaluate(SHOWN) == ["plan"] and not pg.evaluate(LIST_SHOWN)
+    assert pg.evaluate("document.activeElement.id") == "plan-h"
     if mode == "vt":
         assert pg.evaluate("__vt") == 1
     elif mode == "reduce":
@@ -203,14 +208,14 @@ def test_c6_c7_choice_shows_section_moves_focus_and_back_returns(browser, built_
     pg.wait_for_function("location.hash === ''")
     pg.wait_for_timeout(100)
     assert pg.evaluate(SHOWN) == [] and pg.evaluate(LIST_SHOWN)
-    assert pg.evaluate("document.activeElement.getAttribute('data-choice')") == "memo"
+    assert pg.evaluate("document.activeElement.getAttribute('data-choice')") == "plan"
     # "Change" goes back to the list the same way
-    pg.click("a[data-choice=outcomes]")
-    pg.wait_for_function("location.hash === '#outcomes'")
-    pg.click("#outcomes .choice-back")
+    pg.click("a[data-choice=pilot]")
+    pg.wait_for_function("location.hash === '#pilot'")
+    pg.click("#pilot .choice-back")
     pg.wait_for_function("location.hash === '#firm'")
     pg.wait_for_timeout(400)
-    assert pg.evaluate(SHOWN) == [] and pg.evaluate("document.activeElement.getAttribute('data-choice')") == "outcomes"
+    assert pg.evaluate(SHOWN) == [] and pg.evaluate("document.activeElement.getAttribute('data-choice')") == "pilot"
     ctx.close()
 
 
@@ -237,7 +242,8 @@ def test_c8_vt_css_only_on_motion_pages_and_start(built_site):
 
 
 # ------------------------------------------------------------------ C9: ?product= without a hash
-@pytest.mark.parametrize("q,expect", [("snapshot", ["snapshot"]), ("memo", ["memo"]), ("nope", []), ("PILOT", [])])
+@pytest.mark.parametrize("q,expect", [("plan", ["plan"]), ("snapshot", ["plan"]), ("memo", ["plan"]), ("outcomes", ["plan"]),
+                                      ("nope", []), ("PILOT", [])])
 def test_c9_product_query_without_hash(browser, built_site, q, expect):
     ctx = browser.new_context()
     pg = ctx.new_page()

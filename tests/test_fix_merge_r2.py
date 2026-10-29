@@ -595,10 +595,10 @@ def pilot_site(tmp_path_factory):
 
 # v3: /start/ has no enquiry form any more; each product section has a fixed product (C3), so a URL saying
 # "pilot" cannot turn a Snapshot, Memo or Outcomes request into a Pilot request either
-@pytest.mark.parametrize("path,form,expect", [("/start/?product=pilot#memo", "#sf-memo", "memo"),
+@pytest.mark.parametrize("path,form,expect", [("/start/?product=pilot#memo", "#sf-plan", "plan"),   # 29 Oct: old anchors land on the plan
                                               ("/for-firms/?product=pilot", "#ff", "enquiry"),
-                                              ("/start/?product=PILOT#snapshot", "#sf-snapshot", "snapshot"),
-                                              ("/start/?product=memo#outcomes", "#sf-outcomes", "outcomes")])
+                                              ("/start/?product=PILOT#snapshot", "#sf-plan", "plan"),
+                                              ("/start/?product=pilot#plan", "#sf-plan", "plan")])
 def test_nit9_enquiry_form_refuses_pilot_from_the_url(browser, pilot_site, path, form, expect):
     from urllib.parse import parse_qs
     ctx = browser.new_context()

@@ -86,8 +86,8 @@ def test_flag_off_outputs_have_no_commerce(tmp_path):
 
 @pytest.mark.parametrize("color", ["light", "dark"])
 def test_pricing_traders_only_axe_and_pay_panel(browser, built_site, color):
-    # 25 Oct sweep (owner): /pricing/ is for traders only; firm prices are on /for-firms/, and every old firm
-    # anchor lands on the one line that links there. The pay panel and its disclosure are unchanged.
+    # 29 Oct (owner: one product): /pricing/ shows the two packages; every old firm anchor lands in the Firms card,
+    # which links to the Pilot request on /for-firms/. The pay panel and its disclosure are unchanged.
     ctx = browser.new_context(color_scheme=color, viewport={"width": 375, "height": 900}, bypass_csp=True)
     page = ctx.new_page()
     page.goto(built_site["url"] + "/pricing/")
@@ -105,9 +105,10 @@ def test_pricing_traders_only_axe_and_pay_panel(browser, built_site, color):
     assert page.evaluate("document.getElementById('before-you-pay').compareDocumentPosition(document.querySelector(\"#last-step a[href*='buy.stripe.com']\")) & Node.DOCUMENT_POSITION_FOLLOWING")
     assert horizontal_overflow(page) == []
     assert axe_violations(page) == []
-    for anchor in ("firms", "copy-leader", "claims-test", "platforms", "researchers", "payment"):
-        assert page.locator(f"#firms #{anchor}, p#{anchor}").count() == 1, anchor
-    assert page.get_attribute("#firms a", "href") == "/for-firms/#what-it-costs"
+    for anchor in ("copy-leader", "claims-test", "platforms", "researchers", "payment"):
+        assert page.locator(f"#firms #{anchor}").count() == 1, anchor
+    assert page.get_attribute("#firms a.btn", "href") == "/for-firms/#request"
+    assert page.locator("#firms a[href*='buy.stripe.com']").count() == 0
     page.goto(built_site["url"] + "/")
     assert "See the habits in your trade history." in page.inner_text("h1")
     assert axe_violations(page) == []
