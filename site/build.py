@@ -505,9 +505,9 @@ PAGES += [
                                 "real-or-noise check for each tested habit. One price, re-test included."}},
     {"template": "pages/for-firms.html", "path": "/for-firms/", "requires_flag": None, "updated": "2026-10-21",
      "crumb": "Prop firms & brokers", "og_image": "/assets/og/firms.png", "scripts": [FORM_JS, MOTION_JS],
-     "title": "Disposition-Effect Measurement for Prop Firms and Brokers",
-     "description": "Fixed-price measurement of whether your traders sell winners more readily than losers: a "
-                    "published script, run inside your own systems."},
+     "title": "The donttrade Test for Prop Firms and Brokers",
+     "description": "The donttrade test on your whole book: one habit today, the disposition effect, more being added. "
+                    "A published script, run inside your own systems. Pilot, then monthly."},
 ]
 
 # Forms and the pages around them (step 16). Thank-you pages are noindex and stay out of the sitemap.
@@ -1042,6 +1042,13 @@ PAID_LIFTED_SWAPS = {
     "/code/": [("There is no name on this site; the scripts are what you check instead.",
                 "No author name is published on this site (" + _SELLER_WHERE + "); the scripts are what you check "
                 "instead.")],
+    # 29 Oct (owner): one visible name for /sample-report/, "Example report". In a paid build that page is the
+    # donttrade test's own engine on example data, not the lifted research figure this sentence described.
+    "/research/": [("What the coming trader report looks like, run on one real trader from the same public CC0 panel as "
+                    "the disposition-effect study, chosen by a rule fixed before any individual result was looked at. "
+                    "<a href=\"/sample-report/\">Read the sample report →</a>",
+                    "What the donttrade test’s result looks like, from its own engine, run on example data. "
+                    "<a href=\"/sample-report/\">Read the example report →</a>")],
     # 29 Oct (owner): sample data is labelled with the one word "Example", never "made-up"
     "/tools/disposition-calculator/": [
         ('id="dc-example">Fill a made-up example</button>', 'id="dc-example">Try with example data</button>'),
@@ -1106,9 +1113,9 @@ LIFTED_PATHS = [p["path"] for p in LIFTED]
 PAID_REPLACES_LIFTED = ("/sample-report/",)
 SAMPLE_REPORT_JSON = os.path.join(SITE, "config", "sample-report.report.json")
 SAMPLE_PAGE = {"template": "pages/sample-report.html", "path": "/sample-report/", "requires_flag": None,
-               "modules": ["/static/js/paid/sample.js"], "crumb": "Sample test result", "og_image": "/assets/og/sample-report.png",
-               "title": "Sample test result — donttrade", "sample_report": True,
-               "description": "A sample result of the donttrade test: the test's own engine and page, run on example data. "
+               "modules": ["/static/js/paid/sample.js"], "crumb": "Example report", "og_image": "/assets/og/default.png",
+               "title": "Example report — donttrade", "sample_report": True,
+               "description": "An example report of the donttrade test: the test's own engine and page, run on example data. "
                               "Not advice.", "updated": "2026-10-23"}
 
 
@@ -1779,11 +1786,20 @@ def lift_sections(rel_path):
     return out
 
 
+def _cents(n):
+    """A price in whole cents, or a build failure (29 Oct: the firm plan is $0.50 per trader account)."""
+    c = round(n * 100)
+    if abs(n * 100 - c) > 1e-6:
+        die(f"price {n} is not a whole number of cents")
+    return c
+
+
 def usd(n):
-    """$745, $2,500 — prices are whole dollars on this site."""
-    if n != int(n):
-        die(f"price {n} is not a whole number of dollars")
-    return "${:,}".format(int(n))
+    """$745, $2,500 — whole dollars without cents; $0.50 — a price with cents keeps both digits."""
+    c = _cents(n)
+    if c % 100 == 0:
+        return "${:,}".format(c // 100)
+    return "${:,}.{:02d}".format(c // 100, c % 100)
 
 
 def isodate(human):
@@ -1793,10 +1809,9 @@ def isodate(human):
 
 
 def usd_fr(n):
-    """39,00 $ US — Québec style (FRENCH-LEGAL: amounts written « 79,00 $ US »)."""
-    if n != int(n):
-        die(f"price {n} is not a whole number of dollars")
-    return "{:,}".format(int(n)).replace(",", "\u00a0") + ",00\u00a0$\u00a0US"
+    """39,00 $ US — Québec style (FRENCH-LEGAL: amounts written « 79,00 $ US »); 0,50 $ US."""
+    c = _cents(n)
+    return "{:,}".format(c // 100).replace(",", "\u00a0") + ",{:02d}\u00a0$\u00a0US".format(c % 100)
 
 
 BEACON_CONNECT = "https://cloudflareinsights.com"   # the analytics beacon's one connect-src host

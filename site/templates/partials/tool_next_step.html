@@ -8,9 +8,9 @@
 <aside class="notice notice-gap next-step" aria-labelledby="next-step-h" data-requires-flag="paid_report">
   <h2 id="next-step-h">The donttrade test reads {% if source == "typed" %}your trade file{% else %}this same file{% endif %}</h2>
   <p>It looks for up to five habits in your own trades, testing up to two of them against chance. {{ r.price_usd|usd }}, one re-test included, refund within {{ prices.rules.trader_refund_days }} days.</p>
-  <p class="btn-row"><a class="btn" href="/pricing/#last-step">Take the test — {{ r.price_usd|usd }}</a> <a href="/sample-report/">See a sample result</a></p>
+  <p class="btn-row"><a class="btn" href="/pricing/#last-step">Take the test — {{ r.price_usd|usd }}</a> <a href="/sample-report/">See the example report</a></p>
   {%- if firm_line %}
-  <p class="small">Run a prop firm? Measure your traders’ plan gap: <a href="/for-firms/">{{ pl.name }}, {{ pl.price_usd|usd }}</a>.</p>
+  <p class="small">Run a prop firm? Test your whole book: <a href="/for-firms/">{{ pl.name }}, {{ pl.price_usd|usd }}</a>.</p>
   {%- endif %}
 </aside>
 {%- endif %}

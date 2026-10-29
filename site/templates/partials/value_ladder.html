@@ -45,12 +45,15 @@
       {%- endif %}
     </div>
     <div class="ladder-row">
+      {#- 29 Oct (owner: one product): the firm package of the same product. Firms are told it measures one habit
+          today, with more being added (the firm script measures the disposition effect only). -#}
+      {%- set plan = products["plan"] %}
       {%- if show_firm_price %}
-      <h3>For firms: a {{ pilot.name }} at <span class="num">{{ pilot.price_usd|usd }}</span> USD, fixed and published</h3>
+      <h3>For firms: the test on your whole book, from <span class="num">{{ plan.minimum_usd|usd }}</span> a month</h3>
       {%- else %}
-      <h3>For firms: a {{ pilot.name }} at a fixed, published price</h3>
+      <h3>For firms: the test on your whole book</h3>
       {%- endif %}
-      <p>A written scope, then one measure on your traders’ records, run by your own staff on your own systems, and a one-page memo. Each engagement is scoped and written up by a person, so it is priced per engagement, the same for every firm.{% if show_firm_price %} Firms also: Snapshot, Memo, Outcomes pack.{% endif %}</p>
+      <p>One habit today, the disposition effect, with more being added. Your own staff run a public script on your own systems, and you get the figure and a one-page memo each month.{% if show_firm_price %} {{ plan.price_usd|usd }} per trader account a month; the first month is the {{ pilot.price_usd|usd }} {{ pilot.name }}, credited.{% endif %}</p>
       <p><a href="{% if flags.paid_report %}/for-firms/#what-it-costs{% else %}/pricing/#firms{% endif %}">{% if show_firm_price %}All firm prices{% else %}See Pricing{% endif %}</a></p>
     </div>
   </div>
