@@ -74,6 +74,7 @@
         <span class="hint" id="ps-preset-hint">A firm’s rules as published, or your own. Every box stays editable.</span>
         <select id="ps-preset" aria-describedby="ps-preset-hint ps-preset-source">
           <option value="">Custom rules (type your own)</option>
+          <option value="example">Example rules</option>
           {%- for firm in presets.firms %}
           <optgroup label="{{ firm }}">
             {%- for p in presets.presets if p.firm == firm %}<option value="{{ p.id }}">{{ p.program }}</option>{% endfor %}
