@@ -22,6 +22,7 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(REPO, "checks"))
 from lint import lint_text  # noqa: E402
 from test_legal import prices_with_test_link, private_with  # noqa: E402
+from test_paid_flow import pick  # noqa: E402
 
 CONTACT = tomllib.load(open(os.path.join(REPO, "site/config/site.toml"), "rb"))["site"]["contact_email"]
 EXPECTED = ("This report could not be shown, so nothing from it is displayed. "
@@ -122,7 +123,7 @@ def test_a_refused_report_shows_exactly_the_error_line_and_nothing_from_the_repo
     page.route(API + "/analyse", lambda route: route.fulfill(status=200, content_type="application/json",
                                                              body=json.dumps({"report": rep, "uses_left": 1})))
     page.goto(site["origin"] + "/report/#t=" + fake_token())
-    page.set_input_files("#rp-file", os.path.join(HERE, "fixtures", "e2e-upload.csv"))
+    pick(page, os.path.join(HERE, "fixtures", "e2e-upload.csv"))   # 90 trades: through the S3 notice
     page.wait_for_function("() => { const s = document.getElementById('rp-status'); return s && !s.hidden && s.classList.contains('notice-error'); }",
                            timeout=30000)
     status = page.inner_text("#rp-status").strip()

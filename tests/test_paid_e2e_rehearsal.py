@@ -99,7 +99,8 @@ def buyer(browser, stack):
 
 
 def upload(page, path, wait="#rp-status"):
-    page.set_input_files("#rp-file", path)
+    from test_paid_flow import pick
+    pick(page, path)
 
 
 def wait_status(page, needle, timeout=60000):

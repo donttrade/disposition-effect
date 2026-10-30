@@ -10,7 +10,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(HERE), "checks"))
 from a11y import axe_violations, horizontal_overflow  # noqa: E402
 from lint import lint_text  # noqa: E402
-from test_paid_flow import PRIVATE, new_session, stack  # noqa: E402,F401  (module-scoped stack fixture)
+from test_paid_flow import PRIVATE, new_session, pick, stack  # noqa: E402,F401  (module-scoped stack fixture)
 
 pytestmark = pytest.mark.skipif(not os.path.isdir(PRIVATE), reason="dt-private (server) not present")
 FIX = os.path.join(HERE, "fixtures")
@@ -32,7 +32,7 @@ def open_report(browser, stack, sid, color="light", width=1280, downloads=False)
 def run(page, rel):
     sent = []
     page.on("request", lambda r: sent.append(r) if r.url.endswith("/analyse") else None)
-    page.set_input_files("#rp-file", os.path.join(FIX, rel))
+    pick(page, os.path.join(FIX, rel))
     page.wait_for_selector("#focus", timeout=60000)
     return json.loads(sent[-1].post_data)
 
