@@ -91,9 +91,10 @@ def test_h6_ladder_firm_price_on_pricing_only(built_site):
     pilot = next(p for p in PRICES["products"] if p["id"] == "pilot")
     pricing = (built_site["out"] / "pricing" / "index.html").read_text(encoding="utf-8")
     lad = re.search(r'(?s)<section class="section ladder".*?</section>', pricing).group(0)
-    assert f"{B.usd(pilot['price_usd'])}</span> USD" in lad and "Firms also: Snapshot, Memo, Outcomes pack." in lad
+    plan = next(p for p in PRICES["products"] if p["id"] == "plan")   # 29 Oct (one product)
+    assert f"{B.usd(plan['minimum_usd'])}</span> a month" in lad and "Snapshot" not in lad
     home = re.search(r'(?s)<section class="section ladder".*?</section>', _home(built_site)).group(0)
-    assert B.usd(pilot["price_usd"]) not in home and "fixed, published price" in home
+    assert B.usd(pilot["price_usd"]) not in home and "For firms: the test on your whole book" in home
 
 
 def test_h5_free_forever_lint_rule():

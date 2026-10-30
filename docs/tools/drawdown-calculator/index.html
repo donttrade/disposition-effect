@@ -25,11 +25,11 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=322a587c">
+<link rel="stylesheet" href="/static/css/site.css?v=1c6a4d3d">
 <script src="/static/js/theme.js?v=7e47c1a9"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
 <script src="/static/js/pay.js?v=7eb376c2" defer></script>
-<script src="/static/js/tools/drawdown.js?v=8113f7a6" type="module"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cdac673936b54f08beb5991aaae13975"}'></script>
+<script src="/static/js/tools/drawdown.js?v=8bb17eb0" type="module"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cdac673936b54f08beb5991aaae13975"}'></script>
 
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "item": "https://donttrade.ca/tools/", "name": "Free tools", "position": 2}, {"@type": "ListItem", "name": "Drawdown and recovery calculator", "position": 3}]}, {"@id": "https://donttrade.ca/tools/drawdown-calculator/#app", "@type": "WebApplication", "applicationCategory": "FinanceApplication", "browserRequirements": "Requires JavaScript", "description": "How much gain recovers a drawdown, plus your own largest drawdown, longest drawdown and recovery times from your trade file. Free, in your browser.", "isAccessibleForFree": true, "name": "Drawdown and recovery calculator", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "operatingSystem": "Any (runs in a web browser)", "publisher": {"@id": "https://donttrade.ca/#org"}, "url": "https://donttrade.ca/tools/drawdown-calculator/"}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Divide the drawdown by one minus the drawdown. A 10 percent drawdown takes about an 11.1 percent gain to recover, 20 percent takes 25 percent, 30 percent takes about 42.9 percent, and 50 percent takes 100 percent."}, "name": "How much gain recovers a drawdown?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Track the running high of the account’s closed balance after each trade, then measure the largest fall from any high to a later low. The tool reports it in money and, with a starting balance, as a percentage of the high."}, "name": "How is maximum drawdown calculated?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Platforms often include open-trade equity, which moves between trades. A trade file holds closed trades, so this page measures closed-balance drawdown, which can be smaller."}, "name": "Why does my platform show a different maximum drawdown?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "In trades, from the trade after the high up to and including the trade that brought equity back to the high. In calendar days, from the close of the trade that set the high to the close of the trade that recovered it. A drawdown that has not recovered is counted to the last trade in the file."}, "name": "How is the length of a drawdown counted?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. The analysis runs in your browser tab. Only anonymous counts of visits and finished steps are sent; your file is never sent."}, "name": "Is my file uploaded?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. It measures your own past trades and does not recommend any security, trade, size or exit. Past results do not predict future results."}, "name": "Is this investment advice?"}]}]}</script>
 </head>
@@ -39,7 +39,7 @@
 <header class="site-header"><div class="wrap">
   <a class="brand" href="/">donttrade</a>
   <nav class="site-nav" aria-label="Main"><ul class="nav-row">
-    <li><a href="/sample-report/">Sample report</a></li>
+    <li><a href="/sample-report/">Example report</a></li>
     <li><a href="/tools/" aria-current="true">Free tools</a></li>
     <li><a href="/pricing/">Pricing</a></li>
     <li><a href="/for-firms/">For firms</a></li>
@@ -49,15 +49,15 @@
     <div class="nav-panel">
       <ul class="nav-links">
         <li><a href="/">Home</a></li>
-        <li><a href="/sample-report/">Sample report</a></li>
+        <li><a href="/sample-report/">Example report</a></li>
         <li><a href="/tools/" aria-current="true">Free tools</a></li>
         <li><a href="/pricing/">Pricing</a></li>
         <li><a href="/for-firms/">For firms</a></li>
       </ul>
-      <p class="nav-cta"><a class="btn " href="/pricing/#last-step" data-pay>Get report — $39</a></p>
+      <p class="nav-cta"><a class="btn " href="/pricing/#last-step" data-pay>Take the test — $39</a></p>
     </div>
   </details></nav>
-  <a class="btn hdr-cta" href="/pricing/#last-step" data-pay>Get report — $39</a>
+  <a class="btn hdr-cta" href="/pricing/#last-step" data-pay>Take the test — $39</a>
   <button class="theme-toggle" type="button" data-theme-toggle hidden><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg><span class="tt-label">Dark mode</span></button>
 </div></header>
 
@@ -137,7 +137,7 @@
           <input id="dd-file" type="file" accept=".csv,.htm,.html,.txt">
         </div>
         <p class="btn-row"><span class="muted">No file to hand?</span> <button class="btn btn-secondary" id="dd-sample-btn" type="button">Try with example data</button></p>
-        <p class="small muted">Example data: 160 trades on three symbols. The <a href="/tools/trade-stats/#template">CSV template</a> is described on the trade-stats page.</p>
+        <p class="small muted">Example data: 160 trades on three symbols. The <a href="/tools/trade-stats/#template">CSV template</a> is explained on the trade-stats page.</p>
       </div>
       <div class="field">
         <label for="dd-balance">Starting balance (optional)</label>
@@ -153,9 +153,9 @@
 
   <div id="dd-out" class="tool-out" hidden></div>
 <aside class="notice notice-gap next-step" aria-labelledby="next-step-h" data-requires-flag="paid_report">
-  <h2 id="next-step-h">The habit report reads your trade file</h2>
-  <p>It looks for up to five habits in your own trades, testing up to two of them against chance. $39, one re-test included, refund within 14 days.</p>
-  <p class="btn-row"><a class="btn" href="/pricing/#last-step">Get the habit report — $39</a> <a href="/sample-report/">See a sample report</a></p>
+  <h2 id="next-step-h">Is this habit real, or luck?</h2>
+  <p>The donttrade test checks your own trades against chance. $39, re-test included.</p>
+  <p class="btn-row"><a class="btn" href="/pricing/#last-step">Take the test — $39</a> <a href="/sample-report/">See the example report</a></p>
 </aside>
 
 
@@ -512,7 +512,7 @@ Date,Time,Symbol,Side,Quantity,Price,Currency,Fees
 
 </main>
 <footer class="site-footer"><div class="wrap"><div class="cols">
-    <nav aria-label="Traders"><h2>Traders</h2><ul><li><a href="/sample-report/">Sample report</a></li><li><a href="/pricing/">Pricing</a></li><li><a href="/tools/">Free tools</a></li><li><a href="/for-traders/">For traders</a></li>
+    <nav aria-label="Traders"><h2>Traders</h2><ul><li><a href="/sample-report/">Example report</a></li><li><a href="/pricing/">Pricing</a></li><li><a href="/tools/">Free tools</a></li><li><a href="/for-traders/">For traders</a></li>
     </ul></nav>
     <nav aria-label="Firms"><h2>Firms</h2><ul><li><a href="/for-firms/">For firms</a></li><li><a href="/for-platforms/">Journals &amp; platforms</a></li><li><a href="/sample-memo/">Sample memo</a></li>
     </ul></nav>
@@ -526,7 +526,7 @@ Date,Time,Symbol,Side,Quantity,Price,Currency,Fees
   <p class="legal" data-business-id="short">donttrade · Ontario, Canada · <a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a> · <a href="/terms/#seller">Business details</a></p>
   <p class="legal">donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.</p>
   <details class="legal legal-more"><summary>No cookies. What this site stores and sends</summary>
-    <p>This site sets no cookies. Visits are counted with Cloudflare Web Analytics, which sets no cookie. It stores your light/dark choice in your own browser and, if you buy the habit report, your access key there too. For that report your browser sends our server only stripped trade numbers. The server does not keep them: of those numbers it keeps only a scrambled fingerprint of each trade row from your first report, to match a re-test to the same history. Your file itself is not uploaded. Card payments are handled by Stripe. Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; their privacy policies apply. <a href="/privacy/">Privacy</a></p>
+    <p>This site sets no cookies. Visits are counted with Cloudflare Web Analytics, which sets no cookie. It stores your light/dark choice in your own browser and, if you buy the donttrade test, your access key there too. For that test your browser sends our server only stripped trade numbers. The server does not keep them: of those numbers it keeps only a scrambled fingerprint of each trade row from your first result, to match a re-test to the same history. Your file itself is not uploaded. Card payments are handled by Stripe. Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; their privacy policies apply. <a href="/privacy/">Privacy</a></p>
   </details>
   <p class="legal">&copy; 2026 donttrade · <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
 </div></footer>
@@ -535,12 +535,12 @@ Date,Time,Symbol,Side,Quantity,Price,Currency,Fees
 <dialog class="pay-dialog" id="pay-dialog" aria-labelledby="pd-h" data-pay-dialog>
   <div class="pd-inner">
     <div class="pd-top">
-      <h2 id="pd-h">Get the habit report</h2>
+      <h2 id="pd-h">Get the donttrade test</h2>
       <button class="pd-close no-print" type="button" data-pay-close aria-label="Close"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg></button>
     </div>
     <ul class="pay-facts">
   <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M3 10.5 9.5 4H16v6.5L9.5 17z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="13" cy="7" r="1.3" fill="currentColor"/></svg><span>US$39 once</span></li>
-  <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M11 2 4 11.5h5L8 18l7-9.5h-5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span>Report right after payment</span></li>
+  <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M11 2 4 11.5h5L8 18l7-9.5h-5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span>Result right after payment</span></li>
   <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M4.5 8.5A6 6 0 1 1 4 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 4.5v4.5h4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Full refund within 14 days</span></li>
 </ul>
     <details class="pay-more" data-pay-more>

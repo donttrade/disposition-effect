@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Harvest check: every $ amount on today's live /pricing/ page must come from prices.json.
 
-An amount passes if it is a product's price_usd, or is computed
-from a rule in the file (the re-check is percent_of_engagement % of a firm price).
+An amount passes if it is a product's price_usd or minimum_usd (the firm plan's monthly minimum),
+or is computed from a rule in the file (an older file's re-check: percent_of_engagement % of a firm price).
 Run against docs/pricing/index.html (the live page) or any built page.
 
 Since step 30 (b613c8b) the live page is the v2 build, so the retired amounts ($49, $99, on the
@@ -22,10 +22,14 @@ def allowed_amounts(prices, include_retired=False):
     out.add(0)   # the free tier's "$0" (v3 value ladder): no price, so nothing in prices.json can drift from it
     for p in prices["products"]:
         out.add(p["price_usd"])
-    pct = prices["rules"]["recheck"]["percent_of_engagement"]
-    for p in prices["products"]:
-        if p["audience"] == "firm":
-            out.add(p["price_usd"] * pct / 100)
+        if p.get("minimum_usd") is not None:
+            out.add(p["minimum_usd"])   # 29 Oct: the firm plan's monthly minimum
+    recheck = prices["rules"].get("recheck")
+    if recheck:   # retired 29 Oct (one product); kept for an older prices.json
+        pct = recheck["percent_of_engagement"]
+        for p in prices["products"]:
+            if p["audience"] == "firm":
+                out.add(p["price_usd"] * pct / 100)
     return out
 
 

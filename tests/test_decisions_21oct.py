@@ -317,11 +317,10 @@ def test_lint_waive_rule_has_no_false_positive(ok):
 
 # ------------------------------------------------------------------ 3. re-test fingerprint retention (privacy page)
 PRIVACY_SENTENCE = (
-    "To check that a re-test uses the same trading history as your first report, we keep a scrambled fingerprint of "
+    "To check that a re-test uses the same trading history as your first result, we keep a scrambled fingerprint of "
     "each trade row (a keyed hash: it cannot be turned back into your trades without our secret key, but it is still "
     "linked to your purchase). We delete these fingerprints as soon as your included re-test has run, or 75 days after "
-    "your first report, whichever comes first. If you have an active Habit Tracker, we keep them while it is active and "
-    "delete them 15 days after it ends.")
+    "your first result, whichever comes first.")   # 29 Oct (one product): the Tracker sentence is gone
 
 
 @pytest.mark.parametrize("combo", ["paid", "both"])
@@ -348,9 +347,9 @@ def test_french_privacy_section_is_marked_translation_pending(builds):
 # ------------------------------------------------------------------ ruling #2: the key's end
 # The server (dt-private, KEY_AFTER_FIRST_REPORT_DAYS) moves the key's end at the first report to
 # max(purchase + 90 days, first report + 75 days). Every page that states how long access lasts says so.
-KEY_EN_TERMS = "Your key is valid for 90 days after purchase, or until 75 days after your first report if that is later."
-KEY_EN_PRICING = "Access lasts 90 days after purchase, or until 75 days after your first report if that is later."
-KEY_FR = ("Votre clé d’accès est valide 90 jours après l’achat, ou jusqu’à 75 jours après votre premier rapport "
+KEY_EN_TERMS = "Your key is valid for 90 days after purchase, or until 75 days after your first result if that is later."
+KEY_EN_PRICING = "Access lasts 90 days after purchase, or until 75 days after your first result if that is later."
+KEY_FR = ("Votre clé d’accès est valide 90 jours après l’achat, ou jusqu’à 75 jours après votre premier résultat "
           "si cette date est plus tardive.")
 
 

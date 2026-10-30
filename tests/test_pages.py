@@ -201,7 +201,7 @@ def test_old_ids_kept(built_site, path):
 
 # ------------------------------------------------------------------ step 14 (+16): forms
 # v3 (ARCHITECT-V3 §c.6): /start/ has one form per firm product, each in its own section (#pilot, #memo, …)
-FORM_PAGES = {"/for-traders/": "#wl", "/for-firms/": "#ff", "/start/#pilot": "#sf-pilot", "/start/#memo": "#sf-memo",
+FORM_PAGES = {"/for-traders/": "#wl", "/for-firms/": "#ff", "/start/#pilot": "#sf-pilot", "/start/#plan": "#sf-plan",
               "/start/#platform": "#sp",
               "/start/#trader": "#wl", "/for-platforms/": "#fp"}
 FIRM_KEY = "f8fdba04-71bb-4856-b700-01ac6796c252"
@@ -245,7 +245,7 @@ def test_form_posts_with_javascript_off(browser, built_site, path):
     assert body["access_key"] == (TRADER_KEY if form == "#wl" else FIRM_KEY)
     assert body["page"] == base and "botcheck" not in body  # unticked honeypot is not sent
     assert body["redirect"].startswith("https://donttrade.ca/") and body["redirect"].endswith("/thanks/")
-    assert body["product"] in ("waitlist", "pilot", "platform", "memo") and body["ref"] == ""  # JS off: defaults
+    assert body["product"] in ("waitlist", "pilot", "platform", "plan") and body["ref"] == ""  # JS off: defaults
 
 
 @pytest.mark.parametrize("path", sorted(FORM_PAGES))
@@ -259,9 +259,9 @@ def test_form_ref_capture_and_fields(browser, built_site, path):
     hash_ = "#" + frag if frag else ""
     pg.goto(built_site["url"] + base + "?ref=report&product=copy-leader" + hash_)
     assert pg.input_value(form + " input[name=ref]") == "report"
-    if form in ("#ff", "#sf-pilot", "#sf-memo", "#sp", "#fp"):
+    if form in ("#ff", "#sf-pilot", "#sf-plan", "#sp", "#fp"):
         # the /for-firms/ form takes ?product=; the partner form (Tester D1) and the /start/ product forms (v3 C3) are fixed
-        fixed = {"#sp": "platform", "#fp": "platform", "#sf-pilot": "pilot", "#sf-memo": "memo"}
+        fixed = {"#sp": "platform", "#fp": "platform", "#sf-pilot": "pilot", "#sf-plan": "plan"}
         assert pg.input_value(form + " input[name=product]") == fixed.get(form, "copy-leader")
         f = form.lstrip("#")
         assert pg.get_attribute(f"#{f}-email", "autocomplete") == "email"
@@ -305,11 +305,9 @@ def test_pricing_prices_match_prices_json(built_site):
     import json
     prices = json.load(open(os.path.join(REPO, "site", "config", "prices.json")))
     html = html_of(built_site, "/pricing/")
-    rows = re.findall(r'<tr><th scope="row">([^<]+)</th>.*?<td class="num">([^<]+)</td></tr>', html, re.S)
-    by_name = {p["name"]: B.usd(p["price_usd"]) for p in prices["products"] if p["audience"] == "firm"}
-    assert {n: v for n, v in rows if n in by_name} == by_name
+    plan = next(p for p in prices["products"] if p["id"] == "plan")   # 29 Oct (one product): the firm card
     text = visible(html)
-    assert "$1,500 for a Memo" in text  # 25% of the Memo price, computed from the rule
+    assert f"{B.usd(plan['price_usd'])} per trader account a month" in text and f"{B.usd(plan['minimum_usd'])} monthly minimum" in text
     assert "$39 founding price for the first 100 buyers" in text
     assert 'role="tablist"' not in html and "Before you pay" not in text
 

@@ -13,14 +13,14 @@
     <p class="rc-h">{{ f.name }}</p>
     {%- set lab = {"distinguishable": ("pill pill-hit", "Distinguishable from noise", "unlikely to be luck"),
                  "not_distinguishable": ("pill", "Not distinguishable from noise", "could be luck")} %}
-    {%- set pl = lab.get(f.verdict, ("pill pill-muted", "Described, not tested", "")) %}
+    {%- set pl = lab.get(f.verdict, ("pill pill-muted", "Luck check coming", "")) %}
     <p class="rc-pill"><span class="{{ pl[0] }}">{{ pl[1] }}</span>{% if pl[2] %} <span class="rc-gloss">{{ pl[2] }}</span>{% endif %}</p>
     <svg class="rc-bars" viewBox="0 0 300 64" aria-hidden="true" focusable="false">
       <text class="rc-ax" x="0" y="16">After a loss</text><rect class="rc-bar" x="110" y="5" width="{{ (a / top * 188) | round(1) }}" height="16" rx="3"/>
       <text class="rc-ax" x="0" y="50">Other trades</text><rect class="rc-bar rc-bar-b" x="110" y="39" width="{{ [(b / top * 188) | round(1), 3] | max }}" height="16" rx="3"/>
     </svg>
     <p class="rc-note">{% if f.measure_a < 0 and f.measure_b < 0 %}Average loss per trade. Longer bar, bigger loss.{% else %}Average result per trade, scaled to each other.{% endif %}</p>
-    <p class="rc-more">{{ sr.n_tested }} habits tested against chance · {{ sr.habits | length - sr.n_tested }} described</p>
+    <p class="rc-more">{{ sr.n_tested }} habits tested against chance, plus your numbers</p>
   </div>
   <figcaption id="rc-cap">Example report: the summary page.</figcaption>
 </figure>

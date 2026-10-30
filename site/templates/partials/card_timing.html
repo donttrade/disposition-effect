@@ -1,7 +1,7 @@
 {#- The one sentence about when the card link is given. Used on every page that says it, so
     the pages cannot disagree (v1 test_card_payment_timing_consistent). -#}
 {%- if flags.pilot_checkout -%}
-Card payments go through a secure Stripe link. For a Pilot, the link is shown after you send the short Pilot request and confirm you have read the Pilot scope and terms; for other engagements it is sent after you accept the scope.
+Card payments go through a secure Stripe link. For a Pilot, the link is shown after you send the short Pilot request and confirm you have read the Pilot scope and terms; monthly invoices are sent by email.
 {%- else -%}
 Card payments are accepted through a secure Stripe link, sent only after you accept the scope.
 {%- endif -%}

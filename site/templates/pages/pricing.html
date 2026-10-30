@@ -1,55 +1,50 @@
 {% extends "base.html" %}
-{#- /pricing/ (plan step 15). Every price from prices.json. With paid_report off the sections
-    are stacked, firms first, and the #traders anchor works; with it on, a Traders | Firms
-    tablist (traders first; #firms or any id inside the Firms panel opens it). All of today's
-    ids are kept: firms copy-leader claims-test platforms traders researchers payment refunds
-    history questions. #}
+{#- /pricing/ (plan step 15; 29 Oct, one product). Every price from prices.json. paid_report on: the donttrade
+    test's two packages side by side (Traders, Firms), then "Free for everyone". Off: the firm package, then the
+    trader waitlist, stacked. All of today's ids are kept: firms copy-leader claims-test platforms traders
+    researchers payment refunds history questions. #}
 {% block content %}
 {%- import "partials/pilot_terms.html" as pt with context %}
 {%- from "partials/pay_facts.html" import pay_facts %}
-{%- set pilot = products["pilot"] %}{%- set r = products["report39"] %}{%- set t = products["tracker79"] %}
-{%- set firm_ids = ["pilot", "snapshot", "memo", "outcomes"] %}
-{%- set pct = prices.rules.recheck.percent_of_engagement %}
-{%- set ex = products[prices.rules.recheck.example_product] %}
-{%- set RETEST = 'Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.' %}
+{%- set pilot = products["pilot"] %}{%- set plan = products["plan"] %}{%- set r = products["report39"] %}
+{%- set RETEST = 'Your re-test runs on the version of the test that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.' %}
+
+{#- 29 Oct (owner: one product): the firm package of the donttrade test, the same card in both builds. Invoiced, so no
+    Stripe link. Every amount and rule from prices.json. The old firm ids are anchors inside it, so old links land. -#}
+{%- macro firm_card(anchors=("copy-leader", "claims-test", "platforms", "researchers", "payment")) %}
+    <section class="price-card" id="firms" aria-labelledby="pc-firm-h">{% for a in anchors %}<span id="{{ a }}"></span>{% endfor %}
+      <h2 id="pc-firm-h">Firms</h2>
+      <p class="pc-value">The test on your whole book. One habit today, more being added.</p>
+      <p class="price-big"><span class="num">{{ plan.price_usd|usd }}</span> <span class="muted">per trader account a month</span></p>
+      <ul class="ticks">
+        <li>{{ plan.minimum_usd|usd }} monthly minimum</li>
+        <li>The {{ pilot.price_usd|usd }} {{ pilot.name }} is your first month</li>
+        <li>Its {{ pilot.price_usd|usd }} counts toward your plan’s invoices</li>
+        <li>{{ prices.rules.plan_prepay_discount_percent }}% off when you pay a year upfront</li>
+        <li>Cancel at the end of any month</li>
+        <li>Invoiced; no card checkout</li>
+      </ul>
+      <p class="btn-row"><a class="btn" href="/for-firms/#request">Start the {{ pilot.name }}</a></p>
+      <p class="small"><a href="/for-firms/">How it works for firms</a></p>
+    </section>
+{%- endmacro %}
 
 {%- macro firms_block() %}
-  <section class="section" aria-labelledby="firms">
-    <h2 id="firms">Prop firms &amp; brokers</h2>
-    <div class="table-wrap" tabindex="0" role="region" aria-label="Prices for prop firms and brokers">
-    <table class="price-table">
-      <thead><tr><th scope="col">Engagement</th><th scope="col">What you get</th><th scope="col">Delivery</th><th scope="col">Payment</th><th scope="col" class="num">Price (USD)</th></tr></thead>
-      <tbody>
-      {%- set what = {
-        "pilot": "Your first Snapshot at an introductory price, one per firm: one disposition figure on your own records, with a one-page memo. " ~ pilot.credit_rule ~ ".",
-        "snapshot": "One disposition figure for one population and period you name: PGR, PLR, their ratio, a t statistic, the counts behind them and a one-page memo.",
-        "memo": "Everything in a Snapshot, plus your ratio set beside the public study’s ratio, with the differences explained in writing.",
-        "outcomes": "Everything in a Memo for your whole book, plus each split you agree in the scope.",
-      } %}
-      {%- for id in firm_ids %}{% set p = products[id] %}
-        <tr><th scope="row">{{ p.name }}</th><td data-label="What you get">{{ what[id] }}</td><td data-label="Delivery">{{ p.turnaround_days }} business days</td><td data-label="Payment">{{ p.payment_terms }}</td><td class="num" data-label="Price (USD)">{{ p.price_usd|usd }}</td></tr>
-      {%- endfor %}
-      </tbody>
-    </table>
-    </div>
-    <p class="small"><strong>{{ pilot.name }} refunds (from the <a href="/terms/#trial">terms</a>):</strong> {{ pt.both() }}</p>
-    <p class="small muted">The disposition effect is selling winning positions more readily than losing ones; PGR and PLR are the shares of winning and losing positions that were sold. <a href="/glossary/">Glossary</a></p>
-    <p><strong>Quarterly re-check:</strong> the same measurement on a fresh extract, at {{ pct }}% of the price of the engagement being repeated (for example {{ (ex.price_usd * pct / 100)|usd }} for a {{ ex.name }}), payable in advance, delivered in {{ prices.rules.recheck.turnaround_days }} business days.</p>
-    <p class="btn-row"><a class="btn" href="/start/?product=pilot#pilot">Start a {{ pilot.name }} — {{ pilot.price_usd|usd }} USD</a> <a class="btn btn-secondary" href="/for-firms/#what-it-costs">Full detail for firms</a></p>
-  </section>
-  <section class="section" aria-labelledby="copy-leader">
-    <h2 id="copy-leader">Copy-trading platforms</h2>
-    <p>The copy-leader persistence test: does your leader ranking predict what followers earn after copying costs and delay, out of sample and adjusted for luck? Sold to platforms only, never to followers, and not advice. It uses the engagements above, at the same prices: the {{ pilot.name }} for one ranking rule and one period (one per platform), a Snapshot for the same, a Memo for every rule and period agreed in the scope, and an Outcomes pack adding a re-check on a later period.</p>
+  <div class="price-cards price-cards-1">{{ firm_card(("copy-leader", "claims-test", "platforms")) }}</div>
+  <p class="small"><strong>{{ pilot.name }} refunds (from the <a href="/terms/#trial">terms</a>):</strong> {{ pt.both() }}</p>
+  <section class="section" aria-labelledby="copy-leader-h">
+    <h2 id="copy-leader-h">Copy-trading platforms</h2>
+    <p>The copy-leader persistence test: does your leader ranking predict what followers earn after copying costs and delay, out of sample and adjusted for luck? Sold to platforms only, never to followers, and not advice. Scoped and priced in writing before any data is seen; not part of the monthly plan.</p>
     <p><a href="/for-firms/#copy-leader">How the test works</a></p>
   </section>
-  <section class="section" aria-labelledby="claims-test">
-    <h2 id="claims-test">Firms that make behaviour claims</h2>
-    <p>The claims substantiation test: your marketing says your product changes how traders behave, and a pre-registered test, fingerprinted before any data is seen, checks whether that claim holds on your own users’ records. We report the result whether it supports the claim or not. It is a test with stated limits; it is not an audit. It uses the engagements above, at the same prices: the {{ pilot.name }} for one claim, one measure and one comparison (one per firm), a Snapshot for the same, a Memo for every measure and comparison agreed in the scope, and an Outcomes pack running the same pre-registered test again on a later period.</p>
+  <section class="section" aria-labelledby="claims-test-h">
+    <h2 id="claims-test-h">Firms that make behaviour claims</h2>
+    <p>The claims substantiation test: a pre-registered test, fingerprinted before any data is seen, checks whether your claim about how traders behave holds on your own users’ records. We report the result whether it supports the claim or not. It is a test with stated limits; it is not an audit. Scoped and priced in writing before any data is seen; not part of the monthly plan.</p>
     <p><a href="/for-firms/#claims-test">How the claims test works</a></p>
   </section>
-  <section class="section" aria-labelledby="platforms">
-    <h2 id="platforms">Journals &amp; platforms</h2>
-    <p>Free 12-month commercial licence for the first three partners, plus a co-published study. Continuing after 12 months is optional; any fee is agreed in writing before renewal. No referral fees, either way.</p>
+  <section class="section" aria-labelledby="platforms-h">
+    <h2 id="platforms-h">Journals &amp; platforms</h2>
+    <p>Free 12-month commercial licence for the first three partners, plus a co-published study. After 12 months, continuing is on the published monthly plan price, or it ends. No referral fees, either way.</p>
     <p><a href="/start/?product=platform#platform">Apply to partner</a></p>
   </section>
 {%- endmacro %}
@@ -57,55 +52,28 @@
 {%- macro traders_block() %}
   <section class="section" aria-labelledby="traders">
     <h2 id="traders">Individual traders</h2>
-    {%- if flags.paid_report %}
-    <div class="table-wrap" tabindex="0" role="region" aria-label="Trader prices">
-    <table class="stack-table">
-      <thead><tr><th scope="col">Product</th><th scope="col">What you get</th><th scope="col" class="num">Price (USD)</th><th scope="col"><span class="visually-hidden">Action</span></th></tr></thead>
-      <tbody>
-        <tr><th scope="row">Free tools</th><td>{% if flags.free_badges %}Trade stats with a real-or-noise check, and calculators{% else %}Trade stats from your own file, and calculators{% endif %}. No account.</td><td class="num">$0</td><td><a href="/tools/">Open the tools</a></td></tr>
-        <tr><th scope="row">{{ r.name }}</th><td>Up to five habits measured and described in your own trades, with the dollar totals of the matching trades; up to two of them tested against chance in this version; plus one re-test 30 to 60 days after your first report.</td>
-          <td class="num">{{ r.price_usd|usd }} one time</td>
-          <td><a class="btn" href="#last-step">Get the report — {{ r.price_usd|usd }}</a></td></tr>
-        <tr><th scope="row">{{ t.name }}</th><td>Comes later. It is not sold until it exists.</td><td class="num">Not for sale yet</td><td></td></tr>
-      </tbody>
-    </table>
-    </div>
-    <p><a href="/sample-report/">See a sample report</a></p>
-    <p class="small">Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>. Formats: MetaTrader 5/4, IBKR, Tradovate and TradingView in beta, plus the donttrade CSV template. <a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a></p>
-    {% if stripe_mode == "test" %}<p class="notice notice-caution"><strong>Test mode</strong> Payments here use Stripe's test mode. No real card is charged.</p>{% endif %}
-    {%- else %}
     <p><strong>Coming soon, not on sale yet.</strong> No money is taken now. The free tools cost nothing: <a href="/tools/">open the tools</a>.</p>
-    <p>{{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers of the {{ r.name|lower }}, one time, including one re-test. A yearly {{ t.name|lower }} comes later, at {{ t.price_usd|usd }} a year as its founding price; it is not sold until it exists. Prices in USD. Nothing is charged now.</p>
+    <p>{{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers of the {{ r.name|lower }}, one time, including one re-test. Prices in USD. Nothing is charged now.</p>
     <p>When it launches: a full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying. The seller’s details and the full terms are shown before anyone pays. <a href="/terms/#traders">Trader terms</a></p>
-    <p class="btn-row"><a class="btn" href="/for-traders/#waitlist">Join the waitlist — {{ r.price_usd|usd }} founding price</a> <a href="/sample-report/">See a sample report</a></p>
-    {%- endif %}
+    <p class="btn-row"><a class="btn" href="/for-traders/#waitlist">Join the waitlist — {{ r.price_usd|usd }} founding price</a> <a href="/sample-report/">See the example report</a></p>
   </section>
 {%- endmacro %}
 
 {%- if flags.paid_report %}
-{#- 25 Oct sweep (owner): /pricing/ is for traders only; firm prices live on /for-firms/. One boxed price
-    card, then the pay panel (#last-step: the full "Before you pay" disclosure between the two Stripe links,
-    unchanged). No sample figure on this page, so none sits beside a buy button. Every old id stays as an
-    anchor on the firm line, so old links still land. -#}
+{#- 29 Oct (owner: one product). The donttrade test in two packages side by side: Traders (the pay step #last-step,
+    the only Stripe link on the page) and Firms (invoiced: no card link; its button goes to the Pilot request). Then
+    the "Free for everyone" strip. No sample figure and no study finding on this page, so none sits beside a buy
+    button. Every old id stays as an anchor (the firm ones inside the Firms card), so old links still land. -#}
 {%- set link = r["stripe_link_" + stripe_mode] %}
 <div class="wrap">
   {% include "partials/crumbs.html" %}
-  <h1>Pricing</h1>
-  <p class="lede">One report, one price. The free tools cost nothing.</p>
-  <div class="price-cards" id="traders">
-    <section class="price-card" aria-labelledby="pc-free-h">
-      <h2 id="pc-free-h">Free tools</h2>
-      <p class="price-big"><span class="num">$0</span></p>
-      <ul class="ticks">
-        <li>Trade stats, heatmap, drawdown and more</li>
-        <li>No account, no card</li>
-        <li>Your file is read in your browser</li>
-      </ul>
-      <p><a class="more" href="/tools/">Try the free tools <span aria-hidden="true">→</span></a></p>
-    </section>
+  <h1>One test. Two ways to buy it.</h1>
+  <p class="lede">The donttrade test is the one thing we sell. Everything else is free.</p>
+  <div class="price-cards price-cards-2" id="traders">
     <section class="price-card price-card-main" aria-labelledby="pc-report-h">
-      <h2 id="pc-report-h">{{ r.name }}</h2>
-      <p class="price-big"><span class="num">{{ r.price_usd|usd }}</span> <span class="muted">USD, one time · no sales tax</span></p>
+      <h2 id="pc-report-h">Traders</h2>
+      <p class="pc-value">Is your habit real, or luck? Test your own trades.</p>
+      <p class="price-big"><span class="num">{{ r.price_usd|usd }}</span> <span class="muted">USD, once · re-test included</span></p>
       <ul class="ticks">
         <li>Up to five habits measured in your trades</li>
         <li>Up to two tested against chance</li>
@@ -118,7 +86,7 @@
           load unless the URL targets it or something inside it, and site.css paints them closed until then (theme.js
           .dt-pay-hash / .dt-byp-hash when the URL names them), so with JavaScript nothing changes and nothing shifts. -#}
       <details class="pay-step" id="last-step" open>
-        <summary class="btn">Get the habit report — {{ r.price_usd|usd }}</summary>
+        <summary class="btn">Take the test — {{ r.price_usd|usd }}</summary>
         {#- 29 Oct (owner): one click. Three facts, the complete Before-you-pay block one tap away (unchanged, on
             this page, before the Stripe button, printable: Ontario CPA s. 38 / O. Reg. 17/05 s. 32), then the button.
             The binding acceptance is the terms tick on Stripe's checkout; no second required tick here (Baymard). -#}
@@ -134,13 +102,14 @@
         </div>
       </details>
       <p class="small muted">Total {{ r.price_usd|usd }} USD, paid on Stripe’s page.</p>
-      <p class="small" id="refunds">Full refund if you ask within {{ prices.rules.trader_refund_days }} days, even after your report runs.</p>
-      <p class="small"><a href="/sample-report/">See a sample report</a> · <a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a></p>
+      <p class="small" id="refunds">Full refund if you ask within {{ prices.rules.trader_refund_days }} days, even after your test runs.</p>
+      <p class="small"><a href="/sample-report/">See the example report</a> · <a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a></p>
       {% if stripe_mode == "test" %}<p class="notice notice-caution"><strong>Test mode</strong> Payments here use Stripe's test mode. No real card is charged.</p>{% endif %}
     </section>
+    {{ firm_card() }}
   </div>
-  <p class="firm-line" id="firms"><span id="copy-leader"></span><span id="claims-test"></span><span id="platforms"></span><span id="researchers"></span><span id="payment"></span>Buying for a firm? <a href="/for-firms/#what-it-costs">Firm prices are on For firms</a></p>
   <div id="history" hidden></div>
+  {% include "partials/free_strip.html" %}
 
   <section class="section" aria-labelledby="faq-h">
     <h2 id="questions"><span id="faq-h">Questions</span></h2>
@@ -149,39 +118,27 @@
     {{ answer_box("pg") }}
     {%- endif %}
     <details><summary>What exactly do I get?</summary><p>{{ page.product }}</p></details>
-    <details><summary>What does “tested against chance” mean?</summary><p>We check whether a habit’s pattern in your trades could just be luck. The report says “distinguishable from noise” when it is unlikely to be luck, and “not distinguishable” when it could be. Up to two habits get this test; the others are described only.</p></details>
-    <details><summary>What does the re-test do?</summary><p>It runs the same report on a newer export of the same account, 30 to 60 days after your first report. {{ RETEST|safe }}</p></details>
+    <details><summary>What does “tested against chance” mean?</summary><p>We check whether a habit’s pattern in your trades could just be luck. Your result says “distinguishable from noise” when it is unlikely to be luck, and “not distinguishable” when it could be. Up to two habits get this test; the others show what happened in your file.</p></details>
+    <details><summary>What does the re-test do?</summary><p>It runs the same test on a newer export of the same account, 30 to 60 days after your first result. {{ RETEST|safe }}</p></details>
     <details><summary>Which files work?</summary><p>MetaTrader 5 or 4, IBKR, Tradovate and TradingView exports (all in beta), or the donttrade CSV template.</p></details>
     <details><summary>Where does my file go?</summary><p>It stays in your browser. {{ strings.p5.long }}</p></details>
     <details><summary>Is this investment advice?</summary><p>No. It describes your own past trades. It does not tell you what to trade, how much, or when to exit.</p></details>
     <details><summary>Do you take payment by email?</summary><p>No. We never ask for card details by email. <a href="/terms/#cancellation">Cancellation and refund terms</a></p></details>
+    <details><summary>What does a firm pay?</summary><p>{{ plan.price_usd|usd }} per trader account a month, counted from the accounts line that month’s run of the script prints, with a {{ plan.minimum_usd|usd }} monthly minimum, invoiced monthly in arrears. The {{ pilot.name }} is your first month. Its {{ pilot.price_usd|usd }} counts toward your plan’s invoices. <a href="/terms/#plan">Plan terms</a></p></details>
   </section>
   {% include "partials/disclaimer.html" %}
 </div>
 {%- else %}
+{#- paid_report off (not live; it must build and pass): the firm package first, then the trader waitlist. -#}
 <div class="wrap">
   {% include "partials/crumbs.html" %}
   <h1>Pricing</h1>
   <p class="lede">Published prices in USD, the same for everyone, fixed in writing before anyone sees data. Every price on this site comes from one list.</p>
-  {%- if flags.paid_report %}
-  <p class="small"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Version française : Avant de payer</a></p>
-  {%- endif %}
   <p><strong>Firm prices are in US dollars (USD), before any applicable sales tax.</strong></p>
   {#- v3 (ARCHITECT-V3 §c.4, H6): the value ladder, here with the firm price #}
   {%- with show_firm_price = true, ladder_id = "ladder-h" %}{% include "partials/value_ladder.html" %}{% endwith %}
-  {%- if flags.paid_report %}
-  <div data-requires-flag="paid_report">
-    <div role="tablist" aria-label="Who is buying">
-      <button role="tab" id="tab-traders" aria-controls="panel-traders" aria-selected="true" data-hash="traders" type="button">Traders</button>
-      <button role="tab" id="tab-firms" aria-controls="panel-firms" aria-selected="false" data-hash="firms" type="button" tabindex="-1">Firms</button>
-    </div>
-    <div role="tabpanel" id="panel-traders" aria-labelledby="tab-traders">{{ traders_block() }}</div>
-    <div role="tabpanel" id="panel-firms" aria-labelledby="tab-firms">{{ firms_block() }}</div>
-  </div>
-  {%- else %}
   {{ firms_block() }}
   {{ traders_block() }}
-  {%- endif %}
 
   <section class="section" aria-labelledby="researchers">
     <h2 id="researchers">Researchers &amp; press</h2>
@@ -191,14 +148,10 @@
   <section class="section" aria-labelledby="payment">
     <h2 id="payment">How payment works today</h2>
     <ul>
-      <li>Every firm engagement is invoiced by email, in USD. International clients pay by bank transfer; clients in Canada may pay the CAD equivalent by Interac e-Transfer, at the Bank of Canada daily rate on the invoice date. Transfer and bank fees are paid by the sender.</li>
-      <li>The engagement agreement is sent with the scope, before you pay. A blank template is available on request.</li>
-      {%- if flags.paid_report %}
-      <li>The {{ r.name|lower }} is paid by card on Stripe’s own page, from the “Pay {{ r.price_usd|usd }} on Stripe” button in the <a href="#last-step">last step</a> above.</li>
-      <li>For firm engagements: {% include "partials/card_timing.html" %}</li>
-      {%- else %}
+      <li>The {{ pilot.name }} and the monthly plan are invoiced by email, in USD. International clients pay by bank transfer; clients in Canada may pay the CAD equivalent by Interac e-Transfer, at the Bank of Canada daily rate on the invoice date. Transfer and bank fees are paid by the sender.</li>
+      <li>The monthly plan is invoiced monthly in arrears: {{ plan.price_usd|usd }} per trader account counted in that month’s run, {{ plan.minimum_usd|usd }} minimum, due within {{ prices.rules.plan_payment_days }} days.</li>
+      <li>The agreement is sent with the scope, before you pay. A blank template is available on request.</li>
       <li>{% include "partials/card_timing.html" %}</li>
-      {%- endif %}
       <li>We never ask for card details by email.</li>
     </ul>
   </section>
@@ -206,12 +159,8 @@
   <section class="section" aria-labelledby="refunds">
     <h2 id="refunds">Cancellations, refunds and the {{ pilot.name }}</h2>
     <ul>
-      <li><strong>Firms:</strong> no cancellation fees. {{ pt.kickoff(pilot, "") }} Snapshot, Memo and Outcomes pack are paid 50% on acceptance and 50% within 7 days of delivery; if either side stops, completed work is billed pro rata.</li>
-      {%- if flags.paid_report %}
-      <li><strong>Traders:</strong> a full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying, even if you have already run your report.</li>
-      {%- else %}
-      <li><strong>Traders:</strong> nothing is sold yet. When the report launches, a full refund is available if you ask within {{ prices.rules.trader_refund_days }} days of buying.</li>
-      {%- endif %}
+      <li><strong>Firms:</strong> {{ pt.kickoff(pilot, "") }} The monthly plan ends at the end of any month you choose, by email; that month is invoiced as usual. No cancellation fee.</li>
+      <li><strong>Traders:</strong> nothing is sold yet. When the test launches, a full refund is available if you ask within {{ prices.rules.trader_refund_days }} days of buying.</li>
     </ul>
     <p><a href="/terms/#cancellation">Cancellation and refund terms</a> · <a href="/terms/#trial">{{ pilot.name }} terms</a></p>
   </section>
@@ -227,9 +176,9 @@
     {%- endif %}
     <details><summary>Why publish prices?</summary><p>So you know the cost before you write, and every firm pays the same.</p></details>
     <details><summary>Do you take card payments?</summary><p>Yes. {% include "partials/card_timing.html" %} Bank transfer, or Interac e-Transfer in Canada, also work.</p></details>
-    <details><summary>What is the difference between the {{ pilot.name }}, a Snapshot and a Memo?</summary><p>The {{ pilot.name }} is your first Snapshot at an introductory price, one per firm. A Snapshot is one figure for one population and period. A Memo adds your ratio set beside the public study’s, with the differences explained in writing.</p></details>
+    <details><summary>What does the {{ pilot.name }} include?</summary><p>One run of the firm script on your own book, one per firm: the figure, how sure it is, and a one-page memo. It is the first month of the monthly plan.</p></details>
     <details><summary>Is the {{ pilot.name }} fee lost if we go ahead?</summary><p>No. {{ pilot.credit_rule }} of delivery.</p></details>
-    <details><summary>Can the price change after we accept?</summary><p>No. It is fixed in writing in the scope you accept.</p></details>
+    <details><summary>Can the price change?</summary><p>Only with {{ prices.rules.plan_price_notice_days }} days’ written notice, and you may end the plan before the change applies.</p></details>
     <details><summary>Does paying change the result?</summary><p>No. <a href="/independence/">Independence policy</a></p></details>
   </section>
   {% include "partials/disclaimer.html" %}

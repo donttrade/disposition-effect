@@ -307,9 +307,9 @@ def test_d1_partner_form_ignores_product_in_url(browser, built_site, path, form)
 def test_d1_firm_form_still_takes_product_but_not_platform(browser, built_site):
     # v3 (ARCHITECT-V3 B7, C3): each /start/ product section has its own form with a FIXED product;
     # ?product= only picks the section, so a URL can never relabel a form (stronger than D1)
-    assert _post(browser, built_site["url"] + "/start/?product=memo#memo", "#sf-memo")["product"] == "memo"
+    assert _post(browser, built_site["url"] + "/start/?product=memo#memo", "#sf-plan")["product"] == "plan"   # 29 Oct: old link
     assert _post(browser, built_site["url"] + "/start/?product=platform#pilot", "#sf-pilot")["product"] == "pilot"
-    assert _post(browser, built_site["url"] + "/start/?product=pilot#snapshot", "#sf-snapshot")["product"] == "snapshot"
+    assert _post(browser, built_site["url"] + "/start/?product=pilot#plan", "#sf-plan")["product"] == "plan"
 
 
 def test_nit8_partner_mailto_subject(built_site):
@@ -330,7 +330,7 @@ def test_nit9_general_enquiry_form_is_not_tagged_snapshot(tmp_path):
     # a general enquiry "snapshot": only the Snapshot's own form carries that value.
     html = (out / "start" / "index.html").read_text(encoding="utf-8")
     forms = re.findall(r'(?s)<form class="request-form" id="([^"]+)".*?</form>', html)
-    assert forms == ["pc", "sf-snapshot", "sf-memo", "sf-outcomes", "sp", "wl"], forms
+    assert forms == ["pc", "sf-plan", "sp", "wl"], forms   # 29 Oct (one product): the Pilot and the monthly plan
     for fid in forms:
         form = re.search(r'(?s)<form class="request-form" id="' + fid + '".*?</form>', html).group(0)
         tags = re.findall(r'<input[^>]*name="product"[^>]*>', form)
@@ -414,8 +414,8 @@ def test_d5_paid_home_has_the_founding_offer(paid_site):
     text = L.visible_text((paid_site["out"] / "index.html").read_text(encoding="utf-8"))
     assert "See the habits in your trade history." in text   # sweep 2 hero
     assert "$39 founding price for the first 100 buyers." in text
-    assert "One time, in US dollars, with one free re-test 30 to 60 days after your first report." in text
-    assert "Get the habit report — $39" in text and "What the report measures" in text and "How it works" in text
+    assert "One time, in US dollars, with one free re-test 30 to 60 days after your first result." in text
+    assert "Take the test — $39" in text and "What the report measures" in text and "How it works" in text
     assert not FINDING_RE.search(text)  # no study finding anywhere on the page, so none next to an offer
 
 

@@ -39,17 +39,17 @@ OUTAGE = ("If our server is down, your purchase is not lost and no analysis is c
 # The first sentence is the one /welcome/ and /restore/ show (tests/test_delta_fixes.py MANUAL), kept word for word.
 RESTORE = ("If your access link stops working, email us from the address you paid with and we’ll send a new one. "
            "We send it by hand, and only to the email address on the payment.")
-BUYER = ("If you buy the habit report: Stripe shows us the name and email address you enter at checkout. We use them "
+BUYER = ("If you buy the donttrade test: Stripe shows us the name and email address you enter at checkout. We use them "
          "only to send you the copy of your agreement, to answer your emails (a refund, a new access link) and to deal "
          "with a payment dispute. If you dispute the payment with your card issuer, we may give Stripe the dates of "
          "your purchase and of your analyses, and the number of analyses used, as evidence. Our emails with you stay "
          "in our Gmail inbox, and a private list of sales (the checkout code, the date, your name and email, and the "
          "dates we sent the copy of your agreement or a refund) is kept on our own computer, not on our server. Both are kept for the "
          "same period as purchase records (below).")
-FOOTER_PAID = ("It stores your light/dark choice in your own browser and, if you buy the habit report, your access key "
-               "there too. For that report your browser sends our server only stripped trade numbers. The server does "
+FOOTER_PAID = ("It stores your light/dark choice in your own browser and, if you buy the donttrade test, your access key "
+               "there too. For that test your browser sends our server only stripped trade numbers. The server does "
                "not keep them: of those numbers it keeps only a scrambled fingerprint of each trade row from your first "
-               "report, to match a re-test to the same history. Your file itself is not uploaded.")
+               "result, to match a re-test to the same history. Your file itself is not uploaded.")
 
 
 def norm(t):
@@ -120,7 +120,7 @@ def test_paid_privacy_buyer_line_pen_name_and_cloudflare(paid):
     # "same period as purchase records (below)": the period it points to is stated below it, once
     assert p.index('id="buyer-details"') < p.index("kept for as long as Canadian tax law requires (six years)")
     # the server paragraph names the fingerprint in the same element as "does not keep"
-    assert "of those numbers it keeps only a scrambled fingerprint of each trade row from your first report" in p
+    assert "of those numbers it keeps only a scrambled fingerprint of each trade row from your first result" in p
 
 
 def test_paid_french_lines(paid):
@@ -132,9 +132,11 @@ def test_paid_french_lines(paid):
     assert "nous vous remboursons sur demande, en entier." in c
     assert "il n’en garde que des empreintes brouillées" in p
     assert "non conservés; seules des empreintes brouillées" in p
-    # R-D1.3(c): not all five habits are tested; R-D3 I-3: up to two (the hold gap and size after a loss are described)
+    # R-D1.3(c): not all five habits are tested; R-D3 I-3: up to two. 29 Oct (owner, stats round 2): the hold gap is
+    # "facts from your file" and size after a loss has a luck check coming; never "décrite, non testée"
     assert "Il teste cinq habitudes" not in a and "Il couvre cinq habitudes" in a and "Il en teste jusqu’à deux" in a
-    assert "jusqu’à quatre" not in a and "aux gagnantes (décrite, non testée dans cette version); " in a
+    assert "jusqu’à quatre" not in a and "aux gagnantes (faits tirés de votre fichier);" in a
+    assert "après des pertes (vérification du hasard à venir);" in a and "non testée" not in a and "décrite" not in a
 
 
 def test_paid_footer_line_exact_and_qualified(paid):

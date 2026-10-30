@@ -74,7 +74,7 @@ def test_d1_no_reminder_without_a_server_window():
     d = node("import(process.argv[1]).then(m => process.stdout.write(JSON.stringify({"
              "none: m.ics(null), bad: m.ics({opens_at: 5, closes_at: 4}), line: m.retestLine(null)})));")
     assert d["none"] is None and d["bad"] is None
-    assert "30 to 60 days after your first report" in d["line"]
+    assert "30 to 60 days after your first result" in d["line"]
 
 
 def test_d1_report_page_uses_the_servers_window_and_hides_the_reminder_after_the_retest():
@@ -91,16 +91,15 @@ KEEP, GRACE = TERMS["prints_keep_days_after_first_report"], TERMS["tracker_print
 N = r"(\d+)"
 # page → [(pattern with the numbers as groups, the numbers it must state)]. Each must occur at least once.
 STATEMENTS = {
-    "/terms/": [(rf"one re-test, which opens {N} days after your first report and closes {N} days after it", (OPENS, CLOSES)),
-                (rf"Your key is valid for {N} days after purchase, or until {N} days after your first report", (KEY, KEY_FR))],
-    "/fr/conditions/": [(rf"Le nouveau test est offert de {N} à {N} jours après votre premier rapport", (OPENS, CLOSES)),
-                        (rf"valide {N} jours après l’achat, ou jusqu’à {N} jours après votre premier rapport", (KEY, KEY_FR))],
-    "/fr/avant-de-payer/": [(rf"à partir de {N} jours et jusqu’à {N} jours après votre premier rapport", (OPENS, CLOSES)),
-                            (rf"valide {N} jours après l’achat, ou jusqu’à {N} jours après votre premier rapport", (KEY, KEY_FR))],
-    "/pricing/": [(rf"One re-test is included, to run {N} to {N} days after your first report", (OPENS, CLOSES)),
-                  (rf"Access lasts {N} days after purchase, or until {N} days after your first report", (KEY, KEY_FR))],
-    "/privacy/": [(rf"or {N} days after your first report, whichever comes first", (KEEP,)),
-                  (rf"delete them {N} days after it ends", (GRACE,))],
+    "/terms/": [(rf"one re-test, which opens {N} days after your first result and closes {N} days after it", (OPENS, CLOSES)),
+                (rf"Your key is valid for {N} days after purchase, or until {N} days after your first result", (KEY, KEY_FR))],
+    "/fr/conditions/": [(rf"Le nouveau test est offert de {N} à {N} jours après votre premier résultat", (OPENS, CLOSES)),
+                        (rf"valide {N} jours après l’achat, ou jusqu’à {N} jours après votre premier résultat", (KEY, KEY_FR))],
+    "/fr/avant-de-payer/": [(rf"à partir de {N} jours et jusqu’à {N} jours après votre premier résultat", (OPENS, CLOSES)),
+                            (rf"valide {N} jours après l’achat, ou jusqu’à {N} jours après votre premier résultat", (KEY, KEY_FR))],
+    "/pricing/": [(rf"One re-test is included, to run {N} to {N} days after your first result", (OPENS, CLOSES)),
+                  (rf"Access lasts {N} days after purchase, or until {N} days after your first result", (KEY, KEY_FR))],
+    "/privacy/": [(rf"or {N} days after your first result, whichever comes first", (KEEP,))],   # 29 Oct: no Tracker
 }
 # Anywhere on any page: a stated re-test window must be the server's.
 SWEEP = [rf"re-test[^.]{{0,80}}?\b{N} to {N} days", rf"nouveau test[^.]{{0,80}}?\bde {N} à {N} jours",
@@ -151,19 +150,19 @@ def test_d3_every_page_states_the_window_and_key_of_paid_terms_json(both_build):
 
 def test_d3_the_checker_catches_the_testers_mutations():
     # mutate.sh terms_close / fr_window: "60→90" on /terms/ and "30 à 60 → 30 à 90" on /fr/conditions/
-    terms = ("one re-test, which opens 30 days after your first report and closes 90 days after it. "
-             "Your key is valid for 90 days after purchase, or until 75 days after your first report")
+    terms = ("one re-test, which opens 30 days after your first result and closes 90 days after it. "
+             "Your key is valid for 90 days after purchase, or until 75 days after your first result")
     assert statement_problems("/terms/", terms)
-    fr = ("Le nouveau test est offert de 30 à 90 jours après votre premier rapport. "
-          "valide 90 jours après l’achat, ou jusqu’à 75 jours après votre premier rapport")
+    fr = ("Le nouveau test est offert de 30 à 90 jours après votre premier résultat. "
+          "valide 90 jours après l’achat, ou jusqu’à 75 jours après votre premier résultat")
     assert statement_problems("/fr/conditions/", fr)
-    assert statement_problems("/home/", "one free re-test 30 to 90 days after your first report")
+    assert statement_problems("/home/", "one free re-test 30 to 90 days after your first result")
     assert statement_problems("/terms/", "") and statement_problems("/terms/", "")[0][1] == "missing"
 
 
 def test_d3_report_page_line_states_paid_terms_json():
     d = node("import(process.argv[1]).then(m => process.stdout.write(JSON.stringify({line: m.RETEST_LINE})));")
-    m = re.search(rf"re-test on the same account, {N} to {N} days after your first report", d["line"])
+    m = re.search(rf"re-test on the same account, {N} to {N} days after your first result", d["line"])
     assert m and (int(m.group(1)), int(m.group(2))) == (OPENS, CLOSES)
 
 
@@ -258,13 +257,39 @@ def test_d6_civic_and_box_addresses_are_accepted(addr):
 
 
 # ------------------------------------------------------------------ Manager C3: one launch_date, never in the future
-def _toml_launch(tmp, value, extra=""):
+def _toml_launch(tmp, value, extra="", terms=None):
+    """launch_date = value; terms_date = terms, or the same value (29 Oct: the terms version has its own key)."""
     src = open(os.path.join(REPO, "site", "config", "site.toml"), encoding="utf-8").read()
     src, n = re.subn(r'(?m)^launch_date = "[^"]*"', f'launch_date = "{value}"{extra}', src)
     assert n == 1
-    p = tmp / f"launch-{value or 'empty'}.toml"
+    src, n = re.subn(r'(?m)^terms_date = "[^"]*"', f'terms_date = "{value if terms is None else terms}"', src)
+    assert n == 1
+    p = tmp / f"launch-{value or 'empty'}-{terms or 'same'}.toml"
     p.write_text(src, encoding="utf-8")
     return str(p)
+
+
+# ------------------------------------------------------------------ 29 Oct (one product): [legal] terms_date
+def test_terms_date_versions_the_terms_and_the_trial_date_keeps_launch_date(tmp_path):
+    from test_legal import build
+    r, out = build(tmp_path, "td", DT_SITE_TOML=_toml_launch(tmp_path, "2026-10-20", terms="2026-10-27"))
+    assert r.returncode == 0, r.stderr
+    terms = _visible(out, "/terms/")
+    assert "Version 2026-10-27." in terms and "called “Trial” before 20 Oct 2026" in terms
+    assert "withdrawn on 27 Oct 2026" in terms
+    assert "Version 2026-10-27." in _visible(out, "/privacy/")   # later than the hosting date (24 Oct)
+
+
+@pytest.mark.parametrize("terms,env,msg", [
+    ("2099-01-01", {}, "terms_date 2099-01-01 is after the build date"),
+    ("2026-10-19", {}, "is before launch_date"),
+    ("29 Oct 2026", {}, "terms_date '29 Oct 2026' is not YYYY-MM-DD"),
+    ("", {"DT_REQUIRE_LAUNCH_DATE": "1"}, "terms_date is empty"),
+])
+def test_a_future_early_bad_or_missing_terms_date_fails_the_build(tmp_path, terms, env, msg):
+    from test_legal import build
+    r, _ = build(tmp_path, "badterms", DT_SITE_TOML=_toml_launch(tmp_path, "2026-10-20", terms=terms), **env)
+    assert r.returncode == 1 and msg in r.stderr, r.stderr
 
 
 LAUNCH_PAGES = ["/pricing/", "/for-firms/", "/start/", "/terms/"]
