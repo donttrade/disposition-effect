@@ -648,15 +648,15 @@ def verdict(params, rec, res):
 HOW_TO_READ = {
     "NOT MEASURED": "There were too few breaches or too few survivors after exclusions to reach any verdict. "
                     "Nothing is claimed either way. Data collection continues under the same registration.",
-    "FAIL: does not predict usefully": "The habit score did not rank later breaches usefully: either the AUC "
+    "FAIL: does not predict usefully": "The DT-1 habit index did not rank later breaches usefully: either the AUC "
                                        "is below 0.55, or the whole 95% interval is below 0.60. donttrade "
                                        "publishes this result.",
-    "FAIL: adds nothing": "The habit score ranks later breaches better than chance, but it adds nothing beyond "
+    "FAIL: adds nothing": "The DT-1 habit index ranks later breaches better than chance, but it adds nothing beyond "
                           "activity, volatility, P&L so far and headroom. donttrade publishes this result.",
-    "PASS: meets target": "The habit score ranks later breaches above survivors (lower 95% bound above 0.55), "
+    "PASS: meets target": "The DT-1 habit index ranks later breaches above survivors (lower 95% bound above 0.55), "
                           "adds to the baseline, and reaches the 0.65 target. This describes these accounts as "
                           "a group, never one trader.",
-    "PASS: below target": "The habit score ranks later breaches above survivors and adds to the baseline, but "
+    "PASS: below target": "The DT-1 habit index ranks later breaches above survivors and adds to the baseline, but "
                           "below the 0.65 target: it predicts, modestly. This describes these accounts as a "
                           "group, never one trader.",
     "INCONCLUSIVE": "The interval is too wide to pass or to fail. donttrade publishes this result and starts a "
@@ -718,7 +718,7 @@ def render(params, fp, out):
     w = L.append
     rec, res = out["rec"], out["res"]
     w("donttrade prediction study: %s %s" % (SCRIPT_NAME, SCRIPT_VERSION))
-    w("Score: %s   Engine method: %s   Outcome mode: %s   P&L basis: %s" % (
+    w("Index: %s   Engine method: %s   Outcome mode: %s   P&L basis: %s" % (
         params["dt_version"], params["engine_method"], params["outcome_mode"], params["pnl_basis"]))
     w("Registration: %s" % params["registration"])
     w("Sealed block fingerprint (SHA-256): %s" % fp)
@@ -767,12 +767,12 @@ def render(params, fp, out):
             w("  %-24s %-34s %-9s %d" % (f["name"], ci(f["auc"]) if f["auc"] else "n/a", pv(f["p_holm"]),
                                          f["undefined"]))
         w("")
-        w("USEFULNESS (DT-1 deciles, lowest scores first; adjacent deciles merged until every cell has 5+)")
+        w("USEFULNESS (DT-1 deciles, lowest index first; adjacent deciles merged until every cell has 5+)")
         w("  %-9s %-6s %-9s %s" % ("decile", "n", "breaches", "survivors"))
         for r in res["deciles"]:
             w("  %-9s %-6d %-9d %d" % (band_label(r), r["n"], r["events"], r["nonevents"]))
         w("  Breach rate in the top row divided by the overall rate: %s" % f3(res["lift_top"]))
-        w("  Confusion counts when the top share of scores is flagged:")
+        w("  Confusion counts when the top share of the index is flagged:")
         for s, c in res["confusion"]:
             w("    top %2d%%: flagged %s, breached and flagged %s, survived and flagged %s, breached and not "
               "flagged %s, survived and not flagged %s" % (round(100 * s), cell(c["flagged"]), cell(c["tp"]),

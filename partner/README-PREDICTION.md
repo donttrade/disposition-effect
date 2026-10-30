@@ -1,6 +1,6 @@
 # The prediction study script (`prediction_test.py`)
 
-This script tests whether a trader's first 30 trades say anything about what happens next. It asks one question of a firm's **past** accounts. Take each account's first 30 closed trades. Does the donttrade habit score (DT-1) computed from them rank the accounts that went on to break a daily-loss or max-loss rule in the next 30 days above the accounts that didn't? And does it add anything beyond activity, volatility, P&L so far and how close the account already was to its loss limit?
+This script tests whether a trader's first 30 trades say anything about what happens next. It asks one question of a firm's **past** accounts. Take each account's first 30 closed trades. Does the donttrade DT-1 habit index computed from them rank the accounts that went on to break a daily-loss or max-loss rule in the next 30 days above the accounts that didn't? And does it add anything beyond activity, volatility, P&L so far and how close the account already was to its loss limit?
 
 The full plan, the pass and fail rules and the analysis are in the pre-registration, `PREREG-PREDICTION.md`. That registration is posted on OSF before any firm runs the script. donttrade publishes the result whatever it is, including a FAIL.
 
@@ -86,7 +86,7 @@ The fixture is synthetic. It plants a link between the habits and breaches (worl
 <!-- BEGIN EXPECTED OUTPUT -->
 ```text
 donttrade prediction study: prediction_test.py 1.0 (30 Oct 2026)
-Score: DT-1   Engine method: 2026-10-23.stats2f   Outcome mode: firm   P&L basis: net
+Index: DT-1   Engine method: 2026-10-23.stats2f   Outcome mode: firm   P&L basis: net
 Registration: EXAMPLE: synthetic fixture, not a registration
 Sealed block fingerprint (SHA-256): 463e7dab680f333a17e339624bdbc587a62ff3a478e67088b5e016a48349bb19
 Fold seed: the fingerprint's first 16 hex digits
@@ -124,7 +124,7 @@ FEATURES (exploratory, one-sided, Holm-adjusted across 6)
   large_loss_share         0.538 (95% CI 0.503 to 0.574)      0.0349    0
   hold_gap_ratio           0.605 (95% CI 0.559 to 0.652)      <0.0001   0
 
-USEFULNESS (DT-1 deciles, lowest scores first; adjacent deciles merged until every cell has 5+)
+USEFULNESS (DT-1 deciles, lowest index first; adjacent deciles merged until every cell has 5+)
   decile    n      breaches  survivors
   1         60     16        44
   2         60     11        49
@@ -137,7 +137,7 @@ USEFULNESS (DT-1 deciles, lowest scores first; adjacent deciles merged until eve
   9         60     35        25
   10        60     39        21
   Breach rate in the top row divided by the overall rate: 1.688
-  Confusion counts when the top share of scores is flagged:
+  Confusion counts when the top share of the index is flagged:
     top 10%: flagged 60, breached and flagged 39, survived and flagged 21, breached and not flagged 192, survived and not flagged 348
     top 20%: flagged 120, breached and flagged 74, survived and flagged 46, breached and not flagged 157, survived and not flagged 323
     top 30%: flagged 180, breached and flagged 102, survived and flagged 78, breached and not flagged 129, survived and not flagged 291
@@ -187,7 +187,7 @@ H5  ROBUSTNESS (AUC of DT-1 under each check)
   CFD and futures separately; each firm separately: one market family and one firm per run, so these are compared across runs.
 
 VERDICT: PASS: meets target
-HOW TO READ: The habit score ranks later breaches above survivors (lower 95% bound above 0.55), adds to the baseline, and reaches the 0.65 target. This describes these accounts as a group, never one trader. Past accounts only: this says nothing about any one trader and is not investment advice.
+HOW TO READ: The DT-1 habit index ranks later breaches above survivors (lower 95% bound above 0.55), adds to the baseline, and reaches the 0.65 target. This describes these accounts as a group, never one trader. Past accounts only: this says nothing about any one trader and is not investment advice.
 ```
 <!-- END EXPECTED OUTPUT -->
 
@@ -218,13 +218,13 @@ The last line is one of six verdicts. The rules are checked from the top, and th
 | PASS: below target | The lower end is above 0.55, H2 passes, and the AUC is below 0.65 |
 | INCONCLUSIVE | Anything else |
 
-An AUC is the chance that a randomly chosen breached account scores higher than a randomly chosen account that didn't breach. 0.50 is a coin flip.
+An AUC is the chance that a randomly chosen breached account has a higher DT-1 habit index than a randomly chosen account that didn't breach. 0.50 is a coin flip.
 
 The result describes past accounts as a group. It says nothing about any one trader, and it is not investment advice.
 
 ## Known limits (also stated in the registration)
 
 - Accounts that broke a rule within their first 30 trades are excluded and counted (E1). A pass therefore means "among accounts that lasted 30 trades".
-- DT-1 is a rank within the sample. It cannot yet score one new account on its own.
+- DT-1 is a rank within the sample. It cannot yet rate one new account on its own.
 - Rule mode (R*) sees closed trades only, so it undercounts breaches. Rule-mode results are never pooled with firm results.
 - The day boundary uses one fixed UTC offset (`day_utc_offset`). If your server clock follows daylight saving, days near the switch are off by an hour. Export in the server's own clock and seal that offset, or seal UTC.
