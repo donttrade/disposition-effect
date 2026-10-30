@@ -1,0 +1,13 @@
+{
+  "what": "Facts for /research/does-the-test-predict/ (flag prediction_results). Filled in on the day the OSF registration is posted; the build refuses the flag while osf_url or registered_on is empty.",
+  "osf_url": "",
+  "registered_on": "",
+  "release_tag": "prediction-v1",
+  "code_url": "https://github.com/donttrade/disposition-effect/tree/prediction-v1/partner",
+  "sha256": {
+    "partner/prediction_test.py": "7e670cbe08b905acdd91ff6edaeffb0f7c784a920b20a45f54423c1acd8b14f5",
+    "partner/dt1_features.py": "e782800ca5948648f80b5554e5942147946b3eb52edf497acd9eac3618b05c9a",
+    "partner/dt1_outcomes.py": "07f9da966b4734e4d94d86a6f126df6bd24b8ace49709855a7b6fc6e58f6c152",
+    "partner/prediction_metrics.py": "2d810ad6222ea724bd649185deac67a25a06de259eee63f508921041a12798ff"
+  }
+}
