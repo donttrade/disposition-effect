@@ -163,6 +163,30 @@ def test_presets_alphabetical_no_default_and_notes(browser, built_site):
     ctx.close()
 
 
+def test_results_go_stale_after_a_change_until_the_next_run(browser, built_site):
+    """Tester page report F1: a rule, file or preset change dims the results and stops Try this rule."""
+    ctx, pg, log = open_page(browser, built_site)
+    sample(pg)
+    run(pg)
+    assert pg.is_hidden("#ps-stale") and pg.is_enabled("#ps-wi-run")
+
+    def new_file():
+        pg.click("#ps-sample-btn")
+        pg.wait_for_selector("#ps-file-status:text-matches('^Read ')")
+    for change in (lambda: pg.fill("#ps-target", "310"), lambda: pg.select_option("#ps-preset", "ftmo-1-step"), new_file):
+        change()
+        assert pg.is_visible("#ps-stale") and pg.inner_text("#ps-stale").startswith("Rules or file changed — run again.")
+        for part in ("#ps-out", "#ps-whatif", "#ps-expert", "#ps-share"):
+            assert "rc-stale" in pg.get_attribute(part, "class").split(), part
+        for b in ("#ps-wi-run", "#ps-card-dl", "#ps-csv", "#ps-json"):
+            assert pg.is_disabled(b), b
+        pg.click("#ps-stale-run")
+        pg.wait_for_selector("#ps-stale", state="hidden", timeout=60000)
+        assert pg.is_enabled("#ps-wi-run") and "rc-stale" not in pg.get_attribute("#ps-out", "class").split()
+    assert errors(log) == []
+    ctx.close()
+
+
 def test_a_new_file_ends_a_running_check(browser, built_site):
     """F6: a check still running when a new file is picked stops; no error, nothing stale is drawn."""
     ctx, pg, log = open_page(browser, built_site)

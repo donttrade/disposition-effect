@@ -28,6 +28,7 @@ let current = null;    // the preset picked (or null) and the rules it filled in
 let last = null;       // the latest check: {p, res, seq, real, sim, ...}
 let lastWhatIf = null;
 let lastRange = null;
+let stale = false;     // the rules, the file or the preset changed since the shown results
 let worker = null;
 let pending = null;    // resolves the running worker job; cancelWork() ends it with {cancelled: true}
 let slot = null;
@@ -68,6 +69,7 @@ function setFileStatus(text) {
 
 function clearFile() {
   loaded = null;
+  markStale();
   cancelWork();   // a check still running on the previous file stops, and its result is dropped
   setFileStatus('');
   $('ps-file-error').hidden = true;
@@ -132,6 +134,19 @@ function showLoaded(out, label) {
     ` (${FORMAT_NAMES[r.format] || 'read by the site’s importer'}${loaded.beta ? ', beta' : ''}). Times are ${r.tz_label}.` +
     (datesOnly ? ' The file has dates but no times.' : ''));
 }
+
+// ------------------------------------------------------------------ results that no longer match the form
+// After a change to the rules, the file or the preset, the shown results are dimmed under a note, and
+// nothing built on them (Try this rule, the range, the card, the export) runs until the next check.
+const STALE_PARTS = ['ps-out', 'ps-whatif', 'ps-expert', 'ps-share'];
+const STALE_BUTTONS = ['ps-wi-run', 'ps-range-btn', 'ps-card-dl', 'ps-card-share', 'ps-csv', 'ps-json'];
+function setStale(on) {
+  stale = on;
+  for (const id of STALE_PARTS) $(id).classList.toggle('rc-stale', on);
+  for (const id of STALE_BUTTONS) if ($(id)) $(id).disabled = on;
+  $('ps-stale').hidden = !on;
+}
+function markStale() { if (last && !stale) setStale(true); }
 
 // ------------------------------------------------------------------ presets
 const NS_DEFAULT = {
@@ -487,6 +502,7 @@ function render() {
     el('div', { class: 'rc-visuals' }, outcome, ruleCard(res), last.file ? habitsCard(last.real, p.rules) : null),
   ].filter(Boolean));
   $('ps-out').hidden = false;
+  setStale(false);
   renderWhatIfForm();
   $('ps-wi-out').hidden = true;
   $('ps-whatif').hidden = false;
@@ -566,7 +582,7 @@ function readPersonal() {
 }
 
 async function runWhatIf() {
-  if (!last) return;
+  if (!last || stale) return;
   const personal = readPersonal();
   if (!personal) return;
   const why = personalUnavailable(last.p, personal);
@@ -574,7 +590,7 @@ async function runWhatIf() {
   const btn = $('ps-wi-run');
   btn.disabled = true;
   const out = await work({ op: 'whatif', p: last.p, personal }, $('ps-wi-status'), `Running the same ${intText(RUNS)} replays with your rule…`);
-  btn.disabled = false;
+  btn.disabled = stale;
   if (out && out.cancelled) { $('ps-wi-status').hidden = true; return; }
   if (!out || !out.whatif || out.whatif.unavailable) {
     $('ps-wi-status').textContent = out && out.whatif && out.whatif.unavailable ? out.whatif.message : 'The rule could not run in this browser. Press Try this rule again.';
@@ -732,10 +748,11 @@ function timeline(seq) {
 }
 
 async function runRange() {
+  if (stale) return;
   const btn = $('ps-range-btn');
   btn.disabled = true;
   const out = await work({ op: 'range', p: last.p, personal: lastWhatIf ? lastWhatIf.personal : null }, $('ps-range-status'), 'Computing the range: 200 resamples of your days…');
-  btn.disabled = false;
+  btn.disabled = stale;
   if (out && out.cancelled) { $('ps-range-status').hidden = true; return; }
   if (!out || !out.range) { $('ps-range-status').textContent = 'The range could not be computed in this browser.'; return; }
   $('ps-range-status').hidden = true;
@@ -868,6 +885,11 @@ function init() {
     slot.readPaste($('ps-paste').value, 'your pasted table');
   });
   $('ps-form').addEventListener('submit', run);
+  // typing a table is not a change until it is read; the column choices change nothing until then either
+  const changed = (e) => { if (e.target.id !== 'ps-paste' && !e.target.closest('#ps-map')) markStale(); };
+  $('ps-form').addEventListener('input', changed);
+  $('ps-form').addEventListener('change', changed);
+  $('ps-stale-run').addEventListener('click', () => $('ps-form').requestSubmit());
   for (const n of [1, 2]) $(`ps-wi-rule${n}`).addEventListener('change', () => syncWiRow(n, true));
   $('ps-wi-run').addEventListener('click', runWhatIf);
   $('ps-wi-card').addEventListener('change', () => { if (last) drawShareCard(); });

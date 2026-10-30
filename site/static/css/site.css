@@ -1287,6 +1287,11 @@ details.legal-sec[open] { padding-bottom: var(--s2); }
 
 /* ------------------------------------------------------------------ Challenge Readiness Check (tool-prop-sim.html) */
 .ns-note { color: var(--caution); margin: 4px 0 0; }
+/* Results from rules or a file that have since changed: dimmed, with the note laid over their top (no shift). */
+.rc-out-wrap { position: relative; }
+.rc-stale-note { position: absolute; top: 0; left: 0; right: 0; z-index: 2; margin: 0; max-width: none; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s2); box-shadow: 0 2px 8px rgba(0, 0, 0, .12); }
+.rc-stale-note[hidden] { display: none; }
+.rc-stale { opacity: .45; }
 .more-rules { margin: 0 0 var(--s3); max-width: 60rem; }
 .more-rules > summary { cursor: pointer; font-weight: 600; color: var(--rust); margin-bottom: var(--s2); }
 #ps-tz-fields[hidden] { display: none; }

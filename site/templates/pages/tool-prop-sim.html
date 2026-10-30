@@ -164,7 +164,10 @@
     <p id="ps-status" class="muted" role="status" hidden></p>
   </section>
 
-  <div id="ps-out" class="tool-out rc-out" hidden></div>
+  <div class="rc-out-wrap">
+    <p id="ps-stale" class="notice notice-caution rc-stale-note" role="status" hidden><span>Rules or file changed — run again.</span> <button class="btn btn-secondary" id="ps-stale-run" type="button">Run again</button></p>
+    <div id="ps-out" class="tool-out rc-out" hidden></div>
+  </div>
 
   <section id="ps-whatif" class="section rc-whatif" aria-labelledby="ps-whatif-h" hidden>
     <h2 id="ps-whatif-h">Try a rule on your past days</h2>
