@@ -74,7 +74,7 @@ def test_d1_no_reminder_without_a_server_window():
     d = node("import(process.argv[1]).then(m => process.stdout.write(JSON.stringify({"
              "none: m.ics(null), bad: m.ics({opens_at: 5, closes_at: 4}), line: m.retestLine(null)})));")
     assert d["none"] is None and d["bad"] is None
-    assert "30 to 60 days after your first report" in d["line"]
+    assert "30 to 60 days after your first result" in d["line"]
 
 
 def test_d1_report_page_uses_the_servers_window_and_hides_the_reminder_after_the_retest():
@@ -162,7 +162,7 @@ def test_d3_the_checker_catches_the_testers_mutations():
 
 def test_d3_report_page_line_states_paid_terms_json():
     d = node("import(process.argv[1]).then(m => process.stdout.write(JSON.stringify({line: m.RETEST_LINE})));")
-    m = re.search(rf"re-test on the same account, {N} to {N} days after your first report", d["line"])
+    m = re.search(rf"re-test on the same account, {N} to {N} days after your first result", d["line"])
     assert m and (int(m.group(1)), int(m.group(2))) == (OPENS, CLOSES)
 
 
