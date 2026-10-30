@@ -221,7 +221,7 @@ function happenedList(h, unit, report) {
 }
 
 // Layer 2, "Real or luck?": the result pill with its plain gloss, the verdict line; or "Luck check coming" with why.
-const GLOSS = { distinguishable: 'unlikely to be luck', not_distinguishable: 'Not clear yet' };
+const GLOSS = { distinguishable: 'Unlikely to be luck', not_distinguishable: 'Not clear yet' };
 function luckLayer(h, lines, more = null) {
   const box = el('div', { class: 'layer layer-luck' }, el('h4', { text: 'Real or luck?' }));
   const pill = el('p', { class: 'luck-pill' }, badge(h.verdict, h));
