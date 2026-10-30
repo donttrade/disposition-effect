@@ -9,6 +9,8 @@ The owner's answers (29 Oct) are built in:
 - **Q2:** the study licence is free for firms and academic partners, for this study only; the firm plan stays paid for real use.
 - **Q3:** the opt-in study save is built, but stays off until this registration is posted (see "U1" below).
 
+**Renamed before posting (30 Oct):** DT-1 is called the **DT-1 habit index** everywhere (title, §2.3, the script's output labels, the results page), because the site's wording rules never call the donttrade test a score. Nothing in the method or the sealed parameter block changed. The analysis code's SHA-256 values were regenerated with `fill_hashes.py`, so step 4 checks the new values in `PREREG-PREDICTION.md` §4.3, `LICENSING.md` and the release notes.
+
 ## 1. What goes on OSF
 
 **Template:** OSF Preregistration. Its headings were checked against a copy of the OSF Prereg form v1 published in the `preregr` R package, not against the live osf.io page.

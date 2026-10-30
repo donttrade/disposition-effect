@@ -28,7 +28,7 @@ The six features (every one coded so that higher = more of the habit)
                             undefined when W has no loss
   F6 hold_gap_ratio         hold_gap: log(median hold of losers / median hold of winners); undefined when
                             there is no loser or no winner, or either median is 0
-  DT-1 = the mean of the defined features' mid-rank percentiles among the scored accounts (dt1_scores).
+  DT-1 = the mean of the defined features' mid-rank percentiles among the accounts given an index (dt1_scores; the DT-1 habit index).
 """
 
 import bisect

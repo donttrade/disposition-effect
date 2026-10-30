@@ -55,8 +55,8 @@ These must match the OSF registration and the release notes of `prediction-v1` (
 The analysis code (`sha256sum` prints the same):
 
 ```
-7e670cbe08b905acdd91ff6edaeffb0f7c784a920b20a45f54423c1acd8b14f5  partner/prediction_test.py
-e782800ca5948648f80b5554e5942147946b3eb52edf497acd9eac3618b05c9a  partner/dt1_features.py
+7bc070e8e9496afe730ccffb9900449034edbc8faec124f6f7fbd03d79a8b8a4  partner/prediction_test.py
+db81646693dc6888d2361cb49a0031dda659e05c73d23593c5886461882c59c1  partner/dt1_features.py
 07f9da966b4734e4d94d86a6f126df6bd24b8ace49709855a7b6fc6e58f6c152  partner/dt1_outcomes.py
 2d810ad6222ea724bd649185deac67a25a06de259eee63f508921041a12798ff  partner/prediction_metrics.py
 ```
@@ -70,7 +70,7 @@ cf921b4b9a0c979fdcdb9ee2f0c8aac4c79d9aebba604ef3137e8ecd451159f7  partner/parity
 abf723c530f13bae94b5612c0ea52a6a26c2cd919176f34cdd4689cc7b519e1f  partner/PREREG-PREDICTION-EXAMPLE.md
 d213660000e8c0a7bdc547cb62f25fc1eea6e0c66a5b2bb65b413a38f8286474  fixture trades.csv
 1cdfd73bcb7d20ffd947d442339433c61c4a812aaf79e6b899ccfbb2a10cc22b  fixture accounts.csv
-cf85df0d44342018cc7353ba7466d6f7b91f60bd4a7cc16247fd50b086495093  fixture expected output
+c4503575f2538e3f0fd90f4fb12bea5df9a010d485a7d8bbba5ff4c0da124ed1  fixture expected output
 ```
 
 <!-- END PREDICTION SHA-256 -->

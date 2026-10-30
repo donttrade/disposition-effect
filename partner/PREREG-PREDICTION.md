@@ -1,4 +1,4 @@
-# Do early trading habits predict prop-challenge rule breaches? A pre-registered external validation of the donttrade habit score (DT-1)
+# Do early trading habits predict prop-challenge rule breaches? A pre-registered external validation of the donttrade DT-1 habit index
 
 **Status: draft for OSF, not yet posted.** Once posted, the OSF timestamp is the registration date. Each firm completes the firm fields of the parameter block at the end (§2.13) and sends it in before running the script. Each firm's completed block is added as a dated amendment, before that firm's run.
 
@@ -12,7 +12,7 @@ Nothing here is investment advice, and nothing here is a prediction about any on
 
 ### 1.1 Title and authors
 
-**Do early trading habits predict prop-challenge rule breaches? A pre-registered external validation of the donttrade habit score (DT-1).**
+**Do early trading habits predict prop-challenge rule breaches? A pre-registered external validation of the donttrade DT-1 habit index.**
 
 Authors: donttrade (study lead). Invited reviewers and co-authors will be listed in an amendment if they accept.
 
@@ -24,7 +24,7 @@ Authors: donttrade (study lead). Invited reviewers and co-authors will be listed
 
 | # | Hypothesis | Role |
 |---|---|---|
-| **H1** | Take accounts with at least 30 closed trades. The DT-1 score from trades 1–30 ranks accounts that breach a daily-loss or max-loss rule in the next 30 days above accounts that do not, with **AUC > 0.55**. | Primary |
+| **H1** | Take accounts with at least 30 closed trades. The DT-1 habit index from trades 1–30 ranks accounts that breach a daily-loss or max-loss rule in the next 30 days above accounts that do not, with **AUC > 0.55**. | Primary |
 | **H2** | DT-1 adds to the baseline model B0 (§3.4). In a logistic model with B0's four variables plus DT-1, the DT-1 coefficient is positive with a likelihood-ratio p < 0.05. | Primary (co-primary) |
 | H3 | The same as H1 for **challenge failure**: ended challenges, failed vs passed. | Secondary |
 | H4 | Each of the 6 features alone has AUC > 0.5 (Holm-adjusted across the 6). | Exploratory |
@@ -71,7 +71,7 @@ All six come from the engine's group functions applied to W alone. Size `q` is e
 | F5 | `large_loss_share` | `oversized`: the share of W's trades that are losses above 2× the median loss in W | W has no loss |
 | F6 | `hold_gap_ratio` | `hold_gap`: log(median hold of losers ÷ median hold of winners) | no loser, no winner, or either median is 0 |
 
-**DT-1 score.** Each defined feature becomes its mid-rank percentile, (mid-rank − 0.5) ÷ n, among the analysed accounts where it is defined. Ties share the average rank. The score is the **mean of the defined percentiles**. An account is scored only if at least **3 of the 6** features are defined. Nothing is fitted, so the primary AUC carries no optimism. A cross-firm score with absolute calibration (DT-2) is only possible after pooled results exist. It is not part of this registration.
+**DT-1 habit index.** Each defined feature becomes its mid-rank percentile, (mid-rank − 0.5) ÷ n, among the analysed accounts where it is defined. Ties share the average rank. The index is the **mean of the defined percentiles**. An account gets an index only if at least **3 of the 6** features are defined. Nothing is fitted, so the primary AUC carries no optimism. A cross-firm index with absolute calibration (DT-2) is only possible after pooled results exist. It is not part of this registration.
 
 **Not in DT-1.** The P&L effects, overtrading and size creep are not computed in version 1.0 of the script and are not reported.
 
@@ -152,7 +152,7 @@ The figures come from Layer 1 of the synthetic dry run: 2,000 replications per c
 | **H2 test** | Likelihood-ratio test, 1 df, in-sample, with the sign of the DT-1 coefficient. A fit that separates counts as H2 not passed. |
 | Calibration | DT-1 turned into a probability by cross-validated logistic recalibration. For that, for the full model and for B0: calibration intercept (offset model), slope, and a 10-band table of mean predicted vs observed |
 | Brier | Brier score and scaled Brier, 1 − Brier ÷ (base rate × (1 − base rate)) |
-| Usefulness | Breaches and survivors per DT-1 decile; lift in the top decile; confusion counts when the top 10%, 20% and 30% of scores are flagged |
+| Usefulness | Breaches and survivors per DT-1 decile; lift in the top decile; confusion counts when the top 10%, 20% and 30% of the index are flagged |
 | H4 | Each feature's AUC with a DeLong CI, a one-sided p for AUC > 0.5, Holm-adjusted across 6 |
 
 **Small cells.** Every printed table cell describes at least 5 accounts. Adjacent bands are merged, lowest first, until each row has at least 5 breaches and 5 survivors, and a short last row merges into the row before it. Confusion counts under 5 print as `<5`. Reconciliation counts are exact.
@@ -166,8 +166,8 @@ The code is the public repository's `partner/` folder at the tagged release `pre
 The analysis code (`sha256sum` prints the same):
 
 ```
-7e670cbe08b905acdd91ff6edaeffb0f7c784a920b20a45f54423c1acd8b14f5  partner/prediction_test.py
-e782800ca5948648f80b5554e5942147946b3eb52edf497acd9eac3618b05c9a  partner/dt1_features.py
+7bc070e8e9496afe730ccffb9900449034edbc8faec124f6f7fbd03d79a8b8a4  partner/prediction_test.py
+db81646693dc6888d2361cb49a0031dda659e05c73d23593c5886461882c59c1  partner/dt1_features.py
 07f9da966b4734e4d94d86a6f126df6bd24b8ace49709855a7b6fc6e58f6c152  partner/dt1_outcomes.py
 2d810ad6222ea724bd649185deac67a25a06de259eee63f508921041a12798ff  partner/prediction_metrics.py
 ```
@@ -181,7 +181,7 @@ cf921b4b9a0c979fdcdb9ee2f0c8aac4c79d9aebba604ef3137e8ecd451159f7  partner/parity
 abf723c530f13bae94b5612c0ea52a6a26c2cd919176f34cdd4689cc7b519e1f  partner/PREREG-PREDICTION-EXAMPLE.md
 d213660000e8c0a7bdc547cb62f25fc1eea6e0c66a5b2bb65b413a38f8286474  fixture trades.csv
 1cdfd73bcb7d20ffd947d442339433c61c4a812aaf79e6b899ccfbb2a10cc22b  fixture accounts.csv
-cf85df0d44342018cc7353ba7466d6f7b91f60bd4a7cc16247fd50b086495093  fixture expected output
+c4503575f2538e3f0fd90f4fb12bea5df9a010d485a7d8bbba5ff4c0da124ed1  fixture expected output
 ```
 
 <!-- END PREDICTION SHA-256 -->
@@ -207,7 +207,7 @@ cf85df0d44342018cc7353ba7466d6f7b91f60bd4a7cc16247fd50b086495093  fixture expect
 | Order | Verdict | Condition | What donttrade then does |
 |---|---|---|---|
 | 1 | **NOT MEASURED** | Fewer than 100 breaches or 100 survivors after exclusions, or the script refuses the input | Says so, and keeps collecting under this registration |
-| 2 | **FAIL: does not predict usefully** | Point AUC < 0.55, **or** the upper 95% bound < 0.60 | Stops describing DT-1 as a risk score. Publishes. |
+| 2 | **FAIL: does not predict usefully** | Point AUC < 0.55, **or** the upper 95% bound < 0.60 | Stops describing DT-1 as a risk measure. Publishes. |
 | 3 | **FAIL: adds nothing** | The lower 95% bound > 0.55, but H2 is not passed | Publishes "habits rank risk, but no better than size, volatility and headroom". Makes no claim that habits add value. |
 | 4 | **PASS: meets target** | The lower 95% bound > 0.55, H2 passes, and point AUC ≥ 0.65 | Publishes the full CI and calibration, with population wording only ("in a pre-registered study…") |
 | 5 | **PASS: below target** | The lower 95% bound > 0.55, H2 passes, and point AUC < 0.65 | Publishes "it predicts, modestly". Describes DT-1 as a group-level monitoring indicator, not a standard. |
@@ -253,7 +253,7 @@ Relationships were planted at several known AUCs. The pipeline recovered them wi
 ### 5.3 Known limitations
 
 - **Survivor framing.** Accounts that break a rule within their first 30 trades are excluded (E1). A pass means "among accounts that lasted 30 trades".
-- **DT-1 is a within-sample rank.** It cannot yet score one new account on its own.
+- **DT-1 is a within-sample rank.** It cannot yet rate one new account on its own.
 - **Rule mode undercounts breaches.** It sees closed trades only.
 - **The day boundary uses one fixed UTC offset** (`day_utc_offset`). Firms whose server clock changes for daylight saving export in that clock and register its offset, or register UTC.
 - **Firm selection.** The registered `accounts_in_period` count is checked against the export.
