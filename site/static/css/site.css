@@ -892,7 +892,8 @@ svg.tp { padding: 8px 10px; }
 .price-card h2 { font-size: var(--fs-3); margin: 0; }
 .price-card h2::before { display: none; }
 .price-big { margin: var(--s1) 0 var(--s3); }
-.price-big .num { font-size: var(--fs-5); font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.price-big .num { font-size: var(--fs-5); font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
+  font-family: var(--font-sans); white-space: nowrap; }   /* 30 Oct (Tester #4): "$0.50" as one token; the mono dot left a gap */
 .price-card .ticks li { font-size: var(--fs-1); }
 .price-card .pay-step { border: 0; margin: var(--s2) 0; }
 .price-card .more { font-weight: 600; text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 2px; }
@@ -1247,10 +1248,10 @@ svg.tp { padding: 8px 10px; }
 .hs-row { position: relative; display: grid; grid-template-columns: minmax(0, 1.4fr) auto minmax(9rem, 1fr) auto; align-items: center;
   gap: var(--s1) var(--s2); padding: 12px var(--s2); border: 1px solid var(--border); border-radius: 12px; background: var(--bg); }
 .hs-row:hover { border-color: var(--rust); }
-.hs-row:focus-within { outline: 3px solid var(--rust); outline-offset: 2px; }
+/* 30 Oct (Tester #4): the focus ring is on the link itself (keyboard users, and tools that read the focused element) */
 .hs-row > * { padding: 0; border: 0; text-align: left; }
 .hs-row th a { font-weight: 600; color: var(--text); text-decoration: none; }
-.hs-row th a:focus-visible { outline: none; }
+.hs-row th a:focus-visible { outline: 3px solid var(--rust); outline-offset: 3px; border-radius: 4px; }
 .hs-row th a::after { content: ""; position: absolute; inset: 0; border-radius: 12px; }   /* the whole row is the link */
 .hs-row:hover th a { color: var(--rust); text-decoration: underline; }
 .hs-total { display: flex; flex-direction: column; align-items: stretch; gap: 4px; }
