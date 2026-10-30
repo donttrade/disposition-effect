@@ -18,7 +18,8 @@
       <p class="price-big"><span class="num">{{ plan.price_usd|usd }}</span> <span class="muted">per trader account a month</span></p>
       <ul class="ticks">
         <li>{{ plan.minimum_usd|usd }} monthly minimum</li>
-        <li>First month is the {{ pilot.price_usd|usd }} {{ pilot.name }}, credited</li>
+        <li>The {{ pilot.price_usd|usd }} {{ pilot.name }} is your first month</li>
+        <li>Its {{ pilot.price_usd|usd }} counts toward your plan’s invoices</li>
         <li>{{ prices.rules.plan_prepay_discount_percent }}% off when you pay a year upfront</li>
         <li>Cancel at the end of any month</li>
         <li>Invoiced; no card checkout</li>
@@ -123,7 +124,7 @@
     <details><summary>Where does my file go?</summary><p>It stays in your browser. {{ strings.p5.long }}</p></details>
     <details><summary>Is this investment advice?</summary><p>No. It describes your own past trades. It does not tell you what to trade, how much, or when to exit.</p></details>
     <details><summary>Do you take payment by email?</summary><p>No. We never ask for card details by email. <a href="/terms/#cancellation">Cancellation and refund terms</a></p></details>
-    <details><summary>What does a firm pay?</summary><p>{{ plan.price_usd|usd }} per trader account a month, counted from the accounts line that month’s run of the script prints, with a {{ plan.minimum_usd|usd }} monthly minimum, invoiced monthly in arrears. The first month is the {{ pilot.name }}, {{ pilot.price_usd|usd }}, credited against the plan. <a href="/terms/#plan">Plan terms</a></p></details>
+    <details><summary>What does a firm pay?</summary><p>{{ plan.price_usd|usd }} per trader account a month, counted from the accounts line that month’s run of the script prints, with a {{ plan.minimum_usd|usd }} monthly minimum, invoiced monthly in arrears. The {{ pilot.name }} is your first month. Its {{ pilot.price_usd|usd }} counts toward your plan’s invoices. <a href="/terms/#plan">Plan terms</a></p></details>
   </section>
   {% include "partials/disclaimer.html" %}
 </div>

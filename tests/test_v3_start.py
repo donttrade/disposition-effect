@@ -43,7 +43,7 @@ def test_c1_chooser_lists_the_firm_products_in_order_with_their_prices(built_sit
     assert re.findall(r'data-choice="([a-z]+)"', choose) == IDS
     pl, plan = FIRM
     assert IDS == ["pilot", "plan"]
-    assert f'<span class="cl-name">{pl["name"]}</span> <span class="cl-price">{B.usd(pl["price_usd"])} USD · first month, credited</span>' in choose
+    assert f'<span class="cl-name">{pl["name"]}</span> <span class="cl-price">{B.usd(pl["price_usd"])} USD · your first month</span>' in choose
     assert (f'<span class="cl-name">{plan["short_name"]}</span> <span class="cl-price">{B.usd(plan["price_usd"])} per trader account '
             f'a month, {B.usd(plan["minimum_usd"])} minimum</span>') in choose
     for p in FIRM:

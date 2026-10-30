@@ -15,7 +15,7 @@
 {%- set firm = [pilot, plan] %}
 {%- set label = {"pilot": pilot.name, "plan": plan.short_name} %}
 {%- set price = {
-  "pilot": pilot.price_usd|usd ~ " USD · first month, credited",
+  "pilot": pilot.price_usd|usd ~ " USD · your first month",
   "plan": plan.price_usd|usd ~ " per trader account a month, " ~ plan.minimum_usd|usd ~ " minimum",
 } %}
 {%- set blurb = {
