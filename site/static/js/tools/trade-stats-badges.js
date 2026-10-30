@@ -87,12 +87,5 @@ export function render(box, noise, total, unit, tableWrap) {
     el('p', { class: 'small muted', id: 'ts-noise-footnote', text: FREE_CHECKS_FOOTNOTE }));
 }
 
-// The teaser line with the hold-gap check's result. s: freeStats; lead: "The donttrade test" or
-// "We're building a test that".
-export function teaserText(noise, s, lead) {
-  const gap = noise.checks.find((c) => c.stat === 'hold_gap_s');
-  if (s.hold_ratio !== null && gap) {
-    return `In this file, losing trades were held ${ratio(s.hold_ratio)} as long as winning trades (median ${duration(s.hold_median_loss_s)} against ${duration(s.hold_median_win_s)}), and the check above says: ${gap.label}. ${lead} measures up to five habits like this one, tests up to two of them against chance, and shows what the matching trades totalled in your file.`;
-  }
-  return `${lead} looks for habits in what you do after a loss, and tests up to two of them against chance.`;
-}
+// teaserText (the hold-gap check's result next to the offer) was deleted: bundle plan B7, a luck result is never paired
+// with the paid test.

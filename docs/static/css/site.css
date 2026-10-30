@@ -1180,6 +1180,9 @@ svg.tp { padding: 8px 10px; }
 .pay-facts li { display: flex; align-items: center; gap: 10px; margin: 0; max-width: none; padding: 10px 12px;
   border: 1px solid var(--border); border-radius: 10px; background: var(--surface); font-weight: 600; }
 .pay-facts svg { flex: none; color: var(--rust); }
+.pay-expect { margin: 0 0 var(--s2); max-width: 60ch; }
+.more-trades { margin-top: var(--s1); }
+.more-trades .progress-line { flex-wrap: wrap; }
 .pay-more { border: 0; margin: 0 0 var(--s2); }
 .pay-more > summary { font-weight: 400; font-size: var(--fs-0); color: var(--rust); padding: 0; text-decoration: underline; text-underline-offset: 3px; }
 .pay-more[open] > summary { margin-bottom: var(--s1); }

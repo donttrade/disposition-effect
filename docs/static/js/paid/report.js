@@ -12,7 +12,7 @@ import { pgrPlrCounts } from '../engine/pgr.js?v=4c675fe5';
 import { stripRows, spanLine } from './strip.js?v=03137080';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js?v=16f6dd26';
 import { habitSentences, methodLine, page1Lines, coverageLines, mergedLine, checkReport, SENTENCE_HABITS, RESEARCH, RESEARCH_PREFIX, holdDays,
-  V_LAUNCH, V_LAUNCH_SIZE, V_NO } from './wording.js?v=09f9dd9a';
+  V_LAUNCH, V_LAUNCH_SIZE, V_NO, moreTrades } from './wording.js?v=b4340fd7';
 
 const $ = (id) => document.getElementById(id);
 const MINUS = '−';
@@ -218,13 +218,23 @@ function happenedList(h, unit, report) {
 
 // Layer 2, "Real or luck?": the result pill with its plain gloss, the verdict line; or "Luck check coming" with why.
 const GLOSS = { distinguishable: 'unlikely to be luck', not_distinguishable: 'could be luck' };
-function luckLayer(h, lines) {
+function luckLayer(h, lines, more = null) {
   const box = el('div', { class: 'layer layer-luck' }, el('h4', { text: 'Real or luck?' }));
   const pill = el('p', { class: 'luck-pill' }, badge(h.verdict, h));
   if (GLOSS[h.verdict]) pill.append(' ', el('span', { class: 'luck-gloss', text: GLOSS[h.verdict] }));
   box.append(pill);
   const shown = lines.filter((s) => s !== V_LAUNCH && s !== V_LAUNCH_SIZE);   // those two are the "Why not yet" text
   for (const s of shown) box.append(el('p', { class: 'habit-sentence', text: plain(s) }));
+  if (more) {   // bundle plan §2.2: "N more trades to tell", from the fixed moderate pattern, never this file's gap
+    const m = el('div', { class: 'more-trades' }, el('p', { class: 'habit-sentence', text: more.line }));
+    if (more.bar) {
+      const bar = el('p', { class: 'progress-line more-bar' }, el('progress', { max: String(more.bar.of), value: String(more.bar.have), 'aria-label': more.bar.label }),
+        el('span', { class: 'small', text: more.bar.label }));
+      m.append(bar);
+    }
+    m.append(el('p', { class: 'small muted', text: more.caveat }));
+    box.append(m);
+  }
   if (luckComing(h)) {
     box.append(el('details', { class: 'how-more luck-why' }, el('summary', { text: 'Why not yet' }), el('p', { class: 'small', text: whyComing(h) })));
   }
@@ -240,7 +250,7 @@ function habitSection(h, unit, report) {
     const what = el('div', { class: 'layer layer-what' }, el('h4', { text: 'What happened' }));
     if (happenedLines.length) for (const x of happenedLines) what.append(el('p', { class: 'habit-sentence', text: plain(x) }));
     else what.append(el('p', { class: 'muted', text: 'No figure for this file.' }));
-    sec.append(el('h3', { id: 'h-' + h.id, text: nameOf(h) }), what, luckLayer(h, verdictLines));
+    sec.append(el('h3', { id: 'h-' + h.id, text: nameOf(h) }), what, luckLayer(h, verdictLines, moreTrades(h, report, wordingFmt(unit))));
     return sec;
   }
   sec.append(el('h3', { id: 'h-' + h.id, text: nameOf(h) }), el('p', { class: 'muted', text: h.question }));
@@ -253,7 +263,8 @@ function habitSection(h, unit, report) {
   const extra = detailLine(h, unit);
   if (extra) what.append(el('p', { text: extra }));
   sec.append(what);
-  if (!factsOnly(h)) sec.append(luckLayer(h, verdictLines));
+  const more = factsOnly(h) ? null : moreTrades(h, report, wordingFmt(unit));
+  if (!factsOnly(h)) sec.append(luckLayer(h, verdictLines, more));
   const how = el('div', {});
   // The method line carries the habit's own n_perm (it scales with the file size, D-4).
   const method = methodLine(h, wordingFmt(unit));
@@ -268,6 +279,7 @@ function habitSection(h, unit, report) {
     cite.append(el('a', { href: res.url, rel: 'noopener', text: res.cite }));
     how.append(cite);
   }
+  if (more) how.append(el('p', { class: 'small muted more-how', text: more.how }));
   if (how.childNodes.length) sec.append(el('details', { class: 'how-more habit-how' }, el('summary', { text: 'How this was measured' }), how));
   return sec;
 }

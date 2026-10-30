@@ -21,6 +21,8 @@
 // fmt: { money(x), duration(seconds), ratio(x), count(n) } — the page passes its own formatters
 // (money as report.js formats it now); the defaults are plain, for tests.
 
+import { POWER_TABLE } from './power-table.js';
+
 export const METHOD_VERSION = '2026-10-23.stats2f';
 // V-launch (R-D2 H-2, exact text): hold_gap under stats2b. Replaces M2 and the verdict.
 export const V_LAUNCH = 'In our tests on files built to have no real pattern, this test reported a gap in more than 1 file in 20, the rate it is designed for, when a large win or loss changed how long the next trades were held. So this pattern is described here without a verdict.';
@@ -371,3 +373,54 @@ export function coverageLines(report) {
   lines.push(HOLD_GAP_COVERAGE, report.dates_only ? SIZE_UP_NONE : SIZE_UP_COVERAGE);   // R-D3 addendum 3
   return lines;
 }
+
+// ---------------------------------------------------------------- "N more trades to tell" (bundle plan §2.2, slice 1)
+// New strings only; nothing above changes. Shown for a tested habit whose verdict is "could be luck"
+// (not_distinguishable) and never for "unlikely to be luck", a facts-only habit, too_few or a habit that was not tested.
+// N comes from the static table power-table.js (checks/power_table/build_power_table.mjs), built offline on the
+// shipped engine with a FIXED moderate pattern (0.5 sd): it never uses the file's own gap (plan R9, post-hoc power).
+// The table carries the engine method it was built on; a report from another method is refused.
+export const MORE_TRADES_ODDS = 0.5;
+export const MORE_TRADES_CAP = 1000;
+export const moreTradesLine = (N) => `About ${N} more trades would give this check even odds of telling a moderate pattern from luck.`;
+export const MORE_TRADES_OVER = 'More than 1,000 more trades would give this check even odds of telling a moderate pattern from luck.';
+export const moreTradesEnough = (n) => `The ${n} trades in this file already give this check even odds of telling a moderate pattern from luck.`;
+export const moreTradesBar = (have, of) => `${have} of about ${of} trades`;
+export const MORE_TRADES_CAVEAT = 'Assumes your next trades look like these.';
+export const moreTradesHow = (built) => `How "more trades" is worked out: a moderate pattern (the matching trades' results 0.5 standard deviations worse, a fixed size, never your file's own gap) was planted in generated test files of each size, and the share of files in which this check told it apart from luck was counted, at the first Holm step for the habits tested. "Even odds" is the size at which that share reaches one half. The table is fixed (built ${built}).`;
+
+function checkTable(report, table) {
+  if (!table || table.method_version !== report.method_version) {
+    throw new Error(`wording: the more-trades table is for method ${table && table.method_version}, the report is ${report.method_version}`);
+  }
+  if (table.reference_effect_sd !== 0.5) throw new Error('wording: the more-trades table is not built on the fixed moderate pattern');
+}
+
+// Trades for even odds (a whole file's trade count, rounded up to 10), by log-n interpolation; Infinity off the table.
+export function tradesForEvenOdds(id, table = POWER_TABLE) {
+  const t = table.habits[id];
+  if (!t) throw new Error(`wording: no more-trades row for ${id}`);
+  const n = table.n, p = t.power;
+  for (let i = 1; i < p.length; i++) if (p[i] < p[i - 1]) throw new Error(`wording: more-trades row ${id} is not monotone`);
+  const i = p.findIndex((x) => x >= MORE_TRADES_ODDS);
+  if (i < 0) return Infinity;
+  if (i === 0) return n[0];
+  const f = (MORE_TRADES_ODDS - p[i - 1]) / (p[i] - p[i - 1]);
+  return Math.ceil(Math.exp(Math.log(n[i - 1]) + f * (Math.log(n[i]) - Math.log(n[i - 1]))) / 10) * 10;
+}
+
+// { line, bar: {have, of, label} | null, caveat, how } or null when no N is shown for this habit.
+export function moreTrades(h, report, fmt, table = POWER_TABLE) {
+  checkReport(report);
+  if (!TESTED.includes(h.id) || h.verdict !== 'not_distinguishable' || h.p_raw === null) return null;
+  checkTable(report, table);
+  const f = fmtOf(fmt), have = report.n_trades, of = tradesForEvenOdds(h.id, table);
+  const how = moreTradesHow(table.built);
+  if (of - have <= 0) return { line: moreTradesEnough(f.count(have)), bar: null, caveat: MORE_TRADES_CAVEAT, how };
+  if (!Number.isFinite(of) || of - have > MORE_TRADES_CAP) return { line: MORE_TRADES_OVER, bar: null, caveat: MORE_TRADES_CAVEAT, how };
+  return { line: moreTradesLine(f.count(of - have)), bar: { have, of, label: moreTradesBar(f.count(have), f.count(of)) }, caveat: MORE_TRADES_CAVEAT, how };
+}
+
+// Every new string, filled with sample values, for the lint and the word budgets (plan §6, BUNDLE_STRINGS).
+export const BUNDLE_STRINGS = Object.freeze([moreTradesLine('120'), MORE_TRADES_OVER, moreTradesEnough('304'), moreTradesBar('180', '300'),
+  MORE_TRADES_CAVEAT, moreTradesHow('2026-10-30')]);
