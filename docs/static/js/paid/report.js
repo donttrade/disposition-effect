@@ -7,7 +7,7 @@
 // tab; the wording only describes past trades (NON-ADVISER A3).
 
 import { runFile } from '../engine/index.js?v=87619422';
-import { ics, retestLine, RETEST_LINE } from './retest-copy.js?v=0c170eab';
+import { ics, retestLine, RETEST_LINE } from './retest-copy.js?v=b3748546';
 import { pgrPlrCounts } from '../engine/pgr.js?v=4c675fe5';
 import { stripRows, spanLine } from './strip.js?v=03137080';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js?v=16f6dd26';
