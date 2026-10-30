@@ -65,7 +65,7 @@ async function showResult(out, fileLabel, job) {
   state = { result: r, unit: r.trades[0].pnl_unit, fileLabel };
   await render();
   if (!job.isCurrent() || !state || state.result !== r) return; // a newer file replaced this one
-  if (!B) { teaser(null); return; }
+  if (!B) { teaser(); return; }
   if (out.onPage) runNoise(r.trades); // an HTML report was read on the page
   else job.runNoise();
 }
@@ -291,20 +291,19 @@ function runNoise(trades) {
 
 function renderNoise(noise, total) {
   B.render($('ts-noise'), noise, total, state.unit, tableWrap);
-  teaser(noise);
+  teaser();
 }
 
 // R5: the teaser box says data-on-sale="true" when the build sells the report (partials/trader_offer.html).
 const reportLead = () => ($('ts-teaser').dataset.onSale === 'true' ? 'The donttrade test' : "We're building a test that");
 
-// The teaser states only figures computed above: the hold gap (and, with badges, its check result).
-function teaser(noise) {
+// The teaser states only figures computed above: the hold gap, never a check result (bundle plan B7).
+function teaser() {
   // paid_report on: no teaser box (partials/tool_next_step.html is the one offer, never next to a result)
   if (!$('ts-teaser')) return;
   const s = state.stats || freeStats(state.result.trades);
   const text = $('ts-teaser-text');
-  if (noise) text.textContent = B.teaserText(noise, s, reportLead());
-  else if (s.hold_ratio !== null) {
+  if (s.hold_ratio !== null) {
     text.textContent = `In this file, losing trades were held ${ratio(s.hold_ratio)} as long as winning trades (median ${duration(s.hold_median_loss_s)} against ${duration(s.hold_median_win_s)}). ${reportLead()} measures up to five habits like this one and shows what the matching trades totalled in your file.`;
   } else {
     text.textContent = `${reportLead()} looks for patterns in what you do after a loss.`;
