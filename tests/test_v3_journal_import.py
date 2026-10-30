@@ -126,7 +126,13 @@ ENGINE_COMMITS_SINCE_MOTION = ("Engine: TradingView Order History parser",
                                # round 2 (Tester report 30 Oct)
                                "A refused wide fill leaves out the fills that depend on it",
                                "Block list: the identifiers left from round 2",
-                               "Guess: summary rows by what they hold")
+                               "Guess: summary rows by what they hold",
+                               # the Challenge Readiness Check (readiness branch, merged for the 30 Oct launch):
+                               # one file still reads as before; MetaTrader reports without styles now parse
+                               "Engine: paste route, habit columns from the reader, day-resample range",
+                               "Engine: parse MetaTrader reports without their styles",
+                               "Read \"Amount\" (and similar names) as the quantity column",
+                               "Ask which column is which when a paste leaves a needed one unnamed")
 
 
 def test_j13_engine_and_file_worker_untouched():
