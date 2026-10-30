@@ -15,7 +15,7 @@
 // Every message carries the request id it answers (Tester R3); an answer to another id is
 // ignored. tool-state.js is the only caller.
 
-import { runFile } from '../engine/index.js?v=87619422';
+import { runFile } from '../engine/index.js?v=8410d06a';
 
 // No answer at all within START_MS: the worker never started (its script or one of the
 // engine modules did not load). The worker answers {stage} as soon as it has the bytes, so
@@ -63,9 +63,11 @@ function fromColumns(d) {
 // the noise checks and calls onNoise(noise), or onNoise(null) when they could not run.
 // cancel() stops everything; after it, no callback is called again.
 // `item` is the file's bytes (Uint8Array) or a pasted table {paste: text}.
-export function readTradeFile(item, { id = 0, noise = false, onStage = () => {}, onNoise = () => {} } = {}) {
+// ask: a file whose headings leave a needed column unnamed resolves {mapNeeded} instead of an
+// error; cols: the columns picked for it (file-worker.js).
+export function readTradeFile(item, { id = 0, noise = false, ask = false, cols = null, onStage = () => {}, onNoise = () => {} } = {}) {
   const isPasteItem = item !== null && typeof item === 'object' && typeof item.paste === 'string';
-  let worker = new Worker(new URL('./file-worker.js?v=aa1f7810', import.meta.url), { type: 'module' });
+  let worker = new Worker(new URL('./file-worker.js?v=86e0dccc', import.meta.url), { type: 'module' });
   let settled = false;   // `done` has resolved
   let cancelled = false;
   let noiseAsked = false;
@@ -112,6 +114,7 @@ export function readTradeFile(item, { id = 0, noise = false, onStage = () => {},
       return;
     }
     if (d.error) { stop(); finish({ error: d.error }); return; }
+    if (d.mapNeeded) { stop(); finish({ mapNeeded: d.mapNeeded }); return; }
     if (d.result) {
       if (!noise) stop(); else clearTimer();
       finish({ result: fromColumns(d.result) });
@@ -129,7 +132,8 @@ export function readTradeFile(item, { id = 0, noise = false, onStage = () => {},
 
   onStage('Reading your file in this tab…');
   arm(START_MS, () => failed('E_WORKER_TIMEOUT', 'no answer'));
-  worker.postMessage(isPasteItem ? { id, paste: item.paste } : { id, bytes: item });
+  const extra = { ...(ask ? { ask: true } : {}), ...(cols ? { cols } : {}) };
+  worker.postMessage(isPasteItem ? { id, paste: item.paste, ...extra } : { id, bytes: item, ...extra });
 
   const runNoise = () => {
     if (cancelled) return;

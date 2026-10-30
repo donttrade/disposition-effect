@@ -25,11 +25,11 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=fb3a80fd">
+<link rel="stylesheet" href="/static/css/site.css?v=322a587c">
 <script src="/static/js/theme.js?v=7e47c1a9"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
 <script src="/static/js/pay.js?v=7eb376c2" defer></script>
-<script src="/static/js/tools/prop-sim.js?v=2b9a3faf" type="module"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cdac673936b54f08beb5991aaae13975"}'></script>
+<script src="/static/js/tools/prop-sim.js?v=bd34c2b2" type="module"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cdac673936b54f08beb5991aaae13975"}'></script>
 
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "item": "https://donttrade.ca/tools/", "name": "Free tools", "position": 2}, {"@type": "ListItem", "name": "Challenge Readiness Check", "position": 3}]}, {"@id": "https://donttrade.ca/tools/prop-challenge-simulator/#app", "@type": "WebApplication", "applicationCategory": "FinanceApplication", "browserRequirements": "Requires JavaScript", "description": "Replay your past trading days 10,000 times under a prop firm's published rules or your own: pass, bust and time-out shares. Free, in your browser.", "isAccessibleForFree": true, "name": "Challenge Readiness Check", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "operatingSystem": "Any (runs in a web browser)", "publisher": {"@id": "https://donttrade.ca/#org"}, "url": "https://donttrade.ca/tools/prop-challenge-simulator/"}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. It shows how your past trading days would have fared under the rules shown if they came in a different order. Future days can differ from past ones, and past results do not predict future results."}, "name": "Is this a prediction of whether I will pass?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Daily loss limits depend on how losses bunch within a day. Replaying whole days keeps that bunching, while drawing single trades would spread a bad morning across many days and make daily limits look safer than they were."}, "name": "Why are whole days replayed instead of single trades?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "11 rule sets from 8 firms, as each firm publishes them, with the date they were read and a link to the firm’s rules page. A value a firm’s page does not state is marked “not stated by the firm” and runs with the default shown. Rules change and vary by account type, so every box stays editable."}, "name": "Which firms’ rules are in the list?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Four habits, with the same definitions as the habit report, counted on the days a daily limit broke and on your other losing days. It counts how often a habit was there, not whether it caused anything."}, "name": "What does “Habits on breach days” mean?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "The check runs with any number, but with fewer than 30 trading days the result leans heavily on a few days. More history gives a steadier picture."}, "name": "How many trading days do I need in the file?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. The file is read in this tab and all 10,000 replays happen in your browser. Only anonymous counts of visits and finished steps are sent; your file is never sent."}, "name": "Is my file uploaded?"}]}]}</script>
 </head>
@@ -94,8 +94,9 @@
       <div class="field">
         <label for="ps-preset">Rules</label>
         <span class="hint" id="ps-preset-hint">A firm’s rules as published, or your own. Every box stays editable.</span>
-        <select id="ps-preset" aria-describedby="ps-preset-hint ps-preset-source">
+        <select id="ps-preset" aria-describedby="ps-preset-hint ps-preset-info">
           <option value="">Custom rules (type your own)</option>
+          <option value="example">Example rules</option>
           <optgroup label="Alpha Capital Group"><option value="alpha-capital-group-alpha-pro-10-phase-1">Alpha Pro 10%, Phase 1</option>
           </optgroup>
           <optgroup label="Blue Guardian"><option value="blue-guardian-1-step-standard">1 Step Standard</option><option value="blue-guardian-2-step-standard-phase-1">2 Step Standard, Phase 1</option>
@@ -113,10 +114,24 @@
           <optgroup label="Topstep"><option value="topstep-50k-trading-combine">Trading Combine 50K</option>
           </optgroup>
         </select>
-        <p id="ps-preset-source" class="small muted" hidden></p>
+        <div id="ps-preset-info" class="preset-info small">
+          <div class="pi-live"><p id="ps-preset-source" class="muted">Custom rules: type your own in the boxes below.</p><p id="ps-ns" class="ns-line"></p></div>
+          <div class="pi-ghost" aria-hidden="true" data-info=""><p class="muted">Custom rules: type your own in the boxes below.</p><p class="ns-line"></p></div>
+          <div class="pi-ghost" aria-hidden="true" data-info="example"><p class="muted">Example rules, not any firm’s. Every box stays editable.</p><p class="ns-line"></p></div>
+          <div class="pi-ghost" aria-hidden="true" data-info="alpha-capital-group-alpha-pro-10-phase-1"><p class="muted">Read on 29 Oct 2026 from Alpha Capital Group’s <a href="https://help.alphacapitalgroup.uk/en/articles/8420429-alpha-pro-plan" rel="nofollow noopener" tabindex="-1">rules page</a>. Check the firm’s current page: rules change.</p><p class="ns-line">Not stated by Alpha Capital Group: when the target counts; best-day share; what counts as a trading day; time limit. These run with the defaults in each box.</p></div>
+          <div class="pi-ghost" aria-hidden="true" data-info="blue-guardian-1-step-standard"><p class="muted">Read on 29 Oct 2026 from Blue Guardian’s <a href="https://help.blueguardian.com/en/articles/14062186-1-step-standard-rules" rel="nofollow noopener" tabindex="-1">rules page</a>. Check the firm’s current page: rules change.</p><p class="ns-line">Not stated by Blue Guardian: when the target counts; best-day share; time limit. These run with the defaults in each box.</p></div>
+          <div class="pi-ghost" aria-hidden="true" data-info="blue-guardian-2-step-standard-phase-1"><p class="muted">Read on 29 Oct 2026 from Blue Guardian’s <a href="https://help.blueguardian.com/en/articles/14062291-2-step-standard-rules" rel="nofollow noopener" tabindex="-1">rules page</a>. Check the firm’s current page: rules change.</p><p class="ns-line">Not stated by Blue Guardian: when the target counts; best-day share; time limit. These run with the defaults in each box.</p></div>
+          <div class="pi-ghost" aria-hidden="true" data-info="earn2trade-gauntlet-mini-50k"><p class="muted">Read on 29 Oct 2026 from Earn2Trade’s <a href="https://www.earn2trade.com/gauntlet-mini" rel="nofollow noopener" tabindex="-1">rules page</a>. Check the firm’s current page: rules change.</p><p class="ns-line">Not stated by Earn2Trade: when the target counts; time limit. These run with the defaults in each box.</p></div>
+          <div class="pi-ghost" aria-hidden="true" data-info="ftmo-1-step"><p class="muted">Read on 29 Oct 2026 from FTMO’s <a href="https://ftmo.com/en/trading-objectives/" rel="nofollow noopener" tabindex="-1">rules page</a>. Check the firm’s current page: rules change.</p><p class="ns-line">Not stated by FTMO: minimum days; time limit. These run with the defaults in each box.</p></div>
+          <div class="pi-ghost" aria-hidden="true" data-info="ftmo-2-step-challenge"><p class="muted">Read on 29 Oct 2026 from FTMO’s <a href="https://ftmo.com/en/trading-objectives/" rel="nofollow noopener" tabindex="-1">rules page</a>. Check the firm’s current page: rules change.</p><p class="ns-line">Not stated by FTMO: best-day share; time limit. These run with the defaults in each box.</p></div>
+          <div class="pi-ghost" aria-hidden="true" data-info="fundednext-stellar-1-step"><p class="muted">Read on 29 Oct 2026 from FundedNext’s <a href="https://fundednext.com/general-rules/cfds/trading-objectives" rel="nofollow noopener" tabindex="-1">rules page</a>. Check the firm’s current page: rules change.</p><p class="ns-line">Not stated by FundedNext: when the target counts; best-day share. These run with the defaults in each box.</p></div>
+          <div class="pi-ghost" aria-hidden="true" data-info="fundednext-stellar-2-step-phase-1"><p class="muted">Read on 29 Oct 2026 from FundedNext’s <a href="https://fundednext.com/general-rules/cfds/trading-objectives" rel="nofollow noopener" tabindex="-1">rules page</a>. Check the firm’s current page: rules change.</p><p class="ns-line">Not stated by FundedNext: when the target counts; best-day share. These run with the defaults in each box.</p></div>
+          <div class="pi-ghost" aria-hidden="true" data-info="myfundedfutures-rapid-50k"><p class="muted">Read on 29 Oct 2026 from MyFundedFutures’s <a href="https://help.myfundedfutures.com/en/articles/13134709-rapid-plan-50k-a-comprehensive-look" rel="nofollow noopener" tabindex="-1">rules page</a>. Check the firm’s current page: rules change.</p><p class="ns-line">Not stated by MyFundedFutures: when the target counts; where the moving floor stops; what counts as a trading day; time limit; when the firm’s day starts. These run with the defaults in each box.</p></div>
+          <div class="pi-ghost" aria-hidden="true" data-info="the5ers-high-stakes-step-1"><p class="muted">Read on 29 Oct 2026 from The5%ers’s <a href="https://the5ers.com/high-stakes/" rel="nofollow noopener" tabindex="-1">rules page</a>. Check the firm’s current page: rules change.</p><p class="ns-line">Not stated by The5%ers: when the target counts; where the maximum loss is measured from; where the moving floor stops; best-day share; when the firm’s day starts. These run with the defaults in each box.</p></div>
+          <div class="pi-ghost" aria-hidden="true" data-info="topstep-50k-trading-combine"><p class="muted">Read on 29 Oct 2026 from Topstep’s <a href="https://help.topstep.com/en/articles/8284204-what-is-the-maximum-loss-limit" rel="nofollow noopener" tabindex="-1">rules page</a>. Check the firm’s current page: rules change.</p><p class="ns-line">Not stated by Topstep: when the target counts; what counts as a trading day; time limit. These run with the defaults in each box.</p></div>
+        </div>
       </div>
       <p class="small muted" id="ps-adult">Prop firms sell challenges only to adults (18+).</p>
-      <div id="ps-ns" class="notice notice-caution" hidden></div>
       <div class="field-grid">
       
       <div class="field">
@@ -133,7 +148,7 @@
       
       <div class="field">
         <label for="ps-daily">Daily loss limit (optional)</label><span class="hint" id="ps-daily-hint">The most the balance may fall within one day. Leave blank for none.</span>
-        <input id="ps-daily" type="text" inputmode="decimal" autocomplete="off" aria-describedby="ps-daily-hint ps-daily-ns ps-daily-err"><p class="ns-note small" id="ps-daily-ns" data-ns="daily_loss" hidden></p>
+        <input id="ps-daily" type="text" inputmode="decimal" autocomplete="off" aria-describedby="ps-daily-hint ps-daily-ns ps-daily-err"><p class="ns-note visually-hidden" id="ps-daily-ns" data-ns="daily_loss"></p>
         <p class="error" id="ps-daily-err" hidden></p>
       </div>
       
@@ -148,19 +163,19 @@
         <div class="check"><input type="radio" id="ps-trail-static" name="ps-trail" value="static" checked><label for="ps-trail-static">The starting balance (it never moves)</label></div>
         <div class="check"><input type="radio" id="ps-trail-trailing" name="ps-trail" value="trailing_eod"><label for="ps-trail-trailing">The highest balance at the end of a day (moves up)</label></div>
         <div class="check"><input type="radio" id="ps-trail-trade" name="ps-trail" value="trailing_trade"><label for="ps-trail-trade">The highest balance after any closed trade (moves up)</label></div>
-        <p class="ns-note small" id="ps-trail-ns" data-ns="drawdown" hidden></p>
+        <p class="ns-note visually-hidden" id="ps-trail-ns" data-ns="drawdown"></p>
       </fieldset>
       <div class="field-grid">
       
       <div class="field">
         <label for="ps-days">Time limit in trading days (optional)</label><span class="hint" id="ps-days-hint">A whole number from 1 to 365. Leave blank for none: the check stops at 250 trading days.</span>
-        <input id="ps-days" type="text" inputmode="numeric" autocomplete="off" aria-describedby="ps-days-hint ps-days-ns ps-days-err"><p class="ns-note small" id="ps-days-ns" data-ns="time_limit" hidden></p>
+        <input id="ps-days" type="text" inputmode="numeric" autocomplete="off" aria-describedby="ps-days-hint ps-days-ns ps-days-err"><p class="ns-note visually-hidden" id="ps-days-ns" data-ns="time_limit"></p>
         <p class="error" id="ps-days-err" hidden></p>
       </div>
       
       <div class="field">
         <label for="ps-mindays">Minimum days (optional)</label><span class="hint" id="ps-mindays-hint">Leave blank for none.</span>
-        <input id="ps-mindays" type="text" inputmode="numeric" autocomplete="off" aria-describedby="ps-mindays-hint ps-mindays-ns ps-mindays-err"><p class="ns-note small" id="ps-mindays-ns" data-ns="min_days" hidden></p>
+        <input id="ps-mindays" type="text" inputmode="numeric" autocomplete="off" aria-describedby="ps-mindays-hint ps-mindays-ns ps-mindays-err"><p class="ns-note visually-hidden" id="ps-mindays-ns" data-ns="min_days"></p>
         <p class="error" id="ps-mindays-err" hidden></p>
       </div>
       </div>
@@ -184,33 +199,33 @@
       <div class="field">
         <label for="ps-countday">A trading day needs</label>
         <select id="ps-countday" aria-describedby="ps-countday-ns ps-countday-err"><option value="any">Any closed trade</option><option value="nonzero">A trade with a result other than zero</option>
-        </select><p class="ns-note small" id="ps-countday-ns" data-ns="count_day_if" hidden></p>
+        </select><p class="ns-note visually-hidden" id="ps-countday-ns" data-ns="count_day_if"></p>
         <p class="error" id="ps-countday-err" hidden></p>
       </div>
         
       <div class="field">
         <label for="ps-consistency">Best day at most (% of total profit, optional)</label><span class="hint" id="ps-consistency-hint">Reaching the target with a bigger best day keeps the run going until the share falls.</span>
-        <input id="ps-consistency" type="text" inputmode="decimal" autocomplete="off" aria-describedby="ps-consistency-hint ps-consistency-ns ps-consistency-err"><p class="ns-note small" id="ps-consistency-ns" data-ns="consistency" hidden></p>
+        <input id="ps-consistency" type="text" inputmode="decimal" autocomplete="off" aria-describedby="ps-consistency-hint ps-consistency-ns ps-consistency-err"><p class="ns-note visually-hidden" id="ps-consistency-ns" data-ns="consistency"></p>
         <p class="error" id="ps-consistency-err" hidden></p>
       </div>
         
       <div class="field">
         <label for="ps-stopat">Moving floor stops at (optional)</label><span class="hint" id="ps-stopat-hint">An amount above the starting balance: 0 stops it at the starting balance.</span>
-        <input id="ps-stopat" type="text" inputmode="decimal" autocomplete="off" aria-describedby="ps-stopat-hint ps-stopat-ns ps-stopat-err"><p class="ns-note small" id="ps-stopat-ns" data-ns="trail_stop_at" hidden></p>
+        <input id="ps-stopat" type="text" inputmode="decimal" autocomplete="off" aria-describedby="ps-stopat-hint ps-stopat-ns ps-stopat-err"><p class="ns-note visually-hidden" id="ps-stopat-ns" data-ns="trail_stop_at"></p>
         <p class="error" id="ps-stopat-err" hidden></p>
       </div>
         
       <div class="field">
         <label for="ps-targetcheck">The target counts</label>
         <select id="ps-targetcheck" aria-describedby="ps-targetcheck-ns ps-targetcheck-err"><option value="eod">At the end of a day</option><option value="intraday">As soon as a closed trade reaches it</option>
-        </select><p class="ns-note small" id="ps-targetcheck-ns" data-ns="target_check" hidden></p>
+        </select><p class="ns-note visually-hidden" id="ps-targetcheck-ns" data-ns="target_check"></p>
         <p class="error" id="ps-targetcheck-err" hidden></p>
       </div>
         
       <div class="field">
         <label for="ps-daytz">A firm’s day starts in</label>
         <select id="ps-daytz" aria-describedby="ps-daytz-ns ps-daytz-err"><option value="file">My file’s own clock</option><option value="UTC">UTC</option><option value="Europe/Prague">Central European time (Prague)</option><option value="America/New_York">New York time</option><option value="America/Chicago">Chicago time (US Central)</option><option value="broker">Broker server time (GMT+2, GMT+3 in summer)</option><option value="Etc/GMT-3">GMT+3 all year</option>
-        </select><p class="ns-note small" id="ps-daytz-ns" data-ns="day_start" hidden></p>
+        </select><p class="ns-note visually-hidden" id="ps-daytz-ns" data-ns="day_start"></p>
         <p class="error" id="ps-daytz-err" hidden></p>
       </div>
         
@@ -259,6 +274,7 @@
       <p id="ps-file-status" class="small muted" role="status" hidden></p>
       <p id="ps-progress" class="progress-line small muted" hidden><progress aria-label="Reading your trades"></progress> <span data-elapsed aria-hidden="true"></span></p>
       <div id="ps-file-error" class="notice notice-error" role="alert" tabindex="-1" hidden></div>
+      <div id="ps-map" class="notice rc-map" role="group" aria-labelledby="ps-map-h" tabindex="-1" hidden></div>
       <div id="ps-tz-fields" class="field-grid">
         
       <div class="field">
@@ -306,7 +322,10 @@
     <p id="ps-status" class="muted" role="status" hidden></p>
   </section>
 
-  <div id="ps-out" class="tool-out rc-out" hidden></div>
+  <div class="rc-out-wrap">
+    <p id="ps-stale" class="notice notice-caution rc-stale-note" role="status" hidden><span>Rules or file changed — run again.</span> <button class="btn btn-secondary" id="ps-stale-run" type="button">Run again</button></p>
+    <div id="ps-out" class="tool-out rc-out" hidden></div>
+  </div>
 
   <section id="ps-whatif" class="section rc-whatif" aria-labelledby="ps-whatif-h" hidden>
     <h2 id="ps-whatif-h">Try a rule on your past days</h2>

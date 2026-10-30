@@ -10,14 +10,14 @@
 // Nothing is stored. With [flags] analytics on, a finished step loads a counting page in a hidden frame (count()).
 // Ranked suggestions are not on this page (whatif_ranked); neither is saving.
 
-import { createFileSlot, renderReadError, whileBusy, clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js?v=26ec2b4d';
-import { RUNS, DEFAULT_SEED, NO_LIMIT_CAP, METHOD_VERSION, WHATIF_TEXT, groupDays, simulate, ruleLabel, mcError, unavailableText, personalUnavailable, normRules } from './prop-sim-core.js?v=8dc5524e';
+import { createFileSlot, renderReadError, whileBusy, clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js?v=71ddefef';
+import { RUNS, DEFAULT_SEED, NO_LIMIT_CAP, METHOD_VERSION, WHATIF_TEXT, groupDays, simulate, ruleLabel, mcError, unavailableText, personalUnavailable, normRules } from './prop-sim-core.js?v=7c28de14';
 import { presetRules, NOT_STATED } from './challenge-presets.js?v=2e7fd947';
 import { HABITS, HABIT_TEXT, itemsFromTrades, isDatesOnly, habitFlags, dayFlags, realBreachDays, simulatedHabits, countFlags, MIN_BREACH_DAYS, MIN_BUSTS } from './habit-flags.js?v=72b76dd0';
 import { drawCard, cardBlob, altText } from '../card/readiness-card.js?v=b211143d';
 import { money, unitNote, pct, intText, el, DASH } from './format.js?v=acb0db51';
 import { parseStrict, parsePositive, parseNonNegative, parseWhole, InputError } from './num.js?v=8df99e34';
-import { SAMPLE_LABEL, FORMAT_NAMES, plural, tableWrap, rowsTable } from './file-tool.js?v=c246361c';
+import { SAMPLE_LABEL, FORMAT_NAMES, plural, tableWrap, rowsTable } from './file-tool.js?v=0b8658c4';
 
 const $ = (id) => document.getElementById(id);
 const MIN_RULE_BUSTS = 30;   // fewer busts: too few to say which rule broke most (as the old streak line)
@@ -28,7 +28,9 @@ let current = null;    // the preset picked (or null) and the rules it filled in
 let last = null;       // the latest check: {p, res, seq, real, sim, ...}
 let lastWhatIf = null;
 let lastRange = null;
+let stale = false;     // the rules, the file or the preset changed since the shown results
 let worker = null;
+let pending = null;    // resolves the running worker job; cancelWork() ends it with {cancelled: true}
 let slot = null;
 const counted = new Set();
 
@@ -67,16 +69,61 @@ function setFileStatus(text) {
 
 function clearFile() {
   loaded = null;
+  markStale();
+  cancelWork();   // a check still running on the previous file stops, and its result is dropped
   setFileStatus('');
   $('ps-file-error').hidden = true;
+  $('ps-map').hidden = true;
+  $('ps-map').replaceChildren();
+}
+
+// A table whose headings leave a needed column unnamed (TradeLocker's "Amount" was one): one choice per
+// missing field, from the file's own headings, then the same table is read again with those columns.
+const MAP_NAMES = {
+  date: 'Date and time', symbol: 'Symbol', side: 'Buy or sell', qty: 'Quantity (size)', price: 'Price',
+  open_time: 'Open time', close_time: 'Close time', direction: 'Long or short', open_price: 'Open price', close_price: 'Close price',
+};
+function showMapStep(need, choose) {
+  const box = $('ps-map');
+  const taken = new Set(Object.values(need.chosen));
+  const options = need.labels.map((l, i) => [i, l || `Column ${i + 1}`]).filter(([i]) => !taken.has(i));
+  const err = el('p', { class: 'error', id: 'ps-map-err', hidden: true });
+  const fields = need.missing.map((f) => el('div', { class: 'field' },
+    el('label', { for: `ps-map-${f}`, text: MAP_NAMES[f] || f }),
+    el('select', { id: `ps-map-${f}`, 'data-field': f, 'aria-describedby': 'ps-map-err' },
+      el('option', { value: '', text: 'Choose a column' }), ...options.map(([i, l]) => el('option', { value: String(i), text: l })))));
+  const btn = el('button', { class: 'btn btn-secondary', type: 'button', id: 'ps-map-btn', text: 'Read with these columns' });
+  btn.addEventListener('click', () => {
+    const picked = {};
+    const seen = new Set();
+    for (const f of need.missing) {
+      const v = $(`ps-map-${f}`).value;
+      if (v === '' || seen.has(v)) {
+        err.textContent = v === '' ? 'Pick a column for each box.' : 'Pick a different column for each box.';
+        err.hidden = false;
+        $(`ps-map-${f}`).focus();
+        return;
+      }
+      seen.add(v);
+      picked[f] = Number(v);
+    }
+    choose(picked);
+  });
+  box.replaceChildren(el('strong', { id: 'ps-map-h', text: 'Which column is which?' }),
+    el('p', { text: `No heading in your ${need.missing.length === 1 ? 'table names this column' : 'table names these columns'}. Pick ${need.missing.length === 1 ? 'it' : 'each one'} from your headings.` }),
+    el('div', { class: 'field-grid' }, ...fields), err, el('p', { class: 'btn-row' }, btn));
+  box.hidden = false;
+  box.focus();
 }
 
 function showLoaded(out, label) {
   const r = out.result;
   const datesOnly = isDatesOnly(r.trades);
-  loaded = { trades: r.trades, label, format: r.format, tz_label: r.tz_label, beta: !r.verified_format,
+  // whole before it is kept: a check never sees trades without their habit flags
+  const next = { trades: r.trades, label, format: r.format, tz_label: r.tz_label, beta: !r.verified_format,
     unit: r.trades[0].pnl_unit, datesOnly, n: r.trades.length, warnings: r.warnings };
-  loaded.flags = habitFlags(itemsFromTrades(r.trades), { datesOnly });
+  next.flags = habitFlags(itemsFromTrades(r.trades), { datesOnly });
+  loaded = next;
   // the file's zone, preset by format where the format says it (MT4/MT5: the broker's server clock)
   if (label !== 'your pasted table' && !$('ps-filetz').dataset.touched) {
     $('ps-filetz').value = (r.format === 'mt5' || r.format === 'mt4') ? 'broker' : label === SAMPLE_LABEL ? 'UTC' : 'local';
@@ -88,30 +135,76 @@ function showLoaded(out, label) {
     (datesOnly ? ' The file has dates but no times.' : ''));
 }
 
+// ------------------------------------------------------------------ results that no longer match the form
+// After a change to the rules, the file or the preset, the shown results are dimmed under a note, and
+// nothing built on them (Try this rule, the range, the card, the export) runs until the next check.
+const STALE_PARTS = ['ps-out', 'ps-whatif', 'ps-expert', 'ps-share'];
+const STALE_BUTTONS = ['ps-wi-run', 'ps-range-btn', 'ps-card-dl', 'ps-card-share', 'ps-csv', 'ps-json'];
+function setStale(on) {
+  stale = on;
+  // inert: the old results stay on screen, dimmed, but cannot be used or reached until the next run
+  for (const id of STALE_PARTS) { $(id).classList.toggle('rc-stale', on); $(id).inert = on; }
+  for (const id of STALE_BUTTONS) if ($(id)) $(id).disabled = on;
+  $('ps-stale').hidden = !on;
+}
+function markStale() { if (last && !stale) setStale(true); }
+
 // ------------------------------------------------------------------ presets
 const NS_DEFAULT = {
   daily_loss: 'none', drawdown: 'the starting balance', trail_stop_at: 'no stop', consistency: 'none', min_days: 'none',
   count_day_if: 'any closed trade', time_limit: 'no time limit', target_check: 'the end of the day',
   day_start: 'your file’s own clock, at midnight',
 };
-const NS_NAMES = {
-  daily_loss: 'daily loss limit', drawdown: 'where the maximum loss is measured from', trail_stop_at: 'where the moving floor stops',
-  consistency: 'best-day share', min_days: 'minimum days', count_day_if: 'what counts as a trading day',
-  time_limit: 'time limit', target_check: 'when the target counts', day_start: 'when the firm’s day starts',
-};
 const setVal = (id, v) => { $(id).value = v === null || v === undefined ? '' : String(v); };
 const num2 = (x) => String(Math.round(x * 100) / 100);
 
-function applyPreset() {
+// Every rule box, empty or at its default. A preset change starts from these, so nothing typed for one
+// preset (the account size included) carries over to the next.
+const RULE_BOXES = {
+  'ps-account': '', 'ps-target': '', 'ps-daily': '', 'ps-maxloss': '', 'ps-days': '', 'ps-mindays': '',
+  'ps-mindays-kind': 'trading', 'ps-profmin': '', 'ps-countday': 'any', 'ps-consistency': '', 'ps-stopat': '',
+  'ps-targetcheck': 'eod', 'ps-daytz': 'file', 'ps-dayhour': '',
+};
+// "Example rules": the rules the example data is shown with, named as such and no firm's.
+const EXAMPLE_RULES = { 'ps-account': '10000', 'ps-target': '600', 'ps-daily': '250', 'ps-maxloss': '500', 'ps-days': '60' };
+function resetRules(keepSize) {
+  for (const [id, v] of Object.entries(RULE_BOXES)) if (!(keepSize && id === 'ps-account')) setVal(id, v);
+  $('ps-trail-static').checked = true;
+}
+
+// The boxes a not-stated value leaves empty show it as their placeholder; the rest are named in the line under
+// the preset. Each box's note is also read out with it (aria-describedby, visually hidden).
+const NS_BOX = { daily_loss: 'ps-daily', time_limit: 'ps-days', min_days: 'ps-mindays', consistency: 'ps-consistency', trail_stop_at: 'ps-stopat' };
+
+// The line under the preset picker: where the rules were read and what the firm leaves unstated, copied from
+// the page's own unseen version for that pick (tool-prop-sim.html keeps the space for the longest one).
+function fillInfo(id) {
+  const ghost = [...document.querySelectorAll('#ps-preset-info .pi-ghost')].find((g) => g.dataset.info === id);
+  const [srcLine, nsLine] = ghost.children;
+  $('ps-preset-source').replaceChildren(...[...srcLine.childNodes].map((n) => n.cloneNode(true)));
+  for (const a of $('ps-preset-source').querySelectorAll('a')) a.removeAttribute('tabindex');
+  $('ps-ns').textContent = nsLine.textContent;
+  return id && id !== 'example' ? presets.presets.find((x) => x.id === id) : null;
+}
+
+// keepSize: the account size was just typed (a percent preset scales to it); any other call is a preset
+// change and resets every box to the preset's own values.
+function applyPreset(keepSize = false) {
   const id = $('ps-preset').value;
-  const src = $('ps-preset-source');
-  for (const n of document.querySelectorAll('.ns-note')) { n.hidden = true; n.textContent = ''; }
-  $('ps-ns').hidden = true;
+  for (const n of document.querySelectorAll('.ns-note')) n.textContent = '';
+  for (const box of Object.values(NS_BOX)) $(box).placeholder = '';
   $('ps-limits-preset').hidden = true;
-  if (!id) { current = null; src.hidden = true; src.replaceChildren(); return; }
-  const p = presets.presets.find((x) => x.id === id);
+  resetRules(keepSize === true);
+  const p = fillInfo(id);
+  if (!p) {
+    current = null;
+    if (id === 'example') for (const [box, v] of Object.entries(EXAMPLE_RULES)) setVal(box, v);
+    return;
+  }
   let size = null;
-  try { size = $('ps-account').value.trim() ? parsePositive($('ps-account').value, 'the account size') : null; } catch (e) { size = null; }
+  if (keepSize === true) {
+    try { size = $('ps-account').value.trim() ? parsePositive($('ps-account').value, 'the account size') : null; } catch (e) { size = null; }
+  }
   if (!size) { size = p.account_size; setVal('ps-account', size); }
   const pr = presetRules(p, size);
   const r = pr.rules;
@@ -129,19 +222,9 @@ function applyPreset() {
   setVal('ps-targetcheck', r.target_check);
   setVal('ps-daytz', pr.dayStart ? pr.dayStart.tz : 'file');
   setVal('ps-dayhour', pr.dayStart ? pr.dayStart.hour : 0);
-  src.replaceChildren(`Read on ${p.read_text} from ${p.firm}’s `,
-    el('a', { href: p.url, rel: 'nofollow noopener', text: 'rules page' }), '. Check the firm’s current page: rules change.');
-  src.hidden = false;
   for (const f of pr.notStated) {
-    for (const n of document.querySelectorAll(`.ns-note[data-ns="${f}"]`)) {
-      n.textContent = `Not stated by the firm. The check uses ${NS_DEFAULT[f]}.`;
-      n.hidden = false;
-    }
-  }
-  if (pr.notStated.length) {
-    $('ps-ns').replaceChildren(el('strong', { text: 'Not stated by the firm' }),
-      `${p.firm}’s rules page does not state: ${pr.notStated.map((f) => NS_NAMES[f]).join('; ')}. These run with the defaults shown under each box.`);
-    $('ps-ns').hidden = false;
+    for (const n of document.querySelectorAll(`.ns-note[data-ns="${f}"]`)) n.textContent = `Not stated by the firm. The check uses ${NS_DEFAULT[f]}.`;
+    if (NS_BOX[f] && $(NS_BOX[f]).value === '') $(NS_BOX[f]).placeholder = `Not stated by the firm: ${NS_DEFAULT[f]}`;
   }
   if (p.not_modelled.length) {
     $('ps-limits-preset').replaceChildren(el('p', { text: `For ${p.firm}, ${p.program}, this check does not model:` }),
@@ -150,9 +233,6 @@ function applyPreset() {
   }
   current = { preset: p, snapshot: null };
   current.snapshot = JSON.stringify(readRulesQuiet());
-  if (!$('ps-more').open && pr.notStated.some((f) => ['consistency', 'count_day_if', 'trail_stop_at', 'target_check', 'day_start'].includes(f))) {
-    $('ps-more').open = true;   // the notes under those boxes are inside "More rules"
-  }
 }
 
 // ------------------------------------------------------------------ validation
@@ -243,7 +323,9 @@ function read() {
     p.avg_loss = get('ps-avgloss', parsePositive);
     p.trades_per_day = get('ps-tpd', (v, l) => parseWhole(v, l, 1, 50));
   } else {
-    if (!loaded) {
+    if (!loaded && slot.state === 'mapping') {
+      problems.push({ id: 'ps-map', message: 'Pick the columns above, then press Read with these columns.' });
+    } else if (!loaded) {
       const msg = m === 'paste' ? 'Paste a table and press Read the table, or switch to a file or summary numbers.'
         : 'Choose a trade file, or try the example data, or switch to summary numbers.';
       problems.push({ id: m === 'paste' ? 'ps-paste' : 'ps-file', message: msg });
@@ -268,14 +350,22 @@ function read() {
 }
 
 // ------------------------------------------------------------------ the worker
+function cancelWork() {
+  if (worker) { worker.terminate(); worker = null; }
+  if (pending) { const done = pending; pending = null; done({ cancelled: true }); }
+}
+
+// One worker job at a time: a new one, or a new file, ends the one before ({cancelled: true}).
 function work(msg, statusEl, text) {
-  if (worker) worker.terminate();
+  cancelWork();
   statusEl.textContent = text;
   statusEl.hidden = false;
   return new Promise((resolve) => {
-    worker = new Worker(new URL('./prop-sim-worker.js?v=c3f8a7e2', import.meta.url), { type: 'module' });
-    const fail = () => { if (worker) { worker.terminate(); worker = null; } resolve(null); };
-    worker.onmessage = (e) => { worker.terminate(); worker = null; resolve(e.data && !e.data.error ? e.data : null); };
+    const done = (v) => { if (pending === done) pending = null; resolve(v); };
+    pending = done;
+    worker = new Worker(new URL('./prop-sim-worker.js?v=2afa5068', import.meta.url), { type: 'module' });
+    const fail = () => { if (worker) { worker.terminate(); worker = null; } done(null); };
+    worker.onmessage = (e) => { worker.terminate(); worker = null; done(e.data && !e.data.error ? e.data : null); };
     worker.onerror = (e) => { if (e && e.preventDefault) e.preventDefault(); fail(); };
     worker.onmessageerror = fail;
     worker.postMessage(msg);
@@ -288,9 +378,14 @@ async function run(ev) {
   const input = read();
   if (!input) return;
   const btn = $('ps-run');
+  const data = input.p.mode === 'file' ? loaded : null;   // the trades this check runs on
   btn.disabled = true;
   const out = await work(input.p, $('ps-status'), `Running ${intText(RUNS)} replays of your past days…`);
   btn.disabled = false;
+  if ((out && out.cancelled) || (input.p.mode === 'file' && (!data || data !== loaded || !data.flags))) {
+    $('ps-status').hidden = true;   // a new file arrived while it ran: that result is not shown
+    return;
+  }
   if (!out || !out.result) {
     $('ps-status').textContent = 'The check could not run in this browser. Press Run the check to try again.';
     return;
@@ -298,14 +393,15 @@ async function run(ev) {
   $('ps-status').hidden = true;
   const res = out.result;
   const file = input.p.mode === 'file';
-  const fd = file ? dayFlags(loaded.flags, input.grouped.index) : null;
+  const fd = file ? dayFlags(data.flags, input.grouped.index) : null;
   last = {
-    ...input, res, file, fd, unit: file ? loaded.unit : 'account', preset: current ? current.preset : null,
+    ...input, res, file, fd, data, unit: file ? data.unit : 'account', preset: current ? current.preset : null,
+    exampleRules: !current && $('ps-preset').value === 'example',
     edited: current ? current.snapshot !== JSON.stringify(input.p.rules) : false,
     seq: file ? simulate({ mode: 'sequence', days: input.p.days, rules: input.p.rules }) : null,
-    real: file ? realBreachDays(input.p.days, fd, input.p.rules.daily_loss, { datesOnly: loaded.datesOnly }) : null,
-    sim: file ? simulatedHabits(res, fd, { datesOnly: loaded.datesOnly }) : null,
-    example: file && loaded.label === SAMPLE_LABEL,
+    real: file ? realBreachDays(input.p.days, fd, input.p.rules.daily_loss, { datesOnly: data.datesOnly }) : null,
+    sim: file ? simulatedHabits(res, fd, { datesOnly: data.datesOnly }) : null,
+    example: file && data.label === SAMPLE_LABEL,
   };
   lastWhatIf = null;
   lastRange = null;
@@ -407,11 +503,11 @@ function render() {
   const s = shares(res);
   const headline = `Passed in ${whole(s.pass)} of ${intText(res.runs)} replays`;
   const source = last.file
-    ? `whole trading days drawn at random from ${last.example ? 'the example data' : loaded.label} (${plural(p.days.length, 'day', 'days')}, ${plural(loaded.n, 'trade', 'trades')})`
+    ? `whole trading days drawn at random from ${last.example ? 'the example data' : last.data.label} (${plural(p.days.length, 'day', 'days')}, ${plural(last.data.n, 'trade', 'trades')})`
     : `${plural(p.trades_per_day, 'trade', 'trades')} a day, each a win or a loss at the rate you entered`;
   const warn = [];
   if (last.file && p.days.length < 30) warn.push(`Your trades cover ${plural(p.days.length, 'trading day', 'trading days')}, so the results lean heavily on a few days.`);
-  if (last.file && loaded.beta) warn.push('This file format is in beta: check a few trades by hand on the trade-stats page.');
+  if (last.file && last.data.beta) warn.push('This file format is in beta: check a few trades by hand on the trade-stats page.');
   const outcome = el('div', { class: 'rc-card rc-card-wide', id: 'ps-v-outcome' },
     el('h3', { text: 'How the replays ended' }),
     stackBar(res, `Passed ${whole(s.pass)}, broke a rule ${whole(s.bust)}, out of time ${whole(s.timeout)}`),
@@ -427,6 +523,7 @@ function render() {
     el('div', { class: 'rc-visuals' }, outcome, ruleCard(res), last.file ? habitsCard(last.real, p.rules) : null),
   ].filter(Boolean));
   $('ps-out').hidden = false;
+  setStale(false);
   renderWhatIfForm();
   $('ps-wi-out').hidden = true;
   $('ps-whatif').hidden = false;
@@ -468,7 +565,7 @@ function syncWiRow(n, reset) {
 function renderWhatIfForm() {
   syncWiRow(1, false);
   syncWiRow(2, false);
-  const noTimes = !last.file || loaded.datesOnly;
+  const noTimes = !last.file || last.data.datesOnly;
   for (const n of [1, 2]) {
     const opt = $(`ps-wi-rule${n}`).querySelector('option[value="cooldown_s"]');
     opt.disabled = noTimes;
@@ -506,7 +603,7 @@ function readPersonal() {
 }
 
 async function runWhatIf() {
-  if (!last) return;
+  if (!last || stale) return;
   const personal = readPersonal();
   if (!personal) return;
   const why = personalUnavailable(last.p, personal);
@@ -514,7 +611,8 @@ async function runWhatIf() {
   const btn = $('ps-wi-run');
   btn.disabled = true;
   const out = await work({ op: 'whatif', p: last.p, personal }, $('ps-wi-status'), `Running the same ${intText(RUNS)} replays with your rule…`);
-  btn.disabled = false;
+  btn.disabled = stale;
+  if (out && out.cancelled) { $('ps-wi-status').hidden = true; return; }
   if (!out || !out.whatif || out.whatif.unavailable) {
     $('ps-wi-status').textContent = out && out.whatif && out.whatif.unavailable ? out.whatif.message : 'The rule could not run in this browser. Press Try this rule again.';
     return;
@@ -552,7 +650,7 @@ function rulesText() {
   const r = last.p.rules;
   const m = (n) => money(n, last.unit, { sign: false });
   const dd = { static: 'from the starting balance', trailing_eod: 'from the highest end-of-day balance', trailing_trade: 'from the highest balance after any trade' }[r.drawdown];
-  const from = last.preset ? `${last.edited ? 'Edited from' : 'As'} ${last.preset.firm}, ${last.preset.program} (rules_lib ${presets.rules_lib}). ` : 'Custom rules. ';
+  const from = last.preset ? `${last.edited ? 'Edited from' : 'As'} ${last.preset.firm}, ${last.preset.program} (rules_lib ${presets.rules_lib}). ` : last.exampleRules ? 'Example rules. ' : 'Custom rules. ';
   return from + `Profit target ${m(r.target)}${r.target_check === 'intraday' ? ' (counts as soon as reached)' : ''}; daily loss limit ${r.daily_loss === null ? 'none' : m(r.daily_loss)}; ` +
     `maximum loss ${m(r.max_loss)} ${dd}${r.trail_stop_at !== null && r.drawdown !== 'static' ? `, stopping at ${m(r.trail_stop_at)}` : ''}; ` +
     `${r.time_limit === null ? `no time limit (stopped at ${NO_LIMIT_CAP} trading days)` : plural(r.time_limit, 'trading day', 'trading days')}; ` +
@@ -569,8 +667,8 @@ function settingsRows() {
     ['Draw unit', last.file ? 'one whole past trading day, with replacement' : 'one trade at a time, win or loss'],
     ['Day boundary', last.file ? ds : DASH], ['File time zone used', last.file ? tz : DASH],
     ['No-limit cap', `${NO_LIMIT_CAP} trading days`],
-    ['Trades read', last.file ? intText(loaded.n) : DASH], ['Days read', last.file ? intText(p.days.length) : DASH],
-    ['Dates but no times', last.file ? (loaded.datesOnly ? 'yes' : 'no') : DASH], ['Rules library', presets.rules_lib || DASH],
+    ['Trades read', last.file ? intText(last.data.n) : DASH], ['Days read', last.file ? intText(p.days.length) : DASH],
+    ['Dates but no times', last.file ? (last.data.datesOnly ? 'yes' : 'no') : DASH], ['Rules library', presets.rules_lib || DASH],
   ];
 }
 
@@ -616,7 +714,7 @@ function renderExpert() {
     el('dl', { class: 'stats' }, ...facts.map(([l, v, k]) => el('div', { class: 'stat' }, el('dt', { text: l }), el('dd', { text: v, 'data-k': k })))),
     el('p', { id: 'ps-streak', 'data-busts': String(res.bust), text: streakLine(res) }));
   if (last.file) {
-    const c = countFlags(loaded.flags);
+    const c = countFlags(last.data.flags);
     const r = last.real, sm = last.sim;
     body.push(el('h3', { text: 'Habits, raw' }),
       tableWrap('Habits, raw', rowsTable(`Habit counts (breach days: ${intText(r.n_breach)}; fewer than ${MIN_BREACH_DAYS} is too few; replays: fewer than ${MIN_BUSTS} busts is too few)`,
@@ -671,10 +769,12 @@ function timeline(seq) {
 }
 
 async function runRange() {
+  if (stale) return;
   const btn = $('ps-range-btn');
   btn.disabled = true;
   const out = await work({ op: 'range', p: last.p, personal: lastWhatIf ? lastWhatIf.personal : null }, $('ps-range-status'), 'Computing the range: 200 resamples of your days…');
-  btn.disabled = false;
+  btn.disabled = stale;
+  if (out && out.cancelled) { $('ps-range-status').hidden = true; return; }
   if (!out || !out.range) { $('ps-range-status').textContent = 'The range could not be computed in this browser.'; return; }
   $('ps-range-status').hidden = true;
   lastRange = out.range;
@@ -699,7 +799,7 @@ function exportData() {
   const outKeys = ['runs', 'pass', 'bust', 'timeout', 'bust_daily', 'bust_max', 'bust_after_streak', 'held_consistency', 'held_min_days', 'capped', 'median_pass_days', 'median_bust_days', 'trades_seen', 'trades_left_out'];
   const data = {
     schema: 'donttrade.readiness-check.results.v1', method: METHOD_VERSION.paired, rules_lib: presets.rules_lib,
-    preset_id: last.preset ? last.preset.id : 'custom', edited_from_preset: last.edited,
+    preset_id: last.preset ? last.preset.id : last.exampleRules ? 'example' : 'custom', edited_from_preset: last.edited,
     settings: { runs: p.runs, seed: p.seed, stream: 'paired', mode: last.file ? (last.example ? 'example' : 'file') : 'manual',
       day_start: last.dayStart, file_time_zone: last.fileTz, no_limit_cap: NO_LIMIT_CAP },
     rules: p.rules, account_size: last.accountSize,
@@ -782,17 +882,20 @@ function init() {
   try { presets = JSON.parse($('ps-presets').textContent); } catch (e) { presets = { presets: [], firms: [], rules_lib: '' }; }
   for (const r of document.querySelectorAll('input[name="ps-mode"]')) r.addEventListener('change', syncMode);
   $('ps-filetz').addEventListener('change', () => { $('ps-filetz').dataset.touched = '1'; syncTz(); });
-  $('ps-preset').addEventListener('change', applyPreset);
-  $('ps-account').addEventListener('change', () => { if (current && current.preset.scale === 'percent') applyPreset(); });
+  $('ps-preset').addEventListener('change', () => applyPreset(false));
+  $('ps-account').addEventListener('change', () => { if (current && current.preset.scale === 'percent') applyPreset(true); });
   slot = createFileSlot({
     progressBox: $('ps-progress'), onStage: setFileStatus, onClear: clearFile, onResult: showLoaded,
     onError: (err, retry) => renderReadError($('ps-file-error'), err, retry),
+    onMapNeeded: showMapStep,
   });
   $('ps-file').addEventListener('change', (e) => slot.pickFile(e.target.files[0], 'your file'));
   $('ps-sample-btn').addEventListener('click', () => {
-    // the example data also fills example rules where the boxes are empty, not any firm's
-    for (const [id, v] of [['ps-target', '600'], ['ps-daily', '250'], ['ps-maxloss', '500'], ['ps-days', '60']]) {
-      if ($(id).value.trim() === '') $(id).value = v;
+    // The example data loads only the file: a firm's preset or rules typed by hand stay as they are. With
+    // custom rules and no target or maximum loss typed yet, the preset switches to "Example rules".
+    if ($('ps-preset').value === '' && $('ps-target').value.trim() === '' && $('ps-maxloss').value.trim() === '') {
+      $('ps-preset').value = 'example';
+      applyPreset(false);
     }
     slot.readBytes(new TextEncoder().encode($('ps-sample').textContent.replace(/^\s+/, '')), SAMPLE_LABEL);
   });
@@ -805,6 +908,11 @@ function init() {
     slot.readPaste($('ps-paste').value, 'your pasted table');
   });
   $('ps-form').addEventListener('submit', run);
+  // typing a table is not a change until it is read; the column choices change nothing until then either
+  const changed = (e) => { if (e.target.id !== 'ps-paste' && !e.target.closest('#ps-map')) markStale(); };
+  $('ps-form').addEventListener('input', changed);
+  $('ps-form').addEventListener('change', changed);
+  $('ps-stale-run').addEventListener('click', () => $('ps-form').requestSubmit());
   for (const n of [1, 2]) $(`ps-wi-rule${n}`).addEventListener('change', () => syncWiRow(n, true));
   $('ps-wi-run').addEventListener('click', runWhatIf);
   $('ps-wi-card').addEventListener('change', () => { if (last) drawShareCard(); });

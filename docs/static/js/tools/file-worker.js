@@ -4,6 +4,10 @@
 //
 // Messages in:  {id, bytes: Uint8Array}  read the file
 //               {id, paste: string}     read a table pasted from a platform's screen (runFiles)
+//               … ask: true             (either of the two above) a file or table whose headings
+//                                       leave a needed column unnamed answers {mapNeeded} instead of
+//                                       an error, and one read by its headings alone answers {result}
+//               … cols: {field: index}  the columns the person picked for those fields
 //               {id, noise: true}       then run the noise checks on the trades just read (the
 //                                       page asks once it has drawn the result, so the two never
 //                                       compete for the CPU)
@@ -13,15 +17,44 @@
 //                                                       on the page, so the page parses it
 //               {error: EngineError JSON}               the file could not be read
 //               {result: slim ParseResult}              see slim() below (trades as columns)
+//               {mapNeeded: {layout, missing, labels, chosen}}  (ask only) the fields no heading
+//                                       names, and the file's headings to pick them from
 //               {noise: noiseChecks(...)}                after {noise: true}
 //               {crash: message}                        a bug, not a bad file
 //
 // Nothing here touches the network, storage or the console. Only what the pages render is
 // sent back: the trades and counts, never the raw rows.
 
-import { runFile, runFiles } from '../engine/index.js?v=87619422';
+import { runFile, runFiles } from '../engine/index.js?v=8410d06a';
 import { decodeBytes, isHtml } from '../engine/csv.js?v=7dca0e6f';
 import { noiseChecks } from '../engine/noise.js?v=d0f6a787';
+import { inspect, REQUIRED } from '../engine/mapping.js?v=51ef176d';
+import { EngineError, MESSAGES } from '../engine/errors.js?v=8ee10796';
+
+// The errors a short "which column is which" step can answer (ask: true).
+const ASKABLE = new Set(['E_MISSING_COLUMN', 'E_UNKNOWN_FORMAT']);
+const MAX_LABEL = 60;
+
+// A file the known formats could not read, read by its headings (the importer's guess), with the
+// columns the person picked (cols) taken first. → {result} | {error} | {mapNeeded}. Only headings
+// leave the worker, never a row.
+function readByHeadings(item, cols, error) {
+  let g = null, labels = [];
+  try {
+    const ins = inspect(item, cols ? { cols } : {});
+    g = ins.guess;
+    labels = (ins.peek.labels || ins.peek.headers).map((x) => String(x).slice(0, MAX_LABEL));
+  } catch (e) {
+    if (!e || e.name !== 'EngineError') throw e;
+    return { error: error || e.toJSON() };
+  }
+  if (!g) return { error: error || new EngineError('E_UNKNOWN_FORMAT', MESSAGES.E_UNKNOWN_FORMAT).toJSON() };
+  const missing = REQUIRED[g.layout].filter((f) => !(f === 'side' && g.mapping.side_from === 'sign') && g.mapping.cols[f] === null);
+  if (missing.length) return { mapNeeded: { layout: g.layout, missing, labels, chosen: cols || {} } };
+  if (g.questions.length && !cols) return { error };   // a date order or number style to settle: the mapper's job
+  const out = runFiles([item], { mapping: g.mapping });
+  return out.error && !cols ? { error } : out;
+}
 
 // The pages need a few labels and a few numbers per trade. Copying 50,000 trade objects to the
 // page costs the main thread ~0.3 s to unpack, so the trades travel as typed-array columns
@@ -68,7 +101,11 @@ self.onmessage = (ev) => {
       return;
     }
     send({ stage: 'parsing' });
-    const out = paste ? runFiles([{ paste: msg.paste }]) : runFile(msg.bytes);
+    const item = paste ? { paste: msg.paste } : msg.bytes;
+    const cols = msg.cols && typeof msg.cols === 'object' ? msg.cols : null;
+    let out = cols ? readByHeadings(item, cols, null) : paste ? runFiles([item]) : runFile(item);
+    if (!cols && msg.ask === true && out.error && ASKABLE.has(out.error.code)) out = readByHeadings(item, null, out.error);
+    if (out.mapNeeded) { send({ mapNeeded: out.mapNeeded }); return; }
     if (out.error) { send({ error: out.error }); return; }
     // Only two numbers per trade are kept for the checks: no symbol, no time, nothing else.
     lastTrades = out.result.trades.map((t) => ({ pnl: Number(t.pnl), hold_s: Number(t.hold_s) }));

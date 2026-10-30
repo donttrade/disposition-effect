@@ -13,11 +13,11 @@
 
 import { clean, normHeader, parseNumber, resolveNumberStyle, checkQuoting, parseDateFmt, fallBackClose,
   numberShape, DATE_FORMATS, wideRows, splitCell, decodeBytes, isHtml, sniffDelimiter, parseCsv, fromPaste } from './csv.js?v=7dca0e6f';
-import { ISO_CURRENCIES, checkCurrencyColumn } from './detect.js?v=3d28a2dd';
+import { ISO_CURRENCIES, checkCurrencyColumn } from './detect.js?v=fa17739c';
 import { fail, LIMITS } from './errors.js?v=8ee10796';
-import { reqNumber, optNumber, skip, isEmptyRow, htmlRows } from './mt.js?v=3f5ee677';
-import { sideLetter } from './generic.js?v=b28059a4';
-import { CME_MULTIPLIERS } from './tradovate.js?v=038beb75';
+import { reqNumber, optNumber, skip, isEmptyRow, htmlRows } from './mt.js?v=22f54b12';
+import { sideLetter } from './generic.js?v=fdcacce4';
+import { CME_MULTIPLIERS } from './tradovate.js?v=a1e46006';
 
 // ---------------------------------------------------------------- reading one file or paste
 // An item is the bytes of a file (Uint8Array) or a pasted table ({paste: text}).

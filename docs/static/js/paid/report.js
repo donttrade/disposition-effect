@@ -6,7 +6,7 @@
 // Every number on the page comes from the server's Report or from the file in this
 // tab; the wording only describes past trades (NON-ADVISER A3).
 
-import { runFile } from '../engine/index.js?v=87619422';
+import { runFile } from '../engine/index.js?v=8410d06a';
 import { ics, retestLine, RETEST_LINE } from './retest-copy.js?v=0c170eab';
 import { pgrPlrCounts } from '../engine/pgr.js?v=4c675fe5';
 import { stripRows, spanLine } from './strip.js?v=03137080';
