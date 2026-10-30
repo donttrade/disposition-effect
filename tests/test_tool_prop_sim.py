@@ -143,7 +143,8 @@ def fill(page, values):
 
 def run_ui(page):
     page.click("#ps-run")
-    page.wait_for_selector("#ps-out:not([hidden])", timeout=60000)
+    # a change to the form leaves the old results on screen, dimmed (.rc-stale), until the new run renders
+    page.wait_for_selector("#ps-out:not([hidden]):not(.rc-stale)", timeout=60000)
     page.evaluate("document.getElementById('ps-expert').open = true")   # the raw table is in Expert details
     return {k: page.inner_text(f'tr[data-outcome="{k}"] td:nth-child(2)') for k in ("pass", "bust", "timeout")}
 
