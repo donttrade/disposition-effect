@@ -162,16 +162,33 @@ const NS_NAMES = {
 const setVal = (id, v) => { $(id).value = v === null || v === undefined ? '' : String(v); };
 const num2 = (x) => String(Math.round(x * 100) / 100);
 
-function applyPreset() {
+// Every rule box, empty or at its default. A preset change starts from these, so nothing typed for one
+// preset (the account size included) carries over to the next.
+const RULE_BOXES = {
+  'ps-account': '', 'ps-target': '', 'ps-daily': '', 'ps-maxloss': '', 'ps-days': '', 'ps-mindays': '',
+  'ps-mindays-kind': 'trading', 'ps-profmin': '', 'ps-countday': 'any', 'ps-consistency': '', 'ps-stopat': '',
+  'ps-targetcheck': 'eod', 'ps-daytz': 'file', 'ps-dayhour': '',
+};
+function resetRules(keepSize) {
+  for (const [id, v] of Object.entries(RULE_BOXES)) if (!(keepSize && id === 'ps-account')) setVal(id, v);
+  $('ps-trail-static').checked = true;
+}
+
+// keepSize: the account size was just typed (a percent preset scales to it); any other call is a preset
+// change and resets every box to the preset's own values.
+function applyPreset(keepSize = false) {
   const id = $('ps-preset').value;
   const src = $('ps-preset-source');
   for (const n of document.querySelectorAll('.ns-note')) { n.hidden = true; n.textContent = ''; }
   $('ps-ns').hidden = true;
   $('ps-limits-preset').hidden = true;
+  resetRules(keepSize === true);
   if (!id) { current = null; src.hidden = true; src.replaceChildren(); return; }
   const p = presets.presets.find((x) => x.id === id);
   let size = null;
-  try { size = $('ps-account').value.trim() ? parsePositive($('ps-account').value, 'the account size') : null; } catch (e) { size = null; }
+  if (keepSize === true) {
+    try { size = $('ps-account').value.trim() ? parsePositive($('ps-account').value, 'the account size') : null; } catch (e) { size = null; }
+  }
   if (!size) { size = p.account_size; setVal('ps-account', size); }
   const pr = presetRules(p, size);
   const r = pr.rules;
@@ -861,8 +878,8 @@ function init() {
   try { presets = JSON.parse($('ps-presets').textContent); } catch (e) { presets = { presets: [], firms: [], rules_lib: '' }; }
   for (const r of document.querySelectorAll('input[name="ps-mode"]')) r.addEventListener('change', syncMode);
   $('ps-filetz').addEventListener('change', () => { $('ps-filetz').dataset.touched = '1'; syncTz(); });
-  $('ps-preset').addEventListener('change', applyPreset);
-  $('ps-account').addEventListener('change', () => { if (current && current.preset.scale === 'percent') applyPreset(); });
+  $('ps-preset').addEventListener('change', () => applyPreset(false));
+  $('ps-account').addEventListener('change', () => { if (current && current.preset.scale === 'percent') applyPreset(true); });
   slot = createFileSlot({
     progressBox: $('ps-progress'), onStage: setFileStatus, onClear: clearFile, onResult: showLoaded,
     onError: (err, retry) => renderReadError($('ps-file-error'), err, retry),
