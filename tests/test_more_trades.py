@@ -1,4 +1,4 @@
-"""Bundle slice 1 (ARCHITECT-BUNDLE-DONTTRADE-TEST-2026-10-31 §2.2, §4, B7).
+"""Bundle slice 1 (and the Tester's slice 1 fixes: group-share bands, rounding up, a floor of 10) (ARCHITECT-BUNDLE-DONTTRADE-TEST-2026-10-31 §2.2, §4, B7).
 
 * "N more trades to tell" (wording.js moreTrades, power-table.js): only for a tested habit whose verdict is "could be
   luck"; never for "unlikely to be luck", facts-only habits, too_few or untested habits; N comes from the fixed
@@ -30,15 +30,23 @@ out.sample = Object.fromEntries(base.habits.map((h) => [h.id, W.moreTrades(h, ba
 const a = clone(), b = clone();
 by(b, 'tilt').effect = -50; by(b, 'tilt').measure_a = -60; by(b, 'tilt').dollars.amount = -9999;
 out.same = JSON.stringify(W.moreTrades(by(a, 'tilt'), a)) === JSON.stringify(W.moreTrades(by(b, 'tilt'), b));
-// small file: a bar with real counts
-const s = clone(); s.n_trades = 120; s.n_rows = 120;
-out.small = W.moreTrades(by(s, 'tilt'), s);
-const t = { ...POWER_TABLE, habits: { ...POWER_TABLE.habits, tilt: { ...POWER_TABLE.habits.tilt, power: POWER_TABLE.n.map(() => 0.1) } } };
-out.cap = W.moreTrades(by(s, 'tilt'), s, undefined, t);
-try { W.moreTrades(by(s, 'tilt'), s, undefined, { ...POWER_TABLE, method_version: 'x' }); out.mismatch = 'no throw'; } catch (e) { out.mismatch = 'threw'; }
-out.even = { revenge: W.tradesForEvenOdds('revenge'), tilt: W.tradesForEvenOdds('tilt') };
+// a hand-made table: band 0 never reaches even odds, band 1 not simulated, band 2 reaches it at 170 trades
+const N = POWER_TABLE.n;
+const row = (p) => ({ share: [0, 1], power: p, worlds: ['x'], cells: {} });
+const T = { ...POWER_TABLE, bands: { tilt: [[0, 0.15], [0.15, 0.25], [0.25, 0.35], [0.35, 0.5], [0.5, 1]] }, habits: { tilt: [
+  row(N.map(() => 0.2)), row(null), row([0, 0, 0.25, 0.45, 0.6, 0.8, 0.9, 1, 1]), row(N.map(() => 1)), row(null)] } };
+const at = (n, na, table = T) => { const r = clone(); r.n_trades = n; r.n_rows = n; by(r, 'tilt').n_a = na; return W.moreTrades(by(r, 'tilt'), r, undefined, table); };
+out.even = W.tradesForEvenOdds(T.habits.tilt[2], T);
+out.low = at(300, 30); out.unknown = at(300, 60); out.near = at(out.even - 1, Math.round(0.3 * (out.even - 1)));
+out.small = at(120, 36); out.past = at(400, 120); out.high = at(120, 48);
+out.share = [at(300, 30).line, at(300, 90).line];
+// N never below the table's size, whatever the file size
+out.floor = [];
+for (let n = 40; n <= 2000; n += 7) { const m = at(n, Math.round(0.3 * n)); if (m.bar) out.floor.push([n, m.bar.of, m.bar.of - n]); }
+try { W.moreTrades(by(base, 'tilt'), base, undefined, { ...POWER_TABLE, method_version: 'x' }); out.mismatch = 'no throw'; } catch (e) { out.mismatch = 'threw'; }
+out.real = Object.fromEntries(Object.entries(POWER_TABLE.habits).map(([id, rows]) => [id, rows.map((r) => r.power)]));
 out.strings = W.BUNDLE_STRINGS;
-out.table = { mv: POWER_TABLE.method_version, k: POWER_TABLE.reference_effect_sd };
+out.table = { mv: POWER_TABLE.method_version, k: POWER_TABLE.reference_effect_sd, bands: POWER_TABLE.bands.tilt.length };
 out.method = W.METHOD_VERSION;
 console.log(JSON.stringify(out));
 """
@@ -54,17 +62,30 @@ def test_more_trades_rules():
     s = o["sample"]
     assert s["revenge"] is None                       # unlikely to be luck: no N
     assert s["hold_gap"] is None and s["size_up"] is None and s["oversized_loss"] is None
-    assert s["tilt"]["line"] == "The 304 trades in this file already give this check even odds of telling a moderate pattern from luck."
-    assert s["tilt"]["bar"] is None and s["tilt"]["caveat"] == "Assumes your next trades look like these."
+    assert s["tilt"] is not None
     assert o["same"] is True
-    sm = o["small"]
-    n = o["even"]["tilt"] - 120
-    assert sm["line"] == f"About {n} more trades would give this check even odds of telling a moderate pattern from luck."
-    assert sm["bar"] == {"have": 120, "of": o["even"]["tilt"], "label": f"120 of about {o['even']['tilt']} trades"}
-    assert o["cap"]["line"].startswith("More than 1,000 more trades") and o["cap"]["bar"] is None
     assert o["mismatch"] == "threw"
-    assert o["table"] == {"mv": o["method"], "k": 0.5}
-    assert 40 <= o["even"]["tilt"] <= 2000 and 40 <= o["even"]["revenge"] <= 2000
+    assert o["table"] == {"mv": o["method"], "k": 0.5, "bands": 5}
+    assert o["even"] == 170
+    assert o["low"]["line"].startswith("More trades may not settle this.") and o["low"]["bar"] is None
+    assert o["unknown"]["line"].startswith("We can’t say how many more trades") and o["unknown"]["bar"] is None
+    assert o["near"]["line"] == "About 10 more trades would give this check even odds of telling a moderate pattern from luck."
+    assert o["small"]["line"] == "About 50 more trades would give this check even odds of telling a moderate pattern from luck."
+    assert o["small"]["bar"] == {"have": 120, "of": 170, "label": "120 of about 170 trades"}
+    assert o["small"]["caveat"] == "Assumes your next trades look like these."
+    assert o["past"]["line"].startswith("The 400 trades in this file already") and o["past"]["caveat"] is None
+    assert o["high"]["line"].startswith("The 120 trades in this file already")   # share band 0.35-0.5 is at even odds from 40
+    assert o["share"][0] != o["share"][1]             # same size, different share, different answer
+    assert o["floor"] and all(of >= 170 and more >= 10 and more % 10 == 0 for _, of, more in o["floor"])
+
+
+def test_real_table_is_monotone_and_banded():
+    o = run()
+    for id_, rows in o["real"].items():
+        assert len(rows) == 5
+        for p in rows:
+            if p is not None:
+                assert len(p) == 9 and all(p[i] <= p[i + 1] for i in range(8)), (id_, p)
 
 
 def test_new_strings_lint_clean():
@@ -79,6 +100,7 @@ def test_pay_expectation_line():
     line = m.group(1)
     assert not re.search(r"\d", line)
     assert len(re.findall(r"[A-Za-z’']+", line)) <= 14
+    assert "would tell" not in line   # Tester slice 1: the report gives even odds, not a promise
     assert lint_text(line, "pricing/index.html", paid=True, analytics=True) == []
     banned = ["advice", "recommend", "should", "fix", "coach", "must", "need to", "signal", "improve", "mentor", "certified",
               "verified", "audited", "seal"]

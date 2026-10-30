@@ -7,7 +7,7 @@
 
 import { NO_LOSSES } from '../engine/stats.js';
 import { LABELS, N_PERM, guardSentence, FREE_CHECKS_FOOTNOTE } from '../engine/noise.js';
-import { money, ratio, duration, intText, el, DASH } from './format.js';
+import { money, duration, intText, el, DASH } from './format.js';
 
 const CHECK_TEXT = {
   // a bootstrap-t (noise.js), not a sign flip: the question names no method it does not use

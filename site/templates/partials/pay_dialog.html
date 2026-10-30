@@ -10,7 +10,7 @@
     in here. -#}
 {%- from "partials/pay_facts.html" import pay_facts %}
 {%- set r = products["report39"] %}{%- set link = r["stripe_link_" + stripe_mode] %}
-<dialog class="pay-dialog" id="pay-dialog" aria-labelledby="pd-h" data-pay-dialog>
+<dialog class="pay-dialog" id="pay-dialog" lang="en" aria-labelledby="pd-h" data-pay-dialog>
   <div class="pd-inner">
     <div class="pd-top">
       <h2 id="pd-h">Get the {{ r.name|lower }}</h2>

@@ -1,62 +1,83 @@
-// build_power_table.mjs — the static "N more trades to tell" table (ARCHITECT-BUNDLE-DONTTRADE-TEST-2026-10-31 §2.2, B2 slice 1).
+// build_power_table.mjs — the static "N more trades to tell" table (ARCHITECT-BUNDLE-DONTTRADE-TEST-2026-10-31 §2.2).
 // Offline only. It plants a MODERATE pattern (0.5 sd of the shape, the plan's fixed reference effect; never a file's own
-// effect) into the round-2 worlds of the private engine checkout, runs the SHIPPED analyse() on each file, and counts how
-// often the habit's own p is at or below the Holm step-1 level (0.05 / m, m = the habits tested) in the habit's direction.
-// A habit the file cannot test (too few trades in a group) counts as not told apart, as it would for a buyer.
+// effect) into the round-2 worlds of the private engine checkout (scripts/calib-worlds2.mjs), runs the SHIPPED analyse()
+// on each file, and records, per file, the habit's group share (n_a / n_trades: the share of trades the habit applies to)
+// and whether the habit's own p is at or below the Holm step-1 level (0.05 / m, m = habits tested) in the habit's
+// direction. A file that cannot test the habit counts as not told apart, as it would for a buyer.
 //
-// Usage (Claude Code, repo root):
-//   node checks/power_table/build_power_table.mjs <dt-private checkout> <habit> <world> [files] > part.json
-//   node checks/power_table/build_power_table.mjs --merge part1.json ... > site/static/js/paid/power-table.js
+// The merge bins files by group share into the plan's 5 bands (Tester slice 1 B2). Within a band, a size's power is the
+// LOWEST of the worlds with at least MIN_FILES files there (conservative: the number may overstate N, never understate
+// it), then made non-decreasing in n by taking, at each n, the lowest power at that n or any larger n. A band with a
+// size that no world reaches is left empty (the page then shows no number).
+//
+// Seeds are fixed by (habit, world, n, file index), so a rerun gives the same files and the same table.
+// Usage (Claude Code, repo root; 2 cores ≈ 10 minutes for the full set):
+//   node checks/power_table/build_power_table.mjs <dt-private checkout> <habit> <world> > part.jsonl
+//   node checks/power_table/build_power_table.mjs --merge part1.jsonl ... > site/static/js/paid/power-table.js
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import { readFileSync } from 'node:fs';
 
-const N_GRID = [40, 60, 100, 150, 200, 300, 500, 1000, 2000];
-const K = 0.5, ALPHA = 0.05, PERM = 2000;
+export const N_GRID = [40, 60, 100, 150, 200, 300, 500, 1000, 2000];
+// 5 group-share bands per habit. Edges are set so that no simulated world sits across an edge (each world's mean share at
+// 300 trades: revenge carry .21 dayvol .28 drift .44 iid .18 intraday .70 mixed .64 multisym .14 overnight .08 regime .25
+// scalper .96 session .08 sparse .03 swing .00; tilt carry .23, session .45, sparse .40, the rest .32-.37). Power is not
+// monotone in share (a share near 1 leaves too few other trades), so the top band is its own row.
+export const BANDS = { revenge: [[0, 0.15], [0.15, 0.35], [0.35, 0.55], [0.55, 0.85], [0.85, 1.0001]],
+  tilt: [[0, 0.2], [0.2, 0.3], [0.3, 0.4], [0.4, 0.5], [0.5, 1.0001]] };
+export const WORLDS = ['iid', 'regime', 'dayvol', 'intraday', 'mixed', 'swing', 'session', 'carry', 'scalper', 'multisym', 'drift', 'overnight', 'sparse'];
+const K = 0.5, ALPHA = 0.05, PERM = 2000, MIN_FILES = 20;
+const filesAt = (n) => (n >= 1000 ? 30 : n >= 300 ? 40 : 60);
 
 if (process.argv[2] === '--merge') {
-  const parts = process.argv.slice(3).map((p) => JSON.parse(readFileSync(p, 'utf8')));
-  const mv = [...new Set(parts.map((p) => p.method_version))];
+  const rows = process.argv.slice(3).flatMap((p) => readFileSync(p, 'utf8').trim().split('\n').map((l) => JSON.parse(l)));
+  const mv = [...new Set(rows.map((r) => r.mv))];
   if (mv.length !== 1) throw new Error('parts from different engine methods: ' + mv);
   const habits = {};
-  for (const id of [...new Set(parts.map((p) => p.habit))].sort()) {
-    const ps = parts.filter((p) => p.habit === id);
-    habits[id] = {
-      worlds: ps.map((p) => p.world).sort(),
-      // world-pooled: the share of files in which a moderate pattern was told apart from luck, at each n
-      power: N_GRID.map((n) => { let hit = 0, files = 0; for (const p of ps) { hit += p.cells[n].hit; files += p.cells[n].files; } return Math.round(10000 * hit / files) / 10000; }),
-      group_share: Math.round(10000 * ps.reduce((a, p) => a + p.share, 0) / ps.length) / 10000,
-    };
+  for (const id of [...new Set(rows.map((r) => r.habit))].sort()) {
+    habits[id] = BANDS[id].map(([lo, hi]) => {
+      const cells = {};   // world -> n -> {files, hit}
+      for (const r of rows) {
+        if (r.habit !== id || r.share === null || r.share < lo || r.share >= hi) continue;
+        const c = ((cells[r.world] ||= {})[r.n] ||= { files: 0, hit: 0 });
+        c.files++; c.hit += r.hit;
+      }
+      const raw = N_GRID.map((n) => {
+        const ps = Object.values(cells).map((w) => w[n]).filter((c) => c && c.files >= MIN_FILES).map((c) => c.hit / c.files);
+        return ps.length ? Math.min(...ps) : null;
+      });
+      const power = raw.includes(null) ? null : raw.map((_, i) => Math.round(10000 * Math.min(...raw.slice(i))) / 10000);
+      const worlds = Object.entries(cells).filter(([, w]) => Object.values(w).some((c) => c.files >= MIN_FILES)).map(([w]) => w).sort();
+      return { share: [lo, Math.min(1, hi)], power, worlds, cells };
+    });
   }
-  const table = { method_version: mv[0], engine_commit: parts[0].engine_commit, built: parts[0].built, reference_effect_sd: K, alpha: ALPHA,
-    level: 'Holm step 1 (alpha / habits tested)', perm: PERM, n: N_GRID, habits };
+  const table = { method_version: mv[0], engine_commit: rows[0].commit, built: rows[0].built, reference_effect_sd: K, alpha: ALPHA,
+    level: 'Holm step 1 (alpha / habits tested)', perm: PERM, min_files: MIN_FILES, rule: 'lowest world per band, non-decreasing in n',
+    n: N_GRID, bands: Object.fromEntries(Object.entries(BANDS).map(([id, b]) => [id, b.map(([lo, hi]) => [lo, Math.min(1, hi)])])), habits };
   process.stdout.write('// power-table.js — GENERATED by checks/power_table/build_power_table.mjs --merge; do not edit by hand.\n'
-    + '// "N more trades to tell" (ARCHITECT-BUNDLE-DONTTRADE-TEST-2026-10-31 §2.2): the share of planted files in which a\n'
-    + '// moderate pattern (0.5 sd, fixed; never the file\'s own effect) was told apart from luck, by trades in the file.\n'
-    + 'export const POWER_TABLE = Object.freeze(' + JSON.stringify(table, null, 1) + ');\n');
+    + '// "N more trades to tell" (ARCHITECT-BUNDLE-DONTTRADE-TEST-2026-10-31 §2.2): per habit and group-share band, the share of\n'
+    + '// planted files in which a moderate pattern (0.5 sd, fixed; never the file\'s own effect) was told apart from luck.\n'
+    + 'export const POWER_TABLE = Object.freeze(' + JSON.stringify(table) + ');\n');
   process.exit(0);
 }
 
-const [priv, habit, world, filesArg] = process.argv.slice(2);
+const [priv, habit, world] = process.argv.slice(2);
 const H = await import(pathToFileURL(resolve(priv, 'src/core/habits.mjs')).href);
 const W2 = await import(pathToFileURL(resolve(priv, 'scripts/calib-worlds2.mjs')).href);
 if (!W2.WORLDS[world]) throw new Error('no world ' + world);
-const files = Number(filesArg || 200);
-const cells = {}; let shareSum = 0, shareN = 0;
+const built = process.env.DT_BUILT || new Date().toISOString().slice(0, 10), commit = process.env.DT_ENGINE_COMMIT || 'unknown';
 for (const n of N_GRID) {
-  const F = n >= 1000 ? Math.max(40, files >> 2) : n >= 300 ? Math.max(60, files >> 1) : files;
-  let hit = 0;
+  let hits = 0; const F = filesAt(n);
   for (let s = 0; s < F; s++) {
     const R = W2.rng((0x7a11 ^ Math.imul(s + 1, 0x2c1b3c6d) ^ Math.imul(n, 0x297a2d39) ^ [...habit + world].reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 7)) | 0);
     const rows = W2.WORLDS[world](R, n, 'normal', { plant: { habit, k: K } })
       .map((r, i) => ({ o: r.o, h: r.h, q: r.q, p: r.p, s: r.s || 0, d: r.d || 1, f: i.toString(16).padStart(32, '0') }));
     const rep = H.analyse({ rows, currency: 'USD', pgr_plr: null }, 'power', { nPerm: PERM });
     const h = rep.habits.find((x) => x.id === habit);
-    if (h.n_a !== null && rep.n_trades) { shareSum += h.n_a / rep.n_trades; shareN++; }
-    if (h.p_raw !== null && rep.n_tested > 0 && h.direction === 'habit' && h.p_raw <= ALPHA / rep.n_tested) hit++;
+    const hit = h.p_raw !== null && rep.n_tested > 0 && h.direction === 'habit' && h.p_raw <= ALPHA / rep.n_tested ? 1 : 0;
+    hits += hit;
+    process.stdout.write(JSON.stringify({ habit, world, n, s, share: h.n_a !== null && rep.n_trades ? h.n_a / rep.n_trades : null, hit,
+      mv: H.METHOD_VERSION, commit, built }) + '\n');
   }
-  cells[n] = { files: F, hit };
-  process.stderr.write(`${habit} ${world} n=${n}: ${hit}/${F}\n`);
+  process.stderr.write(`${habit} ${world} n=${n}: ${hits}/${F}\n`);
 }
-process.stdout.write(JSON.stringify({ habit, world, method_version: H.METHOD_VERSION, engine_commit: process.env.DT_ENGINE_COMMIT || 'unknown',
-  built: new Date().toISOString().slice(0, 10), share: shareSum / Math.max(1, shareN), cells }) + '\n');
