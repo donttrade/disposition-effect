@@ -76,6 +76,19 @@ def stack(tmp_path_factory):
     srv.shutdown()
 
 
+# S3 (merged uploads): /report/ waits at the small-file notice for a file under 100 trades; "Run anyway" starts the run.
+# pick() chooses the files, then presses "Run anyway" if the notice shows; a refused file (an error line) is left as is.
+PICKED = """() => { const s = document.getElementById('rp-status'), n = document.getElementById('rp-small');
+  return (n && !n.hidden) || !!document.getElementById('focus') || (s && !s.hidden && (s.classList.contains('notice-error') || s.innerText.includes('Sending'))); }"""
+
+
+def pick(page, paths):
+    page.set_input_files("#rp-file", paths)
+    page.wait_for_function(PICKED, timeout=60000)
+    if page.is_visible("#rp-small"):
+        page.click("#rp-run-anyway")
+
+
 def new_session(page, stack, sid):
     page.request.post(stack["api"] + "/__test/session", data=json.dumps({"id": sid}))
     return sid
@@ -83,7 +96,7 @@ def new_session(page, stack, sid):
 
 def run_report(page, stack, sent):
     page.on("request", lambda req: sent.append(req))
-    page.set_input_files("#rp-file", FIXTURE)
+    pick(page, FIXTURE)
     page.wait_for_selector("#focus", timeout=30000)
 
 

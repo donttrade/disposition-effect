@@ -8,10 +8,24 @@
   <section class="no-print" aria-labelledby="pick-h">
     <h2 id="pick-h">Choose your trade file</h2>
     <p id="rp-access" class="muted"></p>
+    {#- S3 (merged uploads): several files of one platform, read as one history; copies across files counted once.
+        The hint, notice and button texts are merge.js's UPLOAD_HINT, SMALL_NOTICE and SMALL_WAIT (tests pin them). -#}
+    <p class="small" id="rp-hint">Add all your accounts and months: more trades, clearer answers.</p>
     <div class="dropzone" id="rp-drop">
-      <p><strong>Drop your trade file here</strong>, or choose it:</p>
-      <label for="rp-file">Trade file (MT5/MT4 report, IBKR Flex, Tradovate Orders, TradingView Order History, all in beta, or the CSV template)</label>
-      <input id="rp-file" type="file" accept=".csv,.htm,.html,.txt">
+      <p><strong>Drop your trade files here</strong>, or choose them:</p>
+      <label for="rp-file">Trade files from one platform (MT5/MT4 report, IBKR Flex, Tradovate Orders, TradingView Order History, all in beta, or the CSV template)</label>
+      <input id="rp-file" type="file" accept=".csv,.htm,.html,.txt" multiple>
+    </div>
+    <div id="rp-picked" hidden>
+      <p id="rp-count" class="small"></p>
+      <ul id="rp-files" class="small"></ul>
+      <p><button class="btn btn-secondary" id="rp-clear" type="button">Remove these files</button></p>
+    </div>
+    <div id="rp-small" class="notice notice-caution" hidden>
+      <p><strong id="rp-small-n"></strong> Files this size mostly show No sign for habits. You still get every dollar total and your rule check.</p>
+      <p class="small">Adding files does not use your run.</p>
+      <p class="btn-row"><button class="btn" id="rp-run-anyway" type="button">Run anyway</button>
+        <button class="btn btn-secondary" id="rp-add" type="button">Add more files</button></p>
     </div>
     <details class="how-more"><summary>What is sent</summary><p>{{ strings.p5.long }}</p></details>
     <div class="field"><label for="rp-firm">Which firm do you trade with? (optional)</label>
