@@ -176,7 +176,7 @@ The supporting files and the fixture run:
 
 ```
 daaaecc53c0a96be065b120c43466797670d2116eb45e2afd4c3232ccdbd0da2  partner/make_fixture_prediction.py
-cf921b4b9a0c979fdcdb9ee2f0c8aac4c79d9aebba604ef3137e8ecd451159f7  partner/parity/dt1_golden.json
+4fc66a69b42175789b686833be558e52b20d909705aa5d434282f0f613d12e1a  partner/parity/dt1_golden.json
 07fcf9ec005837be4410f213b856a1a4e3e96462ab38b001c92598070eaedfa8  partner/parity/rules_golden.json
 abf723c530f13bae94b5612c0ea52a6a26c2cd919176f34cdd4689cc7b519e1f  partner/PREREG-PREDICTION-EXAMPLE.md
 d213660000e8c0a7bdc547cb62f25fc1eea6e0c66a5b2bb65b413a38f8286474  fixture trades.csv
