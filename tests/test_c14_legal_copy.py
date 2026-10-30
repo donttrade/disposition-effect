@@ -132,9 +132,11 @@ def test_paid_french_lines(paid):
     assert "nous vous remboursons sur demande, en entier." in c
     assert "il n’en garde que des empreintes brouillées" in p
     assert "non conservés; seules des empreintes brouillées" in p
-    # R-D1.3(c): not all five habits are tested; R-D3 I-3: up to two (the hold gap and size after a loss are described)
+    # R-D1.3(c): not all five habits are tested; R-D3 I-3: up to two. 29 Oct (owner, stats round 2): the hold gap is
+    # "facts from your file" and size after a loss has a luck check coming; never "décrite, non testée"
     assert "Il teste cinq habitudes" not in a and "Il couvre cinq habitudes" in a and "Il en teste jusqu’à deux" in a
-    assert "jusqu’à quatre" not in a and "aux gagnantes (décrite, non testée dans cette version); " in a
+    assert "jusqu’à quatre" not in a and "aux gagnantes (faits tirés de votre fichier);" in a
+    assert "après des pertes (vérification du hasard à venir);" in a and "non testée" not in a and "décrite" not in a
 
 
 def test_paid_footer_line_exact_and_qualified(paid):
