@@ -4,6 +4,9 @@
   {#- sweep 2 (25 Oct): the button first, then the three steps as a picture, then the restore link; the
       disclaimer moves to the end in small type. -#}
   <h1>Thank you</h1>
+  {#- 30 Oct (Tester #3, CLS): the three states sit in one box that keeps a screen's height while welcome.js
+      decides which to show, so nothing below it moves into view and back. -#}
+  <div class="w-states">
   <section id="w-working" data-state><p>Confirming your purchase with Stripe…</p></section>
   <section id="w-ready" data-state hidden>
     <div class="notice"><strong>Your test result is ready</strong><p id="w-saved"></p></div>
@@ -25,6 +28,7 @@
     <p id="w-retry-row"><button class="btn" id="w-retry" type="button">Try again</button></p>
     <p class="small">Email <a href="mailto:{{ site.contact_email }}?subject={{ ('donttrade test access')|urlencode }}">{{ site.contact_email }}</a>. {{ site.reply_promise }}</p>
   </section>
+  </div>
   {% include "partials/disclaimer.html" %}
 </div>
 {% endblock %}

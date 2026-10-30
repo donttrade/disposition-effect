@@ -258,3 +258,23 @@ def test_plain_rewords_every_described_or_not_tested_line(browser, built_site):
     for before, after in out:
         assert not re.search(r"(?i)\bdescribed\b|\bnot tested\b", after), (before, after)
         assert re.search(r"(?i)described|not tested", before), before
+
+
+# ------------------------------------------------------------------ Tester #3 (30 Oct): CLS under 0.05
+CLS_INIT = ("window.__cls = 0; new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) "
+            "window.__cls += e.value; }).observe({type: 'layout-shift', buffered: true});")
+
+
+@pytest.mark.parametrize("path", ["/sample-report/", "/welcome/", "/welcome/?session_id=cs_test_cls"])
+@pytest.mark.parametrize("width", [1280, 390])
+def test_js_drawn_pages_do_not_shift(browser, built_site, path, width):
+    ctx = browser.new_context(viewport={"width": width, "height": 900})
+    ctx.add_init_script(CLS_INIT)
+    ctx.route("https://donttrade-api*/**", lambda r: r.fulfill(status=200, content_type="application/json", body='{"token": "x.y.z"}'))
+    pg = ctx.new_page()
+    pg.goto(built_site["url"] + path)
+    pg.wait_for_load_state("networkidle")
+    pg.wait_for_timeout(800)
+    cls = pg.evaluate("window.__cls")
+    ctx.close()
+    assert cls < 0.05, (path, width, cls)
