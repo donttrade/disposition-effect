@@ -12,7 +12,7 @@ import { pgrPlrCounts } from '../engine/pgr.js?v=4c675fe5';
 import { stripRows, spanLine } from './strip.js?v=03137080';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js?v=16f6dd26';
 import { habitSentences, methodLine, page1Lines, coverageLines, mergedLine, checkReport, SENTENCE_HABITS, RESEARCH, RESEARCH_PREFIX, holdDays,
-  V_LAUNCH, V_LAUNCH_SIZE, V_NO, moreTrades } from './wording.js?v=b4340fd7';
+  V_LAUNCH, V_LAUNCH_SIZE, V_NO, moreTrades } from './wording.js?v=71321283';
 
 const $ = (id) => document.getElementById(id);
 const MINUS = '−';
@@ -232,7 +232,7 @@ function luckLayer(h, lines, more = null) {
         el('span', { class: 'small', text: more.bar.label }));
       m.append(bar);
     }
-    m.append(el('p', { class: 'small muted', text: more.caveat }));
+    if (more.caveat) m.append(el('p', { class: 'small muted', text: more.caveat }));
     box.append(m);
   }
   if (luckComing(h)) {

@@ -232,7 +232,7 @@ function luckLayer(h, lines, more = null) {
         el('span', { class: 'small', text: more.bar.label }));
       m.append(bar);
     }
-    m.append(el('p', { class: 'small muted', text: more.caveat }));
+    if (more.caveat) m.append(el('p', { class: 'small muted', text: more.caveat }));
     box.append(m);
   }
   if (luckComing(h)) {

@@ -379,15 +379,20 @@ export function coverageLines(report) {
 // (not_distinguishable) and never for "unlikely to be luck", a facts-only habit, too_few or a habit that was not tested.
 // N comes from the static table power-table.js (checks/power_table/build_power_table.mjs), built offline on the
 // shipped engine with a FIXED moderate pattern (0.5 sd): it never uses the file's own gap (plan R9, post-hoc power).
-// The table carries the engine method it was built on; a report from another method is refused.
+// The row is the file's group-share band (n_a / n_trades, the share of its trades the habit applies to): power falls
+// with that share. The table carries the engine method it was built on; a report from another method is refused.
+// Every rounding goes up (Tester slice 1): N is never shown below what the table gives, and never below 10.
 export const MORE_TRADES_ODDS = 0.5;
 export const MORE_TRADES_CAP = 1000;
+export const MORE_TRADES_MIN = 10;
 export const moreTradesLine = (N) => `About ${N} more trades would give this check even odds of telling a moderate pattern from luck.`;
 export const MORE_TRADES_OVER = 'More than 1,000 more trades would give this check even odds of telling a moderate pattern from luck.';
+export const MORE_TRADES_UNSETTLED = 'More trades may not settle this. In our tests on files like this one, a moderate pattern was often missed even at 2,000 trades.';
+export const MORE_TRADES_UNKNOWN = 'We can’t say how many more trades would settle this for a file like this one: our tests did not cover it.';
 export const moreTradesEnough = (n) => `The ${n} trades in this file already give this check even odds of telling a moderate pattern from luck.`;
 export const moreTradesBar = (have, of) => `${have} of about ${of} trades`;
 export const MORE_TRADES_CAVEAT = 'Assumes your next trades look like these.';
-export const moreTradesHow = (built) => `How "more trades" is worked out: a moderate pattern (the matching trades' results 0.5 standard deviations worse, a fixed size, never your file's own gap) was planted in generated test files of each size, and the share of files in which this check told it apart from luck was counted, at the first Holm step for the habits tested. "Even odds" is the size at which that share reaches one half. The table is fixed (built ${built}).`;
+export const moreTradesHow = (built, share) => `How "more trades" is worked out: a moderate pattern (the matching trades' results 0.5 standard deviations worse, a fixed size, never your file's own gap) was planted in generated test files from several trading styles, at each file size. Files were grouped by the share of trades this habit applies to (${share} in your file), because that share changes how hard a pattern is to tell apart. For each size, the lowest share of files in which this check told the pattern apart from luck, at the first Holm step for the habits tested, was used. "Even odds" is the size at which that share reaches one half. The table is fixed (built ${built}).`;
 
 function checkTable(report, table) {
   if (!table || table.method_version !== report.method_version) {
@@ -396,12 +401,20 @@ function checkTable(report, table) {
   if (table.reference_effect_sd !== 0.5) throw new Error('wording: the more-trades table is not built on the fixed moderate pattern');
 }
 
-// Trades for even odds (a whole file's trade count, rounded up to 10), by log-n interpolation; Infinity off the table.
-export function tradesForEvenOdds(id, table = POWER_TABLE) {
-  const t = table.habits[id];
-  if (!t) throw new Error(`wording: no more-trades row for ${id}`);
-  const n = table.n, p = t.power;
-  for (let i = 1; i < p.length; i++) if (p[i] < p[i - 1]) throw new Error(`wording: more-trades row ${id} is not monotone`);
+// The table row for a group share, or null when no band holds it or the band was not filled.
+export function bandFor(id, share, table = POWER_TABLE) {
+  const rows = table.habits[id];
+  if (!rows) throw new Error(`wording: no more-trades rows for ${id}`);
+  if (!(share >= 0 && share <= 1)) return null;
+  const i = table.bands[id].findIndex(([lo, hi]) => share >= lo && (share < hi || (hi === 1 && share === 1)));
+  return i < 0 || !rows[i].power ? null : rows[i];
+}
+
+// Trades for even odds (a whole file's trade count, rounded UP to 10), by log-n interpolation; Infinity when the
+// band never reaches even odds inside the table.
+export function tradesForEvenOdds(row, table = POWER_TABLE) {
+  const n = table.n, p = row.power;
+  for (let i = 1; i < p.length; i++) if (p[i] < p[i - 1]) throw new Error('wording: a more-trades row is not monotone');
   const i = p.findIndex((x) => x >= MORE_TRADES_ODDS);
   if (i < 0) return Infinity;
   if (i === 0) return n[0];
@@ -409,18 +422,25 @@ export function tradesForEvenOdds(id, table = POWER_TABLE) {
   return Math.ceil(Math.exp(Math.log(n[i - 1]) + f * (Math.log(n[i]) - Math.log(n[i - 1]))) / 10) * 10;
 }
 
-// { line, bar: {have, of, label} | null, caveat, how } or null when no N is shown for this habit.
+// { line, bar: {have, of, label} | null, caveat | null, how } or null when no N is shown for this habit.
 export function moreTrades(h, report, fmt, table = POWER_TABLE) {
   checkReport(report);
   if (!TESTED.includes(h.id) || h.verdict !== 'not_distinguishable' || h.p_raw === null) return null;
   checkTable(report, table);
-  const f = fmtOf(fmt), have = report.n_trades, of = tradesForEvenOdds(h.id, table);
-  const how = moreTradesHow(table.built);
-  if (of - have <= 0) return { line: moreTradesEnough(f.count(have)), bar: null, caveat: MORE_TRADES_CAVEAT, how };
-  if (!Number.isFinite(of) || of - have > MORE_TRADES_CAP) return { line: MORE_TRADES_OVER, bar: null, caveat: MORE_TRADES_CAVEAT, how };
-  return { line: moreTradesLine(f.count(of - have)), bar: { have, of, label: moreTradesBar(f.count(have), f.count(of)) }, caveat: MORE_TRADES_CAVEAT, how };
+  if (!Number.isInteger(h.n_a) || h.n_a < 0 || h.n_a > report.n_trades) throw new Error(`wording: ${h.id} has n_a ${h.n_a}`);
+  const f = fmtOf(fmt), have = report.n_trades, share = h.n_a / have;
+  const how = moreTradesHow(table.built, shareOne(share));
+  const row = bandFor(h.id, share, table);
+  if (!row) return { line: MORE_TRADES_UNKNOWN, bar: null, caveat: null, how };
+  const of = tradesForEvenOdds(row, table);
+  if (!Number.isFinite(of)) return { line: MORE_TRADES_UNSETTLED, bar: null, caveat: null, how };
+  if (of <= have) return { line: moreTradesEnough(f.count(have)), bar: null, caveat: null, how };
+  const more = Math.max(MORE_TRADES_MIN, Math.ceil((of - have) / 10) * 10);
+  if (more > MORE_TRADES_CAP) return { line: MORE_TRADES_OVER, bar: null, caveat: MORE_TRADES_CAVEAT, how };
+  return { line: moreTradesLine(f.count(more)), bar: { have, of: have + more, label: moreTradesBar(f.count(have), f.count(have + more)) },
+    caveat: MORE_TRADES_CAVEAT, how };
 }
 
 // Every new string, filled with sample values, for the lint and the word budgets (plan §6, BUNDLE_STRINGS).
-export const BUNDLE_STRINGS = Object.freeze([moreTradesLine('120'), MORE_TRADES_OVER, moreTradesEnough('304'), moreTradesBar('180', '300'),
-  MORE_TRADES_CAVEAT, moreTradesHow('2026-10-30')]);
+export const BUNDLE_STRINGS = Object.freeze([moreTradesLine('120'), MORE_TRADES_OVER, MORE_TRADES_UNSETTLED, MORE_TRADES_UNKNOWN,
+  moreTradesEnough('304'), moreTradesBar('180', '300'), MORE_TRADES_CAVEAT, moreTradesHow('2026-10-31', '29.3%')]);
