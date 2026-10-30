@@ -23,7 +23,7 @@
       <p>After the exclusions, fewer than 100 accounts broke a rule, or fewer than 100 did not. That is too few for any verdict. Nothing is claimed either way, and the study keeps collecting under the same registration.</p>
       {%- elif v == "FAIL: does not predict usefully" %}
       <h2 id="pr-status">Result: the habit score did not predict breaches usefully</h2>
-      <p>Accounts with higher DT-1 scores were not usefully more likely to break a loss rule in the next 30 days. Either the ranking accuracy (AUC) was below 0.55, or its whole 95% interval was below 0.60. donttrade does not offer DT-1 as a risk score. The habit report still describes past habits, with no claim about what happens next.</p>
+      <p>Accounts with higher DT-1 scores were not usefully more likely to break a loss rule in the next 30 days. Either the ranking accuracy (AUC) was below 0.55, or its whole 95% interval was below 0.60. donttrade does not offer DT-1 as a risk score. The donttrade test still describes past habits, with no claim about what happens next.</p>
       {%- elif v == "FAIL: adds nothing" %}
       <h2 id="pr-status">Result: habits rank risk, but add nothing beyond size, volatility and headroom</h2>
       <p>Accounts with higher DT-1 scores did break loss rules more often. But a simple model with no habits in it (activity, volatility, P&amp;L so far and headroom) ranked them just as well, so the habit score added nothing to it. donttrade makes no claim that habits add predictive value.</p>
