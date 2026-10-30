@@ -259,6 +259,7 @@ def test_plain_rewords_every_described_or_not_tested_line(browser, built_site):
     for before, after in out:
         assert not re.search(r"(?i)\bdescribed\b|\bnot tested\b", after), (before, after)
         assert re.search(r"(?i)described|not tested", before), before
+        assert L.lint_text(after) == [] and L.lint_text(after, "shown", paid=True) == [], after   # incl. banned:retired_name
 
 
 # ------------------------------------------------------------------ Tester #3 (30 Oct): CLS under 0.05
