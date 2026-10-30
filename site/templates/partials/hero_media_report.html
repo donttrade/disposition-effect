@@ -11,7 +11,7 @@
     <p class="rc-top"><span>Summary</span><span class="pill pill-muted">Example report</span></p>
     <p class="rc-k">Shown first</p>
     <p class="rc-h">{{ f.name }}</p>
-    {%- set lab = {"distinguishable": ("pill pill-hit", "Distinguishable from noise", "unlikely to be luck"),
+    {%- set lab = {"distinguishable": ("pill pill-hit", "Distinguishable from noise", "Unlikely to be luck"),
                  "not_distinguishable": ("pill", "Not distinguishable from noise", "Not clear yet")} %}
     {%- set pl = lab.get(f.verdict, ("pill pill-muted", "Luck check coming", "")) %}
     <p class="rc-pill"><span class="{{ pl[0] }}">{{ pl[1] }}</span>{% if pl[2] %} <span class="rc-gloss">{{ pl[2] }}</span>{% endif %}</p>

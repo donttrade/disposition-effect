@@ -218,7 +218,7 @@ def test_example_report_shows_two_layers_and_never_described_or_not_tested(brows
     n = pg.locator("#sample-out .habit").count()
     assert n == 5
     assert pg.locator("#sample-out .habit .layer-what h4").count() == 5 and pg.locator("#sample-out .habit .layer-luck h4").count() == 3
-    assert "Large losses" in t and "Luck check coming" in t and "unlikely to be luck" in t and "Not clear yet" in t
+    assert "Large losses" in t and "Luck check coming" in t and "Unlikely to be luck" in t and "Not clear yet" in t
     # stats round 2: size after a loss keeps "Luck check coming"; the hold gap and large losses are "Your numbers", no pill
     sec = pg.locator("#habit-size_up")
     assert sec.locator(".badge-coming").inner_text() == "Luck check coming" and sec.locator(".luck-why summary").inner_text() == "Why not yet"
