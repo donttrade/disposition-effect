@@ -93,3 +93,24 @@ def test_retired_products_are_gone_from_prices_json():
     assert [p["id"] for p in d["products"]] == ["pilot", "plan", "report39"]
     assert "recheck" not in d["rules"]
     assert sorted(RETIRED) == sorted([49, 99, 79, 2500, 6000, 12000, 625, 1500, 3000, 186.25])
+
+
+# 30 Oct (Tester #4): retired names and removed habit statuses fail on customer-visible text
+@pytest.mark.parametrize("text", ["Get the habit report today.", "A Snapshot of your book.", "Ask about a Memo.", "The Outcomes pack.",
+                                  "The Habit Tracker is back.", "Try the demo.", "A fake trader.", "Some made-up numbers.",
+                                  "This is not a real trader.", "Size after a loss: described, not tested.", "This pattern is not tested.",
+                                  "So this pattern is described here without a verdict."])
+def test_retired_names_fail(text):
+    assert "banned:retired_name" in rules(f"<p>{text}</p>"), text
+
+
+@pytest.mark.parametrize("text", ["Fixed-price firm engagements (Snapshot, Memo, Outcomes pack) were withdrawn on 29 Oct 2026; a scope "
+                                  "accepted before then keeps its agreed price and terms.",
+                                  "A one-page memo, every month.", "A data snapshot of 16 Oct 2026.", "It describes your past trades."])
+def test_retired_names_allow_the_withdrawn_line_and_ordinary_words(text):
+    assert "banned:retired_name" not in rules(f"<p>{text}</p>"), text
+
+
+def test_retired_names_do_not_apply_to_a_frozen_study_body():
+    body = "<p>Scalping was not tested. A Memo from 1998 described the sample report.</p>"
+    assert not [r for r in L.passthrough_rules(body, "/research/x/", False) if r[0] == "banned:retired_name"]
