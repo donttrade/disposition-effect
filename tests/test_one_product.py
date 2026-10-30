@@ -85,7 +85,8 @@ def test_pricing_shows_two_packages_and_one_stripe_link(built_site):
     t = text(main)
     assert "One test. Two ways to buy it." in t and "Traders" in t and "Firms" in t
     assert "$0.50 per trader account a month" in t and "$500 monthly minimum" in t
-    assert "First month is the $745 Pilot, credited" in t and "15% off when you pay a year upfront" in t
+    assert "The $745 Pilot is your first month" in t and "Its $745 counts toward your plan’s invoices" in t
+    assert "15% off when you pay a year upfront" in t and "credited" not in t   # 30 Oct (Tester #4): one reading only
     assert len(re.findall(r'href="https://buy\.stripe\.com/', main)) == 1
     firm = re.search(r'(?s)<section class="price-card" id="firms".*?</section>', main).group(0)
     assert "buy.stripe.com" not in firm and 'href="/for-firms/#request"' in firm
@@ -187,7 +188,7 @@ def test_terms_plan_section_and_versions(built_site):
     for s in ("$0.50 per trader account per month, with a minimum of $500 a month",
               "monthly in arrears, by email, in USD, due within 15 days of the invoice date",
               "It ends at the end of the calendar month in which notice is given.",
-              "the $745 is credited in full against the plan’s invoices, starting with the first, until it is used up",
+              "Its $745 counts toward your plan’s invoices: if the monthly plan starts within 60 days of Pilot delivery, the $745 is deducted once from the plan’s invoices, starting with the first, until it is used up.",
               "the donttrade test, a habit test on your own trades: a one-off measurement"):
         assert s in t, s
     assert "called “Trial” before 29 Oct 2026" in t

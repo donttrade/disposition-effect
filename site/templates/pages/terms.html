@@ -60,12 +60,13 @@
   </details>
 
   <details class="legal-sec">
-    <summary><h2 id="trial">The {{ pilot.name }}</h2><span class="ls-sum">The plan’s first month, one per firm; its fee is credited against the plan.</span></summary>
+    <summary><h2 id="trial">The {{ pilot.name }}</h2><span class="ls-sum">Your first month, one per firm. Its fee counts toward your plan’s invoices.</span></summary>
   <p class="small muted">{{ pilot.name }} (called “{{ pilot.former_name }}” before {{ legal.launch_human }}).</p>
   <ul>
-    <li>The {{ pilot.name }} is the first month of the monthly plan: one run on your book, one per firm, {{ pilot.price_usd|usd }}, delivered in {{ pilot.turnaround_days }} business days.</li>
+    <li>The {{ pilot.name }} is your first month: one run on your book, one per firm, {{ pilot.price_usd|usd }}, delivered in {{ pilot.turnaround_days }} business days.</li>
     {#- LAWYER (deferred): the credit. #}
-    <li>If the monthly plan starts within {{ prices.rules.pilot_credit_days }} days of {{ pilot.name }} delivery, the {{ pilot.price_usd|usd }} is credited in full against the plan’s invoices, starting with the first, until it is used up. The credit has no cash value and cannot be transferred.</li>
+    {#- 30 Oct (Tester #4): one reading only. The Pilot is month one; its fee is then deducted from the plan's invoices, once. #}
+    <li>Its {{ pilot.price_usd|usd }} counts toward your plan’s invoices: if the monthly plan starts within {{ prices.rules.pilot_credit_days }} days of {{ pilot.name }} delivery, the {{ pilot.price_usd|usd }} is deducted once from the plan’s invoices, starting with the first, until it is used up. It has no cash value and cannot be transferred.</li>
     <li><strong>Extract refund:</strong> {{ pt.extract() }}</li>
     <li><strong>Reproduction refund:</strong> {{ pt.reproduction() }}</li>
     {%- if flags.pilot_checkout %}

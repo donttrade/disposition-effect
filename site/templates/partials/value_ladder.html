@@ -53,7 +53,7 @@
       {%- else %}
       <h3>For firms: the test on your whole book</h3>
       {%- endif %}
-      <p>One habit today, the disposition effect, with more being added. Your own staff run a public script on your own systems, and you get the figure and a one-page memo each month.{% if show_firm_price %} {{ plan.price_usd|usd }} per trader account a month; the first month is the {{ pilot.price_usd|usd }} {{ pilot.name }}, credited.{% endif %}</p>
+      <p>One habit today, the disposition effect, with more being added. Your own staff run a public script on your own systems, and you get the figure and a one-page memo each month.{% if show_firm_price %} {{ plan.price_usd|usd }} per trader account a month; the {{ pilot.name }} is your first month, and its {{ pilot.price_usd|usd }} counts toward your plan’s invoices.{% endif %}</p>
       <p><a href="{% if flags.paid_report %}/for-firms/#what-it-costs{% else %}/pricing/#firms{% endif %}">{% if show_firm_price %}All firm prices{% else %}See Pricing{% endif %}</a></p>
     </div>
   </div>
