@@ -165,10 +165,11 @@ def test_presets_alphabetical_no_default_and_notes(browser, built_site):
 
 def test_results_go_stale_after_a_change_until_the_next_run(browser, built_site):
     """Tester page report F1: a rule, file or preset change dims the results and stops Try this rule."""
-    ctx, pg, log = open_page(browser, built_site)
+    ctx, pg, log = open_page(browser, built_site, bypass_csp=True)   # axe is injected
     sample(pg)
     run(pg)
     assert pg.is_hidden("#ps-stale") and pg.is_enabled("#ps-wi-run")
+    checked = False
 
     def new_file():
         pg.click("#ps-sample-btn")
@@ -180,6 +181,9 @@ def test_results_go_stale_after_a_change_until_the_next_run(browser, built_site)
             assert "rc-stale" in pg.get_attribute(part, "class").split(), part
         for b in ("#ps-wi-run", "#ps-card-dl", "#ps-csv", "#ps-json"):
             assert pg.is_disabled(b), b
+        if not checked:   # the dimmed results are inert: nothing in them to reach, nothing to fail contrast
+            assert pg.eval_on_selector("#ps-out", "e => e.inert") and axe_violations(pg) == []
+            checked = True
         pg.click("#ps-stale-run")
         pg.wait_for_selector("#ps-stale", state="hidden", timeout=60000)
         assert pg.is_enabled("#ps-wi-run") and "rc-stale" not in pg.get_attribute("#ps-out", "class").split()

@@ -142,7 +142,8 @@ const STALE_PARTS = ['ps-out', 'ps-whatif', 'ps-expert', 'ps-share'];
 const STALE_BUTTONS = ['ps-wi-run', 'ps-range-btn', 'ps-card-dl', 'ps-card-share', 'ps-csv', 'ps-json'];
 function setStale(on) {
   stale = on;
-  for (const id of STALE_PARTS) $(id).classList.toggle('rc-stale', on);
+  // inert: the old results stay on screen, dimmed, but cannot be used or reached until the next run
+  for (const id of STALE_PARTS) { $(id).classList.toggle('rc-stale', on); $(id).inert = on; }
   for (const id of STALE_BUTTONS) if ($(id)) $(id).disabled = on;
   $('ps-stale').hidden = !on;
 }
