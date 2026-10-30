@@ -4,7 +4,7 @@
 
 import { parseDate, fallBackClose } from './csv.js?v=7dca0e6f';
 import { fail } from './errors.js?v=8ee10796';
-import { cell, reqNumber, optNumber, skip, isEmptyRow } from './mt.js?v=3f5ee677';
+import { cell, reqNumber, optNumber, skip, isEmptyRow } from './mt.js?v=22f54b12';
 
 export function sideLetter(v) {
   // Like Tradervue: anything starting with B is a buy, with S a sell ("Short" too).
