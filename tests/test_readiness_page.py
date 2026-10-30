@@ -187,6 +187,29 @@ def test_results_go_stale_after_a_change_until_the_next_run(browser, built_site)
     ctx.close()
 
 
+def test_every_preset_change_resets_every_box(browser, built_site):
+    """F3: nothing typed for one preset, the account size included, carries over to the next."""
+    ctx, pg, _ = open_page(browser, built_site)
+    pg.select_option("#ps-preset", "ftmo-1-step")
+    pg.fill("#ps-account", "5000")
+    pg.dispatch_event("#ps-account", "change")   # a percent preset scales to a typed size
+    assert pg.input_value("#ps-target") == "500"
+    pg.fill("#ps-target", "123")
+    pg.click("#ps-more summary")
+    pg.fill("#ps-consistency", "40")
+    pg.fill("#ps-profmin", "77")
+    pg.select_option("#ps-preset", "topstep-50k-trading-combine")
+    assert (pg.input_value("#ps-account"), pg.input_value("#ps-target")) == ("50000", "3000")
+    pg.select_option("#ps-preset", "ftmo-1-step")
+    assert (pg.input_value("#ps-account"), pg.input_value("#ps-target"), pg.input_value("#ps-consistency"),
+            pg.input_value("#ps-profmin")) == ("100000", "10000", "50", "")
+    pg.select_option("#ps-preset", "")
+    for box in ("#ps-account", "#ps-target", "#ps-daily", "#ps-maxloss", "#ps-days", "#ps-mindays", "#ps-stopat"):
+        assert pg.input_value(box) == "", box
+    assert pg.is_checked("#ps-trail-static") and pg.input_value("#ps-targetcheck") == "eod" and pg.input_value("#ps-daytz") == "file"
+    ctx.close()
+
+
 def test_a_new_file_ends_a_running_check(browser, built_site):
     """F6: a check still running when a new file is picked stops; no error, nothing stale is drawn."""
     ctx, pg, log = open_page(browser, built_site)
