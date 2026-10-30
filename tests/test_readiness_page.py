@@ -143,9 +143,14 @@ def test_presets_alphabetical_no_default_and_notes(browser, built_site):
     assert src.startswith("Read on 29 Oct 2026 from FTMO’s rules page.")
     a = pg.query_selector("#ps-preset-source a")
     assert a.get_attribute("rel") == "nofollow noopener" and a.get_attribute("href") == "https://ftmo.com/en/trading-objectives/"
-    assert pg.is_visible("#ps-days-ns") and "Not stated by the firm" in pg.inner_text("#ps-days-ns")
-    assert pg.is_visible("#ps-mindays-ns") and pg.is_hidden("#ps-daily-ns")
-    assert "does not state: minimum days; time limit" in pg.inner_text("#ps-ns")
+    # a not-stated value: the empty box says so, its note is read out with it, and the line under the picker names it
+    assert pg.get_attribute("#ps-days", "placeholder") == "Not stated by the firm: no time limit"
+    assert pg.get_attribute("#ps-mindays", "placeholder") == "Not stated by the firm: none"
+    assert pg.get_attribute("#ps-daily", "placeholder") == ""
+    assert pg.text_content("#ps-days-ns") == "Not stated by the firm. The check uses no time limit."
+    assert "ps-days-ns" in pg.get_attribute("#ps-days", "aria-describedby") and pg.text_content("#ps-daily-ns") == ""
+    assert pg.inner_text("#ps-ns") == "Not stated by FTMO: minimum days; time limit. These run with the defaults in each box."
+    assert pg.get_attribute("#ps-more", "open") is None   # a pick never opens More rules
     assert "this check does not model" in pg.inner_text("#ps-limits-preset")
     # a percent preset scales with the account size; editing a box says "Edited from"
     pg.fill("#ps-account", "50000")
@@ -547,6 +552,22 @@ def test_layout_axe_cls(browser, built_site, width, scheme):
     assert horizontal_overflow(pg) == []
     assert axe_violations(pg) == []
     assert errors(log) == []
+    ctx.close()
+
+
+@pytest.mark.parametrize("width", [390, 768, 1280])
+@pytest.mark.parametrize("preset", ["ftmo-1-step", "topstep-50k-trading-combine", "example"])
+def test_first_preset_pick_does_not_shift_the_page(browser, built_site, width, preset):
+    """Tester page report F5: the notes a preset brings fill space kept for them."""
+    ctx, pg, _ = open_page(browser, built_site, width=width)
+    pg.wait_for_timeout(300)
+    before = pg.evaluate("window.__cls")
+    pg.select_option("#ps-preset", preset)   # a scripted pick: no recent input, so every shift counts
+    pg.wait_for_timeout(500)
+    shift = pg.evaluate("window.__cls") - before
+    print(f"CLS first pick {preset} @{width}: {shift:.4f} (page total {pg.evaluate('window.__cls'):.4f})")
+    assert shift < 0.05, shift
+    assert pg.evaluate("window.__cls") < 0.05
     ctx.close()
 
 

@@ -8,7 +8,7 @@
         <label for="{{ id }}">{{ label }}</label>
         {%- if hint %}<span class="hint" id="{{ id }}-hint">{{ hint }}</span>{% endif %}
         <input id="{{ id }}" type="text" inputmode="{{ mode }}" autocomplete="off" aria-describedby="{% if hint %}{{ id }}-hint {% endif %}{% if ns %}{{ id }}-ns {% endif %}{{ id }}-err">
-        {%- if ns %}<p class="ns-note small" id="{{ id }}-ns" data-ns="{{ ns }}" hidden></p>{% endif %}
+        {%- if ns %}<p class="ns-note visually-hidden" id="{{ id }}-ns" data-ns="{{ ns }}"></p>{% endif %}
         <p class="error" id="{{ id }}-err" hidden></p>
       </div>
 {%- endmacro %}
@@ -19,7 +19,7 @@
         <select id="{{ id }}" aria-describedby="{% if hint %}{{ id }}-hint {% endif %}{% if ns %}{{ id }}-ns {% endif %}{{ id }}-err">
           {%- for v, t in options %}<option value="{{ v }}">{{ t }}</option>{% endfor %}
         </select>
-        {%- if ns %}<p class="ns-note small" id="{{ id }}-ns" data-ns="{{ ns }}" hidden></p>{% endif %}
+        {%- if ns %}<p class="ns-note visually-hidden" id="{{ id }}-ns" data-ns="{{ ns }}"></p>{% endif %}
         <p class="error" id="{{ id }}-err" hidden></p>
       </div>
 {%- endmacro %}
@@ -72,7 +72,7 @@
       <div class="field">
         <label for="ps-preset">Rules</label>
         <span class="hint" id="ps-preset-hint">A firm’s rules as published, or your own. Every box stays editable.</span>
-        <select id="ps-preset" aria-describedby="ps-preset-hint ps-preset-source">
+        <select id="ps-preset" aria-describedby="ps-preset-hint ps-preset-info">
           <option value="">Custom rules (type your own)</option>
           <option value="example">Example rules</option>
           {%- for firm in presets.firms %}
@@ -81,10 +81,23 @@
           </optgroup>
           {%- endfor %}
         </select>
-        <p id="ps-preset-source" class="small muted" hidden></p>
+        {#- Every version of the line under the picker is here, stacked unseen in one grid cell, so the block is as tall
+            as the longest from the first paint and a pick never moves the boxes below (Tester page report F5).
+            prop-sim.js copies the picked one into the live line: these are the only copy of the wording. #}
+        {%- set ns_names = {"daily_loss": "daily loss limit", "drawdown": "where the maximum loss is measured from",
+            "trail_stop_at": "where the moving floor stops", "consistency": "best-day share", "min_days": "minimum days",
+            "count_day_if": "what counts as a trading day", "time_limit": "time limit", "target_check": "when the target counts",
+            "day_start": "when the firm’s day starts"} %}
+        <div id="ps-preset-info" class="preset-info small">
+          <div class="pi-live"><p id="ps-preset-source" class="muted">Custom rules: type your own in the boxes below.</p><p id="ps-ns" class="ns-line"></p></div>
+          <div class="pi-ghost" aria-hidden="true" data-info=""><p class="muted">Custom rules: type your own in the boxes below.</p><p class="ns-line"></p></div>
+          <div class="pi-ghost" aria-hidden="true" data-info="example"><p class="muted">Example rules, not any firm’s. Every box stays editable.</p><p class="ns-line"></p></div>
+          {%- for p in presets.presets %}
+          <div class="pi-ghost" aria-hidden="true" data-info="{{ p.id }}"><p class="muted">Read on {{ p.read_text }} from {{ p.firm }}’s <a href="{{ p.url }}" rel="nofollow noopener" tabindex="-1">rules page</a>. Check the firm’s current page: rules change.</p><p class="ns-line">{% if p.not_stated %}Not stated by {{ p.firm }}: {% for f in p.not_stated %}{{ ns_names[f] }}{% if not loop.last %}; {% endif %}{% endfor %}. These run with the defaults in each box.{% endif %}</p></div>
+          {%- endfor %}
+        </div>
       </div>
       <p class="small muted" id="ps-adult">Prop firms sell challenges only to adults (18+).</p>
-      <div id="ps-ns" class="notice notice-caution" hidden></div>
       <div class="field-grid">
       {{ field("ps-account", "Account size (optional)", "The starting balance. A preset stated in % of the account scales to it.") }}
       {{ field("ps-target", "Profit target", "As an amount above the starting balance: a 10% target on 50,000 is 5000.") }}
@@ -96,7 +109,7 @@
         <div class="check"><input type="radio" id="ps-trail-static" name="ps-trail" value="static" checked><label for="ps-trail-static">The starting balance (it never moves)</label></div>
         <div class="check"><input type="radio" id="ps-trail-trailing" name="ps-trail" value="trailing_eod"><label for="ps-trail-trailing">The highest balance at the end of a day (moves up)</label></div>
         <div class="check"><input type="radio" id="ps-trail-trade" name="ps-trail" value="trailing_trade"><label for="ps-trail-trade">The highest balance after any closed trade (moves up)</label></div>
-        <p class="ns-note small" id="ps-trail-ns" data-ns="drawdown" hidden></p>
+        <p class="ns-note visually-hidden" id="ps-trail-ns" data-ns="drawdown"></p>
       </fieldset>
       <div class="field-grid">
       {{ field("ps-days", "Time limit in trading days (optional)", "A whole number from 1 to 365. Leave blank for none: the check stops at 250 trading days.", "numeric", ns="time_limit") }}
