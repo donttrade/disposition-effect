@@ -14,6 +14,10 @@ import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreF
 import { habitSentences, methodLine, page1Lines, coverageLines, mergedLine, checkReport, SENTENCE_HABITS, RESEARCH, RESEARCH_PREFIX, holdDays,
   V_LAUNCH, V_LAUNCH_SIZE, V_NO, moreTrades } from './wording.js';
 
+// Off until "N more trades" can be shown without ever understating N (Tester slice 1 re-test: worlds
+// with too few files per share band were ignored, so some files were told too few). Backlog item.
+const SHOW_MORE_TRADES = false;
+
 const $ = (id) => document.getElementById(id);
 const MINUS = '−';
 
@@ -250,7 +254,7 @@ function habitSection(h, unit, report) {
     const what = el('div', { class: 'layer layer-what' }, el('h4', { text: 'What happened' }));
     if (happenedLines.length) for (const x of happenedLines) what.append(el('p', { class: 'habit-sentence', text: plain(x) }));
     else what.append(el('p', { class: 'muted', text: 'No figure for this file.' }));
-    sec.append(el('h3', { id: 'h-' + h.id, text: nameOf(h) }), what, luckLayer(h, verdictLines, moreTrades(h, report, wordingFmt(unit))));
+    sec.append(el('h3', { id: 'h-' + h.id, text: nameOf(h) }), what, luckLayer(h, verdictLines, SHOW_MORE_TRADES ? moreTrades(h, report, wordingFmt(unit)) : null));
     return sec;
   }
   sec.append(el('h3', { id: 'h-' + h.id, text: nameOf(h) }), el('p', { class: 'muted', text: h.question }));
@@ -263,7 +267,7 @@ function habitSection(h, unit, report) {
   const extra = detailLine(h, unit);
   if (extra) what.append(el('p', { text: extra }));
   sec.append(what);
-  const more = factsOnly(h) ? null : moreTrades(h, report, wordingFmt(unit));
+  const more = (factsOnly(h) || !SHOW_MORE_TRADES) ? null : moreTrades(h, report, wordingFmt(unit));
   if (!factsOnly(h)) sec.append(luckLayer(h, verdictLines, more));
   const how = el('div', {});
   // The method line carries the habit's own n_perm (it scales with the file size, D-4).
