@@ -130,12 +130,12 @@ def test_plain_words_in_the_default_view(browser, built_site):
 def test_presets_alphabetical_no_default_and_notes(browser, built_site):
     ctx, pg, _ = open_page(browser, built_site)
     opts = pg.eval_on_selector_all("#ps-preset option", "os => os.map((o) => [o.value, o.parentElement.tagName === 'OPTGROUP' ? o.parentElement.label : ''])")
-    assert opts[0] == ["", ""] and pg.input_value("#ps-preset") == ""
-    firms = [f for _, f in opts[1:]]
+    assert opts[0] == ["", ""] and opts[1] == ["example", ""] and pg.input_value("#ps-preset") == ""
+    firms = [f for _, f in opts[2:]]
     assert firms == sorted(firms, key=str.lower) and len(set(firms)) == 8
     lib = C.load()
     shown = {p["id"] for p in C.shown(lib)}
-    assert {v for v, _ in opts[1:]} == shown
+    assert {v for v, _ in opts[2:]} == shown
     pg.select_option("#ps-preset", "ftmo-1-step")
     assert (pg.input_value("#ps-account"), pg.input_value("#ps-target"), pg.input_value("#ps-daily"), pg.input_value("#ps-maxloss")) == ("100000", "10000", "3000", "10000")
     assert pg.is_checked("#ps-trail-trailing") and pg.input_value("#ps-targetcheck") == "intraday" and pg.input_value("#ps-daytz") == "Europe/Prague"
@@ -188,6 +188,38 @@ def test_results_go_stale_after_a_change_until_the_next_run(browser, built_site)
         pg.wait_for_selector("#ps-stale", state="hidden", timeout=60000)
         assert pg.is_enabled("#ps-wi-run") and "rc-stale" not in pg.get_attribute("#ps-out", "class").split()
     assert errors(log) == []
+    ctx.close()
+
+
+def test_example_data_never_changes_a_preset(browser, built_site):
+    """F4: the example button loads only the file; example rules come as a preset named "Example rules"."""
+    ctx, pg, _ = open_page(browser, built_site)
+    pg.select_option("#ps-preset", "ftmo-1-step")
+    before = [pg.input_value(b) for b in ("#ps-account", "#ps-target", "#ps-daily", "#ps-maxloss", "#ps-days")]
+    pg.click("#ps-sample-btn")
+    pg.wait_for_selector("#ps-file-status:text-matches('^Read ')")
+    assert pg.input_value("#ps-preset") == "ftmo-1-step"
+    assert [pg.input_value(b) for b in ("#ps-account", "#ps-target", "#ps-daily", "#ps-maxloss", "#ps-days")] == before
+    run(pg)
+    assert pg.text_content("#ps-rules-used").startswith("Rules used: As FTMO")
+    ctx.close()
+    # custom rules typed by hand stay too
+    ctx, pg, _ = open_page(browser, built_site)
+    fill(pg, {"#ps-target": "300", "#ps-maxloss": "300"})
+    pg.click("#ps-sample-btn")
+    pg.wait_for_selector("#ps-file-status:text-matches('^Read ')")
+    assert pg.input_value("#ps-preset") == "" and pg.input_value("#ps-target") == "300" and pg.input_value("#ps-daily") == ""
+    ctx.close()
+    # no rules yet: the preset switches to "Example rules", named as such
+    ctx, pg, _ = open_page(browser, built_site)
+    pg.click("#ps-sample-btn")
+    pg.wait_for_selector("#ps-file-status:text-matches('^Read ')")
+    assert pg.input_value("#ps-preset") == "example"
+    assert pg.eval_on_selector("#ps-preset", "s => s.selectedOptions[0].textContent") == "Example rules"
+    assert [pg.input_value(b) for b in ("#ps-account", "#ps-target", "#ps-daily", "#ps-maxloss", "#ps-days")] == ["10000", "600", "250", "500", "60"]
+    assert pg.inner_text("#ps-preset-source").startswith("Example rules, not any firm’s.")
+    run(pg)
+    assert pg.text_content("#ps-rules-used").startswith("Rules used: Example rules.")
     ctx.close()
 
 

@@ -170,6 +170,8 @@ const RULE_BOXES = {
   'ps-mindays-kind': 'trading', 'ps-profmin': '', 'ps-countday': 'any', 'ps-consistency': '', 'ps-stopat': '',
   'ps-targetcheck': 'eod', 'ps-daytz': 'file', 'ps-dayhour': '',
 };
+// "Example rules": the rules the example data is shown with, named as such and no firm's.
+const EXAMPLE_RULES = { 'ps-account': '10000', 'ps-target': '600', 'ps-daily': '250', 'ps-maxloss': '500', 'ps-days': '60' };
 function resetRules(keepSize) {
   for (const [id, v] of Object.entries(RULE_BOXES)) if (!(keepSize && id === 'ps-account')) setVal(id, v);
   $('ps-trail-static').checked = true;
@@ -185,6 +187,13 @@ function applyPreset(keepSize = false) {
   $('ps-limits-preset').hidden = true;
   resetRules(keepSize === true);
   if (!id) { current = null; src.hidden = true; src.replaceChildren(); return; }
+  if (id === 'example') {
+    current = null;
+    for (const [box, v] of Object.entries(EXAMPLE_RULES)) setVal(box, v);
+    src.textContent = 'Example rules, not any firm’s. Every box stays editable.';
+    src.hidden = false;
+    return;
+  }
   const p = presets.presets.find((x) => x.id === id);
   let size = null;
   if (keepSize === true) {
@@ -394,6 +403,7 @@ async function run(ev) {
   const fd = file ? dayFlags(data.flags, input.grouped.index) : null;
   last = {
     ...input, res, file, fd, data, unit: file ? data.unit : 'account', preset: current ? current.preset : null,
+    exampleRules: !current && $('ps-preset').value === 'example',
     edited: current ? current.snapshot !== JSON.stringify(input.p.rules) : false,
     seq: file ? simulate({ mode: 'sequence', days: input.p.days, rules: input.p.rules }) : null,
     real: file ? realBreachDays(input.p.days, fd, input.p.rules.daily_loss, { datesOnly: data.datesOnly }) : null,
@@ -647,7 +657,7 @@ function rulesText() {
   const r = last.p.rules;
   const m = (n) => money(n, last.unit, { sign: false });
   const dd = { static: 'from the starting balance', trailing_eod: 'from the highest end-of-day balance', trailing_trade: 'from the highest balance after any trade' }[r.drawdown];
-  const from = last.preset ? `${last.edited ? 'Edited from' : 'As'} ${last.preset.firm}, ${last.preset.program} (rules_lib ${presets.rules_lib}). ` : 'Custom rules. ';
+  const from = last.preset ? `${last.edited ? 'Edited from' : 'As'} ${last.preset.firm}, ${last.preset.program} (rules_lib ${presets.rules_lib}). ` : last.exampleRules ? 'Example rules. ' : 'Custom rules. ';
   return from + `Profit target ${m(r.target)}${r.target_check === 'intraday' ? ' (counts as soon as reached)' : ''}; daily loss limit ${r.daily_loss === null ? 'none' : m(r.daily_loss)}; ` +
     `maximum loss ${m(r.max_loss)} ${dd}${r.trail_stop_at !== null && r.drawdown !== 'static' ? `, stopping at ${m(r.trail_stop_at)}` : ''}; ` +
     `${r.time_limit === null ? `no time limit (stopped at ${NO_LIMIT_CAP} trading days)` : plural(r.time_limit, 'trading day', 'trading days')}; ` +
@@ -796,7 +806,7 @@ function exportData() {
   const outKeys = ['runs', 'pass', 'bust', 'timeout', 'bust_daily', 'bust_max', 'bust_after_streak', 'held_consistency', 'held_min_days', 'capped', 'median_pass_days', 'median_bust_days', 'trades_seen', 'trades_left_out'];
   const data = {
     schema: 'donttrade.readiness-check.results.v1', method: METHOD_VERSION.paired, rules_lib: presets.rules_lib,
-    preset_id: last.preset ? last.preset.id : 'custom', edited_from_preset: last.edited,
+    preset_id: last.preset ? last.preset.id : last.exampleRules ? 'example' : 'custom', edited_from_preset: last.edited,
     settings: { runs: p.runs, seed: p.seed, stream: 'paired', mode: last.file ? (last.example ? 'example' : 'file') : 'manual',
       day_start: last.dayStart, file_time_zone: last.fileTz, no_limit_cap: NO_LIMIT_CAP },
     rules: p.rules, account_size: last.accountSize,
@@ -888,9 +898,11 @@ function init() {
   });
   $('ps-file').addEventListener('change', (e) => slot.pickFile(e.target.files[0], 'your file'));
   $('ps-sample-btn').addEventListener('click', () => {
-    // the example data also fills example rules where the boxes are empty, not any firm's
-    for (const [id, v] of [['ps-target', '600'], ['ps-daily', '250'], ['ps-maxloss', '500'], ['ps-days', '60']]) {
-      if ($(id).value.trim() === '') $(id).value = v;
+    // The example data loads only the file: a firm's preset or rules typed by hand stay as they are. With
+    // custom rules and no target or maximum loss typed yet, the preset switches to "Example rules".
+    if ($('ps-preset').value === '' && $('ps-target').value.trim() === '' && $('ps-maxloss').value.trim() === '') {
+      $('ps-preset').value = 'example';
+      applyPreset(false);
     }
     slot.readBytes(new TextEncoder().encode($('ps-sample').textContent.replace(/^\s+/, '')), SAMPLE_LABEL);
   });
