@@ -334,6 +334,10 @@ fieldset { border: 0; padding: 0; margin: 0 0 var(--s3); }
 /* 29 Oct (owner): a habit whose luck check is not calibrated yet; neutral, never a result */
 .badge-coming { color: var(--muted); border-style: dashed; }
 .badge-coming::before { content: "…"; }
+/* 30 Oct (Tester #3, CLS < 0.05): content drawn by JavaScript (the example report; /welcome/'s states) gets a
+   screen's height reserved, so the footer below is out of view before and after it is drawn */
+.dt-js .report-slot, .dt-js .w-states { min-height: 100vh; }
+@media print { .dt-js .report-slot, .dt-js .w-states { min-height: 0; } }
 /* the report's two layers per habit: "What happened", then "Real or luck?" */
 .habit .layer { margin: var(--s2) 0; }
 .habit .layer h4 { margin: 0 0 var(--s1); font-size: var(--fs-1); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
