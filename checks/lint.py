@@ -387,6 +387,21 @@ def lint_text(text, where="text", paid=False, analytics=False, english=True):
     out += scarcity_claims(text, where)
     out += free_forever_claims(text, where)
     out += dt_name_claims(text, where)
+    out += retired_name_claims(text, where)
+    return out
+
+
+def retired_name_claims(text, where):
+    """30 Oct (Tester #4): banned.toml [retired_names]. The allow regexes are cut out of the text first."""
+    cfg = RULES.get("retired_names", {})
+    t = text
+    for a in cfg.get("allow", []):
+        t = re.sub(a, " ", t)
+    out = []
+    for rx, flags in [(r, re.IGNORECASE) for r in cfg.get("ignore_case", [])] + [(r, 0) for r in cfg.get("match_case", [])]:
+        for m in re.finditer(rx, t, flags):
+            ctx = t[max(0, m.start() - 40):m.end() + 40].replace("\n", " ")
+            out.append(("banned:retired_name", where, f"“{m.group(0)}” in …{ctx}…"))
     return out
 
 
