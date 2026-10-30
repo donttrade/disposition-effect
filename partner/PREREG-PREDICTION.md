@@ -1,6 +1,6 @@
 # Do early trading habits predict prop-challenge rule breaches? A pre-registered external validation of the donttrade DT-1 habit index
 
-**Status: draft for OSF, not yet posted.** Once posted, the OSF timestamp is the registration date. Each firm completes the firm fields of the parameter block at the end (§2.13) and sends it in before running the script. Each firm's completed block is added as a dated amendment, before that firm's run.
+**Status: as registered on OSF.** The OSF timestamp is the registration date. Each firm completes the firm fields of the parameter block at the end (§2.13) and sends it in before running the script. Each firm's completed block is added as a dated amendment, before that firm's run.
 
 Order follows the OSF "Preregistration" template: study information, design, sampling, variables, analysis, other. Reporting will follow TRIPOD+AI.
 
