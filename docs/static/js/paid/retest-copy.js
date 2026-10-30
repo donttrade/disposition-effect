@@ -14,10 +14,10 @@
 // file to the server's constants).
 
 export const RETEST_HOW = 'For the re-test, export the same account from the same start date as your first file, '
-  + 'up to the day you run it, so the file covers your first report’s period and the trades since.';
+  + 'up to the day you run it, so the file covers your first result’s period and the trades since.';
 
 // Only when no window came back (an older server): no instant, so no time is claimed.
-export const RETEST_LINE = 'Your purchase includes one re-test on the same account, 30 to 60 days after your first report. ' + RETEST_HOW;
+export const RETEST_LINE = 'Your purchase includes one re-test on the same account, 30 to 60 days after your first result. ' + RETEST_HOW;
 
 const iso = (sec) => new Date(sec * 1000).toISOString();
 
