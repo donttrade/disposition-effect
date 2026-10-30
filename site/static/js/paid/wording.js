@@ -375,7 +375,7 @@ export function coverageLines(report) {
 }
 
 // ---------------------------------------------------------------- "N more trades to tell" (bundle plan §2.2, slice 1)
-// New strings only; nothing above changes. Shown for a tested habit whose verdict is "could be luck"
+// New strings only; nothing above changes. Shown for a tested habit whose verdict is "Not clear yet"
 // (not_distinguishable) and never for "unlikely to be luck", a facts-only habit, too_few or a habit that was not tested.
 // N comes from the static table power-table.js (checks/power_table/build_power_table.mjs), built offline on the
 // shipped engine with a FIXED moderate pattern (0.5 sd): it never uses the file's own gap (plan R9, post-hoc power).

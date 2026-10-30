@@ -218,7 +218,7 @@ def test_example_report_shows_two_layers_and_never_described_or_not_tested(brows
     n = pg.locator("#sample-out .habit").count()
     assert n == 5
     assert pg.locator("#sample-out .habit .layer-what h4").count() == 5 and pg.locator("#sample-out .habit .layer-luck h4").count() == 3
-    assert "Large losses" in t and "Luck check coming" in t and "unlikely to be luck" in t and "could be luck" in t
+    assert "Large losses" in t and "Luck check coming" in t and "unlikely to be luck" in t and "Not clear yet" in t
     # stats round 2: size after a loss keeps "Luck check coming"; the hold gap and large losses are "Your numbers", no pill
     sec = pg.locator("#habit-size_up")
     assert sec.locator(".badge-coming").inner_text() == "Luck check coming" and sec.locator(".luck-why summary").inner_text() == "Why not yet"
@@ -280,3 +280,22 @@ def test_js_drawn_pages_do_not_shift(browser, built_site, path, width):
     cls = pg.evaluate("window.__cls")
     ctx.close()
     assert cls < 0.05, (path, width, cls)
+
+
+def test_could_be_luck_label_never_returns():
+    """30 Oct (owner): the inconclusive verdict reads "Not clear yet" ("not clear yet" mid-sentence), never
+    "could be luck", in the templates, the site scripts or the built docs/."""
+    hits = []
+    for rel in ("site/templates", "site/static/js", "docs"):
+        root = os.path.join(REPO, rel)
+        assert os.path.isdir(root), rel
+        for dp, _, fns in os.walk(root):
+            for fn in fns:
+                p = os.path.join(dp, fn)
+                try:
+                    s = open(p, encoding="utf-8").read()
+                except (UnicodeDecodeError, OSError):
+                    continue
+                if re.search(r"could\s+be\s+luck", s, re.I):
+                    hits.append(os.path.relpath(p, REPO))
+    assert hits == [], hits

@@ -12,7 +12,7 @@ import { pgrPlrCounts } from '../engine/pgr.js?v=4c675fe5';
 import { stripRows, spanLine } from './strip.js?v=03137080';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js?v=16f6dd26';
 import { habitSentences, methodLine, page1Lines, coverageLines, mergedLine, checkReport, SENTENCE_HABITS, RESEARCH, RESEARCH_PREFIX, holdDays,
-  V_LAUNCH, V_LAUNCH_SIZE, V_NO, moreTrades } from './wording.js?v=71321283';
+  V_LAUNCH, V_LAUNCH_SIZE, V_NO, moreTrades } from './wording.js?v=0cb7d61e';
 
 // Off until "N more trades" can be shown without ever understating N (Tester slice 1 re-test: worlds
 // with too few files per share band were ignored, so some files were told too few). Backlog item.
@@ -221,7 +221,7 @@ function happenedList(h, unit, report) {
 }
 
 // Layer 2, "Real or luck?": the result pill with its plain gloss, the verdict line; or "Luck check coming" with why.
-const GLOSS = { distinguishable: 'unlikely to be luck', not_distinguishable: 'could be luck' };
+const GLOSS = { distinguishable: 'unlikely to be luck', not_distinguishable: 'Not clear yet' };
 function luckLayer(h, lines, more = null) {
   const box = el('div', { class: 'layer layer-luck' }, el('h4', { text: 'Real or luck?' }));
   const pill = el('p', { class: 'luck-pill' }, badge(h.verdict, h));
