@@ -76,3 +76,10 @@ def test_live_engine_agrees_and_is_untouched(golden):
         assert g["rows"] == w["rows"]
     diff = subprocess.run(["git", "-C", PRIVATE, "diff", "--quiet", "--", "src/core/habits.mjs"])
     assert diff.returncode == 0
+
+
+def test_golden_names_the_shipped_dt1_features(golden):
+    """31 Oct (Tester, slice 1 B1): the golden's dt1_features_sha256 is the shipped file's hash, so it cannot go stale
+    silently (fill_hashes.py --check refuses too)."""
+    with open(os.path.join(REPO, "partner", "dt1_features.py"), "rb") as fh:
+        assert hashlib.sha256(fh.read()).hexdigest() == golden["dt1_features_sha256"]

@@ -54,7 +54,22 @@ def block():
     return "\n".join(lines), dict(code, **sup, **fx)
 
 
+GOLDEN = "partner/parity/dt1_golden.json"
+
+
+def golden_current():
+    """31 Oct (Tester, slice 1 B1): the DT-1 golden names the dt1_features.py it was built against. Hashing the golden
+    as a whole cannot see that field go stale, so it is checked here: rebuild with
+    tests/parity/build_dt1_golden.py --write first, never hand-edit."""
+    g = json.load(open(os.path.join(REPO, GOLDEN), encoding="utf-8"))
+    live = sha(open(os.path.join(REPO, "partner", "dt1_features.py"), "rb").read())
+    if g.get("dt1_features_sha256") != live:
+        raise SystemExit("%s names dt1_features.py %s, but it is %s now: run python3 -B tests/parity/build_dt1_golden.py "
+                         "--write, then this script" % (GOLDEN, g.get("dt1_features_sha256"), live))
+
+
 def main():
+    golden_current()
     text, hashes = block()
     stale = []
     for t in TARGETS:
