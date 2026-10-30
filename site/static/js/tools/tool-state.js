@@ -96,7 +96,10 @@ export function renderReadError(box, err, retry) {
 //   onError(err, retry|null)       the latest read failed; retry() reads the same bytes again
 //   onNoise(noise|null)            noise checks of the latest read (noise: true only)
 //   onClear()                      a new pick started or the pick was emptied: clear old output
-export function createFileSlot({ progressBox, noise = false, onStage = () => {}, onResult, onError, onNoise = () => {}, onClear = () => {} }) {
+//   onMapNeeded(need, choose)      (optional) the headings leave a needed column unnamed: show
+//                                  one choice per field in need.missing, then choose({field: index})
+//                                  reads the same file again with those columns (state 'mapping')
+export function createFileSlot({ progressBox, noise = false, onStage = () => {}, onResult, onError, onNoise = () => {}, onClear = () => {}, onMapNeeded = null }) {
   let seq = 0;            // the latest request id; anything older is stale
   let job = null;         // the latest read's {cancel, runNoise}
   let state = 'empty';
@@ -131,9 +134,9 @@ export function createFileSlot({ progressBox, noise = false, onStage = () => {},
     return true;
   };
 
-  async function read(id, bytes, label) {
+  async function read(id, bytes, label, cols = null) {
     const thisJob = readTradeFile(bytes, {
-      id, noise,
+      id, noise, ask: !!onMapNeeded, cols,
       onStage: (t) => { if (id === seq) onStage(t); },
       onNoise: (n) => { if (id === seq) onNoise(n); },
     });
@@ -143,8 +146,15 @@ export function createFileSlot({ progressBox, noise = false, onStage = () => {},
     if (out.error) {
       job = null;
       try {
-        onError(out.error, isWorkerFailure(out.error) ? () => readBytes(bytes, label) : null);
+        onError(out.error, isWorkerFailure(out.error) ? () => readItem(bytes, label, cols) : null);
       } finally { setState('error'); }
+      return;
+    }
+    if (out.mapNeeded) {
+      job = null;
+      try {
+        onMapNeeded(out.mapNeeded, (picked) => readItem(bytes, label, { ...out.mapNeeded.chosen, ...picked }));
+      } finally { setState('mapping'); }
       return;
     }
     // the page takes the result before anyone waiting on settled() runs
@@ -155,9 +165,19 @@ export function createFileSlot({ progressBox, noise = false, onStage = () => {},
     await drawn;
   }
 
-  function readBytes(bytes, label) {
+  function readItem(item, label, cols) {
     const id = begin();
-    return read(id, bytes, label);
+    return read(id, item, label, cols);
+  }
+
+  function readBytes(bytes, label) {
+    return readItem(bytes, label, null);
+  }
+
+  // A table pasted from a platform's screen: read like a file (the worker's runFiles path).
+  function readPaste(text, label = 'your pasted table') {
+    const id = begin();
+    return read(id, { paste: text }, label);
   }
 
   async function pickFile(file, label = 'your file') {
@@ -194,6 +214,7 @@ export function createFileSlot({ progressBox, noise = false, onStage = () => {},
   return {
     pickFile,
     readBytes,
+    readPaste,
     get state() { return state; },
     // resolves with the final state once no read is in flight
     settled: () => (state === 'reading' ? new Promise((resolve) => waiters.push(resolve)) : Promise.resolve(state)),

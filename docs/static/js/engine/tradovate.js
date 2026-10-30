@@ -7,8 +7,8 @@
 // Mirrors parse_tradovate() in tests/reference/engine_ref.py.
 
 import { parseDate, parseNumber } from './csv.js?v=7dca0e6f';
-import { cell, reqNumber, skip, isEmptyRow } from './mt.js?v=3f5ee677';
-import { sideLetter } from './generic.js?v=b28059a4';
+import { cell, reqNumber, skip, isEmptyRow } from './mt.js?v=22f54b12';
+import { sideLetter } from './generic.js?v=fdcacce4';
 
 // UNVERIFIED: dollars per point per contract. Check each against CME contract specs.
 export const CME_MULTIPLIERS = Object.freeze({

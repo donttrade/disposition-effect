@@ -362,7 +362,7 @@ export function guessLayout(norm) {
   return 'fills';
 }
 
-const REQUIRED = {
+export const REQUIRED = {
   fills: ['date', 'symbol', 'side', 'qty', 'price'],
   orders: ['date', 'symbol', 'side', 'qty', 'price'],
   roundtrips: ['open_time', 'close_time', 'symbol', 'direction', 'qty', 'open_price', 'close_price'],
@@ -401,7 +401,15 @@ export function guessMapping(peek, dataRows, opts = {}) {
   const cols = {};
   for (const f of MAP_FIELDS) cols[f] = null;
   const badges = {};
+  // opts.cols: columns the person picked by hand ({qty: 3}); they are taken first, and no other
+  // field is guessed onto them (the Readiness Check's short "which column is which" step).
+  for (const [f, i] of Object.entries(opts.cols || {})) {
+    if (MAP_FIELDS.includes(f) && f !== 'fees' && Number.isInteger(i) && i >= 0 && i < width) {
+      cols[f] = i; badges[f] = 'chosen'; used.add(i);
+    }
+  }
   const take = (field, synonyms, test) => {
+    if (cols[field] !== null) return { index: cols[field], badge: badges[field] };
     const p = pick(syn, blocked, used, synonyms, (i) => test(vals(i)));
     if (p) { cols[field] = p.index; badges[field] = p.badge; used.add(p.index); }
     return p;
@@ -417,8 +425,8 @@ export function guessMapping(peek, dataRows, opts = {}) {
     take('pnl', SYNONYMS.pnl, CONTENT.pnl);
   } else {
     // A date column plus a time-only column, or one date-and-time column.
-    const d = pick(syn, blocked, used, SYNONYMS.date, (i) => CONTENT.date(vals(i)));
-    let dateDone = false;
+    const d = cols.date !== null ? null : pick(syn, blocked, used, SYNONYMS.date, (i) => CONTENT.date(vals(i)));
+    let dateDone = cols.date !== null;
     if (d && d.badge === 'matched' && vals(d.index).every((v) => dateShape(v).kind !== 'other' && !/\d:\d{2}/.test(v))) {
       used.add(d.index);
       const t = pick(syn, blocked, used, SYNONYMS.time, (i) => CONTENT.time(vals(i)));

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{#- A Challenge Readiness Check count (build.COUNT_EVENTS): the check page loads this page in a hidden same-origin
+    frame when a step finishes, so the site's cookie-free Cloudflare Web Analytics counts it as a page view of this
+    path. It carries nothing else: no query, no fragment, nothing from anyone's file. noindex; robots.txt disallows it. -#}
+{% block content %}
+<div class="wrap">
+  <h1>Counted</h1>
+  <p>This page only counts that a step of the <a href="/tools/prop-challenge-simulator/">Challenge Readiness Check</a> finished. Nothing from any file reaches it.</p>
+</div>
+{% endblock %}

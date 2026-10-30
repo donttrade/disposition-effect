@@ -14,8 +14,16 @@ import { fail, LIMITS } from './errors.js?v=8ee10796';
 // collapsed, and colspan expanded into empty cells so columns stay aligned.
 // table: the index (in document order) of the innermost <table> holding the row, or -1; the
 // universal importer offers one table of a statement that is not MetaTrader (cTrader, Match-Trader).
+// Styles never change a cell's text, and a parsed document takes the page's CSP: the report's own
+// style attributes and <style> blocks drew "Refused to apply inline style" on every tool page. They
+// are removed before parsing; scripts never run in a DOMParser document.
+export function withoutStyles(text) {
+  return text.replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, '')
+    .replace(/<[a-z][^>]*>/gi, (tag) => tag.replace(/\sstyle\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, ''));
+}
+
 export function htmlRows(text) {
-  const doc = new DOMParser().parseFromString(text, 'text/html');
+  const doc = new DOMParser().parseFromString(withoutStyles(text), 'text/html');
   const trs = doc.querySelectorAll('tr');
   if (trs.length > LIMITS.MAX_ROWS) fail('E_TOO_LARGE');
   const tableIndex = new Map();

@@ -1,49 +1,170 @@
 {% extends "base.html" %}
-{%- macro field(id, label, hint, mode="decimal") %}
+{#- The Challenge Readiness Check (ARCHITECT-CHALLENGE-READINESS-2026-10-29, Revision 2). Same URL as the old
+    simulator. Default view: rules, trades, three plain visuals, "Try a rule"; the raw numbers are in Expert details.
+    The one offer (partials/tool_next_step.html) sits after every finding, after "What this check can't see", and
+    never quotes a result. Ranked suggestions ([flags] whatif_ranked) and saving are not on this page. -#}
+{%- macro field(id, label, hint, mode="decimal", ns=None) %}
       <div class="field">
         <label for="{{ id }}">{{ label }}</label>
         {%- if hint %}<span class="hint" id="{{ id }}-hint">{{ hint }}</span>{% endif %}
-        <input id="{{ id }}" type="text" inputmode="{{ mode }}" autocomplete="off" aria-describedby="{% if hint %}{{ id }}-hint {% endif %}{{ id }}-err">
+        <input id="{{ id }}" type="text" inputmode="{{ mode }}" autocomplete="off" aria-describedby="{% if hint %}{{ id }}-hint {% endif %}{% if ns %}{{ id }}-ns {% endif %}{{ id }}-err">
+        {%- if ns %}<p class="ns-note visually-hidden" id="{{ id }}-ns" data-ns="{{ ns }}"></p>{% endif %}
         <p class="error" id="{{ id }}-err" hidden></p>
       </div>
 {%- endmacro %}
+{%- macro pick(id, label, options, hint=None, ns=None) %}
+      <div class="field">
+        <label for="{{ id }}">{{ label }}</label>
+        {%- if hint %}<span class="hint" id="{{ id }}-hint">{{ hint }}</span>{% endif %}
+        <select id="{{ id }}" aria-describedby="{% if hint %}{{ id }}-hint {% endif %}{% if ns %}{{ id }}-ns {% endif %}{{ id }}-err">
+          {%- for v, t in options %}<option value="{{ v }}">{{ t }}</option>{% endfor %}
+        </select>
+        {%- if ns %}<p class="ns-note visually-hidden" id="{{ id }}-ns" data-ns="{{ ns }}"></p>{% endif %}
+        <p class="error" id="{{ id }}-err" hidden></p>
+      </div>
+{%- endmacro %}
+{%- macro rule_row(n) %}
+      <div class="wi-row field-grid" data-wi-row="{{ n }}">
+        <div class="field">
+          <label for="ps-wi-rule{{ n }}">{% if n == 1 %}Pick a rule to replay{% else %}A second rule (optional){% endif %}</label>
+          <select id="ps-wi-rule{{ n }}">
+            {%- if n == 2 %}<option value="">None</option>{% endif %}
+            <option value="stop_after_losses">Stop after N losing trades</option>
+            <option value="stop_at_day_loss">Stop at X% of daily loss</option>
+            <option value="max_trades">At most N trades a day</option>
+            <option value="cooldown_s">Pause N minutes after a loss</option>
+            <option value="after_loss_factor">Smaller trades after a loss</option>
+          </select>
+        </div>
+        <div class="field" data-wi-num>
+          <label for="ps-wi-n{{ n }}" id="ps-wi-n{{ n }}-label">Losing trades</label>
+          <span class="hint" id="ps-wi-n{{ n }}-hint">A whole number from 1 to 10.</span>
+          <input id="ps-wi-n{{ n }}" type="text" inputmode="numeric" autocomplete="off" value="2" aria-describedby="ps-wi-n{{ n }}-hint ps-wi-n{{ n }}-err">
+          <p class="error" id="ps-wi-n{{ n }}-err" hidden></p>
+        </div>
+        <div class="field" data-wi-factor hidden>
+          <label for="ps-wi-f{{ n }}">Part of the result</label>
+          <select id="ps-wi-f{{ n }}"><option value="0.5">Half</option><option value="0.25">A quarter</option><option value="0.75">Three quarters</option></select>
+        </div>
+      </div>
+{%- endmacro %}
 {% block content %}
-{%- import "partials/trader_offer.html" as offer with context %}
 {%- set r = products["report39"] %}
 <div class="wrap">
-  {#- sweep 3 (29 Oct, owner: show, don't tell): one line and a picture; the longer explanation is under
-      "How it works" below, word for word. -#}
   {%- from "partials/tool_shot.html" import shot with context %}{% set t = tools | selectattr("href", "equalto", "/tools/prop-challenge-simulator/") | first %}
   <div class="tool-hero">
     <div>
       {% include "partials/crumbs.html" %}
-      <h1>Prop-firm challenge simulator</h1>
-      <p class="lede">Replay 10,000 challenges from your own trading days, under your firm’s rules.</p>
-      <p><strong>This is a simulation of your past trades, not a prediction.</strong></p>
+      <h1>Challenge Readiness Check</h1>
+      <p class="lede">Your past days, their published rules.</p>
+      <p>{% if flags.analytics %}Only anonymous counts of visits and finished steps are sent; your file is never sent.{% else %}Your file never leaves this tab.{% endif %}</p>
+      <p><strong>A replay of your past trades, not a prediction.</strong></p>
     </div>
     {{ shot("prop", t) }}
   </div>
   {% include "partials/disclaimer.html" %}
 
   <section class="tool" aria-labelledby="ps-tool-h">
-    <h2 id="ps-tool-h">Your trades and your rules</h2>
+    <h2 id="ps-tool-h">Your rules and your trades</h2>
     <p id="ps-js-needed" class="notice notice-caution" data-js-hide>This tool runs in your browser and needs JavaScript turned on.</p>
-    <form id="ps-form" novalidate hidden data-js-show>
+    <form id="ps-form" novalidate hidden data-js-show data-steps-counted="{{ 'on' if flags.analytics else 'off' }}">
+      <h3 id="ps-rules-h">1. The rules</h3>
+      <div class="field">
+        <label for="ps-preset">Rules</label>
+        <span class="hint" id="ps-preset-hint">A firm’s rules as published, or your own. Every box stays editable.</span>
+        <select id="ps-preset" aria-describedby="ps-preset-hint ps-preset-info">
+          <option value="">Custom rules (type your own)</option>
+          <option value="example">Example rules</option>
+          {%- for firm in presets.firms %}
+          <optgroup label="{{ firm }}">
+            {%- for p in presets.presets if p.firm == firm %}<option value="{{ p.id }}">{{ p.program }}</option>{% endfor %}
+          </optgroup>
+          {%- endfor %}
+        </select>
+        {#- Every version of the line under the picker is here, stacked unseen in one grid cell, so the block is as tall
+            as the longest from the first paint and a pick never moves the boxes below (Tester page report F5).
+            prop-sim.js copies the picked one into the live line: these are the only copy of the wording. #}
+        {%- set ns_names = {"daily_loss": "daily loss limit", "drawdown": "where the maximum loss is measured from",
+            "trail_stop_at": "where the moving floor stops", "consistency": "best-day share", "min_days": "minimum days",
+            "count_day_if": "what counts as a trading day", "time_limit": "time limit", "target_check": "when the target counts",
+            "day_start": "when the firm’s day starts"} %}
+        <div id="ps-preset-info" class="preset-info small">
+          <div class="pi-live"><p id="ps-preset-source" class="muted">Custom rules: type your own in the boxes below.</p><p id="ps-ns" class="ns-line"></p></div>
+          <div class="pi-ghost" aria-hidden="true" data-info=""><p class="muted">Custom rules: type your own in the boxes below.</p><p class="ns-line"></p></div>
+          <div class="pi-ghost" aria-hidden="true" data-info="example"><p class="muted">Example rules, not any firm’s. Every box stays editable.</p><p class="ns-line"></p></div>
+          {%- for p in presets.presets %}
+          <div class="pi-ghost" aria-hidden="true" data-info="{{ p.id }}"><p class="muted">Read on {{ p.read_text }} from {{ p.firm }}’s <a href="{{ p.url }}" rel="nofollow noopener" tabindex="-1">rules page</a>. Check the firm’s current page: rules change.</p><p class="ns-line">{% if p.not_stated %}Not stated by {{ p.firm }}: {% for f in p.not_stated %}{{ ns_names[f] }}{% if not loop.last %}; {% endif %}{% endfor %}. These run with the defaults in each box.{% endif %}</p></div>
+          {%- endfor %}
+        </div>
+      </div>
+      <p class="small muted" id="ps-adult">Prop firms sell challenges only to adults (18+).</p>
+      <div class="field-grid">
+      {{ field("ps-account", "Account size (optional)", "The starting balance. A preset stated in % of the account scales to it.") }}
+      {{ field("ps-target", "Profit target", "As an amount above the starting balance: a 10% target on 50,000 is 5000.") }}
+      {{ field("ps-daily", "Daily loss limit (optional)", "The most the balance may fall within one day. Leave blank for none.", ns="daily_loss") }}
+      {{ field("ps-maxloss", "Maximum loss", "How far the balance may fall below its floor.") }}
+      </div>
       <fieldset>
-        <legend>Where the trades come from</legend>
-        <div class="check"><input type="radio" id="ps-mode-file" name="ps-mode" value="file" checked><label for="ps-mode-file">From my trade file (whole trading days, in their real order within each day)</label></div>
-        <div class="check"><input type="radio" id="ps-mode-manual" name="ps-mode" value="manual"><label for="ps-mode-manual">Manual numbers (win rate, average win and loss, trades per day)</label></div>
+        <legend>Where the maximum loss is measured from</legend>
+        <div class="check"><input type="radio" id="ps-trail-static" name="ps-trail" value="static" checked><label for="ps-trail-static">The starting balance (it never moves)</label></div>
+        <div class="check"><input type="radio" id="ps-trail-trailing" name="ps-trail" value="trailing_eod"><label for="ps-trail-trailing">The highest balance at the end of a day (moves up)</label></div>
+        <div class="check"><input type="radio" id="ps-trail-trade" name="ps-trail" value="trailing_trade"><label for="ps-trail-trade">The highest balance after any closed trade (moves up)</label></div>
+        <p class="ns-note visually-hidden" id="ps-trail-ns" data-ns="drawdown"></p>
+      </fieldset>
+      <div class="field-grid">
+      {{ field("ps-days", "Time limit in trading days (optional)", "A whole number from 1 to 365. Leave blank for none: the check stops at 250 trading days.", "numeric", ns="time_limit") }}
+      {{ field("ps-mindays", "Minimum days (optional)", "Leave blank for none.", "numeric", ns="min_days") }}
+      </div>
+      <details id="ps-more" class="more-rules">
+        <summary>More rules</summary>
+        <div class="field-grid">
+        {{ pick("ps-mindays-kind", "Days that count toward the minimum", [("trading", "Every day with a trade"), ("profitable", "Only profitable days")]) }}
+        {{ field("ps-profmin", "A profitable day makes at least", "For profitable days only. Blank means any profit.") }}
+        {{ pick("ps-countday", "A trading day needs", [("any", "Any closed trade"), ("nonzero", "A trade with a result other than zero")], ns="count_day_if") }}
+        {{ field("ps-consistency", "Best day at most (% of total profit, optional)", "Reaching the target with a bigger best day keeps the run going until the share falls.", ns="consistency") }}
+        {{ field("ps-stopat", "Moving floor stops at (optional)", "An amount above the starting balance: 0 stops it at the starting balance.", ns="trail_stop_at") }}
+        {{ pick("ps-targetcheck", "The target counts", [("eod", "At the end of a day"), ("intraday", "As soon as a closed trade reaches it")], ns="target_check") }}
+        {{ pick("ps-daytz", "A firm’s day starts in", [("file", "My file’s own clock"), ("UTC", "UTC"), ("Europe/Prague", "Central European time (Prague)"), ("America/New_York", "New York time"), ("America/Chicago", "Chicago time (US Central)"), ("broker", "Broker server time (GMT+2, GMT+3 in summer)"), ("Etc/GMT-3", "GMT+3 all year")], ns="day_start") }}
+        {{ field("ps-dayhour", "at this hour (0 to 23)", "Midnight is 0; 5 pm is 17.", "numeric") }}
+        {{ field("ps-seed", "Starting number for the replays", "Fixed so a result can be repeated (the random seed). Change it to see how much the answer moves.", "numeric") }}
+        </div>
+      </details>
+
+      <h3 id="ps-trades-h">2. Your trades</h3>
+      <fieldset>
+        <legend>How you add trades</legend>
+        <div class="check"><input type="radio" id="ps-mode-file" name="ps-mode" value="file" checked><label for="ps-mode-file">Drop a file</label></div>
+        <div class="check"><input type="radio" id="ps-mode-paste" name="ps-mode" value="paste"><label for="ps-mode-paste">Paste a table</label></div>
+        <div class="check"><input type="radio" id="ps-mode-manual" name="ps-mode" value="manual"><label for="ps-mode-manual">No file? Use summary numbers</label></div>
       </fieldset>
       <div id="ps-file-fields" class="dropzone">
         <div class="file-pick">
           <label for="ps-file">Your trade file</label>
-          <input id="ps-file" type="file" accept=".csv,.htm,.html,.txt" aria-describedby="ps-file-status ps-file-error">
+          <input id="ps-file" type="file" accept=".csv,.htm,.html,.txt,.tsv" aria-describedby="ps-file-status ps-file-error">
         </div>
         <p class="btn-row"><span class="muted">No file to hand?</span> <button class="btn btn-secondary" id="ps-sample-btn" type="button">Try with example data</button></p>
-        <p id="ps-file-status" class="small muted" role="status" hidden></p>
-        <p id="ps-progress" class="progress-line small muted" hidden><progress aria-label="Reading your file"></progress> <span data-elapsed aria-hidden="true"></span></p>
-        <div id="ps-file-error" class="notice notice-error" role="alert" tabindex="-1" hidden></div>
-        <p class="small muted">Same formats as <a href="/tools/trade-stats/">trade stats</a>: MT5/MT4 report, IBKR Flex Query, Tradovate Orders, TradingView Order History (all beta) or the CSV template. The example data also fills in example rules where the boxes are empty, not any firm’s.</p>
+        <p class="small muted">Same formats as <a href="/tools/trade-stats/">trade stats</a>: MT5/MT4 report, IBKR Flex Query, Tradovate Orders, TradingView Order History (all beta), the CSV template, and other platforms’ exports the site’s importer knows.</p>
+      </div>
+      <div id="ps-paste-fields" class="dropzone" hidden>
+        <div class="field">
+          <label for="ps-paste">Your history table</label>
+          <span class="hint" id="ps-paste-hint">Select the rows on your platform’s history screen, copy, and paste them here with the headings.</span>
+          <textarea id="ps-paste" rows="6" spellcheck="false" aria-describedby="ps-paste-hint ps-paste-err"></textarea>
+          <p class="error" id="ps-paste-err" hidden></p>
+        </div>
+        <p class="btn-row"><button class="btn btn-secondary" id="ps-paste-btn" type="button">Read the table</button></p>
+        <details class="how-group"><summary>Tips for TradeLocker and DXtrade</summary>
+          <p>TradeLocker: open the History panel and paste one screen at a time.</p>
+          <p>DXtrade: open Trading Journal, then Order History. One paste holds about a month.</p>
+        </details>
+      </div>
+      <p id="ps-file-status" class="small muted" role="status" hidden></p>
+      <p id="ps-progress" class="progress-line small muted" hidden><progress aria-label="Reading your trades"></progress> <span data-elapsed aria-hidden="true"></span></p>
+      <div id="ps-file-error" class="notice notice-error" role="alert" tabindex="-1" hidden></div>
+      <div id="ps-map" class="notice rc-map" role="group" aria-labelledby="ps-map-h" tabindex="-1" hidden></div>
+      <div id="ps-tz-fields" class="field-grid">
+        {{ pick("ps-filetz", "Times in this file are in", [("", "Choose one"), ("local", "My computer’s time zone"), ("UTC", "UTC"), ("broker", "Broker server time (GMT+2, GMT+3 in summer)"), ("offset", "Another offset from UTC")], hint="Daily limits group trades by day, so the time zone matters.") }}
+        {{ field("ps-filetz-offset", "Hours from UTC", "For example 2, or -5.", "text") }}
       </div>
       <div id="ps-manual-fields" class="field-grid" hidden>
         {{ field("ps-wr", "Win rate (%)", "Between 0 and 100. Break-even trades are not modelled.") }}
@@ -51,68 +172,87 @@
         {{ field("ps-avgloss", "Average losing trade", "In your account currency, as a positive number (for a loss of 80, enter 80).") }}
         {{ field("ps-tpd", "Trades per trading day", "A whole number from 1 to 50.", "numeric") }}
       </div>
-      <h3>The challenge rules</h3>
-      <p class="small muted">Enter the numbers from your own firm’s current rules, in your account currency, as amounts above or below the starting balance. No firm’s rules are built in.</p>
-      <div class="field-grid">
-      {{ field("ps-target", "Profit target", "For example, for a 10% target on a 50,000 account, enter 5000.") }}
-      {{ field("ps-daily", "Daily loss limit (optional)", "The most the balance may fall within one day. Leave blank if your challenge has none.") }}
-      {{ field("ps-maxloss", "Maximum loss", "How far the balance may fall: below the starting balance (static), or below its highest end-of-day level (trailing).") }}
-      </div>
-      <fieldset>
-        <legend>How the maximum loss is measured</legend>
-        <div class="check"><input type="radio" id="ps-trail-static" name="ps-trail" value="static" checked><label for="ps-trail-static">Static: from the starting balance</label></div>
-        <div class="check"><input type="radio" id="ps-trail-trailing" name="ps-trail" value="trailing"><label for="ps-trail-trailing">Trailing: from the highest end-of-day balance so far</label></div>
-      </fieldset>
-      <div class="field-grid">
-      {{ field("ps-days", "Time limit (trading days)", "A whole number from 1 to 365.", "numeric") }}
-      {{ field("ps-mindays", "Minimum trading days (optional)", "Leave blank for none.", "numeric") }}
-      {{ field("ps-seed", "Random seed", "Fixed so a result can be repeated. Change it to see how much the answer moves.", "numeric") }}
-      </div>
       <div id="ps-errors" class="notice notice-error" role="alert" tabindex="-1" hidden></div>
-      <p><button class="btn" id="ps-run" type="submit">Run 10,000 challenges</button></p>
+      <p><button class="btn" id="ps-run" type="submit">Run the check</button></p>
     </form>
     <p id="ps-status" class="muted" role="status" hidden></p>
   </section>
 
-  <div id="ps-out" class="tool-out" hidden></div>
-  {%- with source = "file", firm_line = true %}{% include "partials/tool_next_step.html" %}{% endwith %}
+  <div class="rc-out-wrap">
+    <p id="ps-stale" class="notice notice-caution rc-stale-note" role="status" hidden><span>Rules or file changed — run again.</span> <button class="btn btn-secondary" id="ps-stale-run" type="button">Run again</button></p>
+    <div id="ps-out" class="tool-out rc-out" hidden></div>
+  </div>
 
-  {%- if not flags.paid_report %}
-  <aside id="ps-teaser" class="notice notice-gap teaser" aria-labelledby="ps-teaser-h" hidden {{ offer.on_sale_attr() }}>
-    <strong id="ps-teaser-h">{{ offer.teaser_heading() }}</strong>
-    <p id="ps-teaser-text"></p>
-    {{- offer.teaser() }}
-  </aside>
-  {%- endif %}
+  <section id="ps-whatif" class="section rc-whatif" aria-labelledby="ps-whatif-h" hidden>
+    <h2 id="ps-whatif-h">Try a rule on your past days</h2>
+    <p class="small muted">Rules come from one fixed list, the same for everyone. The same 10,000 replays run again with your rule, so only the rule differs.</p>
+    <div id="ps-wi-form">
+      {{ rule_row(1) }}
+      {{ rule_row(2) }}
+      <div class="check"><input type="checkbox" id="ps-wi-card"><label for="ps-wi-card">Show on card</label></div>
+      <div id="ps-wi-errors" class="notice notice-error" role="alert" tabindex="-1" hidden></div>
+      <p><button class="btn" id="ps-wi-run" type="button">Try this rule</button></p>
+    </div>
+    <p id="ps-wi-status" class="muted" role="status" hidden></p>
+    <div id="ps-wi-out" hidden></div>
+  </section>
+
+  <details id="ps-expert" class="expert section" hidden>
+    <summary>Expert details</summary>
+    <div id="ps-expert-body"></div>
+  </details>
+
+  <section id="ps-share" class="section rc-share" aria-labelledby="ps-share-h" hidden>
+    <h2 id="ps-share-h">Your card</h2>
+    <p class="small muted">An image of the three results, made in this tab. No amounts, dates, symbols or file name are on it.</p>
+    <div class="field-grid">
+      {{ pick("ps-card-size", "Card size", [("portrait", "Tall, 1080 × 1350"), ("wide", "Wide, 1200 × 630")]) }}
+    </div>
+    <p class="btn-row"><button class="btn btn-secondary" id="ps-card-dl" type="button">Download card</button> <button class="btn btn-secondary" id="ps-card-share" type="button" hidden>Share card</button></p>
+    <figure class="rc-card-preview"><canvas id="ps-card-canvas" width="1080" height="1350" role="img" aria-label="" hidden></canvas></figure>
+  </section>
+
+  <section class="section" aria-labelledby="ps-limits-h">
+    <h2 id="ps-limits-h">What this check can’t see</h2>
+    <ul id="ps-limits">
+      <li>Only closed trades are in a trade file. A limit a firm checks on open positions can break earlier than shown here.</li>
+      <li>Fees and swaps count only as far as they are in your file’s results.</li>
+      <li>Rules a firm has beyond these numbers, such as news, position-size or holding-time rules.</li>
+      <li>Your future days. These are your past days in a different order.</li>
+    </ul>
+    <div id="ps-limits-preset" hidden></div>
+  </section>
+
+  {%- with source = "file", firm_line = true %}{% include "partials/tool_next_step.html" %}{% endwith %}
 
   <section class="section" aria-labelledby="how-h">
     <h2 id="how-h">How it works</h2>
-    <details class="how-group"><summary>How each run works</summary>
-    <p>Most challenge simulators ask for a win rate and an average win and loss, then invent trades from them. This one can start from your own record.</p>
-    <p>Drop a trade file and it builds 10,000 simulated challenges by drawing whole trading days from your history at random, so a day with three quick losses stays a day with three quick losses, which is what daily loss limits react to. Enter the rules you face: profit target, daily loss limit, maximum loss as a static or trailing limit, time limit and minimum trading days. The result shows the share of runs that passed, busted or ran out of time, and how many busts came after two or more losses in a row. No file? A manual mode takes the usual summary numbers instead. The random seed is fixed, so the same inputs always give the same answer.</p>
-    <p>It runs entirely in your browser: your file is never sent.</p>
+    <details class="how-group"><summary>How each replay works</summary>
+    <p>The check builds 10,000 replays from your own record. Each replayed day is one of your past trading days, drawn at random (a day can come up more than once), with its trades in their real order. A day with three quick losses stays a day with three quick losses, which is what daily loss limits react to.</p>
     <ol>
-      <li>Each simulated day is one of your past trading days, drawn at random (a day can be drawn more than once), with its trades replayed in their real order. In manual mode each day is the number of trades you entered, each a win or a loss at your win rate.</li>
-      <li>After every trade, the run busts if the day’s loss reaches the daily limit, or if the balance reaches the maximum-loss floor. Reaching a limit counts as breaking it.</li>
-      <li>At the end of each day, a trailing floor moves up to the highest end-of-day balance minus the maximum loss. Then the run passes if the balance is at or above the target and it has traded the minimum number of days.</li>
-      <li>A run that neither passes nor busts within the time limit has run out of time.</li>
+      <li>After every trade, a replay breaks a rule if the day’s loss reaches the daily limit, or if the balance reaches the maximum-loss floor. Reaching a limit counts as breaking it.</li>
+      <li>A moving floor follows the highest balance, at the end of each day or after each trade, and can stop at a level you set.</li>
+      <li>A replay passes when the balance reaches the target (at the end of the day, or at once if you choose), with enough days counted and, with a best-day share, no single day above it. A replay held by a day count or a best-day share keeps going.</li>
+      <li>A replay that neither passes nor breaks a rule within the time limit runs out of time.</li>
     </ol>
-    <p>Only closed trades are in a trade file, so the simulation sees each trade’s final result, not how far it went against you while open. A limit that a firm checks on open positions can break earlier than shown here.</p>
+    <p>“In their real order” replays your days once, as they happened. “Try a rule” runs the same replays again with one or two rules from a fixed list, so only the rule differs.</p>
+    <p>It runs entirely in your browser. {% if flags.analytics %}Only anonymous counts of visits and finished steps are sent; your file is never sent.{% else %}The page’s security policy blocks every outgoing network request, so your file is not uploaded anywhere.{% endif %}</p>
     </details>
   </section>
 
   <section class="section" aria-labelledby="faq-h">
     <h2 id="faq-h">Questions</h2>
-    <details><summary>Is this a prediction of whether I will pass?</summary><p>No. It shows how your past trading days would have fared under the rules you entered if they came in a different order. Future days can differ from past ones, and past results do not predict future results.</p></details>
-    <details><summary>Why resample days instead of single trades?</summary><p>Daily loss limits depend on how losses bunch within a day. Drawing whole days keeps that bunching, while drawing single trades would spread a bad morning across many days and make daily limits look safer than they were.</p></details>
-    <details><summary>How many trading days do I need in the file?</summary><p>The simulation runs with any number, but with fewer than 30 trading days the page warns that the results lean heavily on a few days. More history gives a steadier picture.</p></details>
-    <details><summary>Why are my results the same every time?</summary><p>The random number generator uses a fixed seed, so anyone can reproduce a result from the same inputs. Change the seed to see how much the answer moves.</p></details>
-    <details><summary>Which firms’ rules does it include?</summary><p>None are built in or named. Enter the numbers from your own firm’s current rules, because rules change and vary by account type.</p></details>
-    <details><summary>Is my file uploaded?</summary><p>No. The file is read in this tab and all 10,000 runs happen in your browser. {% if flags.analytics %}Your file’s contents are never sent; the only request this page makes is an anonymous page-view count.{% else %}The page’s security policy blocks outgoing requests.{% endif %}</p></details>
+    <details><summary>Is this a prediction of whether I will pass?</summary><p>No. It shows how your past trading days would have fared under the rules shown if they came in a different order. Future days can differ from past ones, and past results do not predict future results.</p></details>
+    <details><summary>Why are whole days replayed instead of single trades?</summary><p>Daily loss limits depend on how losses bunch within a day. Replaying whole days keeps that bunching, while drawing single trades would spread a bad morning across many days and make daily limits look safer than they were.</p></details>
+    <details><summary>Which firms’ rules are in the list?</summary><p>{{ presets.presets|length }} rule sets from {{ presets.firms|length }} firms, as each firm publishes them, with the date they were read and a link to the firm’s rules page. A value a firm’s page does not state is marked “not stated by the firm” and runs with the default shown. Rules change and vary by account type, so every box stays editable.</p></details>
+    <details><summary>What does “Habits on breach days” mean?</summary><p>Four habits, with the same definitions as the habit report, counted on the days a daily limit broke and on your other losing days. It counts how often a habit was there, not whether it caused anything.</p></details>
+    <details><summary>How many trading days do I need in the file?</summary><p>The check runs with any number, but with fewer than 30 trading days the result leans heavily on a few days. More history gives a steadier picture.</p></details>
+    <details><summary>Is my file uploaded?</summary><p>No. The file is read in this tab and all 10,000 replays happen in your browser. {% if flags.analytics %}Only anonymous counts of visits and finished steps are sent; your file is never sent.{% else %}The page’s security policy blocks outgoing requests.{% endif %}</p></details>
   </section>
 
-  <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR, Tradovate and TradingView are trademarks of their owners. donttrade is not affiliated with any of them.</p>
+  <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR, Tradovate and TradingView are trademarks of their owners. {{ presets.firms|join(", ") }} are trademarks of their owners. donttrade is not affiliated with any of them and is paid by none of them.</p>
 </div>
 <script type="text/csv" id="ps-sample">
 {{ sample_csv|safe }}</script>
+<script type="application/json" id="ps-presets">{{ presets_json }}</script>
 {% endblock %}

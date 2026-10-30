@@ -181,7 +181,7 @@
     <ul class="trust-list">
       <li>No cookies{% if not flags.analytics %} and no analytics{% endif %}.</li>
       <li>No account, for any free tool.</li>
-      <li>{% if flags.analytics %}On the free tool pages your file’s contents are never sent; the only request those pages make is an anonymous page-view count.{% else %}The free tool pages block every outgoing request, so your file is not uploaded.{% endif %}</li>
+      <li>{% if flags.analytics %}On the free tool pages, only anonymous counts of visits and finished steps are sent; your file is never sent.{% else %}The free tool pages block every outgoing request, so your file is not uploaded.{% endif %}</li>
       <li>Firms pay for fixed-scope measurements of their own data. No firm can pay to change a number.</li>
     </ul>
     <p><a href="/independence/">Independence policy</a> · <a href="/privacy/">Privacy</a> · <a href="/corrections/">Corrections</a></p>
@@ -211,7 +211,7 @@
     {{ answer_box("pg") }}
     {%- endif %}
     <details><summary>Is this advice?</summary><p>No. It describes past trades and past behaviour. It does not tell anyone what to trade, how much, or when to exit.</p></details>
-    <details><summary>Where does my trade file go?</summary><p>The free tools read it inside your browser tab; {% if flags.analytics %}its contents are never sent; the only request those pages make is an anonymous page-view count.{% else %}those pages block every outgoing request, so the file is not uploaded.{% endif %} When the habit report launches, the page that runs it will say exactly what it sends.</p></details>
+    <details><summary>Where does my trade file go?</summary><p>The free tools read it inside your browser tab; {% if flags.analytics %}only anonymous counts of visits and finished steps are sent; your file is never sent.{% else %}those pages block every outgoing request, so the file is not uploaded.{% endif %} When the habit report launches, the page that runs it will say exactly what it sends.</p></details>
     <details><summary>What do the free tools cost?</summary><p>Nothing, with no account and no card. They run in your browser, so serving them costs us almost nothing.</p></details>
     <details><summary>Is our firm’s data safe?</summary><p>Your trading records never leave your systems. Your staff run our public script on your own computers, and you can read every line first. Only the totals it prints come back to us: no account IDs, no trades, no names.</p></details>
     <details><summary>What if no effect is found?</summary><p>Then that is your answer, and it is a finished result. The price is fixed before anyone sees data, so you pay the same either way. The result stays private unless you choose to publish it.</p></details>
