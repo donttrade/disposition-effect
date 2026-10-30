@@ -155,11 +155,6 @@ const NS_DEFAULT = {
   count_day_if: 'any closed trade', time_limit: 'no time limit', target_check: 'the end of the day',
   day_start: 'your file’s own clock, at midnight',
 };
-const NS_NAMES = {
-  daily_loss: 'daily loss limit', drawdown: 'where the maximum loss is measured from', trail_stop_at: 'where the moving floor stops',
-  consistency: 'best-day share', min_days: 'minimum days', count_day_if: 'what counts as a trading day',
-  time_limit: 'time limit', target_check: 'when the target counts', day_start: 'when the firm’s day starts',
-};
 const setVal = (id, v) => { $(id).value = v === null || v === undefined ? '' : String(v); };
 const num2 = (x) => String(Math.round(x * 100) / 100);
 
@@ -177,24 +172,35 @@ function resetRules(keepSize) {
   $('ps-trail-static').checked = true;
 }
 
+// The boxes a not-stated value leaves empty show it as their placeholder; the rest are named in the line under
+// the preset. Each box's note is also read out with it (aria-describedby, visually hidden).
+const NS_BOX = { daily_loss: 'ps-daily', time_limit: 'ps-days', min_days: 'ps-mindays', consistency: 'ps-consistency', trail_stop_at: 'ps-stopat' };
+
+// The line under the preset picker: where the rules were read and what the firm leaves unstated, copied from
+// the page's own unseen version for that pick (tool-prop-sim.html keeps the space for the longest one).
+function fillInfo(id) {
+  const ghost = [...document.querySelectorAll('#ps-preset-info .pi-ghost')].find((g) => g.dataset.info === id);
+  const [srcLine, nsLine] = ghost.children;
+  $('ps-preset-source').replaceChildren(...[...srcLine.childNodes].map((n) => n.cloneNode(true)));
+  for (const a of $('ps-preset-source').querySelectorAll('a')) a.removeAttribute('tabindex');
+  $('ps-ns').textContent = nsLine.textContent;
+  return id && id !== 'example' ? presets.presets.find((x) => x.id === id) : null;
+}
+
 // keepSize: the account size was just typed (a percent preset scales to it); any other call is a preset
 // change and resets every box to the preset's own values.
 function applyPreset(keepSize = false) {
   const id = $('ps-preset').value;
-  const src = $('ps-preset-source');
-  for (const n of document.querySelectorAll('.ns-note')) { n.hidden = true; n.textContent = ''; }
-  $('ps-ns').hidden = true;
+  for (const n of document.querySelectorAll('.ns-note')) n.textContent = '';
+  for (const box of Object.values(NS_BOX)) $(box).placeholder = '';
   $('ps-limits-preset').hidden = true;
   resetRules(keepSize === true);
-  if (!id) { current = null; src.hidden = true; src.replaceChildren(); return; }
-  if (id === 'example') {
+  const p = fillInfo(id);
+  if (!p) {
     current = null;
-    for (const [box, v] of Object.entries(EXAMPLE_RULES)) setVal(box, v);
-    src.textContent = 'Example rules, not any firm’s. Every box stays editable.';
-    src.hidden = false;
+    if (id === 'example') for (const [box, v] of Object.entries(EXAMPLE_RULES)) setVal(box, v);
     return;
   }
-  const p = presets.presets.find((x) => x.id === id);
   let size = null;
   if (keepSize === true) {
     try { size = $('ps-account').value.trim() ? parsePositive($('ps-account').value, 'the account size') : null; } catch (e) { size = null; }
@@ -216,19 +222,9 @@ function applyPreset(keepSize = false) {
   setVal('ps-targetcheck', r.target_check);
   setVal('ps-daytz', pr.dayStart ? pr.dayStart.tz : 'file');
   setVal('ps-dayhour', pr.dayStart ? pr.dayStart.hour : 0);
-  src.replaceChildren(`Read on ${p.read_text} from ${p.firm}’s `,
-    el('a', { href: p.url, rel: 'nofollow noopener', text: 'rules page' }), '. Check the firm’s current page: rules change.');
-  src.hidden = false;
   for (const f of pr.notStated) {
-    for (const n of document.querySelectorAll(`.ns-note[data-ns="${f}"]`)) {
-      n.textContent = `Not stated by the firm. The check uses ${NS_DEFAULT[f]}.`;
-      n.hidden = false;
-    }
-  }
-  if (pr.notStated.length) {
-    $('ps-ns').replaceChildren(el('strong', { text: 'Not stated by the firm' }),
-      `${p.firm}’s rules page does not state: ${pr.notStated.map((f) => NS_NAMES[f]).join('; ')}. These run with the defaults shown under each box.`);
-    $('ps-ns').hidden = false;
+    for (const n of document.querySelectorAll(`.ns-note[data-ns="${f}"]`)) n.textContent = `Not stated by the firm. The check uses ${NS_DEFAULT[f]}.`;
+    if (NS_BOX[f] && $(NS_BOX[f]).value === '') $(NS_BOX[f]).placeholder = `Not stated by the firm: ${NS_DEFAULT[f]}`;
   }
   if (p.not_modelled.length) {
     $('ps-limits-preset').replaceChildren(el('p', { text: `For ${p.firm}, ${p.program}, this check does not model:` }),
@@ -237,9 +233,6 @@ function applyPreset(keepSize = false) {
   }
   current = { preset: p, snapshot: null };
   current.snapshot = JSON.stringify(readRulesQuiet());
-  if (!$('ps-more').open && pr.notStated.some((f) => ['consistency', 'count_day_if', 'trail_stop_at', 'target_check', 'day_start'].includes(f))) {
-    $('ps-more').open = true;   // the notes under those boxes are inside "More rules"
-  }
 }
 
 // ------------------------------------------------------------------ validation
