@@ -27,7 +27,7 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=620363ac">
+<link rel="stylesheet" href="/static/css/site.css?v=322a587c">
 <script src="/static/js/theme.js?v=7e47c1a9"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
 <script src="/static/js/pay.js?v=7eb376c2" defer></script>
@@ -88,7 +88,15 @@
     <tbody>
       <tr><td>17 Oct 2026</td><td><a href="/research/disposition-effect/#robustness-update">Disposition effect</a></td><td>A pre-registered test of whether the effect survives when holding age is held fixed, prompted by a method finding on synthetic data. The direction survives; the size depends on how “gain” is timed, and a V-shaped selling pattern is not ruled out. No published figure changed. Two sentences that read as stronger than this now say so: “not an aggregate artifact” and “the honest magnitude”; the study’s Versions section lists the wording.</td></tr>
     </tbody>
-  </table></div>
+  </table></div><!--island:start-->
+  <h2 id="tool-methods">Free tool method changes</h2>
+  <p>A change to how a free tool computes its numbers, dated, so a result can be matched to the method that made it. These are not counted as corrections.</p>
+  <p class="scroll-hint" aria-hidden="true">Swipe the table sideways for more columns →</p><div class="table-scroll sticky1" tabindex="0" role="region" aria-label="Free tool method changes"><table>
+    <thead><tr><th scope="col">Date</th><th scope="col">Tool</th><th scope="col">What changed</th></tr></thead>
+    <tbody>
+      <tr><td>29 Oct 2026</td><td><a href="/tools/prop-challenge-simulator/">Challenge Readiness Check</a> (formerly the prop-firm challenge simulator)</td><td>Each of the 10,000 replays now draws from its own random stream, set by the seed and the replay’s number (method 2026-10-29.r1), so “Try a rule” replays the same days with and without a rule. With the same seed and rules, results differ from those before this date.</td></tr>
+    </tbody>
+  </table></div><!--island:end-->
   <h2 id="complaints">Complaints log</h2>
   <p class="scroll-hint" aria-hidden="true">Swipe the table sideways for more columns →</p><div class="table-scroll sticky1" tabindex="0" role="region" aria-label="Complaints log"><table>
     <thead><tr><th scope="col">Date</th><th scope="col">Complaint</th><th scope="col">Outcome</th></tr></thead>

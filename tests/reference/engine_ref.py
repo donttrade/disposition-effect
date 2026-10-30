@@ -1113,7 +1113,7 @@ SIGNATURES = {
         "verified": False,
         "fields": {
             "open_time": ["opentime"], "close_time": ["closetime"], "symbol": ["symbol", "ticker", "instrument"],
-            "direction": ["direction", "side"], "qty": ["volume", "quantity", "qty"],
+            "direction": ["direction", "side"], "qty": ["volume", "quantity", "qty", "amount", "size", "lots", "units", "contracts"],
             "open_price": ["openprice", "entryprice"], "close_price": ["closeprice", "exitprice"],
             "fees": ["fees", "fee", "commission", "commissions"], "currency": ["currency"],
         },

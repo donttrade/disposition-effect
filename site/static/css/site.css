@@ -121,7 +121,9 @@
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 /* QA 25 Oct: an anchor target (#last-step, #firms, …) lands with room above it, not flush to the edge */
-[id] { scroll-margin-top: var(--s3); }
+/* 29 Oct: headings, anchors and scroll targets stop below the sticky header (.site-header is 57px at every width). */
+:root { --header-h: 57px; }
+[id], h1, h2, h3, h4, a[name], :target, summary { scroll-margin-top: calc(var(--header-h) + var(--s2)); }
 body {
   margin: 0;
   background: var(--bg);
@@ -179,7 +181,7 @@ a:hover { color: var(--rust-hover); }
 :root { --ease-nav: cubic-bezier(0.45, 0.05, 0.55, 0.95); } /* Stripe's nav easing [READ] */
 /* 29 Oct (owner): slim and sticky. It stays in view on scroll (position: sticky keeps its place in the flow, so
    nothing shifts), and scroll-padding keeps a focused element or an anchor target from sliding under it. */
-html { scroll-padding-top: 72px; }
+html { scroll-padding-top: calc(var(--header-h) + var(--s2)); }
 .site-header { border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 20; background: var(--bg); }
 .site-header .wrap { display: flex; flex-wrap: nowrap; align-items: center; gap: var(--s1) var(--s3); min-height: 56px; }
 .brand { font-weight: 600; color: var(--text); text-decoration: none; font-size: var(--fs-2); margin-right: auto; display: inline-flex; align-items: center; min-height: var(--target); white-space: nowrap; }
@@ -1282,3 +1284,48 @@ details.legal-sec[open] { padding-bottom: var(--s2); }
     --bg: #FFFFFF; --surface: #F4F5F7; --text: #16181C; --muted: #5B606A; --rust: #9A3B1C; --rust-hover: #7C2F16; --on-rust: #FFFFFF;
     --border: #DADCE0; --field-border: #6B717B; --plan: #4A6A94; --gain: #1F7A52; --loss: #A3264F; --caution: #8C6A1E; color-scheme: light; }
 }
+
+/* ------------------------------------------------------------------ Challenge Readiness Check (tool-prop-sim.html) */
+.preset-info { display: grid; margin: var(--s1) 0 0; max-width: var(--prose); }
+.preset-info > div { grid-area: 1 / 1; min-width: 0; }
+.preset-info .pi-ghost { visibility: hidden; }
+.preset-info p { margin: 0 0 4px; }
+.ns-line { color: var(--caution); }
+/* Results from rules or a file that have since changed: dimmed, with the note laid over their top (no shift). */
+.rc-out-wrap { position: relative; }
+.rc-stale-note { position: absolute; top: 0; left: 0; right: 0; z-index: 2; margin: 0; max-width: none; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s2); box-shadow: 0 2px 8px rgba(0, 0, 0, .12); }
+.rc-stale-note[hidden] { display: none; }
+.rc-stale { opacity: .45; }
+.more-rules { margin: 0 0 var(--s3); max-width: 60rem; }
+.more-rules > summary { cursor: pointer; font-weight: 600; color: var(--rust); margin-bottom: var(--s2); }
+#ps-tz-fields[hidden] { display: none; }
+.rc-out > h2 { font-size: var(--fs-4); line-height: 1.15; letter-spacing: -0.01em; }
+.rc-visuals { display: grid; gap: var(--s3); grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); align-items: start; margin: 0 0 var(--s4); max-width: 72rem; }
+.rc-card { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: var(--s3); min-width: 0; }
+.rc-card h3 { margin: 0 0 var(--s2); font-size: var(--fs-1); }
+.rc-card-wide { grid-column: 1 / -1; }
+.rc-big-sm { font-size: var(--fs-2); font-weight: 600; margin: 0 0 var(--s2); }
+.rc-big { font-size: var(--fs-3); font-weight: 600; line-height: 1.1; margin: 0 0 var(--s1); font-variant-numeric: tabular-nums; }
+.rc-bar { display: block; width: 100%; height: 28px; border-radius: 6px; overflow: hidden; margin: 0 0 var(--s1); }
+.rc-bar .tp-pass { fill: var(--gain); } .rc-bar .tp-bust { fill: var(--loss); }
+.rc-bar .tp-time { fill: color-mix(in srgb, var(--muted) 35%, var(--bg)); }
+.rc-legend { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s3); list-style: none; padding: 0; margin: 0 0 var(--s2); font-variant-numeric: tabular-nums; }
+.rc-legend li::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: baseline; }
+.rc-legend .k-pass::before { background: var(--gain); } .rc-legend .k-bust::before { background: var(--loss); }
+.rc-legend .k-time::before { background: color-mix(in srgb, var(--muted) 35%, var(--bg)); }
+.rc-habits { list-style: none; padding: 0; margin: 0 0 var(--s2); }
+.rc-habits li { display: grid; gap: 4px; padding: var(--s1) 0; border-top: 1px solid var(--border); }
+.rc-habits li:first-child { border-top: 0; }
+.rc-habits .h-name { font-weight: 600; }
+.rc-habits .h-base { color: var(--muted); font-size: var(--fs-0); }
+.wi-row { align-items: end; }
+.wi-row select { width: 100%; }
+.wi-pair { display: grid; gap: var(--s1); max-width: 40rem; margin: 0 0 var(--s2); }
+.wi-pair .wi-k { font-size: var(--fs-0); color: var(--muted); }
+.expert > summary { cursor: pointer; font-weight: 600; font-size: var(--fs-2); }
+.expert .table-wrap { max-width: 900px; }
+.expert tbody th[scope="row"] { min-width: 12rem; }
+.rc-timeline { display: block; width: 100%; max-width: 760px; height: auto; }
+.rc-card-preview { margin: var(--s2) 0 0; }
+.rc-card-preview canvas { display: block; width: 100%; max-width: 420px; height: auto; border: 1px solid var(--border); border-radius: 12px; }
+.rc-card-preview canvas[hidden] { display: none; }

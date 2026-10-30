@@ -5,16 +5,16 @@
 // survive into executions and trades.
 
 import { resolveNumberStyle, checkQuoting, normHeader, wideRows, splitCell, parseDate } from './csv.js?v=7dca0e6f';
-import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS, checkCurrencyColumn, ISO_CURRENCIES } from './detect.js?v=3d28a2dd';
+import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS, checkCurrencyColumn, ISO_CURRENCIES } from './detect.js?v=fa17739c';
 import { fail, inFile, LIMITS } from './errors.js?v=8ee10796';
 import { checkMapping, parseMapped, mappedTzLabel, mergeParsed, firstTs, idColumns, idLookup, readRows,
-  isPaste } from './mapped.js?v=6107c001';
-import { matchPreset, presetById, PRESET_AFTER } from './presets.js?v=25a2db8c';
-import { parseMt, isEmptyRow } from './mt.js?v=3f5ee677';
-import { parseGeneric, parseGenericRoundtrip } from './generic.js?v=b28059a4';
-import { parseIbkr } from './ibkr.js?v=ec12f5c3';
-import { parseTradovate } from './tradovate.js?v=038beb75';
-import { parseTradingView, stripCurrencyCells } from './tradingview.js?v=b3b7e1f2';
+  isPaste } from './mapped.js?v=e8a99f4b';
+import { matchPreset, presetById, PRESET_AFTER } from './presets.js?v=169aa9a4';
+import { parseMt, isEmptyRow } from './mt.js?v=22f54b12';
+import { parseGeneric, parseGenericRoundtrip } from './generic.js?v=fdcacce4';
+import { parseIbkr } from './ibkr.js?v=b7496559';
+import { parseTradovate } from './tradovate.js?v=a1e46006';
+import { parseTradingView, stripCurrencyCells } from './tradingview.js?v=ec8763b6';
 import { finish } from './trades.js?v=f9a6a4a2';
 
 export { EngineError } from './errors.js?v=8ee10796';

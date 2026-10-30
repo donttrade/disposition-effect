@@ -17,9 +17,9 @@
 // Mirrors parse_tradingview() in tests/reference/engine_ref.py.
 
 import { clean, parseDate } from './csv.js?v=7dca0e6f';
-import { ISO_CURRENCIES } from './detect.js?v=3d28a2dd';
-import { cell, reqNumber, optNumber, skip, isEmptyRow } from './mt.js?v=3f5ee677';
-import { sideLetter } from './generic.js?v=b28059a4';
+import { ISO_CURRENCIES } from './detect.js?v=fa17739c';
+import { cell, reqNumber, optNumber, skip, isEmptyRow } from './mt.js?v=22f54b12';
+import { sideLetter } from './generic.js?v=fdcacce4';
 
 // Money cells may carry a currency, as the Margin column does ("360.00 USD"): a 3-letter ISO
 // code before or after the number ("0.50 USD", "USD 0.50") or a symbol ("$0.50", "0,50 €",

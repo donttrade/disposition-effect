@@ -427,6 +427,13 @@ def answers_index_js(units, cfg):
 
 
 # Pages owned by templates. path → template, metadata, and the flag that must be on.
+# Challenge Readiness Check counting (ARCHITECT-CHALLENGE-READINESS §7, Revision 2): with [flags] analytics on, the
+# check page loads one of these tiny pages in a hidden same-origin frame when a step finishes, at most once per page
+# load, so the live Cloudflare Web Analytics beacon counts the step as a page view of that path. The frame URL is the
+# path only: no query, no fragment, nothing from the file. No other tracker. noindex, disallowed in robots.txt.
+COUNT_BASE = "/tools/prop-challenge-simulator/e/"
+COUNT_EVENTS = ("ran", "ran-sample", "whatif", "expert", "export", "card")
+CHALLENGE_RULES_JSON = os.path.join(SITE, "config", "challenge_rules.json")
 PAGES = [
     {"template": "pages/home.html", "path": "/", "requires_flag": None, "scripts": [MOTION_JS],
      "title": "donttrade - free trading tools and research on trader habits",
@@ -448,11 +455,11 @@ PAGES += [
      "if_badges": {"description": "Drop your MT5, MT4, IBKR, Tradovate or TradingView file: profit factor, expectancy, "
                                   "drawdown and streaks, with a real-or-noise check. Runs in your browser."}},
     {"template": "pages/tool-prop-sim.html", "path": "/tools/prop-challenge-simulator/", "requires_flag": None,
-     "modules": ["/static/js/tools/prop-sim.js"], "sample": True, "app": True, "updated": "2026-10-21",
-     "crumb": "Prop-firm challenge simulator",
-     "title": "Prop Firm Challenge Simulator on Your Own Trades",
-     "description": "Replay 10,000 challenges built from your own past trading days under the rules you enter. "
-                    "Pass, bust and time-out shares, fully explained. Free."},
+     "modules": ["/static/js/tools/prop-sim.js"], "sample": True, "app": True, "updated": "2026-10-29",
+     "presets": True, "crumb": "Challenge Readiness Check",
+     "title": "Challenge Readiness Check: Your Past Days, Firm Rules",
+     "description": "Replay your past trading days 10,000 times under a prop firm's published rules or your own: "
+                    "pass, bust and time-out shares. Free, in your browser."},
     {"template": "pages/tool-lot-size.html", "path": "/tools/lot-size-calculator/", "requires_flag": None,
      "modules": ["/static/js/tools/lot-size.js"], "app": True, "updated": "2026-10-21",
      "crumb": "Lot size calculator",
@@ -482,10 +489,10 @@ PAGES += [
     {"template": "pages/tools-index.html", "path": "/tools/", "requires_flag": None, "updated": "2026-10-21",
      "crumb": "Free tools", "itemlist": True,
      "title": "Free Trading Tools That Run in Your Browser",
-     "description": "Free tools for your own trades: trade stats from your own file, a prop-firm challenge "
-                    "simulator, a lot size calculator and more. No sign-up.",
+     "description": "Free tools for your own trades: trade stats from your file, a Challenge Readiness "
+                    "Check for prop-firm rules, a lot size calculator and more. No sign-up.",
      "if_badges": {"description": "Free tools for your own trades: trade stats with a real-or-noise check, a "
-                                  "prop-firm challenge simulator, a lot size calculator and more. No sign-up."}},
+                                  "Challenge Readiness Check, a lot size calculator and more. No sign-up."}},
 ]
 
 # Audience pages (step 14). Titles ≤ 60 and descriptions ≤ 155 characters (SEO-PLAN §3.1).
@@ -537,6 +544,12 @@ PAGES += [
      "crumb": "Thank you", "title": "Thank you — donttrade",
      "description": "Your message reached donttrade. Firms get a reply within 1 business day; traders get one email at launch.",
      "if_paid": {"description": "Your message reached donttrade. Firms get a reply within 1 business day."}},
+]
+PAGES += [
+    {"template": "pages/count-stub.html", "path": COUNT_BASE + name + "/", "requires_flag": "analytics", "noindex": True,
+     "no_ask": True, "crumb": "Counted", "title": f"Counted: {name} — donttrade",
+     "description": f"A page the Challenge Readiness Check loads so the site's cookie-free analytics count one step: {name}."}
+    for name in COUNT_EVENTS
 ]
 
 # Legal pages (step 17). The French versions (/fr/…) exist only with paid_report on; the
@@ -626,8 +639,8 @@ TOOLS = [
      "short": "A drawdown or your file → how deep and how long.", "preview": "dd", "icon": "split",   # 25 Oct sweep: the card line and preview
      "question": "What gain recovers a drawdown, and how deep and long were mine?",
      "input": "A drawdown in percent, or your trade file"},
-    {"name": "Prop-firm challenge simulator", "href": "/tools/prop-challenge-simulator/",
-     "short": "Your file and a challenge’s rules → pass, bust or out of time.", "preview": "prop", "icon": "flag",   # 25 Oct sweep: the card line and preview
+    {"name": "Challenge Readiness Check", "href": "/tools/prop-challenge-simulator/",
+     "short": "Your file and a firm’s rules → pass, bust or out of time.", "preview": "prop", "icon": "flag",   # 25 Oct sweep: the card line and preview
      "question": "How would my past trading days have fared under a challenge’s rules?",
      "input": "Your trade file, or win rate and average win and loss; the rules"},
     {"name": "Lot size calculator", "href": "/tools/lot-size-calculator/",
@@ -710,6 +723,33 @@ def page_method_version():
     if not m:
         die("report methods: no METHOD_VERSION line in site/static/js/paid/wording.js")
     return m.group(1)
+
+
+def challenge_presets():
+    """The firm-rules library for the Readiness Check (checks/check_rules.py): the build fails on any library problem,
+    warns about presets last checked more than 30 days ago, and leaves out those more than 45 days old and the ones
+    that cannot be quoted. DT_TODAY (yyyy-mm-dd) sets the date (tests). Only what the page uses goes in."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("check_rules", os.path.join(REPO, "checks", "check_rules.py"))
+    cr = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cr)
+    lib = cr.load(CHALLENGE_RULES_JSON)
+    import datetime
+    today = datetime.date.fromisoformat(os.environ["DT_TODAY"]) if os.environ.get("DT_TODAY") else datetime.date.today()
+    probs = cr.validate(lib, today)
+    if probs:
+        die("challenge rules: " + "; ".join(probs[:5]) + (" …" if len(probs) > 5 else ""))
+    warn, _ = cr.freshness(lib, today)
+    for pid in warn:
+        print(f"NOTE: challenge rules: {pid} was last checked more than {cr.WARN_DAYS} days ago (hidden after {cr.HIDE_DAYS})")
+    out = []
+    for p in cr.shown(lib, today):
+        y, mo, d = (int(x) for x in p["last_checked"].split("-"))
+        out.append({"id": p["id"], "firm": p["firm"], "program": p["program"], "account_size": p["account_size"],
+                    "scale": p["scale"], "status": p["status"], "rules": p["rules"], "not_modelled": p["not_modelled"],
+                    "not_stated": cr.not_stated(p), "last_checked": p["last_checked"],
+                    "read_text": f"{d} {MONTHS[mo - 1]} {y}", "url": p["sources"][0]["url"]})
+    return {"rules_lib": lib["rules_lib"], "presets": out, "firms": sorted({p["firm"] for p in out}, key=str.lower)}
 
 
 def report_methods():
@@ -894,6 +934,16 @@ def check_hero_dashboard():
 ASSET_REF_RE = re.compile(r'((?:src|href)=")(/static/[^"?#]+\.(?:js|css))(")')
 JS_SPEC_RE = re.compile(r"""(\bfrom\s*|\bimport\s*\(?\s*|\bnew URL\(\s*)(['"])(\.{1,2}/[^'"?#\s]+\.js)\2""")
 UNVERSIONED_RE = re.compile(r'(?:src|href)="/static/[^"]+\.(?:js|css)(?:#[^"]*)?"')
+
+
+def set_ranked_flag(path, on):
+    """[flags] whatif_ranked → the copied engine's WHATIF_RANKED (dies if the source line is not there once)."""
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
+    if text.count(RANKED_LINE) != 1 or text.count("WHATIF_RANKED = ") != 1:
+        die(f"whatif_ranked: {RANKED_JS} must hold the line {RANKED_LINE!r} exactly once")
+    with open(path, "w", encoding="utf-8", newline="") as f:
+        f.write(text.replace(RANKED_LINE, f"export const WHATIF_RANKED = {'true' if on else 'false'};"))
 
 
 def asset_version(data):
@@ -1326,8 +1376,15 @@ def die(msg):
     raise BuildError(msg)
 
 
-FLAGS = ("paid_report", "analytics", "trader_first_home", "pilot_checkout", "free_badges", "journal", "ask_box")
-OPTIONAL_FLAGS = {"pilot_checkout": False, "free_badges": False, "journal": False, "ask_box": False}  # older site.toml files may lack the line
+FLAGS = ("paid_report", "analytics", "trader_first_home", "pilot_checkout", "free_badges", "journal", "ask_box", "whatif_ranked")
+OPTIONAL_FLAGS = {"pilot_checkout": False, "free_badges": False, "journal": False, "ask_box": False,
+                  "whatif_ranked": False}  # older site.toml files may lack the line
+# ARCHITECT-CHALLENGE-READINESS §2.7.3: [flags] whatif_ranked switches the ranked "Biggest changes on your past
+# days" rules. Off until a Canadian securities lawyer clears the strings. The build writes the flag into the
+# copied engine (prop-sim-core.js), whose source line must read exactly RANKED_LINE.
+RANKED_JS = os.path.join("js", "tools", "prop-sim-core.js")
+RANKED_LINE = "export const WHATIF_RANKED = false;"
+RANK_JS = os.path.join("js", "tools", "prop-sim-rank.js")   # the ranked rules and their strings: only with the flag
 # Free-launch condition C1 (21 Oct 2026): free_badges turns on the free tools' "real or noise"
 # badges and their footnote, which the Architect is redesigning. Off (the committed default): the
 # free tools show only the descriptive numbers, static/js/tools/trade-stats-badges.js is left out
@@ -1907,6 +1964,8 @@ def write_sitemap_and_robots(out, cfg, built_pages, flags):
     robots = ["User-agent: *", "Allow: /"]
     if flags["paid_report"]:
         robots += [f"Disallow: {p}" for p in PAID_APP_PATHS + PAID_DETAILS_PATHS]
+    if flags["analytics"]:
+        robots.append(f"Disallow: {COUNT_BASE}")
     robots.append(f"Sitemap: {base}/sitemap.xml")
     with open(os.path.join(out, "robots.txt"), "w", encoding="utf-8", newline="\n") as f:
         f.write(PREVIEW_ROBOTS_TXT if preview_name() else "\n".join(robots) + "\n")
@@ -2265,8 +2324,10 @@ def build():
     def static_left_out(rel):
         return ((not flags["paid_report"] and rel.startswith("js" + os.sep + "paid"))
                 or (not flags["free_badges"] and rel == BADGES_JS)
+                or (not flags["whatif_ranked"] and rel == RANK_JS)
                 or (not flags["journal"] and (rel.startswith(JOURNAL_JS_DIR) or rel == os.path.join("css", "journal.css"))))   # ARCHITECT-V3 D7: out of the build until approved
     copy_tree_sorted(os.path.join(SITE, "static"), os.path.join(out, "static"), skip=static_left_out)
+    set_ranked_flag(os.path.join(out, "static", RANKED_JS), flags["whatif_ranked"])
     # 3. dev pages, only on request; never bundled
     if os.environ.get("DT_DEV") == "1":
         copy_tree_sorted(os.path.join(SITE, "dev"), os.path.join(out, "dev"))
@@ -2303,6 +2364,10 @@ def build():
         if not flags["ask_box"]:
             page["scripts"] = [s for s in page["scripts"] if s not in ASK_SCRIPTS]
         extra = {"sample_csv": sample_csv()} if page.get("sample") else {}
+        if page.get("presets"):
+            lib_ = challenge_presets()
+            extra["presets"] = lib_
+            extra["presets_json"] = Markup(json.dumps(lib_, sort_keys=True, ensure_ascii=False).replace("</", "<\\/"))
         if page.get("sample_report") or (page["path"] in ("/", "/for-traders/") and flags["paid_report"]):  # 25 Oct: the home showcase; sweep 2: the report card on /for-traders/
             rep_ = sample_report()
             extra["sample_report"] = rep_

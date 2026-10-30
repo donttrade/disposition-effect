@@ -5,7 +5,9 @@
 // exist inside a worker; those reports are far below the 200,000-row limit in practice.
 // Results have the same shape either way: the ParseResult fields the pages use, with the
 // number of fills as n_fills instead of the executions themselves. From the worker, each trade
-// carries only what the pages read: pnl, hold_s, close_ts, dir and pnl_unit.
+// carries only what the pages read: pnl, hold_s, close_ts, open_ts, qty, dir, pnl_unit and
+// symbol as a number (an index standing for the symbol; its text stays in the worker).
+// A pasted table ({paste: text}) is read the same way, by runFiles.
 //
 // A worker that fails is never silent (Tester R2): a script that does not load, throws, sends
 // a message that cannot be read, sends something unexpected, or does not answer in time ends
@@ -13,7 +15,7 @@
 // Every message carries the request id it answers (Tester R3); an answer to another id is
 // ignored. tool-state.js is the only caller.
 
-import { runFile } from '../engine/index.js?v=87619422';
+import { runFile } from '../engine/index.js?v=8410d06a';
 
 // No answer at all within START_MS: the worker never started (its script or one of the
 // engine modules did not load). The worker answers {stage} as soon as it has the bytes, so
@@ -43,14 +45,15 @@ function slimOnPage(r) {
   };
 }
 
-// The worker sends trades as columns; the pages use these five fields of each trade.
+// The worker sends trades as columns; the pages use these fields of each trade.
 function fromColumns(d) {
-  const { pnl, hold_s, close_ts } = d.cols;
+  const { pnl, hold_s, close_ts, open_ts, qty } = d.cols;
   const trades = new Array(pnl.length);
   for (let i = 0; i < pnl.length; i++) {
-    trades[i] = { pnl: pnl[i], hold_s: hold_s[i], close_ts: close_ts[i], dir: d.dir[i] === 1 ? 'long' : 'short', pnl_unit: d.pnl_unit };
+    trades[i] = { pnl: pnl[i], hold_s: hold_s[i], close_ts: close_ts[i], open_ts: open_ts[i], qty: qty[i],
+      symbol: d.sym[i], dir: d.dir[i] === 1 ? 'long' : 'short', pnl_unit: d.pnl_unit };
   }
-  const { cols, dir, pnl_unit, ...rest } = d;
+  const { cols, dir, sym, pnl_unit, ...rest } = d;
   return { ...rest, trades };
 }
 
@@ -59,8 +62,12 @@ function fromColumns(d) {
 // noise = true the worker stays alive: call runNoise() once the result is drawn, and it runs
 // the noise checks and calls onNoise(noise), or onNoise(null) when they could not run.
 // cancel() stops everything; after it, no callback is called again.
-export function readTradeFile(bytes, { id = 0, noise = false, onStage = () => {}, onNoise = () => {} } = {}) {
-  let worker = new Worker(new URL('./file-worker.js?v=39696582', import.meta.url), { type: 'module' });
+// `item` is the file's bytes (Uint8Array) or a pasted table {paste: text}.
+// ask: a file whose headings leave a needed column unnamed resolves {mapNeeded} instead of an
+// error; cols: the columns picked for it (file-worker.js).
+export function readTradeFile(item, { id = 0, noise = false, ask = false, cols = null, onStage = () => {}, onNoise = () => {} } = {}) {
+  const isPasteItem = item !== null && typeof item === 'object' && typeof item.paste === 'string';
+  let worker = new Worker(new URL('./file-worker.js?v=86e0dccc', import.meta.url), { type: 'module' });
   let settled = false;   // `done` has resolved
   let cancelled = false;
   let noiseAsked = false;
@@ -97,7 +104,7 @@ export function readTradeFile(bytes, { id = 0, noise = false, onStage = () => {}
       setTimeout(() => {
         if (cancelled) return;
         let out;
-        try { out = runFile(bytes); } catch (e) {
+        try { out = runFile(item); } catch (e) {
           // runFile returns bad files as {error}; a throw here is a bug: show it, never hang
           finish({ error: e && e.name === 'EngineError' ? e.toJSON() : workerError('E_WORKER', String(e && e.message ? e.message : e)) });
           return;
@@ -107,6 +114,7 @@ export function readTradeFile(bytes, { id = 0, noise = false, onStage = () => {}
       return;
     }
     if (d.error) { stop(); finish({ error: d.error }); return; }
+    if (d.mapNeeded) { stop(); finish({ mapNeeded: d.mapNeeded }); return; }
     if (d.result) {
       if (!noise) stop(); else clearTimer();
       finish({ result: fromColumns(d.result) });
@@ -124,7 +132,8 @@ export function readTradeFile(bytes, { id = 0, noise = false, onStage = () => {}
 
   onStage('Reading your file in this tab…');
   arm(START_MS, () => failed('E_WORKER_TIMEOUT', 'no answer'));
-  worker.postMessage({ id, bytes });
+  const extra = { ...(ask ? { ask: true } : {}), ...(cols ? { cols } : {}) };
+  worker.postMessage(isPasteItem ? { id, paste: item.paste, ...extra } : { id, bytes: item, ...extra });
 
   const runNoise = () => {
     if (cancelled) return;
