@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{#- /start/ (ARCHITECT-V3 §c.6, steps A3-A4): a compact chooser of the firm products (prices.json,
-    audience == "firm", in its order), then one section per product, each with its own short form and
+{#- /start/ (ARCHITECT-V3 §c.6, steps A3-A4): a compact chooser of the firm packages (the Pilot and the
+    monthly plan, from prices.json), then one section per product, each with its own short form and
     a FIXED hidden product (no data-from-query: ?product= picks the section, never relabels a form).
     JS off: each choice is a link to #<id>, and CSS :target shows only that section (:has() hides the
     list; a browser without :has() shows both). start-chooser.js adds the view transition, focus and
@@ -9,18 +9,26 @@
 {% block content %}
 {%- import "partials/trader_offer.html" as offer with context %}
 {%- set pilot = products["pilot"] %}
-{%- set firm = prices.products|selectattr("audience", "equalto", "firm")|list %}
+{#- 29 Oct (owner: one product): two choices, the Pilot (the first month) and the monthly plan. The old #snapshot,
+    #memo and #outcomes anchors are empty spans inside #plan, so old links land on the plan (CSS :has(:target)). -#}
+{%- set plan = products["plan"] %}
+{%- set firm = [pilot, plan] %}
+{%- set label = {"pilot": pilot.name, "plan": plan.short_name} %}
+{%- set price = {
+  "pilot": pilot.price_usd|usd ~ " USD · your first month",
+  "plan": plan.price_usd|usd ~ " per trader account a month, " ~ plan.minimum_usd|usd ~ " minimum",
+} %}
 {%- set blurb = {
-  "pilot": "One disposition figure on your own records, with a one-page memo. One per firm.",
-  "snapshot": "One disposition figure for one population and period you name, with a one-page memo.",
-  "memo": "A Snapshot, plus your ratio set beside the public study’s, with the differences explained in writing.",
-  "outcomes": "Everything in a Memo for your whole book, plus each split you agree in the scope.",
+  "pilot": "One run on your own book, with a one-page memo. One per firm.",
+  "plan": "The test on your whole book, every month, with a one-page memo. One habit today, more being added.",
+} %}
+{%- set terms = {
+  "pilot": pilot.turnaround_days ~ " business days · " ~ pilot.payment_terms ~ " · " ~ pilot.credit_rule ~ " of delivery",
+  "plan": "Each month’s result within " ~ plan.turnaround_days ~ " business days of a clean run · " ~ plan.payment_terms ~ " · cancel at the end of any month",
 } %}
 {%- set example = {
   "pilot": "e.g. funded accounts, January to June",
-  "snapshot": "e.g. evaluation accounts that reached funded, first half of the year",
-  "memo": "e.g. the plan gap across funded traders, January to June",
-  "outcomes": "e.g. the whole book, split by account size and by platform",
+  "plan": "e.g. every funded account, each month",
 } %}
 <div class="wrap">
   {% include "partials/crumbs.html" %}
@@ -32,10 +40,10 @@
     <h2 id="firm" tabindex="-1">What do you want to start?</h2>
     <ul class="choice-list">
     {%- for p in firm %}
-      <li><a class="choice-link" href="#{{ p.id }}" data-choice="{{ p.id }}"><span class="cl-name">{{ p.name }}</span> <span class="cl-price">{{ p.price_usd|usd }} USD</span> <span class="cl-meta">{{ p.turnaround_days }} business days · {{ blurb[p.id] }}</span></a></li>
+      <li><a class="choice-link" href="#{{ p.id }}" data-choice="{{ p.id }}"><span class="cl-name">{{ label[p.id] }}</span> <span class="cl-price">{{ price[p.id] }}</span> <span class="cl-meta">{{ blurb[p.id] }}</span></a></li>
     {%- endfor %}
     </ul>
-    <p class="small">A claims test uses these same engagements: pick one and describe the claim in the form. <a href="/for-firms/#claims-test">How the claims test works</a> · <a href="{% if flags.paid_report %}/for-firms/#what-it-costs{% else %}/pricing/#firms{% endif %}">Firm pricing</a></p>
+    <p class="small">A claims test or a copy-leader test is scoped and priced in writing: pick either form and describe it. <a href="/for-firms/#claims-test">How the claims test works</a> · <a href="{% if flags.paid_report %}/for-firms/#what-it-costs{% else %}/pricing/#firms{% endif %}">Firm pricing</a></p>
     <p class="small">Run a trading journal or platform? <a href="#platform">Partner application</a>. Trading your own account? <a href="#trader">The trader {{ offer.short_state() }}</a>.</p>
     {%- if flags.ask_box %}
     {%- from "partials/answer_box.html" import answer_box with context %}
@@ -46,11 +54,12 @@
 
   {%- for p in firm %}
   <section class="choice" id="{{ p.id }}" aria-labelledby="{{ p.id }}-h">
+    {%- if p.id == "plan" %}<span class="old-anchor" id="snapshot"></span><span class="old-anchor" id="memo"></span><span class="old-anchor" id="outcomes"></span>{% endif %}
     <div class="choice-head">
-      <h2 id="{{ p.id }}-h" tabindex="-1">{{ p.name }} — {{ p.price_usd|usd }} USD</h2>
+      <h2 id="{{ p.id }}-h" tabindex="-1">{{ label[p.id] }} — {{ price[p.id] }}</h2>
       <a class="choice-back" href="#firm">Change</a>
     </div>
-    <p class="recap">{{ p.turnaround_days }} business days · {{ p.payment_terms }}{% if p.credit_rule %} · {{ p.credit_rule }} of delivery{% endif %}</p>
+    <p class="recap">{{ terms[p.id] }}</p>
     <p>{{ blurb[p.id] }}</p>
     {%- if p.id == "pilot" %}
     <p class="small muted"><a href="/terms/#trial">{{ pilot.name }} terms</a></p>
@@ -58,13 +67,18 @@
     {%- if p.id == "pilot" and flags.pilot_checkout %}
     {%- with heading_id = "pilot-h" %}{% include "partials/pilot_block.html" %}{% endwith %}
     {%- else %}
-    {%- with fid = "sf-" ~ p.id, product = p.id, fixed = true, heading_id = p.id ~ "-h", placeholder = example[p.id], mail_subject = p.name ~ " request — [your firm]" %}{% include "partials/form_firm.html" %}{% endwith %}
+    {%- with fid = "sf-" ~ p.id, product = p.id, fixed = true, heading_id = p.id ~ "-h", placeholder = example[p.id], mail_subject = label[p.id] ~ " request — [your firm]" %}{% include "partials/form_firm.html" %}{% endwith %}
     {%- endif %}
     <h3>What happens next</h3>
     <ol class="steps">
-      <li>Within 1 business day you get a reply with a one-page scope, our data terms and the fixed price.</li>
+      <li>Within 1 business day you get a reply with a one-page scope, our data terms and the published price.</li>
+      {%- if p.id == "plan" %}
+      <li>Nothing is owed until you accept the scope. Each month is invoiced in arrears; pay by bank transfer, or Interac e-Transfer in Canada. {% include "partials/card_timing.html" %}</li>
+      <li>Each month your staff run the published script and send back what it prints; you get the result within {{ p.turnaround_days }} business days of a clean run.</li>
+      {%- else %}
       <li>Nothing is owed until you accept the scope. Then pay by bank transfer, or Interac e-Transfer in Canada. {% include "partials/card_timing.html" %}</li>
       <li>Your staff run the published script and send back what it prints; you get the result within {{ p.turnaround_days }} business days of payment and a clean run.</li>
+      {%- endif %}
     </ol>
   </section>
   {%- endfor %}

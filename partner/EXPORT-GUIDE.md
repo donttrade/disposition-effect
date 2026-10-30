@@ -85,6 +85,9 @@ us something about the export rather than about your traders.
 Run it on `make_fixture.py`'s synthetic output first if you want to see the shape before pointing it
 at anything real.
 
+On the monthly plan, run it once a month on that month's extract; the `accounts:` line it prints is the
+billed count (trader accounts that month).
+
 ## If it refuses
 
 Every refusal names the row number and the problem, and never prints the contents of a cell. The

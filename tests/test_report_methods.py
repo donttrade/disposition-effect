@@ -54,7 +54,7 @@ def test_the_built_corrections_page_dates_the_report_method_the_page_accepts(bui
     assert hit[0][0] == f"{int(e['date'][8:])} {MONTHS[int(e['date'][5:7]) - 1]} {e['date'][:4]}"
     assert html.index("<!--frozen:end-->") < html.index('id="report-method"'), "outside the frozen log"
     for r in rows:
-        assert lint_text(r[2]) == [] and lint_text(r[2], "methods", paid=True) == [], r[2]
+        assert lint_text(r[3]) == [] and lint_text(r[3], "methods", paid=True) == [], r[3]
 
 
 def test_the_corrections_count_is_still_the_corrections_log(built_site):

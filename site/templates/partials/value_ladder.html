@@ -18,13 +18,13 @@
       <p><a href="/tools/">All free tools</a></p>
     </div>
     <div class="ladder-row">
-      <h3>Habit report: <span class="num">{{ r.price_usd|usd }}</span>{% if not flags.paid_report %} (waitlist, nothing charged now){% endif %}</h3>
+      <h3>The donttrade test: <span class="num">{{ r.price_usd|usd }}</span>{% if not flags.paid_report %} (waitlist, nothing charged now){% endif %}</h3>
       {#- Merge into delivery-39 (24 Oct): the offer wording of R-D3 I-3b (up to five habits, up to two tested against
           chance, one re-test, the version sentence), not the v3 draft's "tests four of them". #}
       {%- if flags.paid_report %}
-      <p>The report reads the closed trades in your file: the latest 20,000 rows at most, leaving out trades opened more than about 10 years before your latest trade or held longer than 3,650 days. It measures and describes up to five habits, with the dollar totals of the matching trades, and tests up to two of them against chance in this version, comparing trades from the same days. It includes one re-test 30 to 60 days after your first report. Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>. The tests run on our server on stripped trade numbers.</p>
+      <p>The test reads the closed trades in your file: the latest 20,000 rows at most, leaving out trades opened more than about 10 years before your latest trade or held longer than 3,650 days. It measures and describes up to five habits, with the dollar totals of the matching trades, and tests up to two of them against chance in this version, comparing trades from the same days. It includes one re-test 30 to 60 days after your first result. Your re-test runs on the version of the test that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>. The tests run on our server on stripped trade numbers.</p>
       {%- else %}
-      <p>The report will read the closed trades in your file: the latest 20,000 rows at most, leaving out trades opened more than about 10 years before your latest trade or held longer than 3,650 days. It will measure and describe up to five habits, with the dollar totals of the matching trades, and test up to two of them against chance in this version, comparing trades from the same days. It will include one re-test 30 to 60 days after your first report. Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>. The tests will run on our server on stripped trade numbers.</p>
+      <p>The test will read the closed trades in your file: the latest 20,000 rows at most, leaving out trades opened more than about 10 years before your latest trade or held longer than 3,650 days. It will measure and describe up to five habits, with the dollar totals of the matching trades, and test up to two of them against chance in this version, comparing trades from the same days. It will include one re-test 30 to 60 days after your first result. Your re-test runs on the version of the test that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>. The tests will run on our server on stripped trade numbers.</p>
       {%- endif %}
       {%- if show_firm_price and flags.paid_report %}
       {#- 25 Oct: on /pricing/ the button opens the last step right here (a <details>, works without JS):
@@ -32,7 +32,7 @@
           the page, so the buyer sees the disclosure first. nav.js opens it when the URL names an id inside. #}
       {%- set link = r["stripe_link_" + stripe_mode] %}
       <details class="pay-step" id="last-step">
-        <summary class="btn">Get the habit report — {{ r.price_usd|usd }}</summary>
+        <summary class="btn">Take the test — {{ r.price_usd|usd }}</summary>
         <div class="pay-panel" role="group" aria-labelledby="last-step-h">
           <h3 id="last-step-h">Last step</h3>
           <p class="no-print">{% if link %}<a class="btn" href="{{ link }}" rel="noopener">Pay {{ r.price_usd|usd }} on Stripe</a>{% else %}<span class="muted">Payment link not set yet</span>{% endif %}</p>
@@ -45,14 +45,17 @@
       {%- endif %}
     </div>
     <div class="ladder-row">
+      {#- 29 Oct (owner: one product): the firm package of the same product. Firms are told it measures one habit
+          today, with more being added (the firm script measures the disposition effect only). -#}
+      {%- set plan = products["plan"] %}
       {%- if show_firm_price %}
-      <h3>For firms: a {{ pilot.name }} at <span class="num">{{ pilot.price_usd|usd }}</span> USD, fixed and published</h3>
+      <h3>For firms: the test on your whole book, from <span class="num">{{ plan.minimum_usd|usd }}</span> a month</h3>
       {%- else %}
-      <h3>For firms: a {{ pilot.name }} at a fixed, published price</h3>
+      <h3>For firms: the test on your whole book</h3>
       {%- endif %}
-      <p>A written scope, then one measure on your traders’ records, run by your own staff on your own systems, and a one-page memo. Each engagement is scoped and written up by a person, so it is priced per engagement, the same for every firm.{% if show_firm_price %} Firms also: Snapshot, Memo, Outcomes pack.{% endif %}</p>
+      <p>One habit today, the disposition effect, with more being added. Your own staff run a public script on your own systems, and you get the figure and a one-page memo each month.{% if show_firm_price %} {{ plan.price_usd|usd }} per trader account a month; the {{ pilot.name }} is your first month, and its {{ pilot.price_usd|usd }} counts toward your plan’s invoices.{% endif %}</p>
       <p><a href="{% if flags.paid_report %}/for-firms/#what-it-costs{% else %}/pricing/#firms{% endif %}">{% if show_firm_price %}All firm prices{% else %}See Pricing{% endif %}</a></p>
     </div>
   </div>
-  <p class="small muted">The free tools and the report describe your past trades. They do not tell you what to trade.</p>
+  <p class="small muted">The free tools and the test describe your past trades. They do not tell you what to trade.</p>
 </section>

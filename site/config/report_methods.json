@@ -1,10 +1,15 @@
 {
- "_note": "The habit report's method versions, dated (shown on /corrections/#report-method). The Lead's decision, 23 Oct 2026: the re-test sentence (\"every change is dated on the corrections page\") must be true from the first sale, so every METHOD_VERSION the paid page accepts (site/static/js/paid/wording.js) needs an entry here; site/build.py refuses to build without one. Newest first.",
+ "_note": "The donttrade test's method versions (called the habit report before 29 Oct 2026), dated (shown on /corrections/#report-method). The Lead's decision, 23 Oct 2026: the re-test sentence (\"every change is dated on the corrections page\") must be true from the first sale, so every METHOD_VERSION the paid page accepts (site/static/js/paid/wording.js) needs an entry here; site/build.py refuses to build without one. Newest first. \"name\" (optional, DT-<n>) is the version's public name. \"renamed\" is the dated rename line shown under the table.",
  "entries": [
   {
    "date": "2026-10-23",
    "method": "2026-10-23.stats2f",
-   "text": "First version of the habit report. It tests up to two habits against chance: re-entering soon after a loss, and trading after a losing run. It describes the hold gap, size after a loss and unusually large losses, with the dollar totals of the matching trades, without testing them. Rows in your file that share a symbol, a direction and an open minute (for example, a position closed in parts) count as one trade. Rows that open at exactly 00:00 and are held a whole number of days, as in exports with dates but no times, are never combined; if they are 5% or more of a file's rows, nothing in that file is tested and size after a loss is not described."
+   "text": "First version of the habit report. It tests up to two habits against chance: re-entering soon after a loss, and trading after a losing run. It describes the hold gap, size after a loss and unusually large losses, with the dollar totals of the matching trades, without testing them. Rows in your file that share a symbol, a direction and an open minute (for example, a position closed in parts) count as one trade. Rows that open at exactly 00:00 and are held a whole number of days, as in exports with dates but no times, are never combined; if they are 5% or more of a file's rows, nothing in that file is tested and size after a loss is not described.",
+   "name": "DT-1"
   }
- ]
+ ],
+ "renamed": {
+  "date": "2026-10-29",
+  "text": "The habit report is renamed the donttrade test, and its first method is named DT-1. Method, engine and wording are unchanged."
+ }
 }

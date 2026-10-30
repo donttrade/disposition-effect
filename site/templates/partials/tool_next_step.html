@@ -1,16 +1,17 @@
 {#- The one trader offer on a free tool page (owner, 25 Oct), paid_report only, right after the result
-    container so it shows before a run too. The same words for every visitor and every result: it never
-    quotes the visitor's numbers, so no finding is ever paired with the offer. With it on, the page's
+    container so it shows before a run too. 29 Oct (one product): every free tool points to the one test with
+    the same words, whatever the tool, the file or the result (source is no longer read). It never quotes the
+    visitor's numbers, and holds no sample figure and no study finding. With it on, the page's
     teaser box is left out (the tool scripts skip a missing box).
     Use: {% with source = "file" | "typed", firm_line = false %}{% include "partials/tool_next_step.html" %}{% endwith %} -#}
 {%- if flags.paid_report %}
 {%- set r = products["report39"] %}{%- set pl = products["pilot"] %}
 <aside class="notice notice-gap next-step" aria-labelledby="next-step-h" data-requires-flag="paid_report">
-  <h2 id="next-step-h">The habit report reads {% if source == "typed" %}your trade file{% else %}this same file{% endif %}</h2>
-  <p>It looks for up to five habits in your own trades, testing up to two of them against chance. {{ r.price_usd|usd }}, one re-test included, refund within {{ prices.rules.trader_refund_days }} days.</p>
-  <p class="btn-row"><a class="btn" href="/pricing/#last-step">Get the habit report — {{ r.price_usd|usd }}</a> <a href="/sample-report/">See a sample report</a></p>
+  <h2 id="next-step-h">Is this habit real, or luck?</h2>
+  <p>The donttrade test checks your own trades against chance. {{ r.price_usd|usd }}, re-test included.</p>
+  <p class="btn-row"><a class="btn" href="/pricing/#last-step">Take the test — {{ r.price_usd|usd }}</a> <a href="/sample-report/">See the example report</a></p>
   {%- if firm_line %}
-  <p class="small">Run a prop firm? Measure your traders’ plan gap: <a href="/for-firms/">{{ pl.name }}, {{ pl.price_usd|usd }}</a>.</p>
+  <p class="small">Run a prop firm? Test your whole book: <a href="/for-firms/">{{ pl.name }}, {{ pl.price_usd|usd }}</a>.</p>
   {%- endif %}
 </aside>
 {%- endif %}

@@ -17,7 +17,7 @@ import { HABITS, HABIT_TEXT, itemsFromTrades, isDatesOnly, habitFlags, dayFlags,
 import { drawCard, cardBlob, altText } from '../card/readiness-card.js?v=b211143d';
 import { money, unitNote, pct, intText, el, DASH } from './format.js?v=acb0db51';
 import { parseStrict, parsePositive, parseNonNegative, parseWhole, InputError } from './num.js?v=8df99e34';
-import { SAMPLE_LABEL, FORMAT_NAMES, plural, tableWrap, rowsTable } from './file-tool.js?v=0b8658c4';
+import { SAMPLE_LABEL, FORMAT_NAMES, plural, tableWrap, rowsTable } from './file-tool.js?v=429ae80c';
 
 const $ = (id) => document.getElementById(id);
 const MIN_RULE_BUSTS = 30;   // fewer busts: too few to say which rule broke most (as the old streak line)

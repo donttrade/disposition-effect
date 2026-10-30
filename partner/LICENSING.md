@@ -11,7 +11,7 @@
 
 **Free:** traders running it on their own records; students, researchers, schools, charities, journalists and government bodies; anyone reading or auditing the code.
 
-**Needs a commercial licence:** a business using it for its business — for example, a prop firm or broker running it on its own client records, or publishing, quoting or marketing any figure it produced. A commercial licence comes with every donttrade engagement. Contact: donttrade.research@gmail.com.
+**Needs a commercial licence:** a business using it for its business — for example, a prop firm or broker running it on its own client records, or publishing, quoting or marketing any figure it produced. A commercial licence comes with the donttrade firm plan and the Pilot. Contact: donttrade.research@gmail.com.
 
 ## Additional permission: evaluation
 
@@ -44,7 +44,7 @@ the spec: anyone may implement the spec, commercially or not, without using this
 
 ## Name
 
-No one may describe a figure as measured, verified, certified, audited or produced by donttrade, or imply that donttrade endorses a firm, except under a signed engagement and in the wording that engagement allows.
+No one may describe a figure as measured, verified, certified, audited or produced by donttrade, or imply that donttrade endorses a firm, except under a signed firm plan or Pilot agreement and in the wording that agreement allows.
 
 ## Text, charts and numbers
 

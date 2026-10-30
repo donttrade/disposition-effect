@@ -52,7 +52,7 @@ case "${1:-}" in
     case "$BR" in paid-preview|live-check)
       if [ "${DT_PREVIEW:-}" != "$BR" ]; then echo "the branch $BR takes only a preview bundle: DT_PREVIEW=$BR"; exit 1; fi ;;
     esac
-    DT_REQUIRE_LAUNCH_DATE=1 python3 site/build.py   # [legal] launch_date must be set to the push day
+    DT_REQUIRE_LAUNCH_DATE=1 python3 site/build.py   # [legal] launch_date and terms_date must be set
     rm -rf docs && cp -R site/_site docs && rm -rf docs/dev && printf 'donttrade.ca\n' > docs/CNAME && touch docs/.nojekyll
     echo "docs/ replaced from site/_site" ;;
   *) sed -n '2,12p' "$0"; exit 1 ;;

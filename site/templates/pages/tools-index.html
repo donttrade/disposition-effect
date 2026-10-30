@@ -9,6 +9,8 @@
   {% include "partials/crumbs.html" %}
   <h1>Free trading tools</h1>
   <p class="lede">No account. Your file is not uploaded.</p>
+  {#- 29 Oct (one product): "Free for everyone" at the top; links only, no buy button. -#}
+  {% include "partials/free_strip.html" %}
   {{ tool_cards([by["/tools/trade-stats/"], by["/tools/trading-heatmap/"], by["/tools/drawdown-calculator/"], by["/tools/prop-challenge-simulator/"],
                  by["/tools/lot-size-calculator/"], by["/tools/risk-reward-calculator/"], by["/tools/disposition-calculator/"], by["/tools/pass-rate-calculator/"]],
                 h="h2", cls="tool-cards-4 tool-cards-all") }}

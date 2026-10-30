@@ -1,7 +1,7 @@
 """v3 nav (ARCHITECT-V3-PLAN 2026-10-21 §c.2, steps A1-A2): Tester invariants N1-N8.
 
 29 Oct (owner): Sample report · Free tools · Pricing · For firms as four plain links (no drop-down: /tools/ shows
-every tool), one compact "Get report — $39" button in paid builds (it opens the pay dialog; a link to
+every tool), one compact "Take the test — $39" button in paid builds (it opens the pay dialog; a link to
 /pricing/#last-step without JS), the theme icon, all in a slim sticky bar. Below 900 px the links and the button sit
 in one "Menu" <details>. The [[nav]] labels never show a price, a % or a study number (D3); the only price in the
 header is the button's own.
@@ -19,9 +19,9 @@ sys.path.insert(0, os.path.join(REPO, "site"))
 from a11y import axe_violations, horizontal_overflow  # noqa: E402
 import build as B  # noqa: E402
 
-ORDER = ["Sample report", "Free tools", "Pricing", "For firms"]
+ORDER = ["Example report", "Free tools", "Pricing", "For firms"]
 HEADER_H = "Math.round(document.querySelector('.site-header').getBoundingClientRect().height)"
-CTA_RE = re.compile(r'<a class="btn[^"]*" href="/pricing/#last-step" data-pay>Get report — \$39</a>')
+CTA_RE = re.compile(r'<a class="btn[^"]*" href="/pricing/#last-step" data-pay>Take the test — \$39</a>')
 
 
 def _ctx(browser, width, scheme="light", js=True, **kw):
@@ -117,7 +117,7 @@ def test_n4_phone_menu_no_overflow_targets_axe(browser, built_site, width, schem
     assert horizontal_overflow(pg) == []
     sizes = pg.eval_on_selector_all(".nav-panel a:visible", "es => es.map(e => { const r = e.getBoundingClientRect(); return [r.width, r.height]; })")
     assert len(sizes) == 5 and all(h >= 44 and w >= 44 for w, h in sizes)
-    assert pg.inner_text(".nav-panel a[data-pay]") == "Get report — $39"
+    assert pg.inner_text(".nav-panel a[data-pay]") == "Take the test — $39"
     assert axe_violations(pg) == [], (width, scheme)
     ctx.close()
 
@@ -136,7 +136,7 @@ def test_n4_desktop_axe_clean_and_keyboard_order(browser, built_site, scheme):
         for _ in range(7):
             pg.keyboard.press("Tab")
             seen.append(pg.evaluate("document.activeElement.textContent.trim()"))
-        assert seen[:6] == ["donttrade"] + ORDER + ["Get report — $39"], seen
+        assert seen[:6] == ["donttrade"] + ORDER + ["Take the test — $39"], seen
         assert pg.evaluate("document.activeElement.matches('[data-theme-toggle]')")
         ctx.close()
 

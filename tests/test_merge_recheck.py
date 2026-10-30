@@ -1,7 +1,7 @@
 """Tester merge re-check (24 Oct, report §11) on the preview-combined merge: the wording items MR-1..MR-5.
 
 MR-1: the /for-traders/ comparison row says which code is public (the study scripts, as /code/ counts them) and
-that the habit report's engine is not.
+that the donttrade test's engine is not.
 MR-5: a paid build names the seller, so its /about/ and /code/ no longer say "there is no name"; a free build keeps
 the old line word for word, and the paid swap is the only frozen-body difference compare.py and lint accept."""
 import os
@@ -62,7 +62,7 @@ def raw(out, rel):
 def test_mr1_comparison_row_names_the_public_scripts_and_the_private_engine(builds):
     ev = B.evidence()
     row = (f"Shows its method and code Rarely The method, yes. The scripts behind {ev['scripts_public']} of the "
-           f"{ev['studies']} studies are public (Methods and code); the habit report’s own engine is not")
+           f"{ev['studies']} studies are public (Methods and code); the test’s own engine is not")
     for out in builds.values():
         t = text_of(out, "for-traders/index.html")
         assert row in t and "Shows the method and the code" not in t

@@ -6,13 +6,16 @@
   var params;
   try { params = new URLSearchParams(window.location.search); } catch (e) { return; }
   // Firm products only: the partner form's product is fixed in the HTML (Tester D1).
-  var PRODUCTS = ['pilot', 'snapshot', 'memo', 'outcomes', 'copy-leader', 'claims-test'];
+  var PRODUCTS = ['pilot', 'plan', 'copy-leader', 'claims-test'];
+  // 29 Oct (one product): links to the retired products ask about the monthly plan.
+  var OLD = { snapshot: 'plan', memo: 'plan', outcomes: 'plan' };
   function apply() {
     var inputs = document.querySelectorAll('input[data-from-query]');
     for (var i = 0; i < inputs.length; i++) {
       var key = inputs[i].getAttribute('data-from-query');
       var v = (params.get(key) || '').toLowerCase();
       if (!/^[a-z0-9-]{1,40}$/.test(v)) continue;
+      if (key === 'product' && OLD[v]) v = OLD[v];
       if (key === 'product' && PRODUCTS.indexOf(v) === -1) continue;
       // NIT 9: a field may refuse some products (the enquiry form never becomes a Pilot request)
       var refuse = (inputs[i].getAttribute('data-refuse') || '').split(' ');

@@ -1,6 +1,6 @@
 {#- Trader waitlist (FORMS-SPEC §C; V2 step 16). Plain HTML POST to Web3Forms: works with
     JavaScript off. The launch-email box starts unticked and must be ticked to join (CASL). -#}
-{%- set r = products["report39"] %}{%- set t = products["tracker79"] %}
+{%- set r = products["report39"] %}
 <form class="request-form" id="wl" method="POST" action="{{ forms.endpoint }}" aria-labelledby="{{ heading_id }}">
   <input type="hidden" name="access_key" value="{{ forms.trader_key }}">
   <input type="hidden" name="subject" value="donttrade: trader waitlist">
@@ -14,14 +14,13 @@
     <input id="wl-email" name="email" type="email" autocomplete="email" required></div>
   <fieldset class="field">
     <legend>Which founding price would you use? <span class="req">(required)</span></legend>
-    <div class="check"><input id="wl-p1" type="radio" name="founding_price" value="report {{ r.price_usd|usd }}" required><label for="wl-p1">{{ r.price_usd|usd }} for one habit report</label></div>
-    <div class="check"><input id="wl-p2" type="radio" name="founding_price" value="tracker {{ t.price_usd|usd }}/year"><label for="wl-p2">{{ t.price_usd|usd }} a year for the habit tracker (later)</label></div>
+    <div class="check"><input id="wl-p1" type="radio" name="founding_price" value="report {{ r.price_usd|usd }}" required><label for="wl-p1">{{ r.price_usd|usd }} for the donttrade test</label></div>
     <div class="check"><input id="wl-p3" type="radio" name="founding_price" value="not sure"><label for="wl-p3">Not sure yet</label></div>
   </fieldset>
   <div class="field"><label for="wl-platform">Platform or journal you use <span class="opt">(optional)</span></label>
     <input id="wl-platform" name="platform" type="text" autocomplete="off" placeholder="e.g. MT5"></div>
   <div class="check field"><input id="wl-consent" name="launch_email" type="checkbox" value="yes" required>
-    <label for="wl-consent">Email me once when the trader report launches. <span class="req">(required to join)</span></label></div>
+    <label for="wl-consent">Email me once when the donttrade test launches. <span class="req">(required to join)</span></label></div>
   <p><button class="btn" type="submit">Join the waitlist</button></p>
   <p class="small muted">Nothing is charged. We email you once, at launch, then delete the address unless you buy. <a href="/privacy/">Privacy notice</a></p>
 </form>

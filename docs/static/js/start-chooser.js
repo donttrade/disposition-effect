@@ -21,8 +21,11 @@
     e.preventDefault();
     go(a.getAttribute('href').slice(1));
   });
+  // 29 Oct (one product): the retired products' links land on the monthly plan.
+  var OLD = { snapshot: 'plan', memo: 'plan', outcomes: 'plan' };
   window.addEventListener('hashchange', function () {
     var id = location.hash.slice(1);
+    if (OLD[id]) id = OLD[id];
     if (ids.indexOf(id) !== -1) {
       last = id;
       document.getElementById(id + '-h').focus();
@@ -32,6 +35,7 @@
   });
   if (!location.hash) {
     var m = /[?&]product=([a-z]+)/.exec(location.search);
-    if (m && (ids.indexOf(m[1]) !== -1 || m[1] === 'platform' || m[1] === 'trader')) location.replace('#' + m[1]);
+    var want = m && (OLD[m[1]] || m[1]);
+    if (want && (ids.indexOf(want) !== -1 || want === 'platform' || want === 'trader')) location.replace('#' + want);
   }
 })();

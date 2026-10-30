@@ -1,0 +1,22 @@
+{#- "Free for everyone" (29 Oct, owner: one product, everything else free). The same strip on /pricing/ (under the two
+    packages), the home page (after the free tools, never beside the research finding) and the /tools/ index top;
+    never on /for-firms/. Links only: no buy button, no price, no number. The Challenge Readiness Check is the
+    page at /tools/prop-challenge-simulator/ (30 Oct launch merge: its "(coming)" line went when the page shipped). Use: {% with strip_id = "free-h" %}{% include "partials/free_strip.html" %}{% endwith %} -#}
+{%- set sid = strip_id | default("free-h") %}
+<section class="free-strip" aria-labelledby="{{ sid }}" data-free-strip>
+  <h2 id="{{ sid }}">Free for everyone</h2>
+  <p>No account, no card. Your file stays in your browser.</p>
+  <ul class="free-list">
+    <li><a href="/tools/trade-stats/">Trade stats</a></li>
+    <li><a href="/tools/trading-heatmap/">Trading heatmap</a></li>
+    <li><a href="/tools/drawdown-calculator/">Drawdown calculator</a></li>
+    <li><a href="/tools/prop-challenge-simulator/">Challenge Readiness Check</a></li>
+    {%- if flags.journal %}
+    <li><a href="/journal/">Trading journal</a></li>
+    {%- endif %}
+    <li><a href="/tools/">Calculators</a></li>
+    <li><a href="/sample-report/">Example report</a></li>
+    <li><a href="/code/">Method</a></li>
+    <li><a href="/research/">Research</a></li>
+  </ul>
+</section>

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{#- FRENCH-LEGAL §5, habit report only (no Tracker history items). paid_report only. Unreviewed draft. #}
+{#- FRENCH-LEGAL §5, donttrade test only (formerly the habit report) (no Tracker history items). paid_report only. Unreviewed draft. #}
 {% block content %}
 {%- from "partials/seller.html" import seller_rows %}
 <div class="wrap" data-requires-flag="paid_report"><div class="prose">
@@ -13,26 +13,26 @@
 
   <h2 id="fichier">Votre fichier de transactions</h2>
   <p><strong>Outils gratuits :</strong> votre fichier est ouvert dans votre navigateur et n’est jamais téléversé.</p>
-  <p><strong>Rapport payant :</strong> votre navigateur envoie à notre serveur seulement une liste épurée de chiffres : heures d’ouverture et de fermeture, achat ou vente, taille relative, gain ou perte réalisé, un numéro de symbole tiré au hasard et une empreinte brouillée de chaque ligne.{# T-3 T3-G: EN /privacy/#report "... a random symbol number and a scrambled fingerprint of each row". TRANSLATOR CHECK #} Cette liste ne contient ni nom, ni numéro de compte, ni symbole boursier. Notre serveur fonctionne sur Cloudflare et peut se trouver hors du Canada. Il utilise ces chiffres pour produire votre rapport, vous renvoie le rapport et ne conserve pas ces chiffres : il n’en garde que des empreintes brouillées, celles des transactions de votre premier rapport, décrites ci-dessous.{# TRANSLATOR CHECK (C-14): EN /privacy/#report "…does not keep the numbers: of those numbers it keeps only a scrambled fingerprint of each trade row from your first report, as described below." #} La journalisation des requêtes est désactivée.</p>
+  <p><strong>Test donttrade (payant) :</strong>{# TRANSLATOR CHECK (29 Oct, one product): « test donttrade » replaces « Rapport d’habitudes »; the result is « votre résultat » (EN “the donttrade test”, “your test result”). #} votre navigateur envoie à notre serveur seulement une liste épurée de chiffres : heures d’ouverture et de fermeture, achat ou vente, taille relative, gain ou perte réalisé, un numéro de symbole tiré au hasard et une empreinte brouillée de chaque ligne.{# T-3 T3-G: EN /privacy/#report "... a random symbol number and a scrambled fingerprint of each row". TRANSLATOR CHECK #} Cette liste ne contient ni nom, ni numéro de compte, ni symbole boursier. Notre serveur fonctionne sur Cloudflare et peut se trouver hors du Canada. Il utilise ces chiffres pour produire votre résultat, vous renvoie le résultat et ne conserve pas ces chiffres : il n’en garde que des empreintes brouillées, celles des transactions de votre premier résultat, décrites ci-dessous.{# TRANSLATOR CHECK (C-14): EN /privacy/#report "…does not keep the numbers: of those numbers it keeps only a scrambled fingerprint of each trade row from your first report, as described below." #} La journalisation des requêtes est désactivée.</p>
   <p><strong>Ce que notre serveur conserve :</strong></p>
   <ul>
     <li>une fiche d’achat sous un code brouillé : le produit, le nombre d’analyses utilisées, les dates et l’état de remboursement, sans votre nom ni votre courriel;</li>
     {#- TRANSLATION PENDING (decision 21 Oct ~09:00): the English /privacy/#fingerprints paragraph (what the
-        fingerprints are, deleted after the included re-test or 75 days after the first report, Tracker: while
-        active + 15 days) has no French version yet. Legal translator; do not machine-translate. #}
-    <li>des empreintes brouillées des transactions de votre premier rapport, pour vérifier qu’un nouveau test porte sur le même historique;</li>
+        fingerprints are, deleted after the included re-test or 75 days after the first report; the Tracker
+        sentence was removed 29 Oct) has no French version yet. Legal translator; do not machine-translate. #}
+    <li>des empreintes brouillées des transactions de votre premier résultat, pour vérifier qu’un nouveau test porte sur le même historique;</li>
     <li>des compteurs d’utilisation d’une heure, liés à votre clé et à une version brouillée de votre adresse IP, pour limiter les abus;</li>
     <li>si vous l’acceptez (case non cochée au départ), un simple compte du nom de la firme de négociation que vous indiquez, sans lien avec vous.</li>
   </ul>
 
   <h2 id="profilage">Profilage</h2>
-  <p>Le Rapport analyse vos habitudes de négociation, ce qui peut constituer du profilage au sens de la loi québécoise. Cette analyse a lieu seulement quand vous lancez vous-même une analyse avec votre fichier; rien n’est analysé par défaut. Les résultats servent uniquement à vous être affichés. Ils ne servent pas à la publicité, ne vous comparent pas à d’autres personnes et ne servent à prendre aucune décision à votre sujet.</p>
+  <p>Le test donttrade analyse vos habitudes de négociation, ce qui peut constituer du profilage au sens de la loi québécoise. Cette analyse a lieu seulement quand vous lancez vous-même une analyse avec votre fichier; rien n’est analysé par défaut. Les résultats servent uniquement à vous être affichés. Ils ne servent pas à la publicité, ne vous comparent pas à d’autres personnes et ne servent à prendre aucune décision à votre sujet.</p>
 
   <h2 id="fournisseurs">Paiements, formulaires, courriel, infolettre</h2>
   <ul>
     <li><strong>Paiements :</strong> Stripe traite votre nom, votre courriel, votre pays de facturation et les données de votre carte. donttrade ne voit jamais le numéro complet de votre carte. Pour les données de paiement, Stripe agit comme responsable indépendant; sa politique de confidentialité s’applique.</li>
     {#- C-14 (G14). TRANSLATOR CHECK: EN /privacy/#buyer-details. LAWYER (Q10–Q12): the uses, the dispute evidence, the period. #}
-    <li id="donnees-acheteur"><strong>Si vous achetez le Rapport :</strong> Stripe nous montre le nom et l’adresse courriel que vous indiquez au paiement. Nous les utilisons seulement pour vous envoyer la copie de votre contrat, répondre à vos courriels (un remboursement, un nouveau lien d’accès) et traiter une contestation de paiement. Si vous contestez le paiement auprès de l’émetteur de votre carte, nous pouvons remettre à Stripe, comme preuve, les dates de votre achat et de vos analyses et le nombre d’analyses utilisées. Nos courriels avec vous restent dans notre boîte Gmail, et une liste privée des ventes (le code du paiement, la date, votre nom et votre courriel, et les dates d’envoi de la copie de votre contrat ou d’un remboursement) est gardée sur notre propre ordinateur, pas sur notre serveur. Les deux sont conservés aussi longtemps que les dossiers d’achat (ci-dessous).</li>
+    <li id="donnees-acheteur"><strong>Si vous achetez le test donttrade :</strong> Stripe nous montre le nom et l’adresse courriel que vous indiquez au paiement. Nous les utilisons seulement pour vous envoyer la copie de votre contrat, répondre à vos courriels (un remboursement, un nouveau lien d’accès) et traiter une contestation de paiement. Si vous contestez le paiement auprès de l’émetteur de votre carte, nous pouvons remettre à Stripe, comme preuve, les dates de votre achat et de vos analyses et le nombre d’analyses utilisées. Nos courriels avec vous restent dans notre boîte Gmail, et une liste privée des ventes (le code du paiement, la date, votre nom et votre courriel, et les dates d’envoi de la copie de votre contrat ou d’un remboursement) est gardée sur notre propre ordinateur, pas sur notre serveur. Les deux sont conservés aussi longtemps que les dossiers d’achat (ci-dessous).</li>
     <li><strong>Formulaires :</strong> nos formulaires passent par Web3Forms, qui nous transmet votre message par courriel. Ils demandent seulement ce qui est indiqué sur chaque formulaire.</li>
     <li><strong>Courriel :</strong> notre boîte de réception est hébergée par Google (Gmail).</li>
     <li><strong>Infolettre :</strong> si vous vous y abonnez, elle est envoyée par Substack; sa politique de confidentialité s’applique.</li>
@@ -45,15 +45,15 @@
   <p>Nous ne vendons aucun renseignement. Nous n’utilisons ces fournisseurs que pour faire fonctionner le site, les paiements, les formulaires, le courriel et l’infolettre.</p>
 
   <h2 id="navigateur">Stockage dans votre navigateur (aucun témoin)</h2>
-  <p>Ce site ne dépose aucun témoin. Il enregistre dans votre propre navigateur votre choix de thème clair ou foncé et, si vous achetez, votre clé d’accès au Rapport. Ces données restent sur votre appareil, et nous n’y avons pas accès. Pour les effacer, supprimez les données du site dans votre navigateur. Conservez d’abord votre lien de restauration, sinon vous perdrez l’accès.</p>
+  <p>Ce site ne dépose aucun témoin. Il enregistre dans votre propre navigateur votre choix de thème clair ou foncé et, si vous achetez, votre clé d’accès au test donttrade. Ces données restent sur votre appareil, et nous n’y avons pas accès. Pour les effacer, supprimez les données du site dans votre navigateur. Conservez d’abord votre lien de restauration, sinon vous perdrez l’accès.</p>
 
   <h2 id="hors-quebec">Communication hors du Québec et hors du Canada</h2>
   <p>Nos fournisseurs (Cloudflare, Stripe, Web3Forms, GitHub, Google et Substack) sont situés hors du Québec et, pour la plupart, aux États-Unis. Vos renseignements peuvent y être conservés et traités, et les autorités de ces pays peuvent y avoir accès selon leurs lois.</p>
 
   <h2 id="conservation">Bases légales et conservation</h2>
-  <p><strong>Bases légales (UE et R.-U.) :</strong> l’exécution du contrat pour produire votre rapport et vous répondre; notre intérêt légitime pour limiter les abus et protéger le service.</p>
+  <p><strong>Bases légales (UE et R.-U.) :</strong> l’exécution du contrat pour produire votre résultat et vous répondre; notre intérêt légitime pour limiter les abus et protéger le service.</p>
   <ul>
-    <li>chiffres de transactions envoyés pour l’analyse payante : non conservés; seules des empreintes brouillées des transactions du premier rapport sont gardées, pour le nouveau test;{# TRANSLATOR CHECK (C-14): the deletion dates of /privacy/#fingerprints are still to translate (see above) #}</li>
+    <li>chiffres de transactions envoyés pour l’analyse payante : non conservés; seules des empreintes brouillées des transactions du premier résultat sont gardées, pour le nouveau test;{# TRANSLATOR CHECK (C-14): the deletion dates of /privacy/#fingerprints are still to translate (see above) #}</li>
     <li>courriels avec les acheteurs et liste privée des ventes : six ans, comme les dossiers d’achat;</li>
     <li>compteurs d’utilisation : environ une heure;</li>
     <li>dossiers d’achat et de facturation : six ans, comme l’exige la loi fiscale canadienne;</li>

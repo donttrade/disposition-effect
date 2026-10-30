@@ -239,7 +239,7 @@ def test_dd_hand_file(browser, built_site):
     assert rows.nth(1).inner_text().split("\t")[4:7] == [MINUS + "$80.00", "7.27%", "7.84%"]
     # 7 trades: under 30, so the teaser keeps its fallback line
     t = pg.inner_text("#dd-teaser-text")
-    assert t == "We're building a habit report that looks at what you do after a loss and after a run of losses, in your own trade file."
+    assert t == "We're building a test that looks at what you do after a loss and after a run of losses, in your own trade file."
     assert pg.get_attribute("#dd-teaser-text", "data-live") is None
     assert_clean(ctx, pg, log, built_site, DD)
     ctx.close()
@@ -326,7 +326,7 @@ def test_dd_sample_equals_python_mirror_and_teaser(browser, built_site):
     assert "Example data" in pg.inner_text(s)   # 29 Oct (owner)
     assert hits > 0
     want = (f"Your deepest drawdown ran {len(inside)} trades, and {round(100 * hits / len(inside))}% of the trades inside it "
-            "were opened within 15 minutes of a loss. We're building a habit report that tests whether trades opened within "
+            "were opened within 15 minutes of a loss. We're building a test that tests whether trades opened within "
             "15 minutes of a loss turned out differently from the rest, and what they totalled in your file.")
     assert pg.inner_text("#dd-teaser-text") == want
     assert pg.get_attribute("#dd-teaser-text", "data-live") == "true"
@@ -368,7 +368,7 @@ def test_hm_hand_file(browser, built_site):
     assert mon == ["Monday", "2", "+$6.00", "+$3.00", "50.0%"]
     assert "This grid has 3 cells with trades." in pg.inner_text("#hm-many")
     assert k(pg, "n_small", "#hm-many").startswith("All 3 cells hold fewer than 30 trades")
-    assert pg.inner_text("#hm-teaser-text") == ("None of your cells has 30 or more trades yet. We're building a habit report that "
+    assert pg.inner_text("#hm-teaser-text") == ("None of your cells has 30 or more trades yet. We're building a test that "
                                                 "looks at what you do after a loss rather than at the clock.")
     pg.select_option("#hm-shift", "2")
     assert cell(pg, 0, 11) == ["+$6.00", "2 trades"] and cell(pg, 6, 1) == [MINUS + "$2.00", "1 trade"]
@@ -422,7 +422,7 @@ def test_hm_sample_equals_python_mirror_and_teaser(browser, built_site):
             wd, b, c = min(big, key=lambda x: x[2]["total"])
             lab = f"{b * block:02d}:00–{(b + 1) * block:02d}:00"
             assert teaser == (f"Your {WEEKDAYS[wd]} {lab} trades ({c['n']} of them) closed at {money(c['total'])} in total. We're building a "
-                              "habit report that looks at what you do after a loss, such as trades opened within 15 minutes of one, rather than at the clock.")
+                              "test that looks at what you do after a loss, such as trades opened within 15 minutes of one, rather than at the clock.")
         else:
             assert teaser.startswith("None of your cells has 30 or more trades yet.")
     assert block == 4 and big, "the 4-hour grid of the sample has cells of 30+ trades, so the live line is tested"
@@ -545,19 +545,19 @@ def test_paid_build_sells_and_teasers_follow(browser, paid_tools_site):
     # container; the teaser box (which quoted the visitor's figures) is gone, and a run changes nothing in it.
     for path in PATHS:
         h = (paid_tools_site["out"] / path.strip("/") / "index.html").read_text(encoding="utf-8")
-        assert 'href="/pricing/#last-step">Get the habit report — $39</a>' in h and "/for-traders/#waitlist" not in h, path
+        assert 'href="/pricing/#last-step">Take the test — $39</a>' in h and "/for-traders/#waitlist" not in h, path
         assert h.count('class="notice notice-gap next-step"') == 1 and "notice-gap teaser" not in h, path
         assert not L.not_on_sale_claims(L.readable_text(h), path), path
     ctx, pg, _ = open_page(browser, paid_tools_site, DD)
     before = pg.inner_text(".next-step")
     pg.click("#dd-sample-btn")
     pg.wait_for_selector("#dd-out:not([hidden])")
-    assert pg.inner_text(".next-step") == before and "reads your trade file" in before
+    assert pg.inner_text(".next-step") == before and before.startswith("Is this habit real, or luck?")
     pg.goto(paid_tools_site["url"] + HM)
     before = pg.inner_text(".next-step")
     pg.click("#hm-sample-btn")
     pg.wait_for_selector("#hm-out:not([hidden])")
-    assert pg.inner_text(".next-step") == before and "reads this same file" in before
+    assert pg.inner_text(".next-step") == before and before.startswith("Is this habit real, or luck?")   # 29 Oct: the same words on every tool
     ctx.close()
 
 

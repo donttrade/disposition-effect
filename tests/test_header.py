@@ -8,7 +8,7 @@ brand · nav row · theme toggle. Checked on template pages and lifted pages, li
     focus returns to Menu; a click outside closes it; the expanded state is exposed;
   * axe: 0 serious/critical with the menu open; every target at least 44 px;
   * the toggle is named by its action ("Dark mode" / "Light mode", QA 25 Oct); 29 Oct (owner): four plain links, no
-    drop-down, and one button, "Get report — $39" (twice in the markup: the bar's and the Menu's). v3 nav tests:
+    drop-down, and one button, "Take the test — $39" (twice in the markup: the bar's and the Menu's). v3 nav tests:
     test_v3_nav.py.
 """
 import os
@@ -83,7 +83,7 @@ def test_menu_keyboard_escape_and_click_outside(browser, built_site, width):
     assert pg.evaluate("document.activeElement.textContent") == "Home"
     assert pg.eval_on_selector_all(".nav-panel .nav-acc", "ss => ss.length") == 0
     links = pg.eval_on_selector_all(".nav-panel .nav-links a", "as => as.map(a => [a.textContent, a.getBoundingClientRect().height])")
-    assert [t for t, _ in links] == ["Home", "Sample report", "Free tools", "Pricing", "For firms"]   # Home link (a); 29 Oct (owner): the same four links
+    assert [t for t, _ in links] == ["Home", "Example report", "Free tools", "Pricing", "For firms"]   # Home link (a); 29 Oct (owner): the same four links
     assert all(h >= 44 for _, h in links)
     # no buy button on a research page (never a study finding next to an offer); /pricing/ shows the Menu's one below
     assert pg.locator(".nav-panel a[data-pay]").count() == 0
@@ -150,10 +150,10 @@ def test_header_markup(built_site):
         f = built_site["out"] / (os.path.join(path.strip("/"), "index.html") if path.endswith("/") else path.strip("/"))
         html = f.read_text(encoding="utf-8")
         header = re.search(r"(?s)<header class=\"site-header\">.*?</header>", html).group(0)
-        # 29 Oct (owner): no drop-down, only the phone Menu; one offer, the "Get report — $39" button (bar + Menu)
+        # 29 Oct (owner): no drop-down, only the phone Menu; one offer, the "Take the test — $39" button (bar + Menu)
         assert header.count("<nav ") == 1 and header.count("<details") == 1, path   # no "Ask" popover: ask_box = false (launch, 25 Oct)
-        cta = re.findall(r'<a class="btn[^"]*" href="/pricing/#last-step" data-pay>Get report — \$39</a>', header)
-        rest = re.sub(r'<a class="btn[^"]*" href="/pricing/#last-step" data-pay>Get report — \$39</a>', "", header)
+        cta = re.findall(r'<a class="btn[^"]*" href="/pricing/#last-step" data-pay>Take the test — \$39</a>', header)
+        rest = re.sub(r'<a class="btn[^"]*" href="/pricing/#last-step" data-pay>Take the test — \$39</a>', "", header)
         assert len(cta) == (0 if path.startswith("/research/") else 2), path   # no offer beside a study finding
         assert 'class="btn' not in rest and not re.search(r"\$\d", rest), path
         assert "Start a Pilot" not in header, path
