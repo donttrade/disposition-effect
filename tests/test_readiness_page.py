@@ -163,6 +163,21 @@ def test_presets_alphabetical_no_default_and_notes(browser, built_site):
     ctx.close()
 
 
+def test_a_new_file_ends_a_running_check(browser, built_site):
+    """F6: a check still running when a new file is picked stops; no error, nothing stale is drawn."""
+    ctx, pg, log = open_page(browser, built_site)
+    sample(pg)
+    # the second click lands while the replays run (both in one task, so the run cannot finish first)
+    pg.evaluate("() => { document.getElementById('ps-run').click(); document.getElementById('ps-sample-btn').click(); }")
+    pg.wait_for_selector("#ps-file-status:text-matches('^Read ')")
+    pg.wait_for_timeout(2500)
+    assert pg.is_hidden("#ps-out") and pg.is_enabled("#ps-run") and pg.is_hidden("#ps-status")
+    run(pg)
+    assert pg.inner_text("#ps-out-h") == "Passed in 6% of 10,000 replays"
+    assert errors(log) == []
+    ctx.close()
+
+
 def test_trademark_line_names_every_firm_shown(browser, built_site):
     html = (built_site["out"] / "tools" / "prop-challenge-simulator" / "index.html").read_text(encoding="utf-8")
     line = re.search(r"([^<>]*) are trademarks of their owners\. donttrade is not affiliated", html).group(1)

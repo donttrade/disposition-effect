@@ -29,6 +29,7 @@ let last = null;       // the latest check: {p, res, seq, real, sim, ...}
 let lastWhatIf = null;
 let lastRange = null;
 let worker = null;
+let pending = null;    // resolves the running worker job; cancelWork() ends it with {cancelled: true}
 let slot = null;
 const counted = new Set();
 
@@ -67,6 +68,7 @@ function setFileStatus(text) {
 
 function clearFile() {
   loaded = null;
+  cancelWork();   // a check still running on the previous file stops, and its result is dropped
   setFileStatus('');
   $('ps-file-error').hidden = true;
   $('ps-map').hidden = true;
@@ -115,9 +117,11 @@ function showMapStep(need, choose) {
 function showLoaded(out, label) {
   const r = out.result;
   const datesOnly = isDatesOnly(r.trades);
-  loaded = { trades: r.trades, label, format: r.format, tz_label: r.tz_label, beta: !r.verified_format,
+  // whole before it is kept: a check never sees trades without their habit flags
+  const next = { trades: r.trades, label, format: r.format, tz_label: r.tz_label, beta: !r.verified_format,
     unit: r.trades[0].pnl_unit, datesOnly, n: r.trades.length, warnings: r.warnings };
-  loaded.flags = habitFlags(itemsFromTrades(r.trades), { datesOnly });
+  next.flags = habitFlags(itemsFromTrades(r.trades), { datesOnly });
+  loaded = next;
   // the file's zone, preset by format where the format says it (MT4/MT5: the broker's server clock)
   if (label !== 'your pasted table' && !$('ps-filetz').dataset.touched) {
     $('ps-filetz').value = (r.format === 'mt5' || r.format === 'mt4') ? 'broker' : label === SAMPLE_LABEL ? 'UTC' : 'local';
@@ -311,14 +315,22 @@ function read() {
 }
 
 // ------------------------------------------------------------------ the worker
+function cancelWork() {
+  if (worker) { worker.terminate(); worker = null; }
+  if (pending) { const done = pending; pending = null; done({ cancelled: true }); }
+}
+
+// One worker job at a time: a new one, or a new file, ends the one before ({cancelled: true}).
 function work(msg, statusEl, text) {
-  if (worker) worker.terminate();
+  cancelWork();
   statusEl.textContent = text;
   statusEl.hidden = false;
   return new Promise((resolve) => {
+    const done = (v) => { if (pending === done) pending = null; resolve(v); };
+    pending = done;
     worker = new Worker(new URL('./prop-sim-worker.js', import.meta.url), { type: 'module' });
-    const fail = () => { if (worker) { worker.terminate(); worker = null; } resolve(null); };
-    worker.onmessage = (e) => { worker.terminate(); worker = null; resolve(e.data && !e.data.error ? e.data : null); };
+    const fail = () => { if (worker) { worker.terminate(); worker = null; } done(null); };
+    worker.onmessage = (e) => { worker.terminate(); worker = null; done(e.data && !e.data.error ? e.data : null); };
     worker.onerror = (e) => { if (e && e.preventDefault) e.preventDefault(); fail(); };
     worker.onmessageerror = fail;
     worker.postMessage(msg);
@@ -331,9 +343,14 @@ async function run(ev) {
   const input = read();
   if (!input) return;
   const btn = $('ps-run');
+  const data = input.p.mode === 'file' ? loaded : null;   // the trades this check runs on
   btn.disabled = true;
   const out = await work(input.p, $('ps-status'), `Running ${intText(RUNS)} replays of your past days…`);
   btn.disabled = false;
+  if ((out && out.cancelled) || (input.p.mode === 'file' && (!data || data !== loaded || !data.flags))) {
+    $('ps-status').hidden = true;   // a new file arrived while it ran: that result is not shown
+    return;
+  }
   if (!out || !out.result) {
     $('ps-status').textContent = 'The check could not run in this browser. Press Run the check to try again.';
     return;
@@ -341,14 +358,14 @@ async function run(ev) {
   $('ps-status').hidden = true;
   const res = out.result;
   const file = input.p.mode === 'file';
-  const fd = file ? dayFlags(loaded.flags, input.grouped.index) : null;
+  const fd = file ? dayFlags(data.flags, input.grouped.index) : null;
   last = {
-    ...input, res, file, fd, unit: file ? loaded.unit : 'account', preset: current ? current.preset : null,
+    ...input, res, file, fd, data, unit: file ? data.unit : 'account', preset: current ? current.preset : null,
     edited: current ? current.snapshot !== JSON.stringify(input.p.rules) : false,
     seq: file ? simulate({ mode: 'sequence', days: input.p.days, rules: input.p.rules }) : null,
-    real: file ? realBreachDays(input.p.days, fd, input.p.rules.daily_loss, { datesOnly: loaded.datesOnly }) : null,
-    sim: file ? simulatedHabits(res, fd, { datesOnly: loaded.datesOnly }) : null,
-    example: file && loaded.label === SAMPLE_LABEL,
+    real: file ? realBreachDays(input.p.days, fd, input.p.rules.daily_loss, { datesOnly: data.datesOnly }) : null,
+    sim: file ? simulatedHabits(res, fd, { datesOnly: data.datesOnly }) : null,
+    example: file && data.label === SAMPLE_LABEL,
   };
   lastWhatIf = null;
   lastRange = null;
@@ -450,11 +467,11 @@ function render() {
   const s = shares(res);
   const headline = `Passed in ${whole(s.pass)} of ${intText(res.runs)} replays`;
   const source = last.file
-    ? `whole trading days drawn at random from ${last.example ? 'the example data' : loaded.label} (${plural(p.days.length, 'day', 'days')}, ${plural(loaded.n, 'trade', 'trades')})`
+    ? `whole trading days drawn at random from ${last.example ? 'the example data' : last.data.label} (${plural(p.days.length, 'day', 'days')}, ${plural(last.data.n, 'trade', 'trades')})`
     : `${plural(p.trades_per_day, 'trade', 'trades')} a day, each a win or a loss at the rate you entered`;
   const warn = [];
   if (last.file && p.days.length < 30) warn.push(`Your trades cover ${plural(p.days.length, 'trading day', 'trading days')}, so the results lean heavily on a few days.`);
-  if (last.file && loaded.beta) warn.push('This file format is in beta: check a few trades by hand on the trade-stats page.');
+  if (last.file && last.data.beta) warn.push('This file format is in beta: check a few trades by hand on the trade-stats page.');
   const outcome = el('div', { class: 'rc-card rc-card-wide', id: 'ps-v-outcome' },
     el('h3', { text: 'How the replays ended' }),
     stackBar(res, `Passed ${whole(s.pass)}, broke a rule ${whole(s.bust)}, out of time ${whole(s.timeout)}`),
@@ -511,7 +528,7 @@ function syncWiRow(n, reset) {
 function renderWhatIfForm() {
   syncWiRow(1, false);
   syncWiRow(2, false);
-  const noTimes = !last.file || loaded.datesOnly;
+  const noTimes = !last.file || last.data.datesOnly;
   for (const n of [1, 2]) {
     const opt = $(`ps-wi-rule${n}`).querySelector('option[value="cooldown_s"]');
     opt.disabled = noTimes;
@@ -558,6 +575,7 @@ async function runWhatIf() {
   btn.disabled = true;
   const out = await work({ op: 'whatif', p: last.p, personal }, $('ps-wi-status'), `Running the same ${intText(RUNS)} replays with your rule…`);
   btn.disabled = false;
+  if (out && out.cancelled) { $('ps-wi-status').hidden = true; return; }
   if (!out || !out.whatif || out.whatif.unavailable) {
     $('ps-wi-status').textContent = out && out.whatif && out.whatif.unavailable ? out.whatif.message : 'The rule could not run in this browser. Press Try this rule again.';
     return;
@@ -612,8 +630,8 @@ function settingsRows() {
     ['Draw unit', last.file ? 'one whole past trading day, with replacement' : 'one trade at a time, win or loss'],
     ['Day boundary', last.file ? ds : DASH], ['File time zone used', last.file ? tz : DASH],
     ['No-limit cap', `${NO_LIMIT_CAP} trading days`],
-    ['Trades read', last.file ? intText(loaded.n) : DASH], ['Days read', last.file ? intText(p.days.length) : DASH],
-    ['Dates but no times', last.file ? (loaded.datesOnly ? 'yes' : 'no') : DASH], ['Rules library', presets.rules_lib || DASH],
+    ['Trades read', last.file ? intText(last.data.n) : DASH], ['Days read', last.file ? intText(p.days.length) : DASH],
+    ['Dates but no times', last.file ? (last.data.datesOnly ? 'yes' : 'no') : DASH], ['Rules library', presets.rules_lib || DASH],
   ];
 }
 
@@ -659,7 +677,7 @@ function renderExpert() {
     el('dl', { class: 'stats' }, ...facts.map(([l, v, k]) => el('div', { class: 'stat' }, el('dt', { text: l }), el('dd', { text: v, 'data-k': k })))),
     el('p', { id: 'ps-streak', 'data-busts': String(res.bust), text: streakLine(res) }));
   if (last.file) {
-    const c = countFlags(loaded.flags);
+    const c = countFlags(last.data.flags);
     const r = last.real, sm = last.sim;
     body.push(el('h3', { text: 'Habits, raw' }),
       tableWrap('Habits, raw', rowsTable(`Habit counts (breach days: ${intText(r.n_breach)}; fewer than ${MIN_BREACH_DAYS} is too few; replays: fewer than ${MIN_BUSTS} busts is too few)`,
@@ -718,6 +736,7 @@ async function runRange() {
   btn.disabled = true;
   const out = await work({ op: 'range', p: last.p, personal: lastWhatIf ? lastWhatIf.personal : null }, $('ps-range-status'), 'Computing the range: 200 resamples of your days…');
   btn.disabled = false;
+  if (out && out.cancelled) { $('ps-range-status').hidden = true; return; }
   if (!out || !out.range) { $('ps-range-status').textContent = 'The range could not be computed in this browser.'; return; }
   $('ps-range-status').hidden = true;
   lastRange = out.range;
