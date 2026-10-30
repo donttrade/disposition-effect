@@ -24,6 +24,7 @@ pilot_checkout = false     # "Start a Pilot" block + thanks page with the live S
 # (ARCHITECT-STATS-AMENDMENT-R2 §10 item 8; the free hold-gap badge is the paid hold_gap method, R2-8).
 free_badges = false        # free tools' "real or noise" badges + footnote (off: free-launch condition C1, being redesigned)
 ask_box = false            # hidden until the answer engine passes a real-question test
+prediction_results = false # /research/does-the-test-predict/ (prediction study, R1): off until the OSF registration is posted
 journal = false            # the free Trading Journal + P&L Calendar (/journal/, /tools/pnl-calendar/ and their nav row): off until the Tester passes J1-J38 and the owner approves
 whatif_ranked = false      # Challenge Readiness Check: ranked "Biggest changes on your past days" rules: off until a securities lawyer clears the strings (ARCHITECT-CHALLENGE-READINESS §2.7.5)
 
