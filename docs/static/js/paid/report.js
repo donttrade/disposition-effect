@@ -6,13 +6,15 @@
 // Every number on the page comes from the server's Report or from the file in this
 // tab; the wording only describes past trades (NON-ADVISER A3).
 
-import { readFiles, copyLine, SMALL_FILE } from './merge.js?v=a084021f';
+import { runFile } from '../engine/index.js?v=8410d06a';
 import { ics, retestLine, RETEST_LINE } from './retest-copy.js?v=b3748546';
 import { pgrPlrCounts } from '../engine/pgr.js?v=4c675fe5';
 import { stripRows, spanLine } from './strip.js?v=03137080';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js?v=16f6dd26';
 import { habitSentences, methodLine, page1Lines, coverageLines, mergedLine, checkReport, SENTENCE_HABITS, RESEARCH, RESEARCH_PREFIX, holdDays,
   V_LAUNCH, V_LAUNCH_SIZE, V_NO, moreTrades } from './wording.js?v=0cb7d61e';
+import { factsSection, challengeSection, smallLayout, presetsFromPage } from './small-facts-view.js?v=ef31dc5c';
+import { reportTrades } from './small-facts.js?v=78faeb32';
 
 // Off until "N more trades" can be shown without ever understating N (Tester slice 1 re-test: worlds
 // with too few files per share band were ignored, so some files were told too few). Backlog item.
@@ -358,6 +360,11 @@ export function renderReport(report, out, meta) {
   out.classList.add('report-out');
   wirePrint();
   out.append(el('p', { class: 'disclaimer notice', text: report.disclaimer }));
+  // S4 (small-file facts and challenge check): facts from the trades parsed in this tab, never sent anywhere.
+  // Small files lead with them (addendum §3.1); otherwise the facts follow the habit totals and the rule check
+  // follows the habits (bundle plan §2: part c).
+  const sf = smallFactsParts(report, meta);
+  if (sf && sf.small) out.append(sf.facts, sf.rules);
   // Page 1 (ARCHITECT-STATS-AMENDMENT-R2 §9.1): the headline, the focus habit or why none is
   // shown first (one reason line per distinguishable habit), then the coverage line. All
   // sentences come from wording.js, which refuses a report of another method version.
@@ -378,11 +385,10 @@ export function renderReport(report, out, meta) {
   p1.append(el('p', { class: 'small muted', text: `${report.n_trades} trades over about ${report.period_weeks} week${report.period_weeks === 1 ? '' : 's'}.${unitLine(unit)}${meta && meta.span_left_out ? ' ' + spanLine(meta.span_left_out) : ''}${meta && meta.limited ? ' Only the most recent 20,000 trades were used.' : ''}` }));
   const merged = mergedLine(report, wordingFmt(unit));   // R-D3 addendum I-5: only when rows were merged
   if (merged) p1.append(el('p', { class: 'small', id: 'merged-rows', text: merged }));
-  // S3: trades from different files counted once as copies (merge.js), only when there were any
-  if (meta && meta.copies) p1.append(el('p', { class: 'small', id: 'copy-rows', text: copyLine(meta.copies) }));
   out.append(p1);
 
   out.append(habitsSummary(report, unit));
+  if (sf && !sf.small) out.append(sf.facts);
 
   const details = el('section', { class: 'section', 'aria-labelledby': 'det-h' }, el('h2', { id: 'det-h', text: 'Each habit' }));
   for (const h of report.habits) if (!factsOnly(h)) details.append(habitSection(h, unit, report));
@@ -402,6 +408,8 @@ export function renderReport(report, out, meta) {
       el('p', { text: `Proportion of gains realised (PGR): ${pct(c.pgr)} · proportion of losses realised (PLR): ${pct(c.plr)}.` }),
       el('p', { class: 'small muted', text: `Counts: ${c.rg} realised gains, ${c.pg} paper gains, ${c.rl} realised losses, ${c.pl} paper losses. Coverage: ${c.coverage_pct === null ? 'no open positions on sale days' : c.coverage_pct.toFixed(1) + '% of open position-days had a same-day price in your file'}. This is not the full Odean (1998) measure, which needs a price for every open position every day.` })));
   }
+
+  if (sf && !sf.small) out.append(sf.rules);
 
   // The rule library: identical for everyone, in its fixed order, never matched to the habits above.
   const lib = el('section', { class: 'section', id: 'rules', 'aria-labelledby': 'rules-h' },
@@ -444,6 +452,22 @@ export function renderReport(report, out, meta) {
   out.append(el('p', { class: 'small muted', text: `Engine ${report.engine_commit} · rule library ${report.rule_library_version}.` }));
 }
 
+// S4: the two fact sections, when the page has the file's trades (meta.trades: the report page after a run, the
+// example report from its committed file). Kept here as one call so the habit layer above stays untouched.
+// The trades are the ones the report itself is about (strip.js's selection: Tester S4 M3). Anything that goes wrong
+// here leaves the two sections out and the rest of the paid report as it is (Tester S4 M4).
+function smallFactsParts(report, meta) {
+  if (!meta || !Array.isArray(meta.trades) || !meta.trades.length) return null;
+  try {
+    const trades = reportTrades(meta.trades);
+    if (!trades.length) return null;
+    const opts = { money: (x) => money(x, report.currency), unit: report.currency, presets: presetsFromPage(), format: meta.format || null, sample: !!meta.sample };
+    return { small: smallLayout(report), facts: factsSection(trades, opts), rules: challengeSection(trades, opts) };
+  } catch (e) {
+    return null;
+  }
+}
+
 // ---------------------------------------------------------------- page wiring
 
 let token = null;
@@ -464,93 +488,35 @@ function status(msg, kind = '') {
   s.hidden = false;
 }
 
-// S3 (merged uploads): the files chosen so far, and the read of them waiting for "Run anyway". Choosing or dropping
-// files adds them to the list; nothing is sent until the run starts, so waiting at the small-file notice, or adding
-// files from it, never spends a run. A file that cannot be read with the others (another platform: E_MIXED_FILES) is
-// not added, and the list stays as it was.
-let picked = [];
-let ready = null;
-let busy = false;
-const sameFile = (a, b) => a.name === b.name && a.size === b.size && a.lastModified === b.lastModified;
-const plural = (n, one, many) => `${count(n)} ${n === 1 ? one : many}`;
-
-function showPicked(n) {
-  const box = $('rp-picked');
-  if (!picked.length) { box.hidden = true; return; }
-  $('rp-files').replaceChildren(...picked.map((f) => el('li', { text: f.name })));
-  $('rp-count').textContent = n === null ? `${plural(picked.length, 'file', 'files')} chosen.`
-    : `${plural(n, 'trade', 'trades')} from ${plural(picked.length, 'file', 'files')}.`;
-  box.hidden = false;
-}
-
-function showSmall(n) {
-  $('rp-small-n').textContent = `${plural(n, 'trade', 'trades')}.`;
-  $('rp-small').hidden = false;
-}
-
-async function addFiles(list) {
-  if (busy) return;
-  const fresh = [...list].filter((f) => !picked.some((p) => sameFile(p, f)));
-  if (!fresh.length) return;
-  await prepare(picked.concat(fresh));
-}
-
-async function prepare(files) {
+async function run(file) {
   if (!token) { status('No access found on this device. Open the restore link or restore file you saved after paying.', 'error'); return; }
   const payload = decodeToken(token);
   if (!payload) { status('This access link is damaged. Use your restore link.', 'error'); return; }
-  busy = true;
+  status('Reading your file in this tab…');
+  const parsed = runFile(new Uint8Array(await file.arrayBuffer()));
+  if (parsed.error) { status(parsed.error.message, 'error'); return; }
+  const trades = parsed.result.trades;
+  const stripped = await stripRows(trades, payload.salt);
+  const counts = pgrPlrCounts(parsed.result.executions);
+  const firm = $('rp-firm').value.trim();
+  const body = { v: 1, token, rows: stripped.rows, currency: trades[0].pnl_unit, pgr_plr: counts,
+    firm_name: firm ? firm.slice(0, 80) : null, firm_consent: $('rp-firm-consent').checked };
+  const span = stripped.span_left_out ? spanLine(stripped.span_left_out) + ' ' : '';
+  status(`${span}Sending ${stripped.rows.length} stripped trade rows (no names, accounts or symbols)…`);
+  const r = await api('/analyse', body);
+  if (r.status === 0 || r.status >= 500) { status(OUTAGE, 'error'); return; }
+  if (!r.ok) { status(r.json && r.json.error ? r.json.error.message : 'The report could not be made.', 'error'); return; }
+  $('rp-status').hidden = true;
   try {
-    status(files.length > 1 ? `Reading your ${files.length} files in this tab…` : 'Reading your file in this tab…');
-    const bytes = await Promise.all(files.map(async (f) => new Uint8Array(await f.arrayBuffer())));
-    const r = readFiles(bytes);
-    if (r.error) { status(r.error.message, 'error'); return; }   // picked, ready and the notice stay as they were
-    const stripped = await stripRows(r.trades, payload.salt);
-    picked = files;
-    ready = { stripped, counts: pgrPlrCounts(r.result.executions), currency: r.trades[0].pnl_unit, copies: r.copies };
-    showPicked(stripped.rows.length);
-    if (stripped.rows.length < SMALL_FILE) {
-      $('rp-status').hidden = true;
-      showSmall(stripped.rows.length);
-      return;
-    }
-  } finally {
-    busy = false;
+    renderReport(r.json.report, $('rp-out'), { limited: stripped.limited, span_left_out: stripped.span_left_out, retest: r.json.retest || null, uses_left: r.json.uses_left,
+      trades, format: parsed.result.format });
+  } catch (e) {
+    // wording.js throws rather than print a sentence that is not true of this report (R2-3).
+    $('rp-out').replaceChildren();
+    status(reportError(), 'error');
+    return;
   }
-  await send();
-}
-
-async function send() {
-  if (busy || !ready) return;
-  busy = true;
-  const { stripped, counts, currency, copies } = ready;
-  ready = null;
-  picked = [];
-  $('rp-small').hidden = true;
-  $('rp-picked').hidden = true;
-  try {
-    const firm = $('rp-firm').value.trim();
-    const body = { v: 1, token, rows: stripped.rows, currency, pgr_plr: counts,
-      firm_name: firm ? firm.slice(0, 80) : null, firm_consent: $('rp-firm-consent').checked };
-    const span = stripped.span_left_out ? spanLine(stripped.span_left_out) + ' ' : '';
-    status(`${span}Sending ${stripped.rows.length} stripped trade rows (no names, accounts or symbols)…`);
-    const r = await api('/analyse', body);
-    if (r.status === 0 || r.status >= 500) { status(OUTAGE, 'error'); return; }
-    if (!r.ok) { status(r.json && r.json.error ? r.json.error.message : 'The report could not be made.', 'error'); return; }
-    $('rp-status').hidden = true;
-    try {
-      renderReport(r.json.report, $('rp-out'), { limited: stripped.limited, span_left_out: stripped.span_left_out, retest: r.json.retest || null,
-        uses_left: r.json.uses_left, copies });
-    } catch (e) {
-      // wording.js throws rather than print a sentence that is not true of this report (R2-3).
-      $('rp-out').replaceChildren();
-      status(reportError(), 'error');
-      return;
-    }
-    if (r.json.uses_left !== null) $('rp-uses').textContent = r.json.uses_left === 1 ? 'One re-test left on this purchase.' : r.json.uses_left === 0 ? 'Both runs on this purchase are used.' : '';
-  } finally {
-    busy = false;
-  }
+  if (r.json.uses_left !== null) $('rp-uses').textContent = r.json.uses_left === 1 ? 'One re-test left on this purchase.' : r.json.uses_left === 0 ? 'Both runs on this purchase are used.' : '';
 }
 
 async function init() {
@@ -558,20 +524,11 @@ async function init() {
   if (fromHash) { token = fromHash; await saveToken(fromHash); } else token = await loadToken();
   $('rp-restore-file').addEventListener('click', () => { if (token) downloadRestoreFile(token); });
   $('rp-access').textContent = token ? 'Access found on this device.' : 'No access found on this device yet.';
-  const input = $('rp-file');
-  input.addEventListener('change', () => { const fs = [...input.files]; input.value = ''; if (fs.length) addFiles(fs); });
-  $('rp-run-anyway').addEventListener('click', () => send());
-  $('rp-add').addEventListener('click', () => input.click());
-  $('rp-clear').addEventListener('click', () => {
-    if (busy) return;
-    picked = []; ready = null;
-    $('rp-small').hidden = true; $('rp-status').hidden = true;
-    showPicked(null);
-  });
+  $('rp-file').addEventListener('change', (ev) => { if (ev.target.files[0]) run(ev.target.files[0]); });
   const dz = $('rp-drop');
   dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('is-over'); });
   dz.addEventListener('dragleave', () => dz.classList.remove('is-over'));
-  dz.addEventListener('drop', (e) => { e.preventDefault(); dz.classList.remove('is-over'); if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files); });
+  dz.addEventListener('drop', (e) => { e.preventDefault(); dz.classList.remove('is-over'); if (e.dataTransfer.files[0]) run(e.dataTransfer.files[0]); });
 }
 
 if (document.getElementById('rp-file')) init();

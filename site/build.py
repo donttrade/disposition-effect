@@ -806,7 +806,9 @@ def challenge_presets():
         out.append({"id": p["id"], "firm": p["firm"], "program": p["program"], "account_size": p["account_size"],
                     "scale": p["scale"], "status": p["status"], "rules": p["rules"], "not_modelled": p["not_modelled"],
                     "not_stated": cr.not_stated(p), "last_checked": p["last_checked"],
-                    "read_text": f"{d} {MONTHS[mo - 1]} {y}", "url": p["sources"][0]["url"]})
+                    "read_text": f"{d} {MONTHS[mo - 1]} {y}", "url": p["sources"][0]["url"],
+                    # S4: the unit the rules are stated in, and every source page (not only the first)
+                    "currency": p.get("currency"), "urls": list(dict.fromkeys(s["url"] for s in p["sources"]))})
     return {"rules_lib": lib["rules_lib"], "presets": out, "firms": sorted({p["firm"] for p in out}, key=str.lower)}
 
 
@@ -1100,6 +1102,7 @@ PAID_PAGES = [
      "noindex": True, "crumb": "Restore access", "modules": ["/static/js/paid/restore.js"], "title": "Restore access — donttrade",
      "description": "Reopen your donttrade test result on this browser."},
     {"template": "pages/report.html", "path": "/report/", "requires_flag": "paid_report", "connect_worker": True,
+     "presets": True,  # S4: the firm-rules library for the rule check
      "noindex": True, "crumb": "Your test result", "modules": ["/static/js/paid/report.js"], "title": "Your test result — donttrade",
      "description": "Your donttrade test result, from your own trade file."},
 ]
@@ -1228,9 +1231,23 @@ PAID_REPLACES_LIFTED = ("/sample-report/",)
 SAMPLE_REPORT_JSON = os.path.join(SITE, "config", "sample-report.report.json")
 SAMPLE_PAGE = {"template": "pages/sample-report.html", "path": "/sample-report/", "requires_flag": None,
                "modules": ["/static/js/paid/sample.js"], "crumb": "Example report", "og_image": "/assets/og/default.png",
-               "title": "Example report — donttrade", "sample_report": True,
+               "title": "Example report — donttrade", "sample_report": True, "presets": True, "sample_trades": True,
                "description": "An example report of the donttrade test: the test's own engine and page, run on example data. "
                               "Not advice.", "updated": "2026-10-23"}
+
+
+# S4: the committed trade file the sample report was made from (make_sample_report.py writes it; the sample report's
+# golden test checks the report is the engine's output on it). The example page reads it with the report page's own
+# engine for the facts and the rule check. Inlined (the page's CSP has connect-src 'none').
+SAMPLE_REPORT_CSV = os.path.join(REPO, "tests", "fixtures", "paid", "sample-report.csv")
+
+
+def sample_report_trades():
+    with open(SAMPLE_REPORT_CSV, encoding="utf-8") as f:
+        text = f.read()
+    if "<" in text or "&" in text:
+        die("sample-report.csv contains '<' or '&'; it cannot be inlined safely")
+    return text
 
 
 def lifted_paths_for(paid):
@@ -2501,6 +2518,8 @@ def build():
             lib_ = challenge_presets()
             extra["presets"] = lib_
             extra["presets_json"] = Markup(json.dumps(lib_, sort_keys=True, ensure_ascii=False).replace("</", "<\\/"))
+        if page.get("sample_trades"):
+            extra["sample_trades_csv"] = sample_report_trades()
         if page.get("prediction"):
             extra["prediction"] = prediction_context()
         if page.get("sample_report") or (page["path"] in ("/", "/for-traders/") and flags["paid_report"]):  # 25 Oct: the home showcase; sweep 2: the report card on /for-traders/
