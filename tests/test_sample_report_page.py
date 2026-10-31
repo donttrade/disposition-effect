@@ -125,7 +125,8 @@ def test_chromium_draws_the_sample_with_the_report_pages_own_sentences(paid, bro
     assert errors == []
     # wording.js's own lines; money uses the page's formatter, so lines are compared up to the first figure
     head = lambda line: re.split(r"[\d−$]|-\d", line)[0]  # noqa: E731
-    assert len(p1) == len(want["p1"]) and all(head(w) == head(g) for w, g in zip(want["p1"], p1)), (want["p1"], p1)
+    # page 1's lines, then (with a habit shown first) its question and its pill
+    assert len(p1) >= len(want["p1"]) and all(head(w) == head(g) for w, g in zip(want["p1"], p1)), (want["p1"], p1)
     assert p1[0] == want["p1"][0]
     assert cov == want["cov"]
     n = 0

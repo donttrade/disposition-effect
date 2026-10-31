@@ -8,8 +8,10 @@ the server engine's output on a committed synthetic trade file, rendered by the 
         # (salt "SAMPLE", symbols in sorted order), then analysed by dt-private's src/core/habits.mjs
 
 The file is made up (fixed seed): one trader, two symbols, 60 weekdays, trades one after another from 09:30.
-A trade opened within 15 minutes of a losing trade's close is built to do worse (a planted re-entry habit),
-so the sample shows a tested habit. tests/test_sample_report_page.py checks the page against the engine."""
+A trade opened within 15 minutes of a losing trade's close is built to do worse (a planted re-entry habit:
+it wins 20% of the time instead of 55%, and its losses are 2.5 times as large), so the sample shows a checked habit.
+DT-2 (31 Oct): the win rate after a loss went from 25% to 20%, the smallest change in the generator that makes the
+built habit reach Clear sign under DT-2; the seed and everything else are unchanged. tests/test_sample_report_page.py checks the page against the engine."""
 import datetime as dt
 import json
 import os
@@ -42,7 +44,7 @@ def make_csv():
                 qty = R.choice([1, 1, 2, 2, 3])
                 hold = dt.timedelta(minutes=R.randint(4, 75), seconds=R.randint(0, 59))
                 revenge = last_loss and (t - last_close) <= dt.timedelta(minutes=15)
-                win = R.random() < (0.25 if revenge else 0.55)
+                win = R.random() < (0.20 if revenge else 0.55)   # DT-2 (31 Oct): 0.25 reached only Some sign; 0.20 reaches Clear
                 move = round(R.uniform(1.0, 4.0) if win else -R.uniform(1.0, 3.5) * (2.5 if revenge else 1.0), 2)
                 entry = round(R.uniform(80, 120), 2)
                 exit_ = round(entry + (move if long else -move), 2)

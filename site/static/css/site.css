@@ -354,6 +354,15 @@ fieldset { border: 0; padding: 0; margin: 0 0 var(--s3); }
 .check-pill { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1); }
 .habit-guard { color: var(--muted); max-width: 60ch; }
 .too-few-all { font-size: var(--fs-0); }
+/* the catch figure (report.js catchTable): one row per file size, a bar filled to the lower bound, the words beside it */
+.catch { max-width: 36rem; }
+.catch-table { width: 100%; border-collapse: collapse; margin: var(--s1) 0 0; font-size: var(--fs-0); }
+.catch-table thead th { font-weight: 400; color: var(--muted); text-align: left; padding: 0 var(--s1) 4px 0; }
+.catch-table th[scope="row"], .catch-table td { padding: 6px var(--s1) 6px 0; border-top: 1px solid var(--border); text-align: left; vertical-align: middle; }
+.catch-table th[scope="row"] { font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.catch-bar { display: inline-block; vertical-align: middle; width: 5.5rem; height: 8px; margin-right: var(--s1); border-radius: 4px; background: var(--surface); border: 1px solid var(--border); overflow: hidden; }
+.catch-fill { display: block; height: 100%; background: var(--muted); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.catch-val { white-space: nowrap; }
 
 .gain { color: var(--gain); }
 .loss { color: var(--loss); }

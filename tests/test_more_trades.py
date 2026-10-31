@@ -1,8 +1,9 @@
 """DT-2: "more trades" is the in-file catch line (ARCHITECT-EVIDENCE-SCALE-AND-POWER-2026-10-31 §5.2, §5.3; batch S1
 deletes the static power table, SHOW_MORE_TRADES and every MORE_TRADES_* string).
 
-* The catch line (wording.js catchLine): under every No sign and Some sign, never under a Clear sign, a too-few,
-  dates-only or facts-only habit. Its figures are the engine's (report catch: sizes, at_least_10ths, effect), so two
+* The catch figure (wording.js catchFigure: a lead line, then one row per file size; report.js draws the rows as a
+  labelled table with a bar, buyer read-through 31 Oct): under every No sign and Some sign, never under a Clear sign, a
+  too-few, dates-only or facts-only habit. Its figures are the engine's (report catch: sizes, at_least_10ths, effect), so two
   reports that differ only in the file's own gap print the same line; a bound of 0 says "fewer than 1 in 10"; one,
   two or three sizes; a file over the engine's catch_max_trades gets the fixed line; a forged bound is refused.
 * The pay step's expectation line: in pay_facts (dialog and /pricing/), definite (no hedge word), lint-clean, no
@@ -28,22 +29,22 @@ const by = (r, id) => r.habits.find((h) => h.id === id);
 const fmt = { money: (x) => (x < 0 ? '−$' : '+$') + Math.abs(x).toFixed(2), amount: (x) => '$' + Math.abs(x).toFixed(2), count: (n) => n.toLocaleString('en-US') };
 const run = (f) => { try { return f(); } catch (e) { return 'THROW: ' + e.message; } };
 const out = {};
-out.check = Object.fromEntries(base.habits.map((h) => [h.id, W.habitLines(h, base, fmt).check]));
+out.check = Object.fromEntries(base.habits.map((h) => [h.id, W.habitLines(h, base, fmt)]));
 // the file's own gap never moves the catch line
 const a = clone(), b = clone();
 Object.assign(by(b, 'revenge'), { measure_a: -60, effect: -61.5 }); by(b, 'revenge').dollars.amount = -9999;
-out.same = W.catchLine(by(a, 'revenge'), a, fmt) === W.catchLine(by(b, 'revenge'), b, fmt);
+out.same = JSON.stringify(W.catchFigure(by(a, 'revenge'), a, fmt)) === JSON.stringify(W.catchFigure(by(b, 'revenge'), b, fmt));
 // sizes and bounds
 const withCatch = (sizes, t) => { const r = clone(); const h = by(r, 'tilt'); r.n_trades = sizes[0]; r.n_rows = sizes[0];
   h.catch = { ...h.catch, sizes, at_least_10ths: t, caught: t.map((x) => Math.ceil(6 * x) + 6) }; return [h, r]; };
-out.three = W.catchLine(...withCatch([220, 440, 880], [0, 4, 10]), fmt);
-out.two = W.catchLine(...withCatch([1500, 3000], [6, 9]), fmt);
-out.one = W.catchLine(...withCatch([4500], [7]), fmt);
+out.three = W.catchLines(...withCatch([220, 440, 880], [0, 4, 10]), fmt);
+out.two = W.catchLines(...withCatch([1500, 3000], [6, 9]), fmt);
+out.one = W.catchLines(...withCatch([4500], [7]), fmt);
 // over the engine's limit, and every result the same size
 const big = clone(); big.n_trades = 6000; big.n_rows = 6000; by(big, 'revenge').catch = null;
-out.over = W.catchLine(by(big, 'revenge'), big, fmt);
+out.over = W.catchLines(by(big, 'revenge'), big, fmt);
 const flat = clone(); by(flat, 'revenge').catch.effect.amount = 0;
-out.flat = W.catchLine(by(flat, 'revenge'), flat, fmt);
+out.flat = W.catchLines(by(flat, 'revenge'), flat, fmt);
 // a forged bound (more than the caught count allows) is refused
 const forged = clone(); by(forged, 'revenge').catch.at_least_10ths = [0, 0, 9];
 out.forged = run(() => W.checkReport(forged));
@@ -60,28 +61,30 @@ def run():
     return json.loads(r.stdout)
 
 
-def test_the_catch_line_sits_under_no_sign_and_some_sign_only():
+def test_the_catch_figure_sits_under_no_sign_and_some_sign_only():
     o = run()
     c = o["check"]
-    # stats__07: revenge and tilt both Some sign (11 in 100), so each has its step line, the guard and the catch line
+    # stats__07: revenge and tilt both Some sign (11 in 100): the step line and the guard, then the figure
     for hid in ("revenge", "tilt"):
-        assert len(c[hid]) == 3 and c[hid][0].startswith("Some sign of this habit in these 220 trades, short of clear.")
-        assert c[hid][2].startswith("If your next trades look like these: when ")
-    assert c["revenge"][2] == ("If your next trades look like these: when trades soon after a loss end $48.00 worse each, files of 220 trades show "
-                               "it as a Clear sign fewer than 1 in 10 times, 440 trades fewer than 1 in 10, and 880 trades at least 3 in 10.")
+        assert len(c[hid]["check"]) == 2 and c[hid]["check"][0].startswith("Some sign of this habit in these 220 trades, short of clear.")
+        assert c[hid]["figure"]["lead"] == ("If the habit is real at $48.00 a trade and your next trades look like these, a file shows it "
+                                            "as a Clear sign:")
+    assert c["revenge"]["figure"]["rows"] == [{"size": "220 trades (this file)", "value": "fewer than 1 in 10", "tenths": 0},
+                                              {"size": "440 trades", "value": "fewer than 1 in 10", "tenths": 0},
+                                              {"size": "880 trades", "value": "at least 3 in 10", "tenths": 3}]
     for hid in ("hold_gap", "size_up", "oversized_loss"):
-        assert c[hid] == []
+        assert c[hid]["check"] == [] and c[hid]["figure"] is None
     assert o["same"] is True
 
 
-def test_catch_line_sizes_bounds_and_fixed_lines():
+def test_catch_figure_sizes_bounds_and_fixed_lines():
     o = run()
-    assert o["three"] == ("If your next trades look like these: when trades after 2 or more losses in a row end $48.00 worse each, files of 220 "
-                          "trades show it as a Clear sign fewer than 1 in 10 times, 440 trades at least 4 in 10, and 880 trades at least 10 in 10.")
-    assert o["two"].endswith("files of 1,500 trades show it as a Clear sign at least 6 in 10 times, and 3,000 trades at least 9 in 10.")
-    assert o["one"].endswith("files of 4,500 trades show it as a Clear sign at least 7 in 10 times.")
-    assert o["over"] == "Files over 5,000 trades get no catch figure."
-    assert o["flat"] == "Every trade in this file has the same result, so it gets no catch figure."
+    lead = "If the habit is real at $48.00 a trade and your next trades look like these, a file shows it as a Clear sign:"
+    assert o["three"] == [lead, "220 trades (this file): fewer than 1 in 10", "440 trades: at least 4 in 10", "880 trades: at least 10 in 10"]
+    assert o["two"] == [lead, "1,500 trades (this file): at least 6 in 10", "3,000 trades: at least 9 in 10"]
+    assert o["one"] == [lead, "4,500 trades (this file): at least 7 in 10"]
+    assert o["over"] == ["Files over 5,000 trades get no catch figure."]
+    assert o["flat"] == ["Every trade in this file has the same result, so it gets no catch figure."]
     assert o["forged"].startswith("THROW: wording: revenge has a malformed catch figure")
     assert o["missing"].startswith("THROW: wording: tilt is checked on 220 trades with no catch figure")
 

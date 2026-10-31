@@ -194,14 +194,28 @@ function happenedList(h, unit, report) {
 // Layer 2, "Habit or chance?" (plan §9.4 item 2): the step pill, then the step line, the guard line under every
 // Some sign and Clear sign number, and the catch line under every No sign and Some sign (§2.4, §5.2); or the
 // too-few or dates-only line. Every line is the wording module's own.
-function checkLayer(h, lines) {
+function checkLayer(h, lines, figure = null) {
   const box = el('div', { class: 'layer layer-check' }, el('h4', { text: V.CHECK_HEADING }));
   box.append(el('p', { class: 'check-pill' }, badge(h)));
-  for (const s of lines) {
-    const cls = s === DT2.GUARD_LINE ? 'small habit-guard' : s.startsWith('If your next trades look like these') ? 'habit-sentence habit-catch' : 'habit-sentence';
-    box.append(el('p', { class: cls, text: s }));
-  }
+  for (const s of lines) box.append(el('p', { class: s === DT2.GUARD_LINE ? 'small habit-guard' : 'habit-sentence', text: s }));
+  if (figure) box.append(catchTable(figure));
   return box;
+}
+
+// The catch figure (§5.2; buyer read-through, 31 Oct): the lead line, then a table, one row per file size, each with
+// a bar filled to the engine's lower bound (tenths, never more) and the same words beside it, so the bar is never the
+// only carrier. A real table with a caption and headers for screen readers.
+function catchTable(g) {
+  const tbody = el('tbody');
+  for (const r of g.rows) {
+    const fill = el('span', { class: 'catch-fill' });
+    fill.style.width = (10 * r.tenths) + '%';   // CSSOM, allowed by the CSP
+    tbody.append(el('tr', {}, el('th', { scope: 'row', text: r.size }),
+      el('td', {}, el('span', { class: 'catch-bar', 'aria-hidden': 'true' }, fill), el('span', { class: 'catch-val', text: r.value }))));
+  }
+  return el('div', { class: 'catch' }, el('p', { class: 'habit-sentence habit-catch', text: g.lead }),
+    el('table', { class: 'catch-table' }, el('caption', { class: 'visually-hidden', text: DT2.CATCH_CAPTION }),
+      el('thead', {}, el('tr', {}, el('th', { scope: 'col', text: DT2.CATCH_HEAD[0] }), el('th', { scope: 'col', text: DT2.CATCH_HEAD[1] }))), tbody));
 }
 
 function habitSection(h, unit, report) {
@@ -213,7 +227,7 @@ function habitSection(h, unit, report) {
     if (lines.what.length) for (const x of lines.what) what.append(el('p', { class: 'habit-sentence', text: x }));
     else what.append(el('p', { class: 'muted', text: 'No figure for this file.' }));
     sec.append(el('h3', { id: 'h-' + h.id, text: nameOf(h) }), what);
-    if (!factsOnly(h)) sec.append(checkLayer(h, lines.check));
+    if (!factsOnly(h)) sec.append(checkLayer(h, lines.check, lines.figure));
     return sec;
   }
   sec.append(el('h3', { id: 'h-' + h.id, text: nameOf(h) }), el('p', { class: 'muted', text: h.question }));
@@ -226,7 +240,7 @@ function habitSection(h, unit, report) {
   const extra = detailLine(h, unit);
   if (extra) what.append(el('p', { text: extra }));
   sec.append(what);
-  if (!factsOnly(h)) sec.append(checkLayer(h, lines.check));
+  if (!factsOnly(h)) sec.append(checkLayer(h, lines.check, lines.figure));
   // Expert details (plan §10 row 37): the method line with the habit's own n_perm, the reshuffle count and the
   // adjusted p, and the catch figure's premise in full (§5.2).
   const how = el('div', {});
