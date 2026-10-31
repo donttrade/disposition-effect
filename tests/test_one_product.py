@@ -223,7 +223,7 @@ def test_example_report_shows_two_layers_and_never_described_or_not_tested(brows
     assert n == 5
     assert pg.locator("#sample-out .habit .layer-what h4").count() == 5 and pg.locator("#sample-out .habit .layer-check h4").count() == 2
     assert pg.locator("#sample-out .habit .layer-check h4").all_text_contents() == ["Habit or chance?", "Habit or chance?"]
-    assert pg.locator("#habit-revenge .layer-check .badge").inner_text() == "Some sign"
+    assert pg.locator("#habit-revenge .layer-check .badge").inner_text() == "Clear sign"   # the built re-entry habit (31 Oct)
     assert pg.locator("#habit-tilt .layer-check .badge").inner_text() == "No sign"
     assert "Large losses" in t
     assert pg.locator("#your-numbers h2").inner_text() == "Your numbers"

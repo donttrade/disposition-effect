@@ -117,10 +117,12 @@ async ({ base, cells }) => {
       return;
     }
     if (st === 'too_few') { Object.assign(h, { status: 'too_few', n_a: 3, p_raw: null, p_holm: null, p_mean1: null, p_rank1: null, step: null, chance_per_100: null, n_perm: null }); return; }
-    const p = { none: [0.6, 1], some: [0.04, 0.12], clear: [0.002, 0.006] }[st];
-    Object.assign(h, { status: 'tested', p_raw: p[0], p_mean1: p[0], p_rank1: p[0] / 2, p_holm: p[1], step: st, chance_per_100: W.chancePer100(p[1]),
-      n_perm: h.n_perm || 10000, effect: st === 'none' ? 2.5 : -6.5, measure_a: st === 'none' ? 4 : -5, measure_b: 1.5 });
-    if (h.dollars) h.dollars.amount = st === 'none' ? 80 : -420;
+    // none: the gap runs the other way; none_gap: the habit's way, within chance (adjusted p 0.45)
+    const p = { none: [0.6, 1], none_gap: [0.15, 0.45], some: [0.04, 0.12], clear: [0.002, 0.006] }[st];
+    const other = st === 'none';
+    Object.assign(h, { status: 'tested', p_raw: p[0], p_mean1: p[0], p_rank1: p[0] / 2, p_holm: p[1], step: st === 'none_gap' ? 'none' : st,
+      chance_per_100: W.chancePer100(p[1]), n_perm: h.n_perm || 10000, effect: other ? 2.5 : -6.5, measure_a: other ? 4 : -5, measure_b: 1.5 });
+    if (h.dollars) h.dollars.amount = other ? 80 : -420;
   }
   function recount(r) {
     const t = r.habits.filter((h) => h.status === 'tested');
@@ -150,7 +152,12 @@ async ({ base, cells }) => {
       pill: sec && sec.querySelector('.layer-check .badge') ? sec.querySelector('.layer-check .badge').textContent : null,
       pillClass: sec && sec.querySelector('.layer-check .badge') ? sec.querySelector('.layer-check .badge').className : null,
       heading: sec && sec.querySelector('.layer-check h4') ? sec.querySelector('.layer-check h4').textContent : null,
-      check: sec ? [...sec.querySelectorAll('.layer-check p.habit-sentence, .layer-check p.habit-guard')].map((p) => p.textContent) : [],
+      check: sec ? [...sec.querySelectorAll('.layer-check > p.habit-sentence, .layer-check > p.habit-guard')].map((p) => p.textContent) : [],
+      lead: sec && sec.querySelector('.catch .habit-catch') ? sec.querySelector('.catch .habit-catch').textContent : null,
+      table: sec && sec.querySelector('.catch-table') ? { caption: sec.querySelector('.catch-table caption').textContent,
+        head: [...sec.querySelectorAll('.catch-table thead th')].map((t) => [t.textContent, t.getAttribute('scope')]),
+        rows: [...sec.querySelectorAll('.catch-table tbody tr')].map((tr) => [tr.querySelector('th').textContent, tr.querySelector('th').getAttribute('scope'),
+          tr.querySelector('.catch-val').textContent, tr.querySelector('.catch-fill').style.width, tr.querySelector('.catch-bar').getAttribute('aria-hidden')]) } : null,
       what: sec ? [...sec.querySelectorAll('.layer-what p.habit-sentence')].map((p) => p.textContent) : [],
       inFacts: !!div.querySelector('#your-numbers #habit-' + id),
       focus: q('#focus-lines p').map((p) => p.textContent),
@@ -166,7 +173,7 @@ async ({ base, cells }) => {
 }
 """
 HABITS = ["revenge", "tilt", "size_up"]
-STATES = ["none", "some", "clear", "too_few", "dates_only"]
+STATES = ["none", "none_gap", "some", "clear", "too_few", "dates_only"]
 CELLS = [(f"{h}/{s}/{'retest' if rt else 'first'}", h, s, rt) for h in HABITS for s in STATES for rt in (False, True)]
 
 
@@ -184,7 +191,7 @@ def table(browser, repo_server):
 
 
 def test_the_truth_table_has_every_cell(table):
-    assert len(table) == 30 == len(HABITS) * len(STATES) * 2
+    assert len(table) == 36 == len(HABITS) * len(STATES) * 2
 
 
 @pytest.mark.parametrize("key,hid,st,retest", CELLS, ids=[c[0] for c in CELLS])
@@ -218,7 +225,7 @@ def test_truth_table_cell(table, key, hid, st, retest):
         assert c["check"][0].endswith("this habit depends on the order of trades within a day, which these rows do not show.")
         assert c["focus"][0].endswith("so the 3 habits that depend on the order of trades within a day get no check on this file.")
         return
-    assert c["pill"] == STEP[st] and c["heading"] == "Habit or chance?"
+    assert c["pill"] == STEP["none" if st == "none_gap" else st] and c["heading"] == "Habit or chance?"
     if st == "too_few":
         assert c["check"] == ["Too few trades to check: this habit compares two groups of at least 5 trades each, and this file has 3 and "
                               + ("148" if hid == "revenge" else "151") + "."]
@@ -228,28 +235,33 @@ def test_truth_table_cell(table, key, hid, st, retest):
     n = "200"
     if st == "clear":
         assert first == f"Clear sign of this habit in these {n} trades. In files with no real habit, a result this strong turns up fewer than 1 in 100 times, allowing for all 3 habits at once."
-        assert c["check"][1:] == [GUARD]                 # no catch line under a Clear sign
+        assert c["check"][1:] == [GUARD] and c["table"] is None and c["lead"] is None   # no catch figure under a Clear sign
         assert len(c["hit"]) == 1 and "badge-clear" in c["pillClass"]
         assert c["focus"][0].startswith("Clear sign on 1 of 3 habits, some sign on 0.")
         assert c["focus"][1].startswith("Shown first: ")   # a Clear sign with a loss total is the focus
     elif st == "some":
         assert first == f"Some sign of this habit in these {n} trades, short of clear. In files with no real habit, a result this strong turns up at most 12 in 100 times, allowing for all 3 habits at once."
-        assert c["check"][1] == GUARD and c["check"][2].startswith("If your next trades look like these: when ")
-        assert len(c["check"]) == 3
+        assert c["check"][1:] == [GUARD]
         # never the focus and never flagged (§2.4 items 2-3)
         assert c["hit"] == [] and "badge-some" in c["pillClass"] and "badge-clear" not in c["pillClass"]
         assert c["focus"][0].startswith("Clear sign on 0 of 3 habits, some sign on 1.")
         assert c["focus"][1] == "No habit is shown first. A habit is shown first only when it has a Clear sign and its dollar total is a loss."
         assert not any(x.startswith("Shown first") for x in c["focus"])
-    else:
-        assert first == f"No sign of this habit in these {n} trades."
-        assert len(c["check"]) == 2 and c["check"][1].startswith("If your next trades look like these: when ")
-        assert GUARD not in c["check"]
-    if st != "clear":
-        catch = c["check"][-1]
-        clause = "trades soon after a loss end " if hid == "revenge" else "trades after 2 or more losses in a row end "
-        assert clause in catch and re.search(r"files of 200 trades show it as a Clear sign (at least \d+ in 10|fewer than 1 in 10) times, "
-                                             r"400 trades (at least \d+ in 10|fewer than 1 in 10), and 800 trades", catch), catch
+    elif st == "none_gap":   # the card shows a gap the habit's way: the line says it is within chance, never "no sign of this habit"
+        assert c["check"] == [f"No sign beyond chance in these {n} trades: a gap this size is common in files with no habit."]
+    else:                    # the gap runs the other way
+        what = "trades soon after a loss" if hid == "revenge" else "trades after 2 or more losses in a row"
+        assert c["check"] == [f"No sign in these {n} trades: {what} did not do worse than your other trades."]
+    if st != "clear":        # the catch figure: one lead line, then a labelled table, one row per size, bar = lower bound
+        assert re.fullmatch(r"If the habit is real at \$\d+\.\d\d a trade and your next trades look like these, a file shows it as a Clear sign:", c["lead"]), c["lead"]
+        t = c["table"]
+        assert t["caption"] == "How often a file of each size shows this habit as a Clear sign"
+        assert t["head"] == [["File size", "col"], ["Shown as a Clear sign", "col"]]
+        assert [r[0] for r in t["rows"]] == ["200 trades (this file)", "400 trades", "800 trades"]
+        for size, scope, val, width, hidden in t["rows"]:
+            m = re.fullmatch(r"at least (\d+) in 10|fewer than 1 in 10", val)
+            assert m and scope == "row" and hidden == "true", (size, val)
+            assert width == f"{10 * int(m.group(1)) if m.group(1) else 0}%", (val, width)   # the bar never shows more than the words
 
 
 # ------------------------------------------------------------------ dual accept: every committed report of each method
@@ -451,6 +463,8 @@ def test_small_files_collapse_too_few_habits_and_give_the_re_test_reason(browser
 def test_the_example_report_is_dt2_and_its_steps_are_the_engines():
     rep = json.load(open(os.path.join(REPO, "site/config/sample-report.report.json"), encoding="utf-8"))
     assert rep["method_version"] == "2026-10-30.stats3" and rep["method_label"] == "DT-2"
-    st = {h["id"]: h["step"] for h in rep["habits"]}
-    assert st == {"hold_gap": None, "revenge": "some", "size_up": None, "tilt": "none", "oversized_loss": None}
-    assert rep["focus"] is None and rep["n_clear"] == 0 and rep["n_some"] == 1
+    # 31 Oct (buyer read-through): the built re-entry habit wins 20% of the time (was 25%), enough for a Clear sign under
+    # DT-2; tilt is whatever the engine gives
+    st = {h["id"]: (h["step"], h["chance_per_100"]) for h in rep["habits"]}
+    assert st == {"hold_gap": (None, None), "revenge": ("clear", 2), "size_up": (None, None), "tilt": ("none", 100), "oversized_loss": (None, None)}
+    assert rep["focus"] == "revenge" and rep["n_clear"] == 1 and rep["n_some"] == 0 and rep["n_trades"] == 304

@@ -5,25 +5,25 @@
  "dates_only": false,
  "disclaimer": "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.",
  "engine_commit": "sample",
- "focus": null,
+ "focus": "revenge",
  "habits": [
   {
    "catch": null,
    "chance_per_100": null,
    "detail": null,
    "dollars": {
-    "amount": -478.7300000000002,
+    "amount": -559.9899999999999,
     "label": "Losing trades held longer than your median winning hold",
-    "n_trades": 71
+    "n_trades": 82
    },
-   "effect": 0.9436504695794202,
+   "effect": 0.9896142433234422,
    "id": "hold_gap",
-   "measure_a": 2311,
-   "measure_b": 2449,
+   "measure_a": 2334.5,
+   "measure_b": 2359,
    "method": "earlier comparable trades (symbol, holding period, direction, time of day)",
-   "n_a": 160,
+   "n_a": 168,
    "n_a_compared": null,
-   "n_b": 144,
+   "n_b": 136,
    "n_b_compared": null,
    "n_long_a": 0,
    "n_long_b": 0,
@@ -46,16 +46,16 @@
    "catch": {
     "at_least_10ths": [
      0,
-     0,
-     3
+     1,
+     2
     ],
     "caught": [
-     3,
-     6,
-     25
+     1,
+     13,
+     23
     ],
     "effect": {
-     "amount": 3.1,
+     "amount": 3.2,
      "unit": "USD"
     },
     "n_perm": 199,
@@ -66,53 +66,53 @@
      1216
     ]
    },
-   "chance_per_100": 6,
+   "chance_per_100": 2,
    "detail": null,
    "dollars": {
-    "amount": -527.6400000000001,
+    "amount": -605.8299999999999,
     "label": "Trades opened within 15 minutes of a losing trade's close",
-    "n_trades": 71
+    "n_trades": 74
    },
-   "effect": -6.9405579164643045,
+   "effect": -7.625101498878791,
    "id": "revenge",
-   "measure_a": -7.43154929577465,
-   "measure_b": -0.4909913793103449,
+   "measure_a": -8.186891891891891,
+   "measure_b": -0.5617903930131004,
    "method": "within-day sequence shuffle (mean and rank)",
-   "n_a": 71,
+   "n_a": 74,
    "n_a_compared": null,
-   "n_b": 232,
+   "n_b": 229,
    "n_b_compared": null,
    "n_perm": 10000,
    "name": "Re-entering soon after a loss",
-   "p_holm": 0.05579442055794421,
-   "p_mean1": 0.006099390060993901,
-   "p_rank1": 0.018598140185981403,
-   "p_raw": 0.018598140185981403,
+   "p_holm": 0.010198980101989802,
+   "p_mean1": 0.0018998100189981002,
+   "p_rank1": 0.0033996600339966003,
+   "p_raw": 0.0033996600339966003,
    "question": "Do trades opened within 15 minutes of a losing trade's close end differently from your other trades?",
    "research_ref": {
     "cite": "Coval, J. D. & Shumway, T. (2005). Do behavioral biases affect prices? Journal of Finance 60(1), 1-34.",
     "url": null
    },
    "status": "tested",
-   "step": "some"
+   "step": "clear"
   },
   {
    "catch": null,
    "chance_per_100": null,
    "detail": null,
    "dollars": {
-    "amount": -121.53000000000002,
+    "amount": -145.74,
     "label": "Trades after a loss at 1.5 times your usual size or more",
-    "n_trades": 24
+    "n_trades": 27
    },
    "effect": 1,
    "id": "size_up",
    "measure_a": 1,
    "measure_b": 1,
    "method": "local rank (symbol, holding period, direction, time of day)",
-   "n_a": 159,
+   "n_a": 167,
    "n_a_compared": null,
-   "n_b": 144,
+   "n_b": 136,
    "n_b_compared": null,
    "n_perm": null,
    "name": "Size after a loss",
@@ -131,16 +131,16 @@
    "catch": {
     "at_least_10ths": [
      0,
-     3,
-     5
+     4,
+     6
     ],
     "caught": [
-     7,
-     29,
-     43
+     8,
+     32,
+     44
     ],
     "effect": {
-     "amount": 3.1,
+     "amount": 3.2,
      "unit": "USD"
     },
     "n_perm": 199,
@@ -153,30 +153,30 @@
    },
    "chance_per_100": 100,
    "detail": {
-    "streak3_amount": -210.39,
-    "streak3_mean": -4.045961538461539,
-    "streak3_n": 52
+    "streak3_amount": -216.16,
+    "streak3_mean": -3.726896551724138,
+    "streak3_n": 58
    },
    "dollars": {
-    "amount": -344.3100000000001,
+    "amount": -378.8200000000001,
     "label": "Trades taken after 2 or more losses in a row",
-    "n_trades": 89
+    "n_trades": 99
    },
-   "effect": -2.479679722776438,
+   "effect": -2.0830332739156274,
    "id": "tilt",
-   "measure_a": -3.8686516853932598,
-   "measure_b": -1.388971962616822,
+   "measure_a": -3.8264646464646477,
+   "measure_b": -1.7434313725490203,
    "method": "within-day sequence shuffle (mean and rank)",
-   "n_a": 89,
+   "n_a": 99,
    "n_a_compared": null,
-   "n_b": 214,
+   "n_b": 204,
    "n_b_compared": null,
    "n_perm": 10000,
    "name": "Trading after a losing streak",
    "p_holm": 1,
-   "p_mean1": 0.27947205279472054,
-   "p_rank1": 0.6107389261073892,
-   "p_raw": 0.6107389261073892,
+   "p_mean1": 0.23927607239276072,
+   "p_rank1": 0.5494450554944506,
+   "p_raw": 0.5494450554944506,
    "question": "Do trades taken after 2 or more losses in a row end differently from your other trades?",
    "research_ref": {
     "cite": "Coval, J. D. & Shumway, T. (2005). Do behavioral biases affect prices? Journal of Finance 60(1), 1-34.",
@@ -190,18 +190,18 @@
    "chance_per_100": null,
    "detail": null,
    "dollars": {
-    "amount": -367.25000000000006,
+    "amount": -389.51000000000005,
     "label": "Losses more than twice your median loss",
-    "n_trades": 24
+    "n_trades": 25
    },
-   "effect": 5.470000000000001,
+   "effect": 5.52,
    "id": "oversized_loss",
-   "measure_a": 0.07894736842105263,
-   "measure_b": 0.3299788849454152,
+   "measure_a": 0.08223684210526316,
+   "measure_b": 0.32848697470841726,
    "method": null,
-   "n_a": 24,
+   "n_a": 25,
    "n_a_compared": null,
-   "n_b": 160,
+   "n_b": 168,
    "n_b_compared": null,
    "n_perm": null,
    "name": "Losses much larger than your usual loss",
@@ -219,11 +219,11 @@
  "method_label": "DT-2",
  "method_version": "2026-10-30.stats3",
  "min_group": 5,
- "n_clear": 0,
+ "n_clear": 1,
  "n_date_only_rows": 0,
  "n_family": 3,
  "n_rows": 304,
- "n_some": 1,
+ "n_some": 0,
  "n_tested": 2,
  "n_trades": 304,
  "period_weeks": 12,
