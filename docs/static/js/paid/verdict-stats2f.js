@@ -9,7 +9,7 @@
 //     did, without the retired display words. Habits DT-1 did not check are facts, as in DT-2.
 // Delete this module and wording-stats2f.js one release after DT-2 is live.
 import * as F from './wording-stats2f.js?v=e96bc0a0';
-import { CHECK_HEADING, FACTS_LINE, RESEARCH, RESEARCH_PREFIX, holdDays } from './wording.js?v=3a9ce08e';
+import { CHECK_HEADING, FACTS_LINE, RESEARCH, RESEARCH_PREFIX, holdDays } from './wording.js?v=bda30e6a';
 
 export { CHECK_HEADING, FACTS_LINE, RESEARCH, RESEARCH_PREFIX, holdDays };
 export const METHOD_VERSION = F.METHOD_VERSION;

@@ -27,7 +27,7 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=20d29602">
+<link rel="stylesheet" href="/static/css/site.css?v=3327f956">
 <script src="/static/js/theme.js?v=7e47c1a9"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
 <script src="/static/js/pay.js?v=7eb376c2" defer></script>
@@ -115,6 +115,7 @@
   <div class="table-scroll" tabindex="0" role="region" aria-label="Method versions of the donttrade test"><table>
     <thead><tr><th scope="col">Date</th><th scope="col">Method</th><th scope="col">Name</th><th scope="col">What it does</th></tr></thead>
     <tbody>
+      <tr><td>30 Oct 2026</td><td><code>2026-10-30.stats3</code></td><td>DT-2: the donttrade test, a habit test on your own trades</td><td>DT-2 of the donttrade test. Each checked habit now gets one of three results: No sign, Some sign or Clear sign, with a number for how often chance alone gives that result. Re-entering soon after a loss and trading after a losing run are checked in their harmful direction only. A habit needs at least 5 trades in both groups it compares (was 30). The three habits are checked together, with size after a loss shown as facts until its check ships: the steps are cut so that, on histories with no real habit, a Clear sign on any habit turns up at most 5 in 100 times across a first report and its re-test together, and Some sign or Clear sign at most 20 in 100 times in one report. The &#39;more trades&#39; estimate now comes from your own file: we reshuffle your results so no habit is left, add a habit of a fixed size, and count how often this check catches it. A report or a re-test runs on the method live on the day it runs.</td></tr>
       <tr><td>23 Oct 2026</td><td><code>2026-10-23.stats2f</code></td><td>DT-1: the donttrade test, a habit test on your own trades</td><td>First version of the habit report. It tests up to two habits against chance: re-entering soon after a loss, and trading after a losing run. It describes the hold gap, size after a loss and unusually large losses, with the dollar totals of the matching trades, without testing them. Rows in your file that share a symbol, a direction and an open minute (for example, a position closed in parts) count as one trade. Rows that open at exactly 00:00 and are held a whole number of days, as in exports with dates but no times, are never combined; if they are 5% or more of a file&#39;s rows, nothing in that file is tested and size after a loss is not described.</td></tr>
     </tbody>
   </table></div>
@@ -154,7 +155,7 @@
   <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M3 10.5 9.5 4H16v6.5L9.5 17z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="13" cy="7" r="1.3" fill="currentColor"/></svg><span>US$39 once</span></li>
   <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M11 2 4 11.5h5L8 18l7-9.5h-5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span>Result right after payment</span></li>
   <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M4.5 8.5A6 6 0 1 1 4 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 4.5v4.5h4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Full refund within 14 days</span></li>
-</ul><p class="pay-expect small">Small files often show “not clear yet”. That’s an honest result, not a fault.</p>
+</ul><p class="pay-expect small" data-lint="verdict">Small files often show “No sign”. Every dollar total and rule check is included.</p>
     <details class="pay-more" data-pay-more>
       <summary>Full details before you pay</summary>
       <div class="pd-full" data-pay-full><p class="small"><a href="/pricing/#before-you-pay">Read the full details on the pricing page</a></p></div>
