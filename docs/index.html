@@ -25,7 +25,7 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=679e4723">
+<link rel="stylesheet" href="/static/css/site.css?v=20d29602">
 <link rel="stylesheet" href="/static/css/vt.css?v=af8673c7">
 <script src="/static/js/theme.js?v=7e47c1a9"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
@@ -76,12 +76,15 @@
 <figure class="hero-shot report-card" aria-labelledby="rc-cap">
   <div class="rc">
     <p class="rc-top"><span>Summary</span><span class="pill pill-muted">Example report</span></p>
-    <p class="rc-k">Habit or chance?</p>
-    <ul class="rc-steps">
-      <li><span class="rc-name">Re-entering soon after a loss</span> <span class="pill">Some sign</span></li>
-      <li><span class="rc-name">Trading after a losing streak</span> <span class="pill">No sign</span></li>
-    </ul>
-    <p class="rc-more">Clear sign on 0 of 3 habits, plus your numbers</p>
+    <p class="rc-k">Shown first</p>
+    <p class="rc-h">Re-entering soon after a loss</p>
+    <p class="rc-pill"><span class="pill pill-hit">Distinguishable from noise</span> <span class="rc-gloss">Unlikely to be luck</span></p>
+    <svg class="rc-bars" viewBox="0 0 300 64" aria-hidden="true" focusable="false">
+      <text class="rc-ax" x="0" y="16">After a loss</text><rect class="rc-bar" x="110" y="5" width="188.0" height="16" rx="3"/>
+      <text class="rc-ax" x="0" y="50">Other trades</text><rect class="rc-bar rc-bar-b" x="110" y="39" width="12.4" height="16" rx="3"/>
+    </svg>
+    <p class="rc-note">Average loss per trade. Longer bar, bigger loss.</p>
+    <p class="rc-more">2 habits tested against chance, plus your numbers</p>
   </div>
   <figcaption id="rc-cap">Example report: the summary page.</figcaption>
 </figure>
@@ -113,15 +116,15 @@
             <tr><th scope="row">Re-entry after a loss</th>
               <td class="num">71</td>
               <td class="num loss">−$527.64</td>
-              <td><span class="pill">Some sign</span></td></tr>
+              <td><span class="pill pill-hit">Distinguishable from noise</span></td></tr>
             <tr><th scope="row">Size after a loss</th>
               <td class="num">24</td>
               <td class="num loss">−$121.53</td>
-              <td><span class="muted">Your numbers</span></td></tr>
+              <td><span class="pill pill-muted">Luck check coming</span></td></tr>
             <tr><th scope="row">After a losing run</th>
               <td class="num">89</td>
               <td class="num loss">−$344.31</td>
-              <td><span class="pill">No sign</span></td></tr>
+              <td><span class="pill">Not distinguishable</span></td></tr>
             <tr><th scope="row">Large losses</th>
               <td class="num">24</td>
               <td class="num loss">−$367.25</td>
@@ -130,12 +133,12 @@
         </table>
       </div>
       <p class="toast toast-a"><span class="toast-k">File read</span> 304 trades · 12 weeks</p>
-      <p class="toast toast-b"><span class="toast-k">Checked against chance</span> Clear sign on 0 of 3 habits</p>
+      <p class="toast toast-b"><span class="toast-k">Tested against chance</span> 1 of 2 distinguishable from noise</p>
       <figcaption>Example report.</figcaption>
     </figure>
     <details class="how">
       <summary>What the results mean</summary>
-      <p data-lint="verdict">Each checked habit gets one of three results: No sign, Some sign or Clear sign, with a number for how often chance alone gives that result. A habit with fewer than 5 trades in either group it compares shows “Too few trades”. Each check compares trades from the same days with each other. Dollar figures are historical totals from your file. They describe what happened; they do not show that a habit caused a result.</p>
+      <p>In plain words: the pattern is unlikely to be luck. “Not distinguishable” means it is not clear yet. Each tested habit gets one of three results: “distinguishable from noise”, “not distinguishable from noise”, or “not enough trades to tell” when either of the two groups it compares has fewer than 30 trades. Each test compares trades from the same days with each other. Dollar figures are historical totals from your file. They describe what happened; they do not show that a habit caused a result.</p>
     </details>
   </section><section class="section" aria-labelledby="t-how-h" data-reveal>
     <h2 id="t-how-h">How it works</h2>
@@ -156,7 +159,7 @@
         <details class="how-more"><summary>What we keep</summary><p>It sends our server only stripped trade numbers. Those are not kept; only a scrambled fingerprint of each trade is kept, for the re-test. <a href="/privacy/#report">Exactly what is sent and kept</a></p></details>
       </li>
       <li class="how-step">
-        <div class="how-shot how-shot-tagged" aria-hidden="true"><span class="tp-tag">Example report</span><p class="how-row"><span>Re-entry after a loss</span> <span class="pill">Some sign</span></p><p class="how-row"><span>After a losing run</span> <span class="pill">No sign</span></p>
+        <div class="how-shot how-shot-tagged" aria-hidden="true"><span class="tp-tag">Example report</span><p class="how-row"><span>Re-entry after a loss</span> <span class="pill pill-hit">Distinguishable from noise</span></p><p class="how-row"><span>After a losing run</span> <span class="pill">Not distinguishable</span></p>
         </div>
         <h3><span class="how-n">3</span> See your habits</h3>
         <p>Plus one free re-test, 30 to 60 days later.</p>
@@ -248,7 +251,7 @@
   <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M3 10.5 9.5 4H16v6.5L9.5 17z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="13" cy="7" r="1.3" fill="currentColor"/></svg><span>US$39 once</span></li>
   <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M11 2 4 11.5h5L8 18l7-9.5h-5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span>Result right after payment</span></li>
   <li><svg aria-hidden="true" focusable="false" viewBox="0 0 20 20" width="20" height="20"><path d="M4.5 8.5A6 6 0 1 1 4 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 4.5v4.5h4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Full refund within 14 days</span></li>
-</ul><p class="pay-expect small" data-lint="verdict">Small files often show “No sign”. Every dollar total and rule check is included.</p>
+</ul><p class="pay-expect small">Small files often show “not clear yet”. That’s an honest result, not a fault.</p>
     <details class="pay-more" data-pay-more>
       <summary>Full details before you pay</summary>
       <div class="pd-full" data-pay-full><p class="small"><a href="/pricing/#before-you-pay">Read the full details on the pricing page</a></p></div>
