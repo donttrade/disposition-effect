@@ -880,5 +880,73 @@ def test_the_copy_question_on_the_page(browser, site):
     click_run(page)
     assert len(log["posts"]) == 1 and len(json.loads(log["posts"][0].post_data)["rows"]) == 40
     assert page.eval_on_selector_all(".copy-pair", "ps => ps.map((p) => p.textContent)") == [
-        "Accounts lead13.csv and copy13.csv trade on their own: none of their trades are counted once."]
+        "Accounts lead13.csv and copy13.csv trade on their own: no trade is counted once as a copy. As in one file, trades "
+        "opened in the same minute with the same symbol and direction are combined for the habit checks."]
     ctx.close()
+
+
+# ---------------------------------------------------------------- re-test 4
+
+def ibkr_usd():
+    lines = open(os.path.join(HERE, "fixtures", "ibkr", "activity_flex.csv"), encoding="utf-8").read().strip().split("\n")
+    lines = [re.sub(r"^CAD,", "USD,", x) for x in lines]
+    return lines[0].split(","), [x.split(",") for x in lines[1:]]
+
+
+def ibkr_make(head, rows, cols=None):
+    cols = cols or head
+    return "\n".join([",".join(cols)] + [",".join(r[head.index(c)] for c in cols) for r in rows]) + "\n"
+
+
+def test_one_account_files_with_different_amounts_are_refused_by_name():
+    """Tester re-test 4 F1 (r12.mjs): one account, two overlapping IBKR Flex queries, the second without IBCommission
+    (and ClosePrice). Joined, the same fill with and without its commission doubled a trade ($297, not $583). Now the
+    files are refused, naming both and the difference; without ClosePrice only (same fees) they still read right."""
+    head, rows = ibkr_usd()
+    whole = read_text([ibkr_make(head, rows)])
+    assert whole["facts"] == 583
+    no_comm = [c for c in head if c not in ("IBCommission", "ClosePrice")]
+    r = read_text([ibkr_make(head, rows[:5]), ibkr_make(head, rows[2:], no_comm)], ["q1.csv", "q2.csv"])
+    assert r == {"error": "E_FILES_DIFFER", "file": 1,
+                 "message": "q1.csv and q2.csv show different amounts for the same 1 trade (q1.csv includes commissions). Upload one of them."}
+    no_close = [c for c in head if c != "ClosePrice"]
+    ok = read_text([ibkr_make(head, rows[:5]), ibkr_make(head, rows[2:], no_close)], ["q1.csv", "q2.csv"])
+    assert (ok["groups"], ok["facts"]) == (1, 583)
+    # the buyer's other answer, separate accounts, is not refused (nothing is joined)
+    assert read_text([ibkr_make(head, rows[:5]), ibkr_make(head, rows[2:], no_comm)], ["q1.csv", "q2.csv"], one=False)["groups"] == 2
+
+
+def test_the_own_pair_line_says_what_the_server_combines():
+    """Tester re-test 4 F2: the server combines rows with the same symbol, direction and open minute from any account
+    (habits.mjs mergeRows), so "none of their trades are counted once" was false; the line now says so."""
+    js = READ + "import { ownPairLine } from './site/static/js/paid/merge.js'; out(ownPairLine('a.csv', 'b.csv'));"
+    line = node(js)
+    assert line == ("Accounts a.csv and b.csv trade on their own: no trade is counted once as a copy. As in one file, trades opened "
+                    "in the same minute with the same symbol and direction are combined for the habit checks.")
+    assert lint_text(line) == [] and lint_text(line, "report", paid=True) == []
+    # and the panel's count is the server's: two independent accounts with one same-minute pair are 1 trade fewer
+    a = "\n".join([RT_HEAD, "2026-09-01 09:00:00,2026-09-01 09:30:00,ES,Long,1,100,101,0"]) + "\n"
+    b = "\n".join([RT_HEAD, "2026-09-01 09:00:30,2026-09-01 11:30:00,ES,Long,1,100,99,0", "2026-09-02 09:00:00,2026-09-02 09:30:00,ES,Short,1,100,99,0"]) + "\n"
+    js = READ + f"""const r = readAll([T({json.dumps(a)}), T({json.dumps(b)})], ['a.csv', 'b.csv']);
+      const s = await stripRows(r.trades, 'salt'); out([r.pairs[0].status, r.trades.length, serverTradeCount(s.rows)]);"""
+    assert node(js) == ["own", 3, 2]
+
+
+def test_dt2_bundle_guard(tmp_path):
+    """The S3 notice names DT-2's "No sign": run.sh bundle refuses a site whose /report/ says "No sign" while wording.js
+    has no DT-2 VERDICT_STRINGS with it (this branch, before S1); it passes with S1's VERDICT_STRINGS, or without the
+    notice."""
+    sys.path.insert(0, os.path.join(REPO, "checks"))
+    import dt2_guard
+    site = tmp_path / "site"
+    (site / "report").mkdir(parents=True)
+    (site / "report" / "index.html").write_text("<p>" + NOTICE + "</p>", encoding="utf-8")
+    assert "VERDICT_STRINGS" in dt2_guard.problem(str(site))   # this branch's wording.js: refused
+    w = tmp_path / "wording.js"
+    w.write_text("export const VERDICT_STRINGS = Object.freeze({ none: 'No sign', some: 'Some sign', clear: 'Clear sign' });\n", encoding="utf-8")
+    assert dt2_guard.problem(str(site), str(w)) is None
+    (site / "report" / "index.html").write_text("<p>Not clear yet</p>", encoding="utf-8")
+    assert dt2_guard.problem(str(site)) is None
+    src = open(os.path.join(REPO, "site", "run.sh"), encoding="utf-8").read()
+    bundle = src[src.index("  bundle)"):]
+    assert bundle.index("checks/dt2_guard.py site/_site") < bundle.index("rm -rf docs")

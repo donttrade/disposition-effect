@@ -53,6 +53,7 @@ case "${1:-}" in
       if [ "${DT_PREVIEW:-}" != "$BR" ]; then echo "the branch $BR takes only a preview bundle: DT_PREVIEW=$BR"; exit 1; fi ;;
     esac
     DT_REQUIRE_LAUNCH_DATE=1 python3 site/build.py   # [legal] launch_date and terms_date must be set
+    python3 checks/dt2_guard.py site/_site            # S3's notice names DT-2's "No sign": only with DT-2 (S1)
     rm -rf docs && cp -R site/_site docs && rm -rf docs/dev && printf 'donttrade.ca\n' > docs/CNAME && touch docs/.nojekyll
     echo "docs/ replaced from site/_site" ;;
   *) sed -n '2,12p' "$0"; exit 1 ;;
