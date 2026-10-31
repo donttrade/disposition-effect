@@ -838,6 +838,8 @@ def report_methods():
                 or not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}\.[a-z0-9]+", e["method"]) or not e["text"].strip() \
                 or ("name" in e and not re.fullmatch(r"DT-[1-9][0-9]*", e["name"])):
             die(f"report methods: malformed entry {e!r} ({path})")
+        if re.search(r"\{[^}]*\}", e["text"]):   # DT-2 plan §11: no entry is published with an unfilled figure
+            die(f"report methods: the entry for {e['method']} has an unfilled placeholder ({path})")
         y, mo, d = (int(x) for x in e["date"].split("-"))
         out.append({**e, "date_text": f"{d} {MONTHS[mo - 1]} {y}"})
     if [e["date"] for e in out] != sorted((e["date"] for e in out), reverse=True):
@@ -847,10 +849,22 @@ def report_methods():
     names = [e["name"] for e in out if "name" in e]
     if len(set(names)) != len(names):
         die(f"report methods: a method name is used twice ({path})")
-    mv = page_method_version()
-    if mv not in {e["method"] for e in out}:
-        die(f"report methods: the report page's METHOD_VERSION {mv} has no dated entry in {path} "
-            "(the re-test sentence promises one on /corrections/)")
+    for mv in [page_method_version()] + frozen_method_versions():
+        if mv not in {e["method"] for e in out}:
+            die(f"report methods: the report page's METHOD_VERSION {mv} has no dated entry in {path} "
+                "(the re-test sentence promises one on /corrections/)")
+    return out
+
+
+def frozen_method_versions():
+    """DT-2 dual accept: the methods the report page still words with a frozen module (wording-stats2f.js)."""
+    out = []
+    for name in sorted(os.listdir(os.path.dirname(WORDING_JS))):
+        if re.fullmatch(r"wording-[a-z0-9]+\.js", name):
+            m = re.search(r"^export const METHOD_VERSION = '([^']+)';$", open(os.path.join(os.path.dirname(WORDING_JS), name),
+                                                                              encoding="utf-8").read(), re.M)
+            if m:
+                out.append(m.group(1))
     return out
 def human_date(iso):
     """2026-10-17 → 17 Oct 2026."""
@@ -1239,13 +1253,68 @@ def lifted_paths_for(paid):
 
 
 def sample_report():
-    """The sample page's report, refused unless its method is the one the report page accepts."""
+    """The sample page's report, refused unless its method is the one the report page accepts and every checked
+    habit's step is one the page has words for (DT-2: hero_media_report.html and home.html show them)."""
     with open(SAMPLE_REPORT_JSON, encoding="utf-8") as f:
         rep = json.load(f)
     if rep.get("method_version") != page_method_version():
         die(f"sample report: {SAMPLE_REPORT_JSON} is method {rep.get('method_version')}, the report page accepts "
             f"{page_method_version()}: rerun tests/fixtures/paid/make_sample_report.py --report")
+    labels = step_labels()
+    for h in rep.get("habits", []):
+        key = h.get("step") if h.get("status") == "tested" else h.get("status") if h.get("status") in ("too_few", "dates_only") else None
+        if key is not None and key not in labels:
+            die(f"sample report: {h.get('id')} has the step {key!r}, which wording.js STEP has no words for")
     return rep
+
+
+# DT-2 (plan §10 rows 31, 39): the pill words, read from wording.js's STEP map, so a page and the report can never
+# name a step differently. The templates call step_pill(habit): (css class, words), or None for a facts-only habit;
+# an unknown step fails the build.
+STEP_CLASS = {"clear": "pill pill-hit", "some": "pill", "none": "pill", "too_few": "pill pill-few", "dates_only": "pill pill-few"}
+
+
+def step_labels():
+    src = open(WORDING_JS, encoding="utf-8").read()
+    m = re.search(r"^export const STEP = Object\.freeze\(\{\n(.*?)\n\}\);$", src, re.M | re.S)
+    if not m:
+        die("wording.js: no STEP map (export const STEP = Object.freeze({ ... });)")
+    out = dict(re.findall(r"^\s+(\w+): '([^']+)',$", m.group(1), re.M))
+    if sorted(out) != sorted(STEP_CLASS):
+        die(f"wording.js STEP has the keys {sorted(out)}, the build knows {sorted(STEP_CLASS)}")
+    return out
+
+
+def verdict_facts():
+    """DT-2: the numbers the pages quote about the steps, from the engine's own report (the committed example report,
+    made by dt-private's analyse()) and from wording.js's two-look promise, never typed in a template. The build fails
+    when wording.js's promise is for another Clear cut than the engine's."""
+    import math
+    import types
+    with open(SAMPLE_REPORT_JSON, encoding="utf-8") as f:
+        rep = json.load(f)
+    src = open(WORDING_JS, encoding="utf-8").read()
+    m = re.search(r"^export const TWO_LOOK = Object\.freeze\(\{ clear_cut: ([0-9.]+), per_100: ([0-9]+) \}\);$", src, re.M)
+    if not m:
+        die("wording.js: no TWO_LOOK line")
+    cuts = rep.get("step_cuts")
+    if not (isinstance(cuts, list) and len(cuts) == 2 and abs(float(m.group(1)) - cuts[0]) < 1e-12):
+        die(f"wording.js TWO_LOOK is for the Clear cut {m.group(1)}, the engine's report has {cuts}")
+    return {"clear_per_100": int(m.group(2)), "some_per_100": math.ceil(100 * cuts[1] - 1e-9), "min_group": rep["min_group"],
+            "n_family": rep["n_family"], "steps": types.SimpleNamespace(**step_labels())}   # attributes: "clear" is not dict.clear
+
+
+def step_pill(h):
+    labels = step_labels()
+    status = h.get("status")
+    key = h.get("step") if status == "tested" else status if status in ("too_few", "dates_only") else None
+    if key is None:
+        if status not in ("facts", "not_shipped"):
+            die(f"step_pill: {h.get('id')} has the status {status!r}")
+        return None
+    if key not in labels:
+        die(f"step_pill: {h.get('id')} has the step {key!r}, which wording.js STEP has no words for")
+    return (STEP_CLASS[key], labels[key])
 
 # Paths that may exist only when paid_report = true.
 PAID_APP_PATHS = ["/welcome/", "/restore/", "/report/"]  # noindex, and disallowed in robots.txt
@@ -2470,6 +2539,8 @@ def build():
     env.filters["usd_fr"] = usd_fr
     env.filters["isodate"] = isodate
     env.globals["crumb_items"] = crumb_items
+    env.globals["step_pill"] = step_pill
+    env.globals["verdict"] = verdict_facts()
     products = {p["id"]: p for p in prices["products"]}
     nav = nav_for(cfg["nav"], flags)
     base_ctx = {"site": cfg["site"], "flags": flags, "nav": nav, "nav_current": lambda pg: nav_current(nav, pg),

@@ -1,4 +1,6 @@
-"""Paid report wording R2 (ARCHITECT-STATS-AMENDMENT-R2-2026-10-21 sections 9.1-9.2), site/static/js/paid/wording.js.
+"""Paid report wording R2 (ARCHITECT-STATS-AMENDMENT-R2-2026-10-21 sections 9.1-9.2), now the frozen
+site/static/js/paid/wording-stats2f.js (DT-2 batch S1: method 2026-10-23.stats2f, DT-1, is worded by that frozen copy
+for one release, word for word as wording.js had it at 9d4bdde; DT-2's own wording is tests/test_dt2_report.py).
 
 W-1: every string, filled from synthetic and real (dt-private golden) reports, passes checks/lint.py in
 plain and in paid mode. W-2: page 1 driven through the 9 truth-table cases of section 9.1 prints exactly
@@ -42,7 +44,7 @@ def lint_text(*a, **k):
 FIX = os.path.join(HERE, "fixtures", "paid-reports")
 
 JS = r"""
-import * as W from './site/static/js/paid/wording.js';
+import * as W from './site/static/js/paid/wording-stats2f.js';
 import { readFileSync, readdirSync } from 'node:fs';
 const names = { hold_gap: 'Holding losers longer than winners', revenge: 'Re-entering soon after a loss',
   size_up: 'Size after a loss', tilt: 'Trading after a losing streak', oversized_loss: 'Losses much larger than your usual loss' };

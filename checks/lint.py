@@ -523,6 +523,61 @@ def key_num_per_section(html, where):
     return out
 
 
+# DT-2 (ARCHITECT-EVIDENCE-SCALE-AND-POWER-2026-10-31 §7 S1): banned.toml [verdict_hedges]. The verdict layer says
+# definite things: no hedge word, no overclaim, in the report's own strings (wording.js VERDICT_STRINGS) and in page
+# text marked data-lint="verdict" (the copy that defines the three steps).
+_VH = RULES["verdict_hedges"]
+VERDICT_HEDGES = [(w, _phrase_re(w)) for w in _VH["words"] + _VH["overclaims"]]
+VERDICT_HEDGES_FR = [(w, _phrase_re(w)) for w in _VH["words_fr"]]
+VERDICT_JS = "/static/js/paid/wording.js"
+
+
+def verdict_hedge_hits(text, where, french=False):
+    out = []
+    for w, rx in (VERDICT_HEDGES_FR if french else VERDICT_HEDGES):
+        for m in rx.finditer(text):
+            ctx = text[max(0, m.start() - 40):m.end() + 40].replace("\n", " ")
+            out.append(("verdict:hedge", where, f"“{w}” in …{ctx}…"))
+    return out
+
+
+def verdict_marked(html):
+    """The text of every element marked data-lint="verdict" (innermost tags removed)."""
+    return [re.sub(r"\s+", " ", visible_text(m.group(2))).strip()
+            for m in re.finditer(r'(?s)<(\w+)\b[^>]*\bdata-lint="verdict"[^>]*>(.*?)</\1>', html)]
+
+
+def verdict_strings(js_file):
+    """wording.js VERDICT_STRINGS, read by node from the file itself (a list of strings), or None without node."""
+    import shutil
+    import subprocess
+    if not shutil.which("node"):
+        return None
+    from pathlib import Path
+    code = f"import({json.dumps(Path(js_file).resolve().as_uri())}).then((W) => process.stdout.write(JSON.stringify(W.VERDICT_STRINGS || null)))"
+    r = subprocess.run(["node", "--input-type=module", "-e", code], capture_output=True, text=True)
+    if r.returncode != 0:
+        return ["(wording.js did not load: " + r.stderr.strip().splitlines()[-1] + ")"] if r.stderr.strip() else None
+    return json.loads(r.stdout)
+
+
+def verdict_string_problems(js_file, where, analytics=False):
+    """Every VERDICT_STRINGS entry: [verdict_hedges] plus the page word rules (paid mode)."""
+    strings = verdict_strings(js_file)
+    if strings is None:
+        WARNINGS.append(f"node not found: {where} VERDICT_STRINGS were NOT checked for hedge words")
+        return []
+    if not isinstance(strings, list) or len(strings) < 10 or not all(isinstance(x, str) for x in strings):
+        return [("verdict:strings", where, f"VERDICT_STRINGS is not a list of the verdict layer's strings: {str(strings)[:120]}")]
+    out = []
+    for i, t in enumerate(strings):
+        out += verdict_hedge_hits(t, f"{where}#VERDICT_STRINGS[{i}]")
+        out += lint_text(t, f"{where}#VERDICT_STRINGS[{i}]", paid=True, analytics=analytics)
+        if t.startswith("(wording.js did not load"):
+            out.append(("verdict:strings", where, t))
+    return out
+
+
 def lint_html(html, where, paid, analytics, allowed_amounts, private_values, commerce=None, pilot=False):
     """commerce: True when the seller block may appear (build.show_seller); defaults to paid or pilot."""
     commerce = (paid or pilot) if commerce is None else commerce
@@ -560,6 +615,8 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
             out.append(("flag:seller_block", where, "seller disclosure markup where the seller block is off "
                         "(paid_report off, and pilot_checkout off or [legal] show_seller_for_pilot = false)"))
     out += placeholder_problems(html, where)
+    for t in verdict_marked(html):
+        out += verdict_hedge_hits(t, where, french)
     if french:
         out += lint_text_fr(readable_text(strip_disclaimers(html)), where)
     if analytics is False and "cloudflareinsights" in html:
@@ -847,6 +904,8 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, b
                 problems += feed_problems(s, rel)
             if name == "answers-index.js":   # ARCHITECT-V3 A11: every answer unit passes the page wording rules
                 problems += answer_index_problems(s, rel, paid, analytics)
+            if rel == VERDICT_JS and paid:
+                problems += verdict_string_problems(fp, rel, analytics)
             if name.endswith(".js"):
                 problems += restore_email_claims(js_strings(s), rel)
                 problems += waive_dispute_claims(js_strings(s), rel)

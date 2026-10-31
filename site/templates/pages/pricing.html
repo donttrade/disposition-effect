@@ -118,7 +118,7 @@
     {{ answer_box("pg") }}
     {%- endif %}
     <details><summary>What exactly do I get?</summary><p>{{ page.product }}</p></details>
-    <details><summary>What does “tested against chance” mean?</summary><p>We check whether a habit’s pattern in your trades could just be luck. Your result says “distinguishable from noise” when it is unlikely to be luck, and “not distinguishable” when it could be. Up to two habits get this test; the others show what happened in your file.</p></details>
+    <details><summary>What does “checked against chance” mean?</summary><p data-lint="verdict">We compare a habit’s pattern in your trades with what chance alone gives when your own results are reshuffled. Each checked habit gets one of three results: {{ verdict.steps.none }}, {{ verdict.steps.some }} or {{ verdict.steps.clear }}, with a number for how often chance alone gives that result. A habit with fewer than {{ verdict.min_group }} trades in either group it compares shows “{{ verdict.steps.too_few }}”. Up to two habits get this check; the others show what happened in your file.</p></details>
     <details><summary>What does the re-test do?</summary><p>It runs the same test on a newer export of the same account, 30 to 60 days after your first result. {{ RETEST|safe }}</p></details>
     <details><summary>Which files work?</summary><p>MetaTrader 5 or 4, IBKR, Tradovate and TradingView exports (all in beta), or the donttrade CSV template.</p></details>
     <details><summary>Where does my file go?</summary><p>It stays in your browser. {{ strings.p5.long }}</p></details>

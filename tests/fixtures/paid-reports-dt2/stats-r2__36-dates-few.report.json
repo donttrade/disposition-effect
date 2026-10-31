@@ -1,0 +1,246 @@
+{
+ "catch_level": 0.009666666666666667,
+ "catch_max_trades": 5000,
+ "currency": "USD",
+ "dates_only": false,
+ "disclaimer": "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.",
+ "engine_commit": "golden",
+ "focus": null,
+ "habits": [
+  {
+   "catch": null,
+   "chance_per_100": null,
+   "detail": null,
+   "dollars": {
+    "amount": -1303.0900000000004,
+    "label": "Losing trades held longer than your median winning hold",
+    "n_trades": 38
+   },
+   "effect": 0.6474820143884892,
+   "id": "hold_gap",
+   "measure_a": 180,
+   "measure_b": 278,
+   "method": "earlier comparable trades (symbol, holding period, direction, time of day)",
+   "n_a": 101,
+   "n_a_compared": null,
+   "n_b": 99,
+   "n_b_compared": null,
+   "n_long_a": 2,
+   "n_long_b": 4,
+   "n_perm": null,
+   "name": "Holding losers longer than winners",
+   "p_holm": null,
+   "p_raw": null,
+   "question": "Do your losing trades stay open longer than your winning trades?",
+   "research_ref": {
+    "cite": "Odean, T. (1998). Are investors reluctant to realize their losses? Journal of Finance 53(5), 1775-1798.",
+    "url": "https://doi.org/10.1111/0022-1082.00072"
+   },
+   "share_a": null,
+   "share_b": null,
+   "spread_ratio": null,
+   "status": "facts",
+   "step": null
+  },
+  {
+   "catch": {
+    "at_least_10ths": [
+     1,
+     4,
+     6
+    ],
+    "caught": [
+     17,
+     32,
+     48
+    ],
+    "effect": {
+     "amount": 43,
+     "unit": "USD"
+    },
+    "n_perm": 199,
+    "reps": 60,
+    "sizes": [
+     200,
+     400,
+     800
+    ]
+   },
+   "chance_per_100": 100,
+   "detail": null,
+   "dollars": {
+    "amount": 1591.18,
+    "label": "Trades opened within 15 minutes of a losing trade's close",
+    "n_trades": 129
+   },
+   "effect": 8.219585825027686,
+   "id": "revenge",
+   "measure_a": 12.334728682170542,
+   "measure_b": 4.115142857142857,
+   "method": "within-day sequence shuffle (mean and rank)",
+   "n_a": 129,
+   "n_a_compared": null,
+   "n_b": 70,
+   "n_b_compared": null,
+   "n_perm": 10000,
+   "name": "Re-entering soon after a loss",
+   "p_holm": 1,
+   "p_mean1": 0.9317068293170683,
+   "p_rank1": 0.9582041795820418,
+   "p_raw": 0.9582041795820418,
+   "question": "Do trades opened within 15 minutes of a losing trade's close end differently from your other trades?",
+   "research_ref": {
+    "cite": "Coval, J. D. & Shumway, T. (2005). Do behavioral biases affect prices? Journal of Finance 60(1), 1-34.",
+    "url": null
+   },
+   "status": "tested",
+   "step": "none"
+  },
+  {
+   "catch": null,
+   "chance_per_100": null,
+   "detail": null,
+   "dollars": {
+    "amount": -17.180000000000035,
+    "label": "Trades after a loss at 1.5 times your usual size or more",
+    "n_trades": 13
+   },
+   "effect": 0.8882017126546147,
+   "id": "size_up",
+   "measure_a": 0.9335,
+   "measure_b": 1.051,
+   "method": "local rank (symbol, holding period, direction, time of day)",
+   "n_a": 100,
+   "n_a_compared": null,
+   "n_b": 99,
+   "n_b_compared": null,
+   "n_perm": null,
+   "name": "Size after a loss",
+   "p_holm": null,
+   "p_raw": null,
+   "question": "Is your trade size after a loss different from your size after a win?",
+   "research_ref": {
+    "cite": "Coval, J. D. & Shumway, T. (2005). Do behavioral biases affect prices? Journal of Finance 60(1), 1-34.",
+    "url": null
+   },
+   "share": null,
+   "status": "not_shipped",
+   "step": null
+  },
+  {
+   "catch": {
+    "at_least_10ths": [
+     4,
+     7,
+     8
+    ],
+    "caught": [
+     33,
+     51,
+     56
+    ],
+    "effect": {
+     "amount": 43,
+     "unit": "USD"
+    },
+    "n_perm": 199,
+    "reps": 60,
+    "sizes": [
+     200,
+     400,
+     800
+    ]
+   },
+   "chance_per_100": 50,
+   "detail": {
+    "streak3_amount": -529.4800000000001,
+    "streak3_mean": -13.93368421052632,
+    "streak3_n": 38
+   },
+   "dollars": {
+    "amount": -15.330000000000041,
+    "label": "Trades taken after 2 or more losses in a row",
+    "n_trades": 59
+   },
+   "effect": -13.792473365617433,
+   "id": "tilt",
+   "measure_a": -0.25983050847457695,
+   "measure_b": 13.532642857142855,
+   "method": "within-day sequence shuffle (mean and rank)",
+   "n_a": 59,
+   "n_a_compared": null,
+   "n_b": 140,
+   "n_b_compared": null,
+   "n_perm": 10000,
+   "name": "Trading after a losing streak",
+   "p_holm": 0.4901509849015098,
+   "p_mean1": 0.1633836616338366,
+   "p_rank1": 0.0504949505049495,
+   "p_raw": 0.1633836616338366,
+   "question": "Do trades taken after 2 or more losses in a row end differently from your other trades?",
+   "research_ref": {
+    "cite": "Coval, J. D. & Shumway, T. (2005). Do behavioral biases affect prices? Journal of Finance 60(1), 1-34.",
+    "url": null
+   },
+   "status": "tested",
+   "step": "none"
+  },
+  {
+   "catch": null,
+   "chance_per_100": null,
+   "detail": null,
+   "dollars": {
+    "amount": -2836.05,
+    "label": "Losses more than twice your median loss",
+    "n_trades": 24
+   },
+   "effect": 37.09,
+   "id": "oversized_loss",
+   "measure_a": 0.12,
+   "measure_b": 0.5523183915276321,
+   "method": null,
+   "n_a": 24,
+   "n_a_compared": null,
+   "n_b": 101,
+   "n_b_compared": null,
+   "n_perm": null,
+   "name": "Losses much larger than your usual loss",
+   "p_holm": null,
+   "p_raw": null,
+   "question": "How many of your losses were more than twice your typical loss?",
+   "research_ref": {
+    "cite": "Locke, P. R. & Mann, S. C. (2005). Professional trader discipline and trade disposition. Journal of Financial Economics 76(2), 401-444.",
+    "url": null
+   },
+   "status": "facts",
+   "step": null
+  }
+ ],
+ "method_label": "DT-2",
+ "method_version": "2026-10-30.stats3",
+ "min_group": 5,
+ "n_clear": 0,
+ "n_date_only_rows": 9,
+ "n_family": 3,
+ "n_rows": 200,
+ "n_some": 0,
+ "n_tested": 2,
+ "n_trades": 200,
+ "period_weeks": 2,
+ "pgr_plr": null,
+ "rule_library": [
+  "I write my exit condition down before I enter a trade.",
+  "I close a losing trade by the same written rule I use for a winning trade.",
+  "After a losing trade, I wait 15 minutes before I open the next one.",
+  "After two losing trades in a row, I stop trading for the day.",
+  "My size on the next trade does not change because of the last trade's result.",
+  "I trade only during the hours I set for myself in advance.",
+  "I review my trades at the end of the day, not while a trade is open."
+ ],
+ "rule_library_version": "2026-10-21.1",
+ "step_cuts": [
+  0.029,
+  0.2
+ ],
+ "v": 1
+}

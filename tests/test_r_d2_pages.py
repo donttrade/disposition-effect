@@ -32,11 +32,11 @@ STALE_R_D2 = ["tests up to four", "of the 4 patterns", "jusqu’à quatre", "tes
               "Published research on this pattern"]
 # 29 Oct (owner): "described, not tested" leaves the site; an uncalibrated habit says "luck check coming".
 ROW = "Did you hold losing trades longer than winning ones? (facts from your file)"   # stats round 2: no luck test yet
-SIZE_ROW = "Was the trade after a loss larger than the trade after a win? (luck check coming)"
+SIZE_ROW = "Was the trade after a loss larger than the trade after a win? (facts from your file)"   # DT-2: not shipped, facts
 COUNT = "tests up to two of these habits against chance in this version."
 COUNT_SOON = "test up to two of these habits against chance in this version."
 FR = ("par rapport aux gagnantes (faits tirés de votre fichier);",
-      "l’augmentation de la taille après des pertes (vérification du hasard à venir);",
+      "l’augmentation de la taille après des pertes (faits tirés de votre fichier);",
       "Il en teste jusqu’à deux par rapport au hasard")
 
 
@@ -84,12 +84,12 @@ def test_habit_tables_and_ledes(builds, flavour):
         if rel == "index.html" and flavour == "free":
             continue   # the flag-off home is not the trader home
         if 'class="habit-rows"' in raw(out, rel):   # sweep 2: the paid /for-traders/ shows the habits as table rows
-            assert t.count("Luck check coming") == 1 and t.count("Your numbers") == 2 and t.count("Tested against chance") == 2, (flavour, rel)
+            assert t.count("Luck check coming") == 0 and t.count("Your numbers") == 3 and t.count("Checked against chance") == 2, (flavour, rel)
             assert "described" not in t.lower() and "not tested" not in t.lower(), (flavour, rel)
             continue
         assert "Hold gap " + ROW in t, (flavour, rel)
         assert "Size after a loss " + SIZE_ROW in t, (flavour, rel)   # R-D3
-        assert t.count("(luck check coming)") == 1 and t.count("(facts from your file)") == 2, (flavour, rel)   # stats round 2
+        assert t.count("(luck check coming)") == 0 and t.count("(facts from your file)") == 3, (flavour, rel)   # DT-2
     ft = text_of(out, os.path.join("for-traders", "index.html"))
     assert COUNT in ft or COUNT_SOON in ft
     if flavour == "paid":   # QA 25 Oct: the home lede glosses "against chance" on first use
@@ -128,10 +128,11 @@ FT_LEDE_SOON = ("It will measure and describe up to five habits in your own past
                 "version. It will include one re-test 30 to 60 days after your first result. It will not tell you what to trade.")
 PRODUCT = ("Up to five habits measured in your own trades, with the dollar totals of the matching trades; up to two of "
            "them tested against chance in this version; plus one re-test 30 to 60 days after your first result.")
-BYP = ("a report on habits in your own past trades, built from a trade file you choose. It measures and describes up to five "
-       "habits, with the dollar totals of the matching trades, and tests up to two of them against chance in this version. "
-       "It includes one re-test 30 to 60 days after your first result. It describes what happened; it does not tell you "
-       "what to trade.")
+BYP = ("It measures and describes up to five habits, with the dollar totals of the matching trades, and tests up to two of them "
+       "against chance in this version. Each checked habit gets one of three results: No sign, Some sign or Clear sign. On "
+       "histories with no real habit, a Clear sign on any habit turns up at most 5 in 100 times across your test and its "
+       "re-test together, and Some sign or Clear sign at most 20 in 100 times in one result. It includes one re-test 30 to 60 "
+       "days after your first result. It describes what happened; it does not tell you what to trade.")   # DT-2 (plan §9.4 item 5)
 LOT = ("Sizing on paper is one thing. The donttrade test describes, from your own trade file when it has times of day, your median size after a loss "
        "and after a win, and what trades after a loss at 1.5 times your usual size or more totalled. It measures and "
        "describes up to five habits with the dollar totals of the matching trades, tests up to two of them against chance in this "
@@ -141,7 +142,7 @@ LOT_SOON = ("Sizing on paper is one thing. We’re building a test that describe
             "will measure and describe up to five habits with the dollar totals of the matching trades, test up to two of them "
             "against chance in this version, and include one re-test 30 to 60 days after your first result.")
 FR_FACTS = ("Pour chacune, quand le fichier le permet, il totalise les montants réalisés des transactions en cause. Il en teste jusqu’à deux par rapport au "
-            "hasard dans cette version : pour chacune, il indique si l’écart se distingue du hasard.",
+            "hasard dans cette version : chacune reçoit l’un de trois résultats, « Aucun signe », « Un certain signe » ou « Signe net ».",
             "Comprend un nouveau test gratuit, de 30 à 60 jours plus tard.",
             "Votre nouveau test est fait avec la version du rapport en ligne au moment où vous le lancez; chaque changement est "
             "daté, en anglais, sur la page des corrections.")
@@ -166,7 +167,7 @@ def test_i3b_exact_offer_lines_on_each_page(builds):
     assert FT_LEDE_SOON in text_of(free, os.path.join("for-traders", "index.html"))
     pr = text_of(paid, os.path.join("pricing", "index.html"))
     assert PRODUCT in pr and BYP in pr
-    assert DATES_RESTRICTION in pr and "A tested habit with fewer than 30 trades in either group" in pr   # T-3 T3-A, T3-B
+    assert DATES_RESTRICTION in pr and "A habit with fewer than 5 trades in either group it compares is shown as “Too few trades”." in pr   # DT-2
     assert lint_text(DATES_RESTRICTION) == [] and lint_text(DATES_RESTRICTION, "t3a", paid=True) == []
     # owner, 25 Oct: a paid tool page's one offer is partials/tool_next_step.html; its teaser box is left out
     lot_paid = text_of(paid, os.path.join("tools", "lot-size-calculator", "index.html"))

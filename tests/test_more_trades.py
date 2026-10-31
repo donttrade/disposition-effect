@@ -1,11 +1,13 @@
-"""Bundle slice 1 (and the Tester's slice 1 fixes: group-share bands, rounding up, a floor of 10) (ARCHITECT-BUNDLE-DONTTRADE-TEST-2026-10-31 §2.2, §4, B7).
+"""DT-2: "more trades" is the in-file catch line (ARCHITECT-EVIDENCE-SCALE-AND-POWER-2026-10-31 §5.2, §5.3; batch S1
+deletes the static power table, SHOW_MORE_TRADES and every MORE_TRADES_* string).
 
-* "N more trades to tell" (wording.js moreTrades, power-table.js): only for a tested habit whose verdict is "could be
-  luck"; never for "unlikely to be luck", facts-only habits, too_few or untested habits; N comes from the fixed
-  moderate-pattern table, so two reports that differ only in the file's own gap print the same line; a table from
-  another engine method is refused; the 1,000 cap and the "already" case; every new string passes the lint.
-* The pay step's expectation line: in pay_facts (dialog and /pricing/), lint-clean, no digits, ≤ 14 words.
-* B7: teaserText (a luck result next to the offer) is gone."""
+* The catch line (wording.js catchLine): under every No sign and Some sign, never under a Clear sign, a too-few,
+  dates-only or facts-only habit. Its figures are the engine's (report catch: sizes, at_least_10ths, effect), so two
+  reports that differ only in the file's own gap print the same line; a bound of 0 says "fewer than 1 in 10"; one,
+  two or three sizes; a file over the engine's catch_max_trades gets the fixed line; a forged bound is refused.
+* The pay step's expectation line: in pay_facts (dialog and /pricing/), definite (no hedge word), lint-clean, no
+  digits, at most 14 words, and it names "No sign".
+* The power table and its builder are gone; B7: teaserText (a luck result next to the offer) is gone."""
 import json
 import os
 import re
@@ -15,39 +17,40 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 sys.path.insert(0, os.path.join(REPO, "checks"))
-from lint import lint_text  # noqa: E402
+from lint import lint_text, verdict_hedge_hits  # noqa: E402
 
 JS = r"""
 import { readFileSync } from 'node:fs';
 const W = await import('./site/static/js/paid/wording.js');
-const { POWER_TABLE } = await import('./site/static/js/paid/power-table.js');
-const base = JSON.parse(readFileSync('site/config/sample-report.report.json', 'utf8'));
+const base = JSON.parse(readFileSync('tests/fixtures/paid-reports-dt2/stats__07-dayvol-trend_right_skew-220.report.json', 'utf8'));
 const clone = () => JSON.parse(JSON.stringify(base));
-const out = {};
 const by = (r, id) => r.habits.find((h) => h.id === id);
-out.sample = Object.fromEntries(base.habits.map((h) => [h.id, W.moreTrades(h, base)]));
-// the file's own gap never moves N
+const fmt = { money: (x) => (x < 0 ? '−$' : '+$') + Math.abs(x).toFixed(2), amount: (x) => '$' + Math.abs(x).toFixed(2), count: (n) => n.toLocaleString('en-US') };
+const run = (f) => { try { return f(); } catch (e) { return 'THROW: ' + e.message; } };
+const out = {};
+out.check = Object.fromEntries(base.habits.map((h) => [h.id, W.habitLines(h, base, fmt).check]));
+// the file's own gap never moves the catch line
 const a = clone(), b = clone();
-by(b, 'tilt').effect = -50; by(b, 'tilt').measure_a = -60; by(b, 'tilt').dollars.amount = -9999;
-out.same = JSON.stringify(W.moreTrades(by(a, 'tilt'), a)) === JSON.stringify(W.moreTrades(by(b, 'tilt'), b));
-// a hand-made table: band 0 never reaches even odds, band 1 not simulated, band 2 reaches it at 170 trades
-const N = POWER_TABLE.n;
-const row = (p) => ({ share: [0, 1], power: p, worlds: ['x'], cells: {} });
-const T = { ...POWER_TABLE, bands: { tilt: [[0, 0.15], [0.15, 0.25], [0.25, 0.35], [0.35, 0.5], [0.5, 1]] }, habits: { tilt: [
-  row(N.map(() => 0.2)), row(null), row([0, 0, 0.25, 0.45, 0.6, 0.8, 0.9, 1, 1]), row(N.map(() => 1)), row(null)] } };
-const at = (n, na, table = T) => { const r = clone(); r.n_trades = n; r.n_rows = n; by(r, 'tilt').n_a = na; return W.moreTrades(by(r, 'tilt'), r, undefined, table); };
-out.even = W.tradesForEvenOdds(T.habits.tilt[2], T);
-out.low = at(300, 30); out.unknown = at(300, 60); out.near = at(out.even - 1, Math.round(0.3 * (out.even - 1)));
-out.small = at(120, 36); out.past = at(400, 120); out.high = at(120, 48);
-out.share = [at(300, 30).line, at(300, 90).line];
-// N never below the table's size, whatever the file size
-out.floor = [];
-for (let n = 40; n <= 2000; n += 7) { const m = at(n, Math.round(0.3 * n)); if (m.bar) out.floor.push([n, m.bar.of, m.bar.of - n]); }
-try { W.moreTrades(by(base, 'tilt'), base, undefined, { ...POWER_TABLE, method_version: 'x' }); out.mismatch = 'no throw'; } catch (e) { out.mismatch = 'threw'; }
-out.real = Object.fromEntries(Object.entries(POWER_TABLE.habits).map(([id, rows]) => [id, rows.map((r) => r.power)]));
-out.strings = W.BUNDLE_STRINGS;
-out.table = { mv: POWER_TABLE.method_version, k: POWER_TABLE.reference_effect_sd, bands: POWER_TABLE.bands.tilt.length };
-out.method = W.METHOD_VERSION;
+Object.assign(by(b, 'revenge'), { measure_a: -60, effect: -61.5 }); by(b, 'revenge').dollars.amount = -9999;
+out.same = W.catchLine(by(a, 'revenge'), a, fmt) === W.catchLine(by(b, 'revenge'), b, fmt);
+// sizes and bounds
+const withCatch = (sizes, t) => { const r = clone(); const h = by(r, 'tilt'); r.n_trades = sizes[0]; r.n_rows = sizes[0];
+  h.catch = { ...h.catch, sizes, at_least_10ths: t, caught: t.map((x) => Math.ceil(6 * x) + 6) }; return [h, r]; };
+out.three = W.catchLine(...withCatch([220, 440, 880], [0, 4, 10]), fmt);
+out.two = W.catchLine(...withCatch([1500, 3000], [6, 9]), fmt);
+out.one = W.catchLine(...withCatch([4500], [7]), fmt);
+// over the engine's limit, and every result the same size
+const big = clone(); big.n_trades = 6000; big.n_rows = 6000; by(big, 'revenge').catch = null;
+out.over = W.catchLine(by(big, 'revenge'), big, fmt);
+const flat = clone(); by(flat, 'revenge').catch.effect.amount = 0;
+out.flat = W.catchLine(by(flat, 'revenge'), flat, fmt);
+// a forged bound (more than the caught count allows) is refused
+const forged = clone(); by(forged, 'revenge').catch.at_least_10ths = [0, 0, 9];
+out.forged = run(() => W.checkReport(forged));
+const missing = clone(); by(missing, 'tilt').catch = null;
+out.missing = run(() => W.checkReport(missing));
+out.strings = W.VERDICT_STRINGS;
+out.exports = Object.keys(W);
 console.log(JSON.stringify(out));
 """
 
@@ -57,51 +60,62 @@ def run():
     return json.loads(r.stdout)
 
 
-def test_more_trades_rules():
+def test_the_catch_line_sits_under_no_sign_and_some_sign_only():
     o = run()
-    s = o["sample"]
-    assert s["revenge"] is None                       # unlikely to be luck: no N
-    assert s["hold_gap"] is None and s["size_up"] is None and s["oversized_loss"] is None
-    assert s["tilt"] is not None
+    c = o["check"]
+    # stats__07: revenge and tilt both Some sign (11 in 100), so each has its step line, the guard and the catch line
+    for hid in ("revenge", "tilt"):
+        assert len(c[hid]) == 3 and c[hid][0].startswith("Some sign of this habit in these 220 trades, short of clear.")
+        assert c[hid][2].startswith("If your next trades look like these: when ")
+    assert c["revenge"][2] == ("If your next trades look like these: when trades soon after a loss end $48.00 worse each, files of 220 trades show "
+                               "it as a Clear sign fewer than 1 in 10 times, 440 trades fewer than 1 in 10, and 880 trades at least 3 in 10.")
+    for hid in ("hold_gap", "size_up", "oversized_loss"):
+        assert c[hid] == []
     assert o["same"] is True
-    assert o["mismatch"] == "threw"
-    assert o["table"] == {"mv": o["method"], "k": 0.5, "bands": 5}
-    assert o["even"] == 170
-    assert o["low"]["line"].startswith("More trades may not settle this.") and o["low"]["bar"] is None
-    assert o["unknown"]["line"].startswith("We can’t say how many more trades") and o["unknown"]["bar"] is None
-    assert o["near"]["line"] == "About 10 more trades would give this check even odds of telling a moderate pattern from luck."
-    assert o["small"]["line"] == "About 50 more trades would give this check even odds of telling a moderate pattern from luck."
-    assert o["small"]["bar"] == {"have": 120, "of": 170, "label": "120 of about 170 trades"}
-    assert o["small"]["caveat"] == "Assumes your next trades look like these."
-    assert o["past"]["line"].startswith("The 400 trades in this file already") and o["past"]["caveat"] is None
-    assert o["high"]["line"].startswith("The 120 trades in this file already")   # share band 0.35-0.5 is at even odds from 40
-    assert o["share"][0] != o["share"][1]             # same size, different share, different answer
-    assert o["floor"] and all(of >= 170 and more >= 10 and more % 10 == 0 for _, of, more in o["floor"])
 
 
-def test_real_table_is_monotone_and_banded():
+def test_catch_line_sizes_bounds_and_fixed_lines():
     o = run()
-    for id_, rows in o["real"].items():
-        assert len(rows) == 5
-        for p in rows:
-            if p is not None:
-                assert len(p) == 9 and all(p[i] <= p[i + 1] for i in range(8)), (id_, p)
+    assert o["three"] == ("If your next trades look like these: when trades after 2 or more losses in a row end $48.00 worse each, files of 220 "
+                          "trades show it as a Clear sign fewer than 1 in 10 times, 440 trades at least 4 in 10, and 880 trades at least 10 in 10.")
+    assert o["two"].endswith("files of 1,500 trades show it as a Clear sign at least 6 in 10 times, and 3,000 trades at least 9 in 10.")
+    assert o["one"].endswith("files of 4,500 trades show it as a Clear sign at least 7 in 10 times.")
+    assert o["over"] == "Files over 5,000 trades get no catch figure."
+    assert o["flat"] == "Every trade in this file has the same result, so it gets no catch figure."
+    assert o["forged"].startswith("THROW: wording: revenge has a malformed catch figure")
+    assert o["missing"].startswith("THROW: wording: tilt is checked on 220 trades with no catch figure")
+
+
+def test_the_power_table_and_its_strings_are_gone():
+    o = run()
+    for gone in ("moreTrades", "BUNDLE_STRINGS", "bandFor", "tradesForEvenOdds", "MORE_TRADES_ODDS", "MORE_TRADES_CAVEAT", "moreTradesHow"):
+        assert gone not in o["exports"], gone
+    assert not os.path.exists(os.path.join(REPO, "site/static/js/paid/power-table.js"))
+    assert not os.path.exists(os.path.join(REPO, "checks/power_table"))
+    src = open(os.path.join(REPO, "site/static/js/paid/report.js"), encoding="utf-8").read()
+    for gone in ("SHOW_MORE_TRADES", "moreTrades", "more-trades", "even odds"):
+        assert gone not in src, gone
 
 
 def test_new_strings_lint_clean():
     for s in run()["strings"]:
         assert lint_text(s, "report/index.html", paid=True, analytics=True) == [], s
+        assert verdict_hedge_hits(s, "report/index.html") == [], s
 
 
 def test_pay_expectation_line():
+    sys.path.insert(0, os.path.join(REPO, "site"))
+    import build as B
     src = open(os.path.join(REPO, "site", "templates", "partials", "pay_facts.html"), encoding="utf-8").read()
-    m = re.search(r'<p class="pay-expect small">([^<]+)</p>', src)
+    m = re.search(r'<p class="pay-expect small" data-lint="verdict">([^<]+)</p>', src)
     assert m
-    line = m.group(1)
+    line = m.group(1).replace("{{ verdict.steps.none }}", B.step_labels()["none"])
+    assert line == "Small files often show “No sign”. Every dollar total and rule check is included."
     assert not re.search(r"\d", line)
     assert len(re.findall(r"[A-Za-z’']+", line)) <= 14
-    assert "would tell" not in line   # Tester slice 1: the report gives even odds, not a promise
+    assert "would tell" not in line and "not clear" not in line.lower()
     assert lint_text(line, "pricing/index.html", paid=True, analytics=True) == []
+    assert verdict_hedge_hits(line, "pricing/index.html") == []
     banned = ["advice", "recommend", "should", "fix", "coach", "must", "need to", "signal", "improve", "mentor", "certified",
               "verified", "audited", "seal"]
     assert not [w for w in banned if w in line.lower()]

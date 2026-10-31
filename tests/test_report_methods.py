@@ -68,7 +68,8 @@ def test_the_corrections_count_is_still_the_corrections_log(built_site):
 
 @pytest.mark.skipif(not os.path.isfile(os.path.join(PRIVATE, "src", "core", "habits.mjs")), reason="dt-private (server) not present")
 def test_the_server_method_equals_the_page_method_and_has_a_dated_entry():
-    server = method_of(os.path.join(PRIVATE, "src", "core", "habits.mjs"), r"^export const METHOD_VERSION = '([^']+)';$")
+    # DT-2 (dt-private E1): the server's line may carry a trailing comment
+    server = method_of(os.path.join(PRIVATE, "src", "core", "habits.mjs"), r"^export const METHOD_VERSION = '([^']+)';(?:\s*//.*)?$")
     assert server == page_method()
     assert server in {e["method"] for e in entries()}
 
@@ -84,3 +85,25 @@ def test_a_build_without_an_entry_for_the_page_method_fails(tmp_path):
     r = subprocess.run([sys.executable, os.path.join(REPO, "site", "build.py")], env=env, capture_output=True, text=True)
     assert r.returncode != 0
     assert f"the report page's METHOD_VERSION {page_method()} has no dated entry" in r.stdout + r.stderr
+
+
+def test_the_frozen_dt1_method_keeps_its_entry_and_no_entry_has_a_placeholder(tmp_path):
+    """DT-2 dual accept: wording-stats2f.js still words DT-1 reports, so its method needs its dated entry too; and the
+    DT-2 entry is published only with every figure filled (plan §11: the build refuses a placeholder)."""
+    assert "2026-10-23.stats2f" in {e["method"] for e in entries()}
+    dt2 = next(e for e in entries() if e["method"] == page_method())
+    assert dt2["name"] == "DT-2" and "{" not in dt2["text"]
+    assert "at least 5 trades in both groups it compares (was 30)" in dt2["text"]
+    d = json.load(open(METHODS, encoding="utf-8"))
+    for name, change in (("frozen", lambda d: d.update(entries=[e for e in d["entries"] if e["method"] != "2026-10-23.stats2f"])),
+                         ("placeholder", lambda d: d["entries"][0].update(text=d["entries"][0]["text"] + " Measured: {x} in 100."))):
+        dd = json.loads(json.dumps(d))
+        change(dd)
+        p = tmp_path / f"{name}.json"
+        p.write_text(json.dumps(dd), encoding="utf-8")
+        env = {**os.environ, "DT_OUT": str(tmp_path / name), "DT_REPORT_METHODS_JSON": str(p)}
+        env.pop("DT_DEV", None)
+        r = subprocess.run([sys.executable, os.path.join(REPO, "site", "build.py")], env=env, capture_output=True, text=True)
+        assert r.returncode != 0, name
+        want = "METHOD_VERSION 2026-10-23.stats2f has no dated entry" if name == "frozen" else "has an unfilled placeholder"
+        assert want in r.stdout + r.stderr, (name, r.stdout + r.stderr)

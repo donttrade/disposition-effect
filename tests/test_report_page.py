@@ -63,12 +63,13 @@ def test_rule_library_order_identical_across_reports(three_reports):
 
 
 def test_focus_page_one(three_reports):
-    # the 40-trade MT5 file has groups under 30, so nothing is tested (R-D3 addendum 3: the None line replaces H0a/H0b).
-    # Its opens are 10 each at 09:00, 09:05, 09:10 and 09:15: it is NOT dates-only (stats2f), so no dates line.
+    # DT-2 (batch S1): the 40-trade MT5 file. Its opens are 10 each at 09:00, 09:05, 09:10 and 09:15: it is NOT
+    # dates-only, so no dates line. With the group minimum of 5 its habits get a step or "Too few trades"; page 1 says how
+    # many of the 3 habits were checked, and no retired label is shown.
     t = three_reports[FILES[0]]["text"]
-    assert "None of the patterns could be tested in this file. Some are shown below without a verdict." in t   # 29 Oct: report.js plain()
     assert "open at exactly 00:00" not in t and "No pattern in this file is distinguishable from noise." not in t
-    assert "Luck check coming: " in t and "described" not in t and "not tested" not in t.lower()
+    assert " of 3 habits checked against chance. Each check needs at least 5 trades in both groups it compares." in t
+    assert "Luck check coming" not in t and "described" not in t and "not tested" not in t.lower()
     assert three_reports[FILES[0]]["text"].lstrip().startswith("donttrade measures your own past trades.")
 
 

@@ -73,8 +73,9 @@ def test_dt1_is_always_named_with_its_descriptor(built_site):
         for m in re.finditer(r"\bDT-\d+\b", t):
             win = t[max(0, m.start() - 250):m.end() + 250]
             assert "the donttrade test" in win.lower() or "test donttrade" in win.lower(), (path, win)
-    assert "DT-1" in text(html(built_site, "/corrections/"))
-    assert "Method DT-1 of the donttrade test, a habit test on your own trades" in text(html(built_site, "/sample-report/"))
+    assert "DT-1" in text(html(built_site, "/corrections/")) and "DT-2" in text(html(built_site, "/corrections/"))
+    # DT-2 batch S2: the example report is the DT-2 engine's output on the same committed file
+    assert "Method DT-2 of the donttrade test, a habit test on your own trades" in text(html(built_site, "/sample-report/"))
 
 
 # ------------------------------------------------------------------ /pricing/: two packages
@@ -208,56 +209,56 @@ def test_word_budgets_on_new_strings(built_site):
 # ------------------------------------------------------------------ the report in two layers (owner, 29 Oct)
 @pytest.mark.parametrize("width", [1280, 390])
 def test_example_report_shows_two_layers_and_never_described_or_not_tested(browser, built_site, width):
+    """DT-2 (batch S1): the checked habits' second layer is "Habit or chance?" with a step pill; the hold gap, large
+    losses and size after a loss (not shipped) are "Your numbers", no pill; no retired label is left."""
     ctx = browser.new_context(viewport={"width": width, "height": 900})
     pg = ctx.new_page()
     pg.goto(built_site["url"] + "/sample-report/")
     pg.wait_for_selector("#sample-out .habit")
     t = pg.inner_text("main")
-    for bad in ("described", "Described", "not tested", "Not tested", "Unusually large"):
+    for bad in ("described", "Described", "not tested", "Not tested", "Unusually large", "Luck check coming", "Unlikely to be luck",
+                "Not clear yet", "Real or luck?", "Why not yet", "luck"):
         assert bad not in t, bad
     n = pg.locator("#sample-out .habit").count()
     assert n == 5
-    assert pg.locator("#sample-out .habit .layer-what h4").count() == 5 and pg.locator("#sample-out .habit .layer-luck h4").count() == 3
-    assert "Large losses" in t and "Luck check coming" in t and "Unlikely to be luck" in t and "Not clear yet" in t
-    # stats round 2: size after a loss keeps "Luck check coming"; the hold gap and large losses are "Your numbers", no pill
-    sec = pg.locator("#habit-size_up")
-    assert sec.locator(".badge-coming").inner_text() == "Luck check coming" and sec.locator(".luck-why summary").inner_text() == "Why not yet"
-    why = sec.locator(".luck-why p").text_content()
-    assert why.startswith("In our tests on files built to have no real pattern") and "described" not in why
+    assert pg.locator("#sample-out .habit .layer-what h4").count() == 5 and pg.locator("#sample-out .habit .layer-check h4").count() == 2
+    assert pg.locator("#sample-out .habit .layer-check h4").all_text_contents() == ["Habit or chance?", "Habit or chance?"]
+    assert pg.locator("#habit-revenge .layer-check .badge").inner_text() == "Some sign"
+    assert pg.locator("#habit-tilt .layer-check .badge").inner_text() == "No sign"
+    assert "Large losses" in t
     assert pg.locator("#your-numbers h2").inner_text() == "Your numbers"
-    assert pg.locator("#your-numbers .yn-why p").text_content() == ("These are facts from your file. We have not found a fair way "
-                                                                   "to test them against luck yet.")
-    for hid in ("hold_gap", "oversized_loss"):
+    assert pg.locator("#your-numbers .yn-why p").text_content() == "Facts from your file. No check against chance exists for these habits in this version."
+    for hid in ("hold_gap", "size_up", "oversized_loss"):
         s2 = pg.locator(f"#your-numbers #habit-{hid}")
-        assert s2.count() == 1 and s2.locator(".badge").count() == 0 and s2.locator(".layer-luck").count() == 0
-    assert pg.locator("#sample-out .badge-coming").count() == 1 + 1   # the size-up section and its summary row
+        assert s2.count() == 1 and s2.locator(".badge").count() == 0 and s2.locator(".layer-check").count() == 0
     tested = pg.evaluate("[...document.querySelectorAll('#sample-out .habit')].map(s => s.id)")
-    assert tested.index("habit-tilt") < tested.index("habit-hold_gap")   # the tested habits come first
+    assert tested.index("habit-tilt") < tested.index("habit-hold_gap")   # the checked habits come first
     # print shows every folded part, then folds them back
     pg.evaluate("window.dispatchEvent(new Event('beforeprint'))")
     assert pg.locator("#sample-out details:not([open])").count() == 0
     pg.evaluate("window.dispatchEvent(new Event('afterprint'))")
-    assert pg.locator("#sample-out .luck-why[open]").count() == 0
+    assert pg.locator("#sample-out .habit-how[open]").count() == 0
     ctx.close()
 
 
-def test_plain_rewords_every_described_or_not_tested_line(browser, built_site):
-    """Every wording.js line that says "described" or "not tested" (V-launch, V-launch-size, the dates-only and
-    spread lines, NONE_TESTED) comes out of report.js's plain() without those words; wording.js is unchanged."""
+def test_frozen_dt1_lines_are_reworded_for_display(browser, built_site):
+    """Every frozen DT-1 line (wording-stats2f.js) that says "described" or "not tested" (V-launch, V-launch-size, the
+    dates-only and spread lines, NONE_TESTED) comes out of verdict-stats2f.js's shown() without those words, and
+    without the retired "luck check" words; wording-stats2f.js is unchanged."""
     ctx = browser.new_context()
     pg = ctx.new_page()
     pg.goto(built_site["url"] + "/sample-report/")
     pg.wait_for_selector("#sample-out .habit")
     out = pg.evaluate("""async () => {
-      const r = await import('/static/js/paid/report.js'), w = await import('/static/js/paid/wording.js');
+      const r = await import('/static/js/paid/verdict-stats2f.js'), w = await import('/static/js/paid/wording-stats2f.js');
       const T = 'All 12 trades in this file';
       const lines = [w.V_LAUNCH, w.V_LAUNCH_SIZE, w.NONE_TESTED, w.V_SPREAD0, w.vDatesOnly(T), w.sizeNotDescribed(T), w.datesP1(T),
         'Not tested: the holds of your losing and winning trades are spread very differently (x).'];
-      return lines.map((s) => [s, r.plain(s)]);
+      return lines.map((s) => [s, r.shown(s)]);
     }""")
     ctx.close()
     for before, after in out:
-        assert not re.search(r"(?i)\bdescribed\b|\bnot tested\b", after), (before, after)
+        assert not re.search(r"(?i)\bdescribed\b|\bnot tested\b|luck check", after), (before, after)
         assert re.search(r"(?i)described|not tested", before), before
         assert L.lint_text(after) == [] and L.lint_text(after, "shown", paid=True) == [], after   # incl. banned:retired_name
 
