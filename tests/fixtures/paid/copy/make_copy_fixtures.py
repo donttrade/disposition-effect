@@ -2,8 +2,9 @@
 
 acct_a.csv          60 trades, ES/NQ, 30 minutes apart. Trades 58 and 59 are the same symbol and direction, opened
                     and closed 1 minute apart IN THE SAME FILE (they never collapse).
-acct_b.csv          45 trades: copies of acct_a trades 0-29 at half size with a lag of 0,1,2,3,4,5 minutes (5 each; all
-                    collapse), copies of trades 30-34 at a lag of 6 minutes (none collapse), and 10 CL trades of its own.
+acct_b.csv          45 trades: copies of acct_a trades 0-29 at half size with a lag of 0,3,6,9,12,15 minutes (5 each; all
+                    collapse: the window is 15 minutes), copies of trades 30-34 at a lag of 16 minutes (none collapse;
+                    they are the 5 near-copies, 15 to 60 minutes apart), and 10 CL trades of its own.
 acct_a_overlap.csv  acct_a's trades 40-59 again (an overlapping export: counted once) plus 20 new ES trades.
 acct_c.csv          25 GC trades of its own: acct_a + acct_b + acct_c = 60 + 45 - 30 + 25 = 100 trades.
 """
@@ -51,7 +52,7 @@ def main():
     write("acct_a.csv", a)
     b = []
     for i in range(35):
-        lag = dt.timedelta(minutes=i // 5 if i < 30 else 6)
+        lag = dt.timedelta(minutes=3 * (i // 5) if i < 30 else 16)
         o, c, sym, d, q, p0, p1, fee = a[i]
         b.append((o + lag, c + lag, sym, d, 1, p0, p1, 0.5))
     for j in range(10):

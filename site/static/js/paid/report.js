@@ -6,7 +6,7 @@
 // Every number on the page comes from the server's Report or from the file in this
 // tab; the wording only describes past trades (NON-ADVISER A3).
 
-import { readAll, copyLine, copiesIn, serverTradeCount, overlapLine, accountsLine, filesLabel, SMALL_FILE } from './merge.js';
+import { readAll, copyLine, nearLine, copiesIn, serverTradeCount, overlapLine, accountsLine, filesLabel, SMALL_FILE } from './merge.js';
 import { ics, retestLine, RETEST_LINE } from './retest-copy.js';
 import { pgrPlrCounts } from '../engine/pgr.js';
 import { stripRows, spanLine } from './strip.js';
@@ -388,6 +388,7 @@ export function renderReport(report, out, meta) {
   // S3: trades from different files counted once as copies (merge.js), only when there were any
   if (meta && Array.isArray(meta.accounts) && meta.files > 1) p1.append(el('p', { class: 'small', id: 'accounts-line', text: accountsLine(meta.accounts.length, meta.files) }));
   if (meta && meta.copies) p1.append(el('p', { class: 'small', id: 'copy-rows', text: copyLine(meta.copies) }));
+  if (meta && meta.near) p1.append(el('p', { class: 'small', id: 'near-rows', text: nearLine(meta.near) }));
   out.append(p1);
 
   out.append(habitsSummary(report, unit));
@@ -586,7 +587,7 @@ async function stage(files) {
     if (r.overlap) notes.push(overlapLine(r.overlap));
     if (stripped.span_left_out) notes.push(spanLine(stripped.span_left_out));
     picked = files;
-    ready = { stripped, counts: pgrPlrCounts(r.executions), currency: r.trades[0].pnl_unit, copies: copiesIn(kept),
+    ready = { stripped, counts: pgrPlrCounts(r.executions), currency: r.trades[0].pnl_unit, copies: copiesIn(kept), near: r.near,
       trades: r.factsTrades, accounts: r.accounts, groups: r.groups, files: r.files, question: r.question, format: r.format || null,
       n: serverTradeCount(stripped.rows), notes };
     $('rp-status').hidden = true;
@@ -602,7 +603,7 @@ async function send() {
   if (busy || !ready) return;
   busy = true;
   $('rp-run').disabled = true;
-  const { stripped, counts, currency, copies, trades, accounts, files, format } = ready;
+  const { stripped, counts, currency, copies, near, trades, accounts, files, format } = ready;
   try {
     const firm = $('rp-firm').value.trim();
     const body = { v: 1, token, rows: stripped.rows, currency, pgr_plr: counts,
@@ -618,7 +619,7 @@ async function send() {
     $('rp-status').hidden = true;
     try {
       renderReport(r.json.report, $('rp-out'), { limited: stripped.limited, span_left_out: stripped.span_left_out, retest: r.json.retest || null,
-        uses_left: r.json.uses_left, copies, trades, accounts, files, format });
+        uses_left: r.json.uses_left, copies, near, trades, accounts, files, format });
     } catch (e) {
       // wording.js throws rather than print a sentence that is not true of this report (R2-3).
       $('rp-out').replaceChildren();
