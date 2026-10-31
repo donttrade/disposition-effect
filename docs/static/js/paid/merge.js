@@ -51,6 +51,16 @@ export const TOO_MANY_ACCOUNTS = `These files are from more than ${MAX_ACCOUNTS}
 // The account index of a trade for the server (its group, in the order the files were met), or null for one account.
 export const accountOf = (groups) => (groups > 1 ? (t) => t._g : null);
 export const SMALL_FILE = 100;              // owner Q3: fewer trades than this → the small-file notice
+// Release test B3: the Worker refuses a report on fewer than MIN_TRADES distinct trades (dt-private validate.mjs MIN_ROWS,
+// counted by app.mjs printCounts as distinct (f, h, d, p) rows; tests/test_min_trades.py holds the two equal). The one
+// site constant: the panel blocks Run below it, and site/build.py reads it for every page that states the minimum.
+export const MIN_TRADES = 30;
+export function distinctTrades(rows) {
+  const seen = new Set();
+  for (const r of rows) seen.add(r.f + '|' + r.h + '|' + r.d + '|' + r.p);
+  return seen.size;
+}
+export const minTradesLine = (n, files, min = MIN_TRADES) => `${files === 1 ? 'This file has' : 'These files have'} ${grouped(n)} closed ${n === 1 ? 'trade' : 'trades'}. A report needs at least ${grouped(min)}. Nothing is sent and your run is not used. Add more files to reach ${grouped(min)}.`;
 const DAY_MS = 86400000;
 
 const grouped = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
