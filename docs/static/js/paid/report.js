@@ -13,7 +13,7 @@ import { stripRows, spanLine } from './strip.js?v=03137080';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js?v=16f6dd26';
 import * as DT2 from './wording.js?v=bda30e6a';
 import * as S2F from './verdict-stats2f.js?v=47600b9f';
-import { factsSection, challengeSection, smallLayout, presetsFromPage } from './small-facts-view.js?v=ef31dc5c';
+import { factsSection, challengeSection, smallLayout, presetsFromPage } from './small-facts-view.js?v=7385cba9';
 import { reportTrades } from './small-facts.js?v=78faeb32';
 
 // DT-2 (ARCHITECT-EVIDENCE-SCALE-AND-POWER-2026-10-31 §7 S1): the report's method_version picks its wording. wording.js
