@@ -2,20 +2,21 @@
 // SCALE-AND-POWER §7 S3; Tester S3 report B2–B4, M1, M3). No DOM, no network: report.js calls readFiles, then
 // strip.js strips the result.
 //
-// 1. Every file is read ON ITS OWN first (index.js runFile), so fills from different accounts never share one
-//    position book (Tester B2: pooled books made up trades). All files must be of one platform and report type
-//    (E_MIXED_FILES): an MT5 positions report and an MT5 deals report are two report types.
-// 2. Files that share rows (an overlapping monthly export, or two months of one account) are one account: they are
-//    read together by the engine (runFiles → dropOverlap counts each shared row once). A group read that gives fewer
-//    trades than one of its files alone is refused, naming the files (Tester B3: a file is never dropped silently).
-// 3. All accounts must report in one currency or unit, or the files are refused (Tester M1).
-// 4. Copy collapse, before stripping: a trade copied to a second account shows up in each account's file. Trades
+// 1. Every file is read ON ITS OWN, as its own account: its own fills make its own positions and trades. No fill is
+//    ever deduped, matched or pooled across files (Tester S3 B2 and re-test R2: a shared position book, even one joined
+//    by one identical fill, makes up trades). A position open across the edge of a file is left out, and said so.
+//    All files must be of one platform and report type (E_MIXED_FILES).
+// 2. Closed trades that are identical in two files (an overlapping export of one account: same symbol, direction,
+//    open, close, size, prices, fees and P&L) are counted once, and the page says how many before the run.
+// 3. All files must report in one currency or unit, or they are refused (Tester M1).
+// 4. Copy collapse, after positions and before stripping: a trade copied to a second account shows up in each account's file. Trades
 //    from DIFFERENT accounts with the same symbol and direction, opened within 5 minutes of each other and closed
 //    within 5 minutes of each other, become one trade (P&L, gross, fees, fills and quantity summed). Unmerged copies
 //    doubled revenge's false-alarm rate (copy.mjs: 8.0 in 100 at a 2.5 level; 1.8–3.0 after the collapse). Trades of
 //    one account never collapse, however close; date-only trades (no time of day) never collapse (Tester M3).
 
-import { runFiles, runFile } from '../engine/index.js';
+import { runFile, readRows } from '../engine/index.js';
+import { detectHtml } from '../engine/detect.js';
 import { MESSAGES, LIMITS } from '../engine/errors.js';
 
 export const COPY_WINDOW_MS = 5 * 60000;   // "within 5 minutes": a lag of exactly 5 minutes collapses, 5:01 does not
@@ -33,8 +34,9 @@ export const SMALL_NOTICE = 'Files this size mostly show No sign for habits. You
 export const WAIT_LINE = 'Nothing is sent until you press Run. Adding files does not use a run.';
 export const UPLOAD_HINT = 'Add all your accounts and months: more trades, clearer answers.';
 export const MIXED_UNITS = 'These files report results in different currencies or units, so they cannot be added up. Add the files of one currency at a time.';
-export const disagreeLine = (names) => `${names.join(' and ')} share rows, but read together they give fewer trades than one of them alone. Export them as the same kind of report and add them again.`;
-export const overlapLine = (n) => `${grouped(n)} ${n === 1 ? 'row was' : 'rows were'} in more than one file and ${n === 1 ? 'was' : 'were'} counted once.`;
+export const overlapLine = (n) => `${grouped(n)} ${n === 1 ? 'trade was' : 'trades were'} the same in more than one file and ${n === 1 ? 'was' : 'were'} counted once.`;
+export const accountsLine = (k) => `These results combine ${grouped(k)} accounts, one per file. The rule check covers one account at a time.`;
+export const edgeLine = (n) => `${grouped(n)} ${n === 1 ? 'position was' : 'positions were'} open at the start or end of a file and ${n === 1 ? 'was' : 'were'} left out: each file is read as one account.`;
 
 // A trade with dates but no times: opened at 00:00 and held whole days (habits.mjs isDateOnlyRow, on trades).
 export const isDateOnlyTrade = (t) => t.open_ts % DAY_MS === 0 && t.hold_s % 86400 === 0;
@@ -122,17 +124,32 @@ export function collapseCopies(trades, originOf, windowMs = COPY_WINDOW_MS) {
 // The copies among the trades a report keeps (strip.js / small-facts.js reportTrades: the span and the 20,000 cap).
 export const copiesIn = (trades) => trades.reduce((k, t) => k + (t._copies || 0), 0);
 
-const execKey = (e) => [e.ts, e.symbol, e.side, e.qty, e.price, e.fee].join('\u0001');
 const kindOf = (r) => r.format + (r.preset ? ':' + r.preset : '');
+// An MT5 file is a positions report (its closed positions are its trades) or a deals report (trades are built from
+// its deals). One account's two reports read the same position differently, and nothing tells them apart from two
+// copy accounts, so the two kinds are never mixed (Tester S3 B3): the files are refused by name.
+function mt5Kind(bytes) {
+  try {
+    const src = readRows(bytes);
+    if (src.kind !== 'html') return 'deals';
+    return detectHtml(src.rows).tables.some((t) => t.kind === 'mt5_positions_closed') ? 'positions' : 'deals';
+  } catch (e) {
+    return null;
+  }
+}
+export const mt5MixLine = (pos, deals) => `${pos} is an MT5 positions report and ${deals} is an MT5 deals report. Add reports of one kind: all positions reports, or all deals reports.`;
 const cmpStr = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 const mixed = () => ({ code: 'E_MIXED_FILES', message: MESSAGES.E_MIXED_FILES });
+const tradeKey = (t) => [t.symbol, t.dir, t.open_ts, t.close_ts, t.qty, t.entry_vwap, t.exit_vwap, t.fees, t.pnl].join('\u0001');
+const warned = (r, code) => { const w = r.warnings.find((x) => x.code === code); return w && w.n ? w.n : 0; };
 
 // byteArrays: one Uint8Array per file; names: their names, for the messages.
-// → {error, file?} | {trades, executions, copies, overlap, groups, notes}
-//   trades: every account's trades after the copy collapse, in close-time order (strip.js keeps the latest 20,000:
-//   the cap applies after the merge); executions: every account's fills, symbols kept apart per account, for pgr.js;
-//   copies: trades counted once as copies; overlap: rows in more than one file of one account; groups: accounts;
-//   notes: the engine's left-out lines a buyer sees before the run (currencies left out inside one file).
+// → {error, file?} | {trades, accounts, executions, copies, overlap, groups, notes, format}
+//   trades: every file's trades, identical trades counted once, after the copy collapse, in close-time order (strip.js
+//   keeps the latest 20,000: the cap applies after the merge); accounts: [{name, trades}], each file's own trades,
+//   never added together (the rule check replays one account at a time: Tester re-test R1); executions: every file's
+//   fills, symbols kept apart per file, for pgr.js; copies: trades counted once as copies; overlap: identical trades
+//   counted once; groups: files (one account each); notes: lines a buyer sees before the run.
 export function readFiles(byteArrays, names = []) {
   const n = byteArrays.length;
   const name = (k) => names[k] || `file ${k + 1} of ${n}`;
@@ -146,64 +163,59 @@ export function readFiles(byteArrays, names = []) {
     if (k > 0 && kindOf(r.result) !== kindOf(own[0])) return { error: mixed(), file: k };
     own.push(r.result);
   }
+  if (n > 1 && own[0].format === 'mt5') {
+    const kinds = byteArrays.map(mt5Kind);
+    const p = kinds.indexOf('positions'), d = kinds.indexOf('deals');
+    if (p >= 0 && d >= 0) return { error: { code: 'E_MIXED_FILES', message: mt5MixLine(name(p), name(d)) }, file: Math.max(p, d) };
+  }
   let total = 0;
   for (const r of own) total += r.trades.length;
   if (total > LIMITS.MAX_ROWS) return { error: { code: 'E_TOO_LARGE', message: MESSAGES.E_TOO_LARGE } };
-  // accounts: files that share a fill are one account (union-find on the fills' keys)
-  const parent = own.map((_, k) => k);
-  const root = (k) => (parent[k] === k ? k : (parent[k] = root(parent[k])));
-  const seen = new Map();
+  const units = [...new Set(own.flatMap((r) => r.trades.map((t) => t.pnl_unit)))];
+  if (units.length > 1) return { error: { code: 'E_MIXED_UNITS', message: MIXED_UNITS } };
+  // identical closed trades: kept as many times as the file that has the most of them (a multiset, as dropOverlap)
+  const keep = new Map();
+  const where = new Map();
   own.forEach((r, k) => {
-    for (const e of r.executions) {
-      const key = execKey(e);
-      if (!seen.has(key)) seen.set(key, k);
-      else { const a = root(seen.get(key)), b = root(k); if (a !== b) parent[Math.max(a, b)] = Math.min(a, b); }
+    const c = new Map();
+    for (const t of r.trades) { const key = tradeKey(t); c.set(key, (c.get(key) || 0) + 1); }
+    for (const [key, m] of c) {
+      if (m > (keep.get(key) || 0)) keep.set(key, m);
+      if (!where.has(key)) where.set(key, new Set());
+      where.get(key).add(k);
     }
   });
-  const members = new Map();
-  own.forEach((_, k) => { const g = root(k); if (!members.has(g)) members.set(g, []); members.get(g).push(k); });
-  const groups = [...members.values()];
+  const used = new Map();
   const trades = [];
   const executions = [];
   const notes = [];
   let overlap = 0;
-  groups.forEach((ks, g) => {
-    let res = own[ks[0]];
-    if (ks.length > 1) {
-      const r = runFiles(ks.map((k) => byteArrays[k]));
-      if (r.error) throw Object.assign(new Error('group'), { engine: { ...r.error, message: `${r.error.message} (${ks.map(name).join(', ')})` }, file: ks[0] });
-      res = r.result;
-      const most = Math.max(...ks.map((k) => own[k].trades.length));
-      if (res.trades.length < most) throw Object.assign(new Error('group'), { engine: { code: 'E_FILES_DISAGREE', message: disagreeLine(ks.map(name)) }, file: ks[0] });
-      const w = res.warnings.find((x) => x.code === 'W_OVERLAP_ROWS');
-      if (w) overlap += w.n;
+  let edge = 0;
+  own.forEach((r, k) => {
+    for (const t of r.trades) {
+      const key = tradeKey(t);
+      const u = (used.get(key) || 0) + 1;
+      used.set(key, u);
+      if (u <= keep.get(key)) trades.push(Object.assign({}, t, { _g: k, _in: where.get(key) })); else overlap++;
     }
-    const cur = res.warnings.find((x) => x.code === 'W_MIXED_CURRENCY' && x.n > 0);
-    if (cur) notes.push(cur.message);
-    for (const t of res.trades) trades.push(Object.assign({}, t, { _g: g }));
-    for (const e of res.executions) executions.push(Object.assign({}, e, { symbol: g + '\u0001' + e.symbol }));
+    for (const e of r.executions) executions.push(Object.assign({}, e, { symbol: k + '\u0001' + e.symbol }));
+    const cur = r.warnings.find((x) => x.code === 'W_MIXED_CURRENCY' && x.n > 0);
+    if (cur) notes.push(n > 1 ? `${cur.message} (${name(k)})` : cur.message);
+    edge += warned(r, 'W_OPEN_POSITIONS') + warned(r, 'W_OPEN_AT_START');
   });
-  const units = [...new Set(trades.map((t) => t.pnl_unit))];
-  if (units.length > 1) return { error: { code: 'E_MIXED_UNITS', message: MIXED_UNITS } };
+  if (n > 1 && edge) notes.push(edgeLine(edge));
   trades.sort((a, b) => (a.close_ts - b.close_ts) || (a.open_ts - b.open_ts) || cmpStr(a.symbol, b.symbol) || (a._g - b._g));
   let out = trades;
   let copies = 0;
-  if (groups.length > 1) {
-    const sets = new Map();
-    const c = collapseCopies(trades, (t) => { if (!sets.has(t._g)) sets.set(t._g, new Set([t._g])); return sets.get(t._g); });
+  if (n > 1) {
+    const c = collapseCopies(trades, (t) => t._in);
     out = c.trades;
     copies = c.collapsed;
   }
   out = out.map((t, i) => Object.assign(t, { id: 't' + (i + 1) }));
-  return { trades: out, executions, copies, overlap, groups: groups.length, notes, format: own[0].format };
+  const accounts = own.map((r, k) => ({ name: name(k), trades: r.trades }));
+  return { trades: out, accounts, executions, copies, overlap, groups: n, notes, format: own[0].format };
 }
 
-// readFiles, with a group refusal returned rather than thrown.
-export function readAll(byteArrays, names = []) {
-  try {
-    return readFiles(byteArrays, names);
-  } catch (e) {
-    if (e && e.engine) return { error: e.engine, file: e.file };
-    throw e;
-  }
-}
+// readFiles, kept as the page's entry point (it returns refusals; it never throws for a bad file).
+export const readAll = readFiles;
