@@ -1,5 +1,10 @@
 """The statistics amendment's wording, wired into the pages (CODER-WIRING-REPORT-2026-10-21).
 
+DT-2 batch S1 (31 Oct): these report cases are method 2026-10-23.stats2f (DT-1), which the page still words for one
+release with the frozen wording-stats2f.js (dual accept, verdict-stats2f.js). Their sentences are unchanged; the
+retired display words are gone: no "Luck check coming" (size after a loss is facts, as in DT-2), no "luck check"
+rewording, the heading is "Habit or chance?". DT-2's own page is tests/test_dt2_report.py.
+
 * /report/: renderReport() (report.js) shows the R2 §9.1-9.2 sentences from wording.js
   (ARCHITECT-STATS-AMENDMENT-R2; method 2026-10-23.stats2c since ruling R-D3, so hold_gap is always
   withheld / not_calibrated and shows M1, V-launch and M3, and size_up is always withheld / not_calibrated
@@ -124,7 +129,7 @@ SU_LINE = "Size after a loss is described, not tested, in this version of the re
 # "Why not yet" without their last sentence; the fixed coverage lines give way to one "Luck check coming" line.
 TAIL = " So this pattern is described here without a verdict."
 V_LAUNCH_SHOWN, V_LAUNCH_SIZE_SHOWN = V_LAUNCH[:-len(TAIL)], V_LAUNCH_SIZE[:-len(TAIL)]
-COMING = "Luck check coming: Size after a loss."   # stats round 2: hold gap and large losses are "Your numbers"
+COMING = "Luck check coming"   # DT-2 S1: retired; size after a loss is facts, like the hold gap and large losses
 STALE = ["10,000 shuffles", "Holm correction for testing four", "testing four habits", "Permutation test on past data"]
 
 
@@ -168,9 +173,9 @@ def test_page_one_uses_the_amendment_lines(rendered):
     assert ("Shown first: Re-entering soon after a loss. Trades opened within 15 minutes of a losing trade's close totalled "
             "−$500.00 (historical).") in p1
     assert [x for x in rendered["big_focus"]["coverage"].splitlines() if x.strip()] == [
-        "2 of the 2 habits could be tested. Each one compares two groups of at least 30 trades.", COMING]
-    for k, case in rendered.items():        # every page 1 says once which habits have a luck check coming, never "described"
-        assert case["page1"].count(COMING) == 1 and HG_LINE not in case["page1"] and SU_LINE not in case["page1"], k
+        "2 of the 2 habits could be tested. Each one compares two groups of at least 30 trades."]
+    for k, case in rendered.items():        # no page 1 says a check is coming, or "described"
+        assert COMING not in case["text"] and HG_LINE not in case["page1"] and SU_LINE not in case["page1"], k
     # the old page said "No pattern ... distinguishable" whenever focus was null: false here
     opp = rendered["mid_opposite"]["page1"]
     assert "No pattern in this file is distinguishable from noise." not in opp
@@ -186,7 +191,8 @@ def test_page_one_uses_the_amendment_lines(rendered):
     assert "No pattern in this file is distinguishable from noise." in none
     assert "That does not show the patterns are absent; it means this file cannot tell them apart from chance." in none
     assert "1 of the 2 habits could be tested." in rendered["too_few"]["coverage"]
-    assert "not tested" not in rendered["too_few"]["coverage"].lower() and COMING in rendered["too_few"]["coverage"]
+    assert "not tested" not in rendered["too_few"]["coverage"].lower()
+    assert "No check against chance: Re-entering soon after a loss." in rendered["too_few"]["coverage"]
 
 
 def test_each_habit_shows_its_sentences(rendered):
@@ -200,8 +206,7 @@ def test_each_habit_shows_its_sentences(rendered):
     assert "Losing trades held longer than your median winning hold\n40 trades, totalling" in h["hold_gap"]   # dollars stay ("What happened")
     # R-D3: size_up shows M1, the "not tested" badge, V-launch-size and its dollar figure; no M2, no verdict
     assert "Your median size after a loss was 1.60× your median size after a win." in h["size_up"]
-    assert V_LAUNCH_SIZE_SHOWN in h["size_up"] and "Luck check coming" in h["size_up"]
-    assert h["size_up"].index("median size after a loss was") < h["size_up"].index(V_LAUNCH_SIZE_SHOWN)
+    assert V_LAUNCH_SIZE_SHOWN not in h["size_up"] and "Luck check coming" not in h["size_up"] and "Habit or chance?" not in h["size_up"]
     assert "size rank" not in h["size_up"] and "distinguishable from noise" not in h["size_up"] and "reshuffled" not in h["size_up"]
     assert "Trades after a loss at 1.5 times your usual size or more\n40 trades, totalling" in h["size_up"]   # dollars stay
     assert "Losers were held 3.00 times as long as winners." not in h["hold_gap"]      # shown only when tested
@@ -214,13 +219,13 @@ def test_each_habit_shows_its_sentences(rendered):
     tf = rendered["too_few"]["habit"]
     assert ("Not enough trades to tell: this pattern compares two groups of at least 30 trades each, and this file has 12 "
             "and 90.") in tf["revenge"]
-    assert "Not enough trades to tell" not in tf["size_up"] and V_LAUNCH_SIZE_SHOWN in tf["size_up"]
+    assert "Not enough trades to tell" not in tf["size_up"] and V_LAUNCH_SIZE_SHOWN not in tf["size_up"]
     assert "averaged" not in tf["revenge"]                                             # the too_few sentence replaces both
     w = rendered["launch_m3"]["habit"]["hold_gap"]
     assert V_LAUNCH_SHOWN not in w and "Held 12 hours or more: 2 of your 40 losing trades and 1 of your 90 winning trades." in w
     assert w.index("held a median of") < w.index("Held 12 hours or more") and "Real or luck?" not in w   # stats round 2: "Your numbers"
     assert "Losers were held" not in w and "reshuffled" not in w                       # no test ran: no ratio line, no method line
-    assert "Not tested" not in rendered["launch_m3"]["coverage"] and COMING in rendered["launch_m3"]["coverage"]   # 29 Oct (owner)
+    assert "Not tested" not in rendered["launch_m3"]["coverage"] and COMING not in rendered["launch_m3"]["coverage"]   # 29 Oct (owner)
 
 
 def test_i5_page_one_shows_the_merged_rows_line_only_when_rows_were_merged(rendered):
@@ -332,7 +337,27 @@ STALE_BUILD = ["10,000 shuffles", "shuffles your own trades", "Holm correction f
                "tests up to three", "test up to three", "of the 3 habits", "jusqu’à trois",
                "whether your size changes after a loss",   # R-D3 I-3b
                "Published research on this pattern",       # R-D3 addendum I-6
-               "show the same opening time of day"]        # R-D3 addendum 3: addendum 2's retired wording
+               "show the same opening time of day",        # R-D3 addendum 3: addendum 2's retired wording
+               # DT-2 batch S1/S2 (ARCHITECT-EVIDENCE-SCALE-AND-POWER-2026-10-31 §10): every retired verdict-layer string
+               "Not clear yet", "not clear yet", "could be luck", "Unlikely to be luck", "Not distinguishable from noise",
+               "not distinguishable from noise", "Distinguishable from noise", "Not distinguishable", "Luck check coming",
+               "Real or luck?", "luck check", "Why not yet", "being calibrated", "fair way to test them against luck",
+               "even odds of telling", "More trades may not settle this", "Assumes your next trades look like these",
+               "more trades would settle", "more trades to tell", "That’s an honest result, not a fault.",
+               "means it is not clear yet", "(unlikely to be luck)", "(not clear yet)", "(luck check coming)",
+               "could just be luck", "when it is unlikely to be luck", "“not distinguishable” when it could be",
+               "vérification du hasard à venir", "pas assez de transactions pour conclure", "se distingue du hasard",
+               "badge-coming", "luck-gloss", "layer-luck", "SHOW_MORE_TRADES", "power-table", "POWER_TABLE",
+               "Tested against chance</span>", "habits tested against chance, plus your numbers"]
+# DT-2 dual accept: the retired DT-1 sentences live on only in the two frozen modules that word a DT-1 report for one
+# release (wording-stats2f.js, verdict-stats2f.js); no other built file carries them.
+STALE_DT1 = ["In our tests on files built to have no real pattern", "is described, not tested, in this version",
+             "None of the patterns could be tested", "This gap is distinguishable from noise", "cannot tell it apart from noise",
+             "No pattern in this file is distinguishable", "That does not show the patterns are absent",
+             "The gap counts as distinguishable only when", "A pattern is shown first only when its gap is distinguishable",
+             "It runs the opposite way to this pattern", "Size after a loss is not described or tested",
+             "patterns tested in this file", "of the 2 habits could be tested", "described here without a verdict"]
+FROZEN_DT1 = ("static/js/paid/wording-stats2f.js", "static/js/paid/verdict-stats2f.js")
 
 
 def test_no_stale_method_claim_anywhere_in_the_build(built_site):
@@ -344,7 +369,10 @@ def test_no_stale_method_claim_anywhere_in_the_build(built_site):
             if not n.endswith((".html", ".js", ".json", ".xml", ".txt")):
                 continue
             s = open(os.path.join(root, n), encoding="utf-8", errors="replace").read()
-            hits += [(os.path.relpath(os.path.join(root, n), built_site["out"]), p) for p in STALE_BUILD if p in s]
+            rel = os.path.relpath(os.path.join(root, n), built_site["out"])
+            hits += [(rel, p) for p in STALE_BUILD if p in s]
+            if rel not in FROZEN_DT1:
+                hits += [(rel, p) for p in STALE_DT1 if p in s]
     assert hits == []
 
 
@@ -379,7 +407,7 @@ async (reps) => {
   return out;
 }
 """
-NONE_TESTED = "None of the patterns could be tested in this file. Some are shown below without a verdict."   # as shown (report.js plain())
+NONE_TESTED = "None of the patterns could be tested in this file. Some are shown below without a verdict."   # as shown (verdict-stats2f.js shown())
 DATED = "open at exactly 00:00 and were held a whole number of days, as in exports with dates but no times"
 
 
@@ -403,16 +431,16 @@ def rendered_real(browser, repo_server):
 def test_i9_dates_only_page_shows_exactly_the_ruled_lines(rendered_real, name, T):
     c = rendered_real[name]
     assert c["page1"] == [NONE_TESTED, T + " " + DATED + ", so the patterns that depend on the order and timing of trades "
-                          "within a day get no luck check, and size after a loss gets no figure."]
+                          "within a day get no check against chance, and size after a loss gets no figure."]
     assert "No pattern in this file is distinguishable" not in c["text"] and "were counted as one trade" not in c["text"]
     assert "described" not in c["text"] and "not tested" not in c["text"].lower()   # 29 Oct (owner)
-    assert COMING in c["coverage"]
+    assert COMING not in c["coverage"] and "No check against chance: Re-entering soon after a loss, Trading after a losing streak." in c["coverage"]
     for hid in ("revenge", "tilt"):
-        assert c["habits"][hid] == ["No figure for this file.", "can’t check on this file", "No luck check on this file: " + T[0].lower() + T[1:]
+        assert c["habits"][hid] == ["No figure for this file.", "No check on this file", "No check on this file: " + T[0].lower() + T[1:]
                                     + " " + DATED + "; this pattern depends on the timing of trades within a day, so files like that get no "
-                                    "luck check."], (hid, c["habits"][hid])
+                                    "check against chance."], (hid, c["habits"][hid])
     assert c["habits"]["size_up"] == ["No figure for this file: " + T[0].lower() + T[1:] + " " + DATED + "; this pattern depends on which "
-                                      "trade came after a loss, so files like that get no figure.", "Luck check coming", plain_launch_size()]
+                                      "trade came after a loss, so files like that get no figure."]
     for hid in ("revenge", "tilt", "size_up"):
         joined = " ".join(c["habits"][hid])
         assert "15 minutes" not in joined and "averaged" not in joined and "totalling" not in joined and "$" not in joined, hid
@@ -434,4 +462,4 @@ def test_i9_a_timed_report_with_nothing_tested_says_so(rendered_real):
     t = rendered_real["too_few"]
     assert t["page1"] == [NONE_TESTED]
     assert "No pattern in this file is distinguishable" not in t["text"] and DATED not in t["text"]
-    assert "Luck check coming: " in t["coverage"] and "described" not in t["coverage"]   # 29 Oct (owner)
+    assert "No check against chance: " in t["coverage"] and "described" not in t["coverage"]   # 29 Oct (owner)

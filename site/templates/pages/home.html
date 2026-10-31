@@ -24,9 +24,6 @@
   {%- set sr = sample_report %}
   {%- set short = {"hold_gap": "Held losers longer", "revenge": "Re-entry after a loss", "size_up": "Size after a loss",
                    "tilt": "After a losing run", "oversized_loss": "Large losses"} %}
-  {%- set pill = {"distinguishable": ("pill pill-hit", "Distinguishable from noise"),
-                  "not_distinguishable": ("pill", "Not distinguishable"),
-                  "few": ("pill pill-few", "Not enough trades")} %}
   <section class="section showcase" aria-labelledby="t-measure-h" data-reveal>
     <div class="showcase-copy">
       <p class="kicker">The donttrade test</p>
@@ -46,8 +43,8 @@
           <tbody>
           {%- for h in sr.habits %}
             {%- set d = h.dollars or {} %}
-            {#- stats round 2 (29 Oct): the hold gap and large losses are plain numbers (no luck test yet); size after a loss has one coming -#}
-            {%- set pc = ("muted", "Your numbers") if h.id in ("hold_gap", "oversized_loss") else pill.get(h.verdict, ("pill pill-muted", "Luck check coming")) %}
+            {#- DT-2: each checked habit's step (wording.js STEP, build.step_pill); the hold gap, large losses and size after a loss are plain numbers -#}
+            {%- set pc = step_pill(h) or ("muted", "Your numbers") %}
             <tr><th scope="row">{{ short.get(h.id, h.name) }}</th>
               <td class="num">{{ d.n_trades if d else "–" }}</td>
               <td class="num {{ 'loss' if d and d.amount < 0 else 'gain' }}">{% if d %}{{ "−" if d.amount < 0 else "" }}${{ "{:,.2f}".format(d.amount|abs) }}{% else %}–{% endif %}</td>
@@ -57,12 +54,12 @@
         </table>
       </div>
       <p class="toast toast-a"><span class="toast-k">File read</span> {{ sr.n_trades }} trades · {{ sr.period_weeks }} weeks</p>
-      <p class="toast toast-b"><span class="toast-k">Tested against chance</span> {{ sr.n_distinguishable }} of {{ sr.n_tested }} distinguishable from noise</p>
+      <p class="toast toast-b"><span class="toast-k">Checked against chance</span> {{ verdict.steps.clear }} on {{ sr.n_clear }} of {{ sr.n_family }} habits</p>
       <figcaption>Example report.</figcaption>
     </figure>
     <details class="how">
       <summary>What the results mean</summary>
-      <p>In plain words: the pattern is unlikely to be luck. “Not distinguishable” means it is not clear yet. Each tested habit gets one of three results: “distinguishable from noise”, “not distinguishable from noise”, or “not enough trades to tell” when either of the two groups it compares has fewer than 30 trades. Each test compares trades from the same days with each other. Dollar figures are historical totals from your file. They describe what happened; they do not show that a habit caused a result.</p>
+      <p data-lint="verdict">Each checked habit gets one of three results: {{ verdict.steps.none }}, {{ verdict.steps.some }} or {{ verdict.steps.clear }}, with a number for how often chance alone gives that result. A habit with fewer than {{ verdict.min_group }} trades in either group it compares shows “{{ verdict.steps.too_few }}”. Each check compares trades from the same days with each other. Dollar figures are historical totals from your file. They describe what happened; they do not show that a habit caused a result.</p>
     </details>
   </section>
 
@@ -89,7 +86,7 @@
       </li>
       <li class="how-step">
         <div class="how-shot how-shot-tagged" aria-hidden="true"><span class="tp-tag">Example report</span>
-          {%- for h in sr.habits if h.verdict in pill %}<p class="how-row"><span>{{ short.get(h.id, h.name) }}</span> <span class="{{ pill[h.verdict][0] }}">{{ pill[h.verdict][1] }}</span></p>{% endfor %}
+          {%- for h in sr.habits if step_pill(h) %}{% set pl = step_pill(h) %}<p class="how-row"><span>{{ short.get(h.id, h.name) }}</span> <span class="{{ pl[0] }}">{{ pl[1] }}</span></p>{% endfor %}
         </div>
         <h3><span class="how-n">3</span> See your habits</h3>
         <p>Plus one free re-test, 30 to 60 days later.</p>

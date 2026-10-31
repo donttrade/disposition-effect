@@ -104,10 +104,12 @@ def test_free_build_keeps_the_lifted_research_page(built_site):
 
 
 def test_chromium_draws_the_sample_with_the_report_pages_own_sentences(paid, browser):
+    """DT-2 (batch S1/S2): page 1, the coverage lines and each habit's "What happened" and "Habit or chance?" lines are
+    wording.js's, drawn from the engine's golden; the example report shows no re-test or firm buttons."""
     golden = json.load(open(GOLDEN, encoding="utf-8"))
     js = ("import * as W from './site/static/js/paid/wording.js'; let s=''; process.stdin.on('data', (d) => { s += d; });"
           "process.stdin.on('end', () => { const r = JSON.parse(s); process.stdout.write(JSON.stringify({ p1: W.page1Lines(r),"
-          " cov: W.coverageLines(r), h: r.habits.filter((h) => W.SENTENCE_HABITS.includes(h.id)).map((h) => W.habitSentences(h, r)) })); });")
+          " cov: W.coverageLines(r), h: r.habits.filter((h) => W.SENTENCE_HABITS.includes(h.id)).map((h) => { const l = W.habitLines(h, r); return l.what.concat(l.check); }) })); });")
     want = json.loads(subprocess.run(["node", "--input-type=module", "-e", js], cwd=REPO, input=json.dumps(golden),
                                      capture_output=True, text=True, check=True).stdout)
     ctx = browser.new_context()
@@ -117,25 +119,21 @@ def test_chromium_draws_the_sample_with_the_report_pages_own_sentences(paid, bro
     page.goto(paid["origin"] + "/sample-report/")
     page.wait_for_selector("#sample-out #focus-lines")
     p1 = [p.strip() for p in page.locator("#focus-lines p").all_inner_texts()]
-    cov = [p.strip() for p in page.locator("#coverage p").all_text_contents()]   # sweep 2: folded under one tap
-    text = page.locator("#sample-out").text_content()   # 29 Oct: folded "Why not yet" lines count too
+    cov = [p.strip() for p in page.locator("#coverage p").all_text_contents()]
+    text = page.locator("#sample-out").text_content()
     ctx.close()
     assert errors == []
-    # wording.js's own lines; money and durations use the page's formatters, so lines are compared up to the first figure
-    head = lambda line: re.split(r"[\d−]|-\d", line)[0]  # noqa: E731
-    assert len(p1) >= len(want["p1"]) and all(head(w) == head(g) for w, g in zip(want["p1"], p1)), (want["p1"], p1)
+    # wording.js's own lines; money uses the page's formatter, so lines are compared up to the first figure
+    head = lambda line: re.split(r"[\d−$]|-\d", line)[0]  # noqa: E731
+    assert len(p1) == len(want["p1"]) and all(head(w) == head(g) for w, g in zip(want["p1"], p1)), (want["p1"], p1)
     assert p1[0] == want["p1"][0]
-    # 29 Oct (owner): the coverage shows wording.js's first line, then which habits have a luck check coming;
-    # its fixed "… is described, not tested …" lines are not shown (report.js plain())
-    assert cov[0] == want["cov"][0] and cov[1].startswith("Luck check coming: ") and len(cov) == 2
+    assert cov == want["cov"]
     n = 0
     for lines in want["h"]:
         for line in lines:
-            if line.endswith(" So this pattern is described here without a verdict."):   # under "Why not yet", word for word but the tail
-                line = line[:-len(" So this pattern is described here without a verdict.")]
             assert head(line) in text, line
             n += 1
-    assert n >= 8
-    for bad in ("percentile", "Send to your firm", "re-test reminder", "Print or save as PDF"):
+    assert n >= 6
+    for bad in ("percentile", "Send to your firm", "re-test reminder", "Print or save as PDF", "Luck check coming", "Not clear yet"):
         assert bad not in text, bad
     assert lint_text(text, "sample", paid=True) == []

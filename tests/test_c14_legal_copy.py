@@ -136,7 +136,7 @@ def test_paid_french_lines(paid):
     # "facts from your file" and size after a loss has a luck check coming; never "décrite, non testée"
     assert "Il teste cinq habitudes" not in a and "Il couvre cinq habitudes" in a and "Il en teste jusqu’à deux" in a
     assert "jusqu’à quatre" not in a and "aux gagnantes (faits tirés de votre fichier);" in a
-    assert "après des pertes (vérification du hasard à venir);" in a and "non testée" not in a and "décrite" not in a
+    assert "après des pertes (faits tirés de votre fichier);" in a and "non testée" not in a and "décrite" not in a
 
 
 def test_paid_footer_line_exact_and_qualified(paid):

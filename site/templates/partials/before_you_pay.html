@@ -12,7 +12,10 @@
     {{ seller_rows(private, site, "en") }}
     <dt>What you buy</dt><dd>The {{ r.name }}: a habit test on your own past trades, from a trade file you choose.
       It measures and describes up to five habits, with the dollar totals of the matching trades, and tests up to two of them
-      against chance in this version. It includes one re-test 30 to 60 days after your first result. It describes what
+      against chance in this version. Each checked habit gets one of three results: {{ verdict.steps.none }}, {{ verdict.steps.some }}
+      or {{ verdict.steps.clear }}. On histories with no real habit, a {{ verdict.steps.clear }} on any habit turns up at most
+      {{ verdict.clear_per_100 }} in 100 times across your test and its re-test together, and {{ verdict.steps.some }} or
+      {{ verdict.steps.clear }} at most {{ verdict.some_per_100 }} in 100 times in one result. It includes one re-test 30 to 60 days after your first result. It describes what
       happened; it does not tell you what to trade.</dd>
     <dt>Technical requirements</dt><dd>A current version of Chrome, Edge, Firefox or Safari. Files: MetaTrader 5 or 4 HTML report,
       Interactive Brokers Flex Query CSV, Tradovate Orders CSV or TradingView Order History CSV (all four in beta until
@@ -26,8 +29,8 @@
       Your re-test runs on the version of the test that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.
       Access lasts 90 days after purchase, or until 75 days after your first result if that is later.</dd>
     <dt>Restrictions</dt><dd>Two runs: the test and one re-test of the same account (the re-test file has to share at least
-      half of the first file's trades). At most 20,000 rows per file. A tested habit with fewer than 30 trades in either group
-      is shown as "not enough trades to tell". If 5% or more of a file's rows open at exactly 00:00 and are held a whole
+      half of the first file's trades). At most 20,000 rows per file. A habit with fewer than {{ verdict.min_group }} trades in either group
+      it compares is shown as “{{ verdict.steps.too_few }}”. If 5% or more of a file's rows open at exactly 00:00 and are held a whole
       number of days, as in exports with dates but no times, no habit is tested, and the habits that depend on the order
       of trades within a day (re-entering soon after a loss, size after a loss, trading after a losing run) get no
       figure.</dd>

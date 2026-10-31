@@ -32,7 +32,8 @@ case "${1:-}" in
     PRIV="${DT_PRIVATE_REPO:-$REPO/../dt-private}"
     if [ ! -d "$PRIV" ]; then echo "dt-private not present at $PRIV: the paid-analysis server is kept out of this repo"; exit 0; fi
     SITE_M=$(sed -n "s/^export const METHOD_VERSION = '\(.*\)';\$/\1/p" "$REPO/site/static/js/paid/wording.js")
-    PRIV_M=$(sed -n "s/^export const METHOD_VERSION = '\(.*\)';\$/\1/p" "$PRIV/src/core/habits.mjs" 2>/dev/null || true)
+    # DT-2: the server's line may end in a comment (dt-private E1)
+    PRIV_M=$(sed -n "s/^export const METHOD_VERSION = '\([^']*\)';\( *\/\/.*\)\{0,1\}\$/\1/p" "$PRIV/src/core/habits.mjs" 2>/dev/null || true)
     if [ -z "$SITE_M" ] || [ "$SITE_M" != "$PRIV_M" ]; then
       echo "method mismatch: server ${PRIV_M:-(none)} at $PRIV, site ${SITE_M:-(none)}: check out dt-private delivery-39 (R-D1.6)"; exit 1
     fi

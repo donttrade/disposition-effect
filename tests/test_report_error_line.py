@@ -1,4 +1,5 @@
-"""R-D1 D-2: when wording.js refuses a report (a stats1 or stats2 report: checkMethod throws; R-D2 H-2: a stats2b
+"""DT-2 batch S1: a DT-2 report whose step disagrees with its p-value, chance number, direction or the page's Clear cut
+is refused the same way (forge_dt2). R-D1 D-2: when wording.js refuses a report (a stats1 or stats2 report: checkMethod throws; R-D2 H-2: a stats2b
 report with a forged hold_gap p_raw or verdict: checkHoldGap throws; R-D3 I-2: a stats2b report, or a stats2c report
 with a forged size_up p_raw or verdict: checkSizeUp throws), /report/ shows exactly the report-error
 line, with site.toml's contact_email written in at build time, and nothing else from the report: no habit name,
@@ -42,7 +43,8 @@ def site(tmp_path_factory):
     tmp = tmp_path_factory.mktemp("rperr")
     toml = open(os.path.join(REPO, "site/config/site.toml"), encoding="utf-8").read()
     toml = toml.replace("paid_report = false", "paid_report = true").replace("trader_first_home = false", "trader_first_home = true")
-    toml = toml.replace('api_base = "http://127.0.0.1:8787"', f'api_base = "{API}"')
+    toml = re.sub(r'(?m)^api_base = "[^"]*"', f'api_base = "{API}"', toml)   # whatever the committed Worker address is
+    toml = re.sub(r'(?m)^mode = "live"', 'mode = "test"', toml)   # a local test build (a live build refuses DT_ALLOW_LOCAL_API)
     (tmp / "site.toml").write_text(toml, encoding="utf-8")
     out = tmp / "site"
     env = {**os.environ, "DT_SITE_TOML": str(tmp / "site.toml"), "DT_OUT": str(out), "DT_PRIVATE_TOML": private_with(tmp),
@@ -73,7 +75,30 @@ def test_the_built_page_carries_the_contact_email_from_site_toml(site):
     assert CONTACT not in js  # injected at build time, not typed in the script
 
 
+def forge_dt2(kind):
+    """DT-2 (batch S1): a DT-2 report whose steps disagree with its numbers is refused (wording.js checkReport)."""
+    rep = json.load(open(os.path.join(HERE, "fixtures", "paid-reports-dt2", "stats__07-dayvol-trend_right_skew-220.report.json"), encoding="utf-8"))
+    assert rep["method_version"] == "2026-10-30.stats3"
+    rv, su, tl = rep["habits"][1], rep["habits"][2], rep["habits"][3]
+    if kind == "dt2_step_mismatch":
+        tl["step"] = "clear"                    # a Clear pill on a p_holm of 0.11
+        rep["n_some"], rep["n_clear"] = 1, 1
+    elif kind == "dt2_chance":
+        rv["chance_per_100"] = 2                # "at most 2 in 100" on a p_holm of 0.11
+    elif kind == "dt2_direction":
+        rv["effect"] = 4.0                      # Some sign from a gap that is not the habit's way
+    elif kind == "dt2_cut":
+        rep["step_cuts"] = [0.05, 0.2]          # a Clear cut the page's two-look promise is not for
+    elif kind == "dt2_size_up_step":
+        su.update(status="tested", p_raw=0.001, p_holm=0.003, step="clear", chance_per_100=1, n_perm=10000, effect=1.4)
+        rep["n_tested"] += 1
+        rep["n_clear"] += 1
+    return rep
+
+
 def forge(kind):
+    if kind.startswith("dt2_"):
+        return forge_dt2(kind)
     rep = json.load(open(os.path.join(HERE, "fixtures", "paid-reports", "random.report.json"), encoding="utf-8"))
     assert rep["method_version"] == "2026-10-23.stats2f"
     hg, su = rep["habits"][0], rep["habits"][2]
@@ -112,7 +137,8 @@ def forge(kind):
 
 
 @pytest.mark.parametrize("kind", ["stats1", "stats2", "stats2b", "stats2c", "stats2d", "stats2e", "forged_p", "forged_distinguishable", "forged_size_p",
-                                  "forged_size_distinguishable"])
+                                  "forged_size_distinguishable", "dt2_step_mismatch", "dt2_chance", "dt2_direction", "dt2_cut",
+                                  "dt2_size_up_step"])
 def test_a_refused_report_shows_exactly_the_error_line_and_nothing_from_the_report(browser, site, kind):
     rep = forge(kind)
     ctx = browser.new_context()

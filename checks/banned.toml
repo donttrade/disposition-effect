@@ -37,6 +37,19 @@ seal_words = ["seal*", "unseal*", "reseal*", "seal of approval"]
 # words; the test's method name (DT-1) is never called a score.
 one_product = ["improve", "improves", "improving", "signal", "score", "scores", "scored", "scoring"]
 
+[verdict_hedges]
+# DT-2 (ARCHITECT-EVIDENCE-SCALE-AND-POWER-2026-10-31 §7 S1, owner: no hedge wording anywhere in the verdict layer).
+# Applied to every string of wording.js VERDICT_STRINGS (the report's pills, step lines, guard, catch, coverage,
+# page-1 and re-test lines) and to page text marked data-lint="verdict" (the copy that defines the three steps).
+# Matching as for [words]: whole words, a space matches any gap, a trailing * matches any ending.
+words = ["may", "might", "maybe", "possibly", "perhaps", "unclear", "not clear", "could be", "likely", "unlikely",
+         "luck*", "noise*", "distinguishable", "indistinguishable"]
+# Plan §9.4 item 9: a Clear sign is never an overclaim.
+overclaims = ["proven", "prove", "proves", "confirmed", "confirms", "definitely"]
+# Plan R10: the French twins (TRANSLATOR CHECK).
+words_fr = ["peut-être", "pourrait", "pourraient", "incertain*", "pas clair*", "probable*", "improbable*", "chance*", "bruit*",
+            "prouvé*", "confirmé*"]
+
 [retired_names]
 # 30 Oct (Tester #4): the one-product names. Customer-visible text (templated pages, the full-rule parts of lifted
 # pages, heads, JSON-LD, the answers index) may not use a retired product name, the old sample labels, or a habit

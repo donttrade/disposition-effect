@@ -30,15 +30,15 @@
       <thead><tr><th scope="col">Habit</th><th scope="col">The question</th><th scope="col">Result</th></tr></thead>
       <tbody>
         <tr><th scope="row">Holding losers longer</th><td>Do losing trades stay open longer than winners?</td><td>Your numbers</td></tr>
-        <tr><th scope="row">Re-entry after a loss</th><td>Do trades opened soon after a loss go differently?</td><td><span class="pill">Tested against chance</span></td></tr>
-        <tr><th scope="row">Size after a loss</th><td>Do you trade bigger after a loss?</td><td><span class="pill pill-muted">Luck check coming</span></td></tr>
-        <tr><th scope="row">After a losing run</th><td>Do trades after 2+ losses in a row go differently?</td><td><span class="pill">Tested against chance</span></td></tr>
+        <tr><th scope="row">Re-entry after a loss</th><td>Do trades opened soon after a loss go differently?</td><td><span class="pill">Checked against chance</span></td></tr>
+        <tr><th scope="row">Size after a loss</th><td>Do you trade bigger after a loss?</td><td>Your numbers</td></tr>
+        <tr><th scope="row">After a losing run</th><td>Do trades after 2+ losses in a row go differently?</td><td><span class="pill">Checked against chance</span></td></tr>
         <tr><th scope="row">Large losses</th><td>How much of your losses came from a few big ones?</td><td>Your numbers</td></tr>
       </tbody>
     </table>
     </div>
     <details class="how-more"><summary>What the results mean</summary>
-      <p>Each tested habit gets one of three results: “distinguishable from noise” (unlikely to be luck), “not distinguishable from noise” (not clear yet), or “not enough trades to tell” when either of the two groups it compares has fewer than 30 trades. Each test compares trades from the same days with each other. Dollar figures are historical totals from your file, such as “trades matching this pattern totalled −$X”. They describe what happened; they do not show that a habit caused a result.</p>
+      <p data-lint="verdict">Each checked habit gets one of three results: {{ verdict.steps.none }}, {{ verdict.steps.some }} or {{ verdict.steps.clear }}, with a number for how often chance alone gives that result. A habit with fewer than {{ verdict.min_group }} trades in either group it compares shows “{{ verdict.steps.too_few }}”. Each check compares trades from the same days with each other. Dollar figures are historical totals from your file, such as “trades matching this pattern totalled −$X”. They describe what happened; they do not show that a habit caused a result.</p>
     </details>
   </section>
 
@@ -63,7 +63,7 @@
       <tbody>
         <tr><th scope="row">Logs your trades</th><td>Yes</td><td>{% if flags.journal %}Yes: the free journal keeps them in your browser, on your device{% else %}No: it reads the export your platform already makes{% endif %}</td></tr>
         <tr><th scope="row">Needs an account</th><td>Usually</td><td>No account or login</td></tr>
-        <tr><th scope="row">Tests whether a habit is more than chance</th><td>Varies</td><td>Yes, in the donttrade test: up to two habits in this version, with a stated statistical check, and “not enough trades to tell” when either group of a tested habit has fewer than 30 trades</td></tr>
+        <tr><th scope="row">Tests whether a habit is more than chance</th><td>Varies</td><td>Yes, in the donttrade test: up to two habits in this version, with a stated statistical check, and “{{ verdict.steps.too_few }}” when either group of a checked habit has fewer than {{ verdict.min_group }} trades</td></tr>
         <tr><th scope="row">Shows its method and code</th><td>Rarely</td><td>The method, yes. The scripts behind {{ evidence.scripts_public }} of the {{ evidence.studies }} studies are public (<a href="/code/">Methods and code</a>); the test’s own engine is not</td></tr>
         <tr><th scope="row">Tells you what to buy or sell</th><td>Some do</td><td>No</td></tr>
       </tbody>
@@ -112,11 +112,11 @@
     <dl class="split">
       <div><dt>Hold gap</dt><dd>Did you hold losing trades longer than winning ones? (facts from your file)</dd></div>
       <div><dt>Re-entry after a loss</dt><dd>Did trades opened within 15 minutes of a loss turn out differently from the rest?</dd></div>
-      <div><dt>Size after a loss</dt><dd>Was the trade after a loss larger than the trade after a win? (luck check coming)</dd></div>
+      <div><dt>Size after a loss</dt><dd>Was the trade after a loss larger than the trade after a win? (facts from your file)</dd></div>
       <div><dt>Trading after a losing run</dt><dd>Did trades after two or more losses in a row turn out differently?</dd></div>
       <div><dt>Large losses</dt><dd>How many losses were more than twice your typical loss, and what share of your losses they made up (facts from your file)</dd></div>
     </dl>
-    <p>Each tested habit gets one of three results: “distinguishable from noise”, “not distinguishable from noise”, or “not enough trades to tell” when either of the two groups it compares has fewer than 30 trades. Each test compares trades from the same days with each other. Dollar figures are historical totals from your file, such as “trades matching this pattern totalled −$X”. They describe what happened; they do not show that a habit caused a result.</p>
+    <p data-lint="verdict">Each checked habit gets one of three results: {{ verdict.steps.none }}, {{ verdict.steps.some }} or {{ verdict.steps.clear }}, with a number for how often chance alone gives that result. A habit with fewer than {{ verdict.min_group }} trades in either group it compares shows “{{ verdict.steps.too_few }}”. Each check compares trades from the same days with each other. Dollar figures are historical totals from your file, such as “trades matching this pattern totalled −$X”. They describe what happened; they do not show that a habit caused a result.</p>
   </section>
 
   <section class="section" aria-labelledby="files-h" data-reveal>
@@ -165,7 +165,7 @@
       <tbody>
         <tr><th scope="row">Logs your trades</th><td>Yes</td><td>{% if flags.journal %}Yes: the free journal keeps them in your browser, on your device{% else %}No: it reads the export your platform already makes{% endif %}</td></tr>
         <tr><th scope="row">Needs an account</th><td>Usually</td><td>No account or login</td></tr>
-        <tr><th scope="row">Tests whether a habit is more than chance</th><td>Varies</td><td>{% if flags.paid_report %}Yes, in the donttrade test{% else %}The donttrade test will{% endif %}: up to two habits in this version, with a stated statistical check, and “not enough trades to tell” when either group of a tested habit has fewer than 30 trades</td></tr>
+        <tr><th scope="row">Tests whether a habit is more than chance</th><td>Varies</td><td>{% if flags.paid_report %}Yes, in the donttrade test{% else %}The donttrade test will{% endif %}: up to two habits in this version, with a stated statistical check, and “{{ verdict.steps.too_few }}” when either group of a checked habit has fewer than {{ verdict.min_group }} trades</td></tr>
         <tr><th scope="row">Shows its method and code</th><td>Rarely</td><td>The method, yes. The scripts behind {{ evidence.scripts_public }} of the {{ evidence.studies }} studies are public (<a href="/code/">Methods and code</a>); the test’s own engine is not</td></tr>
         <tr><th scope="row">Tells you what to buy or sell</th><td>Some do</td><td>No</td></tr>
       </tbody>

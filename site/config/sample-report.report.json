@@ -1,13 +1,16 @@
 {
+ "catch_level": 0.009666666666666667,
+ "catch_max_trades": 5000,
  "currency": "USD",
  "dates_only": false,
  "disclaimer": "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.",
  "engine_commit": "sample",
- "focus": "revenge",
+ "focus": null,
  "habits": [
   {
+   "catch": null,
+   "chance_per_100": null,
    "detail": null,
-   "direction": null,
    "dollars": {
     "amount": -478.7300000000002,
     "label": "Losing trades held longer than your median winning hold",
@@ -36,12 +39,35 @@
    "share_a": null,
    "share_b": null,
    "spread_ratio": null,
-   "verdict": "withheld",
-   "withheld": "not_calibrated"
+   "status": "facts",
+   "step": null
   },
   {
+   "catch": {
+    "at_least_10ths": [
+     0,
+     0,
+     3
+    ],
+    "caught": [
+     3,
+     6,
+     25
+    ],
+    "effect": {
+     "amount": 3.1,
+     "unit": "USD"
+    },
+    "n_perm": 199,
+    "reps": 60,
+    "sizes": [
+     304,
+     608,
+     1216
+    ]
+   },
+   "chance_per_100": 6,
    "detail": null,
-   "direction": "habit",
    "dollars": {
     "amount": -527.6400000000001,
     "label": "Trades opened within 15 minutes of a losing trade's close",
@@ -58,20 +84,22 @@
    "n_b_compared": null,
    "n_perm": 10000,
    "name": "Re-entering soon after a loss",
-   "p_holm": 0.037196280371962806,
-   "p_mean": 0.006099390060993901,
-   "p_rank": 0.018598140185981403,
+   "p_holm": 0.05579442055794421,
+   "p_mean1": 0.006099390060993901,
+   "p_rank1": 0.018598140185981403,
    "p_raw": 0.018598140185981403,
    "question": "Do trades opened within 15 minutes of a losing trade's close end differently from your other trades?",
    "research_ref": {
     "cite": "Coval, J. D. & Shumway, T. (2005). Do behavioral biases affect prices? Journal of Finance 60(1), 1-34.",
     "url": null
    },
-   "verdict": "distinguishable"
+   "status": "tested",
+   "step": "some"
   },
   {
+   "catch": null,
+   "chance_per_100": null,
    "detail": null,
-   "direction": null,
    "dollars": {
     "amount": -121.53000000000002,
     "label": "Trades after a loss at 1.5 times your usual size or more",
@@ -96,16 +124,39 @@
     "url": null
    },
    "share": null,
-   "verdict": "withheld",
-   "withheld": "not_calibrated"
+   "status": "not_shipped",
+   "step": null
   },
   {
+   "catch": {
+    "at_least_10ths": [
+     0,
+     3,
+     5
+    ],
+    "caught": [
+     7,
+     29,
+     43
+    ],
+    "effect": {
+     "amount": 3.1,
+     "unit": "USD"
+    },
+    "n_perm": 199,
+    "reps": 60,
+    "sizes": [
+     304,
+     608,
+     1216
+    ]
+   },
+   "chance_per_100": 100,
    "detail": {
     "streak3_amount": -210.39,
     "streak3_mean": -4.045961538461539,
     "streak3_n": 52
    },
-   "direction": "habit",
    "dollars": {
     "amount": -344.3100000000001,
     "label": "Trades taken after 2 or more losses in a row",
@@ -122,20 +173,22 @@
    "n_b_compared": null,
    "n_perm": 10000,
    "name": "Trading after a losing streak",
-   "p_holm": 0.6107389261073892,
-   "p_mean": 0.27947205279472054,
-   "p_rank": 0.6107389261073892,
+   "p_holm": 1,
+   "p_mean1": 0.27947205279472054,
+   "p_rank1": 0.6107389261073892,
    "p_raw": 0.6107389261073892,
    "question": "Do trades taken after 2 or more losses in a row end differently from your other trades?",
    "research_ref": {
     "cite": "Coval, J. D. & Shumway, T. (2005). Do behavioral biases affect prices? Journal of Finance 60(1), 1-34.",
     "url": null
    },
-   "verdict": "not_distinguishable"
+   "status": "tested",
+   "step": "none"
   },
   {
+   "catch": null,
+   "chance_per_100": null,
    "detail": null,
-   "direction": null,
    "dollars": {
     "amount": -367.25000000000006,
     "label": "Losses more than twice your median loss",
@@ -159,13 +212,18 @@
     "cite": "Locke, P. R. & Mann, S. C. (2005). Professional trader discipline and trade disposition. Journal of Financial Economics 76(2), 401-444.",
     "url": null
    },
-   "verdict": "descriptive"
+   "status": "facts",
+   "step": null
   }
  ],
- "method_version": "2026-10-23.stats2f",
+ "method_label": "DT-2",
+ "method_version": "2026-10-30.stats3",
+ "min_group": 5,
+ "n_clear": 0,
  "n_date_only_rows": 0,
- "n_distinguishable": 1,
+ "n_family": 3,
  "n_rows": 304,
+ "n_some": 1,
  "n_tested": 2,
  "n_trades": 304,
  "period_weeks": 12,
@@ -180,5 +238,9 @@
   "I review my trades at the end of the day, not while a trade is open."
  ],
  "rule_library_version": "2026-10-21.1",
+ "step_cuts": [
+  0.029,
+  0.2
+ ],
  "v": 1
 }
