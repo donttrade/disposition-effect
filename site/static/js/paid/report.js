@@ -6,7 +6,7 @@
 // Every number on the page comes from the server's Report or from the file in this
 // tab; the wording only describes past trades (NON-ADVISER A3).
 
-import { readAll, copyLine, nearLine, copyPairLine, ownPairLine, COPY_QUESTION, copiesIn, serverTradeCount, overlapLine, accountsLine, filesLabel, SMALL_FILE } from './merge.js';
+import { readAll, copyLine, nearLine, copyPairLine, ownPairLine, COPY_QUESTION, copiesIn, serverTradeCount, overlapLine, accountsLine, filesLabel, SMALL_FILE, accountOf } from './merge.js';
 import { ics, retestLine, RETEST_LINE } from './retest-copy.js';
 import { pgrPlrCounts } from '../engine/pgr.js';
 import { stripRows, spanLine } from './strip.js';
@@ -248,7 +248,7 @@ function habitSection(h, unit, report) {
   if (method) how.append(el('p', { class: 'small muted habit-method', text: method }));
   const expert = V.expertLine(h, report, wordingFmt(unit));
   if (expert) how.append(el('p', { class: 'small muted habit-expert', text: expert }));
-  const ch = !factsOnly(h) && h.step !== 'clear' ? V.catchHow(h, wordingFmt(unit)) : null;
+  const ch = h.step === 'none' || h.step === 'some' ? V.catchHow(h, wordingFmt(unit)) : null;
   if (ch) how.append(el('p', { class: 'small muted catch-how', text: ch }));
   // R-D3 addendum I-6: the page's own related-research line (wording.js RESEARCH), never the report's
   // research_ref; oversized_loss has none.
@@ -365,7 +365,7 @@ export function renderReport(report, out, meta) {
   for (const line of coverageLines(report)) cov.append(el('p', { class: 'small', text: line }));
   p1.append(cov);
   // The re-test's own report (both runs used): the two-look promise and the fixed lines (plan §5.4, §2.4 item 5, §11).
-  const again = meta && meta.uses_left === 0 ? V.retestLines() : [];
+  const again = meta && meta.uses_left === 0 ? V.retestLines(report) : [];
   if (again.length) p1.append(el('div', { id: 'retest-lines', class: 'notice' }, ...again.map((t) => el('p', { class: 'small', text: t }))));
   p1.append(el('p', { class: 'small muted', text: `${report.n_trades} trades over about ${report.period_weeks} week${report.period_weeks === 1 ? '' : 's'}.${unitLine(unit)}${meta && meta.span_left_out ? ' ' + spanLine(meta.span_left_out) : ''}${meta && meta.limited ? ' Only the most recent 20,000 trades were used.' : ''}` }));
   const merged = mergedLine(report, wordingFmt(unit));   // R-D3 addendum I-5: only when rows were merged
@@ -599,7 +599,7 @@ async function stage(files) {
     const bytes = await Promise.all(files.map(async (f) => new Uint8Array(await f.arrayBuffer())));
     const r = readAll(bytes, files.map((f) => f.name), { oneAccount, copies: copyAnswers });
     if (r.error) { status(r.error.message, 'error'); return; }   // picked, ready and the panel stay as they were
-    const stripped = await stripRows(r.trades, payload.salt);
+    const stripped = await stripRows(r.trades, payload.salt, undefined, accountOf(r.groups));   // a on every row only with 2+ accounts
     const kept = reportTrades(r.trades);   // the trades the rows are made from (span and cap): their copies only (m3)
     const notes = [...r.notes];
     if (r.overlap) notes.push(overlapLine(r.overlap));

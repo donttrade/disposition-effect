@@ -57,7 +57,7 @@ def node(js):
     return json.loads(r.stdout)
 
 
-READ = ("import { readAll, collapseCopies, copyLine, serverTradeCount } from './site/static/js/paid/merge.js';"
+READ = ("import { readAll, collapseCopies, copyLine, serverTradeCount, accountOf } from './site/static/js/paid/merge.js';"
         "import { stripRows } from './site/static/js/paid/strip.js';"
         "import fs from 'node:fs';"
         "const F = (p) => new Uint8Array(fs.readFileSync(p));"
@@ -206,14 +206,15 @@ def test_two_platforms_and_two_currencies_refused():
 
 def test_server_trade_count_follows_the_servers_merge():
     """Tester B4: rows with the same symbol index, direction and open minute are one trade on the server
-    (dt-private habits.mjs mergeRows); date-only rows count one by one; a dates-only file is not merged."""
+    (dt-private habits.mjs mergeRows); date-only rows count one by one; a dates-only file is not merged. stats3a: rows
+    of different accounts (a) never merge."""
     js = READ + """
     const r = (o, h, d = 1, s = 0) => ({ o, h, d, s, q: 1, p: 1, f: 'x' });
     const partial = []; for (let i = 0; i < 80; i++) { partial.push(r(60 + 30 * i, 600)); if (i < 40) partial.push(r(60 + 30 * i, 900)); }
     const dates = []; for (let i = 0; i < 10; i++) { dates.push(r(1440 * i, 86400)); dates.push(r(1440 * i, 86400)); }
     out([partial.length, serverTradeCount(partial), serverTradeCount([r(60, 600, 1, 0), r(60, 600, -1, 0), r(60, 600, 1, 1), r(61, 600)]),
-      serverTradeCount(dates), serverTradeCount([])]);"""
-    assert node(js) == [120, 80, 4, 20, 0]
+      serverTradeCount(dates), serverTradeCount([]), serverTradeCount([{ ...r(60, 600), a: 0 }, { ...r(60, 600), a: 1 }, { ...r(60, 900), a: 1 }])]);"""
+    assert node(js) == [120, 80, 4, 20, 0, 2]
 
 
 def test_row_cap_after_the_merge():
@@ -550,8 +551,9 @@ def test_notice_waits_and_run_anyway_sends_one_post(browser, site):
     assert len(log["posts"]) == 1
     body = json.loads(log["posts"][0].post_data)
     assert set(body) == BODY_KEYS and len(body["rows"]) == 75 and body["firm_name"] == "Acme"
-    for r in body["rows"]:
-        assert set(r) == {"o", "h", "d", "q", "p", "s", "f"}
+    for r in body["rows"]:   # stats3a: two accounts, so every row carries its account index a (0 or 1)
+        assert set(r) == {"o", "h", "d", "q", "p", "s", "f", "a"} and r["a"] in (0, 1)
+    assert {r["a"] for r in body["rows"]} == {0, 1}
     post = log["posts"][0].post_data
     for s in ("acct_a", "acct_b", "ES", "NQ", "CL"):
         assert f'"{s}' not in post and s + ".csv" not in post, s
@@ -745,7 +747,7 @@ def test_the_account_question_when_the_files_do_not_say(browser, site):
     assert page.is_checked("#rp-acct-one") and not page.is_checked("#rp-acct-sep")
     assert "Are these files from one account or separate accounts?" in page.text_content("#rp-live")
     page.check("#rp-acct-sep")
-    staged(page, 80, 2, 2)
+    staged(page, 100, 2, 2)   # stats3a: as separate accounts the rows carry a, so the server keeps both accounts' trades
     assert page.is_checked("#rp-acct-sep") and log["posts"] == []
     page.check("#rp-acct-one")
     staged(page, 80, 2, 1)
@@ -880,8 +882,8 @@ def test_the_copy_question_on_the_page(browser, site):
     click_run(page)
     assert len(log["posts"]) == 1 and len(json.loads(log["posts"][0].post_data)["rows"]) == 40
     assert page.eval_on_selector_all(".copy-pair", "ps => ps.map((p) => p.textContent)") == [
-        "Accounts lead13.csv and copy13.csv trade on their own: no trade is counted once as a copy. As in one file, trades "
-        "opened in the same minute with the same symbol and direction are combined for the habit checks."]
+        "Accounts lead13.csv and copy13.csv trade on their own: no trade is counted once as a copy, and their trades stay "
+        "separate for the habit checks."]
     ctx.close()
 
 
@@ -917,19 +919,46 @@ def test_one_account_files_with_different_amounts_are_refused_by_name():
 
 
 def test_the_own_pair_line_says_what_the_server_combines():
-    """Tester re-test 4 F2: the server combines rows with the same symbol, direction and open minute from any account
-    (habits.mjs mergeRows), so "none of their trades are counted once" was false; the line now says so."""
+    """stats3a (dt-private 6b8b82c): rows carry their account index a when there are two or more accounts, and the server
+    combines same-minute rows only within one account (key s:d:o:a); the own-pair line says the accounts stay separate,
+    and the panel's count is the server's."""
     js = READ + "import { ownPairLine } from './site/static/js/paid/merge.js'; out(ownPairLine('a.csv', 'b.csv'));"
     line = node(js)
-    assert line == ("Accounts a.csv and b.csv trade on their own: no trade is counted once as a copy. As in one file, trades opened "
-                    "in the same minute with the same symbol and direction are combined for the habit checks.")
+    assert line == ("Accounts a.csv and b.csv trade on their own: no trade is counted once as a copy, and their trades stay separate "
+                    "for the habit checks.")
     assert lint_text(line) == [] and lint_text(line, "report", paid=True) == []
-    # and the panel's count is the server's: two independent accounts with one same-minute pair are 1 trade fewer
+    # two independent accounts with one same-minute pair: 3 trades, and the server counts 3 (no longer merged across accounts)
     a = "\n".join([RT_HEAD, "2026-09-01 09:00:00,2026-09-01 09:30:00,ES,Long,1,100,101,0"]) + "\n"
     b = "\n".join([RT_HEAD, "2026-09-01 09:00:30,2026-09-01 11:30:00,ES,Long,1,100,99,0", "2026-09-02 09:00:00,2026-09-02 09:30:00,ES,Short,1,100,99,0"]) + "\n"
     js = READ + f"""const r = readAll([T({json.dumps(a)}), T({json.dumps(b)})], ['a.csv', 'b.csv']);
-      const s = await stripRows(r.trades, 'salt'); out([r.pairs[0].status, r.trades.length, serverTradeCount(s.rows)]);"""
-    assert node(js) == ["own", 3, 2]
+      const s = await stripRows(r.trades, 'salt', undefined, accountOf(r.groups)); out([r.pairs[0].status, r.trades.length, serverTradeCount(s.rows), s.rows.map((x) => x.a)]);"""
+    assert node(js) == ["own", 3, 3, [0, 1, 1]]
+
+
+def test_rows_carry_the_account_index_only_with_two_or_more_accounts():
+    """stats3a: a, an integer 0..99, on every row or none. One account (one file, or two files of one account): no a.
+    Two accounts that copy each other: the copies are sent collapsed, one row each, with the leader's index. More than
+    100 accounts are refused before anything is sent."""
+    acct = lambda n, rows: "Account,Open Time,Close Time,Symbol,Direction,Quantity,Open Price,Close Price,Fees\n" + "".join(  # noqa: E731
+        f"{n},2026-09-{1 + i // 8:02d} {9 + i % 8:02d}:00:00,2026-09-{1 + i // 8:02d} {9 + i % 8:02d}:20:00,ES,Long,1,100,{100 + (i % 5) - 2},0\n" for i in range(rows))
+    js = READ + f"""
+      const one = readAll([T({json.dumps(acct('A1', 12))})], ['a.csv']);
+      const oneRows = (await stripRows(one.trades, 'salt', undefined, accountOf(one.groups))).rows;
+      const two = readAll([T({json.dumps(acct('A1', 12))}), T({json.dumps(acct('B2', 12))})], ['a.csv', 'b.csv']);
+      const twoRows = (await stripRows(two.trades, 'salt', undefined, accountOf(two.groups))).rows;
+      const many = []; for (let k = 0; k < 101; k++) many.push(T({json.dumps(acct('X', 2))}.replace(/X,/g, 'X' + k + ',')));
+      const big = readAll(many, many.map((_, k) => 'f' + k + '.csv'));
+      let thrown = null; try {{ await stripRows(one.trades, 'salt', undefined, () => 100); }} catch (e) {{ thrown = e.message; }}
+      out({{ one: [one.groups, oneRows.length, oneRows.filter((r) => 'a' in r).length],
+        two: [two.groups, two.copies, twoRows.length, [...new Set(twoRows.map((r) => r.a))]],
+        big: big.error ? [big.error.code, big.error.message] : null, thrown }});"""
+    o = node(js)
+    assert o["one"] == [1, 12, 0]                       # one account: no row has a
+    assert o["two"][0] == 2 and o["two"][3] == [0]      # exact copies: collapsed into one row each, the leader's index 0
+    assert o["two"][2] == 12 - 0 and o["two"][1] == 12   # 12 copies counted once: 12 rows sent
+    assert o["big"] == ["E_TOO_MANY_ACCOUNTS", "These files are from more than 100 accounts. One test reads at most 100 accounts at a time."]
+    assert o["thrown"] == "strip: account index 100"
+    assert lint_text(o["big"][1]) == []
 
 
 def test_dt2_bundle_guard(tmp_path):

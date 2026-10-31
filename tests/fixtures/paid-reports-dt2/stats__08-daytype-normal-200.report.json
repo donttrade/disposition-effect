@@ -1,4 +1,11 @@
 {
+ "blocks": {
+  "cap_min": 1440,
+  "clock_band_min": 120,
+  "clock_guard": false,
+  "gap_min": 180,
+  "rule": "session"
+ },
  "catch_level": 0.009666666666666667,
  "catch_max_trades": 5000,
  "currency": "USD",
@@ -9,6 +16,8 @@
  "habits": [
   {
    "catch": null,
+   "catch_reason": null,
+   "chance_below_1": null,
    "chance_per_100": null,
    "detail": null,
    "dollars": {
@@ -38,6 +47,7 @@
    },
    "share_a": null,
    "share_b": null,
+   "small_group": null,
    "spread_ratio": null,
    "status": "facts",
    "step": null
@@ -47,18 +57,18 @@
     "at_least_10ths": [
      0,
      0,
-     3
+     1
     ],
     "caught": [
-     0,
-     10,
-     25
+     6,
+     8,
+     17
     ],
     "effect": {
      "amount": 16,
      "unit": "USD"
     },
-    "n_perm": 199,
+    "n_perm": 399,
     "reps": 60,
     "sizes": [
      200,
@@ -66,7 +76,9 @@
      800
     ]
    },
-   "chance_per_100": 57,
+   "catch_reason": null,
+   "chance_below_1": false,
+   "chance_per_100": 58,
    "detail": null,
    "dollars": {
     "amount": -121.88,
@@ -84,20 +96,23 @@
    "n_b_compared": null,
    "n_perm": 10000,
    "name": "Re-entering soon after a loss",
-   "p_holm": 0.56994300569943,
-   "p_mean1": 0.18998100189981001,
-   "p_rank1": 0.1317868213178682,
-   "p_raw": 0.18998100189981001,
+   "p_holm": 0.5708429157084292,
+   "p_mean1": 0.1902809719028097,
+   "p_rank1": 0.13538646135386462,
+   "p_raw": 0.1902809719028097,
    "question": "Do trades opened within 15 minutes of a losing trade's close end differently from your other trades?",
    "research_ref": {
     "cite": "Coval, J. D. & Shumway, T. (2005). Do behavioral biases affect prices? Journal of Finance 60(1), 1-34.",
     "url": null
    },
+   "small_group": false,
    "status": "tested",
    "step": "none"
   },
   {
    "catch": null,
+   "catch_reason": null,
+   "chance_below_1": null,
    "chance_per_100": null,
    "detail": null,
    "dollars": {
@@ -124,26 +139,27 @@
     "url": null
    },
    "share": null,
+   "small_group": null,
    "status": "not_shipped",
    "step": null
   },
   {
    "catch": {
     "at_least_10ths": [
-     5,
-     8,
-     9
+     4,
+     6,
+     7
     ],
     "caught": [
-     41,
-     55,
-     59
+     35,
+     46,
+     51
     ],
     "effect": {
      "amount": 16,
      "unit": "USD"
     },
-    "n_perm": 199,
+    "n_perm": 399,
     "reps": 60,
     "sizes": [
      200,
@@ -151,6 +167,8 @@
      800
     ]
    },
+   "catch_reason": null,
+   "chance_below_1": false,
    "chance_per_100": 100,
    "detail": {
     "streak3_amount": 19.96999999999999,
@@ -174,19 +192,22 @@
    "n_perm": 10000,
    "name": "Trading after a losing streak",
    "p_holm": 1,
-   "p_mean1": 0.834016598340166,
-   "p_rank1": 0.777022297770223,
-   "p_raw": 0.834016598340166,
+   "p_mean1": 0.8311168883111689,
+   "p_rank1": 0.7803219678032197,
+   "p_raw": 0.8311168883111689,
    "question": "Do trades taken after 2 or more losses in a row end differently from your other trades?",
    "research_ref": {
     "cite": "Coval, J. D. & Shumway, T. (2005). Do behavioral biases affect prices? Journal of Finance 60(1), 1-34.",
     "url": null
    },
+   "small_group": false,
    "status": "tested",
    "step": "none"
   },
   {
    "catch": null,
+   "catch_reason": null,
+   "chance_below_1": null,
    "chance_per_100": null,
    "detail": null,
    "dollars": {
@@ -212,12 +233,13 @@
     "cite": "Locke, P. R. & Mann, S. C. (2005). Professional trader discipline and trade disposition. Journal of Financial Economics 76(2), 401-444.",
     "url": null
    },
+   "small_group": null,
    "status": "facts",
    "step": null
   }
  ],
  "method_label": "DT-2",
- "method_version": "2026-10-30.stats3",
+ "method_version": "2026-10-31.stats3a",
  "min_group": 5,
  "n_clear": 0,
  "n_date_only_rows": 0,
@@ -228,6 +250,11 @@
  "n_trades": 200,
  "period_weeks": 6,
  "pgr_plr": null,
+ "promise_per_100": {
+  "clear_report_and_retest": 5,
+  "clear_run": 3,
+  "some_run": 20
+ },
  "rule_library": [
   "I write my exit condition down before I enter a trade.",
   "I close a losing trade by the same written rule I use for a winning trade.",
@@ -238,6 +265,7 @@
   "I review my trades at the end of the day, not while a trade is open."
  ],
  "rule_library_version": "2026-10-21.1",
+ "some_min_group": 10,
  "step_cuts": [
   0.029,
   0.2

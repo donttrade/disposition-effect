@@ -111,17 +111,23 @@ async ({ base, cells }) => {
       r.dates_only = true; r.n_date_only_rows = r.n_rows; r.n_trades = r.n_rows;
       for (const x of r.habits) {
         if (x.id === 'revenge' || x.id === 'tilt') Object.assign(x, { status: 'dates_only', p_raw: null, p_holm: null, p_mean1: null, p_rank1: null, step: null,
-          chance_per_100: null, n_perm: null, measure_a: null, measure_b: null, effect: null, dollars: null, catch: null, detail: null });
+          chance_per_100: null, chance_below_1: null, small_group: null, n_perm: null, measure_a: null, measure_b: null, effect: null, dollars: null,
+          catch: null, catch_reason: 'dates_only', detail: null });
         if (x.id === 'size_up') Object.assign(x, { measure_a: null, measure_b: null, effect: null, dollars: null });
       }
       return;
     }
-    if (st === 'too_few') { Object.assign(h, { status: 'too_few', n_a: 3, p_raw: null, p_holm: null, p_mean1: null, p_rank1: null, step: null, chance_per_100: null, n_perm: null }); return; }
-    // none: the gap runs the other way; none_gap: the habit's way, within chance (adjusted p 0.45)
-    const p = { none: [0.6, 1], none_gap: [0.15, 0.45], some: [0.04, 0.12], clear: [0.002, 0.006] }[st];
-    const other = st === 'none';
-    Object.assign(h, { status: 'tested', p_raw: p[0], p_mean1: p[0], p_rank1: p[0] / 2, p_holm: p[1], step: st === 'none_gap' ? 'none' : st,
-      chance_per_100: W.chancePer100(p[1]), n_perm: h.n_perm || 10000, effect: other ? 2.5 : -6.5, measure_a: other ? 4 : -5, measure_b: 1.5 });
+    if (st === 'too_few') { Object.assign(h, { status: 'too_few', n_a: 3, p_raw: null, p_holm: null, p_mean1: null, p_rank1: null, step: null, chance_per_100: null,
+      chance_below_1: null, small_group: null, n_perm: null }); return; }
+    // none: the gap runs the other way; none_gap: the habit's way, within chance (adjusted p 0.45); small_none: a smaller
+    // group of 7 with an adjusted p of 0.12, which is No sign there (never Some, calibration fixes item 2); small_clear
+    const p = { none: [0.6, 1], none_gap: [0.15, 0.45], some: [0.04, 0.12], clear: [0.002, 0.006], small_none: [0.04, 0.12], small_clear: [0.002, 0.006] }[st];
+    const other = st === 'none', small = st.startsWith('small_');
+    const step = { none_gap: 'none', small_none: 'none', small_clear: 'clear' }[st] || st;
+    if (small) h.n_a = 7;
+    Object.assign(h, { status: 'tested', p_raw: p[0], p_mean1: p[0], p_rank1: p[0] / 2, p_holm: p[1], step,
+      chance_per_100: W.chancePer100(p[1], step, r.promise_per_100), chance_below_1: step === 'clear' && p[1] < 0.01, small_group: small,
+      n_perm: h.n_perm || 10000, effect: other ? 2.5 : -6.5, measure_a: other ? 4 : -5, measure_b: 1.5 });
     if (h.dollars) h.dollars.amount = other ? 80 : -420;
   }
   function recount(r) {
@@ -173,7 +179,7 @@ async ({ base, cells }) => {
 }
 """
 HABITS = ["revenge", "tilt", "size_up"]
-STATES = ["none", "none_gap", "some", "clear", "too_few", "dates_only"]
+STATES = ["none", "none_gap", "some", "clear", "small_none", "small_clear", "too_few", "dates_only"]
 CELLS = [(f"{h}/{s}/{'retest' if rt else 'first'}", h, s, rt) for h in HABITS for s in STATES for rt in (False, True)]
 
 
@@ -191,7 +197,7 @@ def table(browser, repo_server):
 
 
 def test_the_truth_table_has_every_cell(table):
-    assert len(table) == 36 == len(HABITS) * len(STATES) * 2
+    assert len(table) == 48 == len(HABITS) * len(STATES) * 2
 
 
 @pytest.mark.parametrize("key,hid,st,retest", CELLS, ids=[c[0] for c in CELLS])
@@ -214,7 +220,7 @@ def test_truth_table_cell(table, key, hid, st, retest):
         assert "DT-1 of the donttrade test" in c["retest"][2] and not c["rpRetest"]
     else:
         assert c["retest"] == [] and c["rpRetest"]
-    assert c["foot"].startswith("Method DT-2 of the donttrade test (2026-10-30.stats3)")
+    assert c["foot"].startswith("Method DT-2 of the donttrade test (2026-10-31.stats3a)")
     if hid == "size_up":   # dates-only: size after a loss is facts, with the dates-only line
         assert c["inFacts"] and c["pill"] is None
         assert c["what"] and c["what"][0].startswith("No check on this file: all 200 trades in this file open at exactly 00:00")
@@ -225,7 +231,17 @@ def test_truth_table_cell(table, key, hid, st, retest):
         assert c["check"][0].endswith("this habit depends on the order of trades within a day, which these rows do not show.")
         assert c["focus"][0].endswith("so the 3 habits that depend on the order of trades within a day get no check on this file.")
         return
-    assert c["pill"] == STEP["none" if st == "none_gap" else st] and c["heading"] == "Habit or chance?"
+    shown = {"none_gap": "none", "small_none": "none", "small_clear": "clear"}.get(st, st)
+    assert c["pill"] == STEP[shown] and c["heading"] == "Habit or chance?"
+    if st.startswith("small_"):   # a smaller group of 5-9: Clear sign or No sign, never Some sign
+        assert "Some sign" not in c["pills"] and "badge-some" not in c["pillClass"]
+        if st == "small_none":
+            assert c["check"] == [f"No sign beyond chance in these 200 trades.",
+                                  "With 7 trades in the smaller group, this check shows a Clear sign or no sign."]
+            assert c["lead"] is not None and len(c["table"]["rows"]) == 3
+        else:
+            assert c["check"][0].startswith("Clear sign of this habit in these 200 trades.") and c["check"][1:] == [GUARD] and c["table"] is None
+        return
     if st == "too_few":
         assert c["check"] == ["Too few trades to check: this habit compares two groups of at least 5 trades each, and this file has 3 and "
                               + ("148" if hid == "revenge" else "151") + "."]
@@ -349,10 +365,10 @@ process.stdout.write(JSON.stringify({ old: run(() => F.checkReport(rep)), now: r
   other: run(() => W.checkReport({ ...rep, method_version: '2026-11-30.stats4' })),
   cut: run(() => W.checkReport({ ...rep, step_cuts: [0.05, 0.2] })) }));
 """)
-    assert out["old"] == "wording: report method 2026-10-30.stats3 is not 2026-10-23.stats2f"
+    assert out["old"] == "wording: report method 2026-10-31.stats3a is not 2026-10-23.stats2f"
     assert out["now"] == "ok"
-    assert out["other"] == "wording: report method 2026-11-30.stats4 is not 2026-10-30.stats3 (DT-2)"
-    assert out["cut"].startswith("wording: the Clear cut 0.05 is not the two-look cut 0.029")
+    assert out["other"] == "wording: report method 2026-11-30.stats4 is not 2026-10-31.stats3a (DT-2)"
+    assert out["cut"] == "wording: step cuts [0.05,0.2] are not this method's [0.029,0.2] (DT-2)"
 
 
 # ------------------------------------------------------------------ the engine's numbers, never typed
@@ -397,18 +413,22 @@ def test_a_report_whose_steps_disagree_with_its_numbers_is_refused():
     assert o["hold"].startswith("THROW: wording: hold_gap has status tested")
     # a Some cut of 0.10 moves tilt (p_holm 0.11) to No sign, so the report's own step disagrees: refused, never reworded
     assert o["some_cut"].startswith("THROW: wording: ")
-    assert o["min7"]["cov"][0] == "1 of 3 habits checked against chance. Each check needs at least 7 trades in both groups it compares."
-    assert o["min7"]["lines"] == ["Too few trades to check: this habit compares two groups of at least 7 trades each, and this file has 6 and 129."]
+    # stats3a: the minimum is this method's 5; a report that claims this method with another minimum is refused
+    assert o["min7"] == "THROW: wording: min_group 7 is not this method's 5 (DT-2)"
 
 
 def test_no_step_number_is_typed_in_the_page_code():
-    """The cuts (0.029, 0.20), the minimum (5) and the family size (3) come from the report. wording.js holds the Clear
-    cut once, as TWO_LOOK.clear_cut, only to refuse a report whose promise would differ."""
+    """The cuts, the minimums, the family size and the promises come from the report. wording.js holds this method's
+    settings once, in METHOD_SETTINGS, used only to refuse a report that claims stats3a with other settings."""
     for f in ("site/static/js/paid/wording.js", "site/static/js/paid/report.js"):
         src = re.sub(r"//.*", "", open(os.path.join(REPO, f), encoding="utf-8").read())
         src = src[:src.index("const SAMPLE = ")] if "const SAMPLE = " in src else src   # VERDICT_STRINGS' sample values
-        assert src.count("0.029") == (1 if f.endswith("wording.js") else 0), f
-        for lit in ("0.2,", "0.20", "min_group: 5", "at least 5 ", "at least 10 ", "all 3 ", "of 3 habits"):
+        if f.endswith("wording.js"):
+            block = re.search(r"export const METHOD_SETTINGS = Object\.freeze\(\{.*?\}\);", src, re.S)
+            assert block and "0.029" in block.group(0) and "clear_report_and_retest: 5" in block.group(0)
+            src = src.replace(block.group(0), "")
+        for lit in ("0.029", "0.2,", "0.20", "min_group: 5", "at least 5 ", "at least 10 ", "all 3 ", "of 3 habits", "5 in 100", "3 in 100",
+                    "20 in 100", "180", "1440"):
             assert lit not in src, (f, lit)
 
 
@@ -448,8 +468,8 @@ def test_small_files_collapse_too_few_habits_and_give_the_re_test_reason(browser
     assert o["stats__13-seq-skipped-60"]["collapsed"].startswith("Too few trades to check: re-entering soon after a loss (0 trades soon after")
     assert "habit-tilt" in o["stats__13-seq-skipped-60"]["sections"]
     assert o["stats__13-seq-skipped-60"]["reasons"] == ["For your re-test: when trades after 2 or more losses in a row end $6.30 worse each, files of "
-                                                        "120 trades show it as a Clear sign fewer than 1 in 10 times, and 240 trades show it as a "
-                                                        "Clear sign fewer than 1 in 10 times."]
+                                                        "120 trades show it as a Clear sign at least 3 in 10 times, and 240 trades show it as a "
+                                                        "Clear sign at least 4 in 10 times."]
     # 30 trades, both checked, No sign: nothing to collapse, a reason per habit
     assert o["stats-r2__25-n30"]["collapsed"] is None and len(o["stats-r2__25-n30"]["reasons"]) == 2
     # 63 trades: revenge too few, tilt checked (chance 63 in 100: No sign)
@@ -462,9 +482,85 @@ def test_small_files_collapse_too_few_habits_and_give_the_re_test_reason(browser
 
 def test_the_example_report_is_dt2_and_its_steps_are_the_engines():
     rep = json.load(open(os.path.join(REPO, "site/config/sample-report.report.json"), encoding="utf-8"))
-    assert rep["method_version"] == "2026-10-30.stats3" and rep["method_label"] == "DT-2"
+    assert rep["method_version"] == "2026-10-31.stats3a" and rep["method_label"] == "DT-2"
     # 31 Oct (buyer read-through): the built re-entry habit wins 20% of the time (was 25%), enough for a Clear sign under
     # DT-2; tilt is whatever the engine gives
     st = {h["id"]: (h["step"], h["chance_per_100"]) for h in rep["habits"]}
     assert st == {"hold_gap": (None, None), "revenge": ("clear", 2), "size_up": (None, None), "tilt": ("none", 100), "oversized_loss": (None, None)}
     assert rep["focus"] == "revenge" and rep["n_clear"] == 1 and rep["n_some"] == 0 and rep["n_trades"] == 304
+
+
+# ------------------------------------------------------------------ stats3a (calibration fixes items 2, 4, 8)
+
+STATS3A_JS = r"""
+import { readFileSync } from 'node:fs';
+const W = await import('./site/static/js/paid/wording.js');
+const base = JSON.parse(readFileSync('tests/fixtures/paid-reports-dt2/stats__07-dayvol-trend_right_skew-220.report.json', 'utf8'));
+const clone = () => JSON.parse(JSON.stringify(base));
+const by = (r, id) => r.habits.find((h) => h.id === id);
+const run = (f) => { try { return f(); } catch (e) { return 'THROW: ' + e.message; } };
+const out = { table: {} };
+// item 8: the shown number for each adjusted p, through the page's own check (tilt, smaller group 103)
+for (const p of [0.0096, 0.0288, 0.0297, 0.04, 0.0501, 0.2]) {
+  const r = clone(); const h = by(r, 'tilt');
+  const step = p <= 0.029 ? 'clear' : 'some';
+  Object.assign(h, { p_holm: p, p_raw: p / 3, p_mean1: p / 3, step, chance_per_100: W.chancePer100(p, step, r.promise_per_100), chance_below_1: step === 'clear' && p < 0.01 });
+  r.n_clear = r.habits.filter((x) => x.step === 'clear').length; r.n_some = r.habits.filter((x) => x.step === 'some').length;
+  r.focus = step === 'clear' ? 'tilt' : null;
+  out.table[p] = run(() => W.habitLines(h, r).check[0]);
+}
+// a Some step with a smaller group of 5-9 is refused, whatever its numbers
+let r = clone(); Object.assign(by(r, 'revenge'), { n_a: 8, small_group: true }); out.small_some = run(() => W.checkReport(r));
+r = clone(); by(r, 'revenge').small_group = true; out.small_flag = run(() => W.checkReport(r));
+r = clone(); by(r, 'tilt').chance_per_100 = 3; out.some_three = run(() => W.checkReport(r));
+// every settings field is this method's, or the report is refused
+for (const [k, v] of [['min_group', 10], ['some_min_group', 5], ['n_family', 2], ['step_cuts', [0.05, 0.2]],
+  ['promise_per_100', { clear_run: 3, clear_report_and_retest: 8, some_run: 20 }], ['blocks', { rule: 'day' }]]) {
+  r = clone(); r[k] = v; out['set_' + k] = run(() => W.checkReport(r));
+}
+r = clone(); r.method_version = '2026-10-30.stats3'; out.stats3 = run(() => W.checkReport(r));
+// catch reasons: each has its line; a reason with a figure, or a figure missing its reason, is refused
+for (const why of W.CATCH_REASONS) out['why_' + why] = W.catchReasonLine(why, '5,000');
+r = clone(); by(r, 'tilt').catch = null; by(r, 'tilt').catch_reason = 'same_result';
+out.same = run(() => W.habitLines(by(r, 'tilt'), r).check);
+r = clone(); by(r, 'tilt').catch_reason = 'off'; out.both = run(() => W.checkReport(r));
+r = clone(); by(r, 'tilt').catch = null; out.neither = run(() => W.checkReport(r));
+r = clone(); by(r, 'tilt').catch = null; by(r, 'tilt').catch_reason = 'over_limit'; out.over_small = run(() => W.checkReport(r));
+// the clock guard in "How this was measured"
+r = clone(); r.blocks.clock_guard = true;
+out.guard_on = W.methodLine(by(r, 'tilt'), undefined, r); out.guard_off = W.methodLine(by(base, 'tilt'), undefined, base);
+process.stdout.write(JSON.stringify(out));
+"""
+
+
+def test_stats3a_numbers_small_groups_catch_reasons_and_the_clock_guard():
+    o = node(STATS3A_JS)
+    t = o["table"]
+    # Clear always shows at most 3 in 100 (fewer than 1 below 0.01); Some always at least 4
+    assert "turns up fewer than 1 in 100 times" in t["0.0096"] and t["0.0096"].startswith("Clear sign")
+    assert "at most 3 in 100 times" in t["0.0288"] and t["0.0288"].startswith("Clear sign")
+    assert "at most 4 in 100 times" in t["0.0297"] and t["0.0297"].startswith("Some sign")
+    assert "at most 4 in 100 times" in t["0.04"] and "at most 6 in 100 times" in t["0.0501"] and "at most 20 in 100 times" in t["0.2"]
+    for p, line in t.items():
+        n = int(re.search(r"at most (\d+) in 100|fewer than (1) in 100", line).group(1) or 1)
+        assert (n <= 3) == line.startswith("Clear sign"), (p, line)
+    assert o["small_some"].startswith("THROW: wording: revenge has step some but") or "smaller group" in o["small_some"], o["small_some"]
+    assert o["small_flag"].startswith("THROW: wording: revenge has small_group true")
+    assert o["some_three"].startswith("THROW: wording: tilt has chance 3")
+    for k in ("min_group", "some_min_group", "n_family", "step_cuts", "promise_per_100", "blocks"):
+        assert o["set_" + k].startswith("THROW: wording: "), (k, o["set_" + k])
+    assert o["stats3"] == "THROW: wording: report method 2026-10-30.stats3 is not 2026-10-31.stats3a (DT-2)"
+    assert o["why_same_result"] == "No catch figure: every trade in this file has the same result."
+    assert o["why_over_limit"] == "No catch figure: files over 5,000 trades get none."
+    assert o["why_dates_only"] == "No catch figure: this file has dates but no times of day."
+    assert o["why_no_trades"] == "No catch figure: this file has no trades to build one from."
+    assert o["why_off"] == "No catch figure: this report was made without one."
+    for k in ("why_same_result", "why_over_limit", "why_dates_only", "why_no_trades", "why_off"):
+        assert L.verdict_hedge_hits(o[k], k) == [] and L.lint_text(o[k], k, paid=True) == []
+    assert o["same"][-1] == "No catch figure: every trade in this file has the same result."
+    assert o["both"].startswith("THROW: wording: tilt has a catch figure and the reason off")
+    assert o["neither"].startswith("THROW: wording: tilt has no catch figure and the reason null")
+    assert o["over_small"].startswith("THROW: wording: tilt has the catch reason over_limit on 220 trades")
+    assert ("In this file, wins and losses differ sharply by time of day, so each trade was also kept within its 2-hour band of the "
+            "clock when the results were reshuffled.") in o["guard_on"]
+    assert "time of day" not in o["guard_off"] and "A session ends at a gap of 3 hours or more between opens and lasts at most 24 hours." in o["guard_off"]

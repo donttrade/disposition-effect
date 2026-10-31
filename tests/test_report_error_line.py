@@ -79,7 +79,7 @@ def test_the_built_page_carries_the_contact_email_from_site_toml(site):
 def forge_dt2(kind):
     """DT-2 (batch S1): a DT-2 report whose steps disagree with its numbers is refused (wording.js checkReport)."""
     rep = json.load(open(os.path.join(HERE, "fixtures", "paid-reports-dt2", "stats__07-dayvol-trend_right_skew-220.report.json"), encoding="utf-8"))
-    assert rep["method_version"] == "2026-10-30.stats3"
+    assert rep["method_version"] == "2026-10-31.stats3a"
     rv, su, tl = rep["habits"][1], rep["habits"][2], rep["habits"][3]
     if kind == "dt2_step_mismatch":
         tl["step"] = "clear"                    # a Clear pill on a p_holm of 0.11

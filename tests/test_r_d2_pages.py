@@ -130,8 +130,8 @@ PRODUCT = ("Up to five habits measured in your own trades, with the dollar total
            "them tested against chance in this version; plus one re-test 30 to 60 days after your first result.")
 BYP = ("It measures and describes up to five habits, with the dollar totals of the matching trades, and tests up to two of them "
        "against chance in this version. Each checked habit gets one of three results: No sign, Some sign or Clear sign. On "
-       "histories with no real habit, a Clear sign on any habit turns up at most 5 in 100 times across your test and its "
-       "re-test together, and Some sign or Clear sign at most 20 in 100 times in one result. It includes one re-test 30 to 60 "
+       "histories with no real habit, a Clear sign on any habit turns up at most 3 in 100 times in one result and at most 5 in "
+       "100 times across your test and its re-test together, and Some sign or Clear sign at most 20 in 100 times in one result. It includes one re-test 30 to 60 "
        "days after your first result. It describes what happened; it does not tell you what to trade.")   # DT-2 (plan §9.4 item 5)
 LOT = ("Sizing on paper is one thing. The donttrade test describes, from your own trade file when it has times of day, your median size after a loss "
        "and after a win, and what trades after a loss at 1.5 times your usual size or more totalled. It measures and "
