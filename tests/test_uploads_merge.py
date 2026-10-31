@@ -64,7 +64,7 @@ READ = ("import { readAll, collapseCopies, copyLine, serverTradeCount } from './
         "const T = (s) => new TextEncoder().encode(s);"
         "const out = (x) => process.stdout.write(JSON.stringify(x));"
         "const shape = (r) => r.error ? {error: r.error.code, message: r.error.message, file: r.file} : {n: r.trades.length, "
-        "copies: r.copies, near: r.near, overlap: r.overlap, groups: r.groups, notes: r.notes, question: r.question, "
+        "copies: r.copies, near: r.near, pairs: (r.pairs || []).map((p) => [p.a, p.b, p.matched, Math.round(p.share * 1000) / 1000, p.status, p.copy]), overlap: r.overlap, groups: r.groups, notes: r.notes, question: r.question, "
         "facts: Math.round(r.factsTrades.reduce((a, t) => a + t.pnl, 0) * 100) / 100, nfacts: r.factsTrades.length, "
         "accounts: r.accounts.map((a) => [a.name, a.trades.length]), "
         "ftrades: r.factsTrades.map((t) => [t.symbol, t.dir, t.open_ts, t.close_ts, t.qty, Math.round(t.pnl * 100) / 100]), "
@@ -76,8 +76,9 @@ def read(paths, one=None):
                 f"{{ oneAccount: {json.dumps(one)} }})));")
 
 
-def read_text(texts, names=None, one=None):
-    return node(READ + f"out(shape(readAll({json.dumps(texts)}.map(T), {json.dumps(names or [])}, {{ oneAccount: {json.dumps(one)} }})));")
+def read_text(texts, names=None, one=None, copies=None):
+    return node(READ + f"out(shape(readAll({json.dumps(texts)}.map(T), {json.dumps(names or [])}, "
+                f"{{ oneAccount: {json.dumps(one)}, copies: {json.dumps(copies or {})} }})));")
 
 
 # ---------------------------------------------------------------- unit: merge.js
@@ -99,6 +100,9 @@ def test_collapse_on_two_files():
     # 60 + 45 trades: the 30 copies at a lag of 0 to 15 minutes are counted once; the 5 at 16 minutes (near-copies,
     # counted) and the 10 CL are not
     assert (r["n"], r["copies"], r["near"], r["groups"]) == (75, 30, 5, 2)
+    # a copy pair: 30 of acct_b's 35 trades on the symbols both trade pair within 15 minutes (86%: 80% or more)
+    assert r["pairs"] == [["acct_a.csv", "acct_b.csv", 30, 0.857, "copy", True]]
+    assert r["question"] == {"default": False, "answer": False}   # nothing in the files says; asked, preset "separate"
     b = {(t[0], t[1], t[2]): t for t in read([B])["trades"]}
     got = {(t[0], t[1], t[2]): t for t in r["trades"]}
     a_sorted = sorted(one["trades"], key=lambda t: t[2])
@@ -277,15 +281,21 @@ def test_tradovate_group_trading_keeps_each_accounts_book():
     # two books: every account's own trades, as each file alone gives them (B's short kept, nothing made up)
     assert (both["groups"], both["overlap"], both["nfacts"], both["facts"]) == (2, 0, 4, 950)
     assert sorted(map(tuple, both["ftrades"])) == sorted(map(tuple, one_a["trades"] + one_b["trades"]))
-    # for the habit checks, the two 09:00 longs (open 0, close 10 minutes apart: within 15) are one trade
-    assert (both["n"], both["copies"]) == (3, 1)
+    # copy accounts are decided per pair: 1 of 2 trades pair within 15 minutes (50%), so the buyer is asked, preset
+    # "they trade on their own" (under 65%): no trade is collapsed. Answered "yes", the two 09:00 longs are one trade.
+    assert [x[2:] for x in both["pairs"]] == [[1, 0.5, "ask", False]] and (both["n"], both["copies"]) == (4, 0)
+    key = both["pairs"][0][0] + "\u0001" + both["pairs"][0][1]
+    yes = read_text([a, b], copies={key: True})
+    assert (yes["n"], yes["copies"], yes["facts"]) == (3, 1, 950)
     # the generic fill template, one shared fill: the same, and the dollar total is the two files' own totals
     g1 = "\n".join([FILL_HEAD, "2026-09-01,09:00:00,ES,Buy,1,100,USD,0", "2026-09-01,09:20:00,ES,Sell,1,110,USD,0",
                     "2026-09-01,11:00:00,ES,Buy,1,100,USD,0", "2026-09-01,11:30:00,ES,Sell,1,105,USD,0"]) + "\n"
     g2 = "\n".join([FILL_HEAD, "2026-09-01,09:00:00,ES,Buy,1,100,USD,0", "2026-09-01,09:10:00,ES,Sell,1,103,USD,0",
                     "2026-09-01,11:05:00,ES,Sell,1,105,USD,0", "2026-09-01,11:15:00,ES,Buy,1,104,USD,0"]) + "\n"
     gg = read_text([g1, g2])
-    assert (gg["groups"], gg["nfacts"], gg["facts"], gg["n"], gg["copies"]) == (2, 4, 19, 3, 1)
+    # no account column: the buyer is asked, preset "Separate accounts" (dates overlap, one shared row only)
+    assert gg["question"] == {"default": False, "answer": False}
+    assert (gg["groups"], gg["nfacts"], gg["facts"], gg["n"], gg["copies"]) == (2, 4, 19, 4, 0)
 
 
 def test_months_with_no_overlap_ask_and_one_account_joins_the_edge():
@@ -353,11 +363,13 @@ def test_new_strings_pass_lint_and_are_definite():
     js = READ + ("import * as M from './site/static/js/paid/merge.js'; import * as V from './site/static/js/paid/small-facts-view.js';"
                  "out([M.SMALL_NOTICE, M.WAIT_LINE, M.UPLOAD_HINT, M.MIXED_UNITS, M.overlapLine(1), M.overlapLine(20), M.mt5MixLine('a.htm', 'b.htm'),"
                  " M.edgeLine(1), M.edgeLine(3), M.accountsLine(1, 2), M.accountsLine(2, 3), M.filesLabel(1, 2), M.filesLabel(2, 1),"
-                 " M.ACCOUNT_QUESTION, M.ACCOUNT_ONE, M.ACCOUNT_SEPARATE, M.nearLine(1), M.nearLine(5), V.SF_TEXT.acct, V.SF_TEXT.one_account, V.SF_LINES.combined(2),"
+                 " M.ACCOUNT_QUESTION, M.ACCOUNT_ONE, M.ACCOUNT_SEPARATE, M.nearLine(1), M.nearLine(5), M.COPY_QUESTION,"
+                 " M.copyPairLine('a.csv', 'b.csv', 1), M.copyPairLine('a.csv', 'b.csv', 112), M.ownPairLine('a.csv', 'b.csv'), V.SF_TEXT.acct, V.SF_TEXT.one_account, V.SF_LINES.combined(2),"
                  " V.SF_LINES.checked('a.csv')]);")
     got = node(js)
     assert got[:4] == [NOTICE, WAIT, HINT, MIXED_UNITS]
-    for t in got + [LINE_1, LINE_30, "Run anyway", "Run the test", "Add more files", "Remove these files", "Your files"]:
+    for t in got + [LINE_1, LINE_30, "Run anyway", "Run the test", "Add more files", "Remove these files", "Your files",
+                    "Yes, they copy each other", "No, they trade on their own"]:
         assert lint_text(t) == [] and lint_text(t, "report", paid=True) == [], t
         low = " " + t.lower() + " "
         for h in HEDGES:
@@ -525,7 +537,7 @@ def test_notice_waits_and_run_anyway_sends_one_post(browser, site):
     assert NOTICE in txt and WAIT in txt and page.inner_text("#rp-run").strip() == "Run anyway"
     # Tester M6: the one live line says the count, the notice and that Run sends; focus is on the panel
     live = page.text_content("#rp-live")
-    assert live == f"75 trades: 2 accounts, 2 files. {NOTICE} Press Run to send." and page.get_attribute("#rp-live", "role") == "status"
+    assert live == f"75 trades: 2 accounts, 2 files. {NOTICE} Are these files from one account or separate accounts? Press Run to send." and page.get_attribute("#rp-live", "role") == "status"
     assert page.evaluate("document.activeElement.id") == "rp-picked-h"
     page.wait_for_timeout(1500)
     assert log["posts"] == [] and page.is_hidden("#rp-status")          # waiting spends nothing
@@ -553,6 +565,8 @@ def test_notice_waits_and_run_anyway_sends_one_post(browser, site):
     assert [r.method for r in log["requests"] if r.url == API + "/analyse"] == ["POST"]
     assert page.inner_text("#copy-rows").strip() == LINE_30
     assert page.inner_text("#near-rows").strip() == NEAR_5
+    assert page.eval_on_selector_all(".copy-pair", "ps => ps.map((p) => p.textContent)") == [
+        "Accounts acct_a.csv and acct_b.csv copy each other: 30 trades counted once."]
     assert page.is_hidden("#rp-picked")
     assert lint_text(page.inner_text("#focus"), "report", paid=True) == []
     assert not log["errors"]
@@ -687,7 +701,7 @@ def test_rule_check_is_one_account_at_a_time(browser, site):
     staged(page, 30, 2)
     click_run(page)
     assert page.inner_text("#accounts-line").strip() == ("These results combine 2 accounts from 2 files. Dollar totals add every account’s "
-                                                         "trades; the habit checks count a trade copied between accounts within 15 minutes once. "
+                                                         "trades; for accounts that copy each other, the habit checks count each copied trade once. "
                                                          "The rule check covers one account at a time.")
     assert page.inner_text("#sf-combined").strip() == "Combined across 2 accounts: every account’s trades are added, copies included."
     assert page.inner_text("#sf-one-account").startswith("The rule check covers one account at a time")
@@ -754,4 +768,117 @@ def test_files_with_an_account_column_are_not_asked(browser, site):
     staged(page, 3, 2, 1)
     assert page.is_hidden("#rp-acct-q")
     assert "3 rows were in more than one file of one account and were counted once." in page.inner_text("#rp-notes")
+    ctx.close()
+
+
+# ---------------------------------------------------------------- copy accounts, per pair (Tester re-test 3)
+
+SIM = r"""
+let seed = 12345; const rnd = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
+const M = 60000, DAY = 86400000, t0 = Date.UTC(2026, 0, 5, 14, 30);
+const p2 = (n) => String(n).padStart(2, '0');
+const f = (ms) => { const d = new Date(ms); return `${d.getUTCFullYear()}-${p2(d.getUTCMonth() + 1)}-${p2(d.getUTCDate())} ${p2(d.getUTCHours())}:${p2(d.getUTCMinutes())}:${p2(d.getUTCSeconds())}`; };
+const head = 'Open Time,Close Time,Symbol,Direction,Quantity,Open Price,Close Price,Fees';
+// an intraday futures account: n trades a day on one contract, half of them in the first hour, lognormal holds
+const account = (days, perDay, medHoldMin) => { const out = []; for (let d = 0; d < days; d++) for (let k = 0; k < perDay; k++) {
+  const o = t0 + d * DAY + Math.floor((rnd() < 0.5 ? rnd() * 60 : rnd() * 390) * M);
+  const h = Math.max(1, Math.round(medHoldMin * Math.exp((rnd() + rnd() + rnd() - 1.5) * 0.9) * M / 1000)) * 1000;
+  out.push({ o, c: o + h, dir: rnd() < 0.5 ? 'Long' : 'Short', p: 100 + Math.round((rnd() - 0.5) * 40) / 4 }); } return out; };
+const csv = (ts, q = 1) => head + '\n' + ts.map((t) => `${f(t.o)},${f(t.c)},ES,${t.dir},${q},100,${t.p},0`).join('\n') + '\n';
+"""
+
+
+def test_independent_accounts_on_one_contract_lose_no_trades():
+    """Two INDEPENDENT accounts, one contract, 60 days of 10 trades a day with 5-minute median holds, open-heavy (the
+    Tester's worst typical case: 38% merged at 15 minutes when copies were decided per trade). Decided per pair, they
+    are not copy accounts: no trade is collapsed, near-copies are not counted."""
+    js = READ + SIM + """
+    const A = account(60, 10, 5), B = account(60, 10, 5);
+    const r = readAll([T(csv(A)), T(csv(B))], ['a.csv', 'b.csv']);
+    out({ n: r.trades.length, facts: r.factsTrades.length, copies: r.copies, near: r.near, pair: r.pairs[0] });"""
+    r = node(js)
+    assert r["pair"]["status"] == "own" and r["pair"]["copy"] is False and r["pair"]["share"] < 0.5, r["pair"]
+    assert (r["n"], r["facts"], r["copies"], r["near"]) == (1200, 1200, 0, 0)
+
+
+def test_copy_accounts_with_0_to_14_minutes_of_lag_collapse():
+    """A copier of the same busy account, each copy opened and closed 0 to 14 minutes after the leader's (its own
+    random lag on each end), at half size: a copy pair; every copy is counted once."""
+    js = READ + SIM + """
+    const A = account(60, 10, 5);
+    const B = A.map((t) => { const lo = Math.floor(rnd() * 15) * M, lc = Math.floor(rnd() * 15) * M; return { ...t, o: t.o + lo, c: Math.max(t.c + lc, t.o + lo + 1000) }; });
+    const r = readAll([T(csv(A, 2)), T(csv(B, 1))], ['lead.csv', 'copier.csv']);
+    out({ n: r.trades.length, copies: r.copies, pair: r.pairs[0] });"""
+    r = node(js)
+    assert r["pair"]["status"] == "copy" and r["pair"]["copy"] is True and r["pair"]["share"] >= 0.8, r["pair"]
+    assert r["copies"] >= 570 and r["n"] == 1200 - r["copies"], r
+
+
+def in_between(copied):
+    """A: 20 trades 2 hours apart. B: copies of the first `copied` of them (2 minutes later), and 20 - copied trades of
+    its own at least an hour from any of A's."""
+    a, b = [RT_HEAD], [RT_HEAD]
+    for i in range(20):
+        d, h = 1 + i // 4, 9 + 2 * (i % 4)
+        a.append(f"2026-09-{d:02d} {h:02d}:00:00,2026-09-{d:02d} {h:02d}:10:00,ES,Long,1,100,{101 + i % 3},0")
+        if i < copied:
+            b.append(f"2026-09-{d:02d} {h:02d}:02:00,2026-09-{d:02d} {h:02d}:12:00,ES,Long,1,100,{101 + i % 3},0")
+        else:
+            b.append(f"2026-09-{d:02d} {h + 1:02d}:00:00,2026-09-{d:02d} {h + 1:02d}:10:00,ES,Short,1,100,99,0")
+    return "\n".join(a) + "\n", "\n".join(b) + "\n"
+
+
+def test_in_between_pairs_are_asked_with_a_preset_from_the_share():
+    a, b = in_between(13)                       # 65%: asked, preset "yes"
+    r = read_text([a, b], ["a.csv", "b.csv"])
+    assert r["pairs"] == [["a.csv", "b.csv", 13, 0.65, "ask", True]] and (r["n"], r["copies"]) == (27, 13)
+    no = read_text([a, b], ["a.csv", "b.csv"], copies={"a.csv\u0001b.csv": False})
+    assert no["pairs"][0][5] is False and (no["n"], no["copies"], no["near"]) == (40, 0, 0)
+    a, b = in_between(12)                       # 60%: asked, preset "no"
+    r = read_text([a, b], ["a.csv", "b.csv"])
+    assert r["pairs"] == [["a.csv", "b.csv", 12, 0.6, "ask", False]] and (r["n"], r["copies"]) == (40, 0)
+    a, b = in_between(9)                        # 45%: never collapsed, not asked
+    assert read_text([a, b], ["a.csv", "b.csv"])["pairs"][0][4] == "own"
+    a, b = in_between(16)                       # 80%: a copy pair, not asked
+    assert read_text([a, b], ["a.csv", "b.csv"])["pairs"][0][4:] == ["copy", True]
+
+
+def test_ibkr_overlapping_exports_of_one_account_are_asked_and_counted_once():
+    """Tester re-test 3 (r7.mjs): the engine's own IBKR Flex fixture cut into two overlapping exports (rows 1-5 and
+    3-7), same columns, no account or ID column. The later one starts while a position is open, so the engine's kept
+    fills differ; the rows as written match. The question shows, preset "One account": one book, the shared trade
+    counted once in the dollars (as the whole file alone)."""
+    lines = open(os.path.join(HERE, "fixtures", "ibkr", "activity_flex.csv"), encoding="utf-8").read().splitlines()
+    head, rows = lines[0], [x for x in lines[1:] if x.strip()]
+    assert len(rows) == 7
+    q1 = "\n".join([head] + rows[0:5]) + "\n"
+    q2 = "\n".join([head] + rows[2:7]) + "\n"
+    whole = read_text(["\n".join([head] + rows) + "\n"])
+    r = read_text([q1, q2], ["q1.csv", "q2.csv"])
+    assert r["question"] == {"default": True, "answer": True}
+    assert (r["groups"], r["overlap"], r["nfacts"], r["facts"]) == (1, 3, whole["nfacts"], whole["facts"])
+    sep = read_text([q1, q2], ["q1.csv", "q2.csv"], one=False)
+    assert sep["groups"] == 2                    # the buyer's other answer: two accounts
+
+
+def test_the_copy_question_on_the_page(browser, site):
+    a, b = in_between(13)
+    fa, fb = site["tmp"] / "lead13.csv", site["tmp"] / "copy13.csv"
+    fa.write_text(a)
+    fb.write_text(b)
+    ctx, page, log = report_page(browser, site, width=390)
+    page.set_input_files("#rp-file", [str(fa), str(fb)])
+    staged(page, 27, 2, 2)
+    q = page.query_selector_all("#rp-copy-q fieldset")
+    assert len(q) == 1 and page.inner_text("#rp-copy-q legend").strip() == "Do these accounts copy each other’s trades?"
+    assert page.is_checked("#rp-copy-0-yes") and "Do these accounts copy each other’s trades?" in page.text_content("#rp-live")
+    page.check("#rp-copy-0-no")
+    staged(page, 40, 2, 2)
+    assert page.is_checked("#rp-copy-0-no") and log["posts"] == []
+    from a11y import horizontal_overflow
+    assert horizontal_overflow(page) == []
+    click_run(page)
+    assert len(log["posts"]) == 1 and len(json.loads(log["posts"][0].post_data)["rows"]) == 40
+    assert page.eval_on_selector_all(".copy-pair", "ps => ps.map((p) => p.textContent)") == [
+        "Accounts lead13.csv and copy13.csv trade on their own: none of their trades are counted once."]
     ctx.close()

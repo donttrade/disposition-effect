@@ -6,7 +6,7 @@
 // Every number on the page comes from the server's Report or from the file in this
 // tab; the wording only describes past trades (NON-ADVISER A3).
 
-import { readAll, copyLine, nearLine, copiesIn, serverTradeCount, overlapLine, accountsLine, filesLabel, SMALL_FILE } from './merge.js';
+import { readAll, copyLine, nearLine, copyPairLine, ownPairLine, COPY_QUESTION, copiesIn, serverTradeCount, overlapLine, accountsLine, filesLabel, SMALL_FILE } from './merge.js';
 import { ics, retestLine, RETEST_LINE } from './retest-copy.js';
 import { pgrPlrCounts } from '../engine/pgr.js';
 import { stripRows, spanLine } from './strip.js';
@@ -389,6 +389,13 @@ export function renderReport(report, out, meta) {
   if (meta && Array.isArray(meta.accounts) && meta.files > 1) p1.append(el('p', { class: 'small', id: 'accounts-line', text: accountsLine(meta.accounts.length, meta.files) }));
   if (meta && meta.copies) p1.append(el('p', { class: 'small', id: 'copy-rows', text: copyLine(meta.copies) }));
   if (meta && meta.near) p1.append(el('p', { class: 'small', id: 'near-rows', text: nearLine(meta.near) }));
+  // Tester re-test 3: the copy decision for each pair of accounts that has trades within 15 minutes of each other
+  if (meta && Array.isArray(meta.pairs)) {
+    for (const pr of meta.pairs) {
+      if (!pr.matched) continue;
+      p1.append(el('p', { class: 'small copy-pair', text: pr.copy ? copyPairLine(pr.a, pr.b, pr.matched) : ownPairLine(pr.a, pr.b) }));
+    }
+  }
   out.append(p1);
 
   out.append(habitsSummary(report, unit));
@@ -504,6 +511,27 @@ function status(msg, kind = '') {
 let picked = [];
 let ready = null;
 let oneAccount = null;   // the buyer's answer to merge.js ACCOUNT_QUESTION; null: the default
+let copyAnswers = {};    // the buyer's answers to COPY_QUESTION, by pair key; a pair not answered takes its preset
+
+// One "Do these accounts copy each other's trades?" per pair of accounts whose share of paired trades is in between
+// (merge.js COPY_NEVER..COPY_SURE), preset from that share. Changing it reads the files again; nothing is sent.
+function showCopyQuestions() {
+  const box = $('rp-copy-q');
+  const asks = ready && ready.pairs ? ready.pairs.filter((p) => p.status === 'ask') : [];
+  box.replaceChildren(...asks.map((pr, i) => {
+    const yes = el('input', { type: 'radio', name: 'rp-copy-' + i, id: `rp-copy-${i}-yes`, value: 'yes' });
+    const no = el('input', { type: 'radio', name: 'rp-copy-' + i, id: `rp-copy-${i}-no`, value: 'no' });
+    yes.checked = pr.copy; no.checked = !pr.copy;
+    for (const r of [yes, no]) {
+      r.addEventListener('change', () => { if (busy || !picked.length) return; copyAnswers[pr.key] = r === yes; stage(picked); });
+    }
+    return el('fieldset', { class: 'rp-acct-q rp-copy-q' }, el('legend', { text: COPY_QUESTION }),
+      el('p', { class: 'small', text: `${pr.a} and ${pr.b}` }),
+      el('div', { class: 'check' }, yes, el('label', { for: `rp-copy-${i}-yes`, text: 'Yes, they copy each other' })),
+      el('div', { class: 'check' }, no, el('label', { for: `rp-copy-${i}-no`, text: 'No, they trade on their own' })));
+  }));
+  box.hidden = !asks.length;
+}
 
 // The one question asked when the files do not say which account they are from (Tester re-test 2): a one-tap
 // choice, preset to merge.js's default. Changing it reads the files again; nothing is sent.
@@ -532,13 +560,15 @@ function showPanel() {
   // by detected accounts, never by file count (Tester re-test 2 R6): "80 trades: 1 account, 2 files."
   const lines = [n === null ? `${plural(picked.length, 'file', 'files')} chosen.` : `${plural(n, 'trade', 'trades')}: ${filesLabel(ready.groups, picked.length)}.`];
   showQuestion();
+  showCopyQuestions();
   const small = ready && n < SMALL_FILE;
   $('rp-small').hidden = !small;
   const notes = ready ? ready.notes : [];
   $('rp-notes').replaceChildren(...notes.map((t) => el('p', { class: 'small', text: t })));
   // One live line a screen reader hears when the panel changes (Tester M6): the count, then the notice under 100.
   $('rp-count').textContent = lines[0];
-  const asked = ready && ready.question ? ' ' + $('rp-acct-q').querySelector('legend').textContent.trim() : '';
+  const asked = (ready && ready.question ? ' ' + $('rp-acct-q').querySelector('legend').textContent.trim() : '')
+    + (ready && ready.pairs && ready.pairs.some((p) => p.status === 'ask') ? ' ' + COPY_QUESTION : '');
   $('rp-live').textContent = lines[0] + (small ? ' ' + $('rp-small').textContent.trim() : '') + asked + (n === null ? '' : ' Press Run to send.');
   $('rp-run').textContent = small ? 'Run anyway' : 'Run the test';
   $('rp-run').disabled = !ready;
@@ -566,7 +596,7 @@ async function removeFile(i) {
 
 function clearFiles() {
   if (busy) return;
-  picked = []; ready = null; oneAccount = null;
+  picked = []; ready = null; oneAccount = null; copyAnswers = {};
   $('rp-status').hidden = true;
   showPanel();
 }
@@ -579,7 +609,7 @@ async function stage(files) {
   try {
     status(files.length > 1 ? `Reading your ${files.length} files in this tab…` : 'Reading your file in this tab…');
     const bytes = await Promise.all(files.map(async (f) => new Uint8Array(await f.arrayBuffer())));
-    const r = readAll(bytes, files.map((f) => f.name), { oneAccount });
+    const r = readAll(bytes, files.map((f) => f.name), { oneAccount, copies: copyAnswers });
     if (r.error) { status(r.error.message, 'error'); return; }   // picked, ready and the panel stay as they were
     const stripped = await stripRows(r.trades, payload.salt);
     const kept = reportTrades(r.trades);   // the trades the rows are made from (span and cap): their copies only (m3)
@@ -587,7 +617,7 @@ async function stage(files) {
     if (r.overlap) notes.push(overlapLine(r.overlap));
     if (stripped.span_left_out) notes.push(spanLine(stripped.span_left_out));
     picked = files;
-    ready = { stripped, counts: pgrPlrCounts(r.executions), currency: r.trades[0].pnl_unit, copies: copiesIn(kept), near: r.near,
+    ready = { stripped, counts: pgrPlrCounts(r.executions), currency: r.trades[0].pnl_unit, copies: copiesIn(kept), near: r.near, pairs: r.pairs,
       trades: r.factsTrades, accounts: r.accounts, groups: r.groups, files: r.files, question: r.question, format: r.format || null,
       n: serverTradeCount(stripped.rows), notes };
     $('rp-status').hidden = true;
@@ -603,7 +633,7 @@ async function send() {
   if (busy || !ready) return;
   busy = true;
   $('rp-run').disabled = true;
-  const { stripped, counts, currency, copies, near, trades, accounts, files, format } = ready;
+  const { stripped, counts, currency, copies, near, pairs, trades, accounts, files, format } = ready;
   try {
     const firm = $('rp-firm').value.trim();
     const body = { v: 1, token, rows: stripped.rows, currency, pgr_plr: counts,
@@ -619,7 +649,7 @@ async function send() {
     $('rp-status').hidden = true;
     try {
       renderReport(r.json.report, $('rp-out'), { limited: stripped.limited, span_left_out: stripped.span_left_out, retest: r.json.retest || null,
-        uses_left: r.json.uses_left, copies, near, trades, accounts, files, format });
+        uses_left: r.json.uses_left, copies, near, pairs, trades, accounts, files, format });
     } catch (e) {
       // wording.js throws rather than print a sentence that is not true of this report (R2-3).
       $('rp-out').replaceChildren();
