@@ -13,6 +13,7 @@ import { stripRows, spanLine } from './strip.js';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js';
 import { habitSentences, methodLine, page1Lines, coverageLines, mergedLine, checkReport, SENTENCE_HABITS, RESEARCH, RESEARCH_PREFIX, holdDays,
   V_LAUNCH, V_LAUNCH_SIZE, V_NO, moreTrades } from './wording.js';
+import { factsSection, challengeSection, smallLayout, presetsFromPage } from './small-facts-view.js';
 
 // Off until "N more trades" can be shown without ever understating N (Tester slice 1 re-test: worlds
 // with too few files per share band were ignored, so some files were told too few). Backlog item.
@@ -358,6 +359,11 @@ export function renderReport(report, out, meta) {
   out.classList.add('report-out');
   wirePrint();
   out.append(el('p', { class: 'disclaimer notice', text: report.disclaimer }));
+  // S4 (small-file facts and challenge check): facts from the trades parsed in this tab, never sent anywhere.
+  // Small files lead with them (addendum §3.1); otherwise the facts follow the habit totals and the rule check
+  // follows the habits (bundle plan §2: part c).
+  const sf = smallFactsParts(report, meta);
+  if (sf && sf.small) out.append(sf.facts, sf.rules);
   // Page 1 (ARCHITECT-STATS-AMENDMENT-R2 §9.1): the headline, the focus habit or why none is
   // shown first (one reason line per distinguishable habit), then the coverage line. All
   // sentences come from wording.js, which refuses a report of another method version.
@@ -381,6 +387,7 @@ export function renderReport(report, out, meta) {
   out.append(p1);
 
   out.append(habitsSummary(report, unit));
+  if (sf && !sf.small) out.append(sf.facts);
 
   const details = el('section', { class: 'section', 'aria-labelledby': 'det-h' }, el('h2', { id: 'det-h', text: 'Each habit' }));
   for (const h of report.habits) if (!factsOnly(h)) details.append(habitSection(h, unit, report));
@@ -400,6 +407,8 @@ export function renderReport(report, out, meta) {
       el('p', { text: `Proportion of gains realised (PGR): ${pct(c.pgr)} · proportion of losses realised (PLR): ${pct(c.plr)}.` }),
       el('p', { class: 'small muted', text: `Counts: ${c.rg} realised gains, ${c.pg} paper gains, ${c.rl} realised losses, ${c.pl} paper losses. Coverage: ${c.coverage_pct === null ? 'no open positions on sale days' : c.coverage_pct.toFixed(1) + '% of open position-days had a same-day price in your file'}. This is not the full Odean (1998) measure, which needs a price for every open position every day.` })));
   }
+
+  if (sf && !sf.small) out.append(sf.rules);
 
   // The rule library: identical for everyone, in its fixed order, never matched to the habits above.
   const lib = el('section', { class: 'section', id: 'rules', 'aria-labelledby': 'rules-h' },
@@ -442,6 +451,14 @@ export function renderReport(report, out, meta) {
   out.append(el('p', { class: 'small muted', text: `Engine ${report.engine_commit} · rule library ${report.rule_library_version}.` }));
 }
 
+// S4: the two fact sections, when the page has the file's trades (meta.trades: the report page after a run, the
+// example report from its committed file). Kept here as one call so the habit layer above stays untouched.
+function smallFactsParts(report, meta) {
+  if (!meta || !Array.isArray(meta.trades) || !meta.trades.length) return null;
+  const opts = { money: (x) => money(x, report.currency), presets: presetsFromPage(), format: meta.format || null, sample: !!meta.sample };
+  return { small: smallLayout(report), facts: factsSection(meta.trades, opts), rules: challengeSection(meta.trades, opts) };
+}
+
 // ---------------------------------------------------------------- page wiring
 
 let token = null;
@@ -482,7 +499,8 @@ async function run(file) {
   if (!r.ok) { status(r.json && r.json.error ? r.json.error.message : 'The report could not be made.', 'error'); return; }
   $('rp-status').hidden = true;
   try {
-    renderReport(r.json.report, $('rp-out'), { limited: stripped.limited, span_left_out: stripped.span_left_out, retest: r.json.retest || null, uses_left: r.json.uses_left });
+    renderReport(r.json.report, $('rp-out'), { limited: stripped.limited, span_left_out: stripped.span_left_out, retest: r.json.retest || null, uses_left: r.json.uses_left,
+      trades, format: parsed.result.format });
   } catch (e) {
     // wording.js throws rather than print a sentence that is not true of this report (R2-3).
     $('rp-out').replaceChildren();

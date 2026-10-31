@@ -17,5 +17,9 @@
       report.js fills it, so the footer never sits in view while the report is drawn above it. -#}
   <div id="sample-out" class="report-slot" aria-live="polite"><noscript><p class="notice notice-caution">This example report is drawn by the result page’s own script, so it needs JavaScript turned on.</p></noscript></div>
   <script type="application/json" id="sample-data">{{ sample_report_json }}</script>
+  {#- S4: the committed trade file the sample report was made from, read in the browser by the report page's engine,
+      and the firm-rules library, for the facts and the rule check -#}
+  <script type="text/csv" id="sample-trades">{{ sample_trades_csv }}</script>
+  <script type="application/json" id="sf-presets">{{ presets_json }}</script>
 </div>
 {% endblock %}
