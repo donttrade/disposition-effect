@@ -3,7 +3,7 @@ several files of one platform as one history.
 
 Unit (node and Chromium, merge.js): every file is read on its own, so two accounts never share a position book (B2);
 files that share rows are one account, read together, overlap counted once; an MT5 positions report and a deals
-report are read without losing either (B3); the copy collapse across accounts (5:00 merges, 5:01 does not, one
+report are read without losing either (B3); the copy collapse across accounts (15:00 merges, 15:01 does not, one
 account never, date-only trades never); currencies refused when they differ (M1); the server's trade count (B4);
 the 20,000-row cap after the merge.
 Page (Chromium, the Worker is a Playwright route, everything off the page's origin aborted): choosing files only
@@ -41,8 +41,9 @@ BODY_KEYS = {"v", "token", "rows", "currency", "pgr_plr", "firm_name", "firm_con
 NOTICE = "Files this size mostly show No sign for habits. You still get every dollar total and your rule check."
 WAIT = "Nothing is sent until you press Run. Adding files does not use a run."
 HINT = "Add all your accounts and months: more trades, clearer answers."
-LINE_30 = "30 trades in one file matched a trade in another file within 5 minutes and were counted once."
-LINE_1 = "1 trade in one file matched a trade in another file within 5 minutes and was counted once."
+LINE_30 = "30 trades in one file matched a trade in another file within 15 minutes and were counted once."
+NEAR_5 = "5 more trades match a trade in another file 15 to 60 minutes apart; they are counted as separate trades."
+LINE_1 = "1 trade in one file matched a trade in another file within 15 minutes and was counted once."
 MIXED_UNITS = ("These files report results in different currencies or units, so they cannot be added up. "
                "Add the files of one currency at a time.")
 HEDGES = ("may", "might", "maybe", "unclear", "could be", "possibly")
@@ -63,9 +64,10 @@ READ = ("import { readAll, collapseCopies, copyLine, serverTradeCount } from './
         "const T = (s) => new TextEncoder().encode(s);"
         "const out = (x) => process.stdout.write(JSON.stringify(x));"
         "const shape = (r) => r.error ? {error: r.error.code, message: r.error.message, file: r.file} : {n: r.trades.length, "
-        "copies: r.copies, overlap: r.overlap, groups: r.groups, notes: r.notes, question: r.question, "
+        "copies: r.copies, near: r.near, overlap: r.overlap, groups: r.groups, notes: r.notes, question: r.question, "
         "facts: Math.round(r.factsTrades.reduce((a, t) => a + t.pnl, 0) * 100) / 100, nfacts: r.factsTrades.length, "
         "accounts: r.accounts.map((a) => [a.name, a.trades.length]), "
+        "ftrades: r.factsTrades.map((t) => [t.symbol, t.dir, t.open_ts, t.close_ts, t.qty, Math.round(t.pnl * 100) / 100]), "
         "trades: r.trades.map((t) => [t.symbol, t.dir, t.open_ts, t.close_ts, t.qty, Math.round(t.pnl * 100) / 100])};")
 
 
@@ -94,21 +96,22 @@ def test_collapse_on_two_files():
     one = read([A])
     r = read([A, B])
     assert (one["n"], one["copies"]) == (60, 0)
-    # 60 + 45 trades: the 30 copies at a lag of 0 to 5 minutes are counted once; the 5 at 6 minutes and the 10 CL are not
-    assert (r["n"], r["copies"], r["groups"]) == (75, 30, 2)
+    # 60 + 45 trades: the 30 copies at a lag of 0 to 15 minutes are counted once; the 5 at 16 minutes (near-copies,
+    # counted) and the 10 CL are not
+    assert (r["n"], r["copies"], r["near"], r["groups"]) == (75, 30, 5, 2)
     b = {(t[0], t[1], t[2]): t for t in read([B])["trades"]}
     got = {(t[0], t[1], t[2]): t for t in r["trades"]}
     a_sorted = sorted(one["trades"], key=lambda t: t[2])
     for i, lead in enumerate(a_sorted[:35]):
         k = (lead[0], lead[1], lead[2])
-        lag = (i // 5 if i < 30 else 6) * 60000
+        lag = (3 * (i // 5) if i < 30 else 16) * 60000
         copy = b[(lead[0], lead[1], lead[2] + lag)]
         if i < 30:   # one trade: the leader's times, quantity and P&L summed
             assert got[k][4] == lead[4] + copy[4] and abs(got[k][5] - (lead[5] + copy[5])) < 0.011, i
             assert (got[k][2], got[k][3]) == (lead[2], lead[3])
             if lag:
                 assert (copy[0], copy[1], copy[2]) not in got, i
-        else:        # 6 minutes: both stay, unchanged
+        else:        # 16 minutes: both stay, unchanged
             assert got[k] == lead and got[(copy[0], copy[1], copy[2])] == copy, i
     # trades 58 and 59 of acct_a: same symbol and direction, 1 minute apart, in the same file: never collapsed
     p58, p59 = a_sorted[58], a_sorted[59]
@@ -117,7 +120,7 @@ def test_collapse_on_two_files():
 
 
 def test_collapse_rule_edges():
-    """Synthetic trades: the 5-minute window on both ends (inclusive), one account, three accounts, symbol and
+    """Synthetic trades: the 15-minute window on both ends (inclusive: 15:00 merges, 15:01 does not), one account, three accounts, symbol and
     direction, and date-only trades (Tester M3: they never collapse)."""
     js = READ + """
     const M = 60000, D = 86400000, TR = (sym, dir, o, c, qty, pnl, file) => ({ symbol: sym, dir, open_ts: o, close_ts: c,
@@ -126,9 +129,10 @@ def test_collapse_rule_edges():
     const run = (ts) => { const r = collapseCopies(ts, of); return [r.collapsed, r.trades.length, r.trades.map((t) => [t.qty, t.pnl])]; };
     const t0 = 20000 * D + 9 * 3600000;
     out({
+      at15: run([TR('X', 'long', t0, t0 + 10 * M, 1, 5, [0]), TR('X', 'long', t0 + 15 * M, t0 + 25 * M, 2, 7, [1])]),
+      open1501: run([TR('X', 'long', t0, t0 + 10 * M, 1, 5, [0]), TR('X', 'long', t0 + 15 * M + 1000, t0 + 25 * M, 2, 7, [1])]),
+      close1501: run([TR('X', 'long', t0, t0 + 10 * M, 1, 5, [0]), TR('X', 'long', t0, t0 + 25 * M + 1000, 2, 7, [1])]),
       at5: run([TR('X', 'long', t0, t0 + 10 * M, 1, 5, [0]), TR('X', 'long', t0 + 5 * M, t0 + 15 * M, 2, 7, [1])]),
-      open501: run([TR('X', 'long', t0, t0 + 10 * M, 1, 5, [0]), TR('X', 'long', t0 + 5 * M + 1000, t0 + 15 * M, 2, 7, [1])]),
-      close501: run([TR('X', 'long', t0, t0 + 10 * M, 1, 5, [0]), TR('X', 'long', t0, t0 + 15 * M + 1000, 2, 7, [1])]),
       same_file: run([TR('X', 'long', t0, t0 + 10 * M, 1, 5, [0]), TR('X', 'long', t0, t0 + 10 * M, 2, 7, [0])]),
       three: run([TR('X', 'long', t0, t0 + 10 * M, 1, 5, [0]), TR('X', 'long', t0 + M, t0 + 11 * M, 2, 7, [1]), TR('X', 'long', t0 + 2 * M, t0 + 12 * M, 3, 11, [2])]),
       two_in_b: run([TR('X', 'long', t0, t0 + 10 * M, 1, 5, [0]), TR('X', 'long', t0 + 3 * M, t0 + 13 * M, 2, 7, [1]), TR('X', 'long', t0 + M, t0 + 11 * M, 3, 11, [1])]),
@@ -136,16 +140,17 @@ def test_collapse_rule_edges():
       dir: run([TR('X', 'long', t0, t0 + 10 * M, 1, 5, [0]), TR('X', 'short', t0, t0 + 10 * M, 2, 7, [1])]),
       date_only: run([TR('X', 'long', 20000 * D, 20002 * D, 1, 5, [0]), TR('X', 'long', 20000 * D, 20002 * D, 2, 7, [1])]),
       lines: [copyLine(1), copyLine(30), copyLine(100000)],
+      near: (await import('./site/static/js/paid/merge.js')).nearLine(5),
     });"""
     r = node(js)
-    assert r["at5"] == [1, 1, [[3, 12]]]
-    assert r["open501"][:2] == [0, 2] and r["close501"][:2] == [0, 2]
+    assert r["at15"] == [1, 1, [[3, 12]]] and r["at5"] == [1, 1, [[3, 12]]]
+    assert r["open1501"][:2] == [0, 2] and r["close1501"][:2] == [0, 2]
     assert r["same_file"][:2] == [0, 2]
     assert r["three"] == [2, 1, [[6, 23]]]
     assert r["two_in_b"] == [1, 2, [[4, 16], [2, 7]]]   # one per other account, nearest first
     assert r["symbol"][:2] == [0, 2] and r["dir"][:2] == [0, 2]
     assert r["date_only"][:2] == [0, 2]
-    assert r["lines"] == [LINE_1, LINE_30, LINE_30.replace("30 trades", "100,000 trades")]
+    assert r["lines"] == [LINE_1, LINE_30, LINE_30.replace("30 trades", "100,000 trades")] and r["near"] == NEAR_5
 
 
 def test_date_only_files_never_collapse():
@@ -269,15 +274,18 @@ def test_tradovate_group_trading_keeps_each_accounts_book():
     one_a, one_b, both = read_text([a]), read_text([b]), read_text([a, b])
     assert [(t[1], t[5]) for t in one_a["trades"]] == [("long", 500), ("long", 200)]
     assert [(t[1], t[5]) for t in one_b["trades"]] == [("long", 150), ("short", 100)]
-    assert (both["n"], both["groups"], both["copies"], both["overlap"]) == (4, 2, 0, 0)
-    assert sorted(map(tuple, both["trades"])) == sorted(map(tuple, one_a["trades"] + one_b["trades"]))
+    # two books: every account's own trades, as each file alone gives them (B's short kept, nothing made up)
+    assert (both["groups"], both["overlap"], both["nfacts"], both["facts"]) == (2, 0, 4, 950)
+    assert sorted(map(tuple, both["ftrades"])) == sorted(map(tuple, one_a["trades"] + one_b["trades"]))
+    # for the habit checks, the two 09:00 longs (open 0, close 10 minutes apart: within 15) are one trade
+    assert (both["n"], both["copies"]) == (3, 1)
     # the generic fill template, one shared fill: the same, and the dollar total is the two files' own totals
     g1 = "\n".join([FILL_HEAD, "2026-09-01,09:00:00,ES,Buy,1,100,USD,0", "2026-09-01,09:20:00,ES,Sell,1,110,USD,0",
                     "2026-09-01,11:00:00,ES,Buy,1,100,USD,0", "2026-09-01,11:30:00,ES,Sell,1,105,USD,0"]) + "\n"
     g2 = "\n".join([FILL_HEAD, "2026-09-01,09:00:00,ES,Buy,1,100,USD,0", "2026-09-01,09:10:00,ES,Sell,1,103,USD,0",
                     "2026-09-01,11:05:00,ES,Sell,1,105,USD,0", "2026-09-01,11:15:00,ES,Buy,1,104,USD,0"]) + "\n"
     gg = read_text([g1, g2])
-    assert (gg["n"], gg["groups"]) == (4, 2) and sum(t[5] for t in gg["trades"]) == 19
+    assert (gg["groups"], gg["nfacts"], gg["facts"], gg["n"], gg["copies"]) == (2, 4, 19, 3, 1)
 
 
 def test_months_with_no_overlap_ask_and_one_account_joins_the_edge():
@@ -345,7 +353,7 @@ def test_new_strings_pass_lint_and_are_definite():
     js = READ + ("import * as M from './site/static/js/paid/merge.js'; import * as V from './site/static/js/paid/small-facts-view.js';"
                  "out([M.SMALL_NOTICE, M.WAIT_LINE, M.UPLOAD_HINT, M.MIXED_UNITS, M.overlapLine(1), M.overlapLine(20), M.mt5MixLine('a.htm', 'b.htm'),"
                  " M.edgeLine(1), M.edgeLine(3), M.accountsLine(1, 2), M.accountsLine(2, 3), M.filesLabel(1, 2), M.filesLabel(2, 1),"
-                 " M.ACCOUNT_QUESTION, M.ACCOUNT_ONE, M.ACCOUNT_SEPARATE, V.SF_TEXT.acct, V.SF_TEXT.one_account, V.SF_LINES.combined(2),"
+                 " M.ACCOUNT_QUESTION, M.ACCOUNT_ONE, M.ACCOUNT_SEPARATE, M.nearLine(1), M.nearLine(5), V.SF_TEXT.acct, V.SF_TEXT.one_account, V.SF_LINES.combined(2),"
                  " V.SF_LINES.checked('a.csv')]);")
     got = node(js)
     assert got[:4] == [NOTICE, WAIT, HINT, MIXED_UNITS]
@@ -544,6 +552,7 @@ def test_notice_waits_and_run_anyway_sends_one_post(browser, site):
             assert s not in (r.post_data or "") and s not in r.url, (r.url, s)
     assert [r.method for r in log["requests"] if r.url == API + "/analyse"] == ["POST"]
     assert page.inner_text("#copy-rows").strip() == LINE_30
+    assert page.inner_text("#near-rows").strip() == NEAR_5
     assert page.is_hidden("#rp-picked")
     assert lint_text(page.inner_text("#focus"), "report", paid=True) == []
     assert not log["errors"]
@@ -678,7 +687,7 @@ def test_rule_check_is_one_account_at_a_time(browser, site):
     staged(page, 30, 2)
     click_run(page)
     assert page.inner_text("#accounts-line").strip() == ("These results combine 2 accounts from 2 files. Dollar totals add every account’s "
-                                                         "trades; the habit checks count a trade copied between accounts within 5 minutes once. "
+                                                         "trades; the habit checks count a trade copied between accounts within 15 minutes once. "
                                                          "The rule check covers one account at a time.")
     assert page.inner_text("#sf-combined").strip() == "Combined across 2 accounts: every account’s trades are added, copies included."
     assert page.inner_text("#sf-one-account").startswith("The rule check covers one account at a time")

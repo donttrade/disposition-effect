@@ -13,8 +13,9 @@
 // 3. All files must report in one currency or unit, or they are refused (Tester M1).
 // 4. Copy collapse, after the books and before stripping, for the habit checks only (the dollar facts keep every
 //    account's real trades). A trade copied to a second account shows up in each account's file. Trades
-//    from DIFFERENT accounts with the same symbol and direction, opened within 5 minutes of each other and closed
-//    within 5 minutes of each other, become one trade (P&L, gross, fees, fills and quantity summed). Unmerged copies
+//    from DIFFERENT accounts with the same symbol and direction, opened within 15 minutes of each other and closed
+//    within 15 minutes of each other, become one trade (P&L, gross, fees, fills and quantity summed; ARCHITECT-DT2-
+//    CALIBRATION-FIXES item 6: slow copiers, 6-8 minutes, pushed Clear to 6.0 in 100 at 5 minutes). Unmerged copies
 //    doubled revenge's false-alarm rate (copy.mjs: 8.0 in 100 at a 2.5 level; 1.8–3.0 after the collapse). Trades of
 //    one account never collapse, however close; date-only trades (no time of day) never collapse (Tester M3).
 
@@ -24,14 +25,19 @@ import { normHeader } from '../engine/csv.js';
 import { detectHtml } from '../engine/detect.js';
 import { MESSAGES, LIMITS } from '../engine/errors.js';
 
-export const COPY_WINDOW_MS = 5 * 60000;   // "within 5 minutes": a lag of exactly 5 minutes collapses, 5:01 does not
+export const COPY_WINDOW_MS = 15 * 60000;  // "within 15 minutes": a lag of exactly 15:00 collapses, 15:01 does not
+export const NEAR_WINDOW_MS = 60 * 60000;  // near-copies: 15 to 60 minutes apart, counted and left separate
 export const SMALL_FILE = 100;              // owner Q3: fewer trades than this → the small-file notice
 const DAY_MS = 86400000;
 
 const grouped = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 export const copyLine = (k) => (k === 1
-  ? '1 trade in one file matched a trade in another file within 5 minutes and was counted once.'
-  : `${grouped(k)} trades in one file matched a trade in another file within 5 minutes and were counted once.`);
+  ? '1 trade in one file matched a trade in another file within 15 minutes and was counted once.'
+  : `${grouped(k)} trades in one file matched a trade in another file within 15 minutes and were counted once.`);
+// Calibration fixes item 6: the near-misses, stated definitely, when there are any.
+export const nearLine = (j) => (j === 1
+  ? '1 more trade matches a trade in another file 15 to 60 minutes apart; it is counted as a separate trade.'
+  : `${grouped(j)} more trades match a trade in another file 15 to 60 minutes apart; they are counted as separate trades.`);
 
 // The small-file notice (owner Q3, Architect addendum wording). Definite: no may, might, maybe, unclear, could be or
 // possibly.
@@ -44,7 +50,7 @@ export const overlapLine = (n) => `${grouped(n)} ${n === 1 ? 'row was' : 'rows w
 export const filesLabel = (accts, files) => `${grouped(accts)} ${accts === 1 ? 'account' : 'accounts'}, ${grouped(files)} ${files === 1 ? 'file' : 'files'}`;
 export const accountsLine = (accts, files) => (accts === 1
   ? `These results read ${grouped(files)} files as 1 account.`
-  : `These results combine ${grouped(accts)} accounts from ${grouped(files)} files. Dollar totals add every account’s trades; the habit checks count a trade copied between accounts within 5 minutes once. The rule check covers one account at a time.`);
+  : `These results combine ${grouped(accts)} accounts from ${grouped(files)} files. Dollar totals add every account’s trades; the habit checks count a trade copied between accounts within 15 minutes once. The rule check covers one account at a time.`);
 export const edgeLine = (n) => `${grouped(n)} ${n === 1 ? 'position was' : 'positions were'} open at the start or end of an account’s files and ${n === 1 ? 'was' : 'were'} left out.`;
 export const ACCOUNT_QUESTION = 'Are these files from one account or separate accounts?';
 export const ACCOUNT_ONE = 'One account';
@@ -128,6 +134,8 @@ export function collapseCopies(trades, originOf, windowMs = COPY_WINDOW_MS) {
       t.qty += c.qty; t.pnl += c.pnl; t.pnl_gross += c.pnl_gross; t.fees += c.fees; t.fills_n += c.fills_n;
     }
     t._copies = g.length - 1;
+    t._in = new Set();
+    for (const j of g) for (const k of originOf(trades[j])) t._in.add(k);
     out.push(t);
   }
   return { trades: out, collapsed };
@@ -320,14 +328,19 @@ export function readFiles(byteArrays, names = [], opts = {}) {
   factsTrades.sort((a, b) => (a.close_ts - b.close_ts) || (a.open_ts - b.open_ts) || cmpStr(a.symbol, b.symbol) || (a._g - b._g));
   let out = factsTrades;
   let copies = 0;
+  let near = 0;
   if (groups.length > 1) {
     const sets = groups.map((_, g) => new Set([g]));
-    const c = collapseCopies(factsTrades, (t) => sets[t._g]);
+    const of = (t) => t._in || sets[t._g];
+    const c = collapseCopies(factsTrades, of);
     out = c.trades;
     copies = c.collapsed;
+    // near-copies: the trades left that still pair, one to one and nearest first, with a trade of another account
+    // within 60 minutes on both ends (the same matching, a wider window; nothing is merged)
+    near = collapseCopies(out, of, NEAR_WINDOW_MS).collapsed;
   }
   out = out.map((t, i) => Object.assign({}, t, { id: 't' + (i + 1) }));
-  return { trades: out, factsTrades, accounts, executions, copies, overlap, groups: groups.length, files: n, question, notes,
+  return { trades: out, factsTrades, accounts, executions, copies, near, overlap, groups: groups.length, files: n, question, notes,
     format: own[0].format };
 }
 
