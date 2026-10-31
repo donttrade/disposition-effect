@@ -16,8 +16,8 @@
 // The firm library's quotes are data, not page copy (challenge_rules.json "about"): the page shows each rule's value,
 // the date it was read and a link to the firm's page, and "Not stated by {firm}" where the firm's page is silent.
 
-import { fileFacts, challengeCheck, usablePresets, defaultFileTz, resolveTz } from './small-facts.js';
-import { HABIT_TEXT } from '../tools/habit-flags.js';
+import { fileFacts, challengeCheck, usablePresets, defaultFileTz, resolveTz, unitMismatch } from './small-facts.js';
+import { HABIT_TEXT, MIN_BREACH_DAYS } from '../tools/habit-flags.js';
 import { NOT_STATED } from '../tools/challenge-presets.js';
 
 const NS = 'http://www.w3.org/2000/svg';
@@ -35,7 +35,7 @@ export const SF_TEXT = Object.freeze({
   worst: 'Worst day',
   no_losing_day: 'No losing day',
   no_losing_day_sub: 'Every day ended at zero or above.',
-  loss_dollars: 'of your loss dollars',
+  loss_dollars: 'of your total loss',
   run: 'Longest losing run',
   no_losses: 'No losing trades in this file.',
   last_trade: 'It was the file’s last trade.',
@@ -60,18 +60,25 @@ export const SF_TEXT = Object.freeze({
   r_best: 'Best-day limit',
   r_days: 'Minimum days',
   none: 'None',
-  breach_h: 'Days at the daily loss limit',
+  breach_h: 'Days at the daily loss limit, whole file',
   no_daily: 'These rules have no daily loss limit.',
   strip_caption: 'Each bar is one day, in order. Marked days reached the daily loss limit.',
   cons_h: 'Best day against total profit',
   cons_no_win: 'No day ended in profit, so there is no best day.',
   cons_none: 'These rules have no best-day limit.',
-  habits_h: 'Habits on your breach days',
-  habits_up_to: 'Counted up to the trade that reached the limit.',
-  needs_times: 'Needs trade times.',
+  habits_h: 'Habit trades on breach days and other losing days: counts and totals',
+  habits_breach: 'Breach days',
+  habits_other: 'Other losing days',
+  habits_up_to: 'Breach days are counted up to the trade that reached the limit; other losing days whole.',
+  habits_not_cause: 'A count and a total, not a cause.',
+  few: HABIT_TEXT.few,
+  not_described: HABIT_TEXT.not_described,
+  by_design: HABIT_TEXT.by_design,
   leaves_out: 'What this check leaves out',
   closed_only: 'Closed trades only: what happens inside an open trade is not in the file.',
   source: 'Source',
+  sources: 'Sources:',
+  points_refused: 'This file’s results are in price points, and firm rules are amounts of money, so this file gets no rule check.',
 });
 
 // The habit names the report shows (report.js nameOf: oversized_loss is "Large losses").
@@ -99,43 +106,49 @@ const timeText = (ts) => new Date(ts).toISOString().slice(11, 16);
 
 // The sentences with numbers in them. Each takes formatted pieces only, so the tests can lint every shape.
 export const SF_LINES = Object.freeze({
-  facts_h: (n) => `Your ${plural(n, 'trade', 'trades')}, in dollars`,
+  facts_h: (n, unit) => `Your ${plural(n, 'trade', 'trades')}, ${unit === 'USD' ? 'in dollars' : unit === 'points' ? 'in points' : 'in your currency'}`,
   won: (m, n) => `${m} won in ${plural(n, 'trade', 'trades')}`,
   lost: (m, n) => `${m} lost in ${plural(n, 'trade', 'trades')}`,
   flat: (n) => `${plural(n, 'trade', 'trades')} at break-even`,
   worst_sub: (date, n) => `${date} · ${plural(n, 'trade', 'trades')}`,
   top_label: (k, of) => (k === of ? (of === 1 ? 'Your one loss' : `All ${count(of)} losses`) : `${count(k)} largest losses`),
-  top_all: 'all your loss dollars',
+  top_all: 'your whole total loss',
   largest: (m, n) => `Largest: ${m}, trade ${count(n)}`,
   run_value: (len) => (len === 1 ? '1 loss' : `${count(len)} in a row`),
   run_trades: (from, to) => (from === to ? `trade ${count(from)}` : `trades ${count(from)}–${count(to)}`),
   run_next: (m) => `Next trade: ${m}`,
   run_next_flat: 'Next trade: break-even',
   run_ties: (k) => `The first of ${count(k)} runs this long.`,
-  first_bust: (rule, date, day, n, of) => `In the real order, your trades broke the ${rule} on ${date} (day ${count(day)}), at trade ${count(n)} of ${count(of)}.`,
-  bust_sub_daily: (when, m) => `${when} · the day stood at ${m} at that trade.`,
+  first_bust: (rule, day, n, of) => `In the real order, your trades broke the ${rule} on day ${count(day)}, at trade ${count(n)} of ${count(of)}.`,
+  bust_sub_daily: (when, m) => `${when} · the day stood at ${m}.`,
   bust_sub_max: (when, m) => `${when} · that trade: ${m}.`,
-  closed_at: (t) => `Closed at ${t}`,
-  closed_on: (d) => `Closed ${d}`,
+  closed_at: (n, d, t) => `Trade ${count(n)} closed ${d} at ${t}`,
+  closed_on: (n, d) => `Trade ${count(n)} closed ${d}`,
   first_pass: (day) => `In the real order, your trades reached the target on day ${count(day)}, with no rule broken.`,
   first_pass_held: (t, day) => `In the real order, your trades reached the target on day ${count(t)} and met the day count and best-day rules on day ${count(day)}, with no rule broken.`,
   first_end: (days) => `In the real order, your trades reached neither the target nor a loss limit in ${plural(days, 'day', 'days')}.`,
   first_time: (days) => `In the real order, your trades reached neither the target nor a loss limit in the ${plural(days, 'day', 'days')} these rules allow.`,
+  first_cap: (days) => `In the real order, your trades reached neither the target nor a loss limit in the first ${plural(days, 'day', 'days')} (the check stops there).`,
   rules_for: (firm, program, size) => `${firm}, ${program} · ${size} account`,
+  rules_scaled: (firm, program, size) => `${firm}’s rules (${program}), scaled to ${size}`,
+  percent_unit: (firm) => `${firm}’s rules are shares of the account, so they apply in your file’s own currency.`,
+  currency_refused: (unit, firm, cur) => `This file’s results are in ${unit}, and ${firm}’s rules are fixed amounts in ${cur}, so this file gets no rule check against them.`,
   max_kind: (m, kind) => `${m}, ${kind}`,
+  day_start: (firm, hour, zone, file) => `Days start at ${String(hour).padStart(2, '0')}:00 ${zone}, as ${firm} states; your file’s times are read as ${file}.`,
   not_stated: (firm, parts) => `Not stated by ${firm}: ${parts}.`,
   not_stated_one: (firm) => `Not stated by ${firm}`,
   ns_part: (name, used) => `${name} (the check uses ${used})`,
-  breach_count: (k, of) => `${count(k)} of ${plural(of, 'day', 'days')}`,
+  breach_count: (k, of) => `${count(k)} of ${plural(of, 'day', 'days')} in your file`,
   no_breach: (m) => `No day reached the daily loss limit of ${m}.`,
-  breach_row: (date, day, n) => `${date} · day ${count(day)} · trade ${count(n)} · the day at`,
+  breach_row: (day, n, date) => `Day ${count(day)} · trade ${count(n)}, closed ${date} · the day at`,
   breach_more: (k) => `And ${plural(k, 'more day', 'more days')}.`,
   cons_line: (best, net) => `Best day ${best} of total profit ${net}.`,
   cons_over: (firm, pct) => `${firm}’s limit: ${pct}. This file is over it.`,
   cons_within: (firm, pct) => `${firm}’s limit: ${pct}. This file is within it.`,
   cons_no_profit: (net, best) => `Your days add up to ${net}, so there is no total profit to compare with. Best day: ${best}.`,
-  habit_days: (a, b, c, d) => `On ${count(a)} of ${plural(b, 'breach day', 'breach days')}` + (d ? ` · ${count(c)} of ${plural(d, 'other losing day', 'other losing days')}` : ''),
-  habit_money: (n, m) => `${plural(n, 'trade', 'trades')} on breach days, totalling ${m}`,
+  habit_group: (on, of, n, m) => `on ${count(on)} of ${plural(of, 'day', 'days')} · ${plural(n, 'trade', 'trades')} · ${m}`,
+  habit_group_none: 'no such days',
+  few_count: (k, min) => `${HABIT_TEXT.few}: ${plural(k, 'breach day', 'breach days')} in this file; the free Readiness Check describes ${count(min)} or more.`,
   read_on: (firm, date) => `Rules as published by ${firm}, read on ${date}.`,
   strip_label: (n, k) => `${plural(n, 'day', 'days')} in order; ${count(k)} reached the daily loss limit.`,
 });
@@ -180,12 +193,15 @@ function runSquares(run) {
   return box;
 }
 
+// An amount never splits between its sign and the currency symbol at a line end (a word joiner after the sign).
+const keepSign = (money) => (x) => money(x).replace(/^([−+])/, '$1\u2060');
+
 export function factsSection(trades, opts) {
-  const m = opts.money;
+  const m = keepSign(opts.money);
   const f = fileFacts(trades);
   const years = new Set(trades.map((t) => new Date(t.close_ts).getUTCFullYear())).size > 1;
   const sec = el('section', { class: 'section sf-facts', id: 'file-facts', 'aria-labelledby': 'file-facts-h' },
-    el('h2', { id: 'file-facts-h', text: SF_LINES.facts_h(f.n) }));
+    el('h2', { id: 'file-facts-h', text: SF_LINES.facts_h(f.n, opts.unit) }));
   const grid = el('div', { class: 'sf-grid' });
   // 1. net total, with what was won and lost
   const gross = f.win_total - f.loss_total;
@@ -229,9 +245,9 @@ export function factsSection(trades, opts) {
 function dayStrip(c, m) {
   const n = c.days.length;
   const breach = new Set(c.breaches.map((b) => b.day - 1));
-  const W = 400, H = 90, mid = 46, pad = 2;
+  const W = Math.max(400, n + 4), H = 90, mid = 46, pad = 2;   // every day gets a bar, however many (Tester S4 M2)
   const max = Math.max(1e-9, ...c.days.map((x) => Math.abs(x)), c.rules.daily_loss || 0);
-  const bw = Math.max(1, (W - 2 * pad) / Math.max(n, 1));
+  const bw = (W - 2 * pad) / Math.max(n, 1);
   const svg = document.createElementNS(NS, 'svg');
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   svg.setAttribute('class', 'sf-strip');
@@ -272,8 +288,9 @@ function firstLine(c, m, years) {
   const f = c.first;
   if (f.outcome === 'bust') {
     const rule = f.why === 'daily' ? 'daily loss limit' : 'maximum loss';
-    const lead = SF_LINES.first_bust(rule, dateText(f.trade.close_ts, years), f.day, f.trade.n, c.n_trades);
-    const when = c.dates_only ? SF_LINES.closed_on(dateText(f.trade.close_ts, true)) : SF_LINES.closed_at(timeText(f.trade.close_ts));
+    const lead = SF_LINES.first_bust(rule, f.day, f.trade.n, c.n_trades);
+    const when = c.dates_only ? SF_LINES.closed_on(f.trade.n, dateText(f.trade.close_ts, true))
+      : SF_LINES.closed_at(f.trade.n, dateText(f.trade.close_ts, years), timeText(f.trade.close_ts));
     const subline = f.why === 'daily' ? SF_LINES.bust_sub_daily(when, m(f.day_at)) : SF_LINES.bust_sub_max(when, m(f.trade.pnl));
     return [lead, subline];
   }
@@ -281,7 +298,13 @@ function firstLine(c, m, years) {
     return [f.target_day !== null && f.target_day < f.day ? SF_LINES.first_pass_held(f.target_day, f.day) : SF_LINES.first_pass(f.target_day || f.day), null];
   }
   if (f.outcome === 'end') return [SF_LINES.first_end(f.n_days), null];
-  return [SF_LINES.first_time(f.limit_days === null ? f.cap : f.limit_days), null];
+  // no time limit in these rules: the replay stops at the engine's cap, and says so (Tester S4 B3)
+  return [f.limit_days === null ? SF_LINES.first_cap(f.cap) : SF_LINES.first_time(f.limit_days), null];
+}
+
+// A money unit in words: an ISO code as the code, MetaTrader's account currency and IBKR's base currency by name.
+function unitName(u) {
+  return u === 'USD' ? 'US dollars' : u === 'account' ? 'your account currency' : u === 'base' ? 'your base currency' : u === 'points' ? 'price points' : String(u);
 }
 
 // A rule's amount, without the + a P&L figure carries.
@@ -303,6 +326,15 @@ function rulesList(c, m) {
   return dl;
 }
 
+// Where a day starts, in words: the firm's stated reset in its own zone, and the zone the file is read in. An unstated
+// reset is named in the not-stated line instead ("midnight on your file's clock"), which is what the check uses.
+const zoneName = (z) => (z === 'broker' ? 'broker server time (GMT+2, GMT+3 in summer)' : z === 'file' ? 'on your file’s clock'
+  : z && typeof z === 'object' ? `UTC${z.offset_min >= 0 ? '+' : ''}${z.offset_min / 60}` : /^Etc\/GMT[+-]\d+$/.test(z) ? `UTC${z[7] === '-' ? '+' : '−'}${z.slice(8)}` : `${z} time`);
+function dayStartLine(c) {
+  if (!c.day_start_stated) return null;
+  return el('p', { class: 'small', id: 'sf-day-start', text: SF_LINES.day_start(c.preset.firm, c.day_start.hour, zoneName(c.day_start.tz), zoneName(c.file_tz)) });
+}
+
 function notStatedLine(c) {
   const shown = new Set(['daily_loss', 'consistency', 'min_days']);   // those three say it in the list above
   const parts = c.not_stated.filter((f) => !shown.has(f) && NS_NAMES[f]).map((f) => SF_LINES.ns_part(...NS_NAMES[f]));
@@ -317,7 +349,7 @@ function breachBlock(c, m, years) {
   const ol = el('ol', { class: 'sf-list' });
   const SHOW = 10;
   for (const b of c.breaches.slice(0, SHOW)) {
-    ol.append(el('li', {}, SF_LINES.breach_row(dateText(b.trade.close_ts, years), b.day, b.trade.n) + ' ', el('span', { class: 'sf-nw', text: m(b.running) })));
+    ol.append(el('li', {}, SF_LINES.breach_row(b.day, b.trade.n, dateText(b.trade.close_ts, years)) + ' ', el('span', { class: 'sf-nw', text: m(b.running) })));
   }
   box.append(ol);
   if (c.breaches.length > SHOW) box.append(el('p', { class: 'small muted', text: SF_LINES.breach_more(c.breaches.length - SHOW) }));
@@ -338,42 +370,64 @@ function consistencyBlock(c, m) {
   return box;
 }
 
+// Habit trades on breach days and on the other losing days, under the free Readiness Check's own rule (Tester S4 B1):
+// fewer than MIN_BREACH_DAYS breach days → its "Too few breach days" line and nothing else; a habit that needs times on
+// a dates-only file → its own line. Otherwise both groups, in the same words and weight: days with the habit, its
+// trades and their total. Counts and totals only; no bars, no colour, no ranking.
 function habitsBlock(c, m) {
   if (!c.breaches.length) return null;
   const box = el('div', { class: 'sf-block', id: 'sf-habits' }, el('h3', { text: SF_TEXT.habits_h }));
-  const maxAbs = Math.max(1e-9, ...c.habits.map((h) => Math.abs(h.total)));
+  if (c.breaches.length < MIN_BREACH_DAYS) {
+    box.append(el('p', { id: 'sf-habits-few', text: SF_LINES.few_count(c.breaches.length, MIN_BREACH_DAYS) }));
+    return box;
+  }
   const list = el('ul', { class: 'sf-habits' });
   for (const h of c.habits) {
     const li = el('li', { class: 'sf-habit', 'data-habit': h.id }, el('p', { class: 'sf-hn', text: HABIT_NAMES[h.id] }));
-    if (h.needs_times) li.append(sub(SF_TEXT.needs_times, 'muted'));
+    if (h.status === 'not_described') li.append(sub(SF_TEXT.not_described, 'muted'));
     else {
-      li.append(sub(SF_LINES.habit_days(h.on_breach, h.n_breach, h.on_other_losing, h.n_other_losing)),
-        el('p', { class: 'sf-s sf-hm' }, el('span', { class: signCls(h.total), text: SF_LINES.habit_money(h.n_trades, m(h.total)) })),
-        shareBar(Math.abs(h.total) / maxAbs, h.total < 0 ? 'is-loss' : 'is-gain'));
+      const group = (label, on, of, n, total) => el('p', { class: 'sf-s' }, el('span', { class: 'sf-hg', text: label + ': ' }),
+        of ? SF_LINES.habit_group(on, of, n, m(total)) : SF_LINES.habit_group_none);
+      li.append(group(SF_TEXT.habits_breach, h.on_breach, h.n_breach, h.n_trades, h.total),
+        group(SF_TEXT.habits_other, h.on_other_losing, h.n_other_losing, h.n_trades_other, h.total_other));
     }
     list.append(li);
   }
-  box.append(list, el('p', { class: 'small muted', text: `${SF_TEXT.habits_up_to} ${HABIT_TEXT.by_design}` }));
+  box.append(list, el('p', { class: 'small', text: SF_TEXT.habits_not_cause }),
+    el('p', { class: 'small muted', text: `${SF_TEXT.habits_up_to} ${SF_TEXT.by_design}` }));
   return box;
 }
 
-function checkOut(trades, preset, size, tz, m) {
+function checkOut(trades, preset, size, tz, m, unit) {
   const c = challengeCheck(trades, preset, { accountSize: size, fileTz: resolveTz(tz) });
   const years = new Set(trades.map((t) => new Date(t.close_ts).getUTCFullYear())).size > 1;
   const [lead, subline] = firstLine(c, m, years);
   const out = [el('p', { class: 'sf-first ' + (c.first.outcome === 'bust' ? 'is-bust' : ''), id: 'sf-first', text: lead })];
   if (subline) out.push(el('p', { class: 'sf-s', text: subline }));
-  out.push(el('p', { class: 'small sf-rules-for', text: SF_LINES.rules_for(c.preset.firm, c.preset.program, unsigned(m, c.preset.account_size)) }),
-    rulesList(c, m), notStatedLine(c), dayStrip(c, m), breachBlock(c, m, years), consistencyBlock(c, m), habitsBlock(c, m));
+  // a size the firm does not sell as such reads as the firm's rules scaled to it (Tester S4 M8)
+  const sizeText = unsigned(m, c.preset.account_size);
+  const own = c.preset.scale !== 'percent' || Math.abs(c.preset.account_size - c.preset.own_size) < 0.005;
+  out.push(el('p', { class: 'small sf-rules-for', text: own ? SF_LINES.rules_for(c.preset.firm, c.preset.program, sizeText)
+    : SF_LINES.rules_scaled(c.preset.firm, c.preset.program, sizeText) }),
+    unit !== c.preset.currency ? el('p', { class: 'small', text: SF_LINES.percent_unit(c.preset.firm) }) : null,
+    rulesList(c, m), dayStartLine(c), notStatedLine(c), dayStrip(c, m), breachBlock(c, m, years), consistencyBlock(c, m), habitsBlock(c, m));
   const src = el('p', { class: 'small muted sf-source' }, c.preset.read_text ? SF_LINES.read_on(c.preset.firm, c.preset.read_text) + ' ' : '');
-  if (c.preset.url) src.append(el('a', { href: c.preset.url, rel: 'noopener', text: SF_TEXT.source }));
+  // every source page in the library for this preset, not only the first (Tester S4 M9)
+  if (c.preset.urls.length) {
+    src.append(SF_TEXT.sources + ' ');
+    c.preset.urls.forEach((u, i) => {
+      let host = u;
+      try { host = new URL(u).hostname; } catch (e) { /* the library only holds https URLs */ }
+      src.append(...(i ? [', '] : []), el('a', { href: u, rel: 'noopener', text: c.preset.urls.length > 1 ? `${host} (${i + 1})` : host }));
+    });
+  }
   out.push(src, el('details', { class: 'how-more' }, el('summary', { text: SF_TEXT.leaves_out }),
     el('ul', {}, ...c.not_modelled.map((x) => el('li', { text: x })), el('li', { text: SF_TEXT.closed_only }))));
   return { nodes: out.filter(Boolean), check: c };
 }
 
 export function challengeSection(trades, opts) {
-  const m = opts.money;
+  const m = keepSign(opts.money);
   const presets = usablePresets(opts.presets);
   const sec = el('section', { class: 'section sf-rules-sec', id: 'rule-check', 'aria-labelledby': 'rule-check-h' },
     el('h2', { id: 'rule-check-h', text: SF_TEXT.rules_h }), el('p', { text: SF_TEXT.rules_lead }));
@@ -394,12 +448,22 @@ export function challengeSection(trades, opts) {
     el('div', { class: 'field' }, el('label', { for: 'sf-preset', text: SF_TEXT.pick }), sel),
     el('div', { class: 'field' }, el('label', { for: 'sf-account', text: SF_TEXT.account }), sizeHint, size),
     el('div', { class: 'field' }, el('label', { for: 'sf-tz', text: SF_TEXT.tz }), tz));
-  const out = el('div', { class: 'sf-out', id: 'sf-out', 'aria-live': 'polite' }, el('p', { class: 'muted', text: SF_TEXT.waiting }));
-  sec.append(form, out);
+  // Only the result's first line is announced, not the whole region on every change (Tester S4 M11).
+  const live = el('p', { class: 'visually-hidden', id: 'sf-live', 'aria-live': 'polite' });
+  const out = el('div', { class: 'sf-out', id: 'sf-out' }, el('p', { class: 'muted', text: SF_TEXT.waiting }));
+  sec.append(form, live, out);
   sec.lastCheck = null;
+  const unit = opts.unit || (trades[0] && trades[0].pnl_unit);
   const draw = () => {
     const p = presets.find((x) => x.id === sel.value);
-    if (!p) { out.replaceChildren(el('p', { class: 'muted', text: SF_TEXT.waiting })); sec.lastCheck = null; return; }
+    if (!p) { out.replaceChildren(el('p', { class: 'muted', text: SF_TEXT.waiting })); live.textContent = ''; sec.lastCheck = null; return; }
+    // rules are money: points never, and a fixed-amount preset only in its own currency (Tester S4 B2)
+    const bad = unitMismatch(unit, p);
+    if (bad) {
+      const line = bad.why === 'points' ? SF_TEXT.points_refused : SF_LINES.currency_refused(unitName(unit), p.firm, unitName(p.currency));
+      out.replaceChildren(el('p', { class: 'notice', id: 'sf-refused', text: line }));
+      live.textContent = line; sec.lastCheck = null; return;
+    }
     sizeHint.textContent = p.scale === 'percent' ? SF_TEXT.account_pct : SF_TEXT.account_fixed;
     size.readOnly = p.scale !== 'percent';
     const raw = size.value.replace(/[\s,$]/g, '');
@@ -408,17 +472,21 @@ export function challengeSection(trades, opts) {
       out.replaceChildren(el('p', { class: 'error', text: SF_TEXT.account_bad })); sec.lastCheck = null; return;
     }
     try {
-      const r = checkOut(trades, p, p.scale === 'percent' ? v : p.account_size, tz.value, m);
+      const r = checkOut(trades, p, p.scale === 'percent' ? v : p.account_size, tz.value, m, unit);
       out.replaceChildren(...r.nodes);
+      live.textContent = r.nodes[0].textContent;
       sec.lastCheck = r.check;
     } catch (e) {
       out.replaceChildren(el('p', { class: 'error', text: SF_TEXT.no_rules }));
       sec.lastCheck = null;
     }
   };
+  // A new firm starts from its own account size, unless the trader typed one (kept for any percent preset).
+  let typed = null;
+  size.addEventListener('input', () => { if (!size.readOnly) typed = size.value; });
   sel.addEventListener('change', () => {
     const p = presets.find((x) => x.id === sel.value);
-    if (p) size.value = String(p.account_size);   // a new firm starts from its own account size
+    if (p) size.value = p.scale === 'percent' && typed !== null && typed.trim() !== '' ? typed : String(p.account_size);
     draw();
   });
   size.addEventListener('change', draw);

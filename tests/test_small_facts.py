@@ -28,7 +28,23 @@ sys.path.insert(0, os.path.join(REPO, "site"))
 from lint import lint_text  # noqa: E402
 
 # "May" the month (after a day number) is a date, not a hedge.
-HEDGE = re.compile(r"\b(?:might|maybe|possibly|perhaps|unclear|could\s+be|not\s+clear)\b|(?<!\d )\bmay\b", re.IGNORECASE)
+HEDGE_WORDS = re.compile(r"\b(?:may|might|maybe|possibly|perhaps|unclear|could\s+be|not\s+clear)\b", re.IGNORECASE)
+
+
+def local_only(ctx):
+    """Every request that is not to this machine is aborted (no donttrade.ca, Worker, Stripe or beacon)."""
+    ctx.route("**/*", lambda route: route.continue_() if route.request.url.startswith("http://127.0.0.1") else route.abort())
+    return ctx
+
+
+def hedge(text):
+    """The first hedge in text, or None. "May" is allowed only as the month: capitalised, right after a day number
+    (Tester S4 M10: case-sensitive, so "2 may" is still a hedge)."""
+    for mt in HEDGE_WORDS.finditer(text):
+        if mt.group(0) == "May" and re.search(r"\d $", text[:mt.start()]):
+            continue
+        return mt.group(0)
+    return None
 
 JS_UNITS = r"""
 import { readFileSync } from 'node:fs';
@@ -73,7 +89,7 @@ out.topstep = { first: top.first, breaches: top.breaches, daily: top.rules.daily
 // a dates-only file: re-entry and size after a loss need times
 const D = (d, pnl) => { const o = Date.UTC(2026, 5, d); return { symbol: 'A', dir: 'long', open_ts: o, close_ts: o + 86400000, hold_s: 86400, qty: 1, pnl, pnl_unit: 'USD' }; };
 const dates = SF.challengeCheck([D(1, -400), D(3, -200), D(5, 50)], P('ftmo-1-step'), { accountSize: 10000, fileTz: 'UTC' });
-out.dates = { dates_only: dates.dates_only, needs: dates.habits.filter((h) => h.needs_times).map((h) => h.id), breaches: dates.breaches.length };
+out.dates = { dates_only: dates.dates_only, needs: dates.habits.filter((h) => h.status === 'not_described').map((h) => h.id), breaches: dates.breaches.length };
 // the 30-trade fixture through the engine
 const { runFile } = await import('./site/static/js/engine/index.js');
 const r = runFile(new Uint8Array(readFileSync('tests/fixtures/paid/small-30.csv')));
@@ -90,6 +106,38 @@ out.parity = { outcome: seq.outcome, why: seq.why, day: seq.day };
 // every preset the library can quote runs on the 30-trade file
 out.all = SF.usablePresets(lib).map((p) => { const c = SF.challengeCheck(t30, p, { fileTz: 'UTC' }); return [p.id, c.first.outcome, c.breaches.length]; });
 out.tz = [SF.defaultFileTz('mt5'), SF.defaultFileTz('mt4'), SF.defaultFileTz('generic'), SF.defaultFileTz('generic', true)];
+// M1: scaled amounts to the cent: 3% of 7,000 is 210, and a day at exactly -210 reaches it
+const m1 = SF.challengeCheck([T(1, '09:30', 5, -110), T(1, '09:40', 5, -100), T(2, '09:30', 5, 5)], P('ftmo-1-step'), { accountSize: 7000, fileTz: 'UTC' });
+out.m1 = { daily: m1.rules.daily_loss, breaches: m1.breaches.length, first: m1.first.outcome };
+// B3: no time limit in the rules; 300 quiet days end at the engine's cap, with limit_days null
+const quiet = [];
+for (let i = 0; i < 300; i++) { const o = Date.UTC(2026, 0, 1) + i * 86400000 + 9.5 * 3600000; quiet.push({ symbol: 'A', dir: 'long', open_ts: o, close_ts: o + 300000, hold_s: 300, qty: 1, pnl: i % 2 ? -1 : 1.5, pnl_unit: 'USD' }); }
+const q = SF.challengeCheck(quiet, P('ftmo-1-step'), { accountSize: 100000, fileTz: 'UTC' });
+out.b3 = { outcome: q.first.outcome, limit_days: q.first.limit_days, cap: q.first.cap, n_days: q.first.n_days };
+// B2: which presets a unit may be checked against
+out.units = SF.usablePresets(lib).map((p) => [p.id, p.scale, ...['USD', 'EUR', 'account', 'points'].map((u) => SF.unitMismatch(u, p) && SF.unitMismatch(u, p).why)]);
+// M3: the trades the report is about (strip.js's selection)
+const old = T(1, '09:30', 5, 1); old.open_ts -= 600 * 7 * 86400000; old.close_ts = old.open_ts + 300000;
+out.m3 = SF.reportTrades([old, T(2, '09:30', 5, 2), T(3, '09:30', 5, 3)]).map((t) => t.pnl);
+// B4: per preset, the day splits exactly at the stated reset (or at midnight on the file's clock), with the file read
+// in Toronto time and in UTC: trades closing 30 and 10 minutes before the reset are one day, 10 minutes after another
+const HOUR = 3600000;
+out.b4 = [];
+for (const p of SF.usablePresets(lib)) {
+  for (const ftz of ['America/Toronto', 'UTC']) {
+    const ds = p.rules.day_start;
+    let resetNaive;
+    if (ds === 'not stated') resetNaive = Date.UTC(2026, 5, 2);
+    else {
+      const wall = Date.UTC(2026, 5, 2, ds.hour);
+      const utc = ds.tz === 'broker' ? core.zonedToUtc(wall - 7 * HOUR, 'America/New_York') : core.zonedToUtc(wall, ds.tz);
+      resetNaive = utc + core.tzOffset(ftz, utc);
+    }
+    const at = (min, pnl) => ({ symbol: 'A', dir: 'long', open_ts: resetNaive + (min - 5) * 60000, close_ts: resetNaive + min * 60000, hold_s: 300, qty: 1, pnl, pnl_unit: 'USD' });
+    const c = SF.challengeCheck([at(-30, -1), at(-10, -2), at(10, -4)], p, { fileTz: ftz });
+    out.b4.push([p.id, ftz, c.days, c.day_start_stated, ds === 'not stated' ? null : ds]);
+  }
+}
 console.log(JSON.stringify(out));
 """
 
@@ -134,6 +182,23 @@ def test_ties_go_to_the_first(units):
     assert f["top"] == {"k": 3, "of": 4, "total": -70, "share": 0.875}
     c = units["ties_cons"]
     assert c["best_day"] == 3 and c["best"] == 50 and c["share"] == 50 / 60
+
+
+def test_cents_cap_units_and_report_trades(units):
+    assert units["m1"] == {"daily": 210, "breaches": 1, "first": "bust"}
+    assert units["b3"] == {"outcome": "timeout", "limit_days": None, "cap": 250, "n_days": 300}
+    for pid, scale, usd, eur, account, points in units["units"]:
+        assert points == "points" and usd is None, pid
+        assert (eur, account) == ((None, None) if scale == "percent" else ("currency", "currency")), pid
+    assert units["m3"] == [2, 3]
+
+
+def test_day_start_per_preset(units):
+    ids = {r[0] for r in units["b4"]}
+    assert len(ids) >= 11 and {"the5ers-high-stakes-step-1", "myfundedfutures-rapid-50k"} <= ids
+    for pid, ftz, days, stated, ds in units["b4"]:
+        assert days == [-3, -4], (pid, ftz, days)
+        assert stated == (ds is not None), pid
 
 
 def test_runs_and_closing_order(units):
@@ -199,15 +264,19 @@ const L = V.SF_LINES, m = '−$1,234.50', p = '+$80.00';
 const shapes = [];
 for (const [k, f] of Object.entries(L)) {
   if (typeof f === 'string') { shapes.push(f); continue; }
-  const args = { facts_h: [[1], [30]], won: [[p, 1], [p, 14]], lost: [[m, 1], [m, 16]], flat: [[1], [3]], worst_sub: [['Tue 2 Jun', 6]],
+  const args = { facts_h: [[1, 'USD'], [30, 'USD'], [30, 'points'], [30, 'EUR']], won: [[p, 1], [p, 14]], lost: [[m, 1], [m, 16]], flat: [[1], [3]], worst_sub: [['Tue 2 Jun', 6]],
     top_label: [[3, 16], [2, 2], [1, 1]], largest: [[m, 26]], run_value: [[1], [5]], run_trades: [[7, 11], [4, 4]], run_next: [[p]],
-    run_ties: [[2]], first_bust: [['daily loss limit', 'Tue 2 Jun', 2, 11, 30], ['maximum loss', 'Fri 5 Jun', 5, 28, 30]],
-    bust_sub_daily: [['Closed at 10:40', m]], bust_sub_max: [['Closed Tue 2 Jun 2026', m]], closed_at: [['10:40']], closed_on: [['Tue 2 Jun 2026']],
+    run_ties: [[2]], first_bust: [['daily loss limit', 2, 11, 30], ['maximum loss', 5, 28, 30]],
+    bust_sub_daily: [['Trade 11 closed Tue 2 Jun at 10:40', m]], bust_sub_max: [['Trade 2 closed Tue 2 Jun 2026', m]], closed_at: [[11, 'Tue 2 Jun', '10:40']],
+    closed_on: [[2, 'Tue 2 Jun 2026']], first_cap: [[250], [1]], rules_scaled: [['FTMO', 'FTMO Challenge: 1-Step', '$2,000.00']],
+    percent_unit: [['FTMO']], currency_refused: [['EUR', 'Topstep', 'US dollars'], ['price points', 'Topstep', 'US dollars']],
+    day_start: [['FTMO', 0, 'Europe/Prague time', 'UTC time'], ['Blue Guardian', 17, 'America/New_York time', 'broker server time (GMT+2, GMT+3 in summer)']],
+    habit_group: [[2, 5, 6, m], [0, 1, 0, '$0.00']], few_count: [[2, 5], [1, 5]],
     first_pass: [[9]], first_pass_held: [[7, 9]], first_end: [[1], [5]], first_time: [[30]], rules_for: [['FTMO', 'FTMO Challenge: 1-Step', '$10,000.00']],
     max_kind: [['$1,000.00', 'fixed']], not_stated: [['FTMO', 'time limit (the check uses none)']], not_stated_one: [['FTMO']],
-    ns_part: [['time limit', 'none']], breach_count: [[2, 5], [1, 1]], no_breach: [['$300.00']], breach_row: [['Tue 2 Jun', 2, 11]],
+    ns_part: [['time limit', 'none']], breach_count: [[2, 5], [1, 1]], no_breach: [['$300.00']], breach_row: [[2, 11, 'Tue 2 Jun']],
     breach_more: [[1], [4]], cons_line: [[p, p]], cons_over: [['FTMO', '50%']], cons_within: [['FTMO', '50%']], cons_no_profit: [[m, p]],
-    habit_days: [[2, 2, 1, 1], [0, 2, 0, 0]], habit_money: [[1, m], [6, m]], read_on: [['FTMO', '29 Oct 2026']], strip_label: [[5, 2], [1, 0]] }[k];
+    read_on: [['FTMO', '29 Oct 2026']], strip_label: [[5, 2], [1, 0]] }[k];
   if (!args) throw new Error('no sample arguments for SF_LINES.' + k);
   for (const a of args) shapes.push(f(...a));
 }
@@ -223,7 +292,7 @@ def test_every_new_string_is_lint_clean_and_definite():
     assert len(s["shapes"]) >= 50
     for x in every:
         assert lint_text(x, "small-facts", paid=True) == [], x
-        assert not HEDGE.search(x), x
+        assert hedge(x) is None, x
         assert "NaN" not in x and "undefined" not in x, x
 
 
@@ -291,7 +360,7 @@ def rendered(browser, repo_server):
     os.environ.setdefault("DT_TODAY", "2026-10-30")
     presets = json.dumps(B.challenge_presets(), sort_keys=True, ensure_ascii=False)
     csv = open(os.path.join(HERE, "fixtures", "paid", "small-30.csv"), encoding="utf-8").read()
-    ctx = browser.new_context(viewport={"width": 390, "height": 844})
+    ctx = local_only(browser.new_context(viewport={"width": 390, "height": 844}))
     page = ctx.new_page()
     errors, requests = [], []
     page.on("pageerror", lambda e: errors.append(str(e)))
@@ -300,7 +369,7 @@ def rendered(browser, repo_server):
     # the modules load first; from then on, drawing and using the sections makes no request at all
     page.evaluate("Promise.all([import('/site/static/js/engine/index.js'), import('/site/static/js/paid/report.js')]).then(() => 1)")
     page.on("request", lambda r: requests.append(r.url))
-    res = page.evaluate(RENDER, {"csv": csv, "presets": presets})
+    res = json.loads(json.dumps(page.evaluate(RENDER, {"csv": csv, "presets": presets})).replace("\\u2060", ""))
     ctx.close()
     res["errors"], res["requests"] = errors, requests
     return res
@@ -312,24 +381,44 @@ def test_small_file_order_and_facts(rendered):
     assert o[:4] == ["file-facts", "rule-check", "focus", "all-habits"], o   # §3.1: facts, rules, then the habits
     t = rendered["facts"]
     for want in ("Your 30 trades, in dollars", "Net total", "+$580.00", "+$1,460.00 won in 14 trades", "−$880.00 lost in 16 trades",
-                 "Worst day", "−$330.00", "Tue 2 Jun · 6 trades", "40% of your loss dollars", "3 largest losses", "35%",
+                 "Worst day", "−$330.00", "Tue 2 Jun · 6 trades", "40% of your total loss", "3 largest losses", "35%",
                  "Largest: −$120.00, trade 26", "Longest losing run", "5 in a row", "−$350.00", "trades 7–11", "Next trade: +$20.00"):
         assert want in t, want
 
 
 def test_rule_check_on_the_thirty_trade_file(rendered):
     assert "Choose a firm to replay your trades against its rules." in rendered["before"]
-    assert rendered["first"] == "In the real order, your trades broke the daily loss limit on Tue 2 Jun (day 2), at trade 11 of 30."
+    assert rendered["first"] == "In the real order, your trades broke the daily loss limit on day 2, at trade 11 of 30."
     t = rendered["ftmo"]
-    for want in ("Closed at 10:40 · the day stood at −$350.00 at that trade.", "FTMO, FTMO Challenge: 1-Step · $10,000.00 account",
-                 "$300.00", "50%", "2 of 5 days", "Tue 2 Jun · day 2 · trade 11 · the day at −$350.00",
-                 "Fri 5 Jun · day 5 · trade 28 · the day at −$300.00", "83%", "Best day +$480.00 of total profit +$580.00.",
-                 "FTMO’s limit: 50%. This file is over it.", "Re-entering soon after a loss", "On 2 of 2 breach days · 1 of 1 other losing day",
-                 "6 trades on breach days, totalling −$490.00", "5 trades on breach days, totalling −$320.00",
-                 "2 trades on breach days, totalling −$220.00", "Not stated by FTMO: time limit (the check uses none).",
+    for want in ("Trade 11 closed Tue 2 Jun at 10:40 · the day stood at −$350.00.", "FTMO’s rules (FTMO Challenge: 1-Step), scaled to $10,000.00",
+                 "$300.00", "50%", "2 of 5 days in your file", "Day 2 · trade 11, closed Tue 2 Jun · the day at −$350.00",
+                 "Days start at 00:00 Europe/Prague time, as FTMO states; your file’s times are read as UTC time.",
+                 "Day 5 · trade 28, closed Fri 5 Jun · the day at −$300.00", "83%", "Best day +$480.00 of total profit +$580.00.",
+                 "FTMO’s limit: 50%. This file is over it.",
+                 "Too few breach days to describe: 2 breach days in this file; the free Readiness Check describes 5 or more.",
+                 "Not stated by FTMO: time limit (the check uses none).",
                  "Rules as published by FTMO, read on 29 Oct 2026."):
         assert want in t, want
     assert "Not stated by Alpha Capital Group." in rendered["alpha"]
+    # B1: under the free tool's minimum of 5 breach days, no shares, trades or totals for the habits
+    habits = t[t.index("Habit trades on breach days"):]
+    assert "Breach days:" not in habits and "Other losing days:" not in habits and "−$490" not in habits
+    assert "these rules allow" not in t   # B3: no time limit in FTMO's rules
+
+
+def test_every_preset_states_its_day_start_truly(rendered):
+    """B4: every preset's page says where its day starts: the firm's stated reset, or midnight on the file's clock."""
+    lib = {p["id"]: p for p in json.load(open(os.path.join(REPO, "site", "config", "challenge_rules.json"), encoding="utf-8"))["presets"]}
+    assert len(rendered["texts"]) >= 11
+    for pid, text in rendered["texts"].items():
+        ds = lib[pid]["rules"]["day_start"]
+        if ds == "not stated":
+            assert "when a day starts (the check uses midnight on your file’s clock)" in text, pid
+            assert "Days start at" not in text, pid
+        else:
+            zone = {"broker": "broker server time (GMT+2, GMT+3 in summer)"}.get(ds["tz"]) or (
+                "UTC+3" if ds["tz"] == "Etc/GMT-3" else ds["tz"] + " time")
+            assert f"Days start at {ds['hour']:02d}:00 {zone}, as {lib[pid]['firm']} states; your file’s times are read as UTC time." in text, pid
 
 
 def test_rendered_text_is_lint_clean_definite_and_local(rendered):
@@ -338,7 +427,7 @@ def test_rendered_text_is_lint_clean_definite_and_local(rendered):
     for k in ["facts", "before", "ftmo", "alpha"] + list(rendered["texts"]):
         x = rendered[k] if k in rendered else rendered["texts"][k]
         assert lint_text(x, k, paid=True) == [], (k, lint_text(x, k, paid=True))
-        assert not HEDGE.search(x), (k, HEDGE.search(x).group(0))
+        assert hedge(x) is None, (k, hedge(x))
         assert "NaN" not in x and "undefined" not in x and "Infinity" not in x, k
 
 
@@ -347,14 +436,14 @@ def test_example_page_embeds_the_committed_file(paid_site, browser):
     csv = open(os.path.join(HERE, "fixtures", "paid", "sample-report.csv"), encoding="utf-8").read()
     assert f'<script type="text/csv" id="sample-trades">{csv}</script>' in html
     assert 'id="sf-presets"' in html and 'id="sf-presets"' in (paid_site["out"] / "report" / "index.html").read_text(encoding="utf-8")
-    ctx = browser.new_context()
+    ctx = local_only(browser.new_context())
     page = ctx.new_page()
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
     page.goto(paid_site["url"] + "/sample-report/")
     page.wait_for_selector("#sample-out #file-facts")
     order = page.evaluate("[...document.querySelectorAll('#sample-out > section')].map((s) => s.id || s.querySelector('h2').id)")
-    facts = page.locator("#file-facts").inner_text()
+    facts = page.locator("#file-facts").inner_text().replace("\u2060", "")
     page.select_option("#sf-preset", "ftmo-1-step")
     first = page.locator("#sf-first").inner_text()
     ctx.close()
@@ -385,3 +474,85 @@ def paid_site(tmp_path_factory):
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     yield {"out": out, "url": f"http://127.0.0.1:{srv.server_address[1]}"}
     srv.shutdown()
+
+
+EDGE = r"""
+async ({ presets }) => {
+  const tag = document.createElement('script');
+  tag.type = 'application/json'; tag.id = 'sf-presets'; tag.textContent = presets;
+  document.body.append(tag);
+  const V = await import('/site/static/js/paid/small-facts-view.js');
+  const { money } = await import('/site/static/js/paid/report.js');
+  const lib = V.presetsFromPage();
+  const T = (d, pnl, unit) => { const o = Date.UTC(2026, 5, d, 9, 30); return { symbol: 'A', dir: 'long', open_ts: o, close_ts: o + 300000, hold_s: 300, qty: 1, pnl, pnl_unit: unit }; };
+  const run = (trades, unit, id, size) => {
+    const box = document.createElement('div'); document.body.append(box);
+    const opts = { money: (x) => money(x, unit), unit, presets: lib, format: 'generic' };
+    const facts = V.factsSection(trades, opts); const sec = V.challengeSection(trades, opts);
+    box.append(facts, sec);
+    const sel = sec.querySelector('#sf-preset'); sel.value = id; sel.dispatchEvent(new Event('change'));
+    if (size) { const a = sec.querySelector('#sf-account'); a.value = size; a.dispatchEvent(new Event('input')); a.dispatchEvent(new Event('change')); }
+    const r = { facts: facts.querySelector('h2').textContent, rules: sec.innerText, live: sec.querySelector('#sf-live').textContent };
+    box.remove();
+    return r;
+  };
+  const pts = [T(1, -1200, 'points'), T(1, -900, 'points'), T(2, 300, 'points')];
+  const eur = [T(1, -1200, 'EUR'), T(1, -900, 'EUR'), T(2, 300, 'EUR')];
+  const quiet = [];
+  for (let i = 0; i < 300; i++) { const o = Date.UTC(2026, 0, 1) + i * 86400000 + 9.5 * 3600000; quiet.push({ symbol: 'A', dir: 'long', open_ts: o, close_ts: o + 300000, hold_s: 300, qty: 1, pnl: i % 2 ? -1 : 1.5, pnl_unit: 'USD' }); }
+  return { points_topstep: run(pts, 'points', 'topstep-50k-trading-combine'), points_ftmo: run(pts, 'points', 'ftmo-1-step'),
+    eur_topstep: run(eur, 'EUR', 'topstep-50k-trading-combine'), eur_ftmo: run(eur, 'EUR', 'ftmo-1-step', '10000'),
+    acct_ftmo: run(eur.map((t) => ({ ...t, pnl_unit: 'account' })), 'account', 'ftmo-1-step'),
+    quiet: run(quiet, 'USD', 'ftmo-1-step'), own: run(eur.map((t) => ({ ...t, pnl_unit: 'USD' })), 'USD', 'ftmo-1-step') };
+}
+"""
+
+
+def test_units_cap_and_sizes_in_the_page(browser, repo_server):
+    import build as B
+    os.environ.setdefault("DT_TODAY", "2026-10-30")
+    presets = json.dumps(B.challenge_presets(), sort_keys=True, ensure_ascii=False)
+    ctx = local_only(browser.new_context())
+    page = ctx.new_page()
+    page.goto(repo_server + "/tests/harness.html")
+    page.wait_for_function("document.getElementById('status').textContent !== 'loading'")
+    r = json.loads(json.dumps(page.evaluate(EDGE, {"presets": presets})).replace("\\u2060", ""))
+    ctx.close()
+    refused_pts = "This file’s results are in price points, and firm rules are amounts of money, so this file gets no rule check."
+    for k in ("points_topstep", "points_ftmo"):
+        assert refused_pts in r[k]["rules"] and "In the real order" not in r[k]["rules"] and "pts" not in r[k]["rules"], k
+        assert r[k]["live"] == refused_pts and r[k]["facts"] == "Your 3 trades, in points"
+    assert ("This file’s results are in EUR, and Topstep’s rules are fixed amounts in US dollars, so this file gets no rule check against them."
+            in r["eur_topstep"]["rules"]) and "In the real order" not in r["eur_topstep"]["rules"]
+    assert r["eur_ftmo"]["facts"] == "Your 3 trades, in your currency"
+    assert "In the real order" in r["eur_ftmo"]["rules"] and "FTMO’s rules are shares of the account, so they apply in your file’s own currency." in r["eur_ftmo"]["rules"]
+    assert "300.00 EUR" in r["eur_ftmo"]["rules"]   # 3% of 10,000, in the file's unit
+    assert "In the real order" in r["acct_ftmo"]["rules"]
+    assert "reached neither the target nor a loss limit in the first 250 days (the check stops there)." in r["quiet"]["rules"]
+    assert "these rules allow" not in r["quiet"]["rules"]
+    assert "FTMO, FTMO Challenge: 1-Step · $100,000.00 account" in r["own"]["rules"]   # the firm's own size: no "scaled"
+    for k, v in r.items():
+        for x in v.values():
+            assert lint_text(x, k, paid=True) == [] and hedge(x) is None, (k, x)
+
+
+def test_example_page_habits_with_enough_breach_days(paid_site, browser):
+    """B1: with 5 or more breach days, every habit row shows both groups in the same words: days, trades, total."""
+    ctx = local_only(browser.new_context())
+    page = ctx.new_page()
+    page.goto(paid_site["url"] + "/sample-report/")
+    page.wait_for_selector("#sample-out #file-facts")
+    page.select_option("#sf-preset", "ftmo-1-step")
+    page.fill("#sf-account", "1000")
+    page.dispatch_event("#sf-account", "change")
+    rows = [x.replace("\u2060", "") for x in page.locator("#sf-habits .sf-habit").all_inner_texts()]
+    block = page.locator("#sf-habits").inner_text().replace("\u2060", "")
+    bars = page.locator("#sf-habits .sf-bar").count()
+    ctx.close()
+    assert len(rows) == 4 and bars == 0
+    for row in rows:
+        b = re.search(r"Breach days: on (\d+) of (\d+) days · (\d+) trades? · (\S+)", row)
+        o = re.search(r"Other losing days: on (\d+) of (\d+) days · (\d+) trades? · (\S+)", row)
+        assert b and o and int(b.group(2)) >= 5, row
+    assert "A count and a total, not a cause." in block and "Breach days have more losses" in block
+    assert lint_text(block, "habits", paid=True) == [] and hedge(block) is None

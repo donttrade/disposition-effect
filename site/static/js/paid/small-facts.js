@@ -20,8 +20,9 @@
 //   * "loss dollars" is the sum of all losing trades' P&L (a negative number); a share of it is between 0 and 1.
 
 import { groupDays, simulate, NO_LIMIT_CAP } from '../tools/prop-sim-core.js';
-import { presetRules, NOT_STATED } from '../tools/challenge-presets.js';
-import { HABITS, BIT, NEEDS_TIMES, itemsFromTrades, isDatesOnly, habitFlags, dayFlags, realBreachDays } from '../tools/habit-flags.js';
+import { presetRules, NOT_STATED, SCALED } from '../tools/challenge-presets.js';
+import { HABITS, BIT, itemsFromTrades, isDatesOnly, habitFlags, dayFlags, realBreachDays } from '../tools/habit-flags.js';
+import { MAX_ROWS, SPAN_WEEKS, MAX_HOLD_S } from './strip.js';
 
 export const TOP_K = 3;
 
@@ -103,6 +104,29 @@ export function consistencyShare(dayTotals, limit = null) {
   return { kind: 'share', ...base, share, over: typeof limit === 'number' ? share > limit + 1e-12 : null };
 }
 
+// The trades the report itself is about: the same selection as strip.js stripRows (trades opened within 519 weeks
+// of the latest open and held at most 3,650 days; then the latest MAX_ROWS), so the facts and the report count the
+// same trades (Tester S4 M3).
+export function reportTrades(trades) {
+  let maxOpen = -Infinity;
+  for (const t of trades) if (t.open_ts > maxOpen) maxOpen = t.open_ts;
+  const keep = (SPAN_WEEKS - 1) * 7 * 86400000;
+  const inSpan = trades.filter((t) => t.open_ts >= maxOpen - keep && t.hold_s <= MAX_HOLD_S);
+  return inSpan.length > MAX_ROWS ? inSpan.slice(inSpan.length - MAX_ROWS) : inSpan;
+}
+
+// Whether a firm's rules can be applied to a file in this unit (Tester S4 B2). Rules are money: a file in points
+// never gets the check. A 'fixed' preset states amounts in its own currency, so the file must be in that currency.
+// A 'percent' preset states shares of the account, so it applies in the file's own money unit, whatever it is.
+//   null: the check runs; otherwise {why: 'points' | 'currency', unit, currency}
+export function unitMismatch(unit, preset) {
+  if (unit === 'points') return { why: 'points', unit, currency: preset.currency || null };
+  if (preset.scale === 'percent') return null;
+  return unit === preset.currency ? null : { why: 'currency', unit, currency: preset.currency || null };
+}
+
+const cents = (x) => Math.round(x * 100) / 100;
+
 // The time zone a file's times are read in, by default (as the free Readiness Check: MetaTrader reports carry the
 // broker's server clock; the example report's own data is read as UTC; anything else as the computer's own zone).
 export function defaultFileTz(format, sample = false) {
@@ -126,8 +150,12 @@ export function challengeCheck(trades, preset, opts = {}) {
   const t = inCloseOrder(trades);
   const pr = presetRules(preset, opts.accountSize || preset.account_size);
   const rules = pr.rules;
+  // scaled amounts to the cent, as the free tool's boxes (3% of 7,000 is 210, not 210.00000000000003: Tester S4 M1)
+  for (const f of SCALED) if (typeof rules[f] === 'number') rules[f] = cents(rules[f]);
   const fileTz = opts.fileTz === undefined ? 'UTC' : opts.fileTz;
-  const g = groupDays(t, { fileTz, dayStart: pr.dayStart });
+  // a day start the firm does not state: midnight on the file's own clock, as the free tool (Tester S4 B4)
+  const dayStart = pr.dayStart || { tz: 'file', hour: 0 };
+  const g = groupDays(t, { fileTz, dayStart });
   const seq = simulate({ mode: 'sequence', days: g.days, rules });
   const datesOnly = isDatesOnly(t);
   const tradeAt = (di, i) => { const n = g.index[di][i]; return { n: n + 1, close_ts: t[n].close_ts, pnl: t[n].pnl }; };
@@ -154,25 +182,35 @@ export function challengeCheck(trades, preset, opts = {}) {
     });
   }
 
-  // habits on breach days (bundle §2.3 step 3), in fixed order: presence as the free tool counts it, plus the
-  // habit's trades on those days, up to and including the breaching trade, with their dollar total
+  // habits on breach days (bundle §2.3 step 3), in fixed order, under the free tool's own rule (habit-flags
+  // realBreachDays): its status ('few' under MIN_BREACH_DAYS breach days, 'not_described' for the habits that need
+  // times on a dates-only file) decides what is shown. Counts and totals for both groups, the same way: breach days
+  // up to and including the breaching trade (as the free tool's presence), other losing days whole.
   const flags = habitFlags(itemsFromTrades(t), { datesOnly });
   const fd = dayFlags(flags, g.index);
   const real = realBreachDays(g.days, fd, daily, { datesOnly });
+  const isBreach = new Set(breaches.map((b) => b.day - 1));
+  const otherDays = [];
+  g.days.forEach((d, j) => { if (!isBreach.has(j) && sum(d) < 0) otherDays.push(j); });
+  const tally = (j, last, bit) => {
+    let n = 0, total = 0;
+    for (let i = 0; i <= last; i++) if (fd[j][i] & bit) { n++; total += g.days[j][i]; }
+    return [n, total];
+  };
   const habits = HABITS.map((h) => {
     const r = real.habits[h];
-    let n = 0, total = 0;
-    for (const b of breaches) {
-      for (let i = 0; i <= b.at; i++) if (fd[b.day - 1][i] & BIT[h]) { n++; total += g.days[b.day - 1][i]; }
-    }
-    return { id: h, needs_times: datesOnly && NEEDS_TIMES.includes(h), on_breach: r.on_breach, n_breach: real.n_breach,
-      on_other_losing: r.on_other_losing, n_other_losing: real.n_other_losing, n_trades: n, total };
+    let n = 0, total = 0, on = 0, ot = 0;
+    for (const b of breaches) { const [k, x] = tally(b.day - 1, b.at, BIT[h]); n += k; total += x; }
+    for (const j of otherDays) { const [k, x] = tally(j, g.days[j].length - 1, BIT[h]); on += k; ot += x; }
+    return { id: h, status: r.status, on_breach: r.on_breach, n_breach: real.n_breach,
+      on_other_losing: r.on_other_losing, n_other_losing: real.n_other_losing, n_trades: n, total, n_trades_other: on, total_other: ot };
   });
 
   const dayTotals = g.days.map(sum);
   const consLimit = pr.notStated.includes('consistency') ? NOT_STATED : rules.consistency;
   return { preset: { id: preset.id, firm: preset.firm, program: preset.program, read_text: preset.read_text || null,
-    url: preset.url || null, account_size: pr.accountSize, scale: preset.scale },
-    rules, not_stated: pr.notStated, not_modelled: pr.notModelled, dates_only: datesOnly, n_trades: t.length,
+    url: preset.url || null, urls: preset.urls || (preset.url ? [preset.url] : []), account_size: pr.accountSize,
+    own_size: preset.account_size, scale: preset.scale, currency: preset.currency || null },
+    rules, day_start: dayStart, day_start_stated: !!pr.dayStart, file_tz: fileTz, not_stated: pr.notStated, not_modelled: pr.notModelled, dates_only: datesOnly, n_trades: t.length,
     first, breaches, habits, days: dayTotals, consistency: consistencyShare(dayTotals, consLimit) };
 }
