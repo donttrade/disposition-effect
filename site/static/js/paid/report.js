@@ -6,7 +6,7 @@
 // Every number on the page comes from the server's Report or from the file in this
 // tab; the wording only describes past trades (NON-ADVISER A3).
 
-import { readAll, copyLine, copiesIn, serverTradeCount, overlapLine, SMALL_FILE } from './merge.js';
+import { readAll, copyLine, copiesIn, serverTradeCount, overlapLine, accountsLine, SMALL_FILE } from './merge.js';
 import { ics, retestLine, RETEST_LINE } from './retest-copy.js';
 import { pgrPlrCounts } from '../engine/pgr.js';
 import { stripRows, spanLine } from './strip.js';
@@ -386,6 +386,7 @@ export function renderReport(report, out, meta) {
   const merged = mergedLine(report, wordingFmt(unit));   // R-D3 addendum I-5: only when rows were merged
   if (merged) p1.append(el('p', { class: 'small', id: 'merged-rows', text: merged }));
   // S3: trades from different files counted once as copies (merge.js), only when there were any
+  if (meta && Array.isArray(meta.accounts) && meta.accounts.length > 1) p1.append(el('p', { class: 'small', id: 'accounts-line', text: accountsLine(meta.accounts.length) }));
   if (meta && meta.copies) p1.append(el('p', { class: 'small', id: 'copy-rows', text: copyLine(meta.copies) }));
   out.append(p1);
 
@@ -463,7 +464,11 @@ function smallFactsParts(report, meta) {
   try {
     const trades = reportTrades(meta.trades);
     if (!trades.length) return null;
-    const opts = { money: (x) => money(x, report.currency), unit: report.currency, presets: presetsFromPage(), format: meta.format || null, sample: !!meta.sample };
+    // S3 re-test R1: several files are several accounts; the rule check replays one at a time (never added together)
+    const accounts = Array.isArray(meta.accounts) && meta.accounts.length > 1
+      ? meta.accounts.map((a) => ({ name: a.name, trades: reportTrades(a.trades) })).filter((a) => a.trades.length) : null;
+    const opts = { money: (x) => money(x, report.currency), unit: report.currency, presets: presetsFromPage(), format: meta.format || null, sample: !!meta.sample,
+      accounts: accounts && accounts.length > 1 ? accounts : null };
     return { small: smallLayout(report), facts: factsSection(trades, opts), rules: challengeSection(trades, opts) };
   } catch (e) {
     return null;
@@ -567,7 +572,7 @@ async function stage(files) {
     if (stripped.span_left_out) notes.push(spanLine(stripped.span_left_out));
     picked = files;
     ready = { stripped, counts: pgrPlrCounts(r.executions), currency: r.trades[0].pnl_unit, copies: copiesIn(kept),
-      trades: r.trades, format: r.format || null, n: serverTradeCount(stripped.rows), notes };
+      trades: r.trades, accounts: r.accounts, format: r.format || null, n: serverTradeCount(stripped.rows), notes };
     $('rp-status').hidden = true;
   } finally {
     busy = false;
@@ -581,7 +586,7 @@ async function send() {
   if (busy || !ready) return;
   busy = true;
   $('rp-run').disabled = true;
-  const { stripped, counts, currency, copies, trades, format } = ready;
+  const { stripped, counts, currency, copies, trades, accounts, format } = ready;
   try {
     const firm = $('rp-firm').value.trim();
     const body = { v: 1, token, rows: stripped.rows, currency, pgr_plr: counts,
@@ -597,7 +602,7 @@ async function send() {
     $('rp-status').hidden = true;
     try {
       renderReport(r.json.report, $('rp-out'), { limited: stripped.limited, span_left_out: stripped.span_left_out, retest: r.json.retest || null,
-        uses_left: r.json.uses_left, copies, trades, format });
+        uses_left: r.json.uses_left, copies, trades, accounts, format });
     } catch (e) {
       // wording.js throws rather than print a sentence that is not true of this report (R2-3).
       $('rp-out').replaceChildren();

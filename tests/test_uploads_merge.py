@@ -171,10 +171,10 @@ def test_two_accounts_trading_one_symbol_stay_two_books():
 
 def test_overlap_rows_counted_once():
     r = read([A, A2])
-    assert (r["n"], r["copies"], r["overlap"], r["groups"]) == (80, 0, 20, 1)
-    # the overlapping trades are in both acct_a files (one account), and their acct_b copies still collapse once
+    assert (r["n"], r["copies"], r["overlap"], r["groups"]) == (80, 0, 20, 2)
+    # the identical trades are in both acct_a files, and their acct_b copies still collapse once
     r3 = read([A, A2, B])
-    assert (r3["n"], r3["copies"], r3["groups"]) == (95, 30, 2)
+    assert (r3["n"], r3["copies"], r3["groups"]) == (95, 30, 3)
     # the same file twice: every row overlaps, nothing collapses
     r2 = read([A, A])
     assert (r2["n"], r2["copies"], r2["overlap"]) == (60, 0, 60)
@@ -217,8 +217,9 @@ def test_row_cap_after_the_merge():
 
 
 def test_mt5_reports_in_the_browser(browser, repo_server):
-    """Tester B3 and B2 on MT5 HTML (the engine needs DOMParser): a positions report and a deals report of two accounts
-    keep every trade of both; two deals reports keep both books. Before: 3 and 5 trades."""
+    """Tester B2/B3 on MT5 HTML (the engine needs DOMParser): two deals reports keep both books (1 + 5 trades; one pooled
+    book gave 5). A positions report and a deals report are never mixed, in either order, and the line names both files:
+    one account's two reports read the same position differently (summed as copies, its P&L doubled)."""
     page = browser.new_page()
     page.goto(repo_server + "/tests/harness.html")
     names = ["positions_hedging.htm", "deals_netting_40.htm", "deals_hedging.htm", "deals_netting.htm"]
@@ -226,59 +227,62 @@ def test_mt5_reports_in_the_browser(browser, repo_server):
     got = page.evaluate("""async (files) => {
         const m = await import('/site/static/js/paid/merge.js');
         const b = (n) => new Uint8Array(files[n]);
-        const n = (xs) => { const r = m.readAll(xs.map(b), xs); return r.error ? r.error.code + ': ' + r.error.message : [r.trades.length, r.groups,
+        const n = (xs) => { const r = m.readAll(xs.map(b), xs); return r.error ? [r.error.code, r.error.message] : [r.trades.length, r.groups,
           Math.round(r.trades.reduce((s, t) => s + t.pnl, 0) * 100) / 100]; };
-        return { pos: n(['positions_hedging.htm']), deals40: n(['deals_netting_40.htm']), both: n(['positions_hedging.htm', 'deals_netting_40.htm']),
-          rev: n(['deals_netting_40.htm', 'positions_hedging.htm']), h: n(['deals_hedging.htm']), nt: n(['deals_netting.htm']),
-          hn: n(['deals_hedging.htm', 'deals_netting.htm']) };
+        return { h: n(['deals_hedging.htm']), nt: n(['deals_netting.htm']), hn: n(['deals_hedging.htm', 'deals_netting.htm']),
+          both: n(['positions_hedging.htm', 'deals_netting_40.htm']), rev: n(['deals_netting_40.htm', 'positions_hedging.htm']),
+          same: n(['positions_hedging.htm', 'deals_hedging.htm']) };
     }""", files)
     page.close()
-    assert got["pos"][0] == 3 and got["deals40"][0] == 40
-    for k in ("both", "rev"):
-        assert isinstance(got[k], list), got[k]
-        assert got[k][:2] == [43, 2] and abs(got[k][2] - (got["pos"][2] + got["deals40"][2])) < 0.011, got
-    assert got["hn"][:2] == [got["h"][0] + got["nt"][0], 2], got
+    assert got["hn"][:2] == [got["h"][0] + got["nt"][0], 2] and abs(got["hn"][2] - got["h"][2] - got["nt"][2]) < 0.011, got
+    line = ("positions_hedging.htm is an MT5 positions report and {d} is an MT5 deals report. "
+            "Add reports of one kind: all positions reports, or all deals reports.")
+    assert got["both"] == ["E_MIXED_FILES", line.format(d="deals_netting_40.htm")]
+    assert got["rev"] == ["E_MIXED_FILES", line.format(d="deals_netting_40.htm")]
+    assert got["same"] == ["E_MIXED_FILES", line.format(d="deals_hedging.htm")]
 
 
-def deals_with_extra(n_extra):
-    """deals_hedging.htm (one account's deals) with n_extra more GBPUSD round trips appended: the same account's
-    deals report, holding more trades than that account's positions report (positions_hedging.htm) shows."""
-    src = open(os.path.join(MT5, "deals_hedging.htm"), encoding="utf-8").read()
-    last = src.index("</tr>", src.index("<td>3004</td>")) + len("</tr>")
-    rows = []
-    for i in range(n_extra):
-        d, h = 2 + i // 4, 9 + 2 * (i % 4)
-        for k, (side, io, price, profit) in enumerate((("buy", "in", "1.27000", "0.00"), ("sell", "out", "1.27100", "10.00"))):
-            rows.append(f"<tr><td>2026.09.{d:02d} {h + k:02d}:00:00</td><td>{5000 + 2 * i + k}</td><td>GBPUSD</td><td>{side}</td><td>{io}</td>"
-                        f"<td>1.00</td><td>{price}</td><td>{6000 + 2 * i + k}</td><td>0.00</td><td>0.00</td><td>0.00</td><td>{profit}</td>"
-                        f"<td>5 000.00</td><td></td></tr>")
-    return src[:last] + "".join(rows) + src[last:]
+def test_tradovate_group_trading_keeps_each_accounts_book():
+    """Tester re-test R2: APEX-1 and APEX-2 share one group-traded entry fill at 09:00 (same second, price and size);
+    B is then traded on its own. One shared fill once joined the two files into one position book (3 trades, B's
+    short gone). Each file's own fills make its own trades: together they are A's 2 trades and B's 2."""
+    h = "Account,B/S,Contract,Product,avgPrice,filledQty,Fill Time,Status"
+    f = lambda acct, rows: h + "\n" + "\n".join(acct + "," + r for r in rows) + "\n"   # noqa: E731
+    a = f("APEX-1", [" Buy,ESZ6,ES,5000.00,1,09/01/2026 09:00:00,Filled", " Sell,ESZ6,ES,5010.00,1,09/01/2026 09:20:00,Filled",
+                     " Buy,ESZ6,ES,5000.00,1,09/01/2026 11:00:00,Filled", " Sell,ESZ6,ES,5004.00,1,09/01/2026 11:30:00,Filled"])
+    b = f("APEX-2", [" Buy,ESZ6,ES,5000.00,1,09/01/2026 09:00:00,Filled", " Sell,ESZ6,ES,5003.00,1,09/01/2026 09:10:00,Filled",
+                     " Sell,ESZ6,ES,5005.00,1,09/01/2026 11:05:00,Filled", " Buy,ESZ6,ES,5003.00,1,09/01/2026 11:15:00,Filled"])
+    one_a, one_b, both = read_text([a]), read_text([b]), read_text([a, b])
+    assert [(t[1], t[5]) for t in one_a["trades"]] == [("long", 500), ("long", 200)]
+    assert [(t[1], t[5]) for t in one_b["trades"]] == [("long", 150), ("short", 100)]
+    assert (both["n"], both["groups"], both["copies"], both["overlap"]) == (4, 2, 0, 0)
+    assert sorted(map(tuple, both["trades"])) == sorted(map(tuple, one_a["trades"] + one_b["trades"]))
+    # the generic fill template, one shared fill: the same, and the dollar total is the two files' own totals
+    g1 = "\n".join([FILL_HEAD, "2026-09-01,09:00:00,ES,Buy,1,100,USD,0", "2026-09-01,09:20:00,ES,Sell,1,110,USD,0",
+                    "2026-09-01,11:00:00,ES,Buy,1,100,USD,0", "2026-09-01,11:30:00,ES,Sell,1,105,USD,0"]) + "\n"
+    g2 = "\n".join([FILL_HEAD, "2026-09-01,09:00:00,ES,Buy,1,100,USD,0", "2026-09-01,09:10:00,ES,Sell,1,103,USD,0",
+                    "2026-09-01,11:05:00,ES,Sell,1,105,USD,0", "2026-09-01,11:15:00,ES,Buy,1,104,USD,0"]) + "\n"
+    gg = read_text([g1, g2])
+    assert (gg["n"], gg["groups"]) == (4, 2) and sum(t[5] for t in gg["trades"]) == 19
 
 
-def test_a_report_type_that_loses_trades_is_refused_by_name(browser, repo_server):
-    """Tester B3, same account: an MT5 positions report and a deals report of ONE account share deals, so they are read
-    together; that reading keeps the positions report only. When it gives fewer trades than the deals report alone,
-    both files are refused by name, never dropped. With nothing lost, they read as one account."""
-    page = browser.new_page()
-    page.goto(repo_server + "/tests/harness.html")
-    files = {"positions_hedging.htm": list(open(os.path.join(MT5, "positions_hedging.htm"), "rb").read()),
-             "deals_more.htm": list(deals_with_extra(4).encode()), "deals_hedging.htm": list(open(os.path.join(MT5, "deals_hedging.htm"), "rb").read())}
-    got = page.evaluate("""async (files) => {
-        const m = await import('/site/static/js/paid/merge.js');
-        const r = (xs) => { const x = m.readAll(xs.map((n) => new Uint8Array(files[n])), xs);
-          return x.error ? [x.error.code, x.error.message] : [x.trades.length, x.groups]; };
-        return { more: r(['deals_more.htm']), lost: r(['positions_hedging.htm', 'deals_more.htm']),
-          same: r(['positions_hedging.htm', 'deals_hedging.htm']) };
-    }""", files)
-    page.close()
-    assert got["more"] == [5, 1]
-    assert got["lost"] == ["E_FILES_DISAGREE", "positions_hedging.htm and deals_more.htm share rows, but read together they give "
-                           "fewer trades than one of them alone. Export them as the same kind of report and add them again."]
-    assert got["same"] == [3, 1]
+def test_a_position_across_the_edge_of_a_file_is_left_out_and_said():
+    """Two monthly exports of one account: a position opened in the first and closed in the second is not pooled
+    across files; it is left out, and the panel says so before the run."""
+    sep = "\n".join([FILL_HEAD, "2026-09-29,09:00:00,ES,Buy,1,100,USD,0", "2026-09-29,09:20:00,ES,Sell,1,110,USD,0",
+                     "2026-09-30,15:00:00,ES,Buy,1,100,USD,0"]) + "\n"
+    oct_ = "\n".join([FILL_HEAD, "2026-10-01,09:00:00,ES,Sell,1,104,USD,0", "2026-10-01,10:00:00,ES,Buy,1,100,USD,0",
+                      "2026-10-01,10:20:00,ES,Sell,1,101,USD,0"]) + "\n"
+    r = read_text([sep, oct_])
+    assert r["n"] == 2 and any(x.endswith("open at the start or end of a file and were left out: each file is read as one account.")
+                               or x.endswith("open at the start or end of a file and was left out: each file is read as one account.")
+                               for x in r["notes"]), r
 
 
 def test_new_strings_pass_lint_and_are_definite():
-    js = READ + "import * as M from './site/static/js/paid/merge.js'; out([M.SMALL_NOTICE, M.WAIT_LINE, M.UPLOAD_HINT, M.MIXED_UNITS, M.overlapLine(1), M.overlapLine(20), M.disagreeLine(['a.csv', 'b.csv'])]);"
+    js = READ + ("import * as M from './site/static/js/paid/merge.js'; import * as V from './site/static/js/paid/small-facts-view.js';"
+                 "out([M.SMALL_NOTICE, M.WAIT_LINE, M.UPLOAD_HINT, M.MIXED_UNITS, M.overlapLine(1), M.overlapLine(20), M.mt5MixLine('a.htm', 'b.htm'),"
+                 " M.edgeLine(1), M.edgeLine(3), M.accountsLine(2), V.SF_TEXT.acct, V.SF_TEXT.one_account, V.SF_LINES.combined(2)]);")
     got = node(js)
     assert got[:4] == [NOTICE, WAIT, HINT, MIXED_UNITS]
     for t in got + [LINE_1, LINE_30, "Run anyway", "Run the test", "Add more files", "Remove these files", "Your files"]:
@@ -573,11 +577,11 @@ def test_drop_of_several_files(browser, site):
 
 
 def test_overlap_line_before_the_run(browser, site):
-    """Tester M4: rows in two files are counted once, and the panel says so before anything is sent."""
+    """Tester M4: identical closed trades in two files are counted once, and the panel says so before the run."""
     ctx, page, log = report_page(browser, site)
     page.set_input_files("#rp-file", [A, A2])
     staged(page, 80, 2)
-    assert "20 rows were in more than one file and were counted once." in page.inner_text("#rp-notes")
+    assert "20 trades were the same in more than one file and were counted once." in page.inner_text("#rp-notes")
     ctx.close()
 
 
@@ -587,4 +591,46 @@ def test_phone_width_has_no_overflow(browser, site):
     page.set_input_files("#rp-file", [A, B])
     staged(page, 75, 2)
     assert horizontal_overflow(page) == []
+    ctx.close()
+
+
+RULE_A, RULE_B = os.path.join(COPY, "rule_a.csv"), os.path.join(COPY, "rule_b_copy.csv")
+
+
+def test_rule_check_is_one_account_at_a_time(browser, site):
+    """Tester re-test R1: two USD copy accounts (rule_a.csv, rule_b_copy.csv: 30 trades each, 1-minute lag), each losing
+    $800 on day 4, each under Earn2Trade Gauntlet Mini 50K's $1,100 daily loss limit. Added together they read as a
+    breach (−$1,600). The rule check replays one account (file) at a time, the first by default, never the sum; the
+    facts and page 1 say they combine 2 accounts."""
+    ctx, page, log = report_page(browser, site, width=390)
+    page.set_input_files("#rp-file", [RULE_A, RULE_B])
+    staged(page, 30, 2)
+    click_run(page)
+    assert page.inner_text("#accounts-line").strip() == "These results combine 2 accounts, one per file. The rule check covers one account at a time."
+    assert page.inner_text("#sf-combined").startswith("Combined across 2 accounts, one per file.")
+    assert page.inner_text("#sf-one-account").startswith("The rule check covers one account at a time")
+    assert page.eval_on_selector_all("#sf-acct option", "os => os.map((o) => o.textContent)") == ["rule_a.csv", "rule_b_copy.csv"]
+    assert page.input_value("#sf-acct") == "0"
+    page.select_option("#sf-preset", "earn2trade-gauntlet-mini-50k")
+    page.wait_for_selector("#sf-out #sf-first")
+    first = page.inner_text("#sf-out")
+    assert "broke" not in first and "1,600" not in first, first
+    assert "reached neither the target nor a loss limit" in first, first
+    page.select_option("#sf-acct", "1")
+    page.wait_for_timeout(300)
+    second = page.inner_text("#sf-out")
+    assert "broke" not in second and "1,600" not in second, second
+    from a11y import horizontal_overflow
+    assert horizontal_overflow(page) == []
+    assert not log["errors"]
+    ctx.close()
+
+
+def test_rule_file_alone_has_no_account_choice(browser, site):
+    ctx, page, log = report_page(browser, site)
+    page.set_input_files("#rp-file", RULE_A)
+    staged(page, 30, 1)
+    click_run(page)
+    assert page.query_selector("#sf-acct") is None and page.query_selector("#accounts-line") is None
+    assert page.query_selector("#sf-combined") is None
     ctx.close()

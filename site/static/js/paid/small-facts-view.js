@@ -43,6 +43,10 @@ export const SF_TEXT = Object.freeze({
   rules_h: 'Your file against your firm’s rules',
   rules_lead: 'Your trades, replayed once in their real order against the rules your firm publishes.',
   pick: 'Firm rules',
+  // S3 re-test R1: a firm's loss limits apply to each account on its own, so several files are never added together
+  // for the rule check; the buyer picks one account (file), the first by default.
+  acct: 'Account to check',
+  one_account: 'The rule check covers one account at a time: each file is one account, and its trades are never added to another file’s.',
   pick_none: 'Choose a firm',
   account: 'Account size',
   account_pct: 'These rules are shares of the account, so they scale to this size.',
@@ -106,6 +110,7 @@ const timeText = (ts) => new Date(ts).toISOString().slice(11, 16);
 
 // The sentences with numbers in them. Each takes formatted pieces only, so the tests can lint every shape.
 export const SF_LINES = Object.freeze({
+  combined: (k) => `Combined across ${count(k)} accounts, one per file. A trade copied to another account within 5 minutes is counted once.`,
   facts_h: (n, unit) => `Your ${plural(n, 'trade', 'trades')}, ${unit === 'USD' ? 'in dollars' : unit === 'points' ? 'in points' : 'in your currency'}`,
   won: (m, n) => `${m} won in ${plural(n, 'trade', 'trades')}`,
   lost: (m, n) => `${m} lost in ${plural(n, 'trade', 'trades')}`,
@@ -202,6 +207,7 @@ export function factsSection(trades, opts) {
   const years = new Set(trades.map((t) => new Date(t.close_ts).getUTCFullYear())).size > 1;
   const sec = el('section', { class: 'section sf-facts', id: 'file-facts', 'aria-labelledby': 'file-facts-h' },
     el('h2', { id: 'file-facts-h', text: SF_LINES.facts_h(f.n, opts.unit) }));
+  if (opts.accounts && opts.accounts.length > 1) sec.append(el('p', { class: 'small', id: 'sf-combined', text: SF_LINES.combined(opts.accounts.length) }));
   const grid = el('div', { class: 'sf-grid' });
   // 1. net total, with what was won and lost
   const gross = f.win_total - f.loss_total;
@@ -444,7 +450,13 @@ export function challengeSection(trades, opts) {
   const tz = el('select', { id: 'sf-tz' }, el('option', { value: 'local', text: SF_TEXT.tz_local }),
     el('option', { value: 'UTC', text: SF_TEXT.tz_utc }), el('option', { value: 'broker', text: SF_TEXT.tz_broker }));
   tz.value = defaultFileTz(opts.format, opts.sample);
+  // S3 re-test R1: with several files, one account (file) at a time; the first by default
+  const accounts = Array.isArray(opts.accounts) && opts.accounts.length > 1 ? opts.accounts : null;
+  const acct = accounts ? el('select', { id: 'sf-acct', 'aria-describedby': 'sf-one-account' }) : null;
+  if (accounts) accounts.forEach((a, i) => acct.append(el('option', { value: String(i), text: a.name })));
+  if (accounts) sec.append(el('p', { class: 'small', id: 'sf-one-account', text: SF_TEXT.one_account }));
   const form = el('div', { class: 'field-grid sf-form no-print' },
+    accounts ? el('div', { class: 'field' }, el('label', { for: 'sf-acct', text: SF_TEXT.acct }), acct) : null,
     el('div', { class: 'field' }, el('label', { for: 'sf-preset', text: SF_TEXT.pick }), sel),
     el('div', { class: 'field' }, el('label', { for: 'sf-account', text: SF_TEXT.account }), sizeHint, size),
     el('div', { class: 'field' }, el('label', { for: 'sf-tz', text: SF_TEXT.tz }), tz));
@@ -472,7 +484,8 @@ export function challengeSection(trades, opts) {
       out.replaceChildren(el('p', { class: 'error', text: SF_TEXT.account_bad })); sec.lastCheck = null; return;
     }
     try {
-      const r = checkOut(trades, p, p.scale === 'percent' ? v : p.account_size, tz.value, m, unit);
+      const mine = accounts ? accounts[Number(acct.value)].trades : trades;
+      const r = checkOut(mine, p, p.scale === 'percent' ? v : p.account_size, tz.value, m, unit);
       out.replaceChildren(...r.nodes);
       live.textContent = r.nodes[0].textContent;
       sec.lastCheck = r.check;
@@ -491,6 +504,7 @@ export function challengeSection(trades, opts) {
   });
   size.addEventListener('change', draw);
   tz.addEventListener('change', draw);
+  if (acct) acct.addEventListener('change', draw);
   return sec;
 }
 
