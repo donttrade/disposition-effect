@@ -24,10 +24,12 @@ const NS = 'http://www.w3.org/2000/svg';
 
 // The verdict values that count as "a sign" for the small-file order. The habit verdict layer is being replaced in
 // another batch (E1/S1: Clear / Some / No sign); its merge maps its own step values here, in this one place.
-export const SIGN_VERDICTS = Object.freeze(['distinguishable']);
+export const SIGN_VERDICTS = Object.freeze(['distinguishable']);   // stats2f reports (frozen, one release)
+export const SIGN_STEPS = Object.freeze(['some', 'clear']);         // DT-2 reports
 export const SMALL_FILE_TRADES = 100;
+const hasSign = (h) => SIGN_STEPS.includes(h.step) || SIGN_VERDICTS.includes(h.verdict);
 export function smallLayout(report) {
-  return report.n_trades < SMALL_FILE_TRADES && !report.habits.some((h) => SIGN_VERDICTS.includes(h.verdict));
+  return report.n_trades < SMALL_FILE_TRADES && !report.habits.some(hasSign);
 }
 
 export const SF_TEXT = Object.freeze({
