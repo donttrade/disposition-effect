@@ -806,7 +806,9 @@ def challenge_presets():
         out.append({"id": p["id"], "firm": p["firm"], "program": p["program"], "account_size": p["account_size"],
                     "scale": p["scale"], "status": p["status"], "rules": p["rules"], "not_modelled": p["not_modelled"],
                     "not_stated": cr.not_stated(p), "last_checked": p["last_checked"],
-                    "read_text": f"{d} {MONTHS[mo - 1]} {y}", "url": p["sources"][0]["url"]})
+                    "read_text": f"{d} {MONTHS[mo - 1]} {y}", "url": p["sources"][0]["url"],
+                    # S4: the unit the rules are stated in, and every source page (not only the first)
+                    "currency": p.get("currency"), "urls": list(dict.fromkeys(s["url"] for s in p["sources"]))})
     return {"rules_lib": lib["rules_lib"], "presets": out, "firms": sorted({p["firm"] for p in out}, key=str.lower)}
 
 
