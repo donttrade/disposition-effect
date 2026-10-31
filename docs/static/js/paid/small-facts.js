@@ -22,7 +22,7 @@
 import { groupDays, simulate, NO_LIMIT_CAP } from '../tools/prop-sim-core.js?v=7c28de14';
 import { presetRules, NOT_STATED, SCALED } from '../tools/challenge-presets.js?v=2e7fd947';
 import { HABITS, BIT, itemsFromTrades, isDatesOnly, habitFlags, dayFlags, realBreachDays } from '../tools/habit-flags.js?v=72b76dd0';
-import { MAX_ROWS, SPAN_WEEKS, MAX_HOLD_S } from './strip.js?v=03137080';
+import { MAX_ROWS, SPAN_WEEKS, MAX_HOLD_S } from './strip.js?v=0b3cbecc';
 
 export const TOP_K = 3;
 

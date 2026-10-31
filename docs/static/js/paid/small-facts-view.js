@@ -16,7 +16,7 @@
 // The firm library's quotes are data, not page copy (challenge_rules.json "about"): the page shows each rule's value,
 // the date it was read and a link to the firm's page, and "Not stated by {firm}" where the firm's page is silent.
 
-import { fileFacts, challengeCheck, usablePresets, defaultFileTz, resolveTz, unitMismatch } from './small-facts.js?v=78faeb32';
+import { fileFacts, challengeCheck, usablePresets, defaultFileTz, resolveTz, unitMismatch } from './small-facts.js?v=fbf5448c';
 import { HABIT_TEXT, MIN_BREACH_DAYS } from '../tools/habit-flags.js?v=72b76dd0';
 import { NOT_STATED } from '../tools/challenge-presets.js?v=2e7fd947';
 

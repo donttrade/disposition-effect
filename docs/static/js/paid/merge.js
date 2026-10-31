@@ -41,10 +41,15 @@ export const COPY_SURE = 0.8;
 export const COPY_PRESET = 0.65;
 export const COPY_QUESTION = 'Do these accounts copy each other’s trades?';
 export const copyPairLine = (a, b, k) => `Accounts ${a} and ${b} copy each other: ${grouped(k)} ${k === 1 ? 'trade' : 'trades'} counted once.`;
-// Tester re-test 4 F2: the server combines rows with the same symbol, direction and open minute, from any account
-// (dt-private habits.mjs mergeRows, key s:d:o); this line says so, so it stays true until DT-2's engine keeps accounts
-// apart.
-export const ownPairLine = (a, b) => `Accounts ${a} and ${b} trade on their own: no trade is counted once as a copy. As in one file, trades opened in the same minute with the same symbol and direction are combined for the habit checks.`;
+// stats3a (dt-private 6b8b82c): with more than one account, every row carries its account index a (strip.js), and the
+// server combines rows with the same symbol, direction and open minute only within one account (key s:d:o:a), so two
+// accounts that trade on their own are never combined.
+export const ownPairLine = (a, b) => `Accounts ${a} and ${b} trade on their own: no trade is counted once as a copy, and their trades stay separate for the habit checks.`;
+// The server takes an account index a of 0..99 (dt-private MAX_ACCOUNTS): more accounts than that are refused here.
+export const MAX_ACCOUNTS = 100;
+export const TOO_MANY_ACCOUNTS = `These files are from more than ${MAX_ACCOUNTS} accounts. One test reads at most ${MAX_ACCOUNTS} accounts at a time.`;
+// The account index of a trade for the server (its group, in the order the files were met), or null for one account.
+export const accountOf = (groups) => (groups > 1 ? (t) => t._g : null);
 export const SMALL_FILE = 100;              // owner Q3: fewer trades than this → the small-file notice
 const DAY_MS = 86400000;
 
@@ -89,7 +94,7 @@ export function serverTradeCount(rows) {
   let n = 0;
   for (const r of rows) {
     if (isDateOnlyRow(r)) { n++; continue; }
-    const k = r.s + ':' + r.d + ':' + r.o;
+    const k = r.s + ':' + r.d + ':' + r.o + (r.a === undefined ? '' : ':' + r.a);   // the server's key (s:d:o:a with accounts)
     if (!keys.has(k)) { keys.add(k); n++; }
   }
   return n;
@@ -392,6 +397,7 @@ export function readFiles(byteArrays, names = [], opts = {}) {
   const at = new Map();
   own.forEach((_, k) => { const r = root(k); if (!at.has(r)) { at.set(r, groups.length); groups.push([]); } groups[at.get(r)].push(k); });
   // ---- one book per account
+  if (groups.length > MAX_ACCOUNTS) return { error: { code: 'E_TOO_MANY_ACCOUNTS', message: TOO_MANY_ACCOUNTS } };
   const factsTrades = [];
   const executions = [];
   const accounts = [];

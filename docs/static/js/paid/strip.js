@@ -54,7 +54,9 @@ export function randomPerm(n) {
 }
 
 // trades: ParseResult.trades (close-time order). perm(n) is injectable for tests.
-export async function stripRows(trades, salt, perm = randomPerm) {
+// accountOf (merge.js accountOf): with more than one account, each row carries a, its account's index 0..99 (the
+// order the files were met in, never a name or number), on every row; with one account, no row has it (stats3a).
+export async function stripRows(trades, salt, perm = randomPerm, accountOf = null) {
   let maxOpen = -Infinity;
   for (const t of trades) if (t.open_ts > maxOpen) maxOpen = t.open_ts;
   const inSpan = trades.filter((t) => t.open_ts >= maxOpen - SPAN_KEEP_MS && t.hold_s <= MAX_HOLD_S);
@@ -74,8 +76,14 @@ export async function stripRows(trades, salt, perm = randomPerm) {
   const med = new Map([...qtyBySym].map(([s, qs]) => [s, median(qs)]));
   const rows = [];
   for (const t of used) {
-    rows.push({ o: Math.floor((t.open_ts - anchor) / 60000), h: t.hold_s, d: t.dir === 'long' ? 1 : -1,
-      q: round3(t.qty / med.get(t.symbol)), p: round2(t.pnl), s: index.get(t.symbol), f: await fingerprint(salt, t) });
+    const row = { o: Math.floor((t.open_ts - anchor) / 60000), h: t.hold_s, d: t.dir === 'long' ? 1 : -1,
+      q: round3(t.qty / med.get(t.symbol)), p: round2(t.pnl), s: index.get(t.symbol), f: await fingerprint(salt, t) };
+    if (accountOf) {
+      const a = accountOf(t);
+      if (!Number.isInteger(a) || a < 0 || a > 99) throw new Error(`strip: account index ${a}`);
+      row.a = a;
+    }
+    rows.push(row);
   }
   return { rows, limited: inSpan.length > MAX_ROWS, anchor, span_left_out: trades.length - inSpan.length };
 }
