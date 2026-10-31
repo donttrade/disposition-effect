@@ -6,7 +6,7 @@
 // Every number on the page comes from the server's Report or from the file in this
 // tab; the wording only describes past trades (NON-ADVISER A3).
 
-import { readAll, copyLine, copiesIn, serverTradeCount, overlapLine, accountsLine, SMALL_FILE } from './merge.js';
+import { readAll, copyLine, copiesIn, serverTradeCount, overlapLine, accountsLine, filesLabel, SMALL_FILE } from './merge.js';
 import { ics, retestLine, RETEST_LINE } from './retest-copy.js';
 import { pgrPlrCounts } from '../engine/pgr.js';
 import { stripRows, spanLine } from './strip.js';
@@ -386,7 +386,7 @@ export function renderReport(report, out, meta) {
   const merged = mergedLine(report, wordingFmt(unit));   // R-D3 addendum I-5: only when rows were merged
   if (merged) p1.append(el('p', { class: 'small', id: 'merged-rows', text: merged }));
   // S3: trades from different files counted once as copies (merge.js), only when there were any
-  if (meta && Array.isArray(meta.accounts) && meta.accounts.length > 1) p1.append(el('p', { class: 'small', id: 'accounts-line', text: accountsLine(meta.accounts.length) }));
+  if (meta && Array.isArray(meta.accounts) && meta.files > 1) p1.append(el('p', { class: 'small', id: 'accounts-line', text: accountsLine(meta.accounts.length, meta.files) }));
   if (meta && meta.copies) p1.append(el('p', { class: 'small', id: 'copy-rows', text: copyLine(meta.copies) }));
   out.append(p1);
 
@@ -502,6 +502,18 @@ function status(msg, kind = '') {
 // being read wait their turn (Tester m1). A send that fails keeps the files staged (no run was spent: Tester m2).
 let picked = [];
 let ready = null;
+let oneAccount = null;   // the buyer's answer to merge.js ACCOUNT_QUESTION; null: the default
+
+// The one question asked when the files do not say which account they are from (Tester re-test 2): a one-tap
+// choice, preset to merge.js's default. Changing it reads the files again; nothing is sent.
+function showQuestion() {
+  const box = $('rp-acct-q');
+  const q = ready && ready.question;
+  if (!q) { box.hidden = true; return; }
+  $('rp-acct-one').checked = q.answer === true;
+  $('rp-acct-sep').checked = q.answer === false;
+  box.hidden = false;
+}
 let busy = false;
 const queue = [];
 const sameFile = (a, b) => a.name === b.name && a.size === b.size && a.lastModified === b.lastModified;
@@ -516,14 +528,17 @@ function showPanel() {
     return el('li', {}, el('span', { class: 'rp-name', text: f.name }), ' ', rm);
   }));
   const n = ready ? ready.n : null;
-  const lines = [n === null ? `${plural(picked.length, 'file', 'files')} chosen.` : `${plural(n, 'trade', 'trades')} from ${plural(picked.length, 'file', 'files')}.`];
+  // by detected accounts, never by file count (Tester re-test 2 R6): "80 trades: 1 account, 2 files."
+  const lines = [n === null ? `${plural(picked.length, 'file', 'files')} chosen.` : `${plural(n, 'trade', 'trades')}: ${filesLabel(ready.groups, picked.length)}.`];
+  showQuestion();
   const small = ready && n < SMALL_FILE;
   $('rp-small').hidden = !small;
   const notes = ready ? ready.notes : [];
   $('rp-notes').replaceChildren(...notes.map((t) => el('p', { class: 'small', text: t })));
   // One live line a screen reader hears when the panel changes (Tester M6): the count, then the notice under 100.
   $('rp-count').textContent = lines[0];
-  $('rp-live').textContent = lines[0] + (small ? ' ' + $('rp-small').textContent.trim() : '') + (n === null ? '' : ' Press Run to send.');
+  const asked = ready && ready.question ? ' ' + $('rp-acct-q').querySelector('legend').textContent.trim() : '';
+  $('rp-live').textContent = lines[0] + (small ? ' ' + $('rp-small').textContent.trim() : '') + asked + (n === null ? '' : ' Press Run to send.');
   $('rp-run').textContent = small ? 'Run anyway' : 'Run the test';
   $('rp-run').disabled = !ready;
   box.hidden = false;
@@ -550,7 +565,7 @@ async function removeFile(i) {
 
 function clearFiles() {
   if (busy) return;
-  picked = []; ready = null;
+  picked = []; ready = null; oneAccount = null;
   $('rp-status').hidden = true;
   showPanel();
 }
@@ -563,7 +578,7 @@ async function stage(files) {
   try {
     status(files.length > 1 ? `Reading your ${files.length} files in this tab…` : 'Reading your file in this tab…');
     const bytes = await Promise.all(files.map(async (f) => new Uint8Array(await f.arrayBuffer())));
-    const r = readAll(bytes, files.map((f) => f.name));
+    const r = readAll(bytes, files.map((f) => f.name), { oneAccount });
     if (r.error) { status(r.error.message, 'error'); return; }   // picked, ready and the panel stay as they were
     const stripped = await stripRows(r.trades, payload.salt);
     const kept = reportTrades(r.trades);   // the trades the rows are made from (span and cap): their copies only (m3)
@@ -572,7 +587,8 @@ async function stage(files) {
     if (stripped.span_left_out) notes.push(spanLine(stripped.span_left_out));
     picked = files;
     ready = { stripped, counts: pgrPlrCounts(r.executions), currency: r.trades[0].pnl_unit, copies: copiesIn(kept),
-      trades: r.trades, accounts: r.accounts, format: r.format || null, n: serverTradeCount(stripped.rows), notes };
+      trades: r.factsTrades, accounts: r.accounts, groups: r.groups, files: r.files, question: r.question, format: r.format || null,
+      n: serverTradeCount(stripped.rows), notes };
     $('rp-status').hidden = true;
   } finally {
     busy = false;
@@ -586,7 +602,7 @@ async function send() {
   if (busy || !ready) return;
   busy = true;
   $('rp-run').disabled = true;
-  const { stripped, counts, currency, copies, trades, accounts, format } = ready;
+  const { stripped, counts, currency, copies, trades, accounts, files, format } = ready;
   try {
     const firm = $('rp-firm').value.trim();
     const body = { v: 1, token, rows: stripped.rows, currency, pgr_plr: counts,
@@ -602,7 +618,7 @@ async function send() {
     $('rp-status').hidden = true;
     try {
       renderReport(r.json.report, $('rp-out'), { limited: stripped.limited, span_left_out: stripped.span_left_out, retest: r.json.retest || null,
-        uses_left: r.json.uses_left, copies, trades, accounts, format });
+        uses_left: r.json.uses_left, copies, trades, accounts, files, format });
     } catch (e) {
       // wording.js throws rather than print a sentence that is not true of this report (R2-3).
       $('rp-out').replaceChildren();
@@ -627,6 +643,9 @@ async function init() {
   $('rp-run').addEventListener('click', () => send());
   $('rp-add').addEventListener('click', () => input.click());
   $('rp-clear').addEventListener('click', () => clearFiles());
+  for (const id of ['rp-acct-one', 'rp-acct-sep']) {
+    $(id).addEventListener('change', () => { if (busy || !picked.length) return; oneAccount = id === 'rp-acct-one'; stage(picked); });
+  }
   const dz = $('rp-drop');
   dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('is-over'); });
   dz.addEventListener('dragleave', () => dz.classList.remove('is-over'));

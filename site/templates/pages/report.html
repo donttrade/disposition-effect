@@ -23,6 +23,12 @@
       <p id="rp-count"></p>
       <ul id="rp-files" class="small rp-files"></ul>
       <p id="rp-small" hidden><strong>Files this size mostly show No sign for habits. You still get every dollar total and your rule check.</strong></p>
+      {#- Tester re-test 2: asked only when the files do not say which account they are from (merge.js ACCOUNT_QUESTION) -#}
+      <fieldset id="rp-acct-q" class="rp-acct-q" hidden>
+        <legend>Are these files from one account or separate accounts?</legend>
+        <div class="check"><input type="radio" name="rp-acct" id="rp-acct-one" value="one"><label for="rp-acct-one">One account</label></div>
+        <div class="check"><input type="radio" name="rp-acct" id="rp-acct-sep" value="separate"><label for="rp-acct-sep">Separate accounts</label></div>
+      </fieldset>
       <div id="rp-notes"></div>
       <p class="small">Nothing is sent until you press Run. Adding files does not use a run.</p>
       <p class="btn-row"><button class="btn" id="rp-run" type="button">Run the test</button>

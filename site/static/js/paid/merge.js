@@ -2,20 +2,25 @@
 // SCALE-AND-POWER §7 S3; Tester S3 report B2–B4, M1, M3). No DOM, no network: report.js calls readFiles, then
 // strip.js strips the result.
 //
-// 1. Every file is read ON ITS OWN, as its own account: its own fills make its own positions and trades. No fill is
-//    ever deduped, matched or pooled across files (Tester S3 B2 and re-test R2: a shared position book, even one joined
-//    by one identical fill, makes up trades). A position open across the edge of a file is left out, and said so.
-//    All files must be of one platform and report type (E_MIXED_FILES).
-// 2. Closed trades that are identical in two files (an overlapping export of one account: same symbol, direction,
-//    open, close, size, prices, fees and P&L) are counted once, and the page says how many before the run.
+// 1. Files are first put into accounts (Tester S3 re-test 2): the same account value (Account, ClientAccountID, an
+//    MT5 report's "Account:" line) → one account; different values → separate accounts, whatever else they share (group
+//    trading); else a shared fill, order, deal or trade ID → one account; else dates that overlap with rows that differ
+//    → separate accounts; else the buyer answers one question before Run ("Are these files from one account or
+//    separate accounts?"), "one account" by default when the dates overlap and the overlapping rows match exactly.
+// 2. Each account's files are read together by the engine (runFiles: dropOverlap counts a row in two of its files once),
+//    so each account is ONE position book; no fill is ever pooled across accounts (Tester B2, R2). An MT5 positions
+//    report and an MT5 deals report are never mixed (B3). All files must be of one platform (E_MIXED_FILES).
 // 3. All files must report in one currency or unit, or they are refused (Tester M1).
-// 4. Copy collapse, after positions and before stripping: a trade copied to a second account shows up in each account's file. Trades
+// 4. Copy collapse, after the books and before stripping, for the habit checks only (the dollar facts keep every
+//    account's real trades). A trade copied to a second account shows up in each account's file. Trades
 //    from DIFFERENT accounts with the same symbol and direction, opened within 5 minutes of each other and closed
 //    within 5 minutes of each other, become one trade (P&L, gross, fees, fills and quantity summed). Unmerged copies
 //    doubled revenge's false-alarm rate (copy.mjs: 8.0 in 100 at a 2.5 level; 1.8–3.0 after the collapse). Trades of
 //    one account never collapse, however close; date-only trades (no time of day) never collapse (Tester M3).
 
-import { runFile, readRows } from '../engine/index.js';
+import { runFile, runFiles, readRows } from '../engine/index.js';
+import { idColumns } from '../engine/mapped.js';
+import { normHeader } from '../engine/csv.js';
 import { detectHtml } from '../engine/detect.js';
 import { MESSAGES, LIMITS } from '../engine/errors.js';
 
@@ -34,9 +39,16 @@ export const SMALL_NOTICE = 'Files this size mostly show No sign for habits. You
 export const WAIT_LINE = 'Nothing is sent until you press Run. Adding files does not use a run.';
 export const UPLOAD_HINT = 'Add all your accounts and months: more trades, clearer answers.';
 export const MIXED_UNITS = 'These files report results in different currencies or units, so they cannot be added up. Add the files of one currency at a time.';
-export const overlapLine = (n) => `${grouped(n)} ${n === 1 ? 'trade was' : 'trades were'} the same in more than one file and ${n === 1 ? 'was' : 'were'} counted once.`;
-export const accountsLine = (k) => `These results combine ${grouped(k)} accounts, one per file. The rule check covers one account at a time.`;
-export const edgeLine = (n) => `${grouped(n)} ${n === 1 ? 'position was' : 'positions were'} open at the start or end of a file and ${n === 1 ? 'was' : 'were'} left out: each file is read as one account.`;
+export const overlapLine = (n) => `${grouped(n)} ${n === 1 ? 'row was' : 'rows were'} in more than one file of one account and ${n === 1 ? 'was' : 'were'} counted once.`;
+// Accounts and files, as page 1 and the panel name them (Tester re-test 2 R6: by detected accounts, never by file count).
+export const filesLabel = (accts, files) => `${grouped(accts)} ${accts === 1 ? 'account' : 'accounts'}, ${grouped(files)} ${files === 1 ? 'file' : 'files'}`;
+export const accountsLine = (accts, files) => (accts === 1
+  ? `These results read ${grouped(files)} files as 1 account.`
+  : `These results combine ${grouped(accts)} accounts from ${grouped(files)} files. Dollar totals add every account’s trades; the habit checks count a trade copied between accounts within 5 minutes once. The rule check covers one account at a time.`);
+export const edgeLine = (n) => `${grouped(n)} ${n === 1 ? 'position was' : 'positions were'} open at the start or end of an account’s files and ${n === 1 ? 'was' : 'were'} left out.`;
+export const ACCOUNT_QUESTION = 'Are these files from one account or separate accounts?';
+export const ACCOUNT_ONE = 'One account';
+export const ACCOUNT_SEPARATE = 'Separate accounts';
 
 // A trade with dates but no times: opened at 00:00 and held whole days (habits.mjs isDateOnlyRow, on trades).
 export const isDateOnlyTrade = (t) => t.open_ts % DAY_MS === 0 && t.hold_s % 86400 === 0;
@@ -125,9 +137,15 @@ export function collapseCopies(trades, originOf, windowMs = COPY_WINDOW_MS) {
 export const copiesIn = (trades) => trades.reduce((k, t) => k + (t._copies || 0), 0);
 
 const kindOf = (r) => r.format + (r.preset ? ':' + r.preset : '');
+const cmpStr = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
+const mixed = () => ({ code: 'E_MIXED_FILES', message: MESSAGES.E_MIXED_FILES });
+const warned = (r, code) => { const w = r.warnings.find((x) => x.code === code); return w && w.n ? w.n : 0; };
+const execKey = (e) => [e.ts, e.symbol, e.side, e.qty, e.price, e.fee].join('\u0001');
+const meets = (a, b) => { for (const x of a) if (b.has(x)) return true; return false; };
+
 // An MT5 file is a positions report (its closed positions are its trades) or a deals report (trades are built from
-// its deals). One account's two reports read the same position differently, and nothing tells them apart from two
-// copy accounts, so the two kinds are never mixed (Tester S3 B3): the files are refused by name.
+// its deals). One account's two reports read the same position differently, so the two kinds are never mixed
+// (Tester S3 B3): the files are refused by name.
 function mt5Kind(bytes) {
   try {
     const src = readRows(bytes);
@@ -138,19 +156,82 @@ function mt5Kind(bytes) {
   }
 }
 export const mt5MixLine = (pos, deals) => `${pos} is an MT5 positions report and ${deals} is an MT5 deals report. Add reports of one kind: all positions reports, or all deals reports.`;
-const cmpStr = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
-const mixed = () => ({ code: 'E_MIXED_FILES', message: MESSAGES.E_MIXED_FILES });
-const tradeKey = (t) => [t.symbol, t.dir, t.open_ts, t.close_ts, t.qty, t.entry_vwap, t.exit_vwap, t.fees, t.pnl].join('\u0001');
-const warned = (r, code) => { const w = r.warnings.find((x) => x.code === code); return w && w.n ? w.n : 0; };
 
-// byteArrays: one Uint8Array per file; names: their names, for the messages.
-// → {error, file?} | {trades, accounts, executions, copies, overlap, groups, notes, format}
-//   trades: every file's trades, identical trades counted once, after the copy collapse, in close-time order (strip.js
-//   keeps the latest 20,000: the cap applies after the merge); accounts: [{name, trades}], each file's own trades,
-//   never added together (the rule check replays one account at a time: Tester re-test R1); executions: every file's
-//   fills, symbols kept apart per file, for pgr.js; copies: trades counted once as copies; overlap: identical trades
-//   counted once; groups: files (one account each); notes: lines a buyer sees before the run.
-export function readFiles(byteArrays, names = []) {
+// Which account a file is from, as far as the file says (Tester re-test 2 R4–R6). accounts: the values of its account
+// columns (Account, ClientAccountID, …; an MT5 report's "Account:" line); ids: its fill, order, deal or trade IDs. The
+// values are only compared here: they never reach a result, a message or the page (as mapped.js idColumns).
+const NUMERIC = /^[-+$€£¥]?\s*[\d.,\s]+%?$/;
+export function fileIdentity(bytes) {
+  const accounts = new Set();
+  const ids = new Set();
+  let src;
+  try { src = readRows(bytes); } catch (e) { return { accounts, ids }; }
+  const rows = src.rows;
+  for (const r of rows.slice(0, 60)) {   // a report's header block: "Account:" and its value, alone on a row
+    const full = r.cells.map((c) => c.trim()).filter((c) => c !== '');
+    if (full.length === 2 && normHeader(full[0]) === 'account') accounts.add(full[1]);
+  }
+  let h = -1;
+  for (let i = 0; i < Math.min(rows.length, 200); i++) {
+    const full = rows[i].cells.map((c) => c.trim()).filter((c) => c !== '');
+    if (full.length < 3 || !idColumns(rows[i].cells).length) continue;
+    if (2 * full.filter((c) => NUMERIC.test(c)).length > full.length) continue;
+    h = i;
+    break;
+  }
+  if (h >= 0) {
+    const head = rows[h].cells;
+    const idx = idColumns(head);
+    for (const r of rows.slice(h + 1)) {
+      if (src.kind === 'html' && r.table !== rows[h].table) continue;
+      for (const i of idx) {
+        const v = (r.cells[i] || '').trim();
+        if (!v) continue;
+        const n = normHeader(head[i]);
+        if (n.indexOf('account') !== -1 || n.indexOf('acct') !== -1) accounts.add(v); else ids.add(n + ':' + v);
+      }
+    }
+  }
+  return { accounts, ids };
+}
+
+// Two files with no account column and no shared ID: the default answer to ACCOUNT_QUESTION is "one account" when their
+// dates overlap and every fill of the earlier file inside the overlap is also in the later file (an overlapping
+// re-export). → true (looks like one account), false (dates overlap, rows differ), null (no overlap: no evidence).
+function looksLikeOneAccount(a, b) {
+  const span = (r) => { let lo = Infinity, hi = -Infinity; for (const e of r.executions) { if (e.ts < lo) lo = e.ts; if (e.ts > hi) hi = e.ts; } return [lo, hi]; };
+  let [x, y] = [a, b];
+  if (span(y)[0] < span(x)[0]) [x, y] = [y, x];
+  const from = span(y)[0], to = span(x)[1];
+  if (!(from <= to)) return null;
+  const later = new Map();
+  for (const e of y.executions) { const k = execKey(e); later.set(k, (later.get(k) || 0) + 1); }
+  let inside = 0;
+  for (const e of x.executions) {
+    if (e.ts < from || e.ts > to) continue;
+    inside++;
+    const k = execKey(e);
+    const c = later.get(k) || 0;
+    if (!c) return false;
+    later.set(k, c - 1);
+  }
+  return inside > 0 ? true : null;
+}
+
+// byteArrays: one Uint8Array per file; names: their names; opts.oneAccount: the buyer's answer to ACCOUNT_QUESTION
+// (true, false, or null for the default).
+// → {error, file?} | {trades, factsTrades, accounts, executions, copies, overlap, groups, files, question, notes, format}
+//   Files are first put into accounts (Tester re-test 2): the same account value → one account; different account
+//   values → separate accounts, whatever else they share (group trading); else a shared fill, order or deal ID → one
+//   account; else the buyer's one answer (question: {default}), which never joins files whose account values differ.
+//   Each account's files are read together by the engine (runFiles: dropOverlap counts a row in two of its files
+//   once), so each account is one position book; no fill is pooled across accounts (Tester B2, R2).
+//   trades: every account's trades after the copy collapse (one trade per copy), in close-time order, for the habit
+//   checks (strip.js keeps the latest 20,000: the cap applies after the merge); factsTrades: every account's own trades,
+//   copies kept (real money: the dollar facts); accounts: [{name, trades}] (the rule check, one at a time); executions:
+//   fills, symbols kept apart per account, for pgr.js; copies; overlap: rows counted once inside an account; groups:
+//   accounts; files; notes: lines a buyer sees before the run.
+export function readFiles(byteArrays, names = [], opts = {}) {
   const n = byteArrays.length;
   const name = (k) => names[k] || `file ${k + 1} of ${n}`;
   let bytes = 0;
@@ -171,50 +252,83 @@ export function readFiles(byteArrays, names = []) {
   let total = 0;
   for (const r of own) total += r.trades.length;
   if (total > LIMITS.MAX_ROWS) return { error: { code: 'E_TOO_LARGE', message: MESSAGES.E_TOO_LARGE } };
-  const units = [...new Set(own.flatMap((r) => r.trades.map((t) => t.pnl_unit)))];
-  if (units.length > 1) return { error: { code: 'E_MIXED_UNITS', message: MIXED_UNITS } };
-  // identical closed trades: kept as many times as the file that has the most of them (a multiset, as dropOverlap)
-  const keep = new Map();
-  const where = new Map();
-  own.forEach((r, k) => {
-    const c = new Map();
-    for (const t of r.trades) { const key = tradeKey(t); c.set(key, (c.get(key) || 0) + 1); }
-    for (const [key, m] of c) {
-      if (m > (keep.get(key) || 0)) keep.set(key, m);
-      if (!where.has(key)) where.set(key, new Set());
-      where.get(key).add(k);
+  // ---- accounts
+  const parent = own.map((_, k) => k);
+  const root = (k) => (parent[k] === k ? k : (parent[k] = root(parent[k])));
+  const ident = n > 1 ? byteArrays.map(fileIdentity) : [];
+  // apart: different account values, or (no account and no shared ID) dates that overlap with rows that differ: an
+  // overlapping export of one account repeats the same rows, so those are two accounts
+  const differ = new Set();
+  const apart = (i, j) => (ident[i].accounts.size > 0 && ident[j].accounts.size > 0 && !meets(ident[i].accounts, ident[j].accounts))
+    || differ.has(i + ':' + j) || differ.has(j + ':' + i);
+  const members = (r) => own.map((_, k) => k).filter((k) => root(k) === r);
+  const canJoin = (i, j) => !members(root(i)).some((a) => members(root(j)).some((b) => apart(a, b)));
+  const join = (i, j) => { const a = root(i), b = root(j); if (a !== b) parent[Math.max(a, b)] = Math.min(a, b); };
+  const open = [];
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const A = ident[i], B = ident[j];
+      if (A.accounts.size && B.accounts.size) { if (meets(A.accounts, B.accounts)) join(i, j); continue; }
+      if (A.ids.size && B.ids.size && meets(A.ids, B.ids)) { join(i, j); continue; }
+      open.push([i, j]);
     }
-  });
-  const used = new Map();
-  const trades = [];
+  }
+  const looks = new Map();
+  for (const [i, j] of open) {
+    if (root(i) === root(j)) continue;
+    const l = looksLikeOneAccount(own[i], own[j]);
+    if (l === false) differ.add(i + ':' + j); else looks.set(i + ':' + j, l);
+  }
+  const undecided = open.filter(([i, j]) => looks.has(i + ':' + j) && root(i) !== root(j) && canJoin(i, j));
+  let question = null;
+  if (undecided.length) {
+    const dflt = undecided.some(([i, j]) => looks.get(i + ':' + j) === true);
+    const one = opts.oneAccount === true || opts.oneAccount === false ? opts.oneAccount : dflt;
+    question = { default: dflt, answer: one };
+    if (one) for (const [i, j] of undecided) if (root(i) !== root(j) && canJoin(i, j)) join(i, j);
+  }
+  const groups = [];
+  const at = new Map();
+  own.forEach((_, k) => { const r = root(k); if (!at.has(r)) { at.set(r, groups.length); groups.push([]); } groups[at.get(r)].push(k); });
+  // ---- one book per account
+  const factsTrades = [];
   const executions = [];
+  const accounts = [];
   const notes = [];
   let overlap = 0;
   let edge = 0;
-  own.forEach((r, k) => {
-    for (const t of r.trades) {
-      const key = tradeKey(t);
-      const u = (used.get(key) || 0) + 1;
-      used.set(key, u);
-      if (u <= keep.get(key)) trades.push(Object.assign({}, t, { _g: k, _in: where.get(key) })); else overlap++;
+  for (let g = 0; g < groups.length; g++) {
+    const ks = groups[g];
+    let res = own[ks[0]];
+    if (ks.length > 1) {
+      const r = runFiles(ks.map((k) => byteArrays[k]));
+      if (r.error) return { error: { ...r.error, message: `${r.error.message} (${ks.map(name).join(', ')})` }, file: ks[0] };
+      res = r.result;
+      overlap += warned(res, 'W_OVERLAP_ROWS');
     }
-    for (const e of r.executions) executions.push(Object.assign({}, e, { symbol: k + '\u0001' + e.symbol }));
-    const cur = r.warnings.find((x) => x.code === 'W_MIXED_CURRENCY' && x.n > 0);
-    if (cur) notes.push(n > 1 ? `${cur.message} (${name(k)})` : cur.message);
-    edge += warned(r, 'W_OPEN_POSITIONS') + warned(r, 'W_OPEN_AT_START');
-  });
+    const cur = res.warnings.find((x) => x.code === 'W_MIXED_CURRENCY' && x.n > 0);
+    if (cur) notes.push(n > 1 ? `${cur.message} (${ks.map(name).join(', ')})` : cur.message);
+    edge += warned(res, 'W_OPEN_POSITIONS') + warned(res, 'W_OPEN_AT_START');
+    const mine = res.trades.map((t) => Object.assign({}, t, { _g: g }));
+    accounts.push({ name: ks.map(name).join(' + '), files: ks.map(name), trades: mine });
+    factsTrades.push(...mine);
+    for (const e of res.executions) executions.push(Object.assign({}, e, { symbol: g + '\u0001' + e.symbol }));
+  }
+  const units = [...new Set(factsTrades.map((t) => t.pnl_unit))];
+  if (units.length > 1) return { error: { code: 'E_MIXED_UNITS', message: MIXED_UNITS } };
   if (n > 1 && edge) notes.push(edgeLine(edge));
-  trades.sort((a, b) => (a.close_ts - b.close_ts) || (a.open_ts - b.open_ts) || cmpStr(a.symbol, b.symbol) || (a._g - b._g));
-  let out = trades;
+  factsTrades.sort((a, b) => (a.close_ts - b.close_ts) || (a.open_ts - b.open_ts) || cmpStr(a.symbol, b.symbol) || (a._g - b._g));
+  let out = factsTrades;
   let copies = 0;
-  if (n > 1) {
-    const c = collapseCopies(trades, (t) => t._in);
+  if (groups.length > 1) {
+    const sets = groups.map((_, g) => new Set([g]));
+    const c = collapseCopies(factsTrades, (t) => sets[t._g]);
     out = c.trades;
     copies = c.collapsed;
   }
-  out = out.map((t, i) => Object.assign(t, { id: 't' + (i + 1) }));
-  const accounts = own.map((r, k) => ({ name: name(k), trades: r.trades }));
-  return { trades: out, accounts, executions, copies, overlap, groups: n, notes, format: own[0].format };
+  out = out.map((t, i) => Object.assign({}, t, { id: 't' + (i + 1) }));
+  return { trades: out, factsTrades, accounts, executions, copies, overlap, groups: groups.length, files: n, question, notes,
+    format: own[0].format };
 }
 
 // readFiles, kept as the page's entry point (it returns refusals; it never throws for a bad file).
