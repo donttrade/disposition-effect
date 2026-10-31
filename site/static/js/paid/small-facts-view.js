@@ -46,7 +46,7 @@ export const SF_TEXT = Object.freeze({
   // S3 re-test R1: a firm's loss limits apply to each account on its own, so several files are never added together
   // for the rule check; the buyer picks one account (file), the first by default.
   acct: 'Account to check',
-  one_account: 'The rule check covers one account at a time: each file is one account, and its trades are never added to another file’s.',
+  one_account: 'The rule check covers one account at a time: one account’s trades are never added to another’s.',
   pick_none: 'Choose a firm',
   account: 'Account size',
   account_pct: 'These rules are shares of the account, so they scale to this size.',
@@ -110,7 +110,8 @@ const timeText = (ts) => new Date(ts).toISOString().slice(11, 16);
 
 // The sentences with numbers in them. Each takes formatted pieces only, so the tests can lint every shape.
 export const SF_LINES = Object.freeze({
-  combined: (k) => `Combined across ${count(k)} accounts, one per file. A trade copied to another account within 5 minutes is counted once.`,
+  combined: (k) => `Combined across ${count(k)} accounts: every account’s trades are added, copies included.`,
+  checked: (name) => `Account checked: ${name}.`,
   facts_h: (n, unit) => `Your ${plural(n, 'trade', 'trades')}, ${unit === 'USD' ? 'in dollars' : unit === 'points' ? 'in points' : 'in your currency'}`,
   won: (m, n) => `${m} won in ${plural(n, 'trade', 'trades')}`,
   lost: (m, n) => `${m} lost in ${plural(n, 'trade', 'trades')}`,
@@ -487,6 +488,7 @@ export function challengeSection(trades, opts) {
       const mine = accounts ? accounts[Number(acct.value)].trades : trades;
       const r = checkOut(mine, p, p.scale === 'percent' ? v : p.account_size, tz.value, m, unit);
       out.replaceChildren(...r.nodes);
+      if (accounts) out.append(el('p', { class: 'small', id: 'sf-acct-checked', text: SF_LINES.checked(accounts[Number(acct.value)].name) }));
       live.textContent = r.nodes[0].textContent;
       sec.lastCheck = r.check;
     } catch (e) {

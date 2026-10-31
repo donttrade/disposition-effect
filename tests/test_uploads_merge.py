@@ -63,16 +63,19 @@ READ = ("import { readAll, collapseCopies, copyLine, serverTradeCount } from './
         "const T = (s) => new TextEncoder().encode(s);"
         "const out = (x) => process.stdout.write(JSON.stringify(x));"
         "const shape = (r) => r.error ? {error: r.error.code, message: r.error.message, file: r.file} : {n: r.trades.length, "
-        "copies: r.copies, overlap: r.overlap, groups: r.groups, notes: r.notes, "
+        "copies: r.copies, overlap: r.overlap, groups: r.groups, notes: r.notes, question: r.question, "
+        "facts: Math.round(r.factsTrades.reduce((a, t) => a + t.pnl, 0) * 100) / 100, nfacts: r.factsTrades.length, "
+        "accounts: r.accounts.map((a) => [a.name, a.trades.length]), "
         "trades: r.trades.map((t) => [t.symbol, t.dir, t.open_ts, t.close_ts, t.qty, Math.round(t.pnl * 100) / 100])};")
 
 
-def read(paths):
-    return node(READ + f"out(shape(readAll({json.dumps(paths)}.map(F))));")
+def read(paths, one=None):
+    return node(READ + f"out(shape(readAll({json.dumps(paths)}.map(F), {json.dumps([os.path.basename(x) for x in paths])}, "
+                f"{{ oneAccount: {json.dumps(one)} }})));")
 
 
-def read_text(texts):
-    return node(READ + f"out(shape(readAll({json.dumps(texts)}.map(T))));")
+def read_text(texts, names=None, one=None):
+    return node(READ + f"out(shape(readAll({json.dumps(texts)}.map(T), {json.dumps(names or [])}, {{ oneAccount: {json.dumps(one)} }})));")
 
 
 # ---------------------------------------------------------------- unit: merge.js
@@ -171,13 +174,16 @@ def test_two_accounts_trading_one_symbol_stay_two_books():
 
 def test_overlap_rows_counted_once():
     r = read([A, A2])
-    assert (r["n"], r["copies"], r["overlap"], r["groups"]) == (80, 0, 20, 2)
-    # the identical trades are in both acct_a files, and their acct_b copies still collapse once
+    # no account column, no ID: the dates overlap and the overlapping rows match, so "one account" by default
+    assert (r["n"], r["copies"], r["overlap"], r["groups"]) == (80, 0, 20, 1)
+    assert r["question"] == {"default": True, "answer": True}
+    # mixed, no IDs: two exports of A (one account, one book) plus B (dates overlap, rows differ: another account)
     r3 = read([A, A2, B])
-    assert (r3["n"], r3["copies"], r3["groups"]) == (95, 30, 3)
-    # the same file twice: every row overlaps, nothing collapses
+    assert (r3["n"], r3["copies"], r3["groups"], r3["overlap"]) == (95, 30, 2, 20)
+    assert r3["accounts"] == [["acct_a.csv + acct_a_overlap.csv", 80], ["acct_b.csv", 45]]
+    # the same file twice: every row overlaps
     r2 = read([A, A])
-    assert (r2["n"], r2["copies"], r2["overlap"]) == (60, 0, 60)
+    assert (r2["n"], r2["copies"], r2["overlap"], r2["groups"]) == (60, 0, 60, 1)
 
 
 def test_two_platforms_and_two_currencies_refused():
@@ -217,29 +223,37 @@ def test_row_cap_after_the_merge():
 
 
 def test_mt5_reports_in_the_browser(browser, repo_server):
-    """Tester B2/B3 on MT5 HTML (the engine needs DOMParser): two deals reports keep both books (1 + 5 trades; one pooled
-    book gave 5). A positions report and a deals report are never mixed, in either order, and the line names both files:
+    """Tester B2/B3 on MT5 HTML (the engine needs DOMParser): deals reports of two accounts keep both books (1 + 5
+    trades; one pooled book gave 5); of one account, one book. A positions report and a deals report are never mixed, in either order, and the line names both files:
     one account's two reports read the same position differently (summed as copies, its P&L doubled)."""
     page = browser.new_page()
     page.goto(repo_server + "/tests/harness.html")
     names = ["positions_hedging.htm", "deals_netting_40.htm", "deals_hedging.htm", "deals_netting.htm"]
     files = {n: list(open(os.path.join(MT5, n), "rb").read()) for n in names}
+    # the fixtures share one account line; a second account is the same report with another account number
+    other = open(os.path.join(MT5, "deals_netting.htm"), encoding="utf-8").read()
+    assert other.count("99887766") == 2   # the title and the "Account:" line
+    files["deals_netting_other.htm"] = list(other.replace("99887766", "11223344").encode())
     got = page.evaluate("""async (files) => {
         const m = await import('/site/static/js/paid/merge.js');
         const b = (n) => new Uint8Array(files[n]);
         const n = (xs) => { const r = m.readAll(xs.map(b), xs); return r.error ? [r.error.code, r.error.message] : [r.trades.length, r.groups,
           Math.round(r.trades.reduce((s, t) => s + t.pnl, 0) * 100) / 100]; };
-        return { h: n(['deals_hedging.htm']), nt: n(['deals_netting.htm']), hn: n(['deals_hedging.htm', 'deals_netting.htm']),
+        return { h: n(['deals_hedging.htm']), nt: n(['deals_netting.htm']), hn: n(['deals_hedging.htm', 'deals_netting_other.htm']),
+          same: n(['deals_hedging.htm', 'deals_netting.htm']),
           both: n(['positions_hedging.htm', 'deals_netting_40.htm']), rev: n(['deals_netting_40.htm', 'positions_hedging.htm']),
-          same: n(['positions_hedging.htm', 'deals_hedging.htm']) };
+          posdeals: n(['positions_hedging.htm', 'deals_hedging.htm']) };
     }""", files)
     page.close()
+    # two accounts (their "Account:" lines differ): two books, 1 + 5 trades
     assert got["hn"][:2] == [got["h"][0] + got["nt"][0], 2] and abs(got["hn"][2] - got["h"][2] - got["nt"][2]) < 0.011, got
+    # one account (the same "Account:" line): one book, as the engine reads several files of one account
+    assert got["same"][1] == 1, got
     line = ("positions_hedging.htm is an MT5 positions report and {d} is an MT5 deals report. "
             "Add reports of one kind: all positions reports, or all deals reports.")
     assert got["both"] == ["E_MIXED_FILES", line.format(d="deals_netting_40.htm")]
     assert got["rev"] == ["E_MIXED_FILES", line.format(d="deals_netting_40.htm")]
-    assert got["same"] == ["E_MIXED_FILES", line.format(d="deals_hedging.htm")]
+    assert got["posdeals"] == ["E_MIXED_FILES", line.format(d="deals_hedging.htm")]
 
 
 def test_tradovate_group_trading_keeps_each_accounts_book():
@@ -266,23 +280,73 @@ def test_tradovate_group_trading_keeps_each_accounts_book():
     assert (gg["n"], gg["groups"]) == (4, 2) and sum(t[5] for t in gg["trades"]) == 19
 
 
-def test_a_position_across_the_edge_of_a_file_is_left_out_and_said():
-    """Two monthly exports of one account: a position opened in the first and closed in the second is not pooled
-    across files; it is left out, and the panel says so before the run."""
-    sep = "\n".join([FILL_HEAD, "2026-09-29,09:00:00,ES,Buy,1,100,USD,0", "2026-09-29,09:20:00,ES,Sell,1,110,USD,0",
+def test_months_with_no_overlap_ask_and_one_account_joins_the_edge():
+    """Two monthly exports with no account column, no ID and no overlap: nothing tells, so the buyer is asked, with
+    "separate accounts" preset (no evidence). Separate: the position open across the month edge is left out, and
+    said. One account: one book, and that position is a trade."""
+    sep = "\n".join([FILL_HEAD, "2026-09-29,10:00:00,ES,Buy,1,100,USD,0", "2026-09-29,10:20:00,ES,Sell,1,104,USD,0",
                      "2026-09-30,15:00:00,ES,Buy,1,100,USD,0"]) + "\n"
-    oct_ = "\n".join([FILL_HEAD, "2026-10-01,09:00:00,ES,Sell,1,104,USD,0", "2026-10-01,10:00:00,ES,Buy,1,100,USD,0",
-                      "2026-10-01,10:20:00,ES,Sell,1,101,USD,0"]) + "\n"
-    r = read_text([sep, oct_])
-    assert r["n"] == 2 and any(x.endswith("open at the start or end of a file and were left out: each file is read as one account.")
-                               or x.endswith("open at the start or end of a file and was left out: each file is read as one account.")
-                               for x in r["notes"]), r
+    oct_ = "\n".join([FILL_HEAD, "2026-10-01,09:00:00,ES,Sell,1,103,USD,0", "2026-10-02,10:00:00,ES,Buy,1,100,USD,0",
+                      "2026-10-02,10:20:00,ES,Sell,1,101,USD,0"]) + "\n"
+    r = read_text([sep, oct_], ["sep.csv", "oct.csv"])
+    assert r["question"] == {"default": False, "answer": False}
+    assert (r["n"], r["groups"]) == (2, 2) and "2 positions were open at the start or end of an account’s files and were left out." in r["notes"]
+    one = read_text([sep, oct_], ["sep.csv", "oct.csv"], one=True)
+    assert (one["n"], one["groups"], one["facts"]) == (3, 1, 8) and one["question"] == {"default": False, "answer": True}
+    assert one["accounts"] == [["sep.csv + oct.csv", 3]]
+
+
+TV_HEAD = "Account,B/S,Contract,Product,avgPrice,filledQty,Fill Time,Status"
+
+
+def tv(acct, rows):
+    return TV_HEAD + "\n" + "\n".join(acct + "," + r for r in rows) + "\n"
+
+
+SEP = [" Buy,ESZ6,ES,5000.00,1,09/14/2026 10:00:00,Filled", " Sell,ESZ6,ES,5005.00,1,09/16/2026 10:00:00,Filled",
+       " Buy,ESZ6,ES,5000.00,1,09/20/2026 10:00:00,Filled", " Sell,ESZ6,ES,5002.00,1,09/20/2026 10:30:00,Filled"]
+SEP15_OCT15 = [" Sell,ESZ6,ES,5005.00,1,09/16/2026 10:00:00,Filled", " Buy,ESZ6,ES,5000.00,1,09/20/2026 10:00:00,Filled",
+               " Sell,ESZ6,ES,5002.00,1,09/20/2026 10:30:00,Filled", " Buy,ESZ6,ES,5000.00,1,10/05/2026 10:00:00,Filled",
+               " Sell,ESZ6,ES,4999.00,1,10/05/2026 10:30:00,Filled"]
+
+
+def test_overlapping_months_of_one_account_are_one_book():
+    """Tester re-test 2 R4 (r5.mjs): APEX-1's Sep export and its 15 Sep-15 Oct export. The Account column says one
+    account, so the two files are one book with the shared fills counted once: 3 trades, $300 (read apart: 4 trades,
+    two of them made-up shorts, $700). No question is asked."""
+    r = read_text([tv("APEX-1", SEP), tv("APEX-1", SEP15_OCT15)], ["sep.csv", "sep15-oct15.csv"])
+    assert (r["n"], r["groups"], r["overlap"], r["facts"], r["question"]) == (3, 1, 3, 300, None)
+    assert [t[1] for t in r["trades"]] == ["long", "long", "long"]
+
+
+def test_exact_copy_keeps_both_accounts_dollars():
+    """Tester re-test 2 R5 (r3.mjs): APEX-1 and APEX-2 with the same group-traded trade. The dollar facts add both
+    accounts ($1,000); the habit checks see one trade (copies 1)."""
+    same = [" Buy,ESZ6,ES,5000.00,1,09/01/2026 09:00:00,Filled", " Sell,ESZ6,ES,5010.00,1,09/01/2026 09:20:00,Filled"]
+    r = read_text([tv("APEX-1", same), tv("APEX-2", same)], ["apex1.csv", "apex2.csv"])
+    assert (r["n"], r["copies"], r["groups"], r["overlap"], r["nfacts"], r["facts"]) == (1, 1, 2, 0, 2, 1000)
+    assert r["trades"][0][5] == 1000 and r["question"] is None
+
+
+def test_mixed_two_months_of_a_and_one_file_of_b():
+    """Two exports of APEX-1 (one account, one book: $300) plus APEX-2 trading on its own: two accounts, each its own
+    book; nothing of B is pooled with A."""
+    b = [" Buy,ESZ6,ES,5000.00,1,09/16/2026 09:00:00,Filled", " Sell,ESZ6,ES,5003.00,1,09/16/2026 09:30:00,Filled",
+         " Sell,ESZ6,ES,5004.00,1,09/22/2026 11:00:00,Filled", " Buy,ESZ6,ES,5001.00,1,09/22/2026 11:20:00,Filled"]
+    alone = read_text([tv("APEX-2", b)])
+    r = read_text([tv("APEX-1", SEP), tv("APEX-2", b), tv("APEX-1", SEP15_OCT15)], ["sep.csv", "b.csv", "sep15-oct15.csv"])
+    assert (r["groups"], r["overlap"], r["question"]) == (2, 3, None)
+    assert r["accounts"] == [["sep.csv + sep15-oct15.csv", 3], ["b.csv", 2]]
+    assert r["facts"] == 300 + alone["facts"] and alone["facts"] == 300
+    assert sorted(t[1] for t in r["trades"]) == ["long", "long", "long", "long", "short"]
 
 
 def test_new_strings_pass_lint_and_are_definite():
     js = READ + ("import * as M from './site/static/js/paid/merge.js'; import * as V from './site/static/js/paid/small-facts-view.js';"
                  "out([M.SMALL_NOTICE, M.WAIT_LINE, M.UPLOAD_HINT, M.MIXED_UNITS, M.overlapLine(1), M.overlapLine(20), M.mt5MixLine('a.htm', 'b.htm'),"
-                 " M.edgeLine(1), M.edgeLine(3), M.accountsLine(2), V.SF_TEXT.acct, V.SF_TEXT.one_account, V.SF_LINES.combined(2)]);")
+                 " M.edgeLine(1), M.edgeLine(3), M.accountsLine(1, 2), M.accountsLine(2, 3), M.filesLabel(1, 2), M.filesLabel(2, 1),"
+                 " M.ACCOUNT_QUESTION, M.ACCOUNT_ONE, M.ACCOUNT_SEPARATE, V.SF_TEXT.acct, V.SF_TEXT.one_account, V.SF_LINES.combined(2),"
+                 " V.SF_LINES.checked('a.csv')]);")
     got = node(js)
     assert got[:4] == [NOTICE, WAIT, HINT, MIXED_UNITS]
     for t in got + [LINE_1, LINE_30, "Run anyway", "Run the test", "Add more files", "Remove these files", "Your files"]:
@@ -371,10 +435,17 @@ def report_page(browser, site, width=1280, analyse_status=200):
     return ctx, page, log
 
 
-def staged(page, n, files, timeout=30000):
-    page.wait_for_function("([n, k]) => { const c = document.getElementById('rp-count'), b = document.getElementById('rp-run');"
-                           " return c && c.textContent === `${n} trades from ${k} ${k === 1 ? 'file' : 'files'}.` && !b.disabled; }",
-                           arg=[n, files], timeout=timeout)
+def count_line(n, files, accounts):
+    return (f"{n} {'trade' if n == 1 else 'trades'}: {accounts} {'account' if accounts == 1 else 'accounts'}, "
+            f"{files} {'file' if files == 1 else 'files'}.")
+
+
+def staged(page, n, files, accounts=None, timeout=30000):
+    """Waits for the panel's count line: "{n} trades: {a} account(s), {k} file(s)." (by detected accounts)."""
+    pat = "^" + re.escape(count_line(n, files, 1)).replace("1\\ account,", r"\d+\ accounts?,") + "$" if accounts is None \
+        else "^" + re.escape(count_line(n, files, accounts)) + "$"
+    page.wait_for_function("(p) => { const c = document.getElementById('rp-count'), b = document.getElementById('rp-run');"
+                           " return c && new RegExp(p).test(c.textContent) && !b.disabled; }", arg=pat, timeout=timeout)
 
 
 def visible(page, sel):
@@ -446,7 +517,7 @@ def test_notice_waits_and_run_anyway_sends_one_post(browser, site):
     assert NOTICE in txt and WAIT in txt and page.inner_text("#rp-run").strip() == "Run anyway"
     # Tester M6: the one live line says the count, the notice and that Run sends; focus is on the panel
     live = page.text_content("#rp-live")
-    assert live == f"75 trades from 2 files. {NOTICE} Press Run to send." and page.get_attribute("#rp-live", "role") == "status"
+    assert live == f"75 trades: 2 accounts, 2 files. {NOTICE} Press Run to send." and page.get_attribute("#rp-live", "role") == "status"
     assert page.evaluate("document.activeElement.id") == "rp-picked-h"
     page.wait_for_timeout(1500)
     assert log["posts"] == [] and page.is_hidden("#rp-status")          # waiting spends nothing
@@ -487,7 +558,7 @@ def test_adding_files_recounts_and_removing_one_recounts(browser, site):
     staged(page, 75, 2)
     page.set_input_files("#rp-file", A)                     # the same file again: no change
     page.wait_for_timeout(500)
-    assert page.inner_text("#rp-count").strip() == "75 trades from 2 files."
+    assert page.inner_text("#rp-count").strip() == "75 trades: 2 accounts, 2 files."
     page.set_input_files("#rp-file", C)                     # 60 + 45 − 30 + 25 = 100: no notice, still waits for Run
     staged(page, 100, 3)
     assert page.is_hidden("#rp-small") and page.inner_text("#rp-run").strip() == "Run the test"
@@ -517,7 +588,7 @@ def test_another_platform_or_currency_is_refused_and_the_list_stays(browser, sit
     page.set_input_files("#rp-file", OTHER_PLATFORM)
     page.wait_for_selector("#rp-status.notice-error", timeout=30000)
     assert page.inner_text("#rp-status").startswith("These files have different columns.")
-    assert page.inner_text("#rp-count").strip() == "75 trades from 2 files." and page.is_visible("#rp-small")
+    assert page.inner_text("#rp-count").strip() == "75 trades: 2 accounts, 2 files." and page.is_visible("#rp-small")
     click_run(page)
     assert len(json.loads(log["posts"][0].post_data)["rows"]) == 75
     ctx.close()
@@ -539,7 +610,7 @@ def test_an_outage_keeps_the_files(browser, site):
     staged(page, 75, 2)
     visible(page, "#rp-run")[0].click()
     page.wait_for_selector("#rp-status.notice-error", timeout=30000)
-    assert page.inner_text("#rp-count").strip() == "75 trades from 2 files." and page.is_enabled("#rp-run")
+    assert page.inner_text("#rp-count").strip() == "75 trades: 2 accounts, 2 files." and page.is_enabled("#rp-run")
     log["status"][0] = 200
     click_run(page)
     assert len(log["posts"]) == 2
@@ -577,11 +648,11 @@ def test_drop_of_several_files(browser, site):
 
 
 def test_overlap_line_before_the_run(browser, site):
-    """Tester M4: identical closed trades in two files are counted once, and the panel says so before the run."""
+    """Rows in two files of one account are counted once, and the panel says so before the run."""
     ctx, page, log = report_page(browser, site)
     page.set_input_files("#rp-file", [A, A2])
-    staged(page, 80, 2)
-    assert "20 trades were the same in more than one file and were counted once." in page.inner_text("#rp-notes")
+    staged(page, 80, 2, 1)
+    assert "20 rows were in more than one file of one account and were counted once." in page.inner_text("#rp-notes")
     ctx.close()
 
 
@@ -606,8 +677,10 @@ def test_rule_check_is_one_account_at_a_time(browser, site):
     page.set_input_files("#rp-file", [RULE_A, RULE_B])
     staged(page, 30, 2)
     click_run(page)
-    assert page.inner_text("#accounts-line").strip() == "These results combine 2 accounts, one per file. The rule check covers one account at a time."
-    assert page.inner_text("#sf-combined").startswith("Combined across 2 accounts, one per file.")
+    assert page.inner_text("#accounts-line").strip() == ("These results combine 2 accounts from 2 files. Dollar totals add every account’s "
+                                                         "trades; the habit checks count a trade copied between accounts within 5 minutes once. "
+                                                         "The rule check covers one account at a time.")
+    assert page.inner_text("#sf-combined").strip() == "Combined across 2 accounts: every account’s trades are added, copies included."
     assert page.inner_text("#sf-one-account").startswith("The rule check covers one account at a time")
     assert page.eval_on_selector_all("#sf-acct option", "os => os.map((o) => o.textContent)") == ["rule_a.csv", "rule_b_copy.csv"]
     assert page.input_value("#sf-acct") == "0"
@@ -616,9 +689,11 @@ def test_rule_check_is_one_account_at_a_time(browser, site):
     first = page.inner_text("#sf-out")
     assert "broke" not in first and "1,600" not in first, first
     assert "reached neither the target nor a loss limit" in first, first
+    assert page.inner_text("#sf-acct-checked").strip() == "Account checked: rule_a.csv."
     page.select_option("#sf-acct", "1")
     page.wait_for_timeout(300)
     second = page.inner_text("#sf-out")
+    assert page.inner_text("#sf-acct-checked").strip() == "Account checked: rule_b_copy.csv."
     assert "broke" not in second and "1,600" not in second, second
     from a11y import horizontal_overflow
     assert horizontal_overflow(page) == []
@@ -633,4 +708,41 @@ def test_rule_file_alone_has_no_account_choice(browser, site):
     click_run(page)
     assert page.query_selector("#sf-acct") is None and page.query_selector("#accounts-line") is None
     assert page.query_selector("#sf-combined") is None
+    ctx.close()
+
+
+def test_the_account_question_when_the_files_do_not_say(browser, site):
+    """No account column and no ID (the CSV template): acct_a.csv and its overlapping re-export. The panel asks one
+    question, preset to "One account" (dates overlap, rows match); tapping "Separate accounts" reads them again as two
+    accounts (the shared trades become copies). Nothing is sent until Run, once."""
+    ctx, page, log = report_page(browser, site, width=390)
+    page.set_input_files("#rp-file", [A, A2])
+    staged(page, 80, 2, 1)
+    assert page.is_visible("#rp-acct-q") and page.inner_text("#rp-acct-q legend").strip() == "Are these files from one account or separate accounts?"
+    assert page.is_checked("#rp-acct-one") and not page.is_checked("#rp-acct-sep")
+    assert "Are these files from one account or separate accounts?" in page.text_content("#rp-live")
+    page.check("#rp-acct-sep")
+    staged(page, 80, 2, 2)
+    assert page.is_checked("#rp-acct-sep") and log["posts"] == []
+    page.check("#rp-acct-one")
+    staged(page, 80, 2, 1)
+    from a11y import horizontal_overflow
+    assert horizontal_overflow(page) == []
+    click_run(page)
+    assert len(log["posts"]) == 1
+    assert page.inner_text("#accounts-line").strip() == "These results read 2 files as 1 account."
+    assert page.query_selector("#sf-acct") is None and page.query_selector("#sf-combined") is None
+    ctx.close()
+
+
+def test_files_with_an_account_column_are_not_asked(browser, site):
+    """Tester re-test 2 R4/R6 on the page: two Tradovate exports of APEX-1 read as "1 account, 2 files", no question."""
+    f1, f2 = site["tmp"] / "sep.csv", site["tmp"] / "sep15-oct15.csv"
+    f1.write_text(tv("APEX-1", SEP))
+    f2.write_text(tv("APEX-1", SEP15_OCT15))
+    ctx, page, log = report_page(browser, site)
+    page.set_input_files("#rp-file", [str(f1), str(f2)])
+    staged(page, 3, 2, 1)
+    assert page.is_hidden("#rp-acct-q")
+    assert "3 rows were in more than one file of one account and were counted once." in page.inner_text("#rp-notes")
     ctx.close()
