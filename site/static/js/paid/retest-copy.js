@@ -13,8 +13,26 @@
 // the ones in site/config/paid_terms.json (a test ties them; the server's parity test ties that
 // file to the server's constants).
 
-export const RETEST_HOW = 'For the re-test, export the same account from the same start date as your first file, '
-  + 'up to the day you run it, so the file covers your first result’s period and the trades since.';
+// Release test M2: with several files the re-test needs the same files (the same accounts), not just "the same account".
+export const RETEST_HOW = 'For the re-test, use the same files as your first result, each exported again from the same start date '
+  + 'up to the day you run it, so they cover your first result’s period and the trades since.';
+
+// The Worker's refusals that the page words itself, by error code (Release test M2, M3). Every other code shows the
+// Worker's own message. not_same_history: fewer than half of the first result's trades are in the re-test; the Worker's
+// text advises exporting "the same account", which is wrong when the first result read several files (adding or
+// removing a copy account changes the trades), so the page says what to do in either case.
+export const RETEST_NOT_SAME = 'This re-test does not match your first result: fewer than half of the trades from your first result are in these files. '
+  + 'Use the same files as your first result, with the trades since: the same accounts, each exported again from the same start date. Nothing was counted.';
+export const REFUSAL_LINES = {
+  not_same_history: RETEST_NOT_SAME,
+  // M3 hook: the Worker's refusal of a re-test with no new trades (an identical file) goes here, code: line, when the
+  // engine Coder's code and wording arrive. Until then the Worker's own message is shown for it.
+};
+// The line for a refused /analyse: the page's own for the codes above, else the Worker's message, else the fallback.
+export function refusalLine(error, fallback = 'The report could not be made.') {
+  if (error && Object.prototype.hasOwnProperty.call(REFUSAL_LINES, error.code)) return REFUSAL_LINES[error.code];
+  return error && error.message ? error.message : fallback;
+}
 
 // Only when no window came back (an older server): no instant, so no time is claimed.
 export const RETEST_LINE = 'Your purchase includes one re-test on the same account, 30 to 60 days after your first result. ' + RETEST_HOW;
