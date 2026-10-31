@@ -6,26 +6,28 @@
   <h1>Your donttrade test result</h1>
   <div class="no-print">{% include "partials/report_steps.html" %}</div>
   <section class="no-print" aria-labelledby="pick-h">
-    <h2 id="pick-h">Choose your trade file</h2>
+    <h2 id="pick-h">Choose your trade files</h2>
     <p id="rp-access" class="muted"></p>
-    {#- S3 (merged uploads): several files of one platform, read as one history; copies across files counted once.
-        The hint, notice and button texts are merge.js's UPLOAD_HINT, SMALL_NOTICE and SMALL_WAIT (tests pin them). -#}
+    {#- S3 (merged uploads): several files of one platform, read as one history; copies across accounts counted once.
+        Choosing files only stages them; only #rp-run sends (Tester S3 B1). The hint, notice and wait line are merge.js's
+        UPLOAD_HINT, SMALL_NOTICE and WAIT_LINE (tests pin them). #rp-live is the one line a screen reader hears. -#}
     <p class="small" id="rp-hint">Add all your accounts and months: more trades, clearer answers.</p>
     <div class="dropzone" id="rp-drop">
       <p><strong>Drop your trade files here</strong>, or choose them:</p>
       <label for="rp-file">Trade files from one platform (MT5/MT4 report, IBKR Flex, Tradovate Orders, TradingView Order History, all in beta, or the CSV template)</label>
-      <input id="rp-file" type="file" accept=".csv,.htm,.html,.txt" multiple>
+      <input id="rp-file" type="file" accept=".csv,.htm,.html,.txt" multiple aria-describedby="rp-count">
     </div>
-    <div id="rp-picked" hidden>
-      <p id="rp-count" class="small"></p>
-      <ul id="rp-files" class="small"></ul>
-      <p><button class="btn btn-secondary" id="rp-clear" type="button">Remove these files</button></p>
-    </div>
-    <div id="rp-small" class="notice notice-caution" hidden>
-      <p><strong id="rp-small-n"></strong> Files this size mostly show No sign for habits. You still get every dollar total and your rule check.</p>
-      <p class="small">Adding files does not use your run.</p>
-      <p class="btn-row"><button class="btn" id="rp-run-anyway" type="button">Run anyway</button>
-        <button class="btn btn-secondary" id="rp-add" type="button">Add more files</button></p>
+    <p id="rp-live" class="visually-hidden" role="status"></p>
+    <div id="rp-picked" class="notice rp-picked" hidden>
+      <h3 id="rp-picked-h" tabindex="-1">Your files</h3>
+      <p id="rp-count"></p>
+      <ul id="rp-files" class="small rp-files"></ul>
+      <p id="rp-small" hidden><strong>Files this size mostly show No sign for habits. You still get every dollar total and your rule check.</strong></p>
+      <div id="rp-notes"></div>
+      <p class="small">Nothing is sent until you press Run. Adding files does not use a run.</p>
+      <p class="btn-row"><button class="btn" id="rp-run" type="button">Run the test</button>
+        <button class="btn btn-secondary" id="rp-add" type="button">Add more files</button>
+        <button class="btn btn-secondary" id="rp-clear" type="button">Remove these files</button></p>
     </div>
     <details class="how-more"><summary>What is sent</summary><p>{{ strings.p5.long }}</p></details>
     <div class="field"><label for="rp-firm">Which firm do you trade with? (optional)</label>
@@ -36,6 +38,8 @@
   </section>
   <div id="rp-status" class="notice" role="status" hidden></div>
   <div id="rp-out"></div>
+  {#- S4: the firm-rules library for "Your file against your firm's rules" (small-facts-view.js), as on the free check -#}
+  <script type="application/json" id="sf-presets">{{ presets_json }}</script>
   <div class="no-print">{% include "partials/disclaimer.html" %}</div>
 </div>
 {% endblock %}

@@ -6,13 +6,15 @@
 // Every number on the page comes from the server's Report or from the file in this
 // tab; the wording only describes past trades (NON-ADVISER A3).
 
-import { readFiles, copyLine, SMALL_FILE } from './merge.js';
+import { readAll, copyLine, copiesIn, serverTradeCount, overlapLine, SMALL_FILE } from './merge.js';
 import { ics, retestLine, RETEST_LINE } from './retest-copy.js';
 import { pgrPlrCounts } from '../engine/pgr.js';
 import { stripRows, spanLine } from './strip.js';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js';
 import { habitSentences, methodLine, page1Lines, coverageLines, mergedLine, checkReport, SENTENCE_HABITS, RESEARCH, RESEARCH_PREFIX, holdDays,
   V_LAUNCH, V_LAUNCH_SIZE, V_NO, moreTrades } from './wording.js';
+import { factsSection, challengeSection, smallLayout, presetsFromPage } from './small-facts-view.js';
+import { reportTrades } from './small-facts.js';
 
 // Off until "N more trades" can be shown without ever understating N (Tester slice 1 re-test: worlds
 // with too few files per share band were ignored, so some files were told too few). Backlog item.
@@ -358,6 +360,11 @@ export function renderReport(report, out, meta) {
   out.classList.add('report-out');
   wirePrint();
   out.append(el('p', { class: 'disclaimer notice', text: report.disclaimer }));
+  // S4 (small-file facts and challenge check): facts from the trades parsed in this tab, never sent anywhere.
+  // Small files lead with them (addendum §3.1); otherwise the facts follow the habit totals and the rule check
+  // follows the habits (bundle plan §2: part c).
+  const sf = smallFactsParts(report, meta);
+  if (sf && sf.small) out.append(sf.facts, sf.rules);
   // Page 1 (ARCHITECT-STATS-AMENDMENT-R2 §9.1): the headline, the focus habit or why none is
   // shown first (one reason line per distinguishable habit), then the coverage line. All
   // sentences come from wording.js, which refuses a report of another method version.
@@ -383,6 +390,7 @@ export function renderReport(report, out, meta) {
   out.append(p1);
 
   out.append(habitsSummary(report, unit));
+  if (sf && !sf.small) out.append(sf.facts);
 
   const details = el('section', { class: 'section', 'aria-labelledby': 'det-h' }, el('h2', { id: 'det-h', text: 'Each habit' }));
   for (const h of report.habits) if (!factsOnly(h)) details.append(habitSection(h, unit, report));
@@ -402,6 +410,8 @@ export function renderReport(report, out, meta) {
       el('p', { text: `Proportion of gains realised (PGR): ${pct(c.pgr)} · proportion of losses realised (PLR): ${pct(c.plr)}.` }),
       el('p', { class: 'small muted', text: `Counts: ${c.rg} realised gains, ${c.pg} paper gains, ${c.rl} realised losses, ${c.pl} paper losses. Coverage: ${c.coverage_pct === null ? 'no open positions on sale days' : c.coverage_pct.toFixed(1) + '% of open position-days had a same-day price in your file'}. This is not the full Odean (1998) measure, which needs a price for every open position every day.` })));
   }
+
+  if (sf && !sf.small) out.append(sf.rules);
 
   // The rule library: identical for everyone, in its fixed order, never matched to the habits above.
   const lib = el('section', { class: 'section', id: 'rules', 'aria-labelledby': 'rules-h' },
@@ -444,6 +454,22 @@ export function renderReport(report, out, meta) {
   out.append(el('p', { class: 'small muted', text: `Engine ${report.engine_commit} · rule library ${report.rule_library_version}.` }));
 }
 
+// S4: the two fact sections, when the page has the file's trades (meta.trades: the report page after a run, the
+// example report from its committed file). Kept here as one call so the habit layer above stays untouched.
+// The trades are the ones the report itself is about (strip.js's selection: Tester S4 M3). Anything that goes wrong
+// here leaves the two sections out and the rest of the paid report as it is (Tester S4 M4).
+function smallFactsParts(report, meta) {
+  if (!meta || !Array.isArray(meta.trades) || !meta.trades.length) return null;
+  try {
+    const trades = reportTrades(meta.trades);
+    if (!trades.length) return null;
+    const opts = { money: (x) => money(x, report.currency), unit: report.currency, presets: presetsFromPage(), format: meta.format || null, sample: !!meta.sample };
+    return { small: smallLayout(report), facts: factsSection(trades, opts), rules: challengeSection(trades, opts) };
+  } catch (e) {
+    return null;
+  }
+}
+
 // ---------------------------------------------------------------- page wiring
 
 let token = null;
@@ -464,38 +490,67 @@ function status(msg, kind = '') {
   s.hidden = false;
 }
 
-// S3 (merged uploads): the files chosen so far, and the read of them waiting for "Run anyway". Choosing or dropping
-// files adds them to the list; nothing is sent until the run starts, so waiting at the small-file notice, or adding
-// files from it, never spends a run. A file that cannot be read with the others (another platform: E_MIXED_FILES) is
-// not added, and the list stays as it was.
+// S3 (merged uploads; Tester S3 B1): choosing or dropping files only STAGES them. The panel says how many trades
+// the report will count (the server's count: merge.js serverTradeCount, Tester B4) and from how many files; under 100
+// it adds the small-file notice. Only the Run button sends, at any count, so adding files never spends a run. A file
+// that cannot be read with the others is not added, and the list stays as it was. Files chosen while others are
+// being read wait their turn (Tester m1). A send that fails keeps the files staged (no run was spent: Tester m2).
 let picked = [];
 let ready = null;
 let busy = false;
+const queue = [];
 const sameFile = (a, b) => a.name === b.name && a.size === b.size && a.lastModified === b.lastModified;
 const plural = (n, one, many) => `${count(n)} ${n === 1 ? one : many}`;
 
-function showPicked(n) {
+function showPanel() {
   const box = $('rp-picked');
-  if (!picked.length) { box.hidden = true; return; }
-  $('rp-files').replaceChildren(...picked.map((f) => el('li', { text: f.name })));
-  $('rp-count').textContent = n === null ? `${plural(picked.length, 'file', 'files')} chosen.`
-    : `${plural(n, 'trade', 'trades')} from ${plural(picked.length, 'file', 'files')}.`;
+  if (!picked.length) { box.hidden = true; $('rp-files').replaceChildren(); return; }
+  $('rp-files').replaceChildren(...picked.map((f, i) => {
+    const rm = el('button', { class: 'btn-link rp-remove', type: 'button', text: 'Remove', 'aria-label': 'Remove ' + f.name });
+    rm.addEventListener('click', () => removeFile(i));
+    return el('li', {}, el('span', { class: 'rp-name', text: f.name }), ' ', rm);
+  }));
+  const n = ready ? ready.n : null;
+  const lines = [n === null ? `${plural(picked.length, 'file', 'files')} chosen.` : `${plural(n, 'trade', 'trades')} from ${plural(picked.length, 'file', 'files')}.`];
+  const small = ready && n < SMALL_FILE;
+  $('rp-small').hidden = !small;
+  const notes = ready ? ready.notes : [];
+  $('rp-notes').replaceChildren(...notes.map((t) => el('p', { class: 'small', text: t })));
+  // One live line a screen reader hears when the panel changes (Tester M6): the count, then the notice under 100.
+  $('rp-count').textContent = lines[0];
+  $('rp-live').textContent = lines[0] + (small ? ' ' + $('rp-small').textContent.trim() : '') + (n === null ? '' : ' Press Run to send.');
+  $('rp-run').textContent = small ? 'Run anyway' : 'Run the test';
+  $('rp-run').disabled = !ready;
   box.hidden = false;
 }
 
-function showSmall(n) {
-  $('rp-small-n').textContent = `${plural(n, 'trade', 'trades')}.`;
-  $('rp-small').hidden = false;
+function addFiles(list) {
+  queue.push([...list]);
+  if (!busy) drain();
 }
 
-async function addFiles(list) {
+async function drain() {
+  while (queue.length && !busy) {
+    const fresh = queue.shift().filter((f) => !picked.some((p) => sameFile(p, f)));
+    if (fresh.length) await stage(picked.concat(fresh));
+  }
+}
+
+async function removeFile(i) {
   if (busy) return;
-  const fresh = [...list].filter((f) => !picked.some((p) => sameFile(p, f)));
-  if (!fresh.length) return;
-  await prepare(picked.concat(fresh));
+  const rest = picked.filter((_, k) => k !== i);
+  if (!rest.length) { clearFiles(); return; }
+  await stage(rest);
 }
 
-async function prepare(files) {
+function clearFiles() {
+  if (busy) return;
+  picked = []; ready = null;
+  $('rp-status').hidden = true;
+  showPanel();
+}
+
+async function stage(files) {
   if (!token) { status('No access found on this device. Open the restore link or restore file you saved after paying.', 'error'); return; }
   const payload = decodeToken(token);
   if (!payload) { status('This access link is damaged. Use your restore link.', 'error'); return; }
@@ -503,31 +558,30 @@ async function prepare(files) {
   try {
     status(files.length > 1 ? `Reading your ${files.length} files in this tab…` : 'Reading your file in this tab…');
     const bytes = await Promise.all(files.map(async (f) => new Uint8Array(await f.arrayBuffer())));
-    const r = readFiles(bytes);
-    if (r.error) { status(r.error.message, 'error'); return; }   // picked, ready and the notice stay as they were
+    const r = readAll(bytes, files.map((f) => f.name));
+    if (r.error) { status(r.error.message, 'error'); return; }   // picked, ready and the panel stay as they were
     const stripped = await stripRows(r.trades, payload.salt);
+    const kept = reportTrades(r.trades);   // the trades the rows are made from (span and cap): their copies only (m3)
+    const notes = [...r.notes];
+    if (r.overlap) notes.push(overlapLine(r.overlap));
+    if (stripped.span_left_out) notes.push(spanLine(stripped.span_left_out));
     picked = files;
-    ready = { stripped, counts: pgrPlrCounts(r.result.executions), currency: r.trades[0].pnl_unit, copies: r.copies };
-    showPicked(stripped.rows.length);
-    if (stripped.rows.length < SMALL_FILE) {
-      $('rp-status').hidden = true;
-      showSmall(stripped.rows.length);
-      return;
-    }
+    ready = { stripped, counts: pgrPlrCounts(r.executions), currency: r.trades[0].pnl_unit, copies: copiesIn(kept),
+      trades: r.trades, format: r.format || null, n: serverTradeCount(stripped.rows), notes };
+    $('rp-status').hidden = true;
   } finally {
     busy = false;
   }
-  await send();
+  showPanel();
+  $('rp-picked-h').focus();
+  if (queue.length) drain();
 }
 
 async function send() {
   if (busy || !ready) return;
   busy = true;
-  const { stripped, counts, currency, copies } = ready;
-  ready = null;
-  picked = [];
-  $('rp-small').hidden = true;
-  $('rp-picked').hidden = true;
+  $('rp-run').disabled = true;
+  const { stripped, counts, currency, copies, trades, format } = ready;
   try {
     const firm = $('rp-firm').value.trim();
     const body = { v: 1, token, rows: stripped.rows, currency, pgr_plr: counts,
@@ -537,10 +591,13 @@ async function send() {
     const r = await api('/analyse', body);
     if (r.status === 0 || r.status >= 500) { status(OUTAGE, 'error'); return; }
     if (!r.ok) { status(r.json && r.json.error ? r.json.error.message : 'The report could not be made.', 'error'); return; }
+    // the run is spent: the staged files are done with
+    picked = []; ready = null;
+    showPanel();
     $('rp-status').hidden = true;
     try {
       renderReport(r.json.report, $('rp-out'), { limited: stripped.limited, span_left_out: stripped.span_left_out, retest: r.json.retest || null,
-        uses_left: r.json.uses_left, copies });
+        uses_left: r.json.uses_left, copies, trades, format });
     } catch (e) {
       // wording.js throws rather than print a sentence that is not true of this report (R2-3).
       $('rp-out').replaceChildren();
@@ -550,6 +607,8 @@ async function send() {
     if (r.json.uses_left !== null) $('rp-uses').textContent = r.json.uses_left === 1 ? 'One re-test left on this purchase.' : r.json.uses_left === 0 ? 'Both runs on this purchase are used.' : '';
   } finally {
     busy = false;
+    if (ready) $('rp-run').disabled = false;
+    if (queue.length) drain();
   }
 }
 
@@ -560,14 +619,9 @@ async function init() {
   $('rp-access').textContent = token ? 'Access found on this device.' : 'No access found on this device yet.';
   const input = $('rp-file');
   input.addEventListener('change', () => { const fs = [...input.files]; input.value = ''; if (fs.length) addFiles(fs); });
-  $('rp-run-anyway').addEventListener('click', () => send());
+  $('rp-run').addEventListener('click', () => send());
   $('rp-add').addEventListener('click', () => input.click());
-  $('rp-clear').addEventListener('click', () => {
-    if (busy) return;
-    picked = []; ready = null;
-    $('rp-small').hidden = true; $('rp-status').hidden = true;
-    showPicked(null);
-  });
+  $('rp-clear').addEventListener('click', () => clearFiles());
   const dz = $('rp-drop');
   dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('is-over'); });
   dz.addEventListener('dragleave', () => dz.classList.remove('is-over'));

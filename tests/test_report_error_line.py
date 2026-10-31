@@ -43,7 +43,7 @@ def site(tmp_path_factory):
     tmp = tmp_path_factory.mktemp("rperr")
     toml = open(os.path.join(REPO, "site/config/site.toml"), encoding="utf-8").read()
     toml = toml.replace("paid_report = false", "paid_report = true").replace("trader_first_home = false", "trader_first_home = true")
-    toml = toml.replace('api_base = "http://127.0.0.1:8787"', f'api_base = "{API}"')
+    toml = __import__('test_legal').with_api(toml, API)
     (tmp / "site.toml").write_text(toml, encoding="utf-8")
     out = tmp / "site"
     env = {**os.environ, "DT_SITE_TOML": str(tmp / "site.toml"), "DT_OUT": str(out), "DT_PRIVATE_TOML": private_with(tmp),
