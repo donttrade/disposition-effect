@@ -13,7 +13,8 @@ import { stripRows, spanLine } from './strip.js?v=03137080';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js?v=16f6dd26';
 import { habitSentences, methodLine, page1Lines, coverageLines, mergedLine, checkReport, SENTENCE_HABITS, RESEARCH, RESEARCH_PREFIX, holdDays,
   V_LAUNCH, V_LAUNCH_SIZE, V_NO, moreTrades } from './wording.js?v=0cb7d61e';
-import { factsSection, challengeSection, smallLayout, presetsFromPage } from './small-facts-view.js?v=a7ab54d4';
+import { factsSection, challengeSection, smallLayout, presetsFromPage } from './small-facts-view.js?v=ef31dc5c';
+import { reportTrades } from './small-facts.js?v=78faeb32';
 
 // Off until "N more trades" can be shown without ever understating N (Tester slice 1 re-test: worlds
 // with too few files per share band were ignored, so some files were told too few). Backlog item.
@@ -453,10 +454,18 @@ export function renderReport(report, out, meta) {
 
 // S4: the two fact sections, when the page has the file's trades (meta.trades: the report page after a run, the
 // example report from its committed file). Kept here as one call so the habit layer above stays untouched.
+// The trades are the ones the report itself is about (strip.js's selection: Tester S4 M3). Anything that goes wrong
+// here leaves the two sections out and the rest of the paid report as it is (Tester S4 M4).
 function smallFactsParts(report, meta) {
   if (!meta || !Array.isArray(meta.trades) || !meta.trades.length) return null;
-  const opts = { money: (x) => money(x, report.currency), presets: presetsFromPage(), format: meta.format || null, sample: !!meta.sample };
-  return { small: smallLayout(report), facts: factsSection(meta.trades, opts), rules: challengeSection(meta.trades, opts) };
+  try {
+    const trades = reportTrades(meta.trades);
+    if (!trades.length) return null;
+    const opts = { money: (x) => money(x, report.currency), unit: report.currency, presets: presetsFromPage(), format: meta.format || null, sample: !!meta.sample };
+    return { small: smallLayout(report), facts: factsSection(trades, opts), rules: challengeSection(trades, opts) };
+  } catch (e) {
+    return null;
+  }
 }
 
 // ---------------------------------------------------------------- page wiring

@@ -3,7 +3,7 @@
 // S4: the build also embeds the committed trade file the sample report was made from
 // (tests/fixtures/paid/sample-report.csv); it is read here by the same engine as the report page, so the
 // facts and the rule check are worked out exactly as for a buyer's file.
-import { renderReport } from './report.js?v=ce7868f1';
+import { renderReport } from './report.js?v=cb466c8e';
 import { runFile } from '../engine/index.js?v=8410d06a';
 
 const data = document.getElementById('sample-data');
