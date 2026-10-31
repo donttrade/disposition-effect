@@ -6,12 +6,35 @@
   <h1>Your donttrade test result</h1>
   <div class="no-print">{% include "partials/report_steps.html" %}</div>
   <section class="no-print" aria-labelledby="pick-h">
-    <h2 id="pick-h">Choose your trade file</h2>
+    <h2 id="pick-h">Choose your trade files</h2>
     <p id="rp-access" class="muted"></p>
+    {#- S3 (merged uploads): several files of one platform, read as one history; copies across accounts counted once.
+        Choosing files only stages them; only #rp-run sends (Tester S3 B1). The hint, notice and wait line are merge.js's
+        UPLOAD_HINT, SMALL_NOTICE and WAIT_LINE (tests pin them). #rp-live is the one line a screen reader hears. -#}
+    <p class="small" id="rp-hint">Add all your accounts and months: more trades, clearer answers.</p>
     <div class="dropzone" id="rp-drop">
-      <p><strong>Drop your trade file here</strong>, or choose it:</p>
-      <label for="rp-file">Trade file (MT5/MT4 report, IBKR Flex, Tradovate Orders, TradingView Order History, all in beta, or the CSV template)</label>
-      <input id="rp-file" type="file" accept=".csv,.htm,.html,.txt">
+      <p><strong>Drop your trade files here</strong>, or choose them:</p>
+      <label for="rp-file">Trade files from one platform (MT5/MT4 report, IBKR Flex, Tradovate Orders, TradingView Order History, all in beta, or the CSV template)</label>
+      <input id="rp-file" type="file" accept=".csv,.htm,.html,.txt" multiple aria-describedby="rp-count">
+    </div>
+    <p id="rp-live" class="visually-hidden" role="status"></p>
+    <div id="rp-picked" class="notice rp-picked" hidden>
+      <h3 id="rp-picked-h" tabindex="-1">Your files</h3>
+      <p id="rp-count"></p>
+      <ul id="rp-files" class="small rp-files"></ul>
+      <p id="rp-small" hidden><strong>Files this size mostly show No sign for habits. You still get every dollar total and your rule check.</strong></p>
+      {#- Tester re-test 2: asked only when the files do not say which account they are from (merge.js ACCOUNT_QUESTION) -#}
+      <fieldset id="rp-acct-q" class="rp-acct-q" hidden>
+        <legend>Are these files from one account or separate accounts?</legend>
+        <div class="check"><input type="radio" name="rp-acct" id="rp-acct-one" value="one"><label for="rp-acct-one">One account</label></div>
+        <div class="check"><input type="radio" name="rp-acct" id="rp-acct-sep" value="separate"><label for="rp-acct-sep">Separate accounts</label></div>
+      </fieldset>
+      <div id="rp-copy-q" hidden></div>
+      <div id="rp-notes"></div>
+      <p class="small">Nothing is sent until you press Run. Adding files does not use a run.</p>
+      <p class="btn-row"><button class="btn" id="rp-run" type="button">Run the test</button>
+        <button class="btn btn-secondary" id="rp-add" type="button">Add more files</button>
+        <button class="btn btn-secondary" id="rp-clear" type="button">Remove these files</button></p>
     </div>
     <details class="how-more"><summary>What is sent</summary><p>{{ strings.p5.long }}</p></details>
     <div class="field"><label for="rp-firm">Which firm do you trade with? (optional)</label>

@@ -397,6 +397,14 @@ fieldset { border: 0; padding: 0; margin: 0 0 var(--s3); }
   background: var(--surface); text-align: left;
 }
 .dropzone.is-over { border-color: var(--rust); }
+/* S3: the staged files on /report/ (nothing is sent until Run) */
+.rp-picked { margin-top: var(--s3); }
+.rp-picked h3 { margin: 0 0 var(--s1); }
+.rp-files { padding-left: 1.2em; }
+.rp-files li { overflow-wrap: anywhere; }
+.rp-acct-q { border: 0; padding: 0; margin: var(--s2) 0; }
+.rp-acct-q legend { font-weight: 600; padding: 0; }
+.rp-remove { background: none; border: 0; padding: 0 0.25em; color: var(--rust); text-decoration: underline; cursor: pointer; font: inherit; }
 
 /* ------------------------------------------------------------------ before-you-pay */
 /* /before-you-pay/ gives the block's heading as an h2 (right under its h1); it keeps the h3 size it has on /pricing/ */

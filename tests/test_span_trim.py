@@ -40,7 +40,7 @@ def test_browser_trims_says_so_before_sending_and_the_report_renders(browser, st
     ctx, page = open_report(browser, stack, "cs_test_span11y000001")
     sent = []
     page.on("request", lambda r: sent.append(r) if r.url.endswith("/analyse") else None)
-    page.set_input_files("#rp-file", SPAN)
+    __import__("test_paid_flow").pick(page, SPAN)   # S3: files are staged; Run sends
     page.wait_for_selector("#focus", timeout=60000)
     status = page.text_content("#rp-status")
     text = page.inner_text("#rp-out")

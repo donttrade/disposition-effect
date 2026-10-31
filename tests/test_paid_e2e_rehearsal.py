@@ -70,7 +70,7 @@ def stack(tmp_path_factory):
     tmp = tmp_path_factory.mktemp("partb")
     toml = open(os.path.join(REPO, "site/config/site.toml"), encoding="utf-8").read()
     toml = toml.replace("paid_report = false", "paid_report = true").replace("trader_first_home = false", "trader_first_home = true")
-    toml = toml.replace('api_base = "http://127.0.0.1:8787"', f'api_base = "{api}"')
+    toml = __import__('test_legal').with_api(toml, api)
     assert f'api_base = "{api}"' in toml
     (tmp / "site.toml").write_text(toml, encoding="utf-8")
     out = tmp / "site"
@@ -99,7 +99,8 @@ def buyer(browser, stack):
 
 
 def upload(page, path, wait="#rp-status"):
-    page.set_input_files("#rp-file", path)
+    from test_paid_flow import pick
+    pick(page, path)
 
 
 def wait_status(page, needle, timeout=60000):

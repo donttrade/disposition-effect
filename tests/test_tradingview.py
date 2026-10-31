@@ -251,7 +251,7 @@ def test_paid_report_end_to_end(browser, stack):
     assert "TradingView Order History" in page.inner_text("label[for=rp-file]")
     sent = []
     page.on("request", lambda r: sent.append(r))
-    page.set_input_files("#rp-file", os.path.join(FIX, "tradingview", "forty_trades.csv"))
+    P.pick(page, os.path.join(FIX, "tradingview", "forty_trades.csv"))
     page.wait_for_selector("#focus", timeout=30000)
     analyse = [r for r in sent if r.url.endswith("/analyse")]
     assert len(analyse) == 1

@@ -56,7 +56,7 @@ def stack(tmp_path_factory):
     tmp = tmp_path_factory.mktemp("paid")
     toml = open(os.path.join(REPO, "site/config/site.toml"), encoding="utf-8").read()
     toml = toml.replace("paid_report = false", "paid_report = true").replace("trader_first_home = false", "trader_first_home = true")
-    toml = toml.replace('api_base = "http://127.0.0.1:8787"', f'api_base = "{api}"')
+    toml = __import__('test_legal').with_api(toml, api)
     (tmp / "site.toml").write_text(toml, encoding="utf-8")
     out = tmp / "site"
     from test_legal import prices_with_test_link, private_with
@@ -76,6 +76,19 @@ def stack(tmp_path_factory):
     srv.shutdown()
 
 
+# S3 (merged uploads; Tester S3 B1): /report/ only stages chosen files; its Run button sends, at any trade count.
+# pick() chooses the files and presses Run once they are read; a refused file (an error line) is left as is.
+PICKED = """() => { const s = document.getElementById('rp-status'), b = document.getElementById('rp-run');
+  return (b && !b.disabled && !document.getElementById('rp-picked').hidden) || (s && !s.hidden && s.classList.contains('notice-error')); }"""
+
+
+def pick(page, paths):
+    page.set_input_files("#rp-file", paths)
+    page.wait_for_function(PICKED, timeout=60000)
+    if page.is_visible("#rp-run") and page.is_enabled("#rp-run"):
+        page.click("#rp-run")
+
+
 def new_session(page, stack, sid):
     page.request.post(stack["api"] + "/__test/session", data=json.dumps({"id": sid}))
     return sid
@@ -83,7 +96,7 @@ def new_session(page, stack, sid):
 
 def run_report(page, stack, sent):
     page.on("request", lambda req: sent.append(req))
-    page.set_input_files("#rp-file", FIXTURE)
+    pick(page, FIXTURE)
     page.wait_for_selector("#focus", timeout=30000)
 
 
