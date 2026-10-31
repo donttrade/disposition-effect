@@ -4,9 +4,11 @@
 //
 // 1. Files are first put into accounts (Tester S3 re-test 2): the same account value (Account, ClientAccountID, an
 //    MT5 report's "Account:" line) → one account; different values → separate accounts, whatever else they share (group
-//    trading); else a shared fill, order, deal or trade ID → one account; else dates that overlap with rows that differ
-//    → separate accounts; else the buyer answers one question before Run ("Are these files from one account or
-//    separate accounts?"), "one account" by default when the dates overlap and the overlapping rows match exactly.
+//    trading); else a shared fill, order, deal or trade ID → one account; else the buyer ALWAYS answers one question
+//    before Run ("Are these files from one account or separate accounts?"), preset "One account" when the overlapping
+//    rows match, "Separate accounts" when they differ or the dates do not overlap (Tester re-test 3).
+//    Copy accounts are then decided per pair of accounts (COPY_NEVER, COPY_SURE below), with a second question in
+//    between ("Do these accounts copy each other's trades?").
 // 2. Each account's files are read together by the engine (runFiles: dropOverlap counts a row in two of its files once),
 //    so each account is ONE position book; no fill is ever pooled across accounts (Tester B2, R2). An MT5 positions
 //    report and an MT5 deals report are never mixed (B3). All files must be of one platform (E_MIXED_FILES).
@@ -27,6 +29,19 @@ import { MESSAGES, LIMITS } from '../engine/errors.js';
 
 export const COPY_WINDOW_MS = 15 * 60000;  // "within 15 minutes": a lag of exactly 15:00 collapses, 15:01 does not
 export const NEAR_WINDOW_MS = 60 * 60000;  // near-copies: 15 to 60 minutes apart, counted and left separate
+// Copy accounts are decided per PAIR of accounts, never per trade (Tester S3 re-test 3): the share of the two accounts'
+// trades, on the symbols both trade, that pair one to one within the 15-minute window. The Tester's simulation of two
+// INDEPENDENT accounts on one contract (60 days, lognormal holds, open-heavy days) pairs 0.6-38% of trades at 15
+// minutes for 2-10 trades a day, and 53-61% only for 20-30 two-to-three-minute scalps a day; a copier pairs about all
+// of its trades (100%, less skipped or split copies). So: under 50% the pair is never collapsed; 80% or more is a copy
+// pair (collapsed at up to 15 minutes, which keeps the slow-copier fix); in between the buyer is asked, preset "yes"
+// from 65%.
+export const COPY_NEVER = 0.5;
+export const COPY_SURE = 0.8;
+export const COPY_PRESET = 0.65;
+export const COPY_QUESTION = 'Do these accounts copy each other’s trades?';
+export const copyPairLine = (a, b, k) => `Accounts ${a} and ${b} copy each other: ${grouped(k)} ${k === 1 ? 'trade' : 'trades'} counted once.`;
+export const ownPairLine = (a, b) => `Accounts ${a} and ${b} trade on their own: none of their trades are counted once.`;
 export const SMALL_FILE = 100;              // owner Q3: fewer trades than this → the small-file notice
 const DAY_MS = 86400000;
 
@@ -50,7 +65,7 @@ export const overlapLine = (n) => `${grouped(n)} ${n === 1 ? 'row was' : 'rows w
 export const filesLabel = (accts, files) => `${grouped(accts)} ${accts === 1 ? 'account' : 'accounts'}, ${grouped(files)} ${files === 1 ? 'file' : 'files'}`;
 export const accountsLine = (accts, files) => (accts === 1
   ? `These results read ${grouped(files)} files as 1 account.`
-  : `These results combine ${grouped(accts)} accounts from ${grouped(files)} files. Dollar totals add every account’s trades; the habit checks count a trade copied between accounts within 15 minutes once. The rule check covers one account at a time.`);
+  : `These results combine ${grouped(accts)} accounts from ${grouped(files)} files. Dollar totals add every account’s trades; for accounts that copy each other, the habit checks count each copied trade once. The rule check covers one account at a time.`);
 export const edgeLine = (n) => `${grouped(n)} ${n === 1 ? 'position was' : 'positions were'} open at the start or end of an account’s files and ${n === 1 ? 'was' : 'were'} left out.`;
 export const ACCOUNT_QUESTION = 'Are these files from one account or separate accounts?';
 export const ACCOUNT_ONE = 'One account';
@@ -84,7 +99,7 @@ const disjoint = (a, b) => { for (const x of a) if (b.has(x)) return false; retu
 // trade carries _copies, so a caller can count only the trades it keeps. Deterministic: leaders are taken in
 // open-time order; each takes, nearest first, at most one trade from each account it does not share, all within the
 // window of the leader. The collapsed trade keeps the leader's times (and so its place in close-time order) and id.
-export function collapseCopies(trades, originOf, windowMs = COPY_WINDOW_MS) {
+export function collapseCopies(trades, originOf, windowMs = COPY_WINDOW_MS, pairOk = null) {
   const n = trades.length;
   const order = trades.map((_, i) => i).sort((a, b) => (trades[a].open_ts - trades[b].open_ts)
     || (trades[a].close_ts - trades[b].close_ts) || (a - b));
@@ -105,7 +120,7 @@ export function collapseCopies(trades, originOf, windowMs = COPY_WINDOW_MS) {
       const T = trades[b];
       if (T.symbol !== L.symbol || T.dir !== L.dir || Math.abs(T.close_ts - L.close_ts) > windowMs || isDateOnlyTrade(T)) continue;
       const of = originOf(T);
-      if (!of.size || !disjoint(of, files)) continue;
+      if (!of.size || !disjoint(of, files) || (pairOk && !pairOk(files, of))) continue;
       cands.push({ b, d: Math.abs(T.open_ts - L.open_ts) + Math.abs(T.close_ts - L.close_ts) });
     }
     if (!cands.length) continue;
@@ -113,7 +128,7 @@ export function collapseCopies(trades, originOf, windowMs = COPY_WINDOW_MS) {
     const group = [a];
     for (const c of cands) {
       const of = originOf(trades[c.b]);
-      if (!disjoint(of, files)) continue;
+      if (!disjoint(of, files) || (pairOk && !pairOk(files, of))) continue;
       group.push(c.b);
       used[c.b] = 1;
       for (const k of of) files.add(k);
@@ -203,6 +218,39 @@ export function fileIdentity(bytes) {
   return { accounts, ids };
 }
 
+// A file's rows as written, for comparing two files without account or ID columns (Tester re-test 3: the engine's
+// KEPT fills leave out a fill that closes a position opened before the file, so an overlapping re-export of one
+// account looked different). → {head: normalised headings, rows: cell arrays} (CSV only; HTML → empty).
+function rawRows(bytes) {
+  try {
+    const src = readRows(bytes);
+    if (src.kind === 'html') return { head: [], rows: [] };
+    const rows = src.rows;
+    let h = -1;
+    for (let i = 0; i < Math.min(rows.length, 50); i++) {
+      const full = rows[i].cells.map((c) => c.trim()).filter((c) => c !== '');
+      if (full.length >= 2 && 2 * full.filter((c) => NUMERIC.test(c)).length < full.length) { h = i; break; }
+    }
+    if (h < 0) return { head: [], rows: [] };
+    const data = rows.slice(h + 1).map((r) => r.cells).filter((c) => c.filter((x) => x.trim() !== '').length >= 2);
+    return { head: rows[h].cells.map(normHeader), rows: data };
+  } catch (e) {
+    return { head: [], rows: [] };
+  }
+}
+
+// Rows of two files that are the same in every column both files have (a multiset count), and the smaller row count.
+function sharedRows(a, b) {
+  const common = a.head.filter((x, i) => x && a.head.indexOf(x) === i && b.head.includes(x));
+  if (!common.length) return { shared: 0, fewer: Math.min(a.rows.length, b.rows.length) };
+  const key = (f, cells) => common.map((x) => (cells[f.head.indexOf(x)] || '').trim()).join('\u0001');
+  const m = new Map();
+  for (const c of a.rows) { const k = key(a, c); m.set(k, (m.get(k) || 0) + 1); }
+  let shared = 0;
+  for (const c of b.rows) { const k = key(b, c); const n = m.get(k) || 0; if (n) { shared++; m.set(k, n - 1); } }
+  return { shared, fewer: Math.min(a.rows.length, b.rows.length) };
+}
+
 // Two files with no account column and no shared ID: the default answer to ACCOUNT_QUESTION is "one account" when their
 // dates overlap and every fill of the earlier file inside the overlap is also in the later file (an overlapping
 // re-export). → true (looks like one account), false (dates overlap, rows differ), null (no overlap: no evidence).
@@ -264,11 +312,8 @@ export function readFiles(byteArrays, names = [], opts = {}) {
   const parent = own.map((_, k) => k);
   const root = (k) => (parent[k] === k ? k : (parent[k] = root(parent[k])));
   const ident = n > 1 ? byteArrays.map(fileIdentity) : [];
-  // apart: different account values, or (no account and no shared ID) dates that overlap with rows that differ: an
-  // overlapping export of one account repeats the same rows, so those are two accounts
-  const differ = new Set();
-  const apart = (i, j) => (ident[i].accounts.size > 0 && ident[j].accounts.size > 0 && !meets(ident[i].accounts, ident[j].accounts))
-    || differ.has(i + ':' + j) || differ.has(j + ':' + i);
+  // apart: different account values (never joined, whatever the buyer answers)
+  const apart = (i, j) => ident[i].accounts.size > 0 && ident[j].accounts.size > 0 && !meets(ident[i].accounts, ident[j].accounts);
   const members = (r) => own.map((_, k) => k).filter((k) => root(k) === r);
   const canJoin = (i, j) => !members(root(i)).some((a) => members(root(j)).some((b) => apart(a, b)));
   const join = (i, j) => { const a = root(i), b = root(j); if (a !== b) parent[Math.max(a, b)] = Math.min(a, b); };
@@ -281,19 +326,36 @@ export function readFiles(byteArrays, names = [], opts = {}) {
       open.push([i, j]);
     }
   }
-  const looks = new Map();
+  // Nothing in the files settles these pairs, so the buyer is always asked (Tester re-test 3: never "separate"
+  // silently). Each pair's evidence sets the preset: 'match' (the overlapping kept fills match, or at least 2 rows and a
+  // quarter of the smaller file are the same in every shared column) → "One account"; 'differ' (dates overlap, rows
+  // differ) → "Separate accounts"; 'none' (no overlap: consecutive months, or unrelated files).
+  const raw = open.length ? byteArrays.map(rawRows) : [];
+  const span = (r) => { let lo = Infinity, hi = -Infinity; for (const e of r.executions) { if (e.ts < lo) lo = e.ts; if (e.ts > hi) hi = e.ts; }
+    for (const t of r.trades) { if (t.open_ts < lo) lo = t.open_ts; if (t.close_ts > hi) hi = t.close_ts; } return [lo, hi]; };
+  const evidence = new Map();
   for (const [i, j] of open) {
     if (root(i) === root(j)) continue;
-    const l = looksLikeOneAccount(own[i], own[j]);
-    if (l === false) differ.add(i + ':' + j); else looks.set(i + ':' + j, l);
+    const [a0, a1] = span(own[i]), [b0, b1] = span(own[j]);
+    const overlap = a0 <= b1 && b0 <= a1;
+    const { shared, fewer } = sharedRows(raw[i], raw[j]);
+    const match = looksLikeOneAccount(own[i], own[j]) === true || (shared >= 2 && 4 * shared >= fewer);
+    evidence.set(i + ':' + j, match ? 'match' : overlap ? 'differ' : 'none');
   }
-  const undecided = open.filter(([i, j]) => looks.has(i + ':' + j) && root(i) !== root(j) && canJoin(i, j));
+  const undecided = open.filter(([i, j]) => evidence.has(i + ':' + j) && root(i) !== root(j) && canJoin(i, j));
   let question = null;
   if (undecided.length) {
-    const dflt = undecided.some(([i, j]) => looks.get(i + ':' + j) === true);
-    const one = opts.oneAccount === true || opts.oneAccount === false ? opts.oneAccount : dflt;
-    question = { default: dflt, answer: one };
-    if (one) for (const [i, j] of undecided) if (root(i) !== root(j) && canJoin(i, j)) join(i, j);
+    const anyMatch = undecided.some(([i, j]) => evidence.get(i + ':' + j) === 'match');
+    const one = opts.oneAccount === true || opts.oneAccount === false ? opts.oneAccount : anyMatch;
+    question = { default: anyMatch, answer: one };
+    // "One account" joins the files that match or do not overlap; files whose dates overlap with rows that differ are
+    // joined only when no pair matches (then the answer is about them)
+    if (one) {
+      for (const [i, j] of undecided) {
+        const ev = evidence.get(i + ':' + j);
+        if ((ev !== 'differ' || !anyMatch) && root(i) !== root(j) && canJoin(i, j)) join(i, j);
+      }
+    }
   }
   const groups = [];
   const at = new Map();
@@ -329,18 +391,41 @@ export function readFiles(byteArrays, names = [], opts = {}) {
   let out = factsTrades;
   let copies = 0;
   let near = 0;
+  const pairs = [];
   if (groups.length > 1) {
     const sets = groups.map((_, g) => new Set([g]));
     const of = (t) => t._in || sets[t._g];
-    const c = collapseCopies(factsTrades, of);
-    out = c.trades;
-    copies = c.collapsed;
-    // near-copies: the trades left that still pair, one to one and nearest first, with a trade of another account
-    // within 60 minutes on both ends (the same matching, a wider window; nothing is merged)
-    near = collapseCopies(out, of, NEAR_WINDOW_MS).collapsed;
+    // copy accounts, per pair (COPY_NEVER / COPY_SURE above)
+    const yes = new Set();
+    for (let g = 0; g < groups.length; g++) {
+      for (let h = g + 1; h < groups.length; h++) {
+        const A = accounts[g].trades, B = accounts[h].trades;
+        const sa = new Set(A.map((t) => t.symbol)), sb = new Set(B.map((t) => t.symbol));
+        const a2 = A.filter((t) => sb.has(t.symbol)), b2 = B.filter((t) => sa.has(t.symbol));
+        const base = Math.min(a2.length, b2.length);
+        const matched = base ? collapseCopies(a2.concat(b2), of).collapsed : 0;
+        const share = base ? matched / base : 0;
+        const status = share >= COPY_SURE ? 'copy' : share < COPY_NEVER ? 'own' : 'ask';
+        const preset = status === 'copy' || (status === 'ask' && share >= COPY_PRESET);
+        const key = accounts[g].name + '\u0001' + accounts[h].name;
+        const given = opts.copies && typeof opts.copies[key] === 'boolean' ? opts.copies[key] : null;
+        const copy = status === 'ask' && given !== null ? given : preset;
+        pairs.push({ key, a: accounts[g].name, b: accounts[h].name, matched, share, status, preset, copy });
+        if (copy) yes.add(g + ':' + h);
+      }
+    }
+    const pairOk = (S, T) => { for (const x of S) for (const y of T) if (x !== y && !yes.has(Math.min(x, y) + ':' + Math.max(x, y))) return false; return true; };
+    if (yes.size) {
+      const c = collapseCopies(factsTrades, of, COPY_WINDOW_MS, pairOk);
+      out = c.trades;
+      copies = c.collapsed;
+      // near-copies of copy accounts: the trades left that still pair, one to one and nearest first, with a trade of
+      // the other account within 60 minutes on both ends (the same matching, a wider window; nothing is merged)
+      near = collapseCopies(out, of, NEAR_WINDOW_MS, pairOk).collapsed;
+    }
   }
   out = out.map((t, i) => Object.assign({}, t, { id: 't' + (i + 1) }));
-  return { trades: out, factsTrades, accounts, executions, copies, near, overlap, groups: groups.length, files: n, question, notes,
+  return { trades: out, factsTrades, accounts, executions, copies, near, pairs, overlap, groups: groups.length, files: n, question, notes,
     format: own[0].format };
 }
 
