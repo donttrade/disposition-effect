@@ -333,22 +333,27 @@ fieldset { border: 0; padding: 0; margin: 0 0 var(--s3); }
 .badge-noise::before { content: "○"; }
 .badge-few { color: var(--caution); }
 .badge-few::before { content: "–"; }
-/* 29 Oct (owner): a habit whose luck check is not calibrated yet; neutral, never a result */
-.badge-coming { color: var(--muted); border-style: dashed; }
-.badge-coming::before { content: "…"; }
+/* DT-2 (plan §2.4 items 1–6): the three steps. Only Clear sign uses the flag colour; Some sign is outlined at the same
+   weight and colour as No sign, told apart by its icon and words, never by colour. */
+.badge-clear { color: var(--rust); }
+.badge-clear::before { content: "●"; }
+.badge-some, .badge-none { color: var(--muted); }
+.badge-some::before { content: "◐"; }
+.badge-none::before { content: "○"; }
 /* 30 Oct (Tester #3, CLS < 0.05): content drawn by JavaScript (the example report; /welcome/'s states) gets a
    screen's height reserved, so the footer below is out of view before and after it is drawn */
 .dt-js .report-slot, .dt-js .w-states { min-height: 100vh; }
 @media print { .dt-js .report-slot, .dt-js .w-states { min-height: 0; } }
-/* the report's two layers per habit: "What happened", then "Real or luck?" */
+/* the report's two layers per habit: "What happened", then "Habit or chance?" */
 .habit .layer { margin: var(--s2) 0; }
 .habit .layer h4 { margin: 0 0 var(--s1); font-size: var(--fs-1); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
 .happened { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: var(--s1) var(--s3); margin: var(--s2) 0; }
 .happened div { min-width: 0; }
 .happened dt { font-size: var(--fs-0); color: var(--muted); }
 .happened dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
-.luck-pill { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1); }
-.luck-gloss { font-weight: 600; }
+.check-pill { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1); }
+.habit-guard { color: var(--muted); max-width: 60ch; }
+.too-few-all { font-size: var(--fs-0); }
 
 .gain { color: var(--gain); }
 .loss { color: var(--loss); }
@@ -942,6 +947,9 @@ svg.tp { padding: 8px 10px; }
 .rc-ax { font: 12px var(--font-sans); fill: var(--muted); }
 .rc-bar { fill: var(--loss); } .rc-bar-b { fill: color-mix(in srgb, var(--loss) 45%, var(--bg)); }
 .rc-note { font-size: 0.78rem; color: var(--muted); }
+.rc-steps { list-style: none; margin: var(--s1) 0 0; padding: 0; display: grid; gap: var(--s1); }
+.rc-steps li { display: flex; justify-content: space-between; align-items: center; gap: var(--s1); margin: 0; flex-wrap: wrap; }
+.rc-name { font-weight: 600; min-width: 0; }
 .rc .rc-more { margin-top: var(--s2); padding-top: var(--s2); border-top: 1px solid var(--border); font-size: var(--fs-0); }
 .tools-home .how { margin-top: var(--s2); }
 /* Tester H1/M2 (sweep 1): every preview says it is sample data */
@@ -1181,8 +1189,6 @@ svg.tp { padding: 8px 10px; }
   border: 1px solid var(--border); border-radius: 10px; background: var(--surface); font-weight: 600; }
 .pay-facts svg { flex: none; color: var(--rust); }
 .pay-expect { margin: 0 0 var(--s2); max-width: 60ch; }
-.more-trades { margin-top: var(--s1); }
-.more-trades .progress-line { flex-wrap: wrap; }
 .pay-more { border: 0; margin: 0 0 var(--s2); }
 .pay-more > summary { font-weight: 400; font-size: var(--fs-0); color: var(--rust); padding: 0; text-decoration: underline; text-underline-offset: 3px; }
 .pay-more[open] > summary { margin-bottom: var(--s1); }
@@ -1245,12 +1251,11 @@ svg.tp { padding: 8px 10px; }
 .hs-verdict .badge { font-size: var(--fs-1); min-height: 34px; padding: 4px 14px; background: var(--bg); white-space: normal; max-width: 100%; }
 @media (max-width: 400px) { .hs-verdict { flex-basis: 100%; padding: var(--s2); } .hs-verdict .badge { font-size: var(--fs-0); } }
 .hs-verdict.is-hit .badge { background: var(--rust); color: var(--on-rust); border-color: var(--rust); }
-.hs-gloss { font-size: var(--fs-2); font-weight: 600; }
 .hs-of { font-size: var(--fs-0); color: var(--muted); }
 .hs-table { width: 100%; border-collapse: separate; border-spacing: 0; }
 .hs-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .hs-table tbody { display: grid; gap: var(--s1); }
-.hs-row { position: relative; display: grid; grid-template-columns: minmax(0, 1.4fr) auto minmax(9rem, 1fr) auto; align-items: center;
+.hs-row { position: relative; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(9rem, 1fr) 6.5rem 8.5rem; align-items: center;
   gap: var(--s1) var(--s2); padding: 12px var(--s2); border: 1px solid var(--border); border-radius: 12px; background: var(--bg); }
 .hs-row:hover { border-color: var(--rust); }
 /* 30 Oct (Tester #4): the focus ring is on the link itself (keyboard users, and tools that read the focused element) */
@@ -1269,7 +1274,7 @@ svg.tp { padding: 8px 10px; }
 .hs-count::after { content: "trades"; margin-left: 0.3em; font-family: var(--font-sans); }
 .hs-note { margin-top: var(--s1); }
 @media (max-width: 700px) {
-  .hs-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "name name" "res n" "total total"; }
+  .hs-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "name name" "total total" "n res"; }
   .hs-row th { grid-area: name; } .hs-res { grid-area: res; } .hs-n { grid-area: n; } .hs-total { grid-area: total; }
 }
 .habit-how { margin-top: var(--s1); }
