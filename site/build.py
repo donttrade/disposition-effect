@@ -1304,20 +1304,16 @@ def step_labels():
 
 def verdict_facts():
     """DT-2: the numbers the pages quote about the steps, from the engine's own report (the committed example report,
-    made by dt-private's analyse()) and from wording.js's two-look promise, never typed in a template. The build fails
-    when wording.js's promise is for another Clear cut than the engine's."""
+    made by dt-private's analyse(): promise_per_100, min_group, some_min_group, n_family), never typed in a template."""
     import math
     import types
     with open(SAMPLE_REPORT_JSON, encoding="utf-8") as f:
         rep = json.load(f)
-    src = open(WORDING_JS, encoding="utf-8").read()
-    m = re.search(r"^export const TWO_LOOK = Object\.freeze\(\{ clear_cut: ([0-9.]+), per_100: ([0-9]+) \}\);$", src, re.M)
-    if not m:
-        die("wording.js: no TWO_LOOK line")
-    cuts = rep.get("step_cuts")
-    if not (isinstance(cuts, list) and len(cuts) == 2 and abs(float(m.group(1)) - cuts[0]) < 1e-12):
-        die(f"wording.js TWO_LOOK is for the Clear cut {m.group(1)}, the engine's report has {cuts}")
-    return {"clear_per_100": int(m.group(2)), "some_per_100": math.ceil(100 * cuts[1] - 1e-9), "min_group": rep["min_group"],
+    pr = rep.get("promise_per_100")
+    if not (isinstance(pr, dict) and {"clear_run", "clear_report_and_retest", "some_run"} <= set(pr)):
+        die(f"sample report: no promise_per_100 ({SAMPLE_REPORT_JSON}); rerun tests/fixtures/paid/make_sample_report.py --report")
+    return {"clear_per_100": pr["clear_report_and_retest"], "clear_run_per_100": pr["clear_run"], "some_per_100": pr["some_run"],
+            "min_group": rep["min_group"], "some_min_group": rep["some_min_group"],
             "n_family": rep["n_family"], "steps": types.SimpleNamespace(**step_labels())}   # attributes: "clear" is not dict.clear
 
 

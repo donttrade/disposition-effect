@@ -1,4 +1,11 @@
 {
+ "blocks": {
+  "cap_min": 1440,
+  "clock_band_min": 120,
+  "clock_guard": false,
+  "gap_min": 180,
+  "rule": "session"
+ },
  "catch_level": 0.009666666666666667,
  "catch_max_trades": 5000,
  "currency": "USD",
@@ -9,6 +16,8 @@
  "habits": [
   {
    "catch": null,
+   "catch_reason": null,
+   "chance_below_1": null,
    "chance_per_100": null,
    "detail": null,
    "dollars": {
@@ -38,6 +47,7 @@
    },
    "share_a": null,
    "share_b": null,
+   "small_group": null,
    "spread_ratio": null,
    "status": "facts",
    "step": null
@@ -58,7 +68,7 @@
      "amount": 6.6,
      "unit": "USD"
     },
-    "n_perm": 199,
+    "n_perm": 399,
     "reps": 60,
     "sizes": [
      120,
@@ -66,6 +76,8 @@
      480
     ]
    },
+   "catch_reason": null,
+   "chance_below_1": false,
    "chance_per_100": 100,
    "detail": null,
    "dollars": {
@@ -93,11 +105,14 @@
     "cite": "Coval, J. D. & Shumway, T. (2005). Do behavioral biases affect prices? Journal of Finance 60(1), 1-34.",
     "url": null
    },
+   "small_group": false,
    "status": "tested",
    "step": "none"
   },
   {
    "catch": null,
+   "catch_reason": null,
+   "chance_below_1": null,
    "chance_per_100": null,
    "detail": null,
    "dollars": {
@@ -124,6 +139,7 @@
     "url": null
    },
    "share": null,
+   "small_group": null,
    "status": "not_shipped",
    "step": null
   },
@@ -143,7 +159,7 @@
      "amount": 6.6,
      "unit": "USD"
     },
-    "n_perm": 199,
+    "n_perm": 399,
     "reps": 60,
     "sizes": [
      120,
@@ -151,6 +167,8 @@
      480
     ]
    },
+   "catch_reason": null,
+   "chance_below_1": false,
    "chance_per_100": 100,
    "detail": {
     "streak3_amount": 0,
@@ -182,11 +200,14 @@
     "cite": "Coval, J. D. & Shumway, T. (2005). Do behavioral biases affect prices? Journal of Finance 60(1), 1-34.",
     "url": null
    },
+   "small_group": false,
    "status": "tested",
    "step": "none"
   },
   {
    "catch": null,
+   "catch_reason": null,
+   "chance_below_1": null,
    "chance_per_100": null,
    "detail": null,
    "dollars": {
@@ -212,12 +233,13 @@
     "cite": "Locke, P. R. & Mann, S. C. (2005). Professional trader discipline and trade disposition. Journal of Financial Economics 76(2), 401-444.",
     "url": null
    },
+   "small_group": null,
    "status": "facts",
    "step": null
   }
  ],
  "method_label": "DT-2",
- "method_version": "2026-10-30.stats3",
+ "method_version": "2026-10-31.stats3a",
  "min_group": 5,
  "n_clear": 0,
  "n_date_only_rows": 0,
@@ -237,6 +259,11 @@
   "rg": 40,
   "rl": 80
  },
+ "promise_per_100": {
+  "clear_report_and_retest": 5,
+  "clear_run": 3,
+  "some_run": 20
+ },
  "rule_library": [
   "I write my exit condition down before I enter a trade.",
   "I close a losing trade by the same written rule I use for a winning trade.",
@@ -247,6 +274,7 @@
   "I review my trades at the end of the day, not while a trade is open."
  ],
  "rule_library_version": "2026-10-21.1",
+ "some_min_group": 10,
  "step_cuts": [
   0.029,
   0.2

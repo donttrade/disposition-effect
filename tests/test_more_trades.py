@@ -41,10 +41,11 @@ out.three = W.catchLines(...withCatch([220, 440, 880], [0, 4, 10]), fmt);
 out.two = W.catchLines(...withCatch([1500, 3000], [6, 9]), fmt);
 out.one = W.catchLines(...withCatch([4500], [7]), fmt);
 // over the engine's limit, and every result the same size
-const big = clone(); big.n_trades = 6000; big.n_rows = 6000; by(big, 'revenge').catch = null;
+const big = clone(); big.n_trades = 6000; big.n_rows = 6000; by(big, 'revenge').catch = null; by(big, 'revenge').catch_reason = 'over_limit';
 out.over = W.catchLines(by(big, 'revenge'), big, fmt);
-const flat = clone(); by(flat, 'revenge').catch.effect.amount = 0;
+const flat = clone(); by(flat, 'revenge').catch = null; by(flat, 'revenge').catch_reason = 'same_result';
 out.flat = W.catchLines(by(flat, 'revenge'), flat, fmt);
+out.flat_check = run(() => W.checkReport(flat));
 // a forged bound (more than the caught count allows) is refused
 const forged = clone(); by(forged, 'revenge').catch.at_least_10ths = [0, 0, 9];
 out.forged = run(() => W.checkReport(forged));
@@ -70,7 +71,7 @@ def test_the_catch_figure_sits_under_no_sign_and_some_sign_only():
         assert c[hid]["figure"]["lead"] == ("If the habit is real at $48.00 a trade and your next trades look like these, a file shows it "
                                             "as a Clear sign:")
     assert c["revenge"]["figure"]["rows"] == [{"size": "220 trades (this file)", "value": "fewer than 1 in 10", "tenths": 0},
-                                              {"size": "440 trades", "value": "fewer than 1 in 10", "tenths": 0},
+                                              {"size": "440 trades", "value": "at least 2 in 10", "tenths": 2},
                                               {"size": "880 trades", "value": "at least 3 in 10", "tenths": 3}]
     for hid in ("hold_gap", "size_up", "oversized_loss"):
         assert c[hid]["check"] == [] and c[hid]["figure"] is None
@@ -83,10 +84,11 @@ def test_catch_figure_sizes_bounds_and_fixed_lines():
     assert o["three"] == [lead, "220 trades (this file): fewer than 1 in 10", "440 trades: at least 4 in 10", "880 trades: at least 10 in 10"]
     assert o["two"] == [lead, "1,500 trades (this file): at least 6 in 10", "3,000 trades: at least 9 in 10"]
     assert o["one"] == [lead, "4,500 trades (this file): at least 7 in 10"]
-    assert o["over"] == ["Files over 5,000 trades get no catch figure."]
-    assert o["flat"] == ["Every trade in this file has the same result, so it gets no catch figure."]
+    assert o["over"] == ["No catch figure: files over 5,000 trades get none."]                 # catch_reason over_limit
+    assert o["flat"] == ["No catch figure: every trade in this file has the same result."]      # catch_reason same_result
+    assert o.get("flat_check") is None                                                            # accepted: no throw
     assert o["forged"].startswith("THROW: wording: revenge has a malformed catch figure")
-    assert o["missing"].startswith("THROW: wording: tilt is checked on 220 trades with no catch figure")
+    assert o["missing"].startswith("THROW: wording: tilt has no catch figure and the reason null")
 
 
 def test_the_power_table_and_its_strings_are_gone():
