@@ -264,7 +264,7 @@ const L = V.SF_LINES, m = '−$1,234.50', p = '+$80.00';
 const shapes = [];
 for (const [k, f] of Object.entries(L)) {
   if (typeof f === 'string') { shapes.push(f); continue; }
-  const args = { facts_h: [[1, 'USD'], [30, 'USD'], [30, 'points'], [30, 'EUR']], won: [[p, 1], [p, 14]], lost: [[m, 1], [m, 16]], flat: [[1], [3]], worst_sub: [['Tue 2 Jun', 6]],
+  const args = { combined: [[2], [3]], checked: [['acct_a.csv'], ['sep.csv + oct.csv']], facts_h: [[1, 'USD'], [30, 'USD'], [30, 'points'], [30, 'EUR']], won: [[p, 1], [p, 14]], lost: [[m, 1], [m, 16]], flat: [[1], [3]], worst_sub: [['Tue 2 Jun', 6]],
     top_label: [[3, 16], [2, 2], [1, 1]], largest: [[m, 26]], run_value: [[1], [5]], run_trades: [[7, 11], [4, 4]], run_next: [[p]],
     run_ties: [[2]], first_bust: [['daily loss limit', 2, 11, 30], ['maximum loss', 5, 28, 30]],
     bust_sub_daily: [['Trade 11 closed Tue 2 Jun at 10:40', m]], bust_sub_max: [['Trade 2 closed Tue 2 Jun 2026', m]], closed_at: [[11, 'Tue 2 Jun', '10:40']],

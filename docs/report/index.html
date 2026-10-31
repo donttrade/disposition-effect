@@ -29,11 +29,11 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=3327f956">
+<link rel="stylesheet" href="/static/css/site.css?v=f99a7fe6">
 <script src="/static/js/theme.js?v=7e47c1a9"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
 <script src="/static/js/pay.js?v=7eb376c2" defer></script>
-<script src="/static/js/paid/report.js?v=a069a31f" type="module"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cdac673936b54f08beb5991aaae13975"}'></script>
+<script src="/static/js/paid/report.js?v=89032cd1" type="module"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cdac673936b54f08beb5991aaae13975"}'></script>
 
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "name": "Your test result", "position": 2}]}]}</script>
 </head>
@@ -79,7 +79,7 @@
     <details class="how-more"><summary>TradingView</summary><p>Trading Panel → History → ⋯ → Export data. It saves your order history as CSV.</p></details>
   </li>
   <li class="how-step">
-    <h2 class="rs-h"><span class="how-n">2</span> Drop the file in</h2>
+    <h2 class="rs-h"><span class="how-n">2</span> Drop your files in</h2>
     <p>Your browser removes names, account numbers and symbols before anything is sent.</p>
   </li>
   <li class="how-step">
@@ -89,12 +89,29 @@
 </ol>
 </div>
   <section class="no-print" aria-labelledby="pick-h">
-    <h2 id="pick-h">Choose your trade file</h2>
-    <p id="rp-access" class="muted"></p>
+    <h2 id="pick-h">Choose your trade files</h2>
+    <p id="rp-access" class="muted"></p><p class="small" id="rp-hint">Add all your accounts and months: more trades, clearer answers.</p>
     <div class="dropzone" id="rp-drop">
-      <p><strong>Drop your trade file here</strong>, or choose it:</p>
-      <label for="rp-file">Trade file (MT5/MT4 report, IBKR Flex, Tradovate Orders, TradingView Order History, all in beta, or the CSV template)</label>
-      <input id="rp-file" type="file" accept=".csv,.htm,.html,.txt">
+      <p><strong>Drop your trade files here</strong>, or choose them:</p>
+      <label for="rp-file">Trade files from one platform (MT5/MT4 report, IBKR Flex, Tradovate Orders, TradingView Order History, all in beta, or the CSV template)</label>
+      <input id="rp-file" type="file" accept=".csv,.htm,.html,.txt" multiple aria-describedby="rp-count">
+    </div>
+    <p id="rp-live" class="visually-hidden" role="status"></p>
+    <div id="rp-picked" class="notice rp-picked" hidden>
+      <h3 id="rp-picked-h" tabindex="-1">Your files</h3>
+      <p id="rp-count"></p>
+      <ul id="rp-files" class="small rp-files"></ul>
+      <p id="rp-small" hidden><strong>Files this size mostly show No sign for habits. You still get every dollar total and your rule check.</strong></p><fieldset id="rp-acct-q" class="rp-acct-q" hidden>
+        <legend>Are these files from one account or separate accounts?</legend>
+        <div class="check"><input type="radio" name="rp-acct" id="rp-acct-one" value="one"><label for="rp-acct-one">One account</label></div>
+        <div class="check"><input type="radio" name="rp-acct" id="rp-acct-sep" value="separate"><label for="rp-acct-sep">Separate accounts</label></div>
+      </fieldset>
+      <div id="rp-copy-q" hidden></div>
+      <div id="rp-notes"></div>
+      <p class="small">Nothing is sent until you press Run. Adding files does not use a run.</p>
+      <p class="btn-row"><button class="btn" id="rp-run" type="button">Run the test</button>
+        <button class="btn btn-secondary" id="rp-add" type="button">Add more files</button>
+        <button class="btn btn-secondary" id="rp-clear" type="button">Remove these files</button></p>
     </div>
     <details class="how-more"><summary>What is sent</summary><p>Your browser sends our server only stripped trade numbers: open and close times, buy or sell, relative size, the realised result, a random symbol number and a scrambled fingerprint of each row. No name, account number or ticker is sent. The numbers are not kept; we keep only a scrambled fingerprint of each trade row from your first result, so a re-test can be matched to the same history, and we delete it on the dates in our privacy notice.</p></details>
     <div class="field"><label for="rp-firm">Which firm do you trade with? (optional)</label>

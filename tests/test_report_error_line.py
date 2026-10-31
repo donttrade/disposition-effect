@@ -23,6 +23,7 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(REPO, "checks"))
 from lint import lint_text  # noqa: E402
 from test_legal import prices_with_test_link, private_with  # noqa: E402
+from test_paid_flow import pick  # noqa: E402
 
 CONTACT = tomllib.load(open(os.path.join(REPO, "site/config/site.toml"), "rb"))["site"]["contact_email"]
 EXPECTED = ("This report could not be shown, so nothing from it is displayed. "
@@ -43,7 +44,7 @@ def site(tmp_path_factory):
     tmp = tmp_path_factory.mktemp("rperr")
     toml = open(os.path.join(REPO, "site/config/site.toml"), encoding="utf-8").read()
     toml = toml.replace("paid_report = false", "paid_report = true").replace("trader_first_home = false", "trader_first_home = true")
-    toml = re.sub(r'(?m)^api_base = "[^"]*"', f'api_base = "{API}"', toml)   # whatever the committed Worker address is
+    toml = __import__('test_legal').with_api(toml, API)
     toml = re.sub(r'(?m)^mode = "live"', 'mode = "test"', toml)   # a local test build (a live build refuses DT_ALLOW_LOCAL_API)
     (tmp / "site.toml").write_text(toml, encoding="utf-8")
     out = tmp / "site"
@@ -148,7 +149,7 @@ def test_a_refused_report_shows_exactly_the_error_line_and_nothing_from_the_repo
     page.route(API + "/analyse", lambda route: route.fulfill(status=200, content_type="application/json",
                                                              body=json.dumps({"report": rep, "uses_left": 1})))
     page.goto(site["origin"] + "/report/#t=" + fake_token())
-    page.set_input_files("#rp-file", os.path.join(HERE, "fixtures", "e2e-upload.csv"))
+    pick(page, os.path.join(HERE, "fixtures", "e2e-upload.csv"))   # 90 trades: through the S3 notice
     page.wait_for_function("() => { const s = document.getElementById('rp-status'); return s && !s.hidden && s.classList.contains('notice-error'); }",
                            timeout=30000)
     status = page.inner_text("#rp-status").strip()

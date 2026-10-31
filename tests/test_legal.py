@@ -46,6 +46,15 @@ FAKE_API = "https://api.fixture-zqx.ca"
 FAKE_TEST_LINK = "https://buy.stripe.com/test_fixture0000zqx"
 
 
+def with_api(toml_text, api):
+    """site.toml text with [worker] api_base set to api. The committed value is the LIVE Worker, so a test build that
+    swaps a fixed string instead (the old 'api_base = "http://127.0.0.1:8787"') keeps the live URL: never do that
+    (Tester S3, network safety; tests/test_uploads_merge.py test_no_test_build_carries_the_live_worker)."""
+    out, n = re.subn(r'(?m)^api_base = "[^"]*"', 'api_base = "' + api + '"', toml_text)
+    assert n == 1, "site.toml has no single api_base line"
+    return out
+
+
 def toml_with(tmp, name="site.toml", api=None, **flags):
     src = open(SITE_TOML, encoding="utf-8").read()
     if api is not None:

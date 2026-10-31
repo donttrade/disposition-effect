@@ -47,7 +47,7 @@ def build(tmp, name, api, paid=True):
     toml = open(os.path.join(REPO, "site/config/site.toml"), encoding="utf-8").read()
     if paid:
         toml = toml.replace("paid_report = false", "paid_report = true").replace("trader_first_home = false", "trader_first_home = true")
-    toml = toml.replace('api_base = "http://127.0.0.1:8787"', f'api_base = "{api}"')
+    toml = __import__('test_legal').with_api(toml, api)
     (tmp / f"{name}.toml").write_text(toml, encoding="utf-8")
     out = tmp / name
     priv = private_with(tmp, name=f"{name}-private.toml")
