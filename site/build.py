@@ -1317,6 +1317,18 @@ def verdict_facts():
             "n_family": rep["n_family"], "steps": types.SimpleNamespace(**step_labels())}   # attributes: "clear" is not dict.clear
 
 
+# Release test B3: the fewest closed trades a report takes, read from the one site constant (merge.js MIN_TRADES, held
+# equal to the Worker's MIN_ROWS by tests/test_min_trades.py), never typed in a template.
+MERGE_JS = os.path.join(SITE, "static", "js", "paid", "merge.js")
+
+
+def min_trades():
+    m = re.findall(r"^export const MIN_TRADES = ([0-9]+);$", open(MERGE_JS, encoding="utf-8").read(), re.M)
+    if len(m) != 1:
+        die("merge.js must define MIN_TRADES exactly once")
+    return int(m[0])
+
+
 def step_pill(h):
     labels = step_labels()
     status = h.get("status")
@@ -2554,6 +2566,7 @@ def build():
     env.globals["crumb_items"] = crumb_items
     env.globals["step_pill"] = step_pill
     env.globals["verdict"] = verdict_facts()
+    env.globals["min_trades"] = min_trades()
     products = {p["id"]: p for p in prices["products"]}
     nav = nav_for(cfg["nav"], flags)
     base_ctx = {"site": cfg["site"], "flags": flags, "nav": nav, "nav_current": lambda pg: nav_current(nav, pg),

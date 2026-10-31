@@ -17,12 +17,15 @@
       <label for="rp-file">Trade files from one platform (MT5/MT4 report, IBKR Flex, Tradovate Orders, TradingView Order History, all in beta, or the CSV template)</label>
       <input id="rp-file" type="file" accept=".csv,.htm,.html,.txt" multiple aria-describedby="rp-count">
     </div>
+    <p class="small" id="rp-min">Needs at least {{ min_trades }} closed trades.</p>
     <p id="rp-live" class="visually-hidden" role="status"></p>
     <div id="rp-picked" class="notice rp-picked" hidden>
       <h3 id="rp-picked-h" tabindex="-1">Your files</h3>
       <p id="rp-count"></p>
       <ul id="rp-files" class="small rp-files"></ul>
       <p id="rp-small" hidden><strong>Files this size mostly show No sign for habits. You still get every dollar total and your rule check.</strong></p>
+      {#- Release test B3: under the Worker's minimum (merge.js MIN_TRADES) report.js fills this and keeps Run off -#}
+      <p id="rp-few" hidden><strong></strong></p>
       {#- Tester re-test 2: asked only when the files do not say which account they are from (merge.js ACCOUNT_QUESTION) -#}
       <fieldset id="rp-acct-q" class="rp-acct-q" hidden>
         <legend>Are these files from one account or separate accounts?</legend>

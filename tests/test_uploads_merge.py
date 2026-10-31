@@ -466,7 +466,8 @@ def staged(page, n, files, accounts=None, timeout=30000):
     pat = "^" + re.escape(count_line(n, files, 1)).replace("1\\ account,", r"\d+\ accounts?,") + "$" if accounts is None \
         else "^" + re.escape(count_line(n, files, accounts)) + "$"
     page.wait_for_function("(p) => { const c = document.getElementById('rp-count'), b = document.getElementById('rp-run');"
-                           " return c && new RegExp(p).test(c.textContent) && !b.disabled; }", arg=pat, timeout=timeout)
+                           " const few = document.getElementById('rp-few');"   # release test B3: under 30 trades Run stays off
+                           " return c && new RegExp(p).test(c.textContent) && (!b.disabled || (few && !few.hidden)); }", arg=pat, timeout=timeout)
 
 
 def visible(page, sel):
@@ -768,7 +769,7 @@ def test_files_with_an_account_column_are_not_asked(browser, site):
     ctx, page, log = report_page(browser, site)
     page.set_input_files("#rp-file", [str(f1), str(f2)])
     staged(page, 3, 2, 1)
-    assert page.is_hidden("#rp-acct-q")
+    assert page.is_hidden("#rp-acct-q") and page.is_visible("#rp-few")   # 3 trades: under the minimum (B3)
     assert "3 rows were in more than one file of one account and were counted once." in page.inner_text("#rp-notes")
     ctx.close()
 
@@ -871,6 +872,7 @@ def test_the_copy_question_on_the_page(browser, site):
     ctx, page, log = report_page(browser, site, width=390)
     page.set_input_files("#rp-file", [str(fa), str(fb)])
     staged(page, 27, 2, 2)
+    assert page.is_visible("#rp-few") and page.is_disabled("#rp-run")   # 27 trades as copies: under the minimum (B3)
     q = page.query_selector_all("#rp-copy-q fieldset")
     assert len(q) == 1 and page.inner_text("#rp-copy-q legend").strip() == "Do these accounts copy each other’s trades?"
     assert page.is_checked("#rp-copy-0-yes") and "Do these accounts copy each other’s trades?" in page.text_content("#rp-live")
@@ -982,3 +984,100 @@ def test_dt2_bundle_guard(tmp_path):
     src = open(os.path.join(REPO, "site", "run.sh"), encoding="utf-8").read()
     bundle = src[src.index("  bundle)"):]
     assert bundle.index("checks/dt2_guard.py site/_site") < bundle.index("rm -rf docs")
+
+
+# ------------------------------------------------------------------ release test B3: the Worker's 30-trade minimum
+FEW_29 = ("This file has 29 closed trades. A report needs at least 30. Nothing is sent and your run is not used. "
+          "Add more files to reach 30.")
+
+
+def few_shown(page, text, timeout=30000):
+    page.wait_for_function("(t) => { const p = document.getElementById('rp-few'); return p && !p.hidden && p.textContent === t; }",
+                           arg=text, timeout=timeout)
+
+
+def test_under_30_trades_run_stays_off_and_adding_a_file_turns_it_on(browser, site):
+    """Release test B3: 29 trades is under the Worker's minimum. The panel says so (definite: how many, the 30 needed,
+    nothing sent, no run used, add files), Run is off and pressing it sends nothing; the small-file notice is not shown.
+    Adding a second file (10 more trades) reaches 39: Run turns on, the small-file notice shows, one POST."""
+    f29 = generic_file(site["tmp"], 29, "ES", 1, "s29.csv")
+    f10 = generic_file(site["tmp"], 10, "NQ", 9, "s10.csv")
+    ctx, page, log = report_page(browser, site, width=390)
+    page.set_input_files("#rp-file", f29)
+    few_shown(page, FEW_29)
+    assert page.is_disabled("#rp-run") and page.is_hidden("#rp-small")
+    assert FEW_29 in page.text_content("#rp-live") and "Press Run to send." not in page.text_content("#rp-live")
+    page.eval_on_selector("#rp-run", "b => b.click()")   # even a forced click sends nothing
+    page.wait_for_timeout(500)
+    assert log["posts"] == [] and visible(page, "#rp-add")
+    from a11y import horizontal_overflow
+    assert horizontal_overflow(page) == []
+    page.set_input_files("#rp-file", f10)
+    staged(page, 39, 2)
+    assert page.is_hidden("#rp-few") and page.is_visible("#rp-small") and page.inner_text("#rp-small").strip() == NOTICE
+    assert page.inner_text("#rp-run").strip() == "Run anyway"
+    click_run(page)
+    assert len(log["posts"]) == 1
+    ctx.close()
+
+
+def test_exactly_30_trades_run_with_the_small_file_notice(browser, site):
+    """30 trades meets the minimum: the small-file notice (unchanged text) and Run anyway; the upload step states it."""
+    ctx, page, log = report_page(browser, site)
+    assert page.inner_text("#rp-min").strip() == "Needs at least 30 closed trades."
+    page.set_input_files("#rp-file", generic_file(site["tmp"], 30, "ES", 1, "s30.csv"))
+    staged(page, 30, 1)
+    assert page.is_hidden("#rp-few") and page.inner_text("#rp-small").strip() == NOTICE
+    click_run(page)
+    assert len(log["posts"]) == 1 and len(json.loads(log["posts"][0].post_data)["rows"]) == 30
+    ctx.close()
+
+
+def test_the_min_trades_line_and_count_are_the_servers():
+    """minTradesLine is definite and lint-clean; distinctTrades counts as the Worker's printCounts key (f, h, d, p)."""
+    js = READ + """import { minTradesLine, distinctTrades, MIN_TRADES } from './site/static/js/paid/merge.js';
+      const r = (f, h, d, p) => ({ o: 1, s: 0, q: 1, f, h, d, p });
+      out([minTradesLine(1, 1), minTradesLine(12, 3), MIN_TRADES,
+        distinctTrades([r('a', 60, 1, 5), r('a', 60, 1, 5), r('a', 61, 1, 5), r('a', 60, -1, 5), r('a', 60, 1, 6), r('b', 60, 1, 5)])]);"""
+    one, three, m, d = node(js)
+    assert one == "This file has 1 closed trade. A report needs at least 30. Nothing is sent and your run is not used. Add more files to reach 30."
+    assert three.startswith("These files have 12 closed trades.") and m == 30 and d == 5
+    for t in (one, three, FEW_29):
+        assert lint_text(t) == [] and lint_text(t, "report", paid=True) == []
+
+
+# ------------------------------------------------------------------ release test M2 (M3 hook): the page's refusal lines
+WORKER_NOT_SAME = ("This file does not look like a re-test of the same account: fewer than half of the trades in your first file appear "
+                   "in it. Export the same account again from the same start date as your first file up to today, so the file covers "
+                   "your first report's period and the trades since. Nothing was counted.")
+NOT_SAME = ("This re-test does not match your first result: fewer than half of the trades from your first result are in these files. "
+            "Use the same files as your first result, with the trades since: the same accounts, each exported again from the same "
+            "start date. Nothing was counted.")
+
+
+def test_a_re_test_with_a_copy_account_added_or_removed_gets_the_right_advice(browser, site):
+    """Release test M2: the Worker refuses a re-test whose files add or drop a copy account (not_same_history) with
+    advice to export "the same account", which the buyer did. The page shows its own definite line instead; any other
+    refusal still shows the Worker's message (the M3 hook keeps that path for the identical-file refusal)."""
+    for code, msg, want in (("not_same_history", WORKER_NOT_SAME, NOT_SAME),
+                            ("some_new_refusal", "The Worker's own definite line. Nothing was counted.", "The Worker's own definite line. Nothing was counted.")):
+        ctx, page, log = report_page(browser, site)
+        body = json.dumps({"error": {"code": code, "message": msg}})
+
+        def refuse(rt):   # one parameter: Playwright passes (route, request) to a handler that takes two
+            log["posts"].append(rt.request)
+            rt.fulfill(status=409, content_type="application/json", body=body)
+        page.route(API + "/analyse", refuse)
+        page.set_input_files("#rp-file", [A, B])
+        staged(page, 75, 2)
+        click = visible(page, "#rp-run")[0]
+        click.click()
+        page.wait_for_function("() => { const s = document.getElementById('rp-status'); return s && !s.hidden && s.classList.contains('notice-error'); }")
+        assert page.inner_text("#rp-status").strip() == want and len(log["posts"]) == 1
+        ctx.close()
+    js = READ + "import { refusalLine, REFUSAL_LINES, RETEST_HOW } from './site/static/js/paid/retest-copy.js'; out([refusalLine(null), refusalLine({ code: 'x' }), Object.keys(REFUSAL_LINES), RETEST_HOW]);"
+    none, nomsg, codes, how = node(js)
+    assert none == nomsg == "The report could not be made." and codes == ["not_same_history"]
+    assert how.startswith("For the re-test, use the same files as your first result,")
+    for t in (NOT_SAME, how):
+        assert lint_text(t) == [] and lint_text(t, "report", paid=True) == []

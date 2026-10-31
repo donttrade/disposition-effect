@@ -60,7 +60,7 @@ launch_date = "2026-10-29"
 # YYYY-MM-DD (29 Oct, one product). Set it to the day of any later legal edit; launch_date stays as it is, so
 # "called 'Trial' before <launch_date>" never moves. On or after launch_date, not after the build date;
 # empty = the build date, and ./site/run.sh bundle refuses an empty one.
-terms_date = "2026-10-29"
+terms_date = "2026-10-31"   # DT-2 release: the Limits clause and the verdict names changed (release test M1)
 # T0: the day the site moved from GitHub Pages to Cloudflare Pages (the zone became Active, runbook
 # step 83), YYYY-MM-DD. Stated on /privacy/ and /fr/confidentialite/. Required: empty or a date after
 # the build date fails the build. The privacy notice's version is the later of this and launch_date.

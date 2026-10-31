@@ -19,7 +19,9 @@
   <details class="legal-sec">
     <summary><h2 id="prices">Prices</h2><span class="ls-sum">Firm prices are in US dollars, before sales tax.</span></summary>
   <p>Firm prices are in US dollars (USD), before any applicable sales tax. <a href="/pricing/">Pricing</a></p>
-  <p>Fixed-price firm engagements (Snapshot, Memo, Outcomes pack) were withdrawn on {{ legal.terms_human }}; a scope accepted before then keeps its agreed price and terms.</p>
+  {#- Release test M1: the withdrawal happened on launch day (29 Oct), so it is dated by launch_date, not by terms_date,
+      which moves with every later legal edit (OWNER: confirm). -#}
+  <p>Fixed-price firm engagements (Snapshot, Memo, Outcomes pack) were withdrawn on {{ legal.launch_human }}; a scope accepted before then keeps its agreed price and terms.</p>
   </details>
 
   <details class="legal-sec">
@@ -97,7 +99,7 @@
       <li><strong>Payment:</strong> in full at checkout, by card, on Stripe’s payment page.</li>
       <li><strong>Delivery:</strong> online only, on donttrade.ca, right after payment. Your access key is saved in your browser. Keep the restore link and file shown after payment: they are the only {% if site.manual_restore %}automatic {% endif %}way to reopen your purchase in another browser.{% if site.manual_restore %} <span id="manual-restore">If your access link stops working, email us from the address you paid with and we’ll send a new one. We send it by hand, and only to the email address on the payment.</span>{% endif %}</li>
       <li><strong>Two analyses:</strong> your test and one re-test, which opens 30 days after your first result and closes 60 days after it. The re-test is for the same trading history: at least half of its trades have to match the first file. Your key is valid for 90 days after purchase, or until 75 days after your first result if that is later. An analysis is counted only when a result is produced.</li>
-      <li><strong>Limits:</strong> up to 20,000 rows per file, supported formats only. A habit with fewer than {{ verdict.min_group }} trades in either group it compares shows “{{ verdict.steps.too_few }}”; that is not a fault in the product.</li>
+      <li><strong>Limits:</strong> at least {{ min_trades }} closed trades per report, up to 20,000 rows per file, supported formats only. A habit with fewer than {{ verdict.min_group }} trades in either group it compares shows “{{ verdict.steps.too_few }}”; that is not a fault in the product.</li>
       {#- C-14 (G15): backed by the outage SOP (delivery plan runbook §3.6: /health is checked when a buyer reports
           an outage or smoke fails) and the C-13 outage-refund reply. LAWYER: the 24-hour line. #}
       <li id="outage"><strong>If our server is down,</strong> your purchase is not lost and no analysis is counted. If the service is down for more than 24 hours, we refund you on request, in full.</li>

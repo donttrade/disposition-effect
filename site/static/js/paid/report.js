@@ -6,8 +6,8 @@
 // Every number on the page comes from the server's Report or from the file in this
 // tab; the wording only describes past trades (NON-ADVISER A3).
 
-import { readAll, copyLine, nearLine, copyPairLine, ownPairLine, COPY_QUESTION, copiesIn, serverTradeCount, overlapLine, accountsLine, filesLabel, SMALL_FILE, accountOf } from './merge.js';
-import { ics, retestLine, RETEST_LINE } from './retest-copy.js';
+import { readAll, copyLine, nearLine, copyPairLine, ownPairLine, COPY_QUESTION, copiesIn, serverTradeCount, overlapLine, accountsLine, filesLabel, SMALL_FILE, accountOf, MIN_TRADES, distinctTrades, minTradesLine } from './merge.js';
+import { ics, retestLine, RETEST_LINE, refusalLine } from './retest-copy.js';
 import { pgrPlrCounts } from '../engine/pgr.js';
 import { stripRows, spanLine } from './strip.js';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js';
@@ -549,17 +549,23 @@ function showPanel() {
   const lines = [n === null ? `${plural(picked.length, 'file', 'files')} chosen.` : `${plural(n, 'trade', 'trades')}: ${filesLabel(ready.groups, picked.length)}.`];
   showQuestion();
   showCopyQuestions();
-  const small = ready && n < SMALL_FILE;
+  // Release test B3: under the Worker's minimum, Run stays off and the panel says why (nothing is sent, no run used);
+  // from the minimum to SMALL_FILE, the small-file notice (unchanged).
+  const few = !!ready && ready.distinct < MIN_TRADES;
+  const small = !!ready && !few && n < SMALL_FILE;
   $('rp-small').hidden = !small;
+  $('rp-few').hidden = !few;
+  if (few) $('rp-few').firstElementChild.textContent = minTradesLine(ready.distinct, picked.length);
   const notes = ready ? ready.notes : [];
   $('rp-notes').replaceChildren(...notes.map((t) => el('p', { class: 'small', text: t })));
   // One live line a screen reader hears when the panel changes (Tester M6): the count, then the notice under 100.
   $('rp-count').textContent = lines[0];
   const asked = (ready && ready.question ? ' ' + $('rp-acct-q').querySelector('legend').textContent.trim() : '')
     + (ready && ready.pairs && ready.pairs.some((p) => p.status === 'ask') ? ' ' + COPY_QUESTION : '');
-  $('rp-live').textContent = lines[0] + (small ? ' ' + $('rp-small').textContent.trim() : '') + asked + (n === null ? '' : ' Press Run to send.');
+  $('rp-live').textContent = lines[0] + (small ? ' ' + $('rp-small').textContent.trim() : '') + (few ? ' ' + $('rp-few').textContent.trim() : '')
+    + asked + (n === null || few ? '' : ' Press Run to send.');
   $('rp-run').textContent = small ? 'Run anyway' : 'Run the test';
-  $('rp-run').disabled = !ready;
+  $('rp-run').disabled = !ready || few;
   box.hidden = false;
 }
 
@@ -607,7 +613,7 @@ async function stage(files) {
     picked = files;
     ready = { stripped, counts: pgrPlrCounts(r.executions), currency: r.trades[0].pnl_unit, copies: copiesIn(kept), near: r.near, pairs: r.pairs,
       trades: r.factsTrades, accounts: r.accounts, groups: r.groups, files: r.files, question: r.question, format: r.format || null,
-      n: serverTradeCount(stripped.rows), notes };
+      n: serverTradeCount(stripped.rows), distinct: distinctTrades(stripped.rows), notes };
     $('rp-status').hidden = true;
   } finally {
     busy = false;
@@ -618,7 +624,7 @@ async function stage(files) {
 }
 
 async function send() {
-  if (busy || !ready) return;
+  if (busy || !ready || ready.distinct < MIN_TRADES) return;   // B3: never a body the Worker refuses for size
   busy = true;
   $('rp-run').disabled = true;
   const { stripped, counts, currency, copies, near, pairs, trades, accounts, files, format } = ready;
@@ -630,7 +636,7 @@ async function send() {
     status(`${span}Sending ${stripped.rows.length} stripped trade rows (no names, accounts or symbols)…`);
     const r = await api('/analyse', body);
     if (r.status === 0 || r.status >= 500) { status(OUTAGE, 'error'); return; }
-    if (!r.ok) { status(r.json && r.json.error ? r.json.error.message : 'The report could not be made.', 'error'); return; }
+    if (!r.ok) { status(refusalLine(r.json && r.json.error), 'error'); return; }   // Release test M2/M3: the page's own lines by code
     // the run is spent: the staged files are done with
     picked = []; ready = null;
     showPanel();
