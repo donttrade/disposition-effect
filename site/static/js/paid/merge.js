@@ -41,7 +41,10 @@ export const COPY_SURE = 0.8;
 export const COPY_PRESET = 0.65;
 export const COPY_QUESTION = 'Do these accounts copy each other’s trades?';
 export const copyPairLine = (a, b, k) => `Accounts ${a} and ${b} copy each other: ${grouped(k)} ${k === 1 ? 'trade' : 'trades'} counted once.`;
-export const ownPairLine = (a, b) => `Accounts ${a} and ${b} trade on their own: none of their trades are counted once.`;
+// Tester re-test 4 F2: the server combines rows with the same symbol, direction and open minute, from any account
+// (dt-private habits.mjs mergeRows, key s:d:o); this line says so, so it stays true until DT-2's engine keeps accounts
+// apart.
+export const ownPairLine = (a, b) => `Accounts ${a} and ${b} trade on their own: no trade is counted once as a copy. As in one file, trades opened in the same minute with the same symbol and direction are combined for the habit checks.`;
 export const SMALL_FILE = 100;              // owner Q3: fewer trades than this → the small-file notice
 const DAY_MS = 86400000;
 
@@ -178,6 +181,34 @@ function mt5Kind(bytes) {
     return null;
   }
 }
+// The same trade (symbol, direction, open, close, size) in two files of one account with a different P&L or fee.
+// → null | {k, why: 'fees_a' | 'fees_b' | 'fees' | 'pnl'}  (fees_a: only the first file has fees on them)
+const cents = (x) => Math.round(x * 100);
+function amountsDiffer(A, B) {
+  const at = new Map();
+  for (const t of A) {
+    const k = [t.symbol, t.dir, t.open_ts, t.close_ts, t.qty].join('\u0001');
+    if (!at.has(k)) at.set(k, []);
+    at.get(k).push(t);
+  }
+  let k = 0, feesA = 0, feesB = 0, feeGap = false;
+  for (const t of B) {
+    const list = at.get([t.symbol, t.dir, t.open_ts, t.close_ts, t.qty].join('\u0001'));
+    if (!list || !list.length) continue;
+    const i = list.findIndex((u) => cents(u.pnl) === cents(t.pnl) && cents(u.fees) === cents(t.fees));
+    if (i >= 0) { list.splice(i, 1); continue; }
+    const u = list.shift();
+    k++;
+    feesA += cents(u.fees); feesB += cents(t.fees);
+    if (cents(u.fees) !== cents(t.fees)) feeGap = true;
+  }
+  if (!k) return null;
+  return { k, why: !feeGap ? 'pnl' : feesB === 0 ? 'fees_a' : feesA === 0 ? 'fees_b' : 'fees' };
+}
+export const differLine = (a, b, d) => `${a} and ${b} show different amounts for the same ${grouped(d.k)} ${d.k === 1 ? 'trade' : 'trades'} (`
+  + (d.why === 'fees_a' ? `${a} includes commissions` : d.why === 'fees_b' ? `${b} includes commissions`
+    : d.why === 'fees' ? 'their commissions differ' : 'their results differ') + '). Upload one of them.';
+
 export const mt5MixLine = (pos, deals) => `${pos} is an MT5 positions report and ${deals} is an MT5 deals report. Add reports of one kind: all positions reports, or all deals reports.`;
 
 // Which account a file is from, as far as the file says (Tester re-test 2 R4–R6). accounts: the values of its account
@@ -371,6 +402,14 @@ export function readFiles(byteArrays, names = [], opts = {}) {
     const ks = groups[g];
     let res = own[ks[0]];
     if (ks.length > 1) {
+      // Tester re-test 4 F1: files of one account that show different amounts for the same trades (one export with
+      // commissions, one without) would double some fills in the joined book. Refused, by name, never one picked.
+      for (let x = 0; x < ks.length; x++) {
+        for (let y = x + 1; y < ks.length; y++) {
+          const d = amountsDiffer(own[ks[x]].trades, own[ks[y]].trades);
+          if (d) return { error: { code: 'E_FILES_DIFFER', message: differLine(name(ks[x]), name(ks[y]), d) }, file: ks[y] };
+        }
+      }
       const r = runFiles(ks.map((k) => byteArrays[k]));
       if (r.error) return { error: { ...r.error, message: `${r.error.message} (${ks.map(name).join(', ')})` }, file: ks[0] };
       res = r.result;
