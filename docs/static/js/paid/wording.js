@@ -189,26 +189,43 @@ export function stepLine(h, report, fmt) {
   const tail = `In files with no real habit, a result this strong turns up ${chancePhrase(h)}, allowing for all ${m} habits at once.`;
   if (h.step === 'clear') return `Clear sign of this habit in these ${n} trades. ${tail}`;
   if (h.step === 'some') return `Some sign of this habit in these ${n} trades, short of clear. ${tail}`;
-  if (h.step === 'none') return `No sign of this habit in these ${n} trades.`;
+  // Buyer read-through (31 Oct): the No sign line agrees with the gap the card shows. A gap the habit's way is within
+  // what chance gives (adjusted p over the Some cut); a gap the other way is not the habit at all.
+  if (h.step === 'none') return inHabitWay(h) ? noSignChance(n) : noSignOther(h.id, n);
   return fail(`${h.id} has no step line for ${h.step}`);
 }
+const inHabitWay = (h) => Number.isFinite(h.effect) && h.effect < 0;
+const NO_WORSE = { revenge: 'trades soon after a loss did not do worse than your other trades', tilt: 'trades after 2 or more losses in a row did not do worse than your other trades' };
+export const noSignChance = (n) => `No sign beyond chance in these ${n} trades: a gap this size is common in files with no habit.`;
+export const noSignOther = (id, n) => `No sign in these ${n} trades: ${NO_WORSE[id]}.`;
 // §2.4 guard line, under every Some sign and Clear sign number.
 export const GUARD_LINE = 'This counts how often chance alone does this. It is not the chance your habit is real.';
 
-// §5.2 the catch line, under every No sign and Some sign.
+// §5.2 the catch figure, under every No sign and Some sign (buyer read-through, 31 Oct: one short lead line, then one
+// row per file size, drawn by report.js as a labelled table with a bar). Each row is the engine's Wilson lower bound
+// in tenths ("at least N in 10", or "fewer than 1 in 10" for 0), so no row overstates the catch rate; the lead keeps
+// the premise ("if your next trades look like these").
 const CATCH_CLAUSE = { revenge: 'trades soon after a loss end', tilt: 'trades after 2 or more losses in a row end' };
 const tenths = (t) => (t >= 1 ? `at least ${t} in 10` : 'fewer than 1 in 10');
-export function catchLine(h, report, fmt) {
+export const catchLead = (amount) => `If the habit is real at ${amount} a trade and your next trades look like these, a file shows it as a Clear sign:`;
+export const CATCH_CAPTION = 'How often a file of each size shows this habit as a Clear sign';
+export const CATCH_HEAD = Object.freeze(['File size', 'Shown as a Clear sign']);
+export const catchSize = (count, own) => `${count} trades${own ? ' (this file)' : ''}`;
+// { lead, rows: [{ size, value, tenths }] }, or { line } (a fixed line) when the file gets no figure.
+export function catchFigure(h, report, fmt) {
   const f = fmtOf(fmt), c = h.catch;
   if (c === null) {
-    if (report.n_trades > report.catch_max_trades) return catchOver(f.count(report.catch_max_trades));
+    if (report.n_trades > report.catch_max_trades) return { line: catchOver(f.count(report.catch_max_trades)) };
     return fail(`${h.id} has no catch figure`);
   }
-  if (!(c.effect.amount > 0)) return CATCH_FLAT;
-  const rows = c.sizes.map((s, j) => (j === 0 ? `files of ${f.count(s)} trades show it as a Clear sign ${tenths(c.at_least_10ths[j])} times`
-    : `${f.count(s)} trades ${tenths(c.at_least_10ths[j])}`));
-  const list = rows.length === 1 ? rows[0] : rows.length === 2 ? `${rows[0]}, and ${rows[1]}` : `${rows[0]}, ${rows[1]}, and ${rows[2]}`;
-  return `If your next trades look like these: when ${CATCH_CLAUSE[h.id]} ${f.amount(c.effect.amount)} worse each, ${list}.`;
+  if (!(c.effect.amount > 0)) return { line: CATCH_FLAT };
+  return { lead: catchLead(f.amount(c.effect.amount)),
+    rows: c.sizes.map((sz, j) => ({ size: catchSize(f.count(sz), j === 0), value: tenths(c.at_least_10ths[j]), tenths: c.at_least_10ths[j] })) };
+}
+// The figure as plain lines (lead, then "size: value" rows), for tests and the lint.
+export function catchLines(h, report, fmt) {
+  const g = catchFigure(h, report, fmt);
+  return g.line ? [g.line] : [g.lead, ...g.rows.map((r) => `${r.size}: ${r.value}`)];
 }
 export const catchOver = (max) => `Files over ${max} trades get no catch figure.`;
 export const CATCH_FLAT = 'Every trade in this file has the same result, so it gets no catch figure.';
@@ -245,11 +262,13 @@ export function holdDays(s) {
 }
 export const SAME_DATE_LINE = 'In this file, a trade with dates but no times that opened and closed on the same date counts as 0 days.';
 
-// The lines of one habit, split by layer: what (under "What happened", the fact line first) and check (under
-// "Habit or chance?": the step line, the guard line, the catch line; or the too-few or dates-only line).
+// The lines of one habit, split by layer: what (under "What happened", the fact line first), check (under
+// "Habit or chance?": the step line and the guard line, or the too-few or dates-only line, or a fixed no-figure line)
+// and figure (the catch figure: { lead, rows }, drawn after the check lines), or null.
 export function habitLines(h, report, fmt) {
   checkReport(report);
   const f = fmtOf(fmt), what = [], check = [];
+  let figure = null;
   if (h.id === 'hold_gap') {
     if (h.measure_a !== null && h.measure_b !== null) {
       what.push(report.dates_only ? `Your losing trades were held a median of ${holdDays(h.measure_a)}; your winning trades a median of ${holdDays(h.measure_b)}. ${SAME_DATE_LINE}`
@@ -270,12 +289,15 @@ export function habitLines(h, report, fmt) {
         : `Trades taken after 2 or more losses in a row averaged ${f.money(h.measure_a)} per trade; your other trades averaged ${f.money(h.measure_b)}.`);
       check.push(stepLine(h, report, f));
       if (h.step !== 'none') check.push(GUARD_LINE);
-      if (h.step !== 'clear') check.push(catchLine(h, report, f));
+      if (h.step !== 'clear') {
+        const g = catchFigure(h, report, f);
+        if (g.line) check.push(g.line); else figure = g;
+      }
     }
   } else if (h.id !== 'oversized_loss') {   // large losses: report.js shows its measures list
     fail(`habitLines: ${h.id} has no sentences`);
   }
-  return { what, check };
+  return { what, check, figure };
 }
 
 // ---------------------------------------------------------------- page 1 (plan §10 rows 22–28)
@@ -400,10 +422,9 @@ export const VERDICT_STRINGS = Object.freeze([
   stepLine({ ...SAMPLE, step: 'clear', chance_per_100: 1, p_holm: 0.004 }, SAMPLE_REPORT, SAMPLE_FMT),
   stepLine({ ...SAMPLE, step: 'some', chance_per_100: 14, p_holm: 0.14 }, SAMPLE_REPORT, SAMPLE_FMT),
   stepLine({ ...SAMPLE, step: 'none', chance_per_100: 100, p_holm: 1 }, SAMPLE_REPORT, SAMPLE_FMT),
+  noSignOther('revenge', '120'), noSignOther('tilt', '120'),
   GUARD_LINE,
-  catchLine(SAMPLE, SAMPLE_REPORT, SAMPLE_FMT),
-  catchLine({ ...SAMPLE, id: 'tilt', catch: { ...SAMPLE.catch, sizes: [2000, 4000], at_least_10ths: [4, 7], caught: [30, 50] } }, SAMPLE_REPORT, SAMPLE_FMT),
-  catchLine({ ...SAMPLE, catch: { ...SAMPLE.catch, sizes: [3000], at_least_10ths: [6], caught: [45] } }, SAMPLE_REPORT, SAMPLE_FMT),
+  ...catchLines(SAMPLE, SAMPLE_REPORT, SAMPLE_FMT), CATCH_CAPTION, ...CATCH_HEAD,
   catchOver('5,000'), CATCH_FLAT, catchHow(SAMPLE, SAMPLE_FMT), expertLine(SAMPLE, SAMPLE_REPORT, SAMPLE_FMT),
   methodLine(SAMPLE, SAMPLE_FMT), methodLine({ ...SAMPLE, id: 'tilt' }, SAMPLE_FMT),
   tooFewLine('3', '116', 5), vDatesOnly('All 200 trades in this file'), datesP1('12 of the 200 trades in this file', 3),
