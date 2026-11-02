@@ -1155,7 +1155,14 @@ PAID_LIFTED_SWAPS = {
                         "The research, the newsletter and the free tools cost readers nothing; the one paid product is "
                         "<a href=\"/pricing/#traders\">the donttrade test</a>.")],
     "/about/": [("There’s no name on it on purpose: every study",
-                 "No author name is published here, on purpose (" + _SELLER_WHERE + "): every study")],
+                 "No author name is published here, on purpose (" + _SELLER_WHERE + "): every study"),
+                # 2 Nov (owner): as on /independence/, with the donttrade test on sale. A free build keeps both.
+                ('<span class="ls-sum">Firms pay for measurements. Readers pay nothing.</span>',
+                 '<span class="ls-sum">Firms pay for measurements. The research and free tools cost readers nothing.</span>'),
+                ("Firms pay for fixed-scope measurements of their own data; readers pay nothing; no firm can change a number.",
+                 "Firms pay for fixed-scope measurements of their own data; the research and free tools cost readers "
+                 "nothing, and the one paid product is <a href=\"/pricing/#traders\">the donttrade test</a>; no firm "
+                 "can change a number.")],
     "/code/": [("There is no name on this site; the scripts are what you check instead.",
                 "No author name is published on this site (" + _SELLER_WHERE + "); the scripts are what you check "
                 "instead."),
