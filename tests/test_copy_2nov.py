@@ -35,3 +35,12 @@ def test_about_lists_the_three_new_channels(built_site):
                       ("https://www.threads.net/@donttradestudy", "threads.net/@donttradestudy"),
                       ("https://mastodon.social/@donttradestudy", "mastodon.social/@donttradestudy")]:
         assert f'<a href="{url}" rel="me noopener">{text}</a>' in where, url
+
+
+def test_about_names_the_one_paid_product(built_site):
+    html = _read(built_site, "/about/")
+    assert "Readers pay nothing" not in html and "readers pay nothing" not in html
+    assert "Firms pay for measurements. The research and free tools cost readers nothing." in html
+    assert ("Firms pay for fixed-scope measurements of their own data; the research and free tools cost readers nothing, "
+            'and the one paid product is <a href="/pricing/#traders">the donttrade test</a>; no firm can change a '
+            "number.") in html
