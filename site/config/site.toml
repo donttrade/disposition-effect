@@ -14,6 +14,9 @@ reply_promise = "We reply within 1 business day (Eastern Time, Monday to Friday)
 # emails us from the address they paid with, and the owner sends a new link by hand, ONLY to the address
 # on the Stripe payment. true: /welcome/, /restore/ and the terms say so. false: "restore by email is not offered".
 manual_restore = true
+# Mastodon profile verification (owner decision 2 Nov): every page's <head> carries <link rel="me"> to this
+# profile, so Mastodon shows donttrade.ca as verified on it. Empty = no link.
+mastodon_url = "https://mastodon.social/@donttradestudy"
 
 [flags]
 paid_report = true        # the $39 report, its pages and the trader Stripe links
