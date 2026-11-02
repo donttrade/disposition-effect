@@ -152,6 +152,31 @@ text = "youtube.com/@donttradestudy"
 handle = "@donttradestudy"
 icon = "youtube"
 rel_me = true
+# 2 Nov (owner): Bluesky, Threads and Mastodon. Mastodon verifies the site through rel="me" (here and in <head>).
+[[channels]]
+id = "bluesky"
+name = "Bluesky"
+url = "https://bsky.app/profile/donttradestudy.bsky.social"
+text = "bsky.app/profile/donttradestudy.bsky.social"
+handle = "@donttradestudy.bsky.social"
+icon = "bluesky"
+rel_me = true
+[[channels]]
+id = "threads"
+name = "Threads"
+url = "https://www.threads.net/@donttradestudy"
+text = "threads.net/@donttradestudy"
+handle = "@donttradestudy"
+icon = "threads"
+rel_me = true
+[[channels]]
+id = "mastodon"
+name = "Mastodon"
+url = "https://mastodon.social/@donttradestudy"
+text = "mastodon.social/@donttradestudy"
+handle = "@donttradestudy@mastodon.social"
+icon = "mastodon"
+rel_me = true
 
 # 25 Oct sweep (owner: "way too much writing"): four short columns
 [[footer]]

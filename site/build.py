@@ -1150,6 +1150,10 @@ LIFTED_JS = "/static/js/lifted.js"
 _SELLER_WHERE = ('the seller’s legal name is given for buyers in <a href="/pricing/#before-you-pay">Before you pay</a>, '
                  'the terms and the privacy notice')
 PAID_LIFTED_SWAPS = {
+    # 2 Nov (owner): with the donttrade test on sale, "Readers pay nothing" is out of date. A free build keeps it.
+    "/independence/": [("Readers pay nothing; the newsletter is free.",
+                        "The research, the newsletter and the free tools cost readers nothing; the one paid product is "
+                        "<a href=\"/pricing/#traders\">the donttrade test</a>.")],
     "/about/": [("There’s no name on it on purpose: every study",
                  "No author name is published here, on purpose (" + _SELLER_WHERE + "): every study")],
     "/code/": [("There is no name on this site; the scripts are what you check instead.",
@@ -1860,9 +1864,9 @@ def set_privacy_date(legal, toml_path, today=None):
 
 
 CHANNEL_HOSTS = {"x.com", "github.com", "donttrade.substack.com", "www.linkedin.com", "www.tiktok.com", "www.youtube.com",
-                 "www.instagram.com"}
+                 "www.instagram.com", "bsky.app", "www.threads.net", "mastodon.social"}
 CHANNEL_FIELDS = ("id", "name", "url", "text", "icon", "rel_me")
-BRAND_ICONS = ("x", "github", "substack", "tiktok", "instagram", "youtube")
+BRAND_ICONS = ("x", "github", "substack", "tiktok", "instagram", "youtube", "bluesky", "threads", "mastodon")
 
 
 def load_channels(cfg, toml_path):
