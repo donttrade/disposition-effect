@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="{{ csp }}">
 <meta name="referrer" content="strict-origin-when-cross-origin">
+{%- if site.get("mastodon_url") %}
+<link rel="me" href="{{ site.mastodon_url }}">
+{%- endif %}
 {%- if page.get("connect_worker") %}
 <meta name="dt-api" content="{{ worker.api_base }}">
 <meta name="dt-method" content="{{ paid_method }}">

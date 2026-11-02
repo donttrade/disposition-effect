@@ -1904,6 +1904,9 @@ def load_config():
     set_terms_date(cfg["legal"], toml_path)
     set_hosting_date(cfg["legal"], toml_path)
     set_privacy_date(cfg["legal"], toml_path)
+    mu = cfg["site"].get("mastodon_url", "")
+    if not isinstance(mu, str) or (mu and not re.fullmatch(r"https://[a-z0-9.-]+/@[A-Za-z0-9_]+", mu)):
+        die(f"[site] mastodon_url {mu!r} must be empty or https://<server>/@<name> ({toml_path})")
     cfg["site"].setdefault("manual_restore", True)
     if type(cfg["site"]["manual_restore"]) is not bool:
         die(f"[site] manual_restore must be true or false, not {cfg['site']['manual_restore']!r} ({toml_path})")
