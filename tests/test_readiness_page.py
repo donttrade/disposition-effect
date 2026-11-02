@@ -28,7 +28,9 @@ BRIEF_BANNED = re.compile(r"\b(recommend\w*|should|fix|fixes|fixed it|coach\w*|m
 JARGON = ["bootstrap", "resample", "seed", "Monte Carlo", "percentile", "confidence interval", "EOD", "drawdown model"]
 FUTURE = re.compile(r"\b(you will (pass|fail)|your chances|odds of passing|ready to buy|best rule|best firm|safest|you should)\b", re.I)
 BEACON = ("https://static.cloudflareinsights.com/", "https://cloudflareinsights.com/cdn-cgi/rum",
-          "https://cloud.umami.is/", "https://gateway.umami.is/")   # 2 Nov: Umami Cloud, beside the beacon
+          "https://cloud.umami.is/script.js")   # 2 Nov: Umami's script (the conftest stand-in); never gateway.umami.is
+UMAMI_NAMES = {"pay-open", "pay-continue", "tool-run-readiness", "tool-run-importer", "tool-run-drawdown",
+               "tool-run-lot-size", "tool-run-risk-reward"}
 # 127.0.0.1 only: the beacon's report is refused by CORS. And a timing warning about the site-wide font preload in
 # base.html ("preloaded using link preload but not used within a few seconds"): it depends on how fast the run is.
 LOCAL_ONLY = ("cloudflareinsights.com/cdn-cgi/rum", "Failed to load resource: net::ERR_FAILED",
@@ -446,6 +448,8 @@ def test_counting_uses_the_live_analytics_only(browser, built_site):
     for u in log["requests"]:
         if "/e/" in u:
             assert "?" not in u and "#" not in u
+    calls = pg.evaluate("window.__umamiCalls || []")   # Umami: fixed names only, never event data
+    assert all(c["name"] in UMAMI_NAMES and not c["hasData"] for c in calls), calls
     ctx.close()
 
 

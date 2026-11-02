@@ -35,9 +35,9 @@
         <summary class="btn">Take the test — {{ r.price_usd|usd }}</summary>
         <div class="pay-panel" role="group" aria-labelledby="last-step-h">
           <h3 id="last-step-h">Last step</h3>
-          <p class="no-print">{% if link %}<a class="btn" href="{{ link }}" rel="noopener" data-umami-event="pay-continue">Pay {{ r.price_usd|usd }} on Stripe</a>{% else %}<span class="muted">Payment link not set yet</span>{% endif %}</p>
+          <p class="no-print">{% if link %}<a class="btn" href="{{ link }}" rel="noopener" data-pay-continue>Pay {{ r.price_usd|usd }} on Stripe</a>{% else %}<span class="muted">Payment link not set yet</span>{% endif %}</p>
           {% include "partials/before_you_pay.html" %}
-          <p class="no-print">{% if link %}<a class="btn" href="{{ link }}" rel="noopener" data-umami-event="pay-continue">Pay {{ r.price_usd|usd }} on Stripe</a>{% endif %}</p>
+          <p class="no-print">{% if link %}<a class="btn" href="{{ link }}" rel="noopener" data-pay-continue>Pay {{ r.price_usd|usd }} on Stripe</a>{% endif %}</p>
         </div>
       </details>
       {%- else %}

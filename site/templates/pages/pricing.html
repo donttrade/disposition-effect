@@ -97,7 +97,7 @@
             <summary>Full details before you pay</summary>
             {% include "partials/before_you_pay.html" %}
           </details>
-          <p class="pay-go no-print">{% if link %}<a class="btn" href="{{ link }}" rel="noopener" data-umami-event="pay-continue">Continue to secure payment</a>{% else %}<span class="muted">Payment link not set yet</span>{% endif %}</p>
+          <p class="pay-go no-print">{% if link %}<a class="btn" href="{{ link }}" rel="noopener" data-pay-continue>Continue to secure payment</a>{% else %}<span class="muted">Payment link not set yet</span>{% endif %}</p>
           <p class="small muted pay-links no-print"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a> · <a href="/terms/#seller">Business details</a></p>
         </div>
       </details>

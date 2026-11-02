@@ -1104,6 +1104,7 @@ PAID_PAGES = [
      "description": "Reopen your donttrade test result on this browser."},
     {"template": "pages/report.html", "path": "/report/", "requires_flag": "paid_report", "connect_worker": True,
      "presets": True,  # S4: the firm-rules library for the rule check
+     "no_umami": True,  # owner rule 2 Nov: no analytics beyond the Cloudflare beacon on the page that reads the file
      "noindex": True, "crumb": "Your test result", "modules": ["/static/js/paid/report.js"], "title": "Your test result — donttrade",
      "description": "Your donttrade test result, from your own trade file."},
 ]
@@ -2050,10 +2051,11 @@ def umami_on(cfg):
     return bool(cfg["flags"]["analytics"] and cfg["analytics"].get("umami_website_id"))
 
 
-def analytics_hosts(cfg):
-    """(script-src hosts, connect-src hosts) that a page with analytics adds to its CSP."""
+def analytics_hosts(cfg, page=None):
+    """(script-src hosts, connect-src hosts) that a page with analytics adds to its CSP. Umami's two hosts only
+    with Umami on and never on a no_umami page (/report/)."""
     script, connect = [BEACON_SCRIPT], [BEACON_CONNECT]
-    if umami_on(cfg):
+    if umami_on(cfg) and not (page or {}).get("no_umami"):
         script.append(UMAMI_SCRIPT)
         connect.append(UMAMI_CONNECT)
     return script, connect
@@ -2077,7 +2079,7 @@ def csp_for(page, cfg):
     if page.get("connect_worker"):
         connect = "'self' " + cfg["worker"]["api_base"]
     beacon = cfg["flags"]["analytics"] and not page.get("no_analytics")   # D12: never on the journal
-    sh, ch = analytics_hosts(cfg)
+    sh, ch = analytics_hosts(cfg, page)
     if beacon:   # never "'none' <host>": the browser ignores 'none' there and logs an error (CSP3)
         connect = " ".join(ch) if connect == "'none'" else connect + " " + " ".join(ch)
     script = "'self'" + ("".join(" " + h for h in sh) if beacon else "")

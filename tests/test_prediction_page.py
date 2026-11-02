@@ -157,7 +157,8 @@ def test_mobile_and_axe(tmp_path, twin):
             url = "http://127.0.0.1:%d/research/does-the-test-predict/" % srv.server_address[1]
             for scheme in ("light", "dark"):
                 for width in (375, 1280):
-                    ctx = b.new_context(color_scheme=scheme, viewport={"width": width, "height": 900}, bypass_csp=True)
+                    from conftest import stub_umami   # 2 Nov: never the real Umami script
+                    ctx = stub_umami(b.new_context(color_scheme=scheme, viewport={"width": width, "height": 900}, bypass_csp=True))
                     pg = ctx.new_page()
                     pg.goto(url)
                     assert a11y.axe_violations(pg) == [], (scheme, width)

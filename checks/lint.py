@@ -569,7 +569,9 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
 
 
 UMAMI_TAG_RE = re.compile(r'<script\b[^>]*\bsrc="https://cloud\.umami\.is/script\.js"[^>]*>')
-UMAMI_REQUIRED = ('data-do-not-track="true"', 'data-exclude-search="true"', 'data-exclude-hash="true"')
+UMAMI_REQUIRED = ('data-do-not-track="true"', 'data-exclude-search="true"', 'data-exclude-hash="true"',
+                  'data-domains="donttrade.ca"')
+UMAMI_FREE = ("/report/index.html",)   # owner rule 2 Nov: not on the page that reads the buyer's file
 
 
 def umami_problems(html, where, analytics):
@@ -902,6 +904,8 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, b
                 problems.append(("flag:beacon", rel, "analytics beacon"))
             if not analytics and "cloud.umami.is" in s:
                 problems.append(("flag:umami", rel, "Umami Cloud script"))
+            if rel in UMAMI_FREE and "umami.is" in s:
+                problems.append(("flag:umami", rel, "Umami Cloud on /report/ (owner rule 2 Nov)"))
             if not badges and name.endswith((".html", ".js")):
                 problems += free_badge_problems(s, rel)
     return problems
