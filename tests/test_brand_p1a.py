@@ -339,8 +339,9 @@ TOML = os.path.join(REPO, "site", "config", "site.toml")
 CHANNELS = [c["url"] for c in tomllib.load(open(TOML, "rb"))["channels"]]
 EXPECTED = ["https://donttrade.substack.com", "https://x.com/donttradestudy", "https://github.com/donttrade",
             "https://www.tiktok.com/@donttradestudy", "https://www.instagram.com/donttradestudy/",
-            "https://www.youtube.com/@donttradestudy"]
-NAMES = ["Substack", "X", "GitHub", "TikTok", "Instagram", "YouTube"]
+            "https://www.youtube.com/@donttradestudy", "https://bsky.app/profile/donttradestudy.bsky.social",
+            "https://www.threads.net/@donttradestudy", "https://mastodon.social/@donttradestudy"]   # 2 Nov: + 3
+NAMES = ["Substack", "X", "GitHub", "TikTok", "Instagram", "YouTube", "Bluesky", "Threads", "Mastodon"]
 
 
 def follow_links(html):
@@ -367,8 +368,11 @@ def test_soc1_footer_follow_is_exactly_the_official_accounts(built_site):
     assert ("donttrade.substack.com</a>, <a href=\"https://x.com/donttradestudy\" rel=\"me noopener\">x.com/donttradestudy</a>, "
             "<a href=\"https://github.com/donttrade\" rel=\"me noopener\">github.com/donttrade</a>, "
             "<a href=\"https://www.tiktok.com/@donttradestudy\" rel=\"me noopener\">tiktok.com/@donttradestudy</a>, "
-            "<a href=\"https://www.instagram.com/donttradestudy/\" rel=\"me noopener\">instagram.com/donttradestudy</a> and "
-            "<a href=\"https://www.youtube.com/@donttradestudy\" rel=\"me noopener\">youtube.com/@donttradestudy</a>. ") in about
+            "<a href=\"https://www.instagram.com/donttradestudy/\" rel=\"me noopener\">instagram.com/donttradestudy</a>, "
+            "<a href=\"https://www.youtube.com/@donttradestudy\" rel=\"me noopener\">youtube.com/@donttradestudy</a>, "
+            "<a href=\"https://bsky.app/profile/donttradestudy.bsky.social\" rel=\"me noopener\">bsky.app/profile/donttradestudy.bsky.social</a>, "
+            "<a href=\"https://www.threads.net/@donttradestudy\" rel=\"me noopener\">threads.net/@donttradestudy</a> and "
+            "<a href=\"https://mastodon.social/@donttradestudy\" rel=\"me noopener\">mastodon.social/@donttradestudy</a>. ") in about
 
 
 def test_soc1_every_brand_icon_is_drawn_inline():
@@ -416,7 +420,7 @@ def test_soc2_another_channel_changes_all_three_places(tmp_path):
     ('url = "https://x.com/donttradestudy"', 'url = "http://x.com/donttradestudy"', "https://"),
     ('url = "https://x.com/donttradestudy"', 'url = "https://twitter.com/donttradestudy"', "host"),
     ('text = "x.com/donttradestudy"', 'text = "TODO"', "placeholder"),
-    ('icon = "x"', 'icon = "mastodon"', "icon"),
+    ('icon = "x"', 'icon = "myspace"', "icon"),
     ('url = "https://www.instagram.com/donttradestudy/"', 'url = "https://instagram.com.attacker.net/donttradestudy/"', "host"),
     ('url = "https://www.tiktok.com/@donttradestudy"', 'url = "http://www.tiktok.com/@donttradestudy"', "https://"),
 ])
