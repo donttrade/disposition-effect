@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src &#39;self&#39;; script-src &#39;self&#39; https://static.cloudflareinsights.com; style-src &#39;self&#39;; img-src &#39;self&#39; data:; font-src &#39;self&#39;; connect-src https://cloudflareinsights.com; worker-src &#39;self&#39;; form-action &#39;self&#39; https://api.web3forms.com; base-uri &#39;none&#39;; object-src &#39;none&#39;">
+<meta http-equiv="Content-Security-Policy" content="default-src &#39;self&#39;; script-src &#39;self&#39; https://static.cloudflareinsights.com https://cloud.umami.is; style-src &#39;self&#39;; img-src &#39;self&#39; data:; font-src &#39;self&#39;; connect-src https://cloudflareinsights.com https://gateway.umami.is; worker-src &#39;self&#39;; form-action &#39;self&#39; https://api.web3forms.com; base-uri &#39;none&#39;; object-src &#39;none&#39;">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#16181C" media="(prefers-color-scheme: dark)">
@@ -31,7 +31,8 @@
 <link rel="stylesheet" href="/static/css/site.css?v=20d29602">
 <script src="/static/js/theme.js?v=7e47c1a9"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
-<script src="/static/js/pay.js?v=7eb376c2" defer></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "6ed43d34957a49fcb90ec8e43f7db523"}'></script>
+<script src="/static/js/pay.js?v=1ae99998" defer></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "6ed43d34957a49fcb90ec8e43f7db523"}'></script>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="16c5fa53-e8fc-4c55-892a-5546e7d51830" data-do-not-track="true" data-exclude-search="true" data-exclude-hash="true"></script>
 
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "name": "Privacy", "position": 2}]}]}</script>
 </head>
@@ -69,7 +70,7 @@
   <nav class="crumb small" aria-label="Breadcrumb"><ol class="crumbs"><li><a href="/">Home</a><span class="crumb-sep" aria-hidden="true">›</span></li><li><span aria-current="page">Privacy</span></li></ol></nav>
 
   <h1>Privacy</h1>
-  <p class="notice">Plain-language notice, version 2026-10-29. Where a signed agreement differs, the agreement governs. <a href="/fr/confidentialite/" hreflang="fr" lang="fr">Version française</a></p>
+  <p class="notice">Plain-language notice, version 2026-11-02. Where a signed agreement differs, the agreement governs. <a href="/fr/confidentialite/" hreflang="fr" lang="fr">Version française</a></p>
 
   <details class="legal-sec">
     <summary><h2 id="who">Who we are</h2><span class="ls-sum">Who is responsible for your information.</span></summary>
@@ -87,6 +88,7 @@
     <li>The site is hosted on Cloudflare Pages; before 24 Oct 2026 it was hosted on GitHub Pages. Cloudflare receives visitors’ IP addresses to deliver the pages and protect the site; see <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare’s privacy policy</a>.</li>
     <li>This site sets no cookies.</li>
     <li>Visits are counted with Cloudflare Web Analytics, which sets no cookie and does not follow you from site to site. On the free tools, only anonymous counts of visits and finished steps are sent; your file is never sent. On the Challenge Readiness Check, a finished step (a check, a rule tried, the details opened, an export or a card) is counted once per visit, as a view of a small counting page.</li>
+    <li>Page views and some button clicks are also counted with Umami Cloud, which sets no cookie and does not follow you from site to site. It records the page address (without anything after “?” or “#”), the site you came from, your browser, device type, screen size, language and country, and which counted button you pressed (a “Take the test” button, the payment link, a free tool’s run or calculate button, or running the donttrade test). It never receives your file or anything in it. If your browser sends Do Not Track, Umami counts nothing. Umami Cloud may store this outside Canada; see <a href="https://umami.is/privacy">Umami’s privacy policy</a>.</li>
     <li>Your light/dark choice is stored only in your own browser. If you buy the donttrade test, your access key is stored there too; keep your restore link, because clearing the site’s data removes the key.</li>
   </ul>
   </details>
@@ -142,7 +144,7 @@
     <summary><h2 id="rights">Your rights</h2><span class="ls-sum">Ask to see, correct or delete your information.</span></summary>
   <p>You can ask by email to see, correct or delete your information, or for a copy in a common format. We reply within 30 days. You can also complain to the <a href="https://www.priv.gc.ca/en/">Office of the Privacy Commissioner of Canada</a>, in Quebec to the Commission d’accès à l’information, in the EU to your country’s data protection authority, and in the UK to the Information Commissioner’s Office. If a privacy breach creates a real risk of significant harm to you, we tell you.</p>
   </details>
-  <p class="small muted">Version 2026-10-29.</p>
+  <p class="small muted">Version 2026-11-02.</p>
 </div></div>
 
 </main>
@@ -161,7 +163,7 @@
   <p class="legal" data-business-id="full">donttrade · Ontario, Canada · 2482 Yonge Street #1216, Toronto, ON M4P 2H5, Canada · <a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a></p>
   <p class="legal">donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.</p>
   <details class="legal legal-more"><summary>No cookies. What this site stores and sends</summary>
-    <p>This site sets no cookies. Visits are counted with Cloudflare Web Analytics, which sets no cookie. It stores your light/dark choice in your own browser and, if you buy the donttrade test, your access key there too. For that test your browser sends our server only stripped trade numbers. The server does not keep them: of those numbers it keeps only a scrambled fingerprint of each trade row from your first result, to match a re-test to the same history. Your file itself is not uploaded. Card payments are handled by Stripe. Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; their privacy policies apply. <a href="/privacy/">Privacy</a></p>
+    <p>This site sets no cookies. Visits are counted with Cloudflare Web Analytics and Umami Cloud, which also counts some button clicks; neither sets a cookie. It stores your light/dark choice in your own browser and, if you buy the donttrade test, your access key there too. For that test your browser sends our server only stripped trade numbers. The server does not keep them: of those numbers it keeps only a scrambled fingerprint of each trade row from your first result, to match a re-test to the same history. Your file itself is not uploaded. Card payments are handled by Stripe. Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; their privacy policies apply. <a href="/privacy/">Privacy</a></p>
   </details>
   <p class="legal">&copy; 2026 donttrade · <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
 </div></footer>
@@ -182,7 +184,7 @@
       <summary>Full details before you pay</summary>
       <div class="pd-full" data-pay-full><p class="small"><a href="/pricing/#before-you-pay">Read the full details on the pricing page</a></p></div>
     </details>
-    <p class="pay-go no-print"><a class="btn" href="https://buy.stripe.com/eVq14m66H9Jw15a0Rwdwc04" rel="noopener">Continue to secure payment</a></p>
+    <p class="pay-go no-print"><a class="btn" href="https://buy.stripe.com/eVq14m66H9Jw15a0Rwdwc04?client_reference_id=privacy" rel="noopener" data-umami-event="pay-continue">Continue to secure payment</a></p>
     <p class="small muted pd-links no-print"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a> · <a href="/terms/#seller">Business details</a></p>
     
   </div>

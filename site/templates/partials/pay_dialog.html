@@ -9,7 +9,7 @@
     fails, or without JavaScript, the link below takes the buyer to /pricing/. No study finding and no sample figure
     in here. -#}
 {%- from "partials/pay_facts.html" import pay_facts %}
-{%- set r = products["report39"] %}{%- set link = r["stripe_link_" + stripe_mode] %}
+{%- set r = products["report39"] %}{%- set link = pay_link %}
 <dialog class="pay-dialog" id="pay-dialog" lang="en" aria-labelledby="pd-h" data-pay-dialog>
   <div class="pd-inner">
     <div class="pd-top">
@@ -21,7 +21,7 @@
       <summary>Full details before you pay</summary>
       <div class="pd-full" data-pay-full><p class="small"><a href="/pricing/#before-you-pay">Read the full details on the pricing page</a></p></div>
     </details>
-    <p class="pay-go no-print">{% if link %}<a class="btn" href="{{ link }}" rel="noopener">Continue to secure payment</a>{% else %}<span class="muted">Payment link not set yet</span>{% endif %}</p>
+    <p class="pay-go no-print">{% if link %}<a class="btn" href="{{ link }}" rel="noopener" data-umami-event="pay-continue">Continue to secure payment</a>{% else %}<span class="muted">Payment link not set yet</span>{% endif %}</p>
     <p class="small muted pd-links no-print"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a> · <a href="/terms/#seller">Business details</a></p>
     {% if stripe_mode == "test" %}<p class="notice notice-caution"><strong>Test mode</strong> Payments here use Stripe's test mode. No real card is charged.</p>{% endif %}
   </div>

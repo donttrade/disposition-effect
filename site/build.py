@@ -979,11 +979,12 @@ def vt_css_problem(out):
 def journal_problem(html, path):
     """D12 / J10: the journal pages load no analytics and keep connect-src and form-action 'none'."""
     import html as _h
-    if path in PAID_DETAILS_PATHS and "cloudflareinsights" in html:
+    loads = "cloudflareinsights" in html or "umami.is" in html
+    if path in PAID_DETAILS_PATHS and loads:
         return f"{path} loads analytics (the pay dialog's details source never does: it is not a pageview)"
     if path not in JOURNAL_PATHS:
         return None
-    if "cloudflareinsights" in html:
+    if loads:
         return f"{path} loads analytics (the journal page never does: ARCHITECT-V3 D12)"
     csp = re.search(r'http-equiv="Content-Security-Policy" content="([^"]+)"', html)
     csp = _h.unescape(csp.group(1)) if csp else ""
@@ -1271,9 +1272,12 @@ PAID_ONLY_PATHS = PAID_APP_PATHS + PAID_DETAILS_PATHS + PAID_ONLY_PATHS_FR
 
 # The footer's privacy sentences. One wording for template pages (partials/footer.html) and
 # passthrough pages (PASSTHROUGH_CHROME), so the two can never disagree with /privacy/.
-def footer_privacy(flags):
+def footer_privacy(flags, umami=False):
     if flags["analytics"]:
         parts = ["This site sets no cookies. Visits are counted with Cloudflare Web Analytics, which sets no cookie."]
+        if umami:
+            parts = ["This site sets no cookies. Visits are counted with Cloudflare Web Analytics and Umami Cloud, "
+                     "which also counts some button clicks; neither sets a cookie."]
     else:
         parts = ["This site sets no cookies and runs no analytics."]
     if flags["paid_report"]:
@@ -1397,11 +1401,13 @@ PASSTHROUGH_CHROME = [
 ]
 
 
-def fix_passthrough_chrome(text, rel, flags):
+def fix_passthrough_chrome(text, rel, flags, umami=False):
     for old, new, expected in PASSTHROUGH_CHROME:
         n = text.count(old)
         if (expected is None and n < 1) or (expected is not None and n != expected):
             die(f"passthrough chrome: {rel} holds {old!r} {n} time(s), expected {expected or 'at least 1'}")
+        if new is footer_privacy:
+            new = footer_privacy(flags, umami)
         text = text.replace(old, new(flags) if callable(new) else new)
     return text
 
@@ -1603,13 +1609,13 @@ def check_flags(flags, toml_path):
 SITE_SCHEMA = {
     "site": ({"name", "base_url", "contact_email", "reply_promise"}, None),
     "flags": (set(), None),
-    "analytics": ({"cf_beacon_token"}, {"cf_beacon_token"}),
+    "analytics": ({"cf_beacon_token"}, {"cf_beacon_token", "umami_website_id"}),
     "stripe": ({"mode"}, {"mode"}),
     "forms": ({"endpoint", "firm_key", "trader_key", "redirect_firm", "redirect_trader"}, None),
     "worker": ({"api_base"}, {"api_base"}),
     "legal": ({"launch_date", "terms_date", "cloudflare_pages_since", "disclaimer_short", "disclaimer_long"},
               {"launch_date", "terms_date", "cloudflare_pages_since", "disclaimer_short", "disclaimer_long",
-               "show_seller_for_pilot"}),
+               "show_seller_for_pilot", "privacy_date"}),
 }  # table: (required keys, every allowed key or None when the table is open)
 
 
@@ -1829,6 +1835,29 @@ def set_hosting_date(legal, toml_path, today=None):
     return d
 
 
+def set_privacy_date(legal, toml_path, today=None):
+    """2 Nov (Umami Cloud named on /privacy/): optional [legal] privacy_date, YYYY-MM-DD, the day of the latest
+    edit to the privacy notice alone (/privacy/, /fr/confidentialite/). Like cloudflare_pages_since it moves only
+    legal.privacy_version (the later of the two and the terms version), never the terms. A future date fails.
+    Call it after set_hosting_date."""
+    import datetime as dt
+    today = today or dt.date.today()
+    raw = legal.get("privacy_date", "")
+    if raw == "":
+        return None
+    if not isinstance(raw, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", raw):
+        die(f"[legal] privacy_date {raw!r} is not YYYY-MM-DD ({toml_path})")
+    try:
+        d = dt.date.fromisoformat(raw)
+    except ValueError:
+        die(f"[legal] privacy_date {raw!r} is not a real date ({toml_path})")
+    if d > today:
+        die(f"[legal] privacy_date {raw} is after the build date {today.isoformat()}: the privacy pages would "
+            f"state a version that has not come yet ({toml_path})")
+    legal["privacy_version"] = max(legal["privacy_version"], d.isoformat())
+    return d
+
+
 CHANNEL_HOSTS = {"x.com", "github.com", "donttrade.substack.com", "www.linkedin.com", "www.tiktok.com", "www.youtube.com",
                  "www.instagram.com"}
 CHANNEL_FIELDS = ("id", "name", "url", "text", "icon", "rel_me")
@@ -1874,6 +1903,7 @@ def load_config():
     set_launch_date(cfg["legal"], toml_path)
     set_terms_date(cfg["legal"], toml_path)
     set_hosting_date(cfg["legal"], toml_path)
+    set_privacy_date(cfg["legal"], toml_path)
     cfg["site"].setdefault("manual_restore", True)
     if type(cfg["site"]["manual_restore"]) is not bool:
         die(f"[site] manual_restore must be true or false, not {cfg['site']['manual_restore']!r} ({toml_path})")
@@ -1884,6 +1914,9 @@ def load_config():
             f"paid_report={flags['paid_report']} ({toml_path})")
     if flags["analytics"] and not cfg["analytics"]["cf_beacon_token"]:
         die("analytics = true but [analytics] cf_beacon_token is empty")
+    uid = cfg["analytics"].get("umami_website_id", "")
+    if not isinstance(uid, str) or (uid and not UMAMI_ID_RE.fullmatch(uid)):
+        die(f"[analytics] umami_website_id {uid!r} must be empty or an Umami website ID (a UUID) ({toml_path})")
     mode = cfg["stripe"]["mode"]
     if mode not in ("test", "live"):
         die(f"[stripe] mode must be test or live, not {mode!r}")
@@ -1939,6 +1972,21 @@ def report_link_fr(product, mode):
     return en + ("&" if "?" in en else "?") + "locale=fr"
 
 
+def pay_ref(path):
+    """2 Nov (sale attribution): the page's slug as Stripe's client_reference_id, so the payment records which page
+    the buyer paid from. "/" is home, "/tools/trade-stats/" tools-trade-stats. Stripe allows letters, digits, "-"
+    and "_", up to 200 characters; nothing personal goes in it."""
+    slug = path.strip("/").replace("/", "-") or "home"
+    return re.sub(r"[^A-Za-z0-9_-]", "-", slug)[:200]
+
+
+def with_client_ref(link, path):
+    """The Payment Link with ?client_reference_id=<pay_ref(path)> (a Payment Link URL parameter), or None."""
+    if not link:
+        return link
+    return link + ("&" if "?" in link else "?") + "client_reference_id=" + pay_ref(path)
+
+
 def lift_sections(rel_path):
     """{id: html} for each <h2 id=...> section of an old docs/ page's <main>, verbatim.
 
@@ -1987,6 +2035,25 @@ def usd_fr(n):
 
 
 BEACON_CONNECT = "https://cloudflareinsights.com"   # the analytics beacon's one connect-src host
+BEACON_SCRIPT = "https://static.cloudflareinsights.com"
+# Umami Cloud (2 Nov): the script's host and its one connect host (it posts to <host>/api/send), only with
+# [analytics] umami_website_id set, on the pages that get the beacon.
+UMAMI_SCRIPT = "https://cloud.umami.is"
+UMAMI_CONNECT = "https://gateway.umami.is"
+UMAMI_ID_RE = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
+
+
+def umami_on(cfg):
+    return bool(cfg["flags"]["analytics"] and cfg["analytics"].get("umami_website_id"))
+
+
+def analytics_hosts(cfg):
+    """(script-src hosts, connect-src hosts) that a page with analytics adds to its CSP."""
+    script, connect = [BEACON_SCRIPT], [BEACON_CONNECT]
+    if umami_on(cfg):
+        script.append(UMAMI_SCRIPT)
+        connect.append(UMAMI_CONNECT)
+    return script, connect
 
 
 def csp_for(page, cfg):
@@ -1998,17 +2065,19 @@ def csp_for(page, cfg):
         # 29 Oct: 'none' may not stand beside a host (CSP3; the browser ignores it and logs a console error on
         # every page), so with the beacon the directive is the beacon host alone, which is the same policy.
         a = cfg["flags"]["analytics"]
-        return ("default-src 'self'; script-src 'self'" + (" https://static.cloudflareinsights.com" if a else "") +
+        sh, ch = analytics_hosts(cfg)
+        return ("default-src 'self'; script-src 'self'" + ("".join(" " + h for h in sh) if a else "") +
                 "; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src " +
-                (BEACON_CONNECT if a else "'none'") +
+                (" ".join(ch) if a else "'none'") +
                 "; worker-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'")
     connect = page.get("connect_src", "'none'")
     if page.get("connect_worker"):
         connect = "'self' " + cfg["worker"]["api_base"]
     beacon = cfg["flags"]["analytics"] and not page.get("no_analytics")   # D12: never on the journal
+    sh, ch = analytics_hosts(cfg)
     if beacon:   # never "'none' <host>": the browser ignores 'none' there and logs an error (CSP3)
-        connect = BEACON_CONNECT if connect == "'none'" else connect + " " + BEACON_CONNECT
-    script = "'self'" + (" https://static.cloudflareinsights.com" if beacon else "")
+        connect = " ".join(ch) if connect == "'none'" else connect + " " + " ".join(ch)
+    script = "'self'" + ("".join(" " + h for h in sh) if beacon else "")
     forms = ("'none'" if page.get("no_forms") else
              "'self' https://api.web3forms.com" + "".join(" " + a for a in page.get("form_action", [])))
     return ("default-src 'self'; script-src " + script + "; style-src 'self'; img-src 'self' data:; "
@@ -2450,7 +2519,7 @@ def build():
         fp = os.path.join(out, rel)
         with open(fp, encoding="utf-8") as f:
             text = f.read()
-        text = fix_passthrough_chrome(text, rel, flags)
+        text = fix_passthrough_chrome(text, rel, flags, umami_on(cfg))
         text = add_passthrough_csp(text, rel)
         text = add_business_line(text, rel, business_id_line(cfg, private, url=url_of(rel),
                                                              lang=passthrough_lang(text)))
@@ -2494,11 +2563,10 @@ def build():
                 "legal": cfg["legal"], "forms": cfg["forms"], "analytics": cfg["analytics"],
                 "worker": cfg["worker"], "prices": prices, "products": products, "private": private,
                 "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": tools_for(flags),
-                "tool_previews": tool_previews(), "evidence": evidence(), "latest": latest(), "footer_privacy": footer_privacy(flags), "show_seller": show_seller(cfg),
+                "tool_previews": tool_previews(), "evidence": evidence(), "latest": latest(), "footer_privacy": footer_privacy(flags, umami_on(cfg)), "umami_on": umami_on(cfg), "show_seller": show_seller(cfg),
                 "strings": read_toml(os.path.join(SITE, "config", "strings.toml"), "strings.toml"),
                 "paid_method": paid_method(),
                 "method_name": next((e.get("name") for e in report_methods() if e["method"] == page_method_version()), None),
-                "report_link_fr": report_link_fr(products["report39"], cfg["stripe"]["mode"]),
                 "preview": preview_name()}
     built, rendered = [], []
 
@@ -2514,6 +2582,9 @@ def build():
         if not flags["ask_box"]:
             page["scripts"] = [s for s in page["scripts"] if s not in ASK_SCRIPTS]
         extra = {"sample_csv": sample_csv()} if page.get("sample") else {}
+        # the trader Stripe link, built here only: every page's copy names the page it is on (client_reference_id)
+        extra["pay_link"] = with_client_ref(products["report39"]["stripe_link_" + cfg["stripe"]["mode"]], page["path"])
+        extra["report_link_fr"] = with_client_ref(report_link_fr(products["report39"], cfg["stripe"]["mode"]), page["path"])
         if page.get("presets"):
             lib_ = challenge_presets()
             extra["presets"] = lib_

@@ -194,10 +194,11 @@ def test_sample_run_is_repeatable_local_and_clean(browser, built_site):
     # the check runs paired streams (method 2026-10-29.r1); the example's days on the file's own clock
     py = R.simulate({"mode": "file", "days": demo_days(), "rules": RULES[0], "seed": 20261022, "runs": 10000, "stream": "paired"})
     assert first == {k: f"{py[k]:,}" for k in ("pass", "bust", "timeout")}
-    beacon = ("https://static.cloudflareinsights.com/", "https://cloudflareinsights.com/cdn-cgi/rum")
+    beacon = ("https://static.cloudflareinsights.com/", "https://cloudflareinsights.com/cdn-cgi/rum",
+              "https://cloud.umami.is/", "https://gateway.umami.is/")   # 2 Nov: Umami Cloud, on the same pages
     for method, url in log["requests"]:
         if url.startswith(beacon):
-            continue   # the live analytics beacon (the counting page's and this page's): no file data
+            continue   # the live analytics (Cloudflare beacon, Umami Cloud; the counting page's and this page's): no file data
         assert url.startswith(built_site["url"] + "/"), url
         path = url[len(built_site["url"]):]
         # same-origin static files, or a counting page (a finished example run; Expert details opened), path only

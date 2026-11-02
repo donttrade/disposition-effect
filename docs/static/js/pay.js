@@ -5,7 +5,8 @@
 // link that opened it. "Full details before you pay" copies the #before-you-pay block on demand (from this page when
 // it has one, as /pricing/ does, else from a hidden same-origin frame of /before-you-pay/, removed once read), so only
 // build.ADDRESS_LINE_PATHS carry the seller's address in their HTML and no page needs connect-src. /before-you-pay/
-// loads no analytics, so opening the details is not counted as a pageview of /pricing/ or any page. Stores and sends nothing.
+// loads no analytics, so opening the details is not counted as a pageview of /pricing/ or any page. Stores nothing;
+// with Umami on, opening the dialog sends Umami the fixed event name pay-open, nothing else.
 (function () {
   'use strict';
   // /pricing/'s #last-step and #byp-more <details> are open in the HTML (for visitors without JavaScript). Close each
@@ -86,6 +87,9 @@
     if (menu) { menu.open = false; opener = menu.querySelector('summary'); } else opener = a;
     dlg.showModal();
     document.documentElement.classList.add('pd-open');
+    // Umami Cloud (2 Nov): the fixed event name pay-open. Not a data-umami-event attribute on the buy links: Umami's
+    // own click handler would cancel this one and follow the link to /pricing/#last-step instead of the dialog.
+    try { if (window.umami && typeof window.umami.track === 'function') window.umami.track('pay-open'); } catch (err) { /* counting never blocks paying */ }
   });
   dlg.addEventListener('close', function () {
     document.documentElement.classList.remove('pd-open');

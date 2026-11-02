@@ -83,7 +83,8 @@ def test_analytics_on_calculators_allow_only_the_beacon(tmp_path):
     out, _ = _flag_build(tmp_path, "a", analytics=True)
     for path in CALCS:
         d = _csp(_file(out, path).read_text(encoding="utf-8"))
-        assert d["connect-src"] == "https://cloudflareinsights.com", d   # 29 Oct: never "'none' <host>" (CSP3)
+        # 29 Oct: never "'none' <host>" (CSP3); 2 Nov: + Umami Cloud's one connect host when its website ID is set
+        assert d["connect-src"] in ("https://cloudflareinsights.com", "https://cloudflareinsights.com https://gateway.umami.is"), d
         assert d["worker-src"] == "'none'" and d["form-action"] == "'none'", d
 
 

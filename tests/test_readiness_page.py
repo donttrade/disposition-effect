@@ -27,7 +27,8 @@ BRIEF_BANNED = re.compile(r"\b(recommend\w*|should|fix|fixes|fixed it|coach\w*|m
                           r"certified|verified|audited|seal\w*)\b", re.IGNORECASE)
 JARGON = ["bootstrap", "resample", "seed", "Monte Carlo", "percentile", "confidence interval", "EOD", "drawdown model"]
 FUTURE = re.compile(r"\b(you will (pass|fail)|your chances|odds of passing|ready to buy|best rule|best firm|safest|you should)\b", re.I)
-BEACON = ("https://static.cloudflareinsights.com/", "https://cloudflareinsights.com/cdn-cgi/rum")
+BEACON = ("https://static.cloudflareinsights.com/", "https://cloudflareinsights.com/cdn-cgi/rum",
+          "https://cloud.umami.is/", "https://gateway.umami.is/")   # 2 Nov: Umami Cloud, beside the beacon
 # 127.0.0.1 only: the beacon's report is refused by CORS. And a timing warning about the site-wide font preload in
 # base.html ("preloaded using link preload but not used within a few seconds"): it depends on how fast the run is.
 LOCAL_ONLY = ("cloudflareinsights.com/cdn-cgi/rum", "Failed to load resource: net::ERR_FAILED",

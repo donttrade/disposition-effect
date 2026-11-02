@@ -62,7 +62,9 @@ def test_csp_blocks_all_connections(built_site):
     html = (built_site["out"] / "tools" / "trade-stats" / "index.html").read_text()
     csp = re.search(r'http-equiv="Content-Security-Policy" content="([^"]+)"', html).group(1)
     # 29 Oct: with analytics on, the beacon host alone (never "'none' <host>", which browsers reject: CSP3)
-    assert "connect-src &#39;none&#39;;" in csp or "connect-src https://cloudflareinsights.com;" in csp
+    # 2 Nov: Umami Cloud's one connect host beside it when [analytics] umami_website_id is set
+    assert ("connect-src &#39;none&#39;;" in csp or "connect-src https://cloudflareinsights.com;" in csp
+            or "connect-src https://cloudflareinsights.com https://gateway.umami.is;" in csp)
 
 
 def test_sample_matches_reference_and_sends_nothing(browser, built_site):
