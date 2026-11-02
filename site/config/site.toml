@@ -29,7 +29,7 @@ journal = false            # the free Trading Journal + P&L Calendar (/journal/,
 whatif_ranked = false      # Challenge Readiness Check: ranked "Biggest changes on your past days" rules: off until a securities lawyer clears the strings (ARCHITECT-CHALLENGE-READINESS §2.7.5)
 
 [analytics]
-cf_beacon_token = "cdac673936b54f08beb5991aaae13975"       # required when analytics = true
+cf_beacon_token = "6ed43d34957a49fcb90ec8e43f7db523"       # required when analytics = true
 
 [stripe]
 mode = "live"              # which prices.json link the paid build renders: "test" or "live"
