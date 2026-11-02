@@ -64,7 +64,7 @@
     the only Stripe link on the page) and Firms (invoiced: no card link; its button goes to the Pilot request). Then
     the "Free for everyone" strip. No sample figure and no study finding on this page, so none sits beside a buy
     button. Every old id stays as an anchor (the firm ones inside the Firms card), so old links still land. -#}
-{%- set link = r["stripe_link_" + stripe_mode] %}
+{%- set link = pay_link %}
 <div class="wrap">
   {% include "partials/crumbs.html" %}
   <h1>One test. Two ways to buy it.</h1>
@@ -97,7 +97,7 @@
             <summary>Full details before you pay</summary>
             {% include "partials/before_you_pay.html" %}
           </details>
-          <p class="pay-go no-print">{% if link %}<a class="btn" href="{{ link }}" rel="noopener">Continue to secure payment</a>{% else %}<span class="muted">Payment link not set yet</span>{% endif %}</p>
+          <p class="pay-go no-print">{% if link %}<a class="btn" href="{{ link }}" rel="noopener" data-umami-event="pay-continue">Continue to secure payment</a>{% else %}<span class="muted">Payment link not set yet</span>{% endif %}</p>
           <p class="small muted pay-links no-print"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a> · <a href="/terms/#seller">Business details</a></p>
         </div>
       </details>

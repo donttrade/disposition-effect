@@ -272,7 +272,10 @@ def _toml_launch(tmp, value, extra="", terms=None):
 # ------------------------------------------------------------------ 29 Oct (one product): [legal] terms_date
 def test_terms_date_versions_the_terms_and_the_trial_date_keeps_launch_date(tmp_path):
     from test_legal import build
-    r, out = build(tmp_path, "td", DT_SITE_TOML=_toml_launch(tmp_path, "2026-10-20", terms="2026-10-27"))
+    p = _toml_launch(tmp_path, "2026-10-20", terms="2026-10-27")
+    src = open(p, encoding="utf-8").read()   # 2 Nov: without [legal] privacy_date, which would be later still
+    open(p, "w", encoding="utf-8").write(re.sub(r'(?m)^privacy_date = "[^"]*"', 'privacy_date = ""', src))
+    r, out = build(tmp_path, "td", DT_SITE_TOML=p)
     assert r.returncode == 0, r.stderr
     terms = _visible(out, "/terms/")
     assert "Version 2026-10-27." in terms and "called “Trial” before 20 Oct 2026" in terms

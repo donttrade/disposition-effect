@@ -1,2 +1,10 @@
 {#- Cloudflare Web Analytics beacon: rendered only when flags.analytics is true (step 27). -#}
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "{{ analytics.cf_beacon_token }}"}'></script>
+{#- Umami Cloud (2 Nov, owner: visitor funnels), on the same pages, only with [analytics] umami_website_id set.
+    data-do-not-track: nothing is sent when the browser sends Do Not Track. data-exclude-search and
+    data-exclude-hash: the address it records is the path alone, so /welcome/'s ?session_id= and /report/'s #t=
+    access key never reach it. Its error and performance reports stay off (no data-errors, no data-performance),
+    and no data-umami-event-* property is used, so only page views and fixed event names are sent. -#}
+{%- if umami_on %}
+<script defer src="https://cloud.umami.is/script.js" data-website-id="{{ analytics.umami_website_id }}" data-do-not-track="true" data-exclude-search="true" data-exclude-hash="true"></script>
+{%- endif %}

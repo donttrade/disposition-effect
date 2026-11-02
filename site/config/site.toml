@@ -30,6 +30,10 @@ whatif_ranked = false      # Challenge Readiness Check: ranked "Biggest changes 
 
 [analytics]
 cf_beacon_token = "6ed43d34957a49fcb90ec8e43f7db523"       # required when analytics = true
+# Umami Cloud (owner decision 2 Nov: visitor funnels, free Hobby plan), beside the Cloudflare beacon and on exactly
+# the pages that get it. Empty = off. Its script (cloud.umami.is) and its one connect host (gateway.umami.is) are
+# in the CSP only when this is set and analytics = true. /privacy/ and /fr/confidentialite/ name it.
+umami_website_id = "16c5fa53-e8fc-4c55-892a-5546e7d51830"
 
 [stripe]
 mode = "live"              # which prices.json link the paid build renders: "test" or "live"
@@ -65,6 +69,10 @@ terms_date = "2026-10-29"
 # step 83), YYYY-MM-DD. Stated on /privacy/ and /fr/confidentialite/. Required: empty or a date after
 # the build date fails the build. The privacy notice's version is the later of this and launch_date.
 cloudflare_pages_since = "2026-10-24"
+# The day of the latest edit to the privacy notice alone (/privacy/, /fr/confidentialite/), YYYY-MM-DD, optional.
+# Like cloudflare_pages_since it moves only the privacy version (the latest of the three), never the terms.
+# 2 Nov: Umami Cloud named beside Cloudflare Web Analytics.
+privacy_date = "2026-11-02"
 # Verbatim from NON-ADVISER-DESIGN-AND-AUTORENEW A3 (the only approved wording).
 disclaimer_short = "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results."
 disclaimer_long = "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results."

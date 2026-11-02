@@ -24,6 +24,10 @@
     <li>This site sets no cookies.</li>
     {%- if flags.analytics %}
     <li>Visits are counted with Cloudflare Web Analytics, which sets no cookie and does not follow you from site to site. On the free tools, only anonymous counts of visits and finished steps are sent; your file is never sent. On the Challenge Readiness Check, a finished step (a check, a rule tried, the details opened, an export or a card) is counted once per visit, as a view of a small counting page.</li>
+    {%- if umami_on %}
+    {#- 2 Nov (owner: visitor funnels): Umami Cloud, on the same pages as Cloudflare Web Analytics ([analytics] umami_website_id). #}
+    <li>Page views and some button clicks are also counted with Umami Cloud, which sets no cookie and does not follow you from site to site. It records the page address (without anything after “?” or “#”), the site you came from, your browser, device type, screen size, language and country, and which counted button you pressed (a “Take the test” button, the payment link, a free tool’s run or calculate button, or running the donttrade test). It never receives your file or anything in it. If your browser sends Do Not Track, Umami counts nothing. Umami Cloud may store this outside Canada; see <a href="https://umami.is/privacy">Umami’s privacy policy</a>.</li>
+    {%- endif %}
     {%- else %}
     <li>This site runs no analytics.</li>
     {%- endif %}

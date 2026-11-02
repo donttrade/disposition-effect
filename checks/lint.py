@@ -564,6 +564,35 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
         out += lint_text_fr(readable_text(strip_disclaimers(html)), where)
     if analytics is False and "cloudflareinsights" in html:
         out.append(("flag:beacon", where, "analytics beacon with analytics = false"))
+    out += umami_problems(html, where, analytics)
+    return out
+
+
+UMAMI_TAG_RE = re.compile(r'<script\b[^>]*\bsrc="https://cloud\.umami\.is/script\.js"[^>]*>')
+UMAMI_REQUIRED = ('data-do-not-track="true"', 'data-exclude-search="true"', 'data-exclude-hash="true"')
+
+
+def umami_problems(html, where, analytics):
+    """2 Nov: Umami Cloud loads only beside the Cloudflare beacon (the same pages, never /before-you-pay/ or the
+    journal), never with analytics = false, and always with Do Not Track respected and the address reduced to its
+    path (no ?query, no #hash: /welcome/'s session id and /report/'s access key)."""
+    tags = UMAMI_TAG_RE.findall(html)
+    if not tags:
+        return []
+    out = []
+    if analytics is False:
+        out.append(("flag:umami", where, "Umami Cloud script with analytics = false"))
+    if "static.cloudflareinsights.com/beacon.min.js" not in html:
+        out.append(("flag:umami", where, "Umami Cloud script on a page without the Cloudflare beacon"))
+    if len(tags) != 1:
+        out.append(("flag:umami", where, f"Umami Cloud script {len(tags)} times"))
+    for tag in tags:
+        for a in UMAMI_REQUIRED:
+            if a not in tag:
+                out.append(("flag:umami", where, f"Umami Cloud script without {a}"))
+        for a in ("data-errors", "data-performance", "data-host-url"):
+            if a in tag:
+                out.append(("flag:umami", where, f"Umami Cloud script with {a}"))
     return out
 
 
@@ -871,6 +900,8 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, b
                         problems.append(("flag:seller_identity", rel, "private.toml value in the build, where the seller block is off"))
             if not analytics and "cloudflareinsights" in s:
                 problems.append(("flag:beacon", rel, "analytics beacon"))
+            if not analytics and "cloud.umami.is" in s:
+                problems.append(("flag:umami", rel, "Umami Cloud script"))
             if not badges and name.endswith((".html", ".js")):
                 problems += free_badge_problems(s, rel)
     return problems

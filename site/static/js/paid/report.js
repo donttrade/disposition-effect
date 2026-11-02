@@ -1,7 +1,8 @@
 // report.js — /report/ (paid flag only).
 //
 // 1. The trade file is parsed IN THIS TAB by the same engine as the free tools.
-// 2. strip.js reduces it to StrippedRows; pgr.js to four counts. Nothing else is sent.
+// 2. strip.js reduces it to StrippedRows; pgr.js to four counts. Nothing else is sent (to our server; Umami
+//    Cloud gets only the fixed event name report-run, see run()).
 // 3. POST /analyse with the access token → the Report → rendered here.
 // Every number on the page comes from the server's Report or from the file in this
 // tab; the wording only describes past trades (NON-ADVISER A3).
@@ -492,6 +493,9 @@ async function run(file) {
   if (!token) { status('No access found on this device. Open the restore link or restore file you saved after paying.', 'error'); return; }
   const payload = decodeToken(token);
   if (!payload) { status('This access link is damaged. Use your restore link.', 'error'); return; }
+  // Umami Cloud (2 Nov): one fixed event name per run. There is no Run button (choosing or dropping the file runs
+  // it), so no data-umami-event attribute can count it. Nothing from the file or the token goes with it.
+  try { if (window.umami && typeof window.umami.track === 'function') window.umami.track('report-run'); } catch (e) { /* counting never stops a run */ }
   status('Reading your file in this tab…');
   const parsed = runFile(new Uint8Array(await file.arrayBuffer()));
   if (parsed.error) { status(parsed.error.message, 'error'); return; }

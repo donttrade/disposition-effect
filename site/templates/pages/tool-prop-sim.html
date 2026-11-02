@@ -152,7 +152,7 @@
           <textarea id="ps-paste" rows="6" spellcheck="false" aria-describedby="ps-paste-hint ps-paste-err"></textarea>
           <p class="error" id="ps-paste-err" hidden></p>
         </div>
-        <p class="btn-row"><button class="btn btn-secondary" id="ps-paste-btn" type="button">Read the table</button></p>
+        <p class="btn-row"><button class="btn btn-secondary" id="ps-paste-btn" type="button" data-umami-event="tool-run-importer">Read the table</button></p>
         <details class="how-group"><summary>Tips for TradeLocker and DXtrade</summary>
           <p>TradeLocker: open the History panel and paste one screen at a time.</p>
           <p>DXtrade: open Trading Journal, then Order History. One paste holds about a month.</p>
@@ -173,13 +173,13 @@
         {{ field("ps-tpd", "Trades per trading day", "A whole number from 1 to 50.", "numeric") }}
       </div>
       <div id="ps-errors" class="notice notice-error" role="alert" tabindex="-1" hidden></div>
-      <p><button class="btn" id="ps-run" type="submit">Run the check</button></p>
+      <p><button class="btn" id="ps-run" type="submit" data-umami-event="tool-run-readiness">Run the check</button></p>
     </form>
     <p id="ps-status" class="muted" role="status" hidden></p>
   </section>
 
   <div class="rc-out-wrap">
-    <p id="ps-stale" class="notice notice-caution rc-stale-note" role="status" hidden><span>Rules or file changed — run again.</span> <button class="btn btn-secondary" id="ps-stale-run" type="button">Run again</button></p>
+    <p id="ps-stale" class="notice notice-caution rc-stale-note" role="status" hidden><span>Rules or file changed — run again.</span> <button class="btn btn-secondary" id="ps-stale-run" type="button" data-umami-event="tool-run-readiness">Run again</button></p>
     <div id="ps-out" class="tool-out rc-out" hidden></div>
   </div>
 
