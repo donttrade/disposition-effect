@@ -27,11 +27,35 @@ def repo_server():
     srv.shutdown()
 
 
+# 2 Nov (Umami Cloud): no test ever loads the real Umami script or reaches gateway.umami.is (no page view from a test
+# lands in the owner's stats, and the suites pass offline). Every context from the browser fixture answers
+# cloud.umami.is/script.js with this stand-in, which records each umami.track(name, data) call in window.__umamiCalls,
+# and gateway.umami.is with 204. A test that needs the real tracker routes it itself (tests/test_umami.py, a pinned
+# copy in tests/fixtures/umami-script.js); Playwright runs the route registered last first.
+UMAMI_STUB = ("window.umami={track:function(n,d){(window.__umamiCalls=window.__umamiCalls||[])"
+              ".push({name:n,hasData:d!==undefined});return Promise.resolve();}};")
+
+
+def stub_umami(ctx):
+    ctx.route("https://cloud.umami.is/**",
+              lambda r: r.fulfill(status=200, content_type="text/javascript", body=UMAMI_STUB))
+    ctx.route("https://gateway.umami.is/**", lambda r: r.fulfill(status=204, body=""))
+    return ctx
+
+
 @pytest.fixture(scope="session")
 def browser():
     from playwright.sync_api import sync_playwright
     with sync_playwright() as p:
         b = p.chromium.launch()
+        new_context, new_page = b.new_context, b.new_page
+        b.new_context = lambda *a, **kw: stub_umami(new_context(*a, **kw))
+
+        def _new_page(*a, **kw):
+            pg = new_page(*a, **kw)
+            stub_umami(pg.context)
+            return pg
+        b.new_page = _new_page
         yield b
         b.close()
 

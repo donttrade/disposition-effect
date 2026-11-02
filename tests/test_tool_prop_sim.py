@@ -195,15 +195,17 @@ def test_sample_run_is_repeatable_local_and_clean(browser, built_site):
     py = R.simulate({"mode": "file", "days": demo_days(), "rules": RULES[0], "seed": 20261022, "runs": 10000, "stream": "paired"})
     assert first == {k: f"{py[k]:,}" for k in ("pass", "bust", "timeout")}
     beacon = ("https://static.cloudflareinsights.com/", "https://cloudflareinsights.com/cdn-cgi/rum",
-              "https://cloud.umami.is/", "https://gateway.umami.is/")   # 2 Nov: Umami Cloud, on the same pages
+              "https://cloud.umami.is/script.js")   # 2 Nov: Umami's script (the conftest stand-in); never its gateway
     for method, url in log["requests"]:
         if url.startswith(beacon):
-            continue   # the live analytics (Cloudflare beacon, Umami Cloud; the counting page's and this page's): no file data
+            continue   # the analytics scripts (Cloudflare beacon, Umami stand-in; the counting page's and this page's)
         assert url.startswith(built_site["url"] + "/"), url
         path = url[len(built_site["url"]):]
         # same-origin static files, or a counting page (a finished example run; Expert details opened), path only
         assert (method == "GET" and path.startswith("/static/")) or path in (
             "/tools/prop-challenge-simulator/e/ran-sample/", "/tools/prop-challenge-simulator/e/expert/"), url
+    calls = pg.evaluate("window.__umamiCalls || []")   # Umami: fixed names only, never event data
+    assert all(c["name"].startswith("tool-run-") and not c["hasData"] for c in calls), calls
     assert ctx.cookies() == [] and pg.evaluate("Object.keys(localStorage).length + Object.keys(sessionStorage).length") == 0
     body = pg.inner_text("main")
     assert not re.search(r"\b(NaN|Infinity|undefined|null)\b", body)

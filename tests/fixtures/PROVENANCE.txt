@@ -148,3 +148,10 @@ Tester round-2 fixtures (tester2/, tester2_multi/; make_tester_r2.py)
   The Tester's round-2 files (TESTER-REPORT-IMPORTER-ENGINE-R2-2026-10-30): the f2/ files and the
   blank-cell pastes copied unchanged, and the variants the Tester built inside v3/v5/v6/v7.mjs
   rebuilt line for line by make_tester_r2.py. Every row is made up.
+
+umami-script.js (added 2026-11-02, not an engine fixture)
+  Umami Cloud's tracker, https://cloud.umami.is/script.js, downloaded unchanged on 2026-11-02
+  (8575 bytes, sha256 8104cfafda3cc8286be4f63d6c6e841d163e99bfb8f1eca2f9069fed8814168d). Umami is
+  MIT-licensed (github.com/umami-software/umami). tests/test_umami.py serves it in place of the live
+  script so the tests can check what the real tracker sends without loading it from the network. The
+  live script can change; refresh this copy if the owner wants a newer tracker checked.

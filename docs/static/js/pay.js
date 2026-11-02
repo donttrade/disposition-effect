@@ -20,6 +20,15 @@
     if (!(t && d.contains(t))) d.open = false;
     d.classList.add('ls-ready');
   });
+  // Umami Cloud (2 Nov): the fixed event name pay-continue when a Stripe link (data-pay-continue) is clicked. Not a
+  // data-umami-event attribute: on a link, Umami's own handler cancels the click and follows it only once its request
+  // to gateway.umami.is settles, so a slow or hanging gateway would hold up the payment. This listener never calls
+  // preventDefault: the browser follows the link at once, and the request (keepalive) goes on by itself.
+  document.addEventListener('click', function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('a[data-pay-continue]') : null;
+    if (!a) return;
+    try { if (window.umami && typeof window.umami.track === 'function') window.umami.track('pay-continue'); } catch (err) { /* counting never blocks paying */ }
+  }, true);
   var dlg = document.getElementById('pay-dialog');
   if (!dlg || typeof dlg.showModal !== 'function') return;
   var opener = null, loaded = false;

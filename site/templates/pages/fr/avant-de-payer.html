@@ -27,7 +27,7 @@
     {% include "pages/fr/_disclaimer.html" %}
   </section>
   <p class="btn-row no-print">
-    {%- if link %}<a class="btn" href="{{ link }}" rel="noopener" data-umami-event="pay-continue">Continuer vers le paiement sécurisé (Stripe)</a>{% else %}<span class="muted">Lien de paiement pas encore défini</span>{% endif %}
+    {%- if link %}<a class="btn" href="{{ link }}" rel="noopener" data-pay-continue>Continuer vers le paiement sécurisé (Stripe)</a>{% else %}<span class="muted">Lien de paiement pas encore défini</span>{% endif %}
     <a class="btn btn-secondary" href="/pricing/#traders">Retour</a>
     <button class="btn btn-secondary" type="button" data-print>Imprimer ou enregistrer ce résumé</button></p>
   {% if stripe_mode == "test" %}<p class="notice notice-caution"><strong>Mode test</strong> Les paiements utilisent le mode test de Stripe. Aucune vraie carte n’est débitée.</p>{% endif %}
