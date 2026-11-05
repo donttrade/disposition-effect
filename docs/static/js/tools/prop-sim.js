@@ -10,14 +10,14 @@
 // Nothing is stored. With [flags] analytics on, a finished step loads a counting page in a hidden frame (count()).
 // Ranked suggestions are not on this page (whatif_ranked); neither is saving.
 
-import { createFileSlot, renderReadError, whileBusy, clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js?v=595a9d66';
+import { createFileSlot, renderReadError, whileBusy, clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js?v=af9a3c71';
 import { RUNS, DEFAULT_SEED, NO_LIMIT_CAP, METHOD_VERSION, WHATIF_TEXT, groupDays, simulate, ruleLabel, mcError, unavailableText, personalUnavailable, normRules } from './prop-sim-core.js?v=7c28de14';
 import { presetRules, NOT_STATED } from './challenge-presets.js?v=2e7fd947';
 import { HABITS, HABIT_TEXT, itemsFromTrades, isDatesOnly, habitFlags, dayFlags, realBreachDays, simulatedHabits, countFlags, MIN_BREACH_DAYS, MIN_BUSTS } from './habit-flags.js?v=72b76dd0';
-import { drawCard, cardBlob, altText } from '../card/readiness-card.js?v=399d1317';
+import { drawCard, cardBlob, altText } from '../card/readiness-card.js?v=5af81372';
 import { money, unitNote, pct, intText, el, DASH, wholePercent } from './format.js?v=35164924';
 import { parseStrict, parsePositive, parseNonNegative, parseWhole, InputError } from './num.js?v=8df99e34';
-import { SAMPLE_LABEL, FORMAT_NAMES, plural, tableWrap, rowsTable, warningsNotice, showMapStep } from './file-tool.js?v=c0b1300b';
+import { SAMPLE_LABEL, FORMAT_NAMES, plural, tableWrap, rowsTable, warningsNotice, showMapStep } from './file-tool.js?v=07779693';
 
 const $ = (id) => document.getElementById(id);
 const MIN_DAYS = 30;         // fewer trading days in the file: the replays lean on a few days, and the headline says so
@@ -477,7 +477,13 @@ function render() {
     : `${plural(p.trades_per_day, 'trade', 'trades')} a day, each a win or a loss at the rate you entered`;
   const warn = [];
   if (tooFew) warn.push(`Your trades cover ${plural(p.days.length, 'trading day', 'trading days')}, so the results lean heavily on a few days.`);
-  const outcome = el('div', { class: 'rc-card rc-card-wide', id: 'ps-v-outcome' },
+  // Too few days to read: no pass rate anywhere on the page (no bar, legend or "X passed" sentence), as on the card.
+  const outcome = tooFew
+    ? el('div', { class: 'rc-card rc-card-wide', id: 'ps-v-outcome' },
+      el('h3', { text: 'How the replays ended' }),
+      el('p', { text: 'Not shown: with so few trading days, the shares of replays that passed, broke a rule or ran out of time would lean on a few days.' }),
+      last.seq ? el('p', { id: 'ps-real-order', text: realOrderLine(last.seq, p.rules) }) : null)
+    : el('div', { class: 'rc-card rc-card-wide', id: 'ps-v-outcome' },
     el('h3', { text: 'How the replays ended' }),
     stackBar(res, `Passed ${whole(s.pass)}, broke a rule ${whole(s.bust)}, out of time ${whole(s.timeout)}`),
     legend(res),
@@ -496,7 +502,7 @@ function render() {
   setStale(false);
   renderWhatIfForm();
   $('ps-wi-out').hidden = true;
-  $('ps-whatif').hidden = false;
+  $('ps-whatif').hidden = tooFew;   // its lines are pass shares too
   renderExpert();
   $('ps-expert').hidden = false;
   $('ps-share').hidden = false;
@@ -644,6 +650,7 @@ function settingsRows() {
 
 function renderExpert() {
   const { res } = last;
+  const few = last.file && last.p.days.length < MIN_DAYS;   // no outcome shares for a small sample
   const n = res.runs;
   const s = shares(res);
   const rows = [
@@ -655,8 +662,8 @@ function renderExpert() {
     el('caption', { text: `Outcome of ${intText(n)} replays` }),
     el('thead', {}, el('tr', {}, ...['Outcome', 'Runs', 'Share', '± (95%)'].map((h, i) => el('th', { scope: 'col', class: i ? 'num' : null, text: h })))),
     el('tbody', {}, ...rows.map((x) => el('tr', { 'data-outcome': x.key },
-      el('th', { scope: 'row', text: x.label }), el('td', { class: 'num', text: intText(x.n) }), el('td', { class: 'num', text: pct(x.share) }),
-      el('td', { class: 'num', text: `± ${pct(mcError(x.share, n))}` })))));
+      el('th', { scope: 'row', text: x.label }), el('td', { class: 'num', text: few ? DASH : intText(x.n) }), el('td', { class: 'num', text: few ? DASH : pct(x.share) }),
+      el('td', { class: 'num', text: few ? DASH : `± ${pct(mcError(x.share, n))}` })))));
   const facts = [
     ['Busted on the daily loss limit', intText(res.bust_daily), 'bust_daily'],
     ['Busted on the maximum loss', intText(res.bust_max), 'bust_max'],

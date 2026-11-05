@@ -111,7 +111,7 @@ def test_own_file_with_canary_never_reaches_page(browser, built_site):
     wait_done(page)
     html = page.content()
     assert CANARY not in html
-    assert "checked on sample files only" in page.inner_text("#ts-warnings")
+    assert "not yet tested on a real export" in page.inner_text("#ts-warnings")
     assert page.locator('#ts-warnings li[data-code="W_HEDGING"]').count() == 1
     assert ctx.cookies() == [] and page.evaluate("Object.keys(localStorage)") == []
     ctx.close()

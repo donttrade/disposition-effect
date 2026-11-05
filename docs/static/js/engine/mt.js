@@ -6,8 +6,8 @@
 // mapped, so its text never reaches a result. Balance, credit and cancelled rows
 // are skipped and counted. Mirrors parse_mt() in tests/reference/engine_ref.py.
 
-import { clean, parseNumber, parseDate, fallBackClose } from './csv.js?v=94e67b7c';
-import { fail, LIMITS } from './errors.js?v=9df2f80c';
+import { clean, parseNumber, parseDate, fallBackClose } from './csv.js?v=833cffd4';
+import { fail, LIMITS } from './errors.js?v=8e828461';
 
 // Rows of an HTML document, like the reference's _Rows parser:
 // every <tr> in document order, each cell's textContent with whitespace
