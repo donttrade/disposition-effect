@@ -1,6 +1,6 @@
 {#- Firm / platform request form (FORMS-SPEC §A; V2 step 16). Plain HTML POST to Web3Forms:
     works with JavaScript off. Set before including: fid (id prefix), product (default for the
-    hidden field), heading_id (the id of the heading that labels this form), mail_to (optional: the address in the "Prefer email?" line, default site.contact_email), and optionally
+    hidden field), heading_id (the id of the heading that labels this form), redirect (optional: where Web3Forms sends the visitor after posting, default forms.redirect_firm), message_label (optional: the label of the message field), mail_to (optional: the address in the "Prefer email?" line, default site.contact_email), and optionally
     partner = true for the journal/platform partner form.
     form-ref.js, when it runs, copies ?ref= from the URL into the hidden ref field, and ?product=
     into the product field of the FIRM form only. The partner form's product is fixed (Tester D1):
@@ -16,7 +16,7 @@
   <input type="hidden" name="access_key" value="{{ forms.firm_key }}">
   <input type="hidden" name="subject" value="{{ 'donttrade: partner application' if is_partner else 'donttrade: firm request' }}">
   <input type="hidden" name="from_name" value="donttrade site">
-  <input type="hidden" name="redirect" value="{{ forms.redirect_firm }}">
+  <input type="hidden" name="redirect" value="{{ redirect if redirect is defined else forms.redirect_firm }}">
   <input type="hidden" name="product" value="{{ product }}"{% if not is_fixed %} data-from-query="product"{% endif %}{% if no_pilot %} data-refuse="pilot"{% endif %}>
   <input type="hidden" name="page" value="{{ page.path }}">
   <input type="hidden" name="ref" value="" data-from-query="ref">
@@ -27,7 +27,7 @@
     <input id="{{ fid }}-firm" name="firm" type="text" autocomplete="organization" required></div>
   <div class="field"><label for="{{ fid }}-role">Your role <span class="opt">(optional)</span></label>
     <input id="{{ fid }}-role" name="role" type="text" autocomplete="organization-title" placeholder="e.g. Head of Risk"></div>
-  <div class="field"><label for="{{ fid }}-what">What do you want measured? <span class="opt">(optional)</span></label>
+  <div class="field"><label for="{{ fid }}-what">{{ message_label if message_label is defined else 'What do you want measured?' }} <span class="opt">(optional)</span></label>
     <textarea id="{{ fid }}-what" name="message" rows="3" placeholder="{{ placeholder if placeholder is defined else 'e.g. whether funded traders close winning positions sooner than losing ones' }}"></textarea></div>
   <p><button class="btn" type="submit">Send the request</button></p>
   <p class="small muted">We use these details only to reply. {{ site.reply_promise }} <a href="/privacy/">Privacy notice</a></p>

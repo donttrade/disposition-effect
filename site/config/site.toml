@@ -46,6 +46,7 @@ endpoint = "https://api.web3forms.com/submit"
 firm_key = "f8fdba04-71bb-4856-b700-01ac6796c252"     # Web3Forms access keys are public by design
 trader_key = "54d01baf-5e02-4d93-988c-16cf5487732d"
 redirect_firm = "https://donttrade.ca/start/thanks/"
+redirect_study = "https://donttrade.ca/for-firms/study-thanks/"   # the free firm study form (5 Nov 2026): its own thank-you page
 redirect_trader = "https://donttrade.ca/for-traders/thanks/"
 redirect_pilot = "https://donttrade.ca/start/pilot-thanks/"   # used only with pilot_checkout = true
 

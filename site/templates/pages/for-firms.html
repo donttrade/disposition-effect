@@ -103,14 +103,14 @@
   <section class="section" aria-labelledby="study-price" data-reveal>
     <h2 id="study-price">What the study costs</h2>
     <p><strong>The study is free.</strong> If the result does not pass, is inconclusive, or is not measured, you owe nothing, and we publish that too.</p>
-    <p>If the result passes the line we registered in advance, you can then buy the donttrade test per evaluation. The founding price is <strong>US{{ prices.study.founding_price_usd|usd }} per evaluation</strong> for the first {{ ["zero","one","two","three","four","five"][prices.study.founding_firms] }} firms that pass. The list price is <strong>US{{ prices.study.list_price_usd|usd }} per evaluation, with a US{{ prices.study.monthly_minimum_usd|usd }} monthly minimum.</strong> Either price is set in writing before you run anything. One evaluation means one trader account checked once. This is separate from the monthly plan further down the page.</p>
+    <p>If the result passes the line we registered in advance, you can then buy the donttrade test per evaluation. The founding price is <strong>US{{ prices.study.founding_price_usd|usd }} per evaluation</strong> for the first {{ (["zero","one","two","three","four","five"][prices.study.founding_firms]) if prices.study.founding_firms in [0,1,2,3,4,5] else prices.study.founding_firms }} firms that pass. The list price is <strong>US{{ prices.study.list_price_usd|usd }} per evaluation, with a US{{ prices.study.monthly_minimum_usd|usd }} monthly minimum.</strong> Either price is set in writing before you run anything. One evaluation means one trader account checked once. This is separate from the monthly plan further down the page.</p>
   </section>
 
   {#- 1g. The study request. A separate form from the Pilot request further down; its product is fixed to "study". #}
   <section class="section" aria-labelledby="study-request" data-reveal>
     <h2 id="study-request">Ask for the study plan</h2>
     <p>Tell us your firm. We send the plan within 1 business day. Nothing is owed.</p>
-    {%- with fid = "fs", product = "study", fixed = true, heading_id = "study-request", placeholder = "e.g. the period and roughly how many accounts you could export", mail_to = "research@donttrade.ca", mail_subject = "Study plan request: [your firm]" %}{% include "partials/form_firm.html" %}{% endwith %}
+    {%- with fid = "fs", product = "study", fixed = true, heading_id = "study-request", placeholder = "e.g. the period and roughly how many accounts you could export", message_label = "Anything else to tell us before we send the plan?", redirect = forms.redirect_study|default(forms.redirect_firm), mail_to = "research@donttrade.ca", mail_subject = "Study plan request: [your firm]" %}{% include "partials/form_firm.html" %}{% endwith %}
   </section>
 
   <section class="section" aria-labelledby="dp-h" data-reveal>
@@ -126,7 +126,7 @@
   {#- Paid tests. Everything below this heading is the earlier paid offer (disposition-effect Pilot and monthly plan, copy-leader and claims tests), unchanged in substance except where marked. #}
   <section class="section" aria-labelledby="paid-h" data-reveal>
     <h2 id="paid-h">Paid tests</h2>
-    <p>These are separate from the free study. One habit today, more being added. Your staff run our public script on your records.</p>
+    <p>Everything from here down is the paid Pilot and monthly plan, with the copy-leader and claims tests. It is separate from the free study above and has its own extract, memo and terms. One habit today, more being added. Your staff run our public script on your records.</p>
     <details class="how-more"><summary>What the paid test measures, in full</summary>
     <p>Do your traders sell winners sooner than losers? We measure the plan gap: the difference between how your traders plan to handle wins and losses and how they actually trade. One measure is available today: the disposition effect, which is whether your traders close winning positions more readily than losing ones.</p>
     <p>Tell us the population and the period. Your staff run a published script inside your systems. You get back <a href="/glossary/#pgr">PGR</a>, <a href="/glossary/#plr">PLR</a>, their pooled ratio and a <a href="/glossary/#t">t statistic</a>, the counts and period behind them, and a one-page memo, each month. The price is published and the same for every firm.</p>
@@ -231,7 +231,7 @@
 
   {#- 7. What stays on your systems, and what comes back. #}
   <section class="section" aria-labelledby="export-h" data-reveal>
-    <h2 id="export-h">What stays on your systems</h2>
+    <h2 id="export-h">Pilot: what stays on your systems</h2>
     <details class="how-more"><summary>Your records stay with you. Only counts come back.</summary>
     <p>Your trade records and account identifiers. The script runs inside your systems on a five-column extract, one row per open position per day plus a row on the day it closes, with no names. From the <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/EXPORT-GUIDE.md">export guide</a>:</p>
     <pre tabindex="0" role="region" aria-label="Example extract: one position as three rows">account_id,date,position_id,closed,pnl
@@ -245,13 +245,13 @@ a7f3,2026-03-04,p91,1,240.00</pre>
       {% include "partials/client_output.html" %}
       <p>That block is the whole of it. No account IDs, position IDs, dates or individual P&amp;L values are printed. The script is one Python file using only the standard library; it makes no network calls.</p>
     </details>
-    <p>Retention: we keep the returned aggregates for the life of your agreement record, and never receive the extract.</p>
+    <p>Pilot retention: we keep the returned aggregates for the life of your agreement record, and never receive the extract.</p>
     </details>
   </section>
 
   {#- 8. What you receive. #}
   <section class="section" aria-labelledby="receive-h" data-reveal>
-    <h2 id="receive-h">What you receive</h2>
+    <h2 id="receive-h">Pilot and monthly plan: what you receive</h2>
     <p>Each month, a one-page memo with these fields:</p>
     <dl class="split" data-reveal data-reveal-stagger>
       <div><dt>The figure</dt><dd>Pooled PGR, PLR and their ratio, with the counts behind them, and the same comparison holding position age fixed, with its 95% interval</dd></div>
