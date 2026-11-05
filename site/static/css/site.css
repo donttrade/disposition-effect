@@ -1049,6 +1049,20 @@ svg.tp { padding: 8px 10px; }
 .heat-l3 { background: color-mix(in srgb, var(--loss) 32%, var(--bg)); }
 .heat-l4 { background: color-mix(in srgb, var(--loss) 42%, var(--bg)); }
 .tool-out .table-wrap:has(> .heatmap) { max-width: 100%; }
+/* 5 Nov (free-tools audit F8): under 560px the 5-7 weekday columns do not fit (two showed, the rest scrolled away), so the
+   same cells are listed one hour block at a time with the weekday in each cell. Wider screens keep the table. */
+.heat-compact { display: none; }
+.heat-hour { margin-block: var(--s-3, 1rem); }
+.heat-hour h4 { margin: 0 0 .35rem; font-family: var(--font-mono); font-size: var(--fs-0); }
+.heat-cells { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.25rem, 1fr)); gap: .35rem; list-style: none; margin: 0; padding: 0; }
+.heat-c { display: flex; flex-wrap: wrap; column-gap: .5rem; padding: .35rem .5rem; border: 1px solid var(--border); border-radius: 4px; font-size: var(--fs-0); }
+.heat-c-day { font-weight: 600; flex: 0 0 100%; }
+.heat-c-total { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.heat-c-n { color: var(--text); white-space: nowrap; }
+@media (max-width: 559px) {
+  .tool-out .table-wrap:has(> .heatmap) { display: none; }
+  .heat-compact { display: block; }
+}
 .table-wrap.table-narrow { max-width: 32rem; }
 .table-narrow th.num { white-space: normal; } /* the recovery table's long header wraps, so both columns fit at 375 px */
 .tool-out .table-wrap.table-wide { max-width: none; } /* the drawdown list: 10 columns */

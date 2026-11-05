@@ -17,6 +17,8 @@
       <button class="pd-close no-print" type="button" data-pay-close aria-label="Close"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg></button>
     </div>
     {{ pay_facts(r, prices.rules) }}
+    {#- 5 Nov (free-tools audit F4): what to bring, said before the buyer pays; a visitor from a calculator has not been asked for a file yet. -#}
+    <p class="pay-bring small">What to bring: an export of your trade history from your broker or platform. <a href="/pricing/#traders">Which files work</a></p>
     <details class="pay-more" data-pay-more>
       <summary>Full details before you pay</summary>
       <div class="pd-full" data-pay-full><p class="small"><a href="/pricing/#before-you-pay">Read the full details on the pricing page</a></p></div>

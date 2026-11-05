@@ -8,7 +8,7 @@
 
 import { parsePositive, InputError } from './num.js';
 import { el, plain } from './format.js';
-import { clearFieldErrors, fieldError, showProblems } from './tool-state.js';
+import { clearFieldErrors, fieldError, showProblems, announceResult } from './form-errors.js';   // not tool-state.js: that pulls in the trade-file parsers
 
 const $ = (id) => document.getElementById(id);
 const LABELS = {
@@ -28,8 +28,9 @@ function syncMode() {
 }
 
 function decimalsOf(x) {
-  const s = String(x);
-  return s.includes('.') ? s.split('.')[1].length : 0;
+  const m = /^(?:\d+)(?:\.(\d+))?(?:e([+-]\d+))?$/i.exec(String(x));   // 12.5, 0.0005, 1e-7, 1.5e-7
+  if (!m) return 0;
+  return Math.max(0, (m[1] ? m[1].length : 0) - (m[2] ? Number(m[2]) : 0));
 }
 
 // Pure calculation, exported for the tests. Inputs are already-validated numbers.
@@ -88,10 +89,16 @@ function shown(x, dp) {
 
 function render(v, r) {
   const n = (x, dp = 2) => shown(x, dp);
+  // The worked lines must reproduce by hand: each product is printed with every decimal its factors have (a product
+  // of 12.34 and 0.1 has three), so dividing the printed numbers gives the printed lots, not a neighbouring figure.
+  const capDp = (d) => Math.min(12, Math.max(2, d));
+  const perDp = capDp(decimalsOf(v.stop) + decimalsOf(v.vpp));
+  const riskDp = v.mode === 'pct' ? capDp(decimalsOf(v.balance) + decimalsOf(v.risk) + 2) : Math.max(2, decimalsOf(v.risk));
+  const trim = (t) => t.replace(/(\.\d{2}\d*?)0+$/, '$1');   // 75.0000 → 75.00, 1.2340 → 1.234
   const lines = [];
-  if (v.mode === 'pct') lines.push(`Risk amount = ${n(v.balance)} × ${n(v.risk, decimalsOf(v.risk))}% = ${n(r.riskAmount)}`);
-  lines.push(`Loss for one lot at the stop = ${n(v.stop, Math.max(2, decimalsOf(v.stop)))} points × ${n(v.vpp, Math.max(2, decimalsOf(v.vpp)))} per point = ${n(r.perLot)}`);
-  lines.push(`Lots = ${n(r.riskAmount)} ÷ ${n(r.perLot)} = ${n(r.lots, 4)}`);
+  if (v.mode === 'pct') lines.push(`Risk amount = ${n(v.balance, Math.max(2, decimalsOf(v.balance)))} × ${n(v.risk, decimalsOf(v.risk))}% = ${trim(n(r.riskAmount, riskDp))}`);
+  lines.push(`Loss for one lot at the stop = ${n(v.stop, Math.max(2, decimalsOf(v.stop)))} points × ${n(v.vpp, Math.max(2, decimalsOf(v.vpp)))} per point = ${trim(n(r.perLot, perDp))}`);
+  lines.push(`Lots = ${trim(n(r.riskAmount, riskDp))} ÷ ${trim(n(r.perLot, perDp))} = ${n(r.lots, 4)}`);
   const kids = [
     el('h2', { id: 'ls-out-h', tabindex: '-1', text: 'Result' }),
     el('dl', { class: 'stats' },
@@ -116,6 +123,7 @@ function render(v, r) {
   $('ls-out').replaceChildren(...kids.filter(Boolean));
   $('ls-out').hidden = false;
   $('ls-out-h').focus();
+  announceResult($('ls-out'), $('ls-out-h'));
 }
 
 function init() {

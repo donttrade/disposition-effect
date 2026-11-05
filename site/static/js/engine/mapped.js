@@ -575,7 +575,7 @@ export function firstTs(res) {
   return t;
 }
 
-const SUM_EXTRA = ['duplicate_rows', 'open_positions', 'pnl_sign', 'wide_rows'];
+const SUM_EXTRA = ['duplicate_rows', 'open_positions', 'pnl_sign', 'wide_rows', 'negative_qty'];
 const OR_EXTRA = ['currency_ignored', 'has_closed_positions', 'has_deals', 'zone_ignored', 'offsets'];
 
 // Parsed files (in time order) → one parser result for finish(). Row numbers are moved past the

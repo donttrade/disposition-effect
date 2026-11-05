@@ -17,9 +17,10 @@
 // Without it this page shows only the descriptive numbers, no checks are run, and a neutral
 // line says a check is coming.
 
-import { createFileSlot, renderReadError, fieldError, revealResult } from './tool-state.js?v=71ddefef';
+import { createFileSlot, renderReadError, fieldError, revealResult } from './tool-state.js?v=314f6558';
+import { showMapStep, hideMap } from './file-tool.js?v=4ef0cd3e';
 import { freeStats, equityCurve, NO_LOSSES } from '../engine/stats.js?v=b2ec2891';
-import { money, unitNote, pct, ratio, duration, day, intText, el, signClass } from './format.js?v=acb0db51';
+import { money, unitNote, pct, ratio, duration, day, intText, el, signClass } from './format.js?v=e808aa0f';
 import { parsePositive, InputError } from './num.js?v=8df99e34';
 
 const $ = (id) => document.getElementById(id);
@@ -51,6 +52,7 @@ function clearOutput() {
   if (worker) { worker.terminate(); worker = null; }
   state = null;
   $('ts-error').hidden = true;
+  hideMap('ts');
   $('ts-out').replaceChildren();
   $('ts-out').hidden = true;
   if ($('ts-teaser')) $('ts-teaser').hidden = true;
@@ -178,7 +180,7 @@ async function render(focus = true) {
   const ddPct = s.max_drawdown_pct === null ? 'enter a starting balance above' : pct(s.max_drawdown_pct);
   out.append(el('section', { 'aria-labelledby': 'ts-all-h' },
     el('h3', { id: 'ts-all-h', text: 'All statistics' }),
-    tableWrap('All statistics', rowsTable('Closed trades, net of fees where the file has them', ['Statistic', 'Value'], [
+    tableWrap('Statistics table', rowsTable('Closed trades, net of fees where the file has them', ['Statistic', 'Value'], [
       ['Winning / losing / break-even trades', { text: `${intText(s.wins)} / ${intText(s.losses)} / ${intText(s.scratch)}`, k: 'wls' }],
       ['Win rate (break-even trades left out)', { text: pct(s.win_rate), k: 'win_rate' }],
       ['Gross profit', m(s.gross_profit, 'gross_profit')],
@@ -192,7 +194,7 @@ async function render(focus = true) {
       ['Longest winning streak', streak(s.max_consec_wins, 'max_consec_wins')],
       ['Longest losing streak', streak(s.max_consec_losses, 'max_consec_losses')],
       ['Largest drawdown (closed-trade equity)', { text: money(-s.max_drawdown_abs, state.unit), k: 'max_drawdown_abs' }],
-      ['Largest drawdown, % of balance', { text: ddPct, k: 'max_drawdown_pct' }],
+      ['Deepest drawdown by %, as % of its high (starting balance plus profit at the high)', { text: ddPct, k: 'max_drawdown_pct' }],
       ['Median hold, winning trades', { text: duration(s.hold_median_win_s), k: 'hold_median_win_s' }],
       ['Median hold, losing trades', { text: duration(s.hold_median_loss_s), k: 'hold_median_loss_s' }],
       ['Losing hold ÷ winning hold', { text: ratio(s.hold_ratio), k: 'hold_ratio' }],
@@ -316,6 +318,7 @@ function init() {
   slot = createFileSlot({
     progressBox: $('ts-progress'), noise: BADGES, onStage: status, onClear: clearOutput,
     onResult: showResult, onNoise,
+    onMapNeeded: (need, choose) => showMapStep('ts', need, choose),
     onError: (err, retry) => renderReadError($('ts-error'), err, retry),
   });
   const input = $('ts-file');

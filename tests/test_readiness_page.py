@@ -339,7 +339,7 @@ def test_whatif_is_paired_and_described(browser, built_site):
     run(pg)
     whatif(pg, "stop_at_day_loss", "50")
     line = pg.inner_text("#ps-wi-line")
-    assert line == "On your past days, with this rule: passed 6% → 9%, broke a rule 94% → 91%, out of time 0% → 0%. 8% of your trades were left out."
+    assert line == "On your past days, with this rule: passed 6% → 9%, broke a rule 94% → 91%, out of time 0% → under 0.1%. 8% of your trades were left out."
     pg.select_option("#ps-wi-rule2", "stop_at_day_loss")
     pg.click("#ps-wi-run")
     assert "Pick two different rules." in pg.inner_text("#ps-wi-errors")

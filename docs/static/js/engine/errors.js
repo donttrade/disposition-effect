@@ -90,6 +90,8 @@ export const WARNING_TEXT = Object.freeze({
     'Your file has dates but no times. Results that depend on the time of day are not available; day-level results still are.',
   W_REFUSED_FILLS:
     'A row was refused because a number like 1,000 had no quotes, so its size is unknown. The later fills of its symbol, from the trade open at that time, were left out rather than paired wrongly.',
+  W_NEGATIVE_QTY:
+    'Some rows have a negative quantity. The Side column decides buy or sell, so the minus sign was ignored. If your platform shows sells as negative sizes and also writes Sell, this is right; if not, check these rows.',
   W_WIDE_ROWS:
     'Some rows have more cells than the headings, as when a name or note holds a comma without quotes, so cells after it may be in the wrong column. Check these rows, or export the file again with quotes.',
   W_DST:

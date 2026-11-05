@@ -8,8 +8,8 @@
 // columns come from: OFFICIAL = the platform's own documentation, 3RD = another importer's help.
 // tests/test_engine_mapped.py checks this table equals PRESETS in tests/reference/engine_ref.py.
 
-import { normHeader, detectDateFormat } from './csv.js?v=7dca0e6f';
-import { MAP_FIELDS, dataRowsAfter, numberQuestion, isBlocked, isNoData, isRagged } from './mapped.js?v=e8a99f4b';
+import { normHeader, detectDateFormat } from './csv.js?v=c56f2198';
+import { MAP_FIELDS, dataRowsAfter, numberQuestion, isBlocked, isNoData, isRagged } from './mapped.js?v=8cfaecfd';
 
 export const PRESET_SEARCH_ROWS = 50; // the heading row must be within the first 50 non-empty rows
 

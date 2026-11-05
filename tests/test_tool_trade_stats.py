@@ -118,14 +118,22 @@ def test_own_file_with_canary_never_reaches_page(browser, built_site):
 
 
 @pytest.mark.parametrize("name,code", [("empty.csv", "E_EMPTY"), ("header_only.csv", "E_HEADER_ONLY"),
-                                       ("one_execution.csv", "E_NO_CLOSED_TRADES"), ("ambiguous_date.csv", "E_AMBIGUOUS_DATE"),
-                                       ("unknown_format.csv", "E_UNKNOWN_FORMAT")])
+                                       ("one_execution.csv", "E_NO_CLOSED_TRADES"), ("ambiguous_date.csv", "E_AMBIGUOUS_DATE")])
 def test_errors_are_shown_with_their_code(browser, built_site, name, code):
     ctx, page, _ = open_page(browser, built_site)
     page.set_input_files("#ts-file", os.path.join(FIX, "errors", name))
     page.wait_for_selector("#ts-error:not([hidden])")
     assert code in page.inner_text("#ts-error")
     assert page.is_hidden("#ts-out")
+    ctx.close()
+
+
+def test_unknown_headings_offer_the_column_picker_not_a_dead_end(browser, built_site):
+    # 5 Nov (free-tools audit F7): the same file used to end in E_UNKNOWN_FORMAT; now the page asks which column is which
+    ctx, page, _ = open_page(browser, built_site)
+    page.set_input_files("#ts-file", os.path.join(FIX, "errors", "unknown_format.csv"))
+    page.wait_for_selector("#ts-map:not([hidden])")
+    assert "Which column is which?" in page.inner_text("#ts-map") and page.is_hidden("#ts-out")
     ctx.close()
 
 

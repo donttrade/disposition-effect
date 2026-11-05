@@ -128,7 +128,7 @@ function episodesTable(d, trades, bal) {
   const cap = d.episodes.length > 10 ? `The 10 deepest of ${intText(d.episodes.length)} drawdowns` : `All ${plural(d.episodes.length, 'drawdown', 'drawdowns')}, deepest first`;
   return el('section', { 'aria-labelledby': 'dd-list-h' },
     el('h3', { id: 'dd-list-h', text: 'The deepest drawdowns' }),
-    Object.assign(tableWrap('The deepest drawdowns', rowsTable(cap, head, rows)), { className: 'table-wrap table-wide' }),
+    Object.assign(tableWrap('Drawdowns table', rowsTable(cap, head, rows)), { className: 'table-wrap table-wide' }),
     el('p', { class: 'small muted', text: 'High, Low and Recovered are the close dates of the trade that set the high, the lowest point and the trade that recovered it. “Trades” counts the trades after the high, up to and including the one that recovered it; “Days” are calendar days from the high to the recovery. A drawdown that has not recovered is counted to the last trade in the file.' }));
 }
 

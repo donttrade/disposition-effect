@@ -17,20 +17,13 @@
 //    blank page or an endless "Reading…" (R2). settled() resolves when no read is in flight,
 //    whichever way the latest one ended, so "Run" can wait for it without hanging (R1).
 
-import { readTradeFile, startProgress, workerError } from './read-file.js?v=2db7d1b9';
-import { LIMITS, MESSAGES } from '../engine/errors.js?v=8ee10796';
-import { el } from './format.js?v=acb0db51';
+import { readTradeFile, startProgress, workerError } from './read-file.js?v=98dc1d67';
+import { LIMITS, MESSAGES } from '../engine/errors.js?v=630ae49e';
+import { el } from './format.js?v=e808aa0f';
 
-// ------------------------------------------------------------------ form errors
-export function clearFieldErrors(ids, summaryBox) {
-  for (const id of ids) {
-    const input = document.getElementById(id);
-    if (input) input.removeAttribute('aria-invalid');
-    const box = document.getElementById(id + '-err');
-    if (box) { box.hidden = true; box.textContent = ''; }
-  }
-  if (summaryBox) summaryBox.hidden = true;
-}
+// Form errors live in form-errors.js (no file parsers behind them); re-exported so every page imports them from here as before.
+import { announceResult } from './form-errors.js?v=78b61002';
+export { clearFieldErrors, fieldError, showProblems, announce, announceResult } from './form-errors.js?v=78b61002';
 
 // QA 25 Oct: after a run, move focus to the result heading and bring the result's top into view
 // (a plain jump, no smooth scroll, under reduced motion).
@@ -38,21 +31,7 @@ export function revealResult(heading) {
   heading.focus({ preventScroll: true });
   const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   heading.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' });
-}
-
-export function fieldError(id, message) {
-  document.getElementById(id).setAttribute('aria-invalid', 'true');
-  const box = document.getElementById(id + '-err');
-  box.textContent = message;
-  box.hidden = false;
-}
-
-// problems: [{id, message}] — a summary that links each message to its field
-export function showProblems(box, problems) {
-  box.replaceChildren(el('strong', { text: problems.length === 1 ? 'One input needs a change' : `${problems.length} inputs need a change` }),
-    el('ul', {}, ...problems.map((x) => el('li', {}, el('a', { href: '#' + x.id, text: x.message })))));
-  box.hidden = false;
-  box.focus();
+  announceResult(heading.parentElement || heading, heading);
 }
 
 // ------------------------------------------------------------------ busy controls

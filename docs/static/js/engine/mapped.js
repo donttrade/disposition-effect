@@ -12,12 +12,12 @@
 // Mirrors parse_mapped(), parse_files() and the helpers around them in tests/reference/engine_ref.py.
 
 import { clean, normHeader, parseNumber, resolveNumberStyle, checkQuoting, parseDateFmt, fallBackClose,
-  numberShape, DATE_FORMATS, wideRows, splitCell, decodeBytes, isHtml, sniffDelimiter, parseCsv, fromPaste } from './csv.js?v=7dca0e6f';
-import { ISO_CURRENCIES, checkCurrencyColumn } from './detect.js?v=fa17739c';
-import { fail, LIMITS } from './errors.js?v=8ee10796';
-import { reqNumber, optNumber, skip, isEmptyRow, htmlRows } from './mt.js?v=22f54b12';
-import { sideLetter } from './generic.js?v=fdcacce4';
-import { CME_MULTIPLIERS } from './tradovate.js?v=a1e46006';
+  numberShape, DATE_FORMATS, wideRows, splitCell, decodeBytes, isHtml, sniffDelimiter, parseCsv, fromPaste } from './csv.js?v=c56f2198';
+import { ISO_CURRENCIES, checkCurrencyColumn } from './detect.js?v=d0d48b1b';
+import { fail, LIMITS } from './errors.js?v=630ae49e';
+import { reqNumber, optNumber, skip, isEmptyRow, htmlRows } from './mt.js?v=44195007';
+import { sideLetter } from './generic.js?v=4572da3e';
+import { CME_MULTIPLIERS } from './tradovate.js?v=99d7e3fa';
 
 // ---------------------------------------------------------------- reading one file or paste
 // An item is the bytes of a file (Uint8Array) or a pasted table ({paste: text}).
@@ -575,7 +575,7 @@ export function firstTs(res) {
   return t;
 }
 
-const SUM_EXTRA = ['duplicate_rows', 'open_positions', 'pnl_sign', 'wide_rows'];
+const SUM_EXTRA = ['duplicate_rows', 'open_positions', 'pnl_sign', 'wide_rows', 'negative_qty'];
 const OR_EXTRA = ['currency_ignored', 'has_closed_positions', 'has_deals', 'zone_ignored', 'offsets'];
 
 // Parsed files (in time order) → one parser result for finish(). Row numbers are moved past the

@@ -10,10 +10,10 @@
 // separate, redesigned feature). The teaser states only figures computed on this page.
 
 import { recoveryGain, drawdowns, openedAfterLoss } from './drawdown-core.js?v=0bcc5aae';
-import { money, pct, plain, day, intText, el } from './format.js?v=acb0db51';
+import { money, pct, plain, day, intText, el } from './format.js?v=e808aa0f';
 import { parsePositive, InputError } from './num.js?v=8df99e34';
-import { clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js?v=71ddefef';
-import { wireFileTool, readSection, tableWrap, rowsTable, plural, reportLead, SAMPLE_LABEL } from './file-tool.js?v=429ae80c';
+import { clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js?v=314f6558';
+import { wireFileTool, readSection, tableWrap, rowsTable, plural, reportLead, SAMPLE_LABEL } from './file-tool.js?v=4ef0cd3e';
 
 const $ = (id) => document.getElementById(id);
 
@@ -128,7 +128,7 @@ function episodesTable(d, trades, bal) {
   const cap = d.episodes.length > 10 ? `The 10 deepest of ${intText(d.episodes.length)} drawdowns` : `All ${plural(d.episodes.length, 'drawdown', 'drawdowns')}, deepest first`;
   return el('section', { 'aria-labelledby': 'dd-list-h' },
     el('h3', { id: 'dd-list-h', text: 'The deepest drawdowns' }),
-    Object.assign(tableWrap('The deepest drawdowns', rowsTable(cap, head, rows)), { className: 'table-wrap table-wide' }),
+    Object.assign(tableWrap('Drawdowns table', rowsTable(cap, head, rows)), { className: 'table-wrap table-wide' }),
     el('p', { class: 'small muted', text: 'High, Low and Recovered are the close dates of the trade that set the high, the lowest point and the trade that recovered it. “Trades” counts the trades after the high, up to and including the one that recovered it; “Days” are calendar days from the high to the recovery. A drawdown that has not recovered is counted to the last trade in the file.' }));
 }
 

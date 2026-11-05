@@ -15,11 +15,12 @@ import { RUNS, DEFAULT_SEED, NO_LIMIT_CAP, METHOD_VERSION, WHATIF_TEXT, groupDay
 import { presetRules, NOT_STATED } from './challenge-presets.js';
 import { HABITS, HABIT_TEXT, itemsFromTrades, isDatesOnly, habitFlags, dayFlags, realBreachDays, simulatedHabits, countFlags, MIN_BREACH_DAYS, MIN_BUSTS } from './habit-flags.js';
 import { drawCard, cardBlob, altText } from '../card/readiness-card.js';
-import { money, unitNote, pct, intText, el, DASH } from './format.js';
+import { money, unitNote, pct, intText, el, DASH, wholePercent } from './format.js';
 import { parseStrict, parsePositive, parseNonNegative, parseWhole, InputError } from './num.js';
-import { SAMPLE_LABEL, FORMAT_NAMES, plural, tableWrap, rowsTable } from './file-tool.js';
+import { SAMPLE_LABEL, FORMAT_NAMES, plural, tableWrap, rowsTable, warningsNotice, showMapStep } from './file-tool.js';
 
 const $ = (id) => document.getElementById(id);
+const MIN_DAYS = 30;         // fewer trading days in the file: the replays lean on a few days, and the headline says so
 const MIN_RULE_BUSTS = 30;   // fewer busts: too few to say which rule broke most (as the old streak line)
 const COUNT_PATH = '/tools/prop-challenge-simulator/e/';
 let presets = { presets: [], firms: [], rules_lib: '' };
@@ -34,7 +35,7 @@ let pending = null;    // resolves the running worker job; cancelWork() ends it 
 let slot = null;
 const counted = new Set();
 
-const whole = (x) => `${Math.round(x * 100)}%`;
+const whole = wholePercent;
 function mode() { return document.querySelector('input[name="ps-mode"]:checked').value; }
 
 // ------------------------------------------------------------------ counting (live analytics only)
@@ -75,45 +76,6 @@ function clearFile() {
   $('ps-file-error').hidden = true;
   $('ps-map').hidden = true;
   $('ps-map').replaceChildren();
-}
-
-// A table whose headings leave a needed column unnamed (TradeLocker's "Amount" was one): one choice per
-// missing field, from the file's own headings, then the same table is read again with those columns.
-const MAP_NAMES = {
-  date: 'Date and time', symbol: 'Symbol', side: 'Buy or sell', qty: 'Quantity (size)', price: 'Price',
-  open_time: 'Open time', close_time: 'Close time', direction: 'Long or short', open_price: 'Open price', close_price: 'Close price',
-};
-function showMapStep(need, choose) {
-  const box = $('ps-map');
-  const taken = new Set(Object.values(need.chosen));
-  const options = need.labels.map((l, i) => [i, l || `Column ${i + 1}`]).filter(([i]) => !taken.has(i));
-  const err = el('p', { class: 'error', id: 'ps-map-err', hidden: true });
-  const fields = need.missing.map((f) => el('div', { class: 'field' },
-    el('label', { for: `ps-map-${f}`, text: MAP_NAMES[f] || f }),
-    el('select', { id: `ps-map-${f}`, 'data-field': f, 'aria-describedby': 'ps-map-err' },
-      el('option', { value: '', text: 'Choose a column' }), ...options.map(([i, l]) => el('option', { value: String(i), text: l })))));
-  const btn = el('button', { class: 'btn btn-secondary', type: 'button', id: 'ps-map-btn', text: 'Read with these columns' });
-  btn.addEventListener('click', () => {
-    const picked = {};
-    const seen = new Set();
-    for (const f of need.missing) {
-      const v = $(`ps-map-${f}`).value;
-      if (v === '' || seen.has(v)) {
-        err.textContent = v === '' ? 'Pick a column for each box.' : 'Pick a different column for each box.';
-        err.hidden = false;
-        $(`ps-map-${f}`).focus();
-        return;
-      }
-      seen.add(v);
-      picked[f] = Number(v);
-    }
-    choose(picked);
-  });
-  box.replaceChildren(el('strong', { id: 'ps-map-h', text: 'Which column is which?' }),
-    el('p', { text: `No heading in your ${need.missing.length === 1 ? 'table names this column' : 'table names these columns'}. Pick ${need.missing.length === 1 ? 'it' : 'each one'} from your headings.` }),
-    el('div', { class: 'field-grid' }, ...fields), err, el('p', { class: 'btn-row' }, btn));
-  box.hidden = false;
-  box.focus();
 }
 
 function showLoaded(out, label) {
@@ -501,12 +463,15 @@ function habitsCard(real, rules) {
 function render() {
   const { res, p } = last;
   const s = shares(res);
-  const headline = `Passed in ${whole(s.pass)} of ${intText(res.runs)} replays`;
+  // Too few days to read (the same 30-day line as the note below): the headline leads with that, not a confident share.
+  const tooFew = last.file && p.days.length < MIN_DAYS;
+  const headline = tooFew ? `Too few trades to read: ${plural(last.data.n, 'trade', 'trades')}`
+    : `Passed in ${whole(s.pass)} of ${intText(res.runs)} replays`;
   const source = last.file
     ? `whole trading days drawn at random from ${last.example ? 'the example data' : last.data.label} (${plural(p.days.length, 'day', 'days')}, ${plural(last.data.n, 'trade', 'trades')})`
     : `${plural(p.trades_per_day, 'trade', 'trades')} a day, each a win or a loss at the rate you entered`;
   const warn = [];
-  if (last.file && p.days.length < 30) warn.push(`Your trades cover ${plural(p.days.length, 'trading day', 'trading days')}, so the results lean heavily on a few days.`);
+  if (tooFew) warn.push(`Your trades cover ${plural(p.days.length, 'trading day', 'trading days')}, so the results lean heavily on a few days.`);
   if (last.file && last.data.beta) warn.push('This file format is in beta: check a few trades by hand on the trade-stats page.');
   const outcome = el('div', { class: 'rc-card rc-card-wide', id: 'ps-v-outcome' },
     el('h3', { text: 'How the replays ended' }),
@@ -520,6 +485,7 @@ function render() {
       `Each replay is built from ${source}. ${unitNote(last.unit)}`),
     last.example ? el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Example data' })) : null,
     warn.length ? el('div', { class: 'notice notice-caution' }, el('strong', { text: 'Note' }), el('ul', {}, ...warn.map((w) => el('li', { text: w })))) : null,
+    last.file ? warningsNotice('ps', last.data.warnings) : null,   // mixed currencies, skipped rows: what was left out of the replays
     el('div', { class: 'rc-visuals' }, outcome, ruleCard(res), last.file ? habitsCard(last.real, p.rules) : null),
   ].filter(Boolean));
   $('ps-out').hidden = false;
@@ -887,7 +853,7 @@ function init() {
   slot = createFileSlot({
     progressBox: $('ps-progress'), onStage: setFileStatus, onClear: clearFile, onResult: showLoaded,
     onError: (err, retry) => renderReadError($('ps-file-error'), err, retry),
-    onMapNeeded: showMapStep,
+    onMapNeeded: (need, choose) => showMapStep('ps', need, choose),
   });
   $('ps-file').addEventListener('change', (e) => slot.pickFile(e.target.files[0], 'your file'));
   $('ps-sample-btn').addEventListener('click', () => {
