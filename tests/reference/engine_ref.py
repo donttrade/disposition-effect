@@ -1428,6 +1428,7 @@ def _side_letter(v):
 # Slash dates, mirroring slashVote() / slashOrder() / slashToIso() in engine/generic.js. Never guessed: the file
 # itself must show the order (2026/11/05; a first part over 12; a second part over 12).
 _RE_SLASH_Y = re.compile(r"^(\d{4})/(\d{1,2})/(\d{1,2})(?=$|[ T])")
+_RE_SLASH_SHORT = re.compile(r"^\d{1,2}/\d{1,2}/\d{2}(?=$|[ T])")
 _RE_SLASH_L = re.compile(r"^(\d{1,2})/(\d{1,2})/(\d{4})(?=$|[ T])")
 
 
@@ -1462,7 +1463,11 @@ def _slash_to_iso(raw, order, row, column):
     y_first = _RE_SLASH_Y.match(s)
     x = y_first or _RE_SLASH_L.match(s)
     if not x:
+        if _RE_SLASH_SHORT.match(s):
+            fail("E_BAD_DATE", "two-digit year with slashes", row, column)
         return raw
+    if not y_first and int(x.group(1)) > 12 and int(x.group(2)) > 12:
+        fail("E_BAD_DATE", "day and month both over 12", row, column)
     vote = _slash_vote(s)
     if order is None and not vote:
         fail("E_AMBIGUOUS_DATE", "every slash date is 12 or less", row, column)

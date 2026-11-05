@@ -176,7 +176,7 @@ def test_trade_stats_tool_reads_tradingview(browser, built_site):
     assert k("win_rate") == f"{100 * st['win_rate']:.1f}%"
     assert k("profit_factor") == f"{st['profit_factor']:.2f}"
     out = page.inner_text("#ts-out")
-    assert "TradingView Order History export (beta)" in out
+    assert "TradingView Order History export (checked on sample files only)" in out
     assert "Times are as exported, with no time zone stated." in out
     assert page.locator('#ts-warnings li[data-code="W_SKIPPED_ROWS"]').count() == 1
     assert page.locator('#ts-warnings li[data-code="W_UNVERIFIED_FORMAT"]').count() == 1

@@ -10,21 +10,21 @@
 // Nothing is stored. With [flags] analytics on, a finished step loads a counting page in a hidden frame (count()).
 // Ranked suggestions are not on this page (whatif_ranked); neither is saving.
 
-import { createFileSlot, renderReadError, whileBusy, clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js?v=314f6558';
+import { createFileSlot, renderReadError, whileBusy, clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js?v=595a9d66';
 import { RUNS, DEFAULT_SEED, NO_LIMIT_CAP, METHOD_VERSION, WHATIF_TEXT, groupDays, simulate, ruleLabel, mcError, unavailableText, personalUnavailable, normRules } from './prop-sim-core.js?v=7c28de14';
 import { presetRules, NOT_STATED } from './challenge-presets.js?v=2e7fd947';
 import { HABITS, HABIT_TEXT, itemsFromTrades, isDatesOnly, habitFlags, dayFlags, realBreachDays, simulatedHabits, countFlags, MIN_BREACH_DAYS, MIN_BUSTS } from './habit-flags.js?v=72b76dd0';
-import { drawCard, cardBlob, altText } from '../card/readiness-card.js?v=197687b9';
-import { money, unitNote, pct, intText, el, DASH, wholePercent } from './format.js?v=e808aa0f';
+import { drawCard, cardBlob, altText } from '../card/readiness-card.js?v=399d1317';
+import { money, unitNote, pct, intText, el, DASH, wholePercent } from './format.js?v=35164924';
 import { parseStrict, parsePositive, parseNonNegative, parseWhole, InputError } from './num.js?v=8df99e34';
-import { SAMPLE_LABEL, FORMAT_NAMES, plural, tableWrap, rowsTable, warningsNotice, showMapStep } from './file-tool.js?v=4ef0cd3e';
+import { SAMPLE_LABEL, FORMAT_NAMES, plural, tableWrap, rowsTable, warningsNotice, showMapStep } from './file-tool.js?v=c0b1300b';
 
 const $ = (id) => document.getElementById(id);
 const MIN_DAYS = 30;         // fewer trading days in the file: the replays lean on a few days, and the headline says so
 const MIN_RULE_BUSTS = 30;   // fewer busts: too few to say which rule broke most (as the old streak line)
 const COUNT_PATH = '/tools/prop-challenge-simulator/e/';
 let presets = { presets: [], firms: [], rules_lib: '' };
-let loaded = null;     // the trades read, in memory only: {trades, label, format, tz_label, beta, unit, datesOnly, flags}
+let loaded = null;     // the trades read, in memory only: {trades, label, format, tz_label, unit, datesOnly, flags}
 let current = null;    // the preset picked (or null) and the rules it filled in
 let last = null;       // the latest check: {p, res, seq, real, sim, ...}
 let lastWhatIf = null;
@@ -82,7 +82,7 @@ function showLoaded(out, label) {
   const r = out.result;
   const datesOnly = isDatesOnly(r.trades);
   // whole before it is kept: a check never sees trades without their habit flags
-  const next = { trades: r.trades, label, format: r.format, tz_label: r.tz_label, beta: !r.verified_format,
+  const next = { trades: r.trades, label, format: r.format, tz_label: r.tz_label,
     unit: r.trades[0].pnl_unit, datesOnly, n: r.trades.length, warnings: r.warnings };
   next.flags = habitFlags(itemsFromTrades(r.trades), { datesOnly });
   loaded = next;
@@ -93,7 +93,7 @@ function showLoaded(out, label) {
   }
   const days = groupDays(r.trades, {}).days.length;
   setFileStatus(`Read ${label}: ${plural(loaded.n, 'closed trade', 'closed trades')} on ${plural(days, 'trading day', 'trading days')}` +
-    ` (${FORMAT_NAMES[r.format] || 'read by the site’s importer'}${loaded.beta ? ', beta' : ''}). Times are ${r.tz_label}.` +
+    ` (${FORMAT_NAMES[r.format] || 'read by the site’s importer'}). Times are ${r.tz_label}.` +
     (datesOnly ? ' The file has dates but no times.' : ''));
 }
 
@@ -460,19 +460,23 @@ function habitsCard(real, rules) {
   return el('div', { class: 'rc-card', id: 'ps-v-habits' }, ...kids);
 }
 
+// "Too few trading days to read: 1 day (1 trade)": the trigger is the number of days, so the headline counts days.
+function tooFewText() {
+  return `Too few trading days to read: ${plural(last.p.days.length, 'day', 'days')} (${plural(last.data.n, 'trade', 'trades')})`;
+}
+
 function render() {
   const { res, p } = last;
   const s = shares(res);
   // Too few days to read (the same 30-day line as the note below): the headline leads with that, not a confident share.
   const tooFew = last.file && p.days.length < MIN_DAYS;
-  const headline = tooFew ? `Too few trades to read: ${plural(last.data.n, 'trade', 'trades')}`
+  const headline = tooFew ? tooFewText()
     : `Passed in ${whole(s.pass)} of ${intText(res.runs)} replays`;
   const source = last.file
     ? `whole trading days drawn at random from ${last.example ? 'the example data' : last.data.label} (${plural(p.days.length, 'day', 'days')}, ${plural(last.data.n, 'trade', 'trades')})`
     : `${plural(p.trades_per_day, 'trade', 'trades')} a day, each a win or a loss at the rate you entered`;
   const warn = [];
   if (tooFew) warn.push(`Your trades cover ${plural(p.days.length, 'trading day', 'trading days')}, so the results lean heavily on a few days.`);
-  if (last.file && last.data.beta) warn.push('This file format is in beta: check a few trades by hand on the trade-stats page.');
   const outcome = el('div', { class: 'rc-card rc-card-wide', id: 'ps-v-outcome' },
     el('h3', { text: 'How the replays ended' }),
     stackBar(res, `Passed ${whole(s.pass)}, broke a rule ${whole(s.bust)}, out of time ${whole(s.timeout)}`),
@@ -827,6 +831,7 @@ function cardData() {
     rulesPct: size ? { t: pctOf(r.target), d: r.daily_loss === null ? null : pctOf(r.daily_loss), m: pctOf(r.max_loss), kind: r.drawdown === 'static' ? 'static' : 'moving' } : null,
     whatif: lastWhatIf && $('ps-wi-card').checked ? { personal: lastWhatIf.personal, a: lastWhatIf.before.pass / lastWhatIf.before.runs, b: lastWhatIf.after.pass / lastWhatIf.after.runs } : null,
     example: !!last.example,
+    few: last.file && last.p.days.length < MIN_DAYS ? { days: last.p.days.length, trades: last.data.n } : null,
   };
 }
 

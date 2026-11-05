@@ -48,15 +48,18 @@ export function announce(text) {
 }
 
 // root: the container that holds the result heading and its figures.
-export function announceResult(root, heading) {
+// extra: more words to say after the figures (a prompt, or the key figures of a result that has no dl.stats).
+export function announceResult(root, heading, extra = '') {
   const h = heading || root.querySelector('h2, h3');
   const parts = [h ? h.textContent.trim() : 'Result'];
   const dl = root.querySelector('dl.stats');
   if (dl) {
     for (const row of dl.querySelectorAll('.stat')) {
       const dt = row.querySelector('dt'), dd = row.querySelector('dd');
-      if (dt && dd) parts.push(`${dt.textContent.trim()}: ${dd.textContent.trim()}`);
+      const v = dd ? dd.textContent.trim() : '';
+      if (dt && dd && v !== '—') parts.push(`${dt.textContent.trim()}: ${v}`);   // a dash says nothing aloud
     }
   }
+  if (extra) parts.push(extra.replace(/[.]$/, ''));
   announce(parts.join('. ') + '.');
 }

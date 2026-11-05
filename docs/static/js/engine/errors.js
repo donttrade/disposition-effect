@@ -62,7 +62,7 @@ export function fail(code, detail = '', row = null, column = null) {
 
 export const WARNING_TEXT = Object.freeze({
   W_UNVERIFIED_FORMAT:
-    'Beta: this format was built from public documentation, not yet from a real export. Check a few trades by hand, or use the generic template.',
+    'This format was built from the platform’s public documentation and checked on sample files only. Check a few trades by hand, or use the generic template, and tell us if a column reads wrong.',
   W_SKIPPED_ROWS: 'Rows that are not trades (balance, credit, cancelled or unfilled rows) were skipped.',
   W_DUPLICATE_ROWS:
     'Some rows are exact copies of an earlier row, as when two overlapping exports are pasted together. They were kept, because two identical fills can be real. If you did not expect them, remove the copies and load the file again.',
@@ -80,6 +80,7 @@ export const WARNING_TEXT = Object.freeze({
   W_CLOSE_BEFORE_OPEN:
     'Some round trips close up to one hour before they open, on a night the clocks went back (US or EU dates). They were read as closing in the repeated hour, one hour later than written. If the times in this file have no daylight-saving changes, or the open and close columns are swapped, these trades are wrong: check them.',
   W_MAPPED: 'You matched these columns yourself. Check a few trades against your platform.',
+  W_MAPPED_GUESS: 'These columns were matched from your headings, not read from a known export format. Check a few trades against your platform.',
   W_ORDERS_AVERAGED: 'One row per order: fills inside an order are averaged.',
   W_OVERLAP_ROWS: 'Some rows were in more than one file and were counted once.',
   W_PNL_SIGN:

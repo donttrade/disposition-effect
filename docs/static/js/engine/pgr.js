@@ -7,7 +7,7 @@
 // symbol traded that same day (the last execution price that day); unmarked
 // position-days lower coverage_pct. Mirrors pgr_plr_counts() in engine_ref.py.
 
-import { chronoOrder } from './trades.js?v=22a4d03c';
+import { chronoOrder } from './trades.js?v=59be45ef';
 
 const UNIT = 1e8;
 const DAY_MS = 86400000;

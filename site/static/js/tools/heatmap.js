@@ -40,8 +40,19 @@ function render(focus = true) {
     `Open times ${shiftText(o.shiftHours)}: first trade opened ${stamp(h.first_open)}, last opened ${stamp(h.last_open)}. If these do not match what you remember, change the shift above.`));
   out.append(grid(h), noteSection(h), marginals(h), allCells(h));
   out.hidden = false;
-  if (focus) revealResult($('hm-out-h'));
+  if (focus) revealResult($('hm-out-h'), keyFigures(h));
   teaser(h);
+}
+
+// What a screen reader hears after the heading: how much was read and the highest and lowest cell totals.
+function keyFigures(h) {
+  const parts = [`${plural(h.n, 'closed trade', 'closed trades')} in ${plural(h.cells.length, 'cell', 'cells')} of weekday and hour`];
+  if (h.cells.length) {
+    const hi = h.cells.reduce((a, c) => (c.total > a.total ? c : a)), lo = h.cells.reduce((a, c) => (c.total < a.total ? c : a));
+    parts.push(`Highest total: ${hi.label}, ${money(hi.total, state.unit)} from ${plural(hi.n, 'trade', 'trades')}`);
+    if (lo !== hi) parts.push(`Lowest total: ${lo.label}, ${money(lo.total, state.unit)} from ${plural(lo.n, 'trade', 'trades')}`);
+  }
+  return parts.join('. ');
 }
 
 function grid(h) {

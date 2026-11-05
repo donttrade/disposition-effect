@@ -147,7 +147,7 @@ async function render(focus = true) {
   const first = r.trades[0], last = r.trades[r.trades.length - 1];
   const read = el('section', { 'aria-labelledby': 'ts-read-h' },
     el('h3', { id: 'ts-read-h', text: 'What was read' }),
-    el('p', {}, `Format: ${FORMAT_NAMES[r.format] || r.format}${r.verified_format ? '' : ' (beta)'}. `,
+    el('p', {}, `Format: ${FORMAT_NAMES[r.format] || r.format}${r.verified_format ? '' : ' (checked on sample files only)'}. `,
       `${plural(r.trades.length, 'closed trade', 'closed trades')} from ${plural(r.n_fills, 'fill', 'fills')}, closed ${day(first.close_ts)} to ${day(last.close_ts)}. `,
       `Times are ${r.tz_label}. ${unitNote(state.unit)}`),
   );

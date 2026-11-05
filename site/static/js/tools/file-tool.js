@@ -43,7 +43,7 @@ export function readSection(prefix, r, fileLabel) {
   const unit = first.pnl_unit;
   const sec = el('section', { 'aria-labelledby': `${prefix}-read-h` },
     el('h3', { id: `${prefix}-read-h`, text: 'What was read' }),
-    el('p', {}, `Format: ${FORMAT_NAMES[r.format] || r.format}${r.verified_format ? '' : ' (beta)'}. `,
+    el('p', {}, `Format: ${FORMAT_NAMES[r.format] || r.format}${r.verified_format ? '' : ' (checked on sample files only)'}. `,
       `${plural(r.trades.length, 'closed trade', 'closed trades')} from ${plural(r.n_fills, 'fill', 'fills')}, closed ${day(first.close_ts)} to ${day(last.close_ts)}. `,
       `Times are ${r.tz_label}. ${unitNote(unit)}`));
   if (fileLabel === SAMPLE_LABEL) {
