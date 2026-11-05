@@ -166,7 +166,7 @@
   <input type="hidden" name="access_key" value="f8fdba04-71bb-4856-b700-01ac6796c252">
   <input type="hidden" name="subject" value="donttrade: firm request">
   <input type="hidden" name="from_name" value="donttrade site">
-  <input type="hidden" name="redirect" value="https://donttrade.ca/start/thanks/">
+  <input type="hidden" name="redirect" value="https://donttrade.ca/for-firms/study-thanks/">
   <input type="hidden" name="product" value="study">
   <input type="hidden" name="page" value="/for-firms/">
   <input type="hidden" name="ref" value="" data-from-query="ref">
@@ -177,7 +177,7 @@
     <input id="fs-firm" name="firm" type="text" autocomplete="organization" required></div>
   <div class="field"><label for="fs-role">Your role <span class="opt">(optional)</span></label>
     <input id="fs-role" name="role" type="text" autocomplete="organization-title" placeholder="e.g. Head of Risk"></div>
-  <div class="field"><label for="fs-what">What do you want measured? <span class="opt">(optional)</span></label>
+  <div class="field"><label for="fs-what">Anything else to tell us before we send the plan? <span class="opt">(optional)</span></label>
     <textarea id="fs-what" name="message" rows="3" placeholder="e.g. the period and roughly how many accounts you could export"></textarea></div>
   <p><button class="btn" type="submit">Send the request</button></p>
   <p class="small muted">We use these details only to reply. We reply within 1 business day (Eastern Time, Monday to Friday). <a href="/privacy/">Privacy notice</a></p>
@@ -197,7 +197,7 @@
   </section>
   <section class="section" aria-labelledby="paid-h" data-reveal>
     <h2 id="paid-h">Paid tests</h2>
-    <p>These are separate from the free study. One habit today, more being added. Your staff run our public script on your records.</p>
+    <p>Everything from here down is the paid Pilot and monthly plan, with the copy-leader and claims tests. It is separate from the free study above and has its own extract, memo and terms. One habit today, more being added. Your staff run our public script on your records.</p>
     <details class="how-more"><summary>What the paid test measures, in full</summary>
     <p>Do your traders sell winners sooner than losers? We measure the plan gap: the difference between how your traders plan to handle wins and losses and how they actually trade. One measure is available today: the disposition effect, which is whether your traders close winning positions more readily than losing ones.</p>
     <p>Tell us the population and the period. Your staff run a published script inside your systems. You get back <a href="/glossary/#pgr">PGR</a>, <a href="/glossary/#plr">PLR</a>, their pooled ratio and a <a href="/glossary/#t">t statistic</a>, the counts and period behind them, and a one-page memo, each month. The price is published and the same for every firm.</p>
@@ -290,7 +290,7 @@
     <p><a class="btn btn-secondary" href="?product=claims-test#request">Ask about a claims test</a></p>
   </section>
   <section class="section" aria-labelledby="export-h" data-reveal>
-    <h2 id="export-h">What stays on your systems</h2>
+    <h2 id="export-h">Pilot: what stays on your systems</h2>
     <details class="how-more"><summary>Your records stay with you. Only counts come back.</summary>
     <p>Your trade records and account identifiers. The script runs inside your systems on a five-column extract, one row per open position per day plus a row on the day it closes, with no names. From the <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/EXPORT-GUIDE.md">export guide</a>:</p>
     <pre tabindex="0" role="region" aria-label="Example extract: one position as three rows">account_id,date,position_id,closed,pnl
@@ -388,11 +388,11 @@ HOW TO READ THE AGE-CONTROLLED FIGURES
 
       <p>That block is the whole of it. No account IDs, position IDs, dates or individual P&amp;L values are printed. The script is one Python file using only the standard library; it makes no network calls.</p>
     </details>
-    <p>Retention: we keep the returned aggregates for the life of your agreement record, and never receive the extract.</p>
+    <p>Pilot retention: we keep the returned aggregates for the life of your agreement record, and never receive the extract.</p>
     </details>
   </section>
   <section class="section" aria-labelledby="receive-h" data-reveal>
-    <h2 id="receive-h">What you receive</h2>
+    <h2 id="receive-h">Pilot and monthly plan: what you receive</h2>
     <p>Each month, a one-page memo with these fields:</p>
     <dl class="split" data-reveal data-reveal-stagger>
       <div><dt>The figure</dt><dd>Pooled PGR, PLR and their ratio, with the counts behind them, and the same comparison holding position age fixed, with its 95% interval</dd></div>
