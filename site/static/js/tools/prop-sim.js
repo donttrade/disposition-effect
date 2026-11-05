@@ -418,11 +418,16 @@ function realOrderLine(seq, rules) {
   return `In their real order, your days neither passed nor broke a rule in ${plural(n, 'day', 'days')}.`;
 }
 
+// Under MIN_DAYS trading days no share of replays is shown anywhere (headline, outcome, range, rule split, what-if).
+const fewDays = () => !!last && last.file && last.p.days.length < MIN_DAYS;
+
 function ruleCard(res) {
   const kids = [el('h3', { text: 'Rule that broke most' })];
   if (res.bust === 0) kids.push(el('p', { class: 'rc-big', text: 'None' }), el('p', { text: 'No replay broke a rule.' }));
   else if (res.bust < MIN_RULE_BUSTS) {
     kids.push(el('p', { class: 'rc-big', text: DASH }), el('p', { text: `Too few replays broke a rule (${intText(res.bust)}) to say which broke most.` }));
+  } else if (fewDays()) {
+    kids.push(el('p', { class: 'rc-big', text: DASH }), el('p', { text: 'Not shown: with so few trading days, a share of the busts would lean on a few days.' }));
   } else {
     const daily = res.bust_daily >= res.bust_max;
     const share = (daily ? res.bust_daily : res.bust_max) / res.bust;
@@ -761,8 +766,9 @@ async function runRange() {
 function rangeTable() {
   const r = lastRange;
   const rows = [['Passed', 'pass'], ['Busted', 'bust'], ['Ran out of time', 'timeout']].map(([l, k]) => {
-    const row = [l, `${pct(r.shares[k][0])} to ${pct(r.shares[k][1])}`];
-    if (r.change) row.push(`${pct(r.change[k][0])} to ${pct(r.change[k][1])}`);
+    const few = fewDays();   // same as the outcome table: no shares for a small sample
+    const row = [l, few ? DASH : `${pct(r.shares[k][0])} to ${pct(r.shares[k][1])}`];
+    if (r.change) row.push(few ? DASH : `${pct(r.change[k][0])} to ${pct(r.change[k][1])}`);
     return row;
   });
   return el('div', { id: 'ps-range-out' }, tableWrap('Range', rowsTable(`90% range over ${intText(r.B)} resamples of your days`,
