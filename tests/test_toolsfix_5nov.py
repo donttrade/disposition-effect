@@ -603,7 +603,7 @@ def test_guessed_columns_say_matched_from_headings(browser, built_site, tmp_path
 
 def test_risk_reward_never_echoes_all_or_none_for_a_near_value(browser, built_site):
     ctx, pg, log = page_for(browser, built_site, "/tools/risk-reward-calculator/")
-    for wr, want in (("99.99", "over 99.9% win rate"), ("0.04", "under 0.1% win rate"), ("50", "50.0% win rate")):
+    for wr, want in (("99.99", "win rate of over 99.9%"), ("0.04", "win rate of under 0.1%"), ("50", "win rate of 50.0%")):
         for k, v in {"#rr-entry": "100", "#rr-stop": "95", "#rr-target": "110", "#rr-winrate": wr}.items():
             pg.fill(k, v)
         pg.click("#rr-form button[type=submit]")
@@ -679,4 +679,49 @@ def test_card_alt_text_has_no_double_full_stop(browser, built_site):
         assert ".." not in a and ". ." not in a, a
     assert alts[0].startswith("Too few trading days to read: 28 days (40 trades). Replays of so few days lean heavily on a few days. ")
     assert alts[1].startswith("Passed in 50% of 10,000 replays. Passed 50%, Broke a rule 30%, Out of time 20%.")
+    ctx.close()
+
+
+# ------------------------------------------------------------------ fix round 3
+def losing_file(tmp_path, days, name):
+    return write_tmp(tmp_path, name, round_trips(days, 2, pnl=-48))
+
+
+def test_small_sample_range_table_and_bust_shares_are_blank(browser, built_site, tmp_path):
+    ctx, pg, log = page_for(browser, built_site, "/tools/prop-challenge-simulator/")
+    pg.set_input_files("#ps-file", losing_file(tmp_path, 20, "lose20.csv"))
+    pg.wait_for_selector("#ps-file-status:text-matches('^Read ')", timeout=60000)
+    ps_run(pg, target="1000", maxloss="100")
+    assert pg.inner_text("#ps-out-h").startswith("Too few trading days to read")
+    rule = pg.inner_text("#ps-v-rule")
+    assert "of busts" not in rule and "Not shown" in rule and not re.search(r"\d+(\.\d)?%", rule)
+    pg.click("#ps-expert summary")
+    pg.click("#ps-range-btn")
+    pg.wait_for_selector("#ps-range-out table", timeout=120000)
+    cells = pg.inner_text("#ps-range-out table")
+    assert "%" not in cells.replace("90% range", "") and "to " not in cells.split("Share", 1)[1], cells
+    assert "Per-rule counts" in pg.inner_text("#ps-expert")
+    ctx.close()
+    ctx, pg, log = page_for(browser, built_site, "/tools/prop-challenge-simulator/")
+    pg.set_input_files("#ps-file", losing_file(tmp_path, 40, "lose40.csv"))                 # 30 days or more: back as before
+    pg.wait_for_selector("#ps-file-status:text-matches('^Read ')", timeout=60000)
+    ps_run(pg, target="1000", maxloss="100")
+    assert "of busts" in pg.inner_text("#ps-v-rule")
+    pg.click("#ps-expert summary")
+    pg.click("#ps-range-btn")
+    pg.wait_for_selector("#ps-range-out table", timeout=120000)
+    assert " to " in pg.inner_text("#ps-range-out table")
+    ctx.close()
+
+
+def test_expectancy_label_reads_naturally_at_the_extremes(browser, built_site):
+    ctx, pg, log = page_for(browser, built_site, "/tools/risk-reward-calculator/")
+    for wr, want in (("99.99", "Expectancy at a win rate of over 99.9%"), ("0.04", "Expectancy at a win rate of under 0.1%"),
+                     ("50", "Expectancy at a win rate of 50.0%")):
+        for k, v in {"#rr-entry": "100", "#rr-stop": "95", "#rr-target": "110", "#rr-winrate": wr}.items():
+            pg.fill(k, v)
+        pg.click("#rr-form button[type=submit]")
+        pg.wait_for_selector("#rr-out:not([hidden])")
+        text = pg.inner_text("#rr-out")
+        assert want in text and "at a over" not in text and "at a under" not in text, (wr, text)
     ctx.close()

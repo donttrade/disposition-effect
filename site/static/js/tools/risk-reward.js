@@ -122,7 +122,7 @@ function render(v, o) {
       o.side ? stat('Direction', o.side === 'long' ? 'Long' : 'Short', 'side') : null,
       stat('R multiple (reward ÷ risk)', rText(o.r), 'r'),
       stat('Break-even win rate', pct(o.breakEven), 'break_even'),
-      o.expectancy !== null ? stat(`Expectancy at a ${pct(o.winRate)} win rate`, `${signed(o.expectancy, 2)}R`, 'expectancy') : null),
+      o.expectancy !== null ? stat(`Expectancy at a win rate of ${pct(o.winRate)}`, `${signed(o.expectancy, 2)}R`, 'expectancy') : null),
   ];
   if (o.expectancy === null) {
     kids.push(el('p', { class: 'small muted', id: 'rr-no-winrate', text: 'Enter a win rate above to see the expectancy per trade in R at that win rate.' }));
