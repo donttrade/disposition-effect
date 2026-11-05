@@ -569,19 +569,32 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
 
 
 UMAMI_TAG_RE = re.compile(r'<script\b[^>]*\bsrc="https://cloud\.umami\.is/script\.js"[^>]*>')
-UMAMI_REQUIRED = ('data-do-not-track="true"', 'data-exclude-search="true"', 'data-exclude-hash="true"',
+UMAMI_REQUIRED = ('data-do-not-track="true"', 'data-before-send="dtUmamiClean"', 'data-exclude-hash="true"',
                   'data-domains="donttrade.ca"')
+# 3 Nov (hardening item 7): the before-send hook, exactly once, deferred, before the tracker (deferred scripts run in
+# document order); and the tracker's own data-exclude-search="true" on every page whose address can carry a secret
+# or typed text (build.umami_strict: build.UMAMI_STRICT_PATHS and every noindex page).
+UMAMI_CLEAN_RE = re.compile(r'<script src="/static/js/umami-clean\.js(?:\?v=[0-9a-f]{8})?" defer></script>')
+UMAMI_STRICT_PATHS = ("/welcome/", "/restore/", "/help/")   # = build.UMAMI_STRICT_PATHS (test_hardening_3nov)
+NOINDEX_META = '<meta name="robots" content="noindex">'
+# 3 Nov (Tester R2 I1): a data-umami-event-<name> attribute is event data (the tracker sends its value as
+# data.<name>); only a plain data-umami-event="<fixed name>" may be on a page.
+UMAMI_PROP_RE = re.compile(r"\bdata-umami-event-[\w-]*", re.IGNORECASE)
 UMAMI_FREE = ("/report/index.html",)   # owner rule 2 Nov: not on the page that reads the buyer's file
 
 
 def umami_problems(html, where, analytics):
     """2 Nov: Umami Cloud loads only beside the Cloudflare beacon (the same pages, never /before-you-pay/ or the
-    journal), never with analytics = false, and always with Do Not Track respected and the address reduced to its
-    path (no ?query, no #hash: /welcome/'s session id and /report/'s access key)."""
+    journal), never with analytics = false, and always with Do Not Track respected and no #hash (/report/'s access
+    key). 3 Nov: the query goes through the umami-clean.js hook (campaign tags only), and the tracker drops it whole
+    on noindex pages, /welcome/ (session id), /restore/ and /help/; no data-umami-event-* property on any page."""
+    out = [("flag:umami", where, f"Umami event property attribute {m}= (event data; only data-umami-event=\"<name>\")")
+           for m in sorted(set(UMAMI_PROP_RE.findall(html)))]
     tags = UMAMI_TAG_RE.findall(html)
     if not tags:
-        return []
-    out = []
+        if UMAMI_CLEAN_RE.search(html) or "umami-clean.js" in html:
+            out.append(("flag:umami", where, "umami-clean.js without the Umami Cloud script"))
+        return out
     if analytics is False:
         out.append(("flag:umami", where, "Umami Cloud script with analytics = false"))
     if "static.cloudflareinsights.com/beacon.min.js" not in html:
@@ -595,6 +608,15 @@ def umami_problems(html, where, analytics):
         for a in ("data-errors", "data-performance", "data-host-url"):
             if a in tag:
                 out.append(("flag:umami", where, f"Umami Cloud script with {a}"))
+    hooks = UMAMI_CLEAN_RE.findall(html)
+    if len(hooks) != 1 or html.count("umami-clean.js") != 1:
+        out.append(("flag:umami", where, f"umami-clean.js (deferred) {len(hooks)} times, expected once"))
+    elif html.index(hooks[0]) > html.index(tags[0]):
+        out.append(("flag:umami", where, "umami-clean.js after the Umami Cloud script"))
+    url = where[:-len("index.html")] if where.endswith("/index.html") else where
+    if (NOINDEX_META in html or url in UMAMI_STRICT_PATHS) and not all('data-exclude-search="true"' in t for t in tags):
+        out.append(("flag:umami", where, "Umami Cloud script without data-exclude-search=\"true\" on a page whose "
+                    "address can carry a secret (noindex, /welcome/, /restore/, /help/)"))
     return out
 
 
@@ -846,6 +868,7 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, b
     owned_rel = {"/" + os.path.relpath(build.out_file(out_dir, p), out_dir)
                  for p in owned_paths(paid, pilot, journal, analytics, prediction)}
     lifted = set(build.lifted_paths_for(paid))   # C-12 final: a paid build's /sample-report/ is a template page
+    lifted_rel = {"/" + os.path.relpath(build.out_file(out_dir, p), out_dir) for p in lifted}
     for path in owned_paths(paid, pilot, journal, analytics, prediction):
         fp = build.out_file(out_dir, path)
         if not os.path.exists(fp):
@@ -904,6 +927,9 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, b
                 problems.append(("flag:beacon", rel, "analytics beacon"))
             if not analytics and "cloud.umami.is" in s:
                 problems.append(("flag:umami", rel, "Umami Cloud script"))
+            # owned pages get it from umami_problems (lint_html), except a lifted page's frozen body
+            if name.endswith(".html") and (rel not in owned_rel or rel in lifted_rel) and UMAMI_PROP_RE.search(s):
+                problems.append(("flag:umami", rel, "Umami event property attribute data-umami-event-* (event data)"))
             if rel in UMAMI_FREE and "umami.is" in s:
                 problems.append(("flag:umami", rel, "Umami Cloud on /report/ (owner rule 2 Nov)"))
             if not badges and name.endswith((".html", ".js")):

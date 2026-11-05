@@ -2,10 +2,10 @@
 """check_live.py: is a deployed copy of the site whole? (delivery plan C-15, Pages move prep, G32)
 
 Usage (./site/run.sh check-live ...):
-  python3 checks/check_live.py --base <origin> [--compare <origin>] [--timeout S]
+  python3 checks/check_live.py --base <origin> [--compare <origin>] [--headers] [--timeout S]
 
 For every URL in <base>/sitemap.xml (its https://donttrade.ca prefix is read as <base>), plus /404.html,
-/feed.xml, /robots.txt and /sitemap.xml itself:
+/feed.xml, /robots.txt, /favicon.ico and /sitemap.xml itself:
   * the answer is 200, without a redirect, with the content type its extension implies;
   * with --compare, the body is byte-identical to the other host's.
 Also, on each host:
@@ -14,8 +14,12 @@ Also, on each host:
   * each directory URL asked for WITHOUT its trailing slash either redirects to the slashed URL or
     answers 200; with --compare, both hosts do the same (redirect or not, and to the same path).
     The redirect status (301 on GitHub Pages, 308 on Cloudflare Pages) may differ; the target may not.
-  * every HTML page carries its Content-Security-Policy in a <meta> tag, so the site depends on no
-    response header (GitHub Pages cannot set headers; docs/_headers is therefore not needed).
+  * every HTML page carries its full Content-Security-Policy in a <meta> tag. docs/_headers (written by
+    site/build.py headers_file, 3 Nov) adds only what a <meta> cannot: HSTS, X-Frame-Options, a header CSP
+    holding frame-ancestors alone, and Permissions-Policy.
+With --headers (off by default: local test servers send no headers), /, /before-you-pay/ and /tools/ must answer
+with strict-transport-security max-age=31536000, x-frame-options SAMEORIGIN and a content-security-policy header
+equal to frame-ancestors 'self'.
 
 One PASS/FAIL line per check, then a summary. Exit code = the number of failures (capped at 100).
 Read-only: GET requests only, no cookies, nothing sent but the request line and headers.
@@ -29,11 +33,13 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
 SITE_ORIGIN = "https://donttrade.ca"
-EXTRA = ["/404.html", "/feed.xml", "/robots.txt", "/sitemap.xml"]
+EXTRA = ["/404.html", "/feed.xml", "/robots.txt", "/sitemap.xml", "/favicon.ico"]
 MISSING = "/__check-live-no-such-page__/"
 TYPES = {".html": "text/html", ".xml": "xml", ".txt": "text/plain", ".css": "text/css", ".js": "javascript",
          ".json": "json", ".csv": "text/csv", ".pdf": "application/pdf", ".png": "image/png", ".svg": "image/svg+xml",
-         ".webp": "image/webp", ".woff2": "font/woff2"}
+         ".webp": "image/webp", ".woff2": "font/woff2", ".ico": "image/"}
+HEADER_PATHS = ["/", "/before-you-pay/", "/tools/"]
+FRAME_CSP = "frame-ancestors 'self'"
 CSP_META = re.compile(r'<meta\s+http-equiv="Content-Security-Policy"\s+content="[^"]+"', re.IGNORECASE)
 
 
@@ -60,6 +66,30 @@ def fetch(origin, path, timeout):
         return e.code, e.headers.get("Content-Type", ""), e.headers.get("Location"), e.read()
     except Exception as e:  # noqa: BLE001  (DNS, TLS, refused, timeout: all are one FAIL line)
         return 0, "", None, str(e).encode()
+
+
+def fetch_headers(origin, path, timeout):
+    """(status, {lower-case header name: value}) without following redirects; status 0 = no answer."""
+    req = urllib.request.Request(origin + path, headers={"User-Agent": "donttrade-check-live/1"})
+    try:
+        with _opener(origin).open(req, timeout=timeout) as r:
+            return r.status, {k.lower(): v for k, v in r.headers.items()}
+    except urllib.error.HTTPError as e:
+        return e.code, {k.lower(): v for k, v in e.headers.items()}
+    except Exception:  # noqa: BLE001
+        return 0, {}
+
+
+def header_problems(h):
+    """What a page's response headers lack of docs/_headers' security headers (empty list: all there)."""
+    out = []
+    if "max-age=31536000" not in h.get("strict-transport-security", ""):
+        out.append("strict-transport-security without max-age=31536000")
+    if h.get("x-frame-options", "").strip().upper() != "SAMEORIGIN":
+        out.append("x-frame-options is not SAMEORIGIN")
+    if h.get("content-security-policy", "").strip() != FRAME_CSP:
+        out.append(f"content-security-policy header is not exactly {FRAME_CSP}")
+    return out
 
 
 def expected_type(path):
@@ -95,7 +125,7 @@ def location_path(origin, loc):
     return u.path + (("?" + u.query) if u.query else "")
 
 
-def run(base, compare=None, timeout=20, out=sys.stdout):
+def run(base, compare=None, timeout=20, out=sys.stdout, headers=False):
     base = norm_origin(base)
     compare = norm_origin(compare) if compare else None
     fails, passes = [], 0
@@ -145,6 +175,13 @@ def run(base, compare=None, timeout=20, out=sys.stdout):
             line(ok, f"{h}{p.rstrip('/')} (no trailing slash) -> {st or 'no answer'}"
                      f"{' to ' + str(target) if target else ''} (want a redirect to {p}, or 200)")
 
+    if headers:
+        for h in hosts:
+            for p in HEADER_PATHS:
+                st, hd = fetch_headers(h, p, timeout)
+                bad = header_problems(hd) if st == 200 else [f"answered {st or 'nothing'}"]
+                line(not bad, f"{h}{p} sends the security headers" + ("" if not bad else ": " + "; ".join(bad)))
+
     if compare:
         for p in paths:
             a, b = got[base][p], got[compare][p]
@@ -167,9 +204,11 @@ def main(argv=None):
     ap = argparse.ArgumentParser(prog="check-live", description=__doc__.split("\n")[0])
     ap.add_argument("--base", required=True, help="the host to check, e.g. https://donttrade.pages.dev")
     ap.add_argument("--compare", help="another host that must serve byte-identical files, e.g. https://donttrade.ca")
+    ap.add_argument("--headers", action="store_true",
+                    help="also require docs/_headers' security headers on /, /before-you-pay/ and /tools/")
     ap.add_argument("--timeout", type=float, default=20.0)
     a = ap.parse_args(argv)
-    n, _ = run(a.base, a.compare, a.timeout)
+    n, _ = run(a.base, a.compare, a.timeout, headers=a.headers)
     return min(n, 100)
 
 

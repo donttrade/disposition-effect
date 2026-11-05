@@ -281,7 +281,7 @@ def test_terms_version_was_bumped_for_these_legal_edits(built_site):
     # Manager C3: the version is [legal] launch_date (empty = the build date), never a future date
     # T0: /privacy/ carries the later of that and [legal] cloudflare_pages_since (the hosting change)
     from test_legal import TERMS_VERSION as v, PRIVACY_VERSION as pv
-    assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", v) and pv == max(v, "2026-10-24")
+    assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", v) and pv >= max(v, "2026-10-24")   # + [legal] privacy_date
     for path, want in (("/terms/", v), ("/privacy/", pv)):
         assert f"Version {want}." in _page(built_site["out"], path), path
 

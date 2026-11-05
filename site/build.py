@@ -556,12 +556,12 @@ PAGES += [
 # Legal pages (step 17). The French versions (/fr/…) exist only with paid_report on; the
 # hreflang pair is declared only then (alternates_if_paid).
 PAGES += [
-    {"template": "pages/privacy.html", "path": "/privacy/", "requires_flag": None, "updated": "2026-10-21",
+    {"template": "pages/privacy.html", "path": "/privacy/", "requires_flag": None, "updated": "2026-11-05",
      "crumb": "Privacy", "alternates_if_paid": [("en", "/privacy/"), ("fr", "/fr/confidentialite/"), ("x-default", "/privacy/")],
      "title": "Privacy Notice — donttrade",
      "description": "What donttrade collects and why: no cookies, free tools that read your file in your browser, "
                     "Web3Forms forms, Gmail, Stripe and your rights."},
-    {"template": "pages/terms.html", "path": "/terms/", "requires_flag": None, "updated": "2026-10-21",
+    {"template": "pages/terms.html", "path": "/terms/", "requires_flag": None, "updated": "2026-11-05",
      "crumb": "Terms", "alternates_if_paid": [("en", "/terms/"), ("fr", "/fr/conditions/"), ("x-default", "/terms/")],
      "title": "Terms, Refunds and the Pilot — donttrade",
      "description": "Payment, delivery and refund terms for the donttrade test, the Pilot and the monthly plan for "
@@ -578,13 +578,13 @@ PAGES += [
      "description": "Ce que vous acceptez avant de payer le test donttrade : vendeur, prix en dollars américains, "
                     "exigences techniques, remboursements et restrictions."},
     {"template": "pages/fr/conditions.html", "path": "/fr/conditions/", "requires_flag": "paid_report",
-     "lang": "fr", "crumb": "Conditions", "updated": "2026-10-21",
+     "lang": "fr", "crumb": "Conditions", "updated": "2026-11-05",
      "alternates": [("fr", "/fr/conditions/"), ("en", "/terms/"), ("x-default", "/terms/")],
      "title": "Conditions de service et de vente — donttrade",
      "description": "Conditions du test donttrade : prix, paiement, livraison, nouveau test, "
                     "remboursements et droit de rétractation."},
     {"template": "pages/fr/confidentialite.html", "path": "/fr/confidentialite/", "requires_flag": "paid_report",
-     "lang": "fr", "crumb": "Confidentialité", "updated": "2026-10-21",
+     "lang": "fr", "crumb": "Confidentialité", "updated": "2026-11-05",
      "alternates": [("fr", "/fr/confidentialite/"), ("en", "/privacy/"), ("x-default", "/privacy/")],
      "title": "Politique de confidentialité — donttrade",
      "description": "Ce que donttrade recueille et pourquoi : aucun témoin, fichier lu dans votre navigateur, "
@@ -609,7 +609,7 @@ PAGES += [
 # /help/ (ARCHITECT-V3 §c.5, Q-A1): every answer unit, grouped; the answer box's no-JS landing page.
 # Rendered after every other page, from their HTML (build.answer_units).
 PAGES += [
-    {"template": "pages/help.html", "path": "/help/", "requires_flag": None, "updated": "2026-10-21",
+    {"template": "pages/help.html", "path": "/help/", "requires_flag": None, "updated": "2026-11-05",
      "crumb": "Questions", "scripts": ["/static/js/answers.js", "/static/js/answer-ui.js"], "title": "Questions: Prices, Refunds, Files and Privacy",
      "description": "Every answer on donttrade in one place: prices, refunds, what the free tools do with your file, "
                     "privacy and the terms, each with a link to its page."},
@@ -1151,9 +1151,10 @@ _SELLER_WHERE = ('the seller’s legal name is given for buyers in <a href="/pri
                  'the terms and the privacy notice')
 PAID_LIFTED_SWAPS = {
     # 2 Nov (owner): with the donttrade test on sale, "Readers pay nothing" is out of date. A free build keeps it.
+    # 3 Nov (Tester R2 I3, Manager): "for traders, the only paid product", since the sentence before says firms pay too.
     "/independence/": [("Readers pay nothing; the newsletter is free.",
-                        "The research, the newsletter and the free tools cost readers nothing; the one paid product is "
-                        "<a href=\"/pricing/#traders\">the donttrade test</a>.")],
+                        "The research, the newsletter and the free tools cost readers nothing; for traders, the only "
+                        "paid product is <a href=\"/pricing/#traders\">the donttrade test</a>.")],
     "/about/": [("There’s no name on it on purpose: every study",
                  "No author name is published here, on purpose (" + _SELLER_WHERE + "): every study"),
                 # 2 Nov (owner): as on /independence/, with the donttrade test on sale. A free build keeps both.
@@ -1161,8 +1162,8 @@ PAID_LIFTED_SWAPS = {
                  '<span class="ls-sum">Firms pay for measurements. The research and free tools cost readers nothing.</span>'),
                 ("Firms pay for fixed-scope measurements of their own data; readers pay nothing; no firm can change a number.",
                  "Firms pay for fixed-scope measurements of their own data; the research and free tools cost readers "
-                 "nothing, and the one paid product is <a href=\"/pricing/#traders\">the donttrade test</a>; no firm "
-                 "can change a number.")],
+                 "nothing, and for traders the only paid product is <a href=\"/pricing/#traders\">the donttrade "
+                 "test</a>; no firm can change a number.")],
     "/code/": [("There is no name on this site; the scripts are what you check instead.",
                 "No author name is published on this site (" + _SELLER_WHERE + "); the scripts are what you check "
                 "instead."),
@@ -1284,10 +1285,20 @@ PAID_ONLY_PATHS = PAID_APP_PATHS + PAID_DETAILS_PATHS + PAID_ONLY_PATHS_FR
 
 # The footer's privacy sentences. One wording for template pages (partials/footer.html) and
 # passthrough pages (PASSTHROUGH_CHROME), so the two can never disagree with /privacy/.
-def footer_privacy(flags, umami=False):
-    if flags["analytics"]:
+# 3 Nov (Tester R2 / Manager): per page, so a page Umami (no_umami: /report/) or all analytics (no_analytics:
+# /before-you-pay/, the journal) does not run on never says its visits are counted with it.
+def footer_privacy(flags, umami=False, page=None):
+    page = page or {}
+    if flags["analytics"] and page.get("no_analytics"):
+        parts = ["This site sets no cookies. Visits to this page are not counted; other pages are counted with "
+                 + ("Cloudflare Web Analytics and Umami Cloud, neither of which sets a cookie." if umami
+                    else "Cloudflare Web Analytics, which sets no cookie.")]
+    elif flags["analytics"]:
         parts = ["This site sets no cookies. Visits are counted with Cloudflare Web Analytics, which sets no cookie."]
-        if umami:
+        if umami and page.get("no_umami"):
+            parts = ["This site sets no cookies. Visits to this page are counted with Cloudflare Web Analytics, which "
+                     "sets no cookie; Umami Cloud, which counts visits to other pages, does not run on this page."]
+        elif umami:
             parts = ["This site sets no cookies. Visits are counted with Cloudflare Web Analytics and Umami Cloud, "
                      "which also counts some button clicks; neither sets a cookie."]
     else:
@@ -1871,7 +1882,7 @@ def set_privacy_date(legal, toml_path, today=None):
 
 
 CHANNEL_HOSTS = {"x.com", "github.com", "donttrade.substack.com", "www.linkedin.com", "www.tiktok.com", "www.youtube.com",
-                 "www.instagram.com", "bsky.app", "www.threads.net", "mastodon.social"}
+                 "www.instagram.com", "bsky.app", "www.threads.com", "mastodon.social"}
 CHANNEL_FIELDS = ("id", "name", "url", "text", "icon", "rel_me")
 BRAND_ICONS = ("x", "github", "substack", "tiktok", "instagram", "youtube", "bluesky", "threads", "mastodon")
 
@@ -2062,6 +2073,19 @@ def umami_on(cfg):
     return bool(cfg["flags"]["analytics"] and cfg["analytics"].get("umami_website_id"))
 
 
+# Hardening plan item 7 (3 Nov): campaign tags. Umami keeps data-exclude-search="true" (the whole query dropped by
+# the tracker itself, before any hook) on the pages whose address can carry a secret or typed text: /welcome/
+# (?session_id=), /restore/, /help/ (the no-JavaScript ask form sends ?q=<typed question>) and every noindex page.
+# Everywhere else the data-before-send hook static/js/umami-clean.js keeps only utm_source, utm_medium,
+# utm_campaign and utm_content (short lowercase values) and drops the rest. checks/lint.py enforces the same set.
+UMAMI_STRICT_PATHS = ("/welcome/", "/restore/", "/help/")
+UMAMI_CLEAN_JS = "/static/js/umami-clean.js"
+
+
+def umami_strict(page):
+    return bool(page.get("noindex")) or page["path"] in UMAMI_STRICT_PATHS
+
+
 def analytics_hosts(cfg, page=None):
     """(script-src hosts, connect-src hosts) that a page with analytics adds to its CSP. Umami's two hosts only
     with Umami on and never on a no_umami page (/report/)."""
@@ -2169,6 +2193,43 @@ def jsonld(page, cfg, html, flags, products):
             {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]})
     data = json.dumps({"@context": "https://schema.org", "@graph": graph}, ensure_ascii=False, sort_keys=True)
     return '<script type="application/ld+json">' + data.replace("</", "<\\/") + "</script>"
+
+
+# Security headers (hardening plan item 1, 3 Nov). Cloudflare Pages reads _headers from the root of the folder it
+# serves (docs/). Every page keeps its full CSP in a <meta>; this header CSP holds frame-ancestors ONLY (a <meta>
+# cannot set it), so it adds clickjacking protection and changes nothing else (each policy is enforced on its own).
+# 'self'/SAMEORIGIN, not 'none'/DENY: pay.js loads /before-you-pay/ in a hidden same-origin iframe.
+# HSTS one year, no includeSubDomains, no preload. Pages already sends nosniff and Referrer-Policy: not repeated.
+SECURITY_HEADERS = [
+    ("Strict-Transport-Security", "max-age=31536000"),
+    ("X-Frame-Options", "SAMEORIGIN"),
+    ("Content-Security-Policy", "frame-ancestors 'self'"),
+    ("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=(), usb=()"),
+]
+HEADERS_MAX_RULES = 100      # Cloudflare Pages limits for _headers
+HEADERS_MAX_LINE = 2000
+
+
+def headers_file():
+    lines = ["# Written by site/build.py (headers_file). Edit there, never docs/_headers.", "/*"]
+    lines += [f"  {k}: {v}" for k, v in SECURITY_HEADERS]
+    lines += ["", "https://:project.pages.dev/*", "  X-Robots-Tag: noindex",
+              "", "https://:version.:project.pages.dev/*", "  X-Robots-Tag: noindex"]
+    return "\n".join(lines) + "\n"
+
+
+def headers_problem(text):
+    """None, or why a _headers file breaks Cloudflare's limits (100 rules, 2,000 characters a line)."""
+    lines = text.split("\n")
+    rules = [ln for ln in lines if ln.strip() and not ln.startswith((" ", "\t", "#"))]
+    if not rules:
+        return "no rule"
+    if len(rules) > HEADERS_MAX_RULES:
+        return f"{len(rules)} rules (Cloudflare's limit is {HEADERS_MAX_RULES})"
+    long_ = [i + 1 for i, ln in enumerate(lines) if len(ln) > HEADERS_MAX_LINE]
+    if long_:
+        return f"line {long_[0]} is over {HEADERS_MAX_LINE} characters"
+    return None
 
 
 def write_sitemap_and_robots(out, cfg, built_pages, flags):
@@ -2428,6 +2489,13 @@ def verify(out, flags, seller=None, base_url=None):
         check_language_pairs(out, base_url)
     if seller is None:
         seller = any(flags.get(f) for f in COMMERCE_FLAGS)
+    hp = os.path.join(out, "_headers")   # hardening item 1: the security headers Cloudflare Pages reads
+    if not os.path.isfile(hp):
+        die("_headers missing from the build (headers_file)")
+    with open(hp, encoding="utf-8") as f:
+        why = headers_problem(f.read())
+    if why:
+        die(f"_headers: {why}")
     paths, ids = read_baseline()
     for p in paths:
         if not os.path.exists(out_file(out, p) if p.endswith("/") else os.path.join(out, p.lstrip("/"))):
@@ -2579,7 +2647,7 @@ def build():
                 "legal": cfg["legal"], "forms": cfg["forms"], "analytics": cfg["analytics"],
                 "worker": cfg["worker"], "prices": prices, "products": products, "private": private,
                 "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": tools_for(flags),
-                "tool_previews": tool_previews(), "evidence": evidence(), "latest": latest(), "footer_privacy": footer_privacy(flags, umami_on(cfg)), "umami_on": umami_on(cfg), "show_seller": show_seller(cfg),
+                "tool_previews": tool_previews(), "evidence": evidence(), "latest": latest(), "umami_on": umami_on(cfg), "umami_strict": umami_strict, "show_seller": show_seller(cfg),
                 "strings": read_toml(os.path.join(SITE, "config", "strings.toml"), "strings.toml"),
                 "paid_method": paid_method(),
                 "method_name": next((e.get("name") for e in report_methods() if e["method"] == page_method_version()), None),
@@ -2618,6 +2686,7 @@ def build():
             if page["path"] == "/corrections/":
                 extra["report_methods"] = report_methods()
                 extra["report_methods_renamed"] = report_methods_renamed()
+        extra["footer_privacy"] = footer_privacy(flags, umami_on(cfg), page)   # per page (no_umami, no_analytics)
         line = Markup(business_id_line(cfg, private, "legal", url=page["path"], lang=page["lang"]))
         html = env.get_template(page["template"]).render(page=page, csp=csp_for(page, cfg), business_id_line=line,
                                                          **base_ctx, **extra, **more)
@@ -2643,6 +2712,8 @@ def build():
     for rel, page in sorted(later.items()):
         render(rel, page, answer_units=units)
     write_sitemap_and_robots(out, cfg, built, flags)
+    with open(os.path.join(out, "_headers"), "w", encoding="utf-8", newline="\n") as f:
+        f.write(headers_file())
     version_assets(out, left_out=static_left_out)
 
     verify(out, flags, seller=show_seller(cfg), base_url=cfg["site"]["base_url"])

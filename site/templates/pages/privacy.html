@@ -26,7 +26,7 @@
     <li>Visits are counted with Cloudflare Web Analytics, which sets no cookie and does not follow you from site to site. On the free tools, only anonymous counts of visits and finished steps are sent; your file is never sent. On the Challenge Readiness Check, a finished step (a check, a rule tried, the details opened, an export or a card) is counted once per visit, as a view of a small counting page.</li>
     {%- if umami_on %}
     {#- 2 Nov (owner: visitor funnels): Umami Cloud, on the same pages as Cloudflare Web Analytics ([analytics] umami_website_id). #}
-    <li>Page views and some button clicks are also counted with Umami Cloud, which sets no cookie and does not follow you from site to site. It records the page address (without anything after “?” or “#”), the page title, the site you came from, your browser, device type, screen size and language, and which counted button you pressed (a “Take the test” button, the payment link, or a free tool’s run or calculate button). From your IP address it works out an approximate location (country, region and city). Its analytics records hold that location, not the IP address, though Umami’s own security and operations logs may record the address. It never receives your file or anything in it, and it does not run on /report/, the page that reads your file for the donttrade test. If your browser sends Do Not Track, Umami counts nothing. Umami Cloud may store this outside Canada; see <a href="https://umami.is/privacy">Umami’s privacy policy</a>.</li>
+    <li>Page views and some button clicks are also counted with Umami Cloud, which sets no cookie and does not follow you from site to site. It records the page address (without anything after “#”, and of what follows “?” only the campaign tags utm_source, utm_medium, utm_campaign and utm_content, which say which of our posts or emails a link came from), the page title, the site you came from, your browser, device type, screen size and language, and which counted button you pressed (a “Take the test” button, the payment link, or a free tool’s run or calculate button). From your IP address it works out an approximate location (country, region and city). Its analytics records hold that location, not the IP address, though Umami’s own security and operations logs may record the address. It never receives your file or anything in it, and it does not run on /report/, the page that reads your file for the donttrade test. If your browser sends Do Not Track, Umami counts nothing. Umami Cloud may store this outside Canada; see <a href="https://umami.is/privacy">Umami’s privacy policy</a>.</li>
     {%- endif %}
     {%- else %}
     <li>This site runs no analytics.</li>
@@ -90,6 +90,8 @@
     {%- else %}
     <li>Waitlist addresses are used once, to announce the launch, then deleted unless the person buys.</li>
     {%- endif %}
+    {#- 3 Nov (hardening item 4, CASL s. 6 and s. 11; SOR/2012-36 s. 2-3). LAWYER: wording. FR twin #desabonnement. #}
+    <li id="unsubscribe">Every email we send that offers something for sale (such as the launch email) names donttrade, gives our mailing address and says how to unsubscribe. To unsubscribe, reply “unsubscribe” or write to <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>; we stop within 10 business days. Newsletter emails carry Substack’s own unsubscribe link.</li>
     <li>Nothing is sold. We use these providers only to run the site, email, the newsletter, forms and card payments.</li>
   </ul>
   </details>
@@ -101,7 +103,8 @@
 
   <details class="legal-sec">
     <summary><h2 id="rights">Your rights</h2><span class="ls-sum">Ask to see, correct or delete your information.</span></summary>
-  <p>You can ask by email to see, correct or delete your information, or for a copy in a common format. We reply within 30 days. You can also complain to the <a href="https://www.priv.gc.ca/en/">Office of the Privacy Commissioner of Canada</a>{% if flags.paid_report %}, in Quebec to the Commission d’accès à l’information, in the EU to your country’s data protection authority, and in the UK to the Information Commissioner’s Office{% endif %}.{% if flags.paid_report %} If a privacy breach creates a real risk of significant harm to you, we tell you.{% endif %}</p>
+  {#- 3 Nov (hardening item 5): early deletion or a copy, at any time, and how a buyer is found. FR twin #droits. #}
+  <p>You can ask us at any time to see, correct or delete your information, or for a copy of it in a common format; you do not have to wait for the deletion dates above. Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>{% if flags.paid_report %}, from the address you paid with if you bought the donttrade test, so we can find your purchase{% endif %}. We reply within 30 days. Records that Canadian tax law requires us to keep (six years) are deleted when that period ends. You can also complain to the <a href="https://www.priv.gc.ca/en/">Office of the Privacy Commissioner of Canada</a>{% if flags.paid_report %}, in Quebec to the Commission d’accès à l’information, in the EU to your country’s data protection authority, and in the UK to the Information Commissioner’s Office{% endif %}.{% if flags.paid_report %} If a privacy breach creates a real risk of significant harm to you, we tell you.{% endif %}</p>
   </details>
   <p class="small muted">Version {{ legal.privacy_version }}.</p>
 </div></div>

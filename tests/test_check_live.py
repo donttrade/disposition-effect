@@ -3,6 +3,7 @@
 docs/ itself is never written: the failure cases serve a temporary copy with one planted change."""
 import io
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -116,12 +117,62 @@ def test_a_page_without_its_csp_meta_fails(copy_host):
     assert n == 1 and "/about/ carries its CSP in a <meta> tag" in out, out
 
 
-def test_every_docs_page_carries_its_csp_in_a_meta_so_no_headers_file_is_needed():
+def test_every_docs_page_carries_its_csp_in_a_meta_and_headers_adds_only_frame_ancestors():
+    """3 Nov (hardening item 1): the full CSP stays in each page's <meta>; docs/_headers (build.headers_file) may
+    exist, and its only CSP directive is frame-ancestors (a <meta> cannot set it)."""
     pages = [os.path.join(r, f) for r, _, fs in os.walk(DOCS) for f in fs if f.endswith(".html")]
     assert pages
     for p in pages:
         assert C.CSP_META.search(open(p, encoding="utf-8").read()), p
-    assert not os.path.exists(os.path.join(DOCS, "_headers"))
+    hp = os.path.join(DOCS, "_headers")
+    if os.path.exists(hp):
+        csp = [ln.split(":", 1)[1].strip() for ln in open(hp, encoding="utf-8")
+               if ln.strip().lower().startswith("content-security-policy:")]
+        assert csp and all(re.fullmatch(r"frame-ancestors [^;]+", v) for v in csp), csp
+
+
+def _headers_handler(send):
+    """A _Quiet host that sends docs/_headers' /* rule (send=True) on every answer, or nothing (send=False)."""
+    sys.path.insert(0, os.path.join(REPO, "site"))
+    import build as B
+
+    class H(_Quiet):
+        def end_headers(self):
+            if send:
+                for k, v in B.SECURITY_HEADERS:
+                    self.send_header(k, v)
+            super().end_headers()
+    return H
+
+
+def test_headers_flag_passes_when_the_host_sends_them(copy_host):
+    buf = io.StringIO()
+    n, _ = C.run(copy_host(handler=_headers_handler(True)), timeout=10, out=buf, headers=True)
+    out = buf.getvalue()
+    assert n == 0, out
+    for p in C.HEADER_PATHS:
+        assert f"{p} sends the security headers" in out, p
+
+
+def test_headers_flag_fails_when_the_host_sends_none(copy_host):
+    url = copy_host(handler=_headers_handler(False))
+    buf = io.StringIO()
+    n, _ = C.run(url, timeout=10, out=buf, headers=True)
+    out = buf.getvalue()
+    assert n == len(C.HEADER_PATHS), out
+    assert "FAIL  " + url + "/ sends the security headers: strict-transport-security without max-age=31536000" in out
+    assert "x-frame-options is not SAMEORIGIN" in out and "content-security-policy header is not exactly" in out
+    n, _, _ = _run(url)   # off by default: local servers send no headers
+    assert n == 0
+
+
+def test_header_problems_unit():
+    good = {"strict-transport-security": "max-age=31536000", "x-frame-options": "SAMEORIGIN",
+            "content-security-policy": "frame-ancestors 'self'"}
+    assert C.header_problems(good) == []
+    assert C.header_problems({**good, "x-frame-options": "DENY"}) == ["x-frame-options is not SAMEORIGIN"]
+    assert C.header_problems({**good, "content-security-policy": "frame-ancestors 'self'; script-src 'self'"})
+    assert "/favicon.ico" in C.EXTRA and C.expected_type("/favicon.ico") == "image/"
 
 
 def test_cli_through_run_sh_and_bad_origin(docs_host):

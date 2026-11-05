@@ -12,7 +12,7 @@
   {% call hero_band("hero", media="report") %}
         <h1 id="hero">See the habits in your trade history.</h1>
         <p class="lede">Drop your broker export. Test up to five habits in your trades, with the dollar total of each.</p>
-        <p class="btn-row"><a class="btn" href="/pricing/#last-step">Take the test — {{ r.price_usd|usd }}</a> <a href="/sample-report/">See the example report</a></p>
+        <p class="btn-row"><a class="btn" href="/pricing/#last-step">Take the test for {{ r.price_usd|usd }}</a> <a href="/sample-report/">See the example report</a></p>
         <p class="small">{{ r.price_usd|usd }} once · {{ prices.rules.trader_refund_days }}-day refund</p>
         <p class="small muted">Not investment advice · <a href="/pricing/#before-you-pay">Before you pay</a></p>
   {% endcall %}

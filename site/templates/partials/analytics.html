@@ -1,11 +1,18 @@
 {#- Cloudflare Web Analytics beacon: rendered only when flags.analytics is true (step 27). -#}
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "{{ analytics.cf_beacon_token }}"}'></script>
 {#- Umami Cloud (2 Nov, owner: visitor funnels), on the same pages, only with [analytics] umami_website_id set.
-    data-do-not-track: nothing is sent when the browser sends Do Not Track. data-exclude-search and
-    data-exclude-hash: the address it records is the path alone, so /welcome/'s ?session_id= and any #t= access key
-    never reach it. data-domains: it counts only on donttrade.ca, never on a local, test or preview copy. Not on a
-    page with no_umami (/report/, which reads the buyer's file: owner rule 2 Nov). Its error and performance reports stay off (no data-errors, no data-performance),
-    and no data-umami-event-* property is used, so only page views and fixed event names are sent. -#}
+    data-do-not-track: nothing is sent when the browser sends Do Not Track. data-exclude-hash: no #t= access key
+    ever reaches it. data-before-send="dtUmamiClean" (static/js/umami-clean.js, 3 Nov hardening item 7, loaded
+    first; deferred scripts run in document order, so the hook exists before the tracker runs): of the query it
+    keeps only utm_source, utm_medium, utm_campaign and utm_content with short lowercase values, the referrer keeps
+    no query or hash, and anything unexpected sends nothing. data-exclude-search="true" stays on the pages whose
+    address can carry a secret or typed text (build.umami_strict: /welcome/'s ?session_id=, /restore/, /help/'s
+    ?q=, every noindex page), so there the tracker drops the whole query itself even if the hook never loads.
+    data-domains: it counts only on donttrade.ca, never on a local, test or preview copy. Not on a page with
+    no_umami (/report/, which reads the buyer's file: owner rule 2 Nov). Its error and performance reports stay off
+    (no data-errors, no data-performance), and no data-umami-event-* property is used (lint: flag:umami), so only
+    page views and fixed event names are sent. -#}
 {%- if umami_on and not page.get("no_umami") %}
-<script defer src="https://cloud.umami.is/script.js" data-website-id="{{ analytics.umami_website_id }}" data-do-not-track="true" data-exclude-search="true" data-exclude-hash="true" data-domains="donttrade.ca"></script>
+<script src="/static/js/umami-clean.js" defer></script>
+<script defer src="https://cloud.umami.is/script.js" data-website-id="{{ analytics.umami_website_id }}" data-do-not-track="true"{% if umami_strict(page) %} data-exclude-search="true"{% endif %} data-exclude-hash="true" data-domains="donttrade.ca" data-before-send="dtUmamiClean"></script>
 {%- endif %}

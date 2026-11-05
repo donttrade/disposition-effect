@@ -37,6 +37,7 @@
 /data/disposition-pgr-plr.csv
 /data/insider-interval.csv
 /feed.xml
+/favicon.ico
 /for-firms/
 /for-platforms/
 /for-researchers/
