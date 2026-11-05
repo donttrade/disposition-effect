@@ -2,7 +2,7 @@
  "currency": "USD",
  "source": "Harvested from https://donttrade.ca/pricing/ (docs/pricing/index.html at main e5e6234) on 2026-10-20.",
  "partner": {
-  "note": "6 Nov 2026 (owner decision 5 Nov): the partner deal, worded once on /partners/ and in the pay-panel disclosure. A partner code gives the buyer discount_percent off; the partner earns commission_percent of the amount actually paid on sales made on or before commission_high_until (Toronto time), then commission_percent_after; paid payout_wait_days after the order, minimum payout minimum_payout_usd, cancelled by a refund or a lost dispute.",
+  "note": "6 Nov 2026 (owner decision 5 Nov): the partner deal, worded once on /partners/ and in the pay-panel disclosure. A partner code gives the buyer discount_percent off; the partner earns commission_percent of the amount actually paid on sales made on or before commission_high_until (Eastern Time), then commission_percent_after; paid payout_wait_days after the order, minimum payout minimum_payout_usd, cancelled by a refund or a lost dispute.",
   "discount_percent": 10, "commission_percent": 40, "commission_percent_after": 30, "commission_high_until": "2027-01-31",
   "payout_wait_days": 14, "minimum_payout_usd": 25
  },

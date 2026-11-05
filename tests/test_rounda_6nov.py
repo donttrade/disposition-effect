@@ -137,9 +137,9 @@ def test_open_state_words_the_next_price_only_with_the_first_100(off):
     assert "US$39 for the first 100 buyers, then US$49." in text_of(off / "pricing" / "index.html")
     assert "39,00 $ US pour les 100 premiers acheteurs" not in text_of(off / "pricing" / "index.html")
     byp = text_of(off / "before-you-pay" / "index.html")
-    assert "$39 USD, one time (founding price for the first 100 buyers; US$49 after that). No sales tax is charged. Total: $39 USD" in byp
+    assert "$39 USD, one time (founding price: for the first 100 buyers, then US$49). No sales tax is charged. Total: $39 USD" in byp
     fr = text_of(off / "fr" / "avant-de-payer" / "index.html")
-    assert "paiement unique (prix de fondateur pour les 100 premiers acheteurs; 49,00 $ US ensuite)" in fr.replace(" ", " ")
+    assert "paiement unique (prix de fondateur : pour les 100 premiers acheteurs, puis 49,00 $ US)" in fr.replace(" ", " ")
     assert lint_ok(off) == []
 
 
@@ -156,7 +156,7 @@ def test_49_appears_nowhere_else_in_the_open_state(off):
 def test_founding_problem_catches_wrong_forms():
     ok = "<p>US$39 for the first 100 buyers, then US$49.</p>"
     assert B.founding_problem(ok, True, 100) is None
-    assert "first 100" in B.founding_problem("<p>The price is US$49 later.</p>", True, 100)
+    assert "approved form" in B.founding_problem("<p>The price is US$49 later.</p>", True, 100)
     assert "crossed out" in B.founding_problem("<p><s>$49</s> $39 for the first 100 buyers</p>", True, 100)
     assert "crossed out" in B.founding_problem("<p><del class=x>US$49</del></p>", False, 100)
     assert B.founding_problem("<p>US$49.</p>", False, 100) is None   # ended: the price alone is fine
@@ -169,7 +169,8 @@ def test_the_old_retired_list_no_longer_holds_49_but_99_stays():
     assert 49 in allowed_amounts(PRICES) and 25 in allowed_amounts(PRICES)
 
 
-def test_ended_state_shows_49_as_the_price_and_passes_lint(ended):
+def test_ended_state_shows_49_as_the_price_and_passes_lint(ended, monkeypatch):
+    monkeypatch.setenv("DT_PRICES_JSON", str(ended.parent / "e.prices.json"))   # lint reads the prices file the build used
     pr = text_of(ended / "pricing" / "index.html")
     assert "$49 USD, once" in pr and "for the first 100 buyers" not in pr
     assert "Take the test for $49" in pr
@@ -413,7 +414,7 @@ def test_refund_flag_defaults_off_and_the_old_wording_stays(off):
     assert "even if you have already run your test" in text_of(off / "terms" / "index.html")
     assert "Our voluntary 14-day refund still applies." in text_of(off / "terms" / "index.html")
     assert "14-day refund" in text_of(off / "index.html")
-    assert not (off / "partners" / "index.html").read_text(encoding="utf-8").count("noindex") == 0
+    assert not (off / "partners").exists()      # fix round 1: /partners/ exists only while promotion codes are on
 
 
 def test_flag_off_lint_refuses_the_new_phrase(off):
@@ -513,7 +514,7 @@ def test_refund_on_lint_catches_a_bare_claim_a_retired_phrase_and_a_bare_full_re
 
 def test_refund_pages_are_noindex_out_of_the_sitemap_and_not_in_the_answers(on):
     sm = (on / "sitemap.xml").read_text(encoding="utf-8")
-    for rel in ("refund", "refund/thanks", "fr/remboursement", "fr/remboursement/merci", "partners"):
+    for rel in ("refund", "refund/thanks", "fr/remboursement", "fr/remboursement/merci", "partners"):   # `on` has codes on
         h = (on / rel / "index.html").read_text(encoding="utf-8")
         assert '<meta name="robots" content="noindex">' in h, rel
         assert f"https://donttrade.ca/{rel}/" not in sm, rel
@@ -577,8 +578,8 @@ def test_privacy_names_the_refund_form_the_log_and_the_misuse_list_only_with_the
 
 
 # ===================================================================== A6 partners
-def test_partners_page_numbers_come_from_prices_json(off):
-    t = text_of(off / "partners" / "index.html")
+def test_partners_page_numbers_come_from_prices_json(on):
+    t = text_of(on / "partners" / "index.html")
     p = PRICES["partner"]
     assert f"{p['discount_percent']}% off" in t and f"{p['commission_percent']}%" in t and "31 January 2027" in t
     assert "$25" in t and "14 days after the order" in t
@@ -748,3 +749,234 @@ def test_axe_overflow_console_on_the_round_a_pages(browser, on_url, path, width,
         assert axe_violations(pg) == []
     assert [e for e in errs if "Failed to load resource" not in e and "cloudflareinsights" not in e] == []
     ctx.close()
+
+
+# =============================================================================== FIX ROUND 1 (Tester minors)
+# ---- M1 founding price: one approved form, enforced
+APPROVED_EN = "for the first 100 buyers, then US$49"
+APPROVED_FR = "pour les 100 premiers acheteurs, puis 49,00\u00a0$\u00a0US"
+
+
+@pytest.mark.parametrize("plant", [
+    "<p>Now only $49.</p>", "<p>Now only $49</p>", "<p>US$49 after that.</p>", "<p>The usual rate is $49 for everyone.</p>",
+    "<p>Then 49 USD.</p>", "<p>Then 49,00\u00a0$\u00a0US.</p>", "<p>Then 49 $ US.</p>", "<p>Was $49 before.</p>",
+    "<p>for the first 100 buyers, thereafter US$49</p>", "<p>launch offer, first 100 buyers: US$49</p>",
+    "<p>pour les 100 premiers acheteurs, ensuite 49,00\u00a0$\u00a0US</p>"])
+def test_any_other_mention_of_the_next_price_fails_while_the_founding_price_is_open(plant):
+    ok = f"<p>US$39 {APPROVED_EN}.</p><p>{APPROVED_FR}.</p>"
+    assert B.founding_problem(ok, True, 100) is None
+    assert "approved form" in B.founding_problem(ok + plant, True, 100), plant
+    assert "approved form" in B.founding_problem(plant, True, 100)
+    assert any(p[0] == "claim:founding_price" for p in L.founding_claims(ok + plant, "/x/"))
+    assert not L.founding_claims(ok, "/x/")
+
+
+@pytest.mark.parametrize("plant", ["<s>US$49</s>", "<del>$49</del>", "<strike>49,00\u00a0$\u00a0US</strike>", "<s class=a>49 USD</s>"])
+def test_a_crossed_out_next_price_fails_open_or_ended(plant):
+    assert "crossed out" in B.founding_problem(f"<p>{APPROVED_EN}</p>" + plant, True, 100)
+    assert "crossed out" in B.founding_problem(plant, False, 100)
+
+
+def test_every_page_that_shows_the_next_price_uses_the_approved_wording(off):
+    shown = []
+    for rel, phrase in (("pricing", APPROVED_EN), ("terms", APPROVED_EN), ("before-you-pay", APPROVED_EN),
+                        ("fr/conditions", APPROVED_FR), ("fr/avant-de-payer", APPROVED_FR)):
+        t = text_of(off / rel / "index.html", main_only=False)
+        assert phrase in t.replace("\u00a0", " ").replace(" ", " ") or phrase.replace("\u00a0", " ") in t.replace("\u00a0", " "), rel
+        shown.append(rel)
+    assert len(shown) == 5
+    for p in off.rglob("index.html"):
+        if p.relative_to(off).parts[0] == "research":
+            continue
+        assert B.founding_problem(p.read_text(encoding="utf-8"), True, 100) is None, p
+
+
+def test_the_approved_phrase_is_pinned_in_the_macro_and_the_terms(off):
+    macro = open(os.path.join(SITE, "templates", "partials", "price_line.html"), encoding="utf-8").read()
+    assert "for the first {{ rules.founding_limit }} buyers, then US{{ r.after_price_usd|usd }}" in macro
+    assert "pour les {{ rules.founding_limit }} premiers acheteurs, puis {{ r.after_price_usd|usd_fr }}" in macro
+    terms = text_of(off / "terms" / "index.html")
+    assert "$39 USD, one time, for the first 100 buyers, then US$49, one time, for every buyer after that. The first price is the founding price." in terms
+    fr = text_of(off / "fr" / "conditions" / "index.html").replace("\u00a0", " ")
+    assert "39,00 $ US, paiement unique, pour les 100 premiers acheteurs, puis 49,00 $ US, paiement unique, pour chaque acheteur suivant. Le premier prix est le prix de fondateur." in fr
+
+
+def test_a_planted_next_price_in_a_built_page_fails_lint(off, tmp_path):
+    import shutil
+    out = tmp_path / "_site"
+    shutil.copytree(off, out)
+    fp = out / "about" / "index.html"
+    fp.write_text(fp.read_text(encoding="utf-8").replace("</main>", "<p>Now only $49.</p></main>", 1), encoding="utf-8")
+    probs = lint_ok(out)
+    assert any(p[0] == "claim:founding_price" and p[1] == "/about/" for p in probs)
+
+
+# ---- M2 flag off: no new-policy wording of any kind
+ON_FLAG_OFF_PLANTS = [
+    "<p>Once your result is delivered there is no refund, apart from one goodwill refund per customer.</p>",
+    "<p>You get no refund once your result is delivered.</p>", "<p>We make a goodwill refund.</p>",
+    '<p><a href="/refund/">Ask us</a></p>', '<p><a href="/terms/#trader-refunds">Terms</a></p>',
+    '<p><a href="/fr/remboursement/">Demande</a></p>', '<p id="no-resale">x</p>',
+    "<p>Un remboursement à titre gracieux par client.</p>", "<p>Une fois votre résultat remis, nous ne remboursons pas.</p>",
+    "<p>No result, no charge.</p>"]
+
+
+@pytest.mark.parametrize("plant", ON_FLAG_OFF_PLANTS)
+def test_flag_off_lint_refuses_every_kind_of_new_policy_wording(off, plant):
+    L.REFUND["on"] = False
+    h = (off / "pricing" / "index.html").read_text(encoding="utf-8").replace("</main>", plant + "</main>", 1)
+    assert any(p[0] == "claim:refund_flag_off" for p in L.refund_policy_claims(h, "/pricing/")), plant
+    assert B.refund_off_problems(h), plant
+
+
+def test_the_flag_off_deny_list_is_derived_from_the_flag_on_strings(on, off):
+    """Every sentence of the flag-on refund wording on the pages is refused when planted in a flag-off page, so the
+    two cannot drift: a new flag-on sentence is covered without anyone editing a list."""
+    deny = B.refund_denylist()
+    assert {"/refund/", "/fr/remboursement/", "/terms/#trader-refunds", "/fr/conditions/#remboursements-traders"} <= deny["hrefs"]
+    assert {"goodwill", "gracieux", "customer"} <= deny["words"]
+    seen = 0
+    for rel in ("terms", "pricing", "before-you-pay", "fr/conditions", "fr/avant-de-payer", "for-traders"):
+        for sent in re.split(r"(?<=[.;:!?])\s+", text_of(on / rel / "index.html")):
+            if len(sent.split()) >= 8 and re.search(r"goodwill|gracieux|result is delivered|résultat remis|no charge|pas de frais", sent, re.I):
+                assert B.refund_off_problems(f"<p>{_html.escape(sent)}</p>"), sent
+                seen += 1
+    assert seen >= 8
+
+
+def test_flag_off_build_fails_on_new_wording_in_a_template(tmp_path):
+    import shutil
+    work = tmp_path / "repo"
+    shutil.copytree(SITE, work / "site", ignore=shutil.ignore_patterns("_site", "dev", "__pycache__"))
+    shutil.copytree(os.path.join(REPO, "docs"), work / "docs", ignore=shutil.ignore_patterns("*.webp"))
+    shutil.copytree(os.path.join(REPO, "checks"), work / "checks", ignore=shutil.ignore_patterns("__pycache__"))
+    shutil.copytree(os.path.join(REPO, "tests", "fixtures", "paid"), work / "tests" / "fixtures" / "paid")
+    p = work / "site" / "templates" / "pages" / "welcome.html"
+    p.write_text(p.read_text(encoding="utf-8").replace("{% include \"partials/disclaimer.html\" %}", "<p>One goodwill refund per customer.</p>{% include \"partials/disclaimer.html\" %}", 1), encoding="utf-8")
+    r = subprocess.run([sys.executable, str(work / "site" / "build.py")], env={**os.environ, "DT_OUT": str(tmp_path / "o")}, capture_output=True, text=True)
+    assert r.returncode == 1 and "refund_no_result is off but the page says the new policy" in r.stderr and "goodwill" in r.stderr
+
+
+# ---- M3 dates
+def test_a_bad_dt_today_is_one_clear_line_not_a_traceback(tmp_path):
+    for bad in ("abc", "2026-13-40", "06/11/2026", ""):
+        r, _ = build(tmp_path, "b", DT_TODAY=bad)
+        if bad == "":
+            continue
+        assert r.returncode == 1 and "Traceback" not in r.stderr, bad
+        assert r.stderr.strip().count("\n") == 0 and "DT_TODAY" in r.stderr and "YYYY-MM-DD" in r.stderr, r.stderr
+
+
+def test_dt_today_that_is_not_today_prints_a_note(tmp_path):
+    r, _ = build(tmp_path, "n", DT_TODAY="2026-11-06")
+    import datetime
+    if datetime.date.today().isoformat() != "2026-11-06":
+        assert "NOTE: DT_TODAY=2026-11-06 is not today" in r.stderr and "never bundle or deploy" in r.stderr
+
+
+def test_a_bundle_build_refuses_a_date_later_than_the_real_date(tmp_path):
+    import datetime
+    far = (datetime.date.today() + datetime.timedelta(days=3)).isoformat()
+    toml = TOML.replace('terms_date = "2026-11-06"', f'terms_date = "{far}"').replace('privacy_date = "2026-11-06"', f'privacy_date = "{far}"')
+    r, _ = build(tmp_path, "f", toml=toml, DT_TODAY=far, DT_REQUIRE_LAUNCH_DATE="1")
+    assert r.returncode == 1 and "docs/ would be stamped later than today's real date" in r.stderr and "Traceback" not in r.stderr
+    # the same build as a preview (an explicit, deliberate DT_TODAY) is allowed
+    r, _ = build(tmp_path, "p", toml=toml, DT_TODAY=far, DT_REQUIRE_LAUNCH_DATE="1", DT_PREVIEW="paid-preview")
+    assert r.returncode == 0, r.stderr
+    # page content dates count too (they become the sitemap's <lastmod>)
+    d = datetime.date.today()
+    if d.isoformat() < "2026-11-06":
+        r, _ = build(tmp_path, "g", toml=TOML.replace('terms_date = "2026-11-06"', f'terms_date = "{d.isoformat()}"').replace('privacy_date = "2026-11-06"', f'privacy_date = "{d.isoformat()}"'), DT_REQUIRE_LAUNCH_DATE="1")
+        assert r.returncode == 1 and "updated 2026-11-06" in r.stderr
+
+
+def test_bundle_command_refuses_dt_today_and_leaves_docs_alone():
+    import hashlib
+    before = hashlib.sha256(open(os.path.join(REPO, "docs", "sitemap.xml"), "rb").read()).hexdigest()
+    r = subprocess.run(["sh", os.path.join(SITE, "run.sh"), "bundle"], cwd=REPO, capture_output=True, text=True,
+                       env={**os.environ, "DT_BUNDLE": "yes", "DT_TODAY": "2026-11-06"})
+    assert r.returncode == 1 and "bundle refuses DT_TODAY=2026-11-06" in r.stdout
+    assert hashlib.sha256(open(os.path.join(REPO, "docs", "sitemap.xml"), "rb").read()).hexdigest() == before
+
+
+def test_docs_date_check_fails_on_a_future_dated_docs_and_passes_today(tmp_path):
+    sys.path.insert(0, os.path.join(REPO, "checks"))
+    import docs_date as D
+    import datetime
+    d = tmp_path / "docs"
+    (d / "terms").mkdir(parents=True)
+    (d / "terms" / "index.html").write_text("<p>Version 2099-01-01.</p>")
+    (d / "sitemap.xml").write_text("<urlset><url><loc>https://donttrade.ca/x/</loc><lastmod>2099-01-02</lastmod></url></urlset>")
+    r = subprocess.run([sys.executable, os.path.join(REPO, "checks", "docs_date.py"), str(d)], capture_output=True, text=True)
+    assert r.returncode == 1 and "docs_date: FAIL" in r.stdout and "never commit or deploy it earlier" in r.stdout
+    (d / "terms" / "index.html").write_text("<p>Version 2026-01-01.</p>")
+    (d / "sitemap.xml").write_text("<urlset><url><loc>https://donttrade.ca/x/</loc><lastmod>2026-01-02</lastmod></url></urlset>")
+    assert D.future_dates(str(d), datetime.date.today()) == []
+    real = subprocess.run([sys.executable, os.path.join(REPO, "checks", "docs_date.py")], capture_output=True, text=True)
+    assert real.returncode == 0, real.stdout          # the committed docs/ is not dated ahead
+    assert "docs_date.py" in open(os.path.join(SITE, "run.sh")).read()
+
+
+# ---- M4 French validation messages
+def test_french_refund_form_shows_french_validation_messages(browser, on_url):
+    pg = browser.new_page()
+    pg.goto(on_url + "/fr/remboursement/")
+    pg.click("#refund-form button[type=submit]")
+    msgs = pg.evaluate("[].map.call(document.querySelectorAll('.field-err'), e => e.hidden ? '' : e.textContent).filter(Boolean)")
+    assert "Courriel utilisé pour payer est obligatoire." in msgs and "Choisissez une réponse." in msgs
+    assert not any(re.search(r"required|Choose|\(", m) for m in msgs), msgs
+    pg.fill("#rf-email", "pas-un-courriel")
+    pg.click("#refund-form button[type=submit]")
+    assert "Entrez une adresse courriel complète, comme nom@exemple.com." in pg.evaluate("[].map.call(document.querySelectorAll('.field-err'), e => e.hidden ? '' : e.textContent)")
+    pg.close()
+
+
+def test_english_refund_form_keeps_english_messages_without_the_hint_in_parentheses(browser, on_url):
+    pg = browser.new_page()
+    pg.goto(on_url + "/refund/")
+    pg.fill("#rf-email", "a@b.co")
+    pg.click("label[for=rf-r-other]")
+    pg.click("#refund-form button[type=submit]")
+    msgs = pg.evaluate("[].map.call(document.querySelectorAll('.field-err'), e => e.hidden ? '' : e.textContent).filter(Boolean)")
+    assert msgs == ["What did you see is required."], msgs
+    pg.close()
+
+
+# ---- M5 /help/ and the answers index keep the Stripe sentence with the refund flag on
+def test_flag_on_help_and_answers_index_keep_the_stripe_controller_sentence(on, off):
+    for out in (off, on):
+        assert "independent controller" in (out / "help" / "index.html").read_text(encoding="utf-8")
+        assert "independent controller" in (out / "static" / "js" / "answers-index.js").read_text(encoding="utf-8")
+        assert "independent controller" in text_of(out / "privacy" / "index.html")
+
+
+def test_privacy_refund_and_partner_records_have_their_own_section(on, off):
+    for out, refund in ((off, False), (on, True)):
+        h = (out / "privacy" / "index.html").read_text(encoding="utf-8")
+        assert 'id="refund-partner-records"' in h and 'id="partners-free-tests"' in h
+        assert ('id="refund-misuse"' in h) is refund and ('id="refund-form-data"' in h) is refund
+        forms = h.split('id="forms"')[1].split('id="refund-partner-records"')[0]
+        assert "refund log" not in forms and "misuse" not in forms.lower()
+
+
+# ---- M6 Eastern Time
+def test_partners_page_says_eastern_time_and_no_toronto_anywhere(on):
+    assert "(Eastern Time)" in text_of(on / "partners" / "index.html") and "Toronto" not in text_of(on / "partners" / "index.html")
+    assert "Toronto" not in open(os.path.join(SITE, "config", "prices.json"), encoding="utf-8").read()
+    for p in list(on.rglob("*.html")):
+        if p.relative_to(on).parts[0] != "research":
+            assert "Toronto" not in p.read_text(encoding="utf-8"), p
+
+
+# ---- M7 /partners/ only with promotion codes
+def test_partners_page_exists_only_while_promotion_codes_are_on(off, on, tmp_path):
+    assert not (off / "partners").exists() and "/partners/" not in (off / "sitemap.xml").read_text(encoding="utf-8")
+    assert (on / "partners" / "index.html").exists()
+    assert "/partners/" not in (on / "sitemap.xml").read_text(encoding="utf-8")
+    for out in (off, on):
+        for p in out.rglob("*.html"):
+            if p.relative_to(out).parts[0] != "research":
+                assert 'href="/partners/"' not in p.read_text(encoding="utf-8"), p
+    assert lint_ok(off) == [] and lint_ok(on) == []
+    r, o = build(tmp_path, "pr", toml=on_toml(promo=False), partners={})
+    assert r.returncode == 0 and not (o / "partners").exists()

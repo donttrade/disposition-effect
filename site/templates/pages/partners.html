@@ -13,7 +13,7 @@
   <h2 id="deal">The deal</h2>
   <ul>
     <li><strong>For the buyer:</strong> {{ pt.discount_percent }}% off the price of the donttrade test, with the partner’s code.</li>
-    <li><strong>For the partner:</strong> {{ pt.commission_percent }}% of the amount actually paid on each sale made with the partner’s code, on orders placed on or before {{ pt.commission_high_until|longdate }} (Toronto time); {{ pt.commission_percent_after }}% after that. One time per sale.</li>
+    <li><strong>For the partner:</strong> {{ pt.commission_percent }}% of the amount actually paid on each sale made with the partner’s code, on orders placed on or before {{ pt.commission_high_until|longdate }} (Eastern Time); {{ pt.commission_percent_after }}% after that. One time per sale.</li>
     <li><strong>When it is paid:</strong> {{ pt.payout_wait_days }} days after the order, once the refund window has passed. The minimum payout is {{ pt.minimum_payout_usd|usd }}; smaller amounts carry forward.</li>
     <li><strong>When it is cancelled:</strong> a refund or a lost payment dispute cancels the commission on that order. If it was already paid, it is taken off the next payout.</li>
     <li><strong>Free tests do not earn a commission</strong>, and neither does a partner’s own purchase.</li>
