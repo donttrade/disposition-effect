@@ -42,7 +42,7 @@ one_product = ["improve", "improves", "improving", "signal", "score", "scores", 
 # pages, heads, JSON-LD, the answers index) may not use a retired product name, the old sample labels, or a habit
 # status the owner removed ("described" as a status, "not tested"). Frozen research bodies keep their words
 # (passthrough rules); the allow list below holds the intended dated lines only. Regexes.
-ignore_case = ['\bhabit[\s-]+reports?\b', '\bhabit[\s-]+trackers?\b', '\boutcomes[\s-]+packs?\b', '\bdemo\b', '\bfake\b',
+ignore_case = ['\bb[eê]ta\b', '\bhabit[\s-]+reports?\b', '\bhabit[\s-]+trackers?\b', '\boutcomes[\s-]+packs?\b', '\bdemo\b', '\bfake\b',
                '\bmade-up\b', '\bnot\s+a\s+real\s+trader\b', '\bnot\s+tested\b', '\bdescribed,\s+not\b', '\bdescribed\s+only\b',
                '\bonly\s+described\b', '\bdescribed\s+(?:here\s+|below\s+)?without\s+a\s+verdict\b', '\(described\b',
                '\b(?:is|are)\s+described\s+(?:here|below)\b']
