@@ -5,6 +5,7 @@
 {% block content %}
 {%- from "partials/seller.html" import seller_rows %}
 {%- set r = products["report39"] %}
+{%- import "partials/refund_copy_fr.html" as refund_fr with context %}
 <div class="wrap" data-requires-flag="paid_report"><div class="prose">
   <p class="small"><a href="/terms/" hreflang="en" lang="en">English</a></p>
   <h1>Conditions de service et de vente</h1>
@@ -18,14 +19,22 @@
   <p><strong>Langue :</strong> la version française de ces conditions vous est présentée en premier. Si vous choisissez la version anglaise, les deux versions ont la même valeur; pour les consommateurs du Québec, la version française prévaut en cas de divergence.</p>
 
   <h2 id="prix">2. Prix et devise</h2>
-  <p>Test donttrade : {{ r.price_usd|usd_fr }}, paiement unique; prix de fondateur pour les {{ prices.rules.founding_limit }} premiers acheteurs. Les prix sont en dollars américains. Aucune taxe de vente n’est facturée. L’émetteur de votre carte peut ajouter des frais de conversion. Le prix que vous acceptez au moment de l’achat est celui qui s’applique.</p>
+  {#- 6 Nov (Round A1): TRANSLATOR CHECK, EN /terms/#price. LAWYER: Quebec wording. The count rule is the owner's (5 Nov). -#}
+  {%- if founding_open %}
+  <p>Test donttrade : {{ r.price_usd|usd_fr }}, paiement unique, pour les {{ prices.rules.founding_limit }} premiers acheteurs (le prix de fondateur), puis {{ r.after_price_usd|usd_fr }}, paiement unique, pour chaque acheteur suivant. Un acheteur est une personne dont la commande payée figure parmi les {{ prices.rules.founding_limit }} premières commandes payées au prix de fondateur, comptées ensemble sur les pages de paiement en français et en anglais. Une commande remboursée garde son rang.{% if stripe_promo %} Une commande payée avec un code de partenaire compte.{% endif %} Les tests gratuits que donttrade offre ne comptent pas. Les prix sont en dollars américains. Aucune taxe de vente n’est facturée. L’émetteur de votre carte peut ajouter des frais de conversion. {% if stripe_promo %}Le prix affiché sur la page de paiement de Stripe au moment où vous payez, après tout code promotionnel que vous entrez, est celui qui s’applique.{% else %}Le prix que vous acceptez au moment de l’achat est celui qui s’applique.{% endif %} Le prix de fondateur prend fin avec la {{ prices.rules.founding_limit }}e commande payée; si le prix a déjà changé quand vous arrivez à la page de paiement, celle-ci affiche le nouveau prix avant que vous payiez.</p>
+  {%- else %}
+  <p>Test donttrade : {{ r.price_usd|usd_fr }}, paiement unique. Le prix de fondateur de {{ r.founding_price_usd|usd_fr }} a pris fin avec la {{ prices.rules.founding_limit }}e commande payée. Les prix sont en dollars américains. Aucune taxe de vente n’est facturée. L’émetteur de votre carte peut ajouter des frais de conversion. {% if stripe_promo %}Le prix affiché sur la page de paiement de Stripe au moment où vous payez, après tout code promotionnel que vous entrez, est celui qui s’applique.{% else %}Le prix que vous acceptez au moment de l’achat est celui qui s’applique.{% endif %}</p>
+  {%- endif %}
+  {%- if stripe_promo %}
+  <p id="codes-promotionnels"><strong>Codes promotionnels :</strong> un code de partenaire donne {{ prices.partner.discount_percent }} % de rabais sur le prix affiché sur la page de paiement, et le partenaire gagne une commission si vous achetez; la page d’où vous venez l’indique avant que vous payiez. Un code peut servir une seule fois ou être limité, selon ce qui est indiqué à sa remise. Un test gratuit offert par donttrade est présenté comme gratuit.</p>
+  {%- endif %}
 
   <h2 id="paiement">3. Paiement</h2>
   <p>Le paiement se fait en entier au moment de l’achat, par carte, sur la page sécurisée de Stripe.</p>
 
   <h2 id="livraison">4. Livraison et exigences techniques</h2>
   <p>Le produit est fourni en ligne seulement, sur donttrade.ca, dès le paiement. Votre clé d’accès est enregistrée dans votre navigateur. Conservez le lien et le fichier de restauration affichés après le paiement : ils sont le seul moyen {% if site.manual_restore %}automatique {% endif %}de rouvrir votre achat dans un autre navigateur.{% if site.manual_restore %} <span id="restauration-manuelle">Si votre lien d’accès cesse de fonctionner, écrivez-nous depuis l’adresse utilisée pour payer et nous vous en enverrons un nouveau. Nous l’envoyons à la main, et seulement à l’adresse courriel du paiement.</span>{# TRANSLATOR CHECK (C-14, 23 Oct): EN /terms/#manual-restore "…and we’ll send a new one. We send it by hand, and only to the email address on the payment." #}{% endif %}</p>
-  <p><strong>Exigences :</strong> une version récente de Chrome, Edge, Firefox ou Safari avec JavaScript activé, et un fichier dans un format pris en charge (rapport MT4/MT5, requête Flex d’IBKR, fichier CSV des ordres Tradovate ou historique des ordres TradingView en CSV, en version bêta, ou notre modèle CSV){# TRANSLATOR CHECK (29 Oct): EN adds "TradingView order history" to the list of files. #}, d’au plus 20 000 lignes. Une habitude testée dont l’un des deux groupes compte moins de 30 transactions affiche « pas assez de transactions pour conclure ».{# T-3 T3-B: EN "A tested habit with fewer than 30 trades in either group is shown as "not enough trades to tell"." TRANSLATOR CHECK #} Ce n’est pas un défaut du produit.</p>
+  <p><strong>Exigences :</strong> une version récente de Chrome, Edge, Firefox ou Safari avec JavaScript activé, et un fichier dans un format pris en charge (rapport MT4/MT5, requête Flex d’IBKR, fichier CSV des ordres Tradovate ou historique des ordres TradingView en CSV, ou notre modèle CSV){# TRANSLATOR CHECK (29 Oct): EN adds "TradingView order history" to the list of files. #}, d’au plus 20 000 lignes. {{ refund_fr.formats_caveat() }} Une habitude testée dont l’un des deux groupes compte moins de 30 transactions affiche « pas assez de transactions pour conclure ».{# T-3 T3-B: EN "A tested habit with fewer than 30 trades in either group is shown as "not enough trades to tell"." TRANSLATOR CHECK #} Ce n’est pas un défaut du produit.</p>
   {#- C-14 (G15), runbook §3.6. TRANSLATOR CHECK: EN /terms/#outage "…we refund you on request, in full." LAWYER: the 24-hour line. #}
   <p id="panne"><strong>Si notre serveur est hors service,</strong> votre achat n’est pas perdu et aucune analyse n’est comptée. Réessayez plus tard. Si le service est interrompu plus de 24 heures, nous vous remboursons sur demande, en entier.</p>
 
@@ -33,13 +42,13 @@
   <p>Le test donttrade comprend deux analyses : votre test et un nouveau test gratuit. Le nouveau test est offert de 30 à 60 jours après votre premier résultat. Il doit porter sur le même historique de négociation, mis à jour : au moins la moitié de ses transactions doivent correspondre à celles du premier fichier. Votre clé d’accès est valide 90 jours après l’achat, ou jusqu’à 75 jours après votre premier résultat si cette date est plus tardive.{# TRANSLATOR CHECK (ruling #2, 21 Oct): EN /terms/ "Your key is valid for 90 days after purchase, or until 75 days after your first report if that is later." #} Une analyse est comptée seulement si le résultat est produit avec succès.{# TRANSLATOR CHECK (29 Oct): « premier résultat », « le résultat » (EN “your first result”, “a result is produced”). #}</p>
 
   <h2 id="remboursements">6. Remboursements</h2>
-  <p>Vous pouvez obtenir un remboursement complet si vous le demandez par courriel dans les {{ prices.rules.trader_refund_days }} jours suivant l’achat, même si vous avez déjà fait le test.{# TRANSLATOR CHECK (29 Oct): EN “even if you have already run your test”. #} Le remboursement est fait sur la carte utilisée, habituellement en 5 à 10 jours ouvrables. La clé d’accès cesse alors de fonctionner. Ces remboursements s’ajoutent aux droits que la loi vous accorde; ils ne les remplacent pas.</p>
+  {{ refund_fr.terms_p() }}
   {#- C-14 (Q11): access ends only on a dispute decided for the buyer (dt-private C-6). TRANSLATOR CHECK: EN /terms/#chargeback. LAWYER: wording. #}
   <p id="contestation"><strong>Contestation de paiement :</strong> si vous contestez le paiement auprès de l’émetteur de votre carte et que la contestation est tranchée en votre faveur, votre clé d’accès cesse de fonctionner, comme après un remboursement.</p>
   <p>Si une clé semble partagée entre plusieurs personnes, une personne examine la situation et vous écrit avant toute suspension.</p>
 
   <h2 id="retractation">7. Droit de rétractation (Union européenne et Royaume-Uni)</h2>
-  <p>Si vous habitez dans l’Union européenne ou au Royaume-Uni, vous avez en principe un droit légal de rétractation de 14 jours. Si vous demandez l’accès immédiat au contenu numérique et reconnaissez perdre ce droit (case prévue au paiement), il prend fin dès que le contenu est fourni. Notre remboursement volontaire de {{ prices.rules.trader_refund_days }} jours (section 6) s’applique quand même.</p>
+  <p>{{ refund_fr.eu_uk() }}</p>
 
   <h2 id="mise-en-garde">8. Ce que donttrade n’est pas</h2>
   <div data-lint="disclaimer">

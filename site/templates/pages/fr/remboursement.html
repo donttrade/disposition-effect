@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{#- /fr/remboursement/ (6 Nov, Round A8): the French twin of /refund/. TRANSLATOR CHECK on every sentence; LAWYER on the
+    Quebec wording. Built only with [flags] refund_no_result. noindex. -#}
+{% block content %}
+{%- import "partials/refund_copy_fr.html" as refund_fr with context %}
+<div class="wrap" data-requires-flag="paid_report"><div class="prose">
+  <p class="small"><a href="/refund/" hreflang="en" lang="en">English</a></p>
+  <h1 id="refund-h">Demander un remboursement</h1>
+  <p><strong>Pas de résultat, pas de frais.</strong> Si votre fichier n’a pas pu être lu, si le test n’a pas pu s’exécuter ou si aucune habitude n’a pu être testée, vous êtes remboursé en totalité si vous le demandez dans les {{ prices.rules.trader_refund_days }} jours suivant l’achat. Une fois votre résultat remis, il n’y a pas de remboursement, sauf un remboursement à titre gracieux par client. <a href="/fr/conditions/#remboursements-traders">Conditions de remboursement</a></p>
+  <p>Une personne lit chaque demande et répond dans les {{ prices.rules.refund_reply_business_days }} jours ouvrables (du lundi au vendredi, heure de l’Est), au courriel que vous indiquez. Le formulaire est une commodité : vous pouvez aussi nous écrire les mêmes renseignements par courriel.</p>
+  {% with lang = "fr" %}{% include "partials/form_refund.html" %}{% endwith %}
+  <p class="small"><a href="/fr/conditions/#remboursements-traders">Conditions de remboursement</a> · <a href="/fr/confidentialite/">Confidentialité</a></p>
+</div></div>
+{% endblock %}

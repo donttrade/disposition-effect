@@ -8,6 +8,9 @@
 {%- if site.get("mastodon_url") %}
 <link rel="me" href="{{ site.mastodon_url }}">
 {%- endif %}
+{%- if partners_meta and flags.paid_report %}
+<meta name="dt-partners" content="{{ partners_meta }}">
+{%- endif %}
 {%- if page.get("connect_worker") %}
 <meta name="dt-api" content="{{ worker.api_base }}">
 <meta name="dt-method" content="{{ paid_method }}">

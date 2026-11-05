@@ -1,0 +1,44 @@
+{#- The refund request form (6 Nov, Round A8; ARCHITECT-ADDENDUM-REFUNDS §3.2). Plain HTML POST to Web3Forms, so it works with
+    JavaScript off (markup follows form_waitlist.html). The reason is a radio group (a dropdown hides the options on
+    phones), required; the note is optional except for "Something else" (static/js/refund.js makes it required then).
+    The email is the only personal field. The radios come from site/config/refund_reasons.json. lang: "en" or "fr".
+    A convenience, never a condition: the page and the terms also take a plain email with a reason. -#}
+{%- set fr = (lang == "fr") %}
+<form class="request-form" id="refund-form" method="POST" action="{{ forms.endpoint }}" aria-labelledby="refund-h">
+  <input type="hidden" name="access_key" value="{{ forms.trader_key }}">
+  <input type="hidden" name="subject" value="donttrade: refund request">
+  <input type="hidden" name="from_name" value="donttrade site">
+  <input type="hidden" name="redirect" value="{{ forms.redirect_refund_fr if fr else forms.redirect_refund }}">
+  <input type="hidden" name="product" value="refund">
+  <input type="hidden" name="page" value="{{ page.path }}">
+  <input type="checkbox" name="botcheck" class="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" hidden>
+  <div class="field"><label for="rf-email">{{ "Courriel utilisé pour payer" if fr else "Email you paid with" }} <span class="req">({{ "obligatoire" if fr else "required" }})</span></label>
+    <input id="rf-email" name="email" type="email" autocomplete="email" required></div>
+  <div class="field"><label for="rf-order">{{ "Référence de la commande" if fr else "Order reference" }} <span class="opt">({{ "facultatif" if fr else "optional" }})</span></label>
+    <input id="rf-order" name="order_ref" type="text" maxlength="40" autocomplete="off">
+    <p class="small muted">{{ "Tirée du reçu ou du courriel envoyé après le paiement." if fr else "From your receipt or the email we sent after you paid." }}</p></div>
+  <fieldset class="field">
+    <legend>{{ "Pourquoi demandez-vous un remboursement ?" if fr else "Why are you asking?" }} <span class="req">({{ "obligatoire" if fr else "required" }})</span></legend>
+    {%- for x in refund_reasons %}
+    <div class="check"><input id="rf-r-{{ x.slug }}" type="radio" name="reason" value="{{ x.slug }}"{% if loop.first %} required{% endif %}><label for="rf-r-{{ x.slug }}">{{ x.fr if fr else x.en }}</label></div>
+    {%- endfor %}
+    <p class="small muted">{{ "Si vous avez déjà votre résultat, les remboursements se limitent à un remboursement à titre gracieux par client. Envoyez quand même votre demande : une personne les lit toutes." if fr else "If you already have your result, refunds are limited to one goodwill refund per customer. Send your request anyway: a person reads every one." }}</p>
+  </fieldset>
+  <div class="field"><label for="rf-format">{{ "Type de fichier" if fr else "File type" }} <span class="opt">({{ "facultatif" if fr else "optional" }})</span></label>
+    <select id="rf-format" name="file_format" autocomplete="off">
+      <option value="">{{ "Je ne sais pas" if fr else "Not sure" }}</option>
+      <option value="MT5 HTML">MetaTrader 5 (HTML)</option>
+      <option value="MT4 HTML">MetaTrader 4 (HTML)</option>
+      <option value="IBKR Flex CSV">IBKR Flex Query (CSV)</option>
+      <option value="Tradovate Orders CSV">Tradovate Orders (CSV)</option>
+      <option value="TradingView Order History CSV">TradingView Order History (CSV)</option>
+      <option value="donttrade CSV template">{{ "Modèle CSV de donttrade" if fr else "donttrade CSV template" }}</option>
+      <option value="other">{{ "Autre" if fr else "Other" }}</option>
+    </select></div>
+  <div class="field"><label for="rf-detail">{{ "Qu’avez-vous vu ?" if fr else "What did you see?" }} <span class="opt">({{ "facultatif sauf pour « Autre chose »" if fr else "optional, except for “Something else”" }})</span></label>
+    <textarea id="rf-detail" name="detail" rows="4" maxlength="1000" autocomplete="off"></textarea>
+    <p class="small muted">{{ "Décrivez le message affiché sur la page. N’envoyez ni votre fichier de transactions ni des données de carte." if fr else "Describe the message on the page. Do not send your trade file or card details." }}</p></div>
+  <p><button class="btn" type="submit">{{ "Envoyer la demande" if fr else "Send the request" }}</button></p>
+  <p class="small muted">{% if fr %}Nous utilisons ces renseignements seulement pour vous répondre et pour compter les raisons (sans votre courriel). <a href="/fr/confidentialite/">Confidentialité</a>{% else %}We use this only to answer you and to count reasons (without your email). <a href="/privacy/">Privacy notice</a>{% endif %}</p>
+</form>
+<p class="mailto-line">{% if fr %}Vous préférez le courriel ? Écrivez à <a href="mailto:{{ site.contact_email }}?subject={{ ('Demande de remboursement')|urlencode }}">{{ site.contact_email }}</a> en indiquant la raison.{% else %}Prefer email? Write to <a href="mailto:{{ site.contact_email }}?subject={{ ('Refund request')|urlencode }}">{{ site.contact_email }}</a> and tell us why.{% endif %}</p>

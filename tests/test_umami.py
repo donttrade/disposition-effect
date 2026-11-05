@@ -192,6 +192,8 @@ def test_tracked_events_in_js():
             src = open(os.path.join(d, f), encoding="utf-8", errors="ignore").read()
             if os.path.join(d, f) == os.path.join(js, "umami-clean.js"):   # 3 Nov: the before-send hook, no track()
                 assert ".track(" not in src and "fetch(" not in src and "sendBeacon" not in src, f
+            elif os.path.join(d, f) == os.path.join(js, "refund.js"):   # 6 Nov: one fixed-prefix name, no event data
+                assert len(re.findall(r"umami\.track\('refund-reason-' \+ v\)", src)) == 1 and not re.search(r"umami\.track\([^)]*,", src), f
             elif os.path.join(d, f) != os.path.join(js, "pay.js"):
                 assert "umami" not in src, f
 

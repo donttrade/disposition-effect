@@ -19,7 +19,7 @@ export function render(J, body) {
       i.n_possible_dupe_kept ? `${intText(i.n_possible_dupe_kept)} possible duplicates kept` : null].filter(Boolean).join('; ') || 'none';
     return el('tr', {},
       el('th', { scope: 'row', text: i.file_name || '(no name)' }), el('td', { text: acc ? acc.name : '' }),
-      el('td', { text: J.formatName(i.format) + (i.verified_format ? '' : ' (beta)') }),
+      el('td', { text: J.formatName(i.format) + (i.verified_format ? '' : ' (not yet tested on a real export)') }),
       el('td', { class: 'nowrap', text: localDay(i.imported_at) }),
       el('td', { class: 'nowrap', text: i.date_from ? `${i.date_from} to ${i.date_to}` : '' }),
       el('td', { class: 'num', text: intText(count.get(i.id) || 0) }), el('td', { text: dupes }), el('td', {}, undo));

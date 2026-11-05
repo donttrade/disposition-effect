@@ -190,7 +190,7 @@ def test_wording_rules(built_site, path):
     # "Trial" only in the formerly line; no regular-price wording; no competitor price talk
     for m in re.finditer(r"\btrial\b", text, re.I):
         assert f"called “Trial” before {LAUNCH_HUMAN}" in text[max(0, m.start() - 10):m.end() + 30], text[m.start() - 60:m.end() + 60]
-    assert not re.search(r"standard (prices?|after launch)|regular price|\$49|\$99", text, re.I)
+    assert not re.search(r"standard (prices?|after launch)|regular price|\$99", text, re.I)
 
 
 @pytest.mark.parametrize("path", sorted(OLD_IDS))
@@ -295,7 +295,7 @@ def test_for_traders_waitlist_and_privacy_wording(built_site):
     text = visible(html_of(built_site, "/for-traders/"))
     assert "Join the waitlist — $39 founding price" in text
     assert "$39 founding price for the first 100 buyers" in text
-    assert "beta" in text and "not uploaded" in text
+    assert "beta" not in text.lower() and "tested on a real export" in text and "not uploaded" in text   # 6 Nov: no "beta" wording
     for bad in ("nothing leaves", "never leaves", "anonymous"):
         assert bad not in text.lower()
 

@@ -1,0 +1,83 @@
+{#- refund_copy.html (6 Nov, Round A7; ARCHITECT-ADDENDUM-REFUNDS §2): the refund wording of the donttrade test, in one
+    place. [flags] refund_no_result picks the policy:
+      off  the policy Stripe's checkout text promises today ("full refund within 14 days, even after your test runs"),
+           word for word as the pages said it before 6 Nov;
+      on   "No result, no charge": three tiers (a short claim that always links to the terms, the two-sentence
+           statement beside every buy button, the contract text in /terms/ and the Before-you-pay row), the
+           /refund/ request form, and the French twins. Turn it on the same day the owner changes Stripe's text.
+    The words come from prices.json rules (trader_refund_days, goodwill_refunds_per_customer,
+    refund_reply_business_days) and [legal] refund_effective. banned.toml words are avoided on purpose.
+    Use: {% import "partials/refund_copy.html" as refund with context %} -#}
+{%- set _days = prices.rules.trader_refund_days %}
+{%- set _gw = prices.rules.goodwill_refunds_per_customer|numword %}
+{%- set _reply = prices.rules.refund_reply_business_days %}
+
+{#- Tier 1: the chip and the small line under a buy button. Always a link to the contract text when new. -#}
+{%- macro chip() -%}
+{%- if refund_on %}<a href="/terms/#trader-refunds">No result, no charge</a>{% else %}Full refund within {{ _days }} days{% endif -%}
+{%- endmacro %}
+{%- macro chip_fr() -%}
+{%- if refund_on %}<a href="/fr/conditions/#remboursements-traders">Pas de résultat, pas de frais</a>{% endif -%}
+{%- endmacro %}
+{#- the trust line's last item and the "· 14-day refund" small line -#}
+{%- macro short() -%}
+{%- if refund_on %}<a href="/terms/#trader-refunds">No result, no charge</a>{% else %}{{ _days }}-day refund{% endif -%}
+{%- endmacro %}
+
+{#- Tier 2: near every buy button. Inline (no <p>), links included. -#}
+{%- macro tier2(ask=true) -%}
+{%- if refund_on -%}
+<strong>No result, no charge.</strong> If your file can’t be read, the test can’t run, or no habit can be tested, you get a full refund when you ask within {{ _days }} days of buying. Once your result is delivered there is no refund, apart from {{ _gw }} goodwill refund per customer. <a href="/terms/#trader-refunds">Refund terms</a>{% if ask %} · <a href="/refund/">Ask for a refund</a>{% endif %}
+{%- else -%}
+A full refund if you ask within {{ _days }} days of buying.
+{%- endif -%}
+{%- endmacro %}
+{#- the pricing card's small line (legacy: its own sentence) -#}
+{%- macro pricing_line() -%}
+{%- if refund_on %}{{ tier2() }}{% else %}Full refund if you ask within {{ _days }} days, even after your test runs.{% endif -%}
+{%- endmacro %}
+{#- a FAQ answer: "Can I get a refund?" -#}
+{%- macro faq_answer(link=true) -%}
+{%- if refund_on %}{{ tier2() }}{% else %}Yes. A full refund if you ask by email within {{ _days }} days of buying, even if you have already run your test.{% if link %} <a href="/terms/#traders">Trader terms</a>{% endif %}{% endif -%}
+{%- endmacro %}
+
+{#- Tier 3: the Terms bullet (id trader-refunds when new) -#}
+{%- macro terms_item() -%}
+{%- if refund_on -%}
+<li id="trader-refunds"><strong>Refunds: No result, no charge.</strong> You get a full refund if you ask within {{ _days }} days of buying and any of these is true, even after we have tried to help: your file could not be read; the test could not run; the test ran but no habit could be tested (every tested habit shows “not enough trades to tell”, or the file has dates but no times); or you have not yet run your first analysis. A <strong>result is delivered</strong> when the report page shows you the figures from a test that could test at least one habit. Once a result has been delivered to you, we do not refund, except that we will make <strong>{{ _gw }} goodwill refund per customer</strong>, at our discretion, if you ask within {{ _days }} days of buying. A customer is the person who paid; we match requests by the email address and the card used. To ask, use the <a href="/refund/">refund request form</a> or email us, and tell us why. We reply within {{ _reply }} business days (Monday to Friday, Eastern Time). The refund goes to the card you paid with, usually within 5 to 10 business days, and your access key and free re-test then stop working. These terms apply to purchases made on or after {{ legal.refund_effective_human }}; earlier purchases keep the refund terms in force on the day they were made. This adds to your rights under consumer law; it does not replace them.</li>
+{%- else -%}
+<li><strong>Refunds:</strong> a full refund if you ask by email within {{ _days }} days of buying, even if you have already run your test. The refund goes to the card you paid with, usually within 5 to 10 business days, and the access key then stops working. This adds to your rights under consumer law; it does not replace them.</li>
+{%- endif -%}
+{%- endmacro %}
+{%- macro terms_summary() -%}
+{%- if refund_on %}Traders: No result, no charge; full refund within {{ _days }} days.{% else %}Traders: full refund within {{ _days }} days.{% endif -%}
+{%- endmacro %}
+{#- the payment-disputes sentence added with the new policy -#}
+{%- macro dispute_ask_first() -%}
+{%- if refund_on %} If something is wrong with your order, ask us first; we answer faster than a card dispute, and a refund request does not affect your rights.{% endif -%}
+{%- endmacro %}
+{%- macro misuse_item() -%}
+{%- if refund_on %}<li id="no-resale"><strong>Misuse of refunds:</strong> we may decline a refund, or a new order, from someone who has repeatedly asked for refunds after receiving results. A person reviews each case and writes to you first.</li>{% endif -%}
+{%- endmacro %}
+{%- macro eu_uk() -%}
+{%- if refund_on -%}
+If you live in the European Union or the United Kingdom, you have in principle a {{ _days }}-day legal right of withdrawal. At checkout you ask for access right away and acknowledge that this right ends once your test result is supplied (the field shown at checkout). Until your result is supplied, you can still withdraw within {{ _days }} days of buying: use the <a href="/refund/">refund request form</a>. No result, no charge applies to you as it does to everyone else; the goodwill refund does not use up your legal rights.
+{%- else -%}
+If you live in the European Union or the United Kingdom, you have in principle a 14-day legal right of withdrawal. If you ask for immediate access to the digital content and acknowledge that you lose this right (the field shown at checkout), it ends once your test result is supplied. Our voluntary {{ _days }}-day refund still applies.
+{%- endif -%}
+{%- endmacro %}
+
+{#- the Before-you-pay "Refunds" row (and, through agreement-copy, the emailed copy) -#}
+{%- macro byp_dd() -%}
+{%- if refund_on -%}
+<strong>No result, no charge:</strong> a full refund if you ask within {{ _days }} days of buying and your file couldn’t be read, the test couldn’t run, no habit could be tested, or you haven’t run your first analysis. Once a result is delivered we don’t refund, except {{ _gw }} goodwill refund per customer, at our discretion. A refund ends your access key and free re-test. This adds to your rights under consumer law; it doesn’t replace them. <a href="/terms/#trader-refunds">Refund terms</a> · <a href="/refund/">Ask for a refund</a>
+{%- else -%}
+Full refund if you ask within {{ _days }} days of buying: <a href="/terms/#cancellation">cancellation and refund terms</a>.
+{%- endif -%}
+{%- endmacro %}
+
+{#- The promise sentences beside the file formats (Before you pay, Terms, For traders; Round A3). Removing the word "beta"
+    must not remove the fact: no format has yet been tested on a real export, except the donttrade CSV template. -#}
+{%- macro formats_caveat() -%}
+Each reader follows the platform’s published export format, and not every one has yet been tested on a real export from that platform. Your result states how many trades were read and over how many weeks, so you can compare with your platform. {% if refund_on %}If the file does not read correctly, use the CSV template or ask for a refund: a file that could not be read is covered by <a href="/terms/#trader-refunds">“No result, no charge”</a>.{% else %}If the file does not read correctly, use the CSV template or ask for a full refund within {{ _days }} days.{% endif -%}
+{%- endmacro %}

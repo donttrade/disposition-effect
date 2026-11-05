@@ -29,6 +29,43 @@
     if (!a) return;
     try { if (window.umami && typeof window.umami.track === 'function') window.umami.track('pay-continue'); } catch (err) { /* counting never blocks paying */ }
   }, true);
+  // 6 Nov (Round A6): partner links. A link like /pricing/?via=<slug> carries the partner's slug only; the code and the
+  // name come from the allow-list the build puts in <meta name="dt-partners"> (active partners only), never from the
+  // URL, so an unknown, inactive, upper-case-trick or overlong ?via= changes nothing and shows nothing. For a known
+  // slug, in memory only (nothing is stored, no cookie, no localStorage): every Stripe link on the page gets the
+  // promotion code (prefilled_promo_code) and a client_reference_id ending _p-<slug> (letters, digits, - and _ only,
+  // as Stripe allows), and the pay panel says, before the buyer pays, that the code is applied and that the partner
+  // earns a commission. The text is set with textContent; no HTML comes from the URL or the meta.
+  (function () {
+    var meta = document.querySelector('meta[name="dt-partners"]');
+    if (!meta || typeof URL !== 'function') return;
+    var cfg, via = '';
+    try {
+      cfg = JSON.parse(meta.getAttribute('content'));
+      via = (new URLSearchParams(location.search).get('via') || '').toLowerCase();
+    } catch (e) { return; }
+    if (!cfg || !cfg.p || !/^[a-z0-9-]{2,30}$/.test(via) || !Object.prototype.hasOwnProperty.call(cfg.p, via)) return;
+    var code = cfg.p[via][0], name = cfg.p[via][1], applied = 0;
+    var links = document.querySelectorAll('a[data-pay-continue]');
+    for (var i = 0; i < links.length; i++) {
+      try {
+        var u = new URL(links[i].getAttribute('href'), location.href);
+        if (u.hostname !== 'buy.stripe.com') continue;
+        u.searchParams.set('prefilled_promo_code', code);
+        u.searchParams.set('client_reference_id', ((u.searchParams.get('client_reference_id') || 'site') + '_p-' + via).slice(0, 200));
+        links[i].setAttribute('href', u.toString());
+        applied++;
+      } catch (e) { /* a link we cannot read is left as it was */ }
+    }
+    if (!applied) return;
+    var notes = document.querySelectorAll('[data-partner-note]');
+    for (var j = 0; j < notes.length; j++) {
+      notes[j].textContent = (document.documentElement.lang === 'fr'
+        ? 'Le code de partenaire ' + code + ' sera appliqué sur la page de paiement : ' + cfg.d + ' % de rabais. ' + name + ' gagne une commission si vous achetez.'
+        : 'Partner code ' + code + ' will be applied on the payment page: ' + cfg.d + '% off. ' + name + ' earns a commission if you buy.');
+      notes[j].hidden = false;
+    }
+  })();
   var dlg = document.getElementById('pay-dialog');
   if (!dlg || typeof dlg.showModal !== 'function') return;
   var opener = null, loaded = false;

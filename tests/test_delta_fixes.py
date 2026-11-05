@@ -279,7 +279,7 @@ def test_terms_date_versions_the_terms_and_the_trial_date_keeps_launch_date(tmp_
     assert r.returncode == 0, r.stderr
     terms = _visible(out, "/terms/")
     assert "Version 2026-10-27." in terms and "called “Trial” before 20 Oct 2026" in terms
-    assert "withdrawn on 27 Oct 2026" in terms
+    assert "withdrawn on 20 Oct 2026" in terms   # 6 Nov: the withdrawal date is the launch date; it used to follow every terms bump
     assert "Version 2026-10-27." in _visible(out, "/privacy/")   # later than the hosting date (24 Oct)
 
 

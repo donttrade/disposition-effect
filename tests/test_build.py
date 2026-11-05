@@ -174,7 +174,7 @@ def test_baseline_covers_every_old_url_and_the_published_docs_hold_them():
 def test_harvest_check_passes_on_live_pricing(tmp_path):
     harvest = [sys.executable, os.path.join(REPO, "checks", "harvest_prices.py")]
     # the live page (docs/, the v2 bundle since step 30) and a fresh build: prices.json only,
-    # and the retired amounts ($49, $99) are no longer accepted on either
+    # and the retired amounts ($99, and since 6 Nov not $49: it is the price after the first 100 buyers) are not accepted on either
     r = subprocess.run(harvest, capture_output=True, text=True)
     assert r.returncode == 0, r.stdout
     rb, out = run_build(tmp_path, "h")
@@ -186,6 +186,6 @@ def test_harvest_check_passes_on_live_pricing(tmp_path):
     old.write_text(subprocess.run(["git", "show", f"{PRE_BUNDLE}:docs/pricing/index.html"], cwd=REPO,
                                   capture_output=True, text=True, check=True).stdout, encoding="utf-8")
     r = subprocess.run(harvest + [str(old)], capture_output=True, text=True)
-    assert r.returncode == 1 and "49.0" in r.stdout and "99.0" in r.stdout, r.stdout
+    assert r.returncode == 1 and "99.0" in r.stdout and "49.0" not in r.stdout.split("FAIL:")[1], r.stdout
     r = subprocess.run(harvest + ["--old", str(old)], capture_output=True, text=True)
     assert r.returncode == 0, r.stdout

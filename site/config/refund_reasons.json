@@ -1,0 +1,14 @@
+{
+ "note": "6 Nov 2026 (ARCHITECT-ADDENDUM-REFUNDS 3.2): the nine reasons on /refund/ and /fr/remboursement/, in the order shown. slug = the radio value and the last part of the Umami event name refund-reason-<slug>; class = how a person treats it (eligible: refund; check: eligible after a check; goodwill: only the one goodwill refund; review: read and decide). refund.js holds the same slugs (tests/test_refund.py checks it), and the Worker repo's refund-summary script reads a copy of this file.",
+ "reasons": [
+  {"slug": "unreadable", "en": "My file could not be read", "fr": "Mon fichier n’a pas pu être lu", "class": "eligible"},
+  {"slug": "wont-run", "en": "The test would not run, or showed an error", "fr": "Le test ne s’est pas exécuté, ou a affiché une erreur", "class": "eligible"},
+  {"slug": "nothing-tested", "en": "The test ran, but no habit could be tested", "fr": "Le test s’est exécuté, mais aucune habitude n’a pu être testée", "class": "eligible"},
+  {"slug": "not-run", "en": "I have not run the test and no longer want it", "fr": "Je n’ai pas lancé le test et je n’en veux plus", "class": "eligible"},
+  {"slug": "mistake", "en": "I bought by mistake or paid twice", "fr": "J’ai acheté par erreur ou payé deux fois", "class": "eligible"},
+  {"slug": "unrecognised", "en": "I don’t recognise this charge", "fr": "Je ne reconnais pas ce prélèvement", "class": "check"},
+  {"slug": "disagree", "en": "I got my result and I disagree with it", "fr": "J’ai reçu mon résultat et je ne suis pas d’accord", "class": "goodwill"},
+  {"slug": "expected-other", "en": "It isn’t what I expected", "fr": "Ce n’est pas ce que j’attendais", "class": "goodwill"},
+  {"slug": "other", "en": "Something else (please tell us below)", "fr": "Autre chose (précisez ci-dessous)", "class": "review"}
+ ]
+}

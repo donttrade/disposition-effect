@@ -57,7 +57,7 @@ def test_lint_covers_passthrough_pages(tmp_path):
     assert L.lint_build(str(out)) == []
     page = out / "glossary" / "index.html"  # a lifted page; the plant goes inside its frozen body
     page.write_text(page.read_text(encoding="utf-8").replace(
-        "<!--frozen:end-->", "<p>Nothing is uploaded. Standard prices after launch: $49.</p><!--frozen:end-->"),
+        "<!--frozen:end-->", "<p>Nothing is uploaded. Standard prices after launch: $99.</p><!--frozen:end-->"),
         encoding="utf-8")
     rules = {r for r, where, _ in L.lint_build(str(out)) if where == "/glossary/"}
     assert {"claim:no_upload", "banned:regular_price", "price_literal", "frozen:text"} <= rules
@@ -103,7 +103,7 @@ def test_no_standard_price_wording_flag_off_or_on(built_site, tmp_path):
     for out in (built_site["out"], on):
         for p in out.rglob("*.html"):
             text = L.visible_text(p.read_text(encoding="utf-8", errors="replace"))
-            assert not re.search(r"standard (price|after launch)|regular price|\$\s?49\b|\$\s?99\b", text, re.I), p
+            assert not re.search(r"standard (price|after launch)|regular price|\$\s?99\b", text, re.I), p
     assert "$39 founding price for the first 100 buyers" in L.visible_text((on / "pricing" / "index.html").read_text())
 
 
