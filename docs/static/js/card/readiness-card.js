@@ -11,6 +11,8 @@
 export const SIZES = Object.freeze({ portrait: [1080, 1350], wide: [1200, 630] });
 export const CARD_STRINGS = Object.freeze({
   headline: 'Passed in {p}% of {n} replays',
+  few: 'Too few trading days to read: {d} ({t})',   // under 30 days: the page's headline, so card and page agree
+  few_note: 'Replays of so few days lean heavily on a few days.',
   pass: 'Passed {p}%', bust: 'Broke a rule {p}%', time: 'Out of time {p}%',
   rule_daily: 'Rule that broke most: daily loss',
   rule_max: 'Rule that broke most: maximum loss',
@@ -53,7 +55,10 @@ export function shortRule(personal) {
 // → the card's lines, in drawing order (also its alt text).
 export function cardLines(data) {
   const S = CARD_STRINGS;
-  const lines = { headline: fill(S.headline, { p: whole(data.pass), n: grouped(data.runs) }),
+  const few = data.few || null;   // {days, trades}: too few days to read. No "Passed X%" line, bar or what-if claim then.
+  const nm = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+  const lines = few ? { headline: fill(S.few, { d: nm(few.days, 'day', 'days'), t: nm(few.trades, 'trade', 'trades') }), shares: [], facts: [S.few_note] }
+    : { headline: fill(S.headline, { p: whole(data.pass), n: grouped(data.runs) }),
     shares: [fill(S.pass, { p: whole(data.pass) }), fill(S.bust, { p: whole(data.bust) }), fill(S.time, { p: whole(data.timeout) })],
     facts: [] };
   if (data.rule) lines.facts.push(data.rule === 'daily' ? S.rule_daily : S.rule_max);
@@ -62,7 +67,7 @@ export function cardLines(data) {
     const r = data.rulesPct;
     lines.facts.push(fill(S.rules, { t: r.t, d: r.d === null ? S.none : `${r.d}%`, m: r.m, kind: r.kind === 'static' ? S.static : S.moving }));
   }
-  if (data.whatif) {
+  if (data.whatif && !few) {
     const v = { rule: shortRule(data.whatif.personal), a: whole(data.whatif.a), b: whole(data.whatif.b) };
     const line = fill(S.whatif, v);
     lines.facts.push(line.split(' ').length <= 12 ? line : fill(S.whatif_short, v));   // a card line stays within 12 words
@@ -74,7 +79,7 @@ export function cardLines(data) {
 
 export function altText(data) {
   const l = cardLines(data);
-  return [l.headline + '.', l.shares.join(', ') + '.', ...l.facts.map((f) => f + '.'), l.example ? l.example + '.' : null, ...l.footer]
+  return [l.headline + '.', l.shares.length ? l.shares.join(', ') + '.' : null, ...l.facts.map((f) => f + '.'), l.example ? l.example + '.' : null, ...l.footer]
     .filter(Boolean).join(' ');
 }
 
@@ -110,6 +115,7 @@ export async function drawCard(canvas, data, size = 'portrait') {
   y += wide ? 10 : 30;
   const bw = W - 2 * pad;
   let x = pad;
+  if (l.shares.length) {
   for (const [share, col] of [[data.pass, C.gain], [data.bust, C.loss], [data.timeout, C.time]]) {
     const w = Math.round(share * bw);
     g.fillStyle = col; g.fillRect(x, y, w, z.bar); x += w;
@@ -131,6 +137,7 @@ export async function drawCard(canvas, data, size = 'portrait') {
     lx += sq + 10 + g.measureText(s).width + gap;
   });
   y += wide ? 30 : 60;
+  }
   const footY = H - pad - (wide ? 44 : 64);
   g.fillStyle = C.border; g.fillRect(pad, y, W - 2 * pad, 2);
   // the facts: the largest size at which they all end above the footer line

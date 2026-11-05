@@ -49,7 +49,7 @@ COPIES = {   # function in dt1_features -> (file, first line, last line)
     "prior_index": ("private", 254, 259), "ratio": ("private", 806, 807), "revenge_groups": ("private", 845, 860),
     "tilt_groups": ("private", 909, 921), "size_up_groups": ("private", 873, 889),
     "oversized_parts": ("private", 935, 943), "hold_gap_parts": ("private", 811, 816),
-    "median": ("public", 3449, 3456),
+    "median": ("public", 3454, 3461),
 }
 
 

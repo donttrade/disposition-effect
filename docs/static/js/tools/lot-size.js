@@ -7,8 +7,8 @@
 // Strict number input (num.js): anything that reads two ways is refused, never guessed.
 
 import { parsePositive, InputError } from './num.js?v=8df99e34';
-import { el, plain } from './format.js?v=e808aa0f';
-import { clearFieldErrors, fieldError, showProblems, announceResult } from './form-errors.js?v=78b61002';   // not tool-state.js: that pulls in the trade-file parsers
+import { el, plain } from './format.js?v=35164924';
+import { clearFieldErrors, fieldError, showProblems, announceResult } from './form-errors.js?v=0d0c716c';   // not tool-state.js: that pulls in the trade-file parsers
 
 const $ = (id) => document.getElementById(id);
 const LABELS = {

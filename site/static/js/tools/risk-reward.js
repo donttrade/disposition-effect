@@ -9,7 +9,7 @@
 // (num.js): anything that reads two ways is refused, never guessed.
 
 import { parsePositive, parseNonNegative, InputError } from './num.js';
-import { el, plain, pct, MINUS } from './format.js';
+import { el, plain, pctBounded as pct, MINUS } from './format.js';
 import { clearFieldErrors, fieldError, showProblems, announceResult } from './form-errors.js';   // not tool-state.js: that pulls in the trade-file parsers
 
 const $ = (id) => document.getElementById(id);

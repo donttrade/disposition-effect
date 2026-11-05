@@ -113,7 +113,7 @@ function render(focus = true) {
     out.append(episodesTable(d, trades, bal));
   }
   out.hidden = false;
-  if (focus) revealResult($('dd-out-h'));
+  if (focus) revealResult($('dd-out-h'), bal === null ? 'Enter a starting balance to see drawdowns as a percentage and the gain that recovers them' : '');
   teaser(d);
 }
 

@@ -15,7 +15,7 @@
 // Every message carries the request id it answers (Tester R3); an answer to another id is
 // ignored. tool-state.js is the only caller.
 
-import { runFile } from '../engine/index.js?v=b37d5118';
+import { runFile } from '../engine/index.js?v=00f6ab35';
 
 // No answer at all within START_MS: the worker never started (its script or one of the
 // engine modules did not load). The worker answers {stage} as soon as it has the bytes, so
@@ -67,7 +67,7 @@ function fromColumns(d) {
 // error; cols: the columns picked for it (file-worker.js).
 export function readTradeFile(item, { id = 0, noise = false, ask = false, cols = null, onStage = () => {}, onNoise = () => {} } = {}) {
   const isPasteItem = item !== null && typeof item === 'object' && typeof item.paste === 'string';
-  let worker = new Worker(new URL('./file-worker.js?v=1b6924d7', import.meta.url), { type: 'module' });
+  let worker = new Worker(new URL('./file-worker.js?v=231866f9', import.meta.url), { type: 'module' });
   let settled = false;   // `done` has resolved
   let cancelled = false;
   let noiseAsked = false;

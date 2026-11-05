@@ -100,8 +100,14 @@ def test_truly_ambiguous_and_mixed_slash_dates_are_still_refused_with_an_accurat
     m = js_run([mixed])[0]
     assert m["error"]["code"] == "E_BAD_DATE" and m["error"]["row"] == 4
     assert {k: m["error"][k] for k in ("code", "row", "column")} == py_run(mixed)["error"]
-    two_digit = two_trades("13/11/26", "14/11/26")           # a two-digit year is not read with slashes
-    assert js_run([two_digit])[0]["error"]["code"] == "E_AMBIGUOUS_DATE" == py_run(two_digit)["error"]["code"]
+    two_digit = two_trades("13/11/26", "14/11/26")           # a two-digit year: the problem is the year form, not the order
+    td = js_run([two_digit])[0]["error"]
+    assert td["code"] == "E_BAD_DATE" and "four-digit year" in td["message"] and "told apart" not in td["message"]
+    assert {k: td[k] for k in ("code", "row", "column")} == py_run(two_digit)["error"]
+    both = two_trades("13/14/2026", "14/14/2026")             # no month over 12: an impossible date, not an ambiguous one
+    bd = js_run([both])[0]["error"]
+    assert bd["code"] == "E_BAD_DATE" and "both over 12" in bd["message"] and "12 or less" not in bd["message"]
+    assert {k: bd[k] for k in ("code", "row", "column")} == py_run(both)["error"]
 
 
 def test_datetime_column_with_slashes_and_the_single_cell_parser_unchanged():
@@ -193,7 +199,7 @@ def test_one_trade_headline_leads_with_the_caveat(browser, built_site, tmp_path)
     pg.set_input_files("#ps-file", write_tmp(tmp_path, "one.csv", round_trips(1)))
     pg.wait_for_selector("#ps-file-status:text-matches('^Read ')", timeout=60000)
     ps_run(pg)
-    assert pg.inner_text("#ps-out-h") == "Too few trades to read: 1 trade"
+    assert pg.inner_text("#ps-out-h") == "Too few trading days to read: 1 day (1 trade)"
     assert "Passed in" not in pg.inner_text("#ps-out-h")
     assert "lean heavily on a few days" in pg.inner_text("#ps-out")      # the note stays under it
     assert pg.evaluate("document.activeElement.id") == "ps-out-h"
@@ -477,4 +483,148 @@ def test_drawdown_percent_label_matches_what_is_computed(browser, built_site):
         for (const t of r.trades) { eq += t.pnl; peak = Math.max(peak, eq); const top = 10000 + peak; best = Math.max(best, (top - (10000 + eq)) / top); }
         return best; }""")
     assert shown == f"{dd * 100:.1f}%"
+    ctx.close()
+
+
+# ------------------------------------------------------------------ fix round 1
+CARD_FEW = """async () => { const m = await import('/static/js/card/readiness-card.js');
+    return [m.cardLines({ pass: 1, bust: 0, timeout: 0, runs: 10000, rule: null, habit: null, rulesPct: null, example: false,
+      whatif: { personal: { max_trades: 1 }, a: 0.5, b: 0.6 }, few: { days: 1, trades: 1 } }),
+      m.altText({ pass: 1, bust: 0, timeout: 0, runs: 10000, rule: null, habit: null, rulesPct: null, whatif: null, example: false, few: { days: 28, trades: 40 } })]; }"""
+
+
+def test_card_and_alt_text_say_too_few_days_not_passed(browser, built_site, tmp_path):
+    ctx, pg, log = page_for(browser, built_site, "/tools/prop-challenge-simulator/")
+    lines, alt = pg.evaluate(CARD_FEW)
+    assert lines["headline"] == "Too few trading days to read: 1 day (1 trade)" and lines["shares"] == []
+    assert not [f for f in lines["facts"] if "assed" in f]                  # no what-if "passed a to b" claim either
+    assert alt.startswith("Too few trading days to read: 28 days (40 trades).") and "Passed" not in alt
+    # the real page: the canvas label and the headline agree, for a file under 30 days and for one over
+    pg.set_input_files("#ps-file", write_tmp(tmp_path, "one.csv", round_trips(1)))
+    pg.wait_for_selector("#ps-file-status:text-matches('^Read ')", timeout=60000)
+    ps_run(pg)
+    pg.wait_for_function("() => document.getElementById('ps-card-canvas').getAttribute('aria-label')")
+    label = pg.get_attribute("#ps-card-canvas", "aria-label")
+    assert label.startswith(pg.inner_text("#ps-out-h") + ".") and "Passed" not in label
+    ctx2, pg2, _ = page_for(browser, built_site, "/tools/prop-challenge-simulator/")
+    pg2.set_input_files("#ps-file", write_tmp(tmp_path, "long.csv", round_trips(60, 2)))
+    pg2.wait_for_selector("#ps-file-status:text-matches('^Read ')", timeout=60000)
+    ps_run(pg2, target="100", maxloss="500", days="30")
+    pg2.wait_for_function("() => document.getElementById('ps-card-canvas').getAttribute('aria-label')")
+    assert pg2.get_attribute("#ps-card-canvas", "aria-label").startswith("Passed in ")
+    ctx.close(); ctx2.close()
+
+
+def test_headline_counts_days_like_its_trigger(browser, built_site, tmp_path):
+    ctx, pg, log = page_for(browser, built_site, "/tools/prop-challenge-simulator/")
+    pg.set_input_files("#ps-file", write_tmp(tmp_path, "d28.csv", round_trips(28, 2)))     # 56 trades on 28 days
+    pg.wait_for_selector("#ps-file-status:text-matches('^Read ')", timeout=60000)
+    ps_run(pg)
+    assert pg.inner_text("#ps-out-h") == "Too few trading days to read: 28 days (56 trades)"
+    ctx.close()
+    ctx, pg, log = page_for(browser, built_site, "/tools/prop-challenge-simulator/")
+    pg.set_input_files("#ps-file", write_tmp(tmp_path, "d30.csv", round_trips(30, 2)))     # 30 days is enough
+    pg.wait_for_selector("#ps-file-status:text-matches('^Read ')", timeout=60000)
+    ps_run(pg, target="100")
+    assert pg.inner_text("#ps-out-h").startswith("Passed in ")
+    ctx.close()
+
+
+def test_no_beta_wording_on_the_tool_pages_or_pricing_faq(built_site):
+    faq = re.search(r"<summary>Which files work\?</summary><p>(.*?)</p>", built(built_site, "pricing"), re.S).group(1)
+    assert "checked on sample files only" in faq and "beta" not in faq.lower()
+    for rel in ("tools/trade-stats", "tools/trading-heatmap", "tools/drawdown-calculator", "tools/prop-challenge-simulator",
+                "tools/lot-size-calculator", "tools/risk-reward-calculator"):
+        h = re.sub(r"<script.*?</script>", "", built(built_site, rel), flags=re.S)
+        assert not re.search(r"beta", re.sub(r"<[^>]+>", " ", h), re.I), rel
+    ts = built(built_site, "tools/trade-stats")
+    assert "Checked on sample files only" in ts and "tell us if a column reads wrong" in ts
+    for js in ("tools/file-tool.js", "tools/trade-stats.js", "tools/prop-sim.js", "tools/file-worker.js", "engine/errors.js"):
+        src = (built_site["out"] / "static" / "js" / js).read_text(encoding="utf-8")
+        assert not re.search(r"['\"`][^'\"`\n]*\bbeta\b", src, re.I), js        # no beta inside a string
+
+
+def test_unverified_format_result_says_the_factual_caveat(browser, built_site):
+    ctx, pg, log = page_for(browser, built_site, "/tools/trade-stats/")
+    pg.set_input_files("#ts-file", os.path.join(FIX, "tradingview", "forty_trades.csv"))
+    pg.wait_for_selector("#ts-out-h", timeout=60000)
+    out = pg.inner_text("#ts-out")
+    assert "TradingView Order History export (checked on sample files only)" in out
+    assert "checked on sample files only" in pg.inner_text("#ts-warnings") and "beta" not in out.lower()
+    ctx.close()
+
+
+JUNK = {
+    "doc.pdf": b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\n1 0 obj\n<< /Type /Catalog >>\nendobj\n" * 3,
+    "img.png": b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x01,\x00\x00\x01,\x08\x06" + bytes(range(256)) * 4,
+    "random.bin": bytes(random.Random(3).randrange(256) for _ in range(4000)),
+    "prose.txt": b"Dear trader, here are my thoughts on the market this week.\nIt went up and then it went down.\nBest wishes\n" * 5,
+    "data.json": json.dumps({"trades": [{"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}] * 5}).encode(),
+    "two_cols.csv": b"Name,Value\nalpha,1\nbeta,2\ngamma,3\n",
+    "numbers.csv": b"1,2,3,4,5,6\n7,8,9,10,11,12\n13,14,15,16,17,18\n",
+}
+
+
+@pytest.mark.parametrize("path,prefix", [("/tools/trade-stats/", "ts"), ("/tools/trading-heatmap/", "hm"),
+                                         ("/tools/drawdown-calculator/", "dd"), ("/tools/prop-challenge-simulator/", None)])
+def test_junk_files_get_not_recognised_not_the_picker(browser, built_site, tmp_path, path, prefix):
+    ctx, pg, log = page_for(browser, built_site, path)
+    inp, err, mp = (f"#{prefix}-file", f"#{prefix}-error", f"#{prefix}-map") if prefix else ("#ps-file", "#ps-file-error", "#ps-map")
+    for name, data in JUNK.items():
+        f = tmp_path / name
+        f.write_bytes(data)
+        pg.set_input_files(inp, str(f))
+        pg.wait_for_selector(f"{err}:not([hidden])", timeout=30000)
+        assert pg.is_hidden(mp), name
+        assert "was not recognised" in pg.inner_text(err) or "not a text" in pg.inner_text(err), (name, pg.inner_text(err))
+    ctx.close()
+
+
+GUESSED = ("When,Instrument,Dir,Size,Px\n2026-11-02 09:30:00,AAA,Buy,10,100\n2026-11-02 10:30:00,AAA,Sell,10,105\n"
+           "2026-11-03 09:30:00,AAA,Sell,10,110\n2026-11-03 11:00:00,AAA,Buy,10,104\n")
+
+
+def test_guessed_columns_say_matched_from_headings(browser, built_site, tmp_path):
+    ctx, pg, log = page_for(browser, built_site, "/tools/trade-stats/")
+    pg.set_input_files("#ts-file", write_tmp(tmp_path, "guess.csv", GUESSED))
+    pg.wait_for_selector("#ts-out-h", timeout=60000)
+    w = pg.inner_text("#ts-warnings")
+    assert "matched from your headings" in w and "yourself" not in w
+    # picked by the person: the old words stay
+    text = open(os.path.join(FIX, "tester", "fx_tl.paste.txt"), encoding="utf-8").read().replace("\tAmount\t", "\tQ\t", 1)
+    pg.set_input_files("#ts-file", write_tmp(tmp_path, "fx.tsv", text))
+    pg.wait_for_selector("#ts-map:not([hidden])", timeout=60000)
+    pg.select_option("#ts-map-qty", label="Q")
+    pg.click("#ts-map-btn")
+    pg.wait_for_selector("#ts-warnings", timeout=60000)
+    assert "You matched these columns yourself" in pg.inner_text("#ts-warnings")
+    ctx.close()
+
+
+def test_risk_reward_never_echoes_all_or_none_for_a_near_value(browser, built_site):
+    ctx, pg, log = page_for(browser, built_site, "/tools/risk-reward-calculator/")
+    for wr, want in (("99.99", "over 99.9% win rate"), ("0.04", "under 0.1% win rate"), ("50", "50.0% win rate")):
+        for k, v in {"#rr-entry": "100", "#rr-stop": "95", "#rr-target": "110", "#rr-winrate": wr}.items():
+            pg.fill(k, v)
+        pg.click("#rr-form button[type=submit]")
+        pg.wait_for_selector("#rr-out:not([hidden])")
+        text = pg.inner_text("#rr-out")
+        assert want in text and "100.0%" not in text and " 0.0%" not in text, (wr, text)
+    ctx.close()
+
+
+def test_heatmap_and_drawdown_announce_key_figures(browser, built_site):
+    ctx, pg, log = page_for(browser, built_site, "/tools/trading-heatmap/")
+    pg.click("#hm-sample-btn")
+    pg.wait_for_selector("#hm-out-h", timeout=60000)
+    pg.wait_for_function("() => document.getElementById('tool-live') && document.getElementById('tool-live').textContent.includes('Highest total')")
+    live = pg.inner_text("#tool-live")
+    assert "closed trades" in live and "Lowest total" in live and "−" in live or "+" in live
+    ctx.close()
+    ctx, pg, log = page_for(browser, built_site, "/tools/drawdown-calculator/")
+    pg.click("#dd-sample-btn")
+    pg.wait_for_selector("#dd-out-h", timeout=60000)
+    pg.wait_for_function("() => document.getElementById('tool-live') && document.getElementById('tool-live').textContent.length > 0")
+    live = pg.inner_text("#tool-live")
+    assert "Enter a starting balance" in live and "—" not in live and "Largest drawdown:" in live
     ctx.close()

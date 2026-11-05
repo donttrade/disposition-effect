@@ -29,11 +29,20 @@ import { runFile, runFiles } from '../engine/index.js';
 import { decodeBytes, isHtml } from '../engine/csv.js';
 import { noiseChecks } from '../engine/noise.js';
 import { inspect, REQUIRED } from '../engine/mapping.js';
-import { EngineError, MESSAGES } from '../engine/errors.js';
+import { EngineError, MESSAGES, WARNING_TEXT } from '../engine/errors.js';
 
 // The errors a short "which column is which" step can answer (ask: true).
 const ASKABLE = new Set(['E_MISSING_COLUMN', 'E_UNKNOWN_FORMAT']);
 const MAX_LABEL = 60;
+
+// Does this look like a table with headings, and one wide enough for the picker? A PDF, an image, random bytes, prose,
+// JSON and a table with fewer columns than the layout needs are refused with the "not recognised" message instead.
+function looksLikeTable(labels, needed) {
+  if (labels.length < needed) return false;
+  if (labels.some((l) => /[\u0000-\u0008\u000b-\u001f\u007f-\u009f\ufffd]/.test(l))) return false;
+  if (labels.some((l) => /^\s*(\{|\[|<|%PDF|PK)/.test(l))) return false;
+  return labels.filter((l) => /[A-Za-z]/.test(l)).length * 2 >= labels.length;
+}
 
 // A file the known formats could not read, read by its headings (the importer's guess), with the
 // columns the person picked (cols) taken first. → {result} | {error} | {mapNeeded}. Only headings
@@ -50,9 +59,12 @@ function readByHeadings(item, cols, error) {
   }
   if (!g) return { error: error || new EngineError('E_UNKNOWN_FORMAT', MESSAGES.E_UNKNOWN_FORMAT).toJSON() };
   const missing = REQUIRED[g.layout].filter((f) => !(f === 'side' && g.mapping.side_from === 'sign') && g.mapping.cols[f] === null);
+  if (!looksLikeTable(labels, REQUIRED[g.layout].length)) return { error: error || new EngineError('E_UNKNOWN_FORMAT', MESSAGES.E_UNKNOWN_FORMAT).toJSON() };
   if (missing.length) return { mapNeeded: { layout: g.layout, missing, labels, chosen: cols || {} } };
   if (g.questions.length && !cols) return { error };   // a date order or number style to settle: the mapper's job
   const out = runFiles([item], { mapping: g.mapping });
+  // The columns were matched from the headings, not by the person: say that, not "you matched these columns yourself".
+  if (out.result && !cols) for (const w of out.result.warnings) if (w.code === 'W_MAPPED') w.message = WARNING_TEXT.W_MAPPED_GUESS;
   return out.error && !cols ? { error } : out;
 }
 

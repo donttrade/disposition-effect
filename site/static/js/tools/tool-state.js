@@ -27,11 +27,11 @@ export { clearFieldErrors, fieldError, showProblems, announce, announceResult } 
 
 // QA 25 Oct: after a run, move focus to the result heading and bring the result's top into view
 // (a plain jump, no smooth scroll, under reduced motion).
-export function revealResult(heading) {
+export function revealResult(heading, extra = '') {
   heading.focus({ preventScroll: true });
   const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   heading.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' });
-  announceResult(heading.parentElement || heading, heading);
+  announceResult(heading.parentElement || heading, heading, extra);
 }
 
 // ------------------------------------------------------------------ busy controls

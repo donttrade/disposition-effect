@@ -10,10 +10,10 @@
 // separate, redesigned feature). The teaser states only figures computed on this page.
 
 import { recoveryGain, drawdowns, openedAfterLoss } from './drawdown-core.js?v=0bcc5aae';
-import { money, pct, plain, day, intText, el } from './format.js?v=e808aa0f';
+import { money, pct, plain, day, intText, el } from './format.js?v=35164924';
 import { parsePositive, InputError } from './num.js?v=8df99e34';
-import { clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js?v=314f6558';
-import { wireFileTool, readSection, tableWrap, rowsTable, plural, reportLead, SAMPLE_LABEL } from './file-tool.js?v=4ef0cd3e';
+import { clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js?v=595a9d66';
+import { wireFileTool, readSection, tableWrap, rowsTable, plural, reportLead, SAMPLE_LABEL } from './file-tool.js?v=c0b1300b';
 
 const $ = (id) => document.getElementById(id);
 
@@ -113,7 +113,7 @@ function render(focus = true) {
     out.append(episodesTable(d, trades, bal));
   }
   out.hidden = false;
-  if (focus) revealResult($('dd-out-h'));
+  if (focus) revealResult($('dd-out-h'), bal === null ? 'Enter a starting balance to see drawdowns as a percentage and the gain that recovers them' : '');
   teaser(d);
 }
 

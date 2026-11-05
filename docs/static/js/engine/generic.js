@@ -2,9 +2,9 @@
 // TradeZella-style round-trip layout. Mirrors parse_generic() and
 // parse_generic_roundtrip() in tests/reference/engine_ref.py.
 
-import { parseDate, fallBackClose } from './csv.js?v=c56f2198';
-import { fail } from './errors.js?v=630ae49e';
-import { cell, reqNumber, optNumber, skip, isEmptyRow } from './mt.js?v=44195007';
+import { parseDate, fallBackClose } from './csv.js?v=94e67b7c';
+import { fail } from './errors.js?v=9df2f80c';
+import { cell, reqNumber, optNumber, skip, isEmptyRow } from './mt.js?v=e8658846';
 
 export function sideLetter(v) {
   // Like Tradervue: anything starting with B is a buy, with S a sell ("Short" too).
@@ -22,6 +22,7 @@ export function sideLetter(v) {
 // every day and month is 12 or less shows nothing, and stays refused. Two orders in one column are refused too.
 // Mirrors slash_order() and slash_to_iso() in tests/reference/engine_ref.py.
 const RE_SLASH_Y = /^(\d{4})\/(\d{1,2})\/(\d{1,2})(?=$|[ T])/;
+const RE_SLASH_SHORT = /^\d{1,2}\/\d{1,2}\/\d{2}(?=$|[ T])/;
 const RE_SLASH_L = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?=$|[ T])/;
 
 function slashVote(s) {
@@ -51,7 +52,11 @@ function slashToIso(raw, order, row, column) {
   const s = raw.trim();
   const yFirst = RE_SLASH_Y.exec(s);
   const x = yFirst || RE_SLASH_L.exec(s);
-  if (!x) return raw;   // another shape: parseDate refuses it
+  if (!x) {
+    if (RE_SLASH_SHORT.test(s)) fail('E_BAD_DATE', 'a date with slashes needs a four-digit year (13/01/2026) or the year first (2026/01/13)', row, column);
+    return raw;   // another shape: parseDate refuses it
+  }
+  if (!yFirst && Number(x[1]) > 12 && Number(x[2]) > 12) fail('E_BAD_DATE', 'a date has a day and a month that are both over 12, so it is not a real date', row, column);
   const vote = slashVote(s);
   if (order === null && !vote) {
     fail('E_AMBIGUOUS_DATE', 'In this file every date with slashes has a day and a month of 12 or less, so no row shows which comes first.', row, column);

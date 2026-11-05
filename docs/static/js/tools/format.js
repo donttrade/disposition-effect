@@ -51,6 +51,15 @@ export function wholePercent(x) {
   return `${w}%`;
 }
 
+// pct() that never prints 100.0% or 0.0% for a value that is not exactly 1 or 0 ("over 99.9%", "under 0.1%").
+export function pctBounded(x, dp = 1) {
+  if (!finite(x)) return DASH;
+  const t = (100 * Math.abs(x)).toFixed(dp);
+  if (x < 1 && x > 0 && Number(t) === 100) return `over ${(100 - 10 ** -dp).toFixed(dp)}%`;
+  if (x > 0 && Number(t) === 0) return `under ${(10 ** -dp).toFixed(dp)}%`;
+  return pct(x, dp);
+}
+
 export function ratio(x, dp = 2) {
   return finite(x) ? x.toFixed(dp) + '×' : DASH;
 }

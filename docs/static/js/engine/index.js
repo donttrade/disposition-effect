@@ -4,20 +4,20 @@
 // cookies or storage, and raw rows are never kept: only whitelisted fields
 // survive into executions and trades.
 
-import { resolveNumberStyle, checkQuoting, normHeader, wideRows, splitCell, parseDate } from './csv.js?v=c56f2198';
-import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS, checkCurrencyColumn, ISO_CURRENCIES } from './detect.js?v=d0d48b1b';
-import { fail, inFile, LIMITS } from './errors.js?v=630ae49e';
+import { resolveNumberStyle, checkQuoting, normHeader, wideRows, splitCell, parseDate } from './csv.js?v=94e67b7c';
+import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS, checkCurrencyColumn, ISO_CURRENCIES } from './detect.js?v=9766549f';
+import { fail, inFile, LIMITS } from './errors.js?v=9df2f80c';
 import { checkMapping, parseMapped, mappedTzLabel, mergeParsed, firstTs, idColumns, idLookup, readRows,
-  isPaste } from './mapped.js?v=8cfaecfd';
-import { matchPreset, presetById, PRESET_AFTER } from './presets.js?v=cc2b0508';
-import { parseMt, isEmptyRow } from './mt.js?v=44195007';
-import { parseGeneric, parseGenericRoundtrip } from './generic.js?v=4572da3e';
-import { parseIbkr } from './ibkr.js?v=a344f683';
-import { parseTradovate } from './tradovate.js?v=99d7e3fa';
-import { parseTradingView, stripCurrencyCells } from './tradingview.js?v=13b63271';
-import { finish } from './trades.js?v=22a4d03c';
+  isPaste } from './mapped.js?v=59f06827';
+import { matchPreset, presetById, PRESET_AFTER } from './presets.js?v=545c2fc8';
+import { parseMt, isEmptyRow } from './mt.js?v=e8658846';
+import { parseGeneric, parseGenericRoundtrip } from './generic.js?v=9255a37e';
+import { parseIbkr } from './ibkr.js?v=2ab89784';
+import { parseTradovate } from './tradovate.js?v=9fa40287';
+import { parseTradingView, stripCurrencyCells } from './tradingview.js?v=b696c3b1';
+import { finish } from './trades.js?v=59be45ef';
 
-export { EngineError } from './errors.js?v=630ae49e';
+export { EngineError } from './errors.js?v=9df2f80c';
 
 export const TZ_LABELS = Object.freeze({
   mt5: 'broker server time', mt4: 'broker server time', ibkr_flex: 'as exported',

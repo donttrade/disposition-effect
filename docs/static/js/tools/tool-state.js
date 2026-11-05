@@ -17,21 +17,21 @@
 //    blank page or an endless "Reading…" (R2). settled() resolves when no read is in flight,
 //    whichever way the latest one ended, so "Run" can wait for it without hanging (R1).
 
-import { readTradeFile, startProgress, workerError } from './read-file.js?v=98dc1d67';
-import { LIMITS, MESSAGES } from '../engine/errors.js?v=630ae49e';
-import { el } from './format.js?v=e808aa0f';
+import { readTradeFile, startProgress, workerError } from './read-file.js?v=d022a80a';
+import { LIMITS, MESSAGES } from '../engine/errors.js?v=9df2f80c';
+import { el } from './format.js?v=35164924';
 
 // Form errors live in form-errors.js (no file parsers behind them); re-exported so every page imports them from here as before.
-import { announceResult } from './form-errors.js?v=78b61002';
-export { clearFieldErrors, fieldError, showProblems, announce, announceResult } from './form-errors.js?v=78b61002';
+import { announceResult } from './form-errors.js?v=0d0c716c';
+export { clearFieldErrors, fieldError, showProblems, announce, announceResult } from './form-errors.js?v=0d0c716c';
 
 // QA 25 Oct: after a run, move focus to the result heading and bring the result's top into view
 // (a plain jump, no smooth scroll, under reduced motion).
-export function revealResult(heading) {
+export function revealResult(heading, extra = '') {
   heading.focus({ preventScroll: true });
   const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   heading.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' });
-  announceResult(heading.parentElement || heading, heading);
+  announceResult(heading.parentElement || heading, heading, extra);
 }
 
 // ------------------------------------------------------------------ busy controls

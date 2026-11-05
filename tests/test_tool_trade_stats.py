@@ -111,7 +111,7 @@ def test_own_file_with_canary_never_reaches_page(browser, built_site):
     wait_done(page)
     html = page.content()
     assert CANARY not in html
-    assert "Beta" in page.inner_text("#ts-warnings")
+    assert "checked on sample files only" in page.inner_text("#ts-warnings")
     assert page.locator('#ts-warnings li[data-code="W_HEDGING"]').count() == 1
     assert ctx.cookies() == [] and page.evaluate("Object.keys(localStorage)") == []
     ctx.close()
@@ -128,12 +128,12 @@ def test_errors_are_shown_with_their_code(browser, built_site, name, code):
     ctx.close()
 
 
-def test_unknown_headings_offer_the_column_picker_not_a_dead_end(browser, built_site):
-    # 5 Nov (free-tools audit F7): the same file used to end in E_UNKNOWN_FORMAT; now the page asks which column is which
+def test_unknown_headings_with_too_few_columns_stay_not_recognised(browser, built_site):
+    # 5 Nov: the column picker opens only for a table wide enough for it (fix round 1); a 3-column junk table does not
     ctx, page, _ = open_page(browser, built_site)
     page.set_input_files("#ts-file", os.path.join(FIX, "errors", "unknown_format.csv"))
-    page.wait_for_selector("#ts-map:not([hidden])")
-    assert "Which column is which?" in page.inner_text("#ts-map") and page.is_hidden("#ts-out")
+    page.wait_for_selector("#ts-error:not([hidden])")
+    assert "E_UNKNOWN_FORMAT" in page.inner_text("#ts-error") and page.is_hidden("#ts-map") and page.is_hidden("#ts-out")
     ctx.close()
 
 
