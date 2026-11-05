@@ -19,6 +19,7 @@ case "${1:-}" in
   check)
     python3 site/build.py
     python3 checks/contrast.py >/dev/null && echo "contrast: PASS"
+    python3 checks/docs_date.py                                    # docs/ is never dated after today's real date
     python3 checks/harvest_prices.py docs/pricing/index.html       # the live page (v2 bundle since step 30)
     python3 checks/harvest_prices.py site/_site/pricing/index.html # the page this build would publish
     if [ -f checks/lint.py ]; then python3 checks/lint.py site/_site; fi
@@ -44,6 +45,8 @@ case "${1:-}" in
   site-tests) python3 site/build.py && python3 checks/tests/run_site_tests.py "${2:-site/_site}" ;;
   bundle)
     if [ "${DT_BUNDLE:-}" != "yes" ]; then echo "bundle replaces docs/ — run with DT_BUNDLE=yes (step 30, after the owner's review)"; exit 1; fi
+    # 6 Nov: docs/ is never stamped later than the real date. DT_TODAY (a build dated ahead) is for tests and previews only.
+    if [ -n "${DT_TODAY:-}" ] && [ -z "${DT_PREVIEW:-}" ]; then echo "bundle refuses DT_TODAY=$DT_TODAY: docs/ is never dated ahead. Bundle on the day itself without DT_TODAY (only a preview, DT_PREVIEW, may be dated ahead)"; exit 1; fi
     # C-17: a preview bundle (DT_PREVIEW=<name>: noindex, Disallow-all, preview band) lives only on the branch of
     # that name (paid-preview, live-check), never on main; those two branches take only their own preview bundle.
     BR=$(git symbolic-ref --short -q HEAD || true)

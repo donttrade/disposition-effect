@@ -622,7 +622,7 @@ PAGES += [
     {"template": "pages/fr/remboursement-merci.html", "path": "/fr/remboursement/merci/", "requires_flag": "refund_no_result",
      "noindex": True, "no_ask": True, "lang": "fr", "crumb": "Merci", "title": "Demande de remboursement reçue — donttrade",
      "description": "Votre demande de remboursement est arrivée chez donttrade. Réponse dans les 2 jours ouvrables, heure de l’Est."},
-    {"template": "pages/partners.html", "path": "/partners/", "requires_flag": "paid_report", "noindex": True,
+    {"template": "pages/partners.html", "path": "/partners/", "requires_flag": "paid_report", "requires_promo": True, "noindex": True,
      "no_ask": True, "crumb": "Partners", "title": "Partners — donttrade",
      "description": "How partners work with donttrade: a code for the buyer, a commission for the partner, and the rules for both."},
 ]
@@ -828,7 +828,7 @@ def challenge_presets():
     spec.loader.exec_module(cr)
     lib = cr.load(CHALLENGE_RULES_JSON)
     import datetime
-    today = datetime.date.fromisoformat(os.environ["DT_TODAY"]) if os.environ.get("DT_TODAY") else datetime.date.today()
+    today = _today()
     probs = cr.validate(lib, today)
     if probs:
         die("challenge rules: " + "; ".join(probs[:5]) + (" …" if len(probs) > 5 else ""))
@@ -1800,12 +1800,36 @@ def check_stripe_link(link, mode, what):
 MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
 
+_DT_TODAY_NOTED = []
+
+
+def real_today():
+    """The machine's date, never DT_TODAY (the date guards on docs/ compare with this one)."""
+    import datetime as dt
+    return dt.date.today()
+
+
 def _today():
     """The build date: today, or DT_TODAY (YYYY-MM-DD) for a build made ahead of a dated push (6 Nov round: the terms
-    version is the push day, so the build before it is made as of that day). Never set on the day itself."""
+    version is the push day, so a local build before it is made as of that day). A bad value is a one-line BUILD FAILED;
+    a value that is not today prints a NOTE on stderr, once. Such a build is for tests and previews: ./site/run.sh bundle
+    refuses it (docs/ is never stamped later than the real date unless it is a preview, DT_PREVIEW), and
+    checks/docs_date.py fails ./site/run.sh check on a docs/ dated in the future."""
     import datetime as dt
     raw = os.environ.get("DT_TODAY")
-    return dt.date.fromisoformat(raw) if raw else dt.date.today()
+    if not raw:
+        return dt.date.today()
+    try:
+        d = dt.date.fromisoformat(raw)
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", raw):
+            raise ValueError(raw)
+    except ValueError:
+        die(f"DT_TODAY={raw!r} is not a date, YYYY-MM-DD (for example DT_TODAY=2026-11-06)")
+    if d != dt.date.today() and not _DT_TODAY_NOTED:
+        _DT_TODAY_NOTED.append(1)
+        print(f"NOTE: DT_TODAY={raw} is not today ({dt.date.today().isoformat()}): this build is dated ahead. "
+              "Use it for tests or a preview only; never bundle or deploy it.", file=sys.stderr)
+    return d
 
 
 def set_launch_date(legal, toml_path, today=None):
@@ -2423,19 +2447,104 @@ def jsonld(page, cfg, html, flags, products):
     return '<script type="application/ld+json">' + data.replace("</", "<\\/") + "</script>"
 
 
-def founding_problem(html, open_, limit):
-    """None, or why a rendered page words the price after the founding price wrongly (Round A1). While the founding
-    price is open, a page that shows the next price must say it in the one form "<founding price> for the first N
-    buyers, then <next price>" (so it names the first N buyers), and the next price is never crossed out. The
-    wording bans (regular price, standard price) are in checks/banned.toml; the retired-amounts list no longer
-    holds it, so this is the check that keeps it out of any other form."""
+_DENY_CACHE = {}
+REFUND_MACRO_CALLS = ("r.chip()", "r.chip_fr()", "r.short()", "r.tier2()", "r.pricing_line()", "r.faq_answer()", "r.terms_item()", "r.terms_summary()",
+                      "r.dispute_ask_first()", "r.misuse_item()", "r.eu_uk()", "r.byp_dd()", "r.formats_caveat()",
+                      "f.terms_p()", "f.eu_uk()", "f.byp_dd()", "f.formats_caveat()")
+DENY_GRAM = 4
+# Words the flag-on wording has and the flag-off wording lacks, but that flag-off pages use for other things. Everything
+# else that is flag-on-only (and said twice or more, 7+ letters: goodwill, customer, discretion, gracieux …) is denied.
+# Phrases the flag-on wording repeats from text that flag-off pages already carry (the "not enough trades to tell" rule, the
+# card-dispute sentence, the reply promise): a run of words inside one of these is not new refund wording.
+DENY_NEUTRAL = ("not enough trades to tell the file has dates but no times a person reviews it and writes to you a refund or a lost "
+                "payment dispute pas assez de transactions pour conclure affiche pas assez de transactions pour conclure "
+                "auprès de l'émetteur de votre carte nous répondons dans les du lundi au vendredi "
+                "habit shows not enough trades to tell these terms apply to the donttrade test bought for personal use")
+DENY_WORD_OK = frozenset("delivered analysis request re-test purchases habitude analyse remboursons personne demander formulaire "
+                         "demande répondons nouveau gratuit commande d'abord".split())
+
+
+def _gram_words(html):
+    import html as _h
+    t = _h.unescape(re.sub(r"<[^>]+>", " ", html)).lower().replace("\u2019", "'")
+    return re.findall(r"[a-zà-ÿ0-9'-]+", t)
+
+
+def refund_denylist():
+    """Fix round 1 (6 Nov): what a page may NOT say while [flags] refund_no_result is off, DERIVED from the flag-on
+    strings so the two cannot drift. The refund macros (partials/refund_copy*.html) are rendered twice, flag on and flag
+    off. Denied: every two-word run, every href and every id that the flag-on rendering has and the flag-off one has
+    not ("goodwill refund", "no refund", "once your result", "apart from", the /refund/ and /fr/remboursement/ links,
+    the #trader-refunds anchors, and the French twins). Runs of DENY_GRAM = 4 words catch whole phrases ("once your
+    result is delivered"); single words catch short ones ("goodwill", "gracieux"): flag-on-only words of 7+ letters used
+    twice or more, minus DENY_WORD_OK (a hand list of words flag-off pages use for other things; a new flag-on word is
+    denied until someone decides). Returns {"grams", "words", "hrefs", "ids"}."""
+    key = os.environ.get("DT_PRICES_JSON", "")
+    if _DENY_CACHE.get("key") == key:
+        return _DENY_CACHE
+    with open(os.environ.get("DT_PRICES_JSON") or os.path.join(SITE, "config", "prices.json"), encoding="utf-8") as f:
+        prices = json.load(f)
+    env = Environment(loader=FileSystemLoader(os.path.join(SITE, "templates")), undefined=StrictUndefined, autoescape=True)
+    env.filters["numword"], env.filters["usd"], env.filters["usd_fr"] = numword, usd, usd_fr
+    legal = {"refund_effective_human": "1 Jan 2000", "refund_effective_fr": "1 janvier 2000"}
+    src = ('{% import "partials/refund_copy.html" as r with context %}{% import "partials/refund_copy_fr.html" as f with context %}'
+           + "".join("{{ " + c + " }}\n" for c in REFUND_MACRO_CALLS))
+    out = {}
+    for on in (True, False):
+        out[on] = env.from_string(src).render(prices=prices, legal=legal, refund_on=on)
+    grams = lambda h: set(zip(*[_gram_words(h)[i:] for i in range(DENY_GRAM)]))
+    attr = lambda h, a: set(re.findall(a + r'="([^"]+)"', h))
+    import collections
+    on_count, off_words = collections.Counter(_gram_words(out[True])), set(_gram_words(out[False]))
+    words = {w for w, c in on_count.items() if w not in off_words and len(w) >= 7 and c >= 2} - DENY_WORD_OK
+    _DENY_CACHE.clear()
+    _DENY_CACHE.update({"key": key, "grams": grams(out[True]) - grams(out[False]), "words": words, "hrefs": attr(out[True], "href") - attr(out[False], "href"),
+                        "ids": attr(out[True], "id") - attr(out[False], "id")})
+    return _DENY_CACHE
+
+
+def refund_off_problems(html):
+    """[what] a flag-off page says from the flag-on refund wording (see refund_denylist). Visible text, hrefs and ids."""
+    deny = refund_denylist()
+    found = []
     body = re.sub(r"(?s)<script.*?</script>|<style.*?</style>", " ", html)
-    nxt = r"\$\s?49(?![\d,.])|49,00(?:\u00a0| )\$"
-    if re.search(r"(?is)<(?:s|del|strike)\b[^>]*>[^<]*(?:" + nxt + ")", body):
+    words = _gram_words(body)
+    seen = {g for g in set(zip(*[words[i:] for i in range(DENY_GRAM)])) & deny["grams"] if " ".join(g) not in DENY_NEUTRAL}
+    if seen:
+        found.append("new refund wording: " + ", ".join(sorted('"' + " ".join(g) + '"' for g in seen)[:3]))
+    loose = sorted(set(words) & deny["words"])
+    if loose:
+        found.append("new refund word: " + ", ".join(f'"{w}"' for w in loose[:4]))
+    for h in sorted(deny["hrefs"]):
+        if f'href="{h}"' in body:
+            found.append(f"link to {h}")
+    for i in sorted(deny["ids"]):
+        if f'id="{i}"' in body:
+            found.append(f"anchor #{i}")
+    return found
+
+
+def founding_problem(html, open_, limit, after=49):
+    """None, or why a rendered page words the price after the founding price wrongly (Round A1, fix round 1).
+    While the founding price is open there is ONE approved form: "for the first N buyers, then US$49" (French: "pour les
+    N premiers acheteurs, puis 49,00 $ US"). The check removes every use of that exact phrase and then fails on ANY other
+    mention of the next price: a sentence-final "$49.", a bare "$49", "US$49 after that", "49 $ US", "49 USD", "was $49".
+    It also fails when the next price is crossed out (<s>, <del>, <strike>), open or ended. Ended, the next price is the
+    price, so only the crossed-out rule applies. Retired amounts and the words regular/standard price are checked by lint."""
+    body = re.sub(r"(?s)<script.*?</script>|<style.*?</style>", " ", html)
+    n = r"(?:\$\s?%d(?!\d)|(?<![\d,.])%d(?:[.,]00)?[\s\u00a0]*(?:\$|USD\b|US\b))" % (after, after)
+    if re.search(r"(?is)<(?:s|del|strike)\b[^>]*>[^<]*" + n, body):
         return "the next price is crossed out (<s>, <del> or <strike>): it is never a reference price"
+    if not open_:
+        return None
     text = _text(body)
-    if open_ and re.search(nxt, text) and not re.search(rf"first {limit}\b|{limit} premiers", text):
-        return f"shows the next price but not \"for the first {limit} buyers\" while the founding price is open"
+    approved = (rf"for the first {limit} buyers, then US\$[\s\u00a0]?{after}(?!\d)"
+                rf"|pour les {limit} premiers acheteurs, puis {after},00[\s\u00a0]*\$[\s\u00a0]*US")
+    rest = re.sub(approved, " ", text)
+    m = re.search(n, rest)
+    if m:
+        return (f"the next price appears outside the one approved form \"for the first {limit} buyers, then US${after}\" "
+                f"(French: \"pour les {limit} premiers acheteurs, puis {after},00 $ US\"): …{rest[max(0, m.start() - 50):m.end() + 40].strip()}…")
     return None
 
 
@@ -2821,9 +2930,24 @@ def verify(out, flags, seller=None, base_url=None):
                 die(f"business line: {href} has no single {SELLER_ANCHOR} for the footer's details link")
 
 
+def future_dated(cfg):
+    """[(what, date)] stamped later than the machine's real date: the terms and privacy versions, and the content
+    dates that become the sitemap's <lastmod>. A bundle (docs/) must have none of them (6 Nov, fix round 1)."""
+    rt = real_today().isoformat()
+    found = [(k, cfg["legal"][k]) for k in ("terms_version", "privacy_version") if cfg["legal"][k] > rt]
+    found += [(f"{pg['path']} updated", pg["updated"]) for pg in PAGES if pg.get("updated", "") > rt]
+    return found
+
+
 def build():
     cfg, prices, private = load_config()
     flags = cfg["flags"]
+    if os.environ.get("DT_REQUIRE_LAUNCH_DATE") == "1" and not preview_name():
+        ahead = future_dated(cfg)
+        if ahead:
+            die("docs/ would be stamped later than today's real date " + real_today().isoformat() + " ("
+                + ", ".join(f"{k} {v}" for k, v in ahead[:4]) + (" …" if len(ahead) > 4 else "")
+                + "): bundle on that day without DT_TODAY. Only a preview build (DT_PREVIEW) may be dated ahead.")
     out = os.environ.get("DT_OUT") or os.path.join(SITE, "_site")
     if os.path.exists(out):
         shutil.rmtree(out)
@@ -2833,6 +2957,8 @@ def build():
     for page in PAGES:
         if page["requires_flag"] and not flags[page["requires_flag"]]:
             continue
+        if page.get("requires_promo") and not cfg["stripe"]["promo_codes_enabled"]:
+            continue   # fix round 1: /partners/ exists only while promotion codes are switched on (Round B codes are not live)
         if flags["paid_report"] and page.get("lifted") and page["path"] in PAID_REPLACES_LIFTED:
             page = SAMPLE_PAGE   # C-12 final: the real sample report replaces the lifted research figure
         owned[os.path.relpath(out_file(out, page["path"]), out)] = page
@@ -2946,7 +3072,12 @@ def build():
         if html.count(LD_MARKER) != 1:
             die(f"{page['template']}: the JSON-LD marker must appear exactly once")
         html = html.replace(LD_MARKER, jsonld(page, cfg, html, flags, products))
-        why = founding_problem(html, prices["rules"]["founding_open"], prices["rules"]["founding_limit"])
+        if not flags["refund_no_result"] and not page.get("lifted"):
+            off = refund_off_problems(html)
+            if off:
+                die(f"{page['path']}: refund_no_result is off but the page says the new policy: " + "; ".join(off))
+        why = founding_problem(html, prices["rules"]["founding_open"], prices["rules"]["founding_limit"],
+                               products["report39"]["after_founding"]["price_usd"])
         if why:
             die(f"{page['path']}: {why}")
         fp = os.path.join(out, rel)

@@ -21,11 +21,15 @@ US{{ r.price_usd|usd }}.
 {%- endif -%}
 {%- endmacro %}
 
+{#- The ONE approved form of the next price (fix round 1, 6 Nov): "for the first N buyers, then US$49" and, in French,
+    "pour les N premiers acheteurs, puis 49,00 $ US". Every page that shows the next price carries exactly this phrase
+    (pricing card, Before you pay, Terms, and the FR twins); build.founding_problem and checks/lint.py fail any other
+    mention. Terms may add facts around it, never reword it. -#}
 {#- The parenthesis after "$39 USD, one time" in the Before-you-pay Price row (EN) and its twin in the French summary. -#}
 {%- macro byp_note(r, rules) -%}
-{%- if rules.founding_open %} (founding price for the first {{ rules.founding_limit }} buyers; US{{ r.after_price_usd|usd }} after that){% endif -%}
+{%- if rules.founding_open %} (founding price: for the first {{ rules.founding_limit }} buyers, then US{{ r.after_price_usd|usd }}){% endif -%}
 {%- endmacro %}
 
 {%- macro byp_note_fr(r, rules) -%}
-{%- if rules.founding_open %} (prix de fondateur pour les {{ rules.founding_limit }} premiers acheteurs; {{ r.after_price_usd|usd_fr }} ensuite){% endif -%}
+{%- if rules.founding_open %} (prix de fondateur : pour les {{ rules.founding_limit }} premiers acheteurs, puis {{ r.after_price_usd|usd_fr }}){% endif -%}
 {%- endmacro %}

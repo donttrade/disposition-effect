@@ -65,7 +65,7 @@
   <details class="legal-sec">
     <summary><h2 id="forms">Forms, email and payments</h2><span class="ls-sum">Forms, email, the newsletter and card payments use outside services.</span></summary>
   <ul>
-    <li><strong>Forms</strong> are sent through Web3Forms, which emails each submission to us; it is hosted on AWS and keeps a 30-day history. The firm and partner forms ask for a work email and firm (required), and your role and what you want measured (optional). {% if not flags.paid_report %}The trader waitlist asks for an email, the founding price you would use, and an unticked launch-email consent; the platform you use is optional.{% endif %} No phone numbers are collected.{% if refund_on %} The refund request form asks for the email you paid with, a reason from a list and, if you choose, a short note and your file type.{% endif %}</li>
+    <li><strong>Forms</strong> are sent through Web3Forms, which emails each submission to us; it is hosted on AWS and keeps a 30-day history. The firm and partner forms ask for a work email and firm (required), and your role and what you want measured (optional). {% if not flags.paid_report %}The trader waitlist asks for an email, the founding price you would use, and an unticked launch-email consent; the platform you use is optional.{% endif %} No phone numbers are collected.</li>
     <li><strong>Email</strong> is handled by Gmail (Google). We keep form emails there.</li>
     <li><strong>The newsletter</strong> runs on Substack; see <a href="https://substack.com/privacy">Substack’s privacy policy</a>.</li>
     <li><strong>Card payments</strong> (the firm {{ products.pilot.name }}{% if flags.paid_report %}, and the donttrade test{% endif %}) are handled by Stripe; donttrade never sees full card numbers. For payment data Stripe acts as an independent controller; see <a href="https://stripe.com/privacy">Stripe’s privacy policy</a>.</li>
@@ -74,16 +74,25 @@
         and the period ("the same period as purchase records" = the six years under "What we do with what you
         send"). The ledger is the C-13 sales list (dt-private scripts/agreement-copy.mjs check mode), kept
         outside every repository. #}
-    <li id="buyer-details"><strong>If you buy the donttrade test:</strong> Stripe shows us the name and email address you enter at checkout. We use them only to send you the copy of your agreement, to answer your emails (a refund, a new access link) and to deal with a payment dispute. If you dispute the payment with your card issuer, we may give Stripe the dates of your purchase and of your analyses, and the number of analyses used, as evidence. Our emails with you stay in our Gmail inbox, and a private list of sales (the checkout code, the date, your name and email, and the dates we sent the copy of your agreement or a refund) is kept on our own computer, not on our server. Both are kept for the same period as purchase records (below).{% if refund_on %} To handle a refund request we check, in Stripe and on our server, whether a result was delivered to your order and whether the same email or card has had a refund before. We keep a private refund log (order code, date, reason, decision) with the purchase records.{% endif %}</li>
-    {%- if refund_on %}
-    <li id="refund-misuse"><strong>Refund misuse list:</strong> if someone repeatedly takes refunds after receiving results, we may keep their email address and a note, for up to 24 months from the last event, to decline a further refund or order. A person reviews each case.</li>
-    {%- endif %}
-    {#- 6 Nov (Round A6): partner and free-test records. LAWYER: wording and the period. FR twin /fr/confidentialite/#partenaires. -#}
-    <li id="partners-free-tests"><strong>If you are a partner or receive a free test:</strong> we keep your name and email, your partner code or free-test code and, for a partner, your payout details and the amounts of the sales made with your code. We use them to pay commissions, to disclose the relationship, to answer you and for tax records, and keep them as long as tax rules require (six years). A free test is kept with the order record.</li>
+    <li id="buyer-details"><strong>If you buy the donttrade test:</strong> Stripe shows us the name and email address you enter at checkout. We use them only to send you the copy of your agreement, to answer your emails (a refund, a new access link) and to deal with a payment dispute. If you dispute the payment with your card issuer, we may give Stripe the dates of your purchase and of your analyses, and the number of analyses used, as evidence. Our emails with you stay in our Gmail inbox, and a private list of sales (the checkout code, the date, your name and email, and the dates we sent the copy of your agreement or a refund) is kept on our own computer, not on our server. Both are kept for the same period as purchase records (below).</li>
+
     {%- endif %}
     {#- T0: Cloudflare hosts every build now, so it is always listed (as on /fr/confidentialite/) #}
     {%- set abroad = ["Web3Forms", "Google", "GitHub", "Stripe", "Substack", "Cloudflare"] %}
     <li>{{ abroad[:-1]|join(", ") }} and {{ abroad[-1] }} are mostly in the United States, so what you send may be stored or processed outside Canada, and the authorities there may access it under their laws.</li>
+  </ul>
+  </details>
+
+  {#- 6 Nov (Round A6/A7, fix round 1): the refund-request, partner and free-test records sit in their own section, so the
+      "Forms, email and payments" section keeps its Stripe sentence in the answer index. FR twin: /fr/confidentialite/. -#}
+  <details class="legal-sec">
+    <summary><h2 id="refund-partner-records">Partners, free tests and refund requests</h2><span class="ls-sum">What we keep about partners, free tests and refund requests.</span></summary>
+  <ul>
+    {%- if refund_on %}
+    <li id="refund-form-data">The refund request form asks for the email you paid with, a reason from a list and, if you choose, a short note and your file type. To handle a refund request we check, in Stripe and on our server, whether a result was delivered to your order and whether the same email or card has had a refund before. We keep a private refund log (order code, date, reason, decision) with the purchase records.</li>
+    <li id="refund-misuse"><strong>Refund misuse list:</strong> if someone repeatedly takes refunds after receiving results, we may keep their email address and a note, for up to 24 months from the last event, to decline a further refund or order. A person reviews each case.</li>
+    {%- endif %}
+    <li id="partners-free-tests"><strong>If you are a partner or receive a free test:</strong> we keep your name and email, your partner code or free-test code and, for a partner, your payout details and the amounts of the sales made with your code. We use them to pay commissions, to disclose the relationship, to answer you and for tax records, and keep them as long as tax rules require (six years). A free test is kept with the order record.</li>
   </ul>
   </details>
 

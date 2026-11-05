@@ -538,6 +538,21 @@ FULL_REFUND_CONDITION = re.compile(r"\bresult\b|résultat|could not be read|can[
 JSONLD_FORBIDDEN = re.compile(r"aggregateRating|\"review\"|priceValidUntil|MerchantReturnPolicy|FullRefund", re.IGNORECASE)
 
 
+_FOUNDING = {}
+
+
+def founding_claims(html, where):
+    """Fix round 1 (6 Nov): build.founding_problem on every templated page, so a plant in a built page is caught by lint
+    too: the next price only in the one approved form, never crossed out."""
+    import build
+    with open(prices_path(), encoding="utf-8") as f:   # read each time: a test may build with another prices file
+        d = json.load(f)
+    r = next(p for p in d["products"] if p["id"] == "report39")
+    _FOUNDING.update(open=d["rules"]["founding_open"], limit=d["rules"]["founding_limit"], after=r["after_founding"]["price_usd"])
+    why = build.founding_problem(html, _FOUNDING["open"], _FOUNDING["limit"], _FOUNDING["after"])
+    return [("claim:founding_price", where, why)] if why else []
+
+
 def refund_policy_claims(html, where):
     """6 Nov (Round A7; ARCHITECT-ADDENDUM-REFUNDS §6). Four rules.
     1. The JSON-LD of any page carries no rating, review, priceValidUntil or return policy (a FullRefund block said
@@ -556,6 +571,10 @@ def refund_policy_claims(html, where):
     if not REFUND["on"]:
         if REFUND_CLAIM.search(text):
             out.append(("claim:refund_flag_off", where, "“No result, no charge” on a page while refund_no_result is off"))
+        # fix round 1: ANY wording, link or anchor of the new policy (a deny-list derived from the flag-on macros)
+        import build
+        for what in build.refund_off_problems(html):
+            out.append(("claim:refund_flag_off", where, what))
         return out
     for rx in REFUND_RETIRED:
         m = rx.search(text)
@@ -582,6 +601,7 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
     out += tally_mentions(html, where)
     out += key_num_per_section(html, where)
     out += refund_policy_claims(html, where)
+    out += founding_claims(html, where)
     if paid:
         out += not_on_sale_claims(readable_text(html), where)
     from harvest_prices import amounts_in
@@ -840,7 +860,7 @@ def private_values(fields=("seller_legal_name", "premises_address", "phone"), da
     return out
 
 
-def owned_paths(paid, pilot=False, journal=False, analytics=False, prediction=False, refund=False):
+def owned_paths(paid, pilot=False, journal=False, analytics=False, prediction=False, refund=False, promo=False):
     import build
     # analytics: the Readiness Check's count pages (build.COUNT_EVENTS) exist only with [flags] analytics
     # refund: /refund/ and its French twin exist only with [flags] refund_no_result (6 Nov, Round A8)
@@ -849,6 +869,8 @@ def owned_paths(paid, pilot=False, journal=False, analytics=False, prediction=Fa
     out = []
     for p in build.PAGES:
         if p["requires_flag"] and not on[p["requires_flag"]]:
+            continue
+        if p.get("requires_promo") and not promo:   # /partners/: only with [stripe] promo_codes_enabled
             continue
         out.append(p["path"])
     return out
@@ -920,11 +942,12 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, b
     # the refund request page exists only in a refund_no_result build; the same fact switches the refund wording rules
     refund = os.path.exists(build.out_file(out_dir, "/refund/"))
     REFUND["on"] = refund
+    promo = os.path.exists(build.out_file(out_dir, "/partners/"))
     owned_rel = {"/" + os.path.relpath(build.out_file(out_dir, p), out_dir)
-                 for p in owned_paths(paid, pilot, journal, analytics, prediction, refund)}
+                 for p in owned_paths(paid, pilot, journal, analytics, prediction, refund, promo)}
     lifted = set(build.lifted_paths_for(paid))   # C-12 final: a paid build's /sample-report/ is a template page
     lifted_rel = {"/" + os.path.relpath(build.out_file(out_dir, p), out_dir) for p in lifted}
-    for path in owned_paths(paid, pilot, journal, analytics, prediction, refund):
+    for path in owned_paths(paid, pilot, journal, analytics, prediction, refund, promo):
         fp = build.out_file(out_dir, path)
         if not os.path.exists(fp):
             problems.append(("flags", path, "page missing: is the build made with these flags?"))
