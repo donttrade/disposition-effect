@@ -3,6 +3,7 @@
 {%- set r = products["report39"] %}
 {%- set ev = evidence %}
 {%- from "partials/hero_band.html" import hero_band with context %}
+{%- import "partials/refund_copy.html" as refund with context %}
   {%- if flags.trader_first_home %}
   {#- Trader-first home (paid_report only; Tester D5). Prices from prices.json. No study finding
       on this page, so none can sit next to an offer. The hero is the dark band (ARCHITECT-BRAND §2.5). #}
@@ -10,16 +11,21 @@
   {#- sweep 2 (25 Oct; Architect plan §2.3): one sentence, one real output. The visual is the sample
       report's first page with no dollar figure (it sits beside the buy button). -#}
   {% call hero_band("hero", media="report") %}
-        <h1 id="hero">See the habits in your trade history.</h1>
-        <p class="lede">Drop your broker export. Test up to five habits in your trades, with the dollar total of each.</p>
+        {#- 6 Nov (owner decision 5 Nov; RESEARCH-HERO-HEADLINE): the headline names the one habit the test is built around
+            and the sub-line says what the test does, in the test's own terms. "Costing you" is a cause claim, so the
+            sub-line keeps it to "total the dollars on those trades" and the example caption below says the totals
+            describe what happened. The trust line's last item follows the refund policy (partials/refund_copy.html). -#}
+        <h1 id="hero">Is revenge trading costing you? Get the dollar figure.</h1>
+        <p class="lede">Drop in your trade history. We test whether you re-enter after losses more often than chance would explain, then total the dollars on those trades.</p>
         <p class="btn-row"><a class="btn" href="/pricing/#last-step">Take the test for {{ r.price_usd|usd }}</a> <a href="/sample-report/">See the example report</a></p>
-        <p class="small">{{ r.price_usd|usd }} once · {{ prices.rules.trader_refund_days }}-day refund</p>
+        <p class="small"><a href="/research/">Pre-registered research</a> · Your file stays in your browser · {{ refund.short() }}</p>
+        <p class="small muted">Needs the time of each trade. Files with dates only get fewer habits.</p>
         <p class="small muted">Not investment advice · <a href="/pricing/#before-you-pay">Before you pay</a></p>
   {% endcall %}
   <div class="wrap">
 
   {#- 25 Oct (owner): show the report instead of describing it. The panel is the sample report's own
-      numbers (site/config/sample-report.report.json, a made-up file), labelled as such; no buy button
+      numbers (site/config/sample-report.report.json, an example file), labelled as such; no buy button
       sits in this section. The method sentences moved into "How the results work". -#}
   {%- set sr = sample_report %}
   {%- set short = {"hold_gap": "Held losers longer", "revenge": "Re-entry after a loss", "size_up": "Size after a loss",
@@ -30,11 +36,12 @@
   <section class="section showcase" aria-labelledby="t-measure-h" data-reveal>
     <div class="showcase-copy">
       <p class="kicker">The donttrade test</p>
-      <h2 id="t-measure-h">Five habits, checked in your own trades.</h2>
+      {#- 6 Nov (Round A2): the two numbers come from prices.json rules (habits_measured, habits_tested), as the pricing card's do. -#}
+      <h2 id="t-measure-h">Up to {{ prices.rules.habits_measured|numword }} habits measured. Up to {{ prices.rules.habits_tested|numword }} tested against chance.</h2>
       <ul class="ticks">
-        <li>Reads MetaTrader, IBKR, Tradovate, TradingView (all in beta) or a simple CSV</li>
-        <li>Up to two habits tested against chance</li>
-        <li>Dollar totals straight from your file</li>
+        <li>The dollar total for each habit, straight from your file</li>
+        <li>One free re-test, 30 to 60 days later</li>
+        <li>Reads MetaTrader, IBKR, Tradovate, TradingView or a simple CSV</li>
         <li>Runs in your browser</li>
       </ul>
       <p><a class="more" href="/sample-report/">See the full example report <span aria-hidden="true">→</span></a></p>
@@ -58,7 +65,7 @@
       </div>
       <p class="toast toast-a"><span class="toast-k">File read</span> {{ sr.n_trades }} trades · {{ sr.period_weeks }} weeks</p>
       <p class="toast toast-b"><span class="toast-k">Tested against chance</span> {{ sr.n_distinguishable }} of {{ sr.n_tested }} distinguishable from noise</p>
-      <figcaption>Example report.</figcaption>
+      <figcaption>Example report. Dollar totals describe what happened in your file.</figcaption>
     </figure>
     <details class="how">
       <summary>What the results mean</summary>
@@ -68,14 +75,14 @@
 
   {#- 25 Oct sweep: the three steps as pictures. Step 2 shows what stays and what is sent instead of a
       paragraph (strings.p5: the same facts as /privacy/#report); step 3 is the sample report's own result
-      pills (made-up file). No buy button in this section. -#}
+      pills (example file). No buy button in this section. -#}
   <section class="section" aria-labelledby="t-how-h" data-reveal>
     <h2 id="t-how-h">How it works</h2>
     <ol class="how-steps" data-reveal-stagger>
       <li class="how-step">
         <div class="how-shot" aria-hidden="true"><span class="pill">MT5</span> <span class="pill">MT4</span> <span class="pill">IBKR</span> <span class="pill">Tradovate</span> <span class="pill">TradingView</span> <span class="pill">CSV</span></div>
         <h3><span class="how-n">1</span> Export your trades</h3>
-        <p>From MetaTrader, IBKR, Tradovate or TradingView (all in beta). Or use our CSV template.</p>
+        <p>From MetaTrader, IBKR, Tradovate or TradingView. Or use our CSV template.</p>
       </li>
       <li class="how-step">
         <div class="how-shot">
@@ -135,9 +142,9 @@
       the first screen (H1). The words are unchanged. #}
   {% call hero_band("hero", media="dashboard") %}
         <h1 id="hero">See what your trades did, free.</h1>
-        <p class="lede">Drop your MetaTrader, IBKR, Tradovate or TradingView export (all in beta) and see your profit factor, expectancy, drawdown and streaks. No account. The page reads the file in your browser, so the file is not uploaded.</p>
+        <p class="lede">Drop your MetaTrader, IBKR, Tradovate or TradingView export and see your profit factor, expectancy, drawdown and streaks. No account. The page reads the file in your browser, so the file is not uploaded.</p>
         <p class="btn-row"><a class="btn" href="/tools/trade-stats/">Open trade stats</a> <a href="/tools/">All free tools</a></p>
-        <p class="small muted">Reads MetaTrader 5 and 4 reports, IBKR Flex Queries, Tradovate exports and TradingView order history (all in beta), and the donttrade CSV template.</p>
+        <p class="small muted">Reads MetaTrader 5 and 4 reports, IBKR Flex Queries, Tradovate exports and TradingView order history, and the donttrade CSV template.</p>
         <div class="firm-door">
           <p><strong>At a prop firm, broker or copy-trading platform?</strong> We measure your traders’ <a href="/plan-gap/">plan gap</a> on your own records, at a published price.</p>
           <p class="btn-row"><a class="btn btn-secondary vt-start" href="/start/?product=pilot#pilot">Start a Pilot</a> <a href="/for-firms/">What firms get</a></p>

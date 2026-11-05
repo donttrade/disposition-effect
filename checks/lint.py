@@ -523,6 +523,56 @@ def key_num_per_section(html, where):
     return out
 
 
+REFUND = {"on": False}   # set by lint_build from the build itself: /refund/ is there only with [flags] refund_no_result
+REFUND_CLAIM = re.compile(r"No result, no charge|Pas de résultat, pas de frais", re.IGNORECASE)
+# Tier 1 (the short claim) never stands alone (16 CFR 239.3(b): a satisfaction-guarantee claim carries its limits
+# with equal prominence): the section it sits in links the contract text or states the goodwill limit.
+REFUND_LIMIT = re.compile(r"trader-refunds|remboursements-traders|goodwill|à titre gracieux", re.IGNORECASE)
+REFUND_RETIRED = [re.compile(p, re.IGNORECASE) for p in (
+    r"even if you have already run your test", r"even after your test runs", r"voluntary\s+14-day\s+refund",
+    r"même si vous avez déjà fait le test", r"remboursement volontaire de \d+ jours")]
+FULL_REFUND = re.compile(r"full refund|remboursement complet|remboursé en totalité", re.IGNORECASE)
+FULL_REFUND_CONDITION = re.compile(r"\bresult\b|résultat|could not be read|can[’']t be read|n’a pas pu|can[’']t run|could not run|"
+                                   r"no habit|aucune habitude|outage|server is down|hors service|reproduce|reproduit|extract|"
+                                   r"made to run|interrompu|down for more than|does not read correctly", re.IGNORECASE)
+JSONLD_FORBIDDEN = re.compile(r"aggregateRating|\"review\"|priceValidUntil|MerchantReturnPolicy|FullRefund", re.IGNORECASE)
+
+
+def refund_policy_claims(html, where):
+    """6 Nov (Round A7; ARCHITECT-ADDENDUM-REFUNDS §6). Four rules.
+    1. The JSON-LD of any page carries no rating, review, priceValidUntil or return policy (a FullRefund block said
+       "full refund" with no condition).
+    2. Without [flags] refund_no_result, no page says "No result, no charge": the pages must not promise what
+       Stripe's checkout text does not yet say.
+    3. With it, no page keeps a retired phrase of the old policy, and every section that says "No result, no charge"
+       also links the contract text or states the goodwill limit.
+    4. With it, "full refund" never stands without a condition (a result, a file that could not be read, an outage, the
+       Pilot's own clauses) within 300 characters. Raw HTML is cut at <section> and <dialog> boundaries for rule 3."""
+    out = []
+    for m in re.finditer(r'(?s)<script type="application/ld\+json">(.*?)</script>', html):
+        for bad in JSONLD_FORBIDDEN.finditer(m.group(1)):
+            out.append(("claim:jsonld", where, f"“{bad.group(0)}” in the JSON-LD"))
+    text = readable_text(html)
+    if not REFUND["on"]:
+        if REFUND_CLAIM.search(text):
+            out.append(("claim:refund_flag_off", where, "“No result, no charge” on a page while refund_no_result is off"))
+        return out
+    for rx in REFUND_RETIRED:
+        m = rx.search(text)
+        if m:
+            out.append(("claim:refund_retired", where, f"retired refund wording: “{m.group(0)}”"))
+    for chunk in re.split(r"(?i)(?=<section\b|<dialog\b|<footer\b)", html):
+        if REFUND_CLAIM.search(re.sub(r"<[^>]+>", " ", chunk)) and not REFUND_LIMIT.search(chunk):
+            out.append(("claim:refund_limits", where, "“No result, no charge” without a link to the refund terms or the goodwill limit in the same section"))
+            break
+    flat = " ".join(text.split())
+    for m in FULL_REFUND.finditer(flat):
+        window = flat[max(0, m.start() - 300):m.end() + 300]
+        if not FULL_REFUND_CONDITION.search(window):
+            out.append(("claim:full_refund", where, f"“{m.group(0)}” without its conditions within 300 characters: …{flat[max(0, m.start() - 60):m.end() + 60]}…"))
+    return out
+
+
 def lint_html(html, where, paid, analytics, allowed_amounts, private_values, commerce=None, pilot=False):
     """commerce: True when the seller block may appear (build.show_seller); defaults to paid or pilot."""
     commerce = (paid or pilot) if commerce is None else commerce
@@ -531,6 +581,7 @@ def lint_html(html, where, paid, analytics, allowed_amounts, private_values, com
     out += dated_pricing_claims("", where, html)   # priceValidUntil in JSON-LD (the phrases: lint_text)
     out += tally_mentions(html, where)
     out += key_num_per_section(html, where)
+    out += refund_policy_claims(html, where)
     if paid:
         out += not_on_sale_claims(readable_text(html), where)
     from harvest_prices import amounts_in
@@ -789,11 +840,12 @@ def private_values(fields=("seller_legal_name", "premises_address", "phone"), da
     return out
 
 
-def owned_paths(paid, pilot=False, journal=False, analytics=False, prediction=False):
+def owned_paths(paid, pilot=False, journal=False, analytics=False, prediction=False, refund=False):
     import build
     # analytics: the Readiness Check's count pages (build.COUNT_EVENTS) exist only with [flags] analytics
+    # refund: /refund/ and its French twin exist only with [flags] refund_no_result (6 Nov, Round A8)
     on = {"paid_report": paid, "pilot_checkout": pilot, "journal": journal, "analytics": analytics,
-          "prediction_results": prediction}
+          "prediction_results": prediction, "refund_no_result": refund}
     out = []
     for p in build.PAGES:
         if p["requires_flag"] and not on[p["requires_flag"]]:
@@ -865,11 +917,14 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, b
                         "against it (set DT_PRIVATE_TOML to the file the build used)")
     # the prediction study's results page exists only in a prediction_results build (build.PREDICTION_PATH)
     prediction = os.path.exists(build.out_file(out_dir, build.PREDICTION_PATH))
+    # the refund request page exists only in a refund_no_result build; the same fact switches the refund wording rules
+    refund = os.path.exists(build.out_file(out_dir, "/refund/"))
+    REFUND["on"] = refund
     owned_rel = {"/" + os.path.relpath(build.out_file(out_dir, p), out_dir)
-                 for p in owned_paths(paid, pilot, journal, analytics, prediction)}
+                 for p in owned_paths(paid, pilot, journal, analytics, prediction, refund)}
     lifted = set(build.lifted_paths_for(paid))   # C-12 final: a paid build's /sample-report/ is a template page
     lifted_rel = {"/" + os.path.relpath(build.out_file(out_dir, p), out_dir) for p in lifted}
-    for path in owned_paths(paid, pilot, journal, analytics, prediction):
+    for path in owned_paths(paid, pilot, journal, analytics, prediction, refund):
         fp = build.out_file(out_dir, path)
         if not os.path.exists(fp):
             problems.append(("flags", path, "page missing: is the build made with these flags?"))

@@ -1,0 +1,31 @@
+{#- price_line.html (6 Nov, Round A1; ARCHITECT-PLAN-CODES-PRICING-COPY A1): the founding price in the one form that is
+    allowed. prices.json rules.founding_open says which state the site is in; build.apply_founding makes
+    products.report39.price_usd the CURRENT price (the founding price while it is open, then the next one), so
+    every button and total reads the current price and only this macro words the change.
+    open:  "US$39 for the first 100 buyers, then US$49."   ended: "US$49."
+    The next price is never "regular", "standard" or crossed out (banned.toml; build.founding_problem).
+    Use: {% from "partials/price_line.html" import price_line, price_line_fr %}{{ price_line(r, prices.rules) }} -#}
+{%- macro price_line(r, rules) -%}
+{%- if rules.founding_open -%}
+US{{ r.founding_price_usd|usd }} for the first {{ rules.founding_limit }} buyers, then US{{ r.after_price_usd|usd }}.
+{%- else -%}
+US{{ r.price_usd|usd }}.
+{%- endif -%}
+{%- endmacro %}
+
+{%- macro price_line_fr(r, rules) -%}
+{%- if rules.founding_open -%}
+{{ r.founding_price_usd|usd_fr }} pour les {{ rules.founding_limit }} premiers acheteurs, puis {{ r.after_price_usd|usd_fr }}.
+{%- else -%}
+{{ r.price_usd|usd_fr }}.
+{%- endif -%}
+{%- endmacro %}
+
+{#- The parenthesis after "$39 USD, one time" in the Before-you-pay Price row (EN) and its twin in the French summary. -#}
+{%- macro byp_note(r, rules) -%}
+{%- if rules.founding_open %} (founding price for the first {{ rules.founding_limit }} buyers; US{{ r.after_price_usd|usd }} after that){% endif -%}
+{%- endmacro %}
+
+{%- macro byp_note_fr(r, rules) -%}
+{%- if rules.founding_open %} (prix de fondateur pour les {{ rules.founding_limit }} premiers acheteurs; {{ r.after_price_usd|usd_fr }} ensuite){% endif -%}
+{%- endmacro %}

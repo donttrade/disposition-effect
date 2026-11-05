@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{#- /refund/ (6 Nov, Round A8; ARCHITECT-ADDENDUM-REFUNDS §3). Built only with [flags] refund_no_result (and paid_report).
+    noindex, out of the sitemap. A convenience, never a condition: the terms also take a plain email with a reason. -#}
+{% block content %}
+{%- import "partials/refund_copy.html" as refund with context %}
+<div class="wrap" data-requires-flag="paid_report"><div class="prose">
+  {% include "partials/crumbs.html" %}
+  <h1 id="refund-h">Ask for a refund</h1>
+  <p>{{ refund.tier2(false) }}</p>
+  <p>A person reads every request and replies within {{ prices.rules.refund_reply_business_days }} business days (Monday to Friday, Eastern Time), to the email you give. The form is a convenience: you can also email us the same details.</p>
+  {% with lang = "en" %}{% include "partials/form_refund.html" %}{% endwith %}
+  <p class="small"><a href="/fr/remboursement/" hreflang="fr" lang="fr">Version française</a> · <a href="/terms/#trader-refunds">Refund terms</a></p>
+</div></div>
+{% endblock %}

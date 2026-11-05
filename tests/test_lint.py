@@ -36,7 +36,7 @@ def rules(html, paid=False, analytics=False, priv=()):
     ("<p>Standard prices after launch apply.</p>", "banned:regular_price"),
     ('<a href="https://tally.so/r/x">form</a>', "tally"),
     ("<p>Only $59 today.</p>", "price_literal"),
-    ("<p>Then $49 after the founding offer.</p>", "price_literal"),  # retired 20 Oct: allowed nowhere
+    ("<p>Then $99 after the founding offer.</p>", "price_literal"),  # retired 20 Oct: allowed nowhere ($49 came back 6 Nov, only in the form build.founding_problem allows)
     ("<p>We help you improve.</p>", "banned:one_product"),           # 29 Oct (one product)
     ("<p>A buy signal.</p>", "banned:one_product"),
     ("<p>Your DT-1 score.</p>", "banned:one_product"),
@@ -92,7 +92,7 @@ def test_retired_products_are_gone_from_prices_json():
     d = json.load(open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8"))
     assert [p["id"] for p in d["products"]] == ["pilot", "plan", "report39"]
     assert "recheck" not in d["rules"]
-    assert sorted(RETIRED) == sorted([49, 99, 79, 2500, 6000, 12000, 625, 1500, 3000, 186.25])
+    assert sorted(RETIRED) == sorted([99, 79, 2500, 6000, 12000, 625, 1500, 3000, 186.25])   # 49 left the list on 6 Nov
 
 
 # 30 Oct (Tester #4): retired names and removed habit statuses fail on customer-visible text

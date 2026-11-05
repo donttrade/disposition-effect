@@ -1,12 +1,22 @@
 {
  "currency": "USD",
  "source": "Harvested from https://donttrade.ca/pricing/ (docs/pricing/index.html at main e5e6234) on 2026-10-20.",
+ "partner": {
+  "note": "6 Nov 2026 (owner decision 5 Nov): the partner deal, worded once on /partners/ and in the pay-panel disclosure. A partner code gives the buyer discount_percent off; the partner earns commission_percent of the amount actually paid on sales made on or before commission_high_until (Toronto time), then commission_percent_after; paid payout_wait_days after the order, minimum payout minimum_payout_usd, cancelled by a refund or a lost dispute.",
+  "discount_percent": 10, "commission_percent": 40, "commission_percent_after": 30, "commission_high_until": "2027-01-31",
+  "payout_wait_days": 14, "minimum_payout_usd": 25
+ },
  "retired_amounts": {
-  "note": "Withdrawn prices, rejected by lint on every built page. $49 and $99: on the old live /pricing/ only, withdrawn 20 Oct 2026 (DECISIONS ADDED: Competition Act regular-price risk). 29 Oct 2026 (owner: one product, the donttrade test): the Habit Tracker ($79 a year), the Snapshot, Memo and Outcomes pack ($2,500, $6,000, $12,000) and their 25% re-checks ($625, $1,500, $3,000, and $186.25 for the Pilot) are retired. The harvest check of an old page accepts them with --old.",
-  "amounts": [49, 99, 79, 2500, 6000, 12000, 625, 1500, 3000, 186.25]
+  "note": "Withdrawn prices, rejected by lint on every built page. $99: on the old live /pricing/ only, withdrawn 20 Oct 2026 (DECISIONS ADDED: Competition Act regular-price risk). $49 was withdrawn then too and came back on 6 Nov 2026 (owner decision 5 Nov) as report39.after_founding, the price after the first founding buyers, and only in the form \"US$39 for the first 100 buyers, then US$49\" (never as a regular, standard or crossed-out price; lint and build.founding_problem hold that). 29 Oct 2026 (owner: one product, the donttrade test): the Habit Tracker ($79 a year), the Snapshot, Memo and Outcomes pack ($2,500, $6,000, $12,000) and their 25% re-checks ($625, $1,500, $3,000, and $186.25 for the Pilot) are retired. The harvest check of an old page accepts them with --old.",
+  "amounts": [99, 79, 2500, 6000, 12000, 625, 1500, 3000, 186.25]
  },
  "rules": {
   "founding_limit": 100,
+  "founding_open": true,
+  "habits_measured": 5,
+  "habits_tested": 2,
+  "goodwill_refunds_per_customer": 1,
+  "refund_reply_business_days": 2,
   "trader_refund_days": 14,
   "pilot_credit_days": 60,
   "plan_prepay_discount_percent": 15,
@@ -16,6 +26,6 @@
  "products": [
   {"id": "pilot", "audience": "firm", "name": "Pilot", "former_name": "Trial", "price_usd": 745, "interval": "once", "founding": false, "credit_rule": "Its fee counts toward your plan’s invoices if the plan starts within 60 days", "turnaround_days": 5, "payment_terms": "100% on acceptance", "anchor": "firms", "cta_label": "Start the Pilot", "stripe_link_live": "https://buy.stripe.com/eVq6oGgLl1d04hmfMqdwc00", "stripe_link_test": null, "requires_flag": null},
   {"id": "plan", "audience": "firm", "name": "donttrade test for firms", "short_name": "Monthly plan", "former_name": null, "price_usd": 0.5, "interval": "month", "unit": "trader account", "minimum_usd": 500, "billing": "invoiced monthly in arrears", "founding": false, "credit_rule": null, "turnaround_days": 5, "payment_terms": "invoiced monthly in arrears, due within 15 days", "anchor": "firms", "cta_label": "Ask about the monthly plan", "stripe_link_live": null, "stripe_link_test": null, "requires_flag": null},
-  {"id": "report39", "audience": "trader", "name": "donttrade test", "former_name": null, "price_usd": 39, "interval": "once", "founding": true, "credit_rule": null, "turnaround_days": null, "payment_terms": null, "anchor": "traders", "cta_label": "Join the waitlist", "stripe_link_live": "https://buy.stripe.com/eVq14m66H9Jw15a0Rwdwc04", "stripe_link_test": null, "stripe_link_live_fr": null, "stripe_link_test_fr": null, "requires_flag": "paid_report"}
+  {"id": "report39", "audience": "trader", "name": "donttrade test", "former_name": null, "price_usd": 39, "interval": "once", "founding": true, "credit_rule": null, "turnaround_days": null, "payment_terms": null, "anchor": "traders", "cta_label": "Join the waitlist", "stripe_link_live": "https://buy.stripe.com/eVq14m66H9Jw15a0Rwdwc04", "stripe_link_test": null, "stripe_link_live_fr": null, "stripe_link_test_fr": null, "after_founding": {"price_usd": 49, "stripe_link_live": null, "stripe_link_test": null, "stripe_link_live_fr": null, "stripe_link_test_fr": null}, "requires_flag": "paid_report"}
  ]
 }

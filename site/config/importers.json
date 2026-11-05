@@ -1,0 +1,13 @@
+{
+ "note": "6 Nov 2026 (Round A3): which file readers have been tested on a real export. The pages say \"not yet tested on a real export\" for every format with verified = false (the tool page's table, the Before-you-pay, Terms and For-traders sentences). Flip a format to true here and in site/static/js/engine/detect.js SIGNATURES when a real export passes; tests/test_rounda_6nov.py holds this file equal to those flags, so the two cannot drift.",
+ "formats": [
+  {"id": "mt5_deals", "platform": "MetaTrader 5 (deals)", "verified": false},
+  {"id": "mt5_positions", "platform": "MetaTrader 5 (positions)", "verified": false},
+  {"id": "mt4", "platform": "MetaTrader 4", "verified": false},
+  {"id": "ibkr_flex", "platform": "Interactive Brokers Flex Query", "verified": false},
+  {"id": "tradovate_orders", "platform": "Tradovate Orders", "verified": false},
+  {"id": "tradingview", "platform": "TradingView Order History", "verified": false},
+  {"id": "generic_roundtrip", "platform": "donttrade CSV template, one row per round trip", "verified": false},
+  {"id": "generic", "platform": "donttrade CSV template", "verified": true}
+ ]
+}

@@ -5,6 +5,8 @@
 {%- set byp_h = byp_h | default("h3") %}
 {%- set r = products["report39"] %}
 {%- from "partials/seller.html" import seller_rows %}
+{%- import "partials/refund_copy.html" as refund with context %}
+{%- from "partials/price_line.html" import byp_note %}
 <section class="notice" id="before-you-pay" aria-labelledby="byp-h" data-requires-flag="paid_report">
   <{{ byp_h }} id="byp-h">Before you pay: what you’re agreeing to</{{ byp_h }}>
   <p class="small"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Version française</a></p>
@@ -15,9 +17,9 @@
       against chance in this version. It includes one re-test 30 to 60 days after your first result. It describes what
       happened; it does not tell you what to trade.</dd>
     <dt>Technical requirements</dt><dd>A current version of Chrome, Edge, Firefox or Safari. Files: MetaTrader 5 or 4 HTML report,
-      Interactive Brokers Flex Query CSV, Tradovate Orders CSV or TradingView Order History CSV (all four in beta until
-      real exports confirm the columns), or the donttrade CSV template. Your browser reads the file. {{ strings.p5.long }}</dd>
-    <dt>Price</dt><dd>{{ r.price_usd|usd }} USD, one time. No sales tax is charged. Total: {{ r.price_usd|usd }} USD.</dd>
+      Interactive Brokers Flex Query CSV, Tradovate Orders CSV or TradingView Order History CSV, or the donttrade CSV
+      template. {{ refund.formats_caveat() }} Your browser reads the file. {{ strings.p5.long }}</dd>
+    <dt>Price</dt><dd>{{ r.price_usd|usd }} USD, one time{{ byp_note(r, prices.rules) }}. No sales tax is charged. Total: {{ r.price_usd|usd }} USD{% if stripe_promo %}, before any promotion code you enter; Stripe’s payment page shows the exact total{% endif %}.</dd>
     <dt>Currency and fees</dt><dd>Priced in US dollars. Stripe’s payment page may offer to charge you in your own currency instead, at
       Stripe’s exchange rate, which includes a 2–4% conversion fee. If you pay in US dollars, your card issuer may
       charge a currency conversion fee. donttrade receives neither fee.</dd>
@@ -31,7 +33,7 @@
       number of days, as in exports with dates but no times, no habit is tested, and the habits that depend on the order
       of trades within a day (re-entering soon after a loss, size after a loss, trading after a losing run) get no
       figure.</dd>
-    <dt>Refunds</dt><dd>Full refund if you ask within 14 days of buying: <a href="/terms/#cancellation">cancellation and refund terms</a>.</dd>
+    <dt>Refunds</dt><dd>{{ refund.byp_dd() }}</dd>
   </dl>
   <p class="small">{{ legal.disclaimer_short }}</p>
   <p class="no-print"><button class="btn btn-secondary" type="button" data-print>Print this</button></p>
