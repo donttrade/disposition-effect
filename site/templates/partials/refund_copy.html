@@ -50,14 +50,14 @@ A full refund if you ask within {{ _days }} days of buying.
 {%- endif -%}
 {%- endmacro %}
 {%- macro terms_summary() -%}
-{%- if refund_on %}Traders: No result, no charge; full refund within {{ _days }} days.{% else %}Traders: full refund within {{ _days }} days.{% endif -%}
+{%- if refund_on %}Traders: No result, no charge. Full refund within {{ _days }} days if no result is delivered (details in the refund terms below).{% else %}Traders: full refund within {{ _days }} days.{% endif -%}
 {%- endmacro %}
 {#- the payment-disputes sentence added with the new policy -#}
 {%- macro dispute_ask_first() -%}
 {%- if refund_on %} If something is wrong with your order, ask us first; we answer faster than a card dispute, and a refund request does not affect your rights.{% endif -%}
 {%- endmacro %}
 {%- macro misuse_item() -%}
-{%- if refund_on %}<li id="no-resale"><strong>Misuse of refunds:</strong> we may decline a refund, or a new order, from someone who has repeatedly asked for refunds after receiving results. A person reviews each case and writes to you first.</li>{% endif -%}
+{%- if refund_on %}<li id="no-resale"><strong>Misuse of refunds:</strong> a refund is always made in the cases listed under Refunds. Beyond those cases, we may decline a goodwill refund, or a new order, from someone who has repeatedly asked for refunds after receiving results. A person reviews each case and writes to you first.</li>{% endif -%}
 {%- endmacro %}
 {%- macro eu_uk() -%}
 {%- if refund_on -%}
@@ -76,8 +76,13 @@ Full refund if you ask within {{ _days }} days of buying: <a href="/terms/#cance
 {%- endif -%}
 {%- endmacro %}
 
-{#- The promise sentences beside the file formats (Before you pay, Terms, For traders; Round A3). Removing the word "beta"
-    must not remove the fact: no format has yet been tested on a real export, except the donttrade CSV template. -#}
+{#- The promise sentences beside the file formats (Before you pay, Terms, For traders; Round A3, fix round 2). Removing the word
+    "beta" must not remove the fact, and the fact is generated from site/config/importers.json: the four broker file readers
+    are built from the platforms' published formats and none has been tested on a real export; the donttrade CSV template has. -#}
 {%- macro formats_caveat() -%}
-Each reader follows the platform’s published export format, and not every one has yet been tested on a real export from that platform. Your result states how many trades were read and over how many weeks, so you can compare with your platform. {% if refund_on %}If the file does not read correctly, use the CSV template or ask for a refund: a file that could not be read is covered by <a href="/terms/#trader-refunds">“No result, no charge”</a>.{% else %}If the file does not read correctly, use the CSV template or ask for a full refund within {{ _days }} days.{% endif -%}
+{%- if readers_untested|length == readers_all|length -%}
+The {{ readers_all|length|numword }} broker file readers ({{ readers_all[:-1]|join(", ") }} and {{ readers_all[-1] }}) are built from each platform’s published format and have not yet been tested on a real export; the donttrade CSV template has.
+{%- elif readers_untested -%}
+These broker file readers are built from each platform’s published format and have not yet been tested on a real export: {{ readers_untested|join(", ") }}. The others, and the donttrade CSV template, have.
+{%- endif %} Your result states how many trades were read and over how many weeks, so you can compare with your platform. {% if refund_on %}If the file does not read correctly, use the CSV template or ask for a refund: a file that could not be read is covered by <a href="/terms/#trader-refunds">“No result, no charge”</a>.{% else %}If the file does not read correctly, use the CSV template or ask for a full refund within {{ _days }} days.{% endif -%}
 {%- endmacro %}

@@ -224,7 +224,7 @@ def test_home_hero_and_trust_line(off):
     assert ("Drop in your trade history. We test whether you re-enter after losses more often than chance would explain, "
             "then total the dollars on those trades.") in t
     assert "Pre-registered research · Your file stays in your browser · 14-day refund" in t
-    assert "Needs the time of each trade. Files with dates only get fewer habits." in t
+    assert "Needs the time of each trade. A file with dates but no times gets no tested habits." in t
     assert "Take the test for $39" in t and "See the example report" in t
     assert 'href="/research/">Pre-registered research</a>' in h
     assert "Dollar totals describe what happened in your file." in t
@@ -276,10 +276,12 @@ def test_engine_strings_carry_no_beta():
 
 
 def test_the_promise_places_carry_the_factual_caveat(off):
-    sentence = "not every one has yet been tested on a real export from that platform"
+    sentence = ("The four broker file readers (MetaTrader 4/5, IBKR, Tradovate and TradingView) are built from each platform’s published "
+                "format and have not yet been tested on a real export; the donttrade CSV template has.")
     for rel in ("before-you-pay", "terms", "for-traders"):
         assert sentence in text_of(off / rel / "index.html"), rel
-    fr = "tous n’ont pas encore été testés avec une vraie exportation de cette plateforme"
+    fr = ("Les quatre lecteurs de fichiers de courtiers (MetaTrader 4/5, IBKR, Tradovate et TradingView) sont conçus d’après le format "
+          "publié par chaque plateforme et n’ont pas encore été testés avec une vraie exportation; le modèle CSV de donttrade l’a été.")
     assert fr in text_of(off / "fr" / "avant-de-payer" / "index.html")
     assert fr in text_of(off / "fr" / "conditions" / "index.html")
     assert "not yet tested on a real export" in text_of(off / "pricing" / "index.html")
@@ -459,7 +461,7 @@ def test_refund_on_tier_texts_match_the_addendum_word_for_word(on):
     assert ("Once a result has been delivered to you, we do not refund, except that we will make one goodwill refund per "
             "customer , at our discretion, if you ask within 14 days of buying.").replace("customer ,", "customer,") in terms.replace("customer ,", "customer,")
     assert "These terms apply to purchases made on or after 6 Nov 2026; earlier purchases keep the refund terms in force on the day they were made." in terms
-    assert "Traders: No result, no charge; full refund within 14 days." in (on / "terms" / "index.html").read_text(encoding="utf-8").replace("\n", " ")
+    assert "Traders: No result, no charge. Full refund within 14 days if no result is delivered (details in the refund terms below)." in (on / "terms" / "index.html").read_text(encoding="utf-8").replace("\n", " ")
     assert "If something is wrong with your order, ask us first; we answer faster than a card dispute" in terms
     assert 'id="trader-refunds"' in (on / "terms" / "index.html").read_text(encoding="utf-8")
     assert ("At checkout you ask for access right away and acknowledge that this right ends once your test result is supplied "
@@ -980,3 +982,105 @@ def test_partners_page_exists_only_while_promotion_codes_are_on(off, on, tmp_pat
     assert lint_ok(off) == [] and lint_ok(on) == []
     r, o = build(tmp_path, "pr", toml=on_toml(promo=False), partners={})
     assert r.returncode == 0 and not (o / "partners").exists()
+
+
+# =============================================================================== FIX ROUND 2 (Manager)
+def collapse(s):
+    return re.sub(r"\s+", " ", s.replace("\u00a0", " "))
+
+
+# ---- 1 the beta-removal sentence says what importers.json says
+def test_the_formats_sentence_is_true_to_importers_json_in_all_six_places(off):
+    cfg = json.load(open(os.path.join(SITE, "config", "importers.json"), encoding="utf-8"))["formats"]
+    assert not any(x["verified"] for x in cfg if x.get("reader")) and [x["id"] for x in cfg if x["verified"]] == ["generic"]
+    en = ("The four broker file readers (MetaTrader 4/5, IBKR, Tradovate and TradingView) are built from each platform’s published "
+          "format and have not yet been tested on a real export; the donttrade CSV template has.")
+    fr = ("Les quatre lecteurs de fichiers de courtiers (MetaTrader 4/5, IBKR, Tradovate et TradingView) sont conçus d’après le format "
+          "publié par chaque plateforme et n’ont pas encore été testés avec une vraie exportation; le modèle CSV de donttrade l’a été.")
+    places = {"before-you-pay": 1, "terms": 1, "for-traders": 1}   # the sixth place is For-traders' waitlist branch (paid_report off)
+    for rel, n in places.items():
+        assert collapse(text_of(off / rel / "index.html")).count(en) == n, rel
+    for rel in ("fr/avant-de-payer", "fr/conditions"):
+        assert collapse(text_of(off / rel / "index.html")).count(fr) == 1, rel
+    wl = open(os.path.join(SITE, "templates", "pages", "for-traders.html"), encoding="utf-8").read()
+    assert wl.count("refund.formats_caveat()") == 2     # paid and waitlist branches
+    for rel in ("before-you-pay", "terms", "for-traders", "fr/avant-de-payer", "fr/conditions", "pricing", "welcome", "report"):
+        assert "not every one" not in text_of(off / rel / "index.html") and "tous n’ont pas" not in text_of(off / rel / "index.html")
+
+
+def test_the_formats_sentence_changes_when_a_reader_flips(tmp_path):
+    """Generated from importers.json: with one reader tested, the sentence names only the others."""
+    import jinja2
+    env = jinja2.Environment(loader=jinja2.FileSystemLoader(os.path.join(SITE, "templates")), undefined=jinja2.StrictUndefined, autoescape=True)
+    env.filters.update(numword=B.numword, numword_fr=B.numword_fr)
+    src = '{% import "partials/refund_copy.html" as r with context %}{{ r.formats_caveat() }}'
+    prices = json.load(open(os.path.join(SITE, "config", "prices.json"), encoding="utf-8"))
+    names = ["MetaTrader 4/5", "IBKR", "Tradovate", "TradingView"]
+    out = env.from_string(src).render(prices=prices, refund_on=False, readers_untested=["IBKR", "Tradovate", "TradingView"], readers_all=names)
+    assert "These broker file readers are built" in out and "IBKR, Tradovate, TradingView" in out and "MetaTrader 4/5, IBKR" not in out
+    assert "The four broker file readers" in env.from_string(src).render(prices=prices, refund_on=False, readers_untested=names, readers_all=names)
+
+
+@pytest.mark.parametrize("plant", ["<p>in beta</p>", "<p>Beta wording</p>", "<p>version bêta</p>", "<p>(all in BETA)</p>"])
+def test_lint_refuses_the_word_beta_on_a_page(off, plant):
+    h = (off / "about" / "index.html").read_text(encoding="utf-8").replace("</main>", plant + "</main>", 1)
+    assert any(p[0] == "banned:retired_name" for p in L.lint_html(h, "/about/", True, True, L.allowed_amounts(), (), commerce=True)), plant
+
+
+# ---- 2 "withdrawn on" is the launch date and says why
+def test_withdrawn_on_is_the_launch_date_and_states_the_reason(off, tmp_path):
+    sentence = ("Fixed-price firm engagements (Snapshot, Memo, Outcomes pack) were withdrawn on 29 Oct 2026, the day donttrade moved to "
+                "one paid product, the donttrade test; a scope accepted before then keeps its agreed price and terms.")
+    assert sentence in text_of(off / "terms" / "index.html")
+    assert re.search(r'launch_date = "2026-10-29"', TOML)
+    r, out = build(tmp_path, "later", toml=TOML.replace('terms_date = "2026-11-06"', 'terms_date = "2026-11-05"').replace('privacy_date = "2026-11-06"', 'privacy_date = "2026-11-05"'))
+    assert r.returncode == 0, r.stderr
+    t = text_of(out / "terms" / "index.html")
+    assert "Version 2026-11-05." in t and sentence in t           # a terms bump does not move it
+
+
+# ---- 3 Terms summary line, flag on
+def test_terms_summary_line_has_no_bare_full_refund(on, off):
+    h = (on / "terms" / "index.html").read_text(encoding="utf-8")
+    m = re.search(r'<span class="ls-sum">No cancellation fees\.([^<]*)</span>', h)
+    assert collapse(m.group(1)).strip() == "Traders: No result, no charge. Full refund within 14 days if no result is delivered (details in the refund terms below)."
+    for sent in re.split(r"(?<=[.;])\s+", collapse(m.group(0))):
+        assert "full refund" not in sent.lower() or "if no result is delivered" in sent
+    assert "Traders: full refund within 14 days." in (off / "terms" / "index.html").read_text(encoding="utf-8")
+
+
+# ---- 4 home caveat says the same true thing as Before-you-pay
+def test_home_caveat_agrees_with_before_you_pay(off):
+    home, byp = text_of(off / "index.html"), collapse(text_of(off / "before-you-pay" / "index.html"))
+    assert "A file with dates but no times gets no tested habits." in home and "fewer habits" not in home
+    assert "no habit is tested" in byp and "dates but no times" in byp
+
+
+# ---- 5 misuse bullet
+def test_misuse_bullet_is_unambiguous_flag_on_only(on, off):
+    want = ("Misuse of refunds: a refund is always made in the cases listed under Refunds. Beyond those cases, we may decline a goodwill "
+            "refund, or a new order, from someone who has repeatedly asked for refunds after receiving results. A person reviews each "
+            "case and writes to you first.")
+    assert want in collapse(text_of(on / "terms" / "index.html"))
+    assert "Misuse of refunds" not in text_of(off / "terms" / "index.html") and "goodwill" not in text_of(off / "terms" / "index.html")
+    fr = collapse(text_of(on / "fr" / "conditions" / "index.html"))
+    assert "Abus des remboursements : un remboursement est toujours fait dans les cas énumérés sous Remboursements. Au-delà de ces cas" in fr
+
+
+# ---- 6 spelled-out amounts
+@pytest.mark.parametrize("plant", ["<p>The test costs 49 dollars.</p>", "<p>forty-nine dollars after launch</p>", "<p>Forty nine US dollars.</p>",
+                                   "<p>49 dollars US</p>", "<p>quarante-neuf dollars après.</p>", "<p>quarante-neuf dollars américains</p>",
+                                   "<p>49 dollars américains</p>"])
+def test_spelled_out_next_price_fails_while_the_founding_price_is_open(plant):
+    ok = f"<p>US$39 {APPROVED_EN}.</p><p>{APPROVED_FR}.</p>"
+    assert B.founding_problem(ok, True, 100) is None
+    assert "approved form" in B.founding_problem(ok + plant, True, 100), plant
+    assert any(p[0] == "claim:founding_price" for p in L.founding_claims(ok + plant, "/x/"))
+
+
+def test_spelled_amount_regex_covers_french_and_english_numbers():
+    for n, words in ((49, ["forty-nine dollars", "quarante-neuf dollars"]), (95, ["ninety-five dollars", "quatre-vingt-quinze dollars"]),
+                     (80, ["eighty dollars", "quatre-vingts dollars"]), (21, ["twenty-one dollars", "vingt et un dollars"]), (15, ["fifteen dollars", "quinze dollars"])):
+        for w in words:
+            assert re.search(B.spelled_amount(n), w, re.I), (n, w)
+    assert not re.search(B.spelled_amount(49), "forty-eight dollars", re.I)

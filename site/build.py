@@ -2217,6 +2217,16 @@ def lift_sections(rel_path):
 NUMWORDS = ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
 
 
+NUMWORDS_FR = ("zéro", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf")
+
+
+def numword_fr(n):
+    """4 -> "quatre" (0 to 9)."""
+    if type(n) is not int or not 0 <= n <= 9:
+        die(f"numword_fr: {n!r} is not a whole number from 0 to 9")
+    return NUMWORDS_FR[n]
+
+
 def numword(n):
     """5 -> "five" (rules.habits_measured / habits_tested are written once, in prices.json, and spelled out on the pages)."""
     if type(n) is not int or not 0 <= n <= 9:
@@ -2229,6 +2239,22 @@ def longdate(iso):
     import datetime as dt
     d = dt.date.fromisoformat(iso)
     return f"{d.day} {d.strftime('%B')} {d.year}"
+
+
+IMPORTERS_JSON = os.path.join(SITE, "config", "importers.json")
+
+
+def readers_untested():
+    """[reader name] of the broker file readers not yet tested on a real export, from site/config/importers.json (a
+    reader is untested while any of its formats has verified = false). Fix round 2: the beta-removal sentence says exactly
+    this, so it changes when a format flips."""
+    with open(IMPORTERS_JSON, encoding="utf-8") as f:
+        fm = json.load(f)["formats"]
+    names, out = [], []
+    for x in fm:
+        if x.get("reader") and x["reader"] not in names:
+            names.append(x["reader"])
+    return [n for n in names if any(not x["verified"] for x in fm if x.get("reader") == n)], names
 
 
 def partners_meta(partners, prices):
@@ -2485,13 +2511,14 @@ def refund_denylist():
     with open(os.environ.get("DT_PRICES_JSON") or os.path.join(SITE, "config", "prices.json"), encoding="utf-8") as f:
         prices = json.load(f)
     env = Environment(loader=FileSystemLoader(os.path.join(SITE, "templates")), undefined=StrictUndefined, autoescape=True)
-    env.filters["numword"], env.filters["usd"], env.filters["usd_fr"] = numword, usd, usd_fr
+    env.filters["numword"], env.filters["numword_fr"], env.filters["usd"], env.filters["usd_fr"] = numword, numword_fr, usd, usd_fr
     legal = {"refund_effective_human": "1 Jan 2000", "refund_effective_fr": "1 janvier 2000"}
     src = ('{% import "partials/refund_copy.html" as r with context %}{% import "partials/refund_copy_fr.html" as f with context %}'
            + "".join("{{ " + c + " }}\n" for c in REFUND_MACRO_CALLS))
     out = {}
+    ru = readers_untested()
     for on in (True, False):
-        out[on] = env.from_string(src).render(prices=prices, legal=legal, refund_on=on)
+        out[on] = env.from_string(src).render(prices=prices, legal=legal, refund_on=on, readers_untested=ru[0], readers_all=ru[1])
     grams = lambda h: set(zip(*[_gram_words(h)[i:] for i in range(DENY_GRAM)]))
     attr = lambda h, a: set(re.findall(a + r'="([^"]+)"', h))
     import collections
@@ -2524,6 +2551,32 @@ def refund_off_problems(html):
     return found
 
 
+_EN_UNITS = ("zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen "
+             "eighteen nineteen").split()
+_EN_TENS = "x x twenty thirty forty fifty sixty seventy eighty ninety".split()
+_FR_UNITS = ("zéro un deux trois quatre cinq six sept huit neuf dix onze douze treize quatorze quinze seize").split()
+_FR_TENS = {2: "vingt", 3: "trente", 4: "quarante", 5: "cinquante", 6: "soixante"}
+
+
+def spelled_amount(n):
+    """Regex for the amount n (10 to 99) written in words before "dollars", English and French: "forty-nine dollars",
+    "forty nine US dollars", "49 dollars", "quarante-neuf dollars américains". Fix round 2: the digit patterns missed these."""
+    t, u = divmod(n, 10)
+    en = _EN_UNITS[n] if n < 20 else _EN_TENS[t] + (r"[\s-]" + _EN_UNITS[u] if u else "")
+    if n < 17:
+        fr = _FR_UNITS[n]
+    elif n < 20:
+        fr = "dix-" + _FR_UNITS[u]
+    elif t in _FR_TENS:
+        fr = _FR_TENS[t] + ((r"(?:\s+et\s+|-)" + _FR_UNITS[u]) if u else "")
+    else:   # 70 to 99
+        base = "soixante" if t < 8 else "quatre-vingt"
+        rest = (10 if t in (7, 9) else 0) + u
+        fr = base + ((r"(?:\s+et\s+|-)" + (_FR_UNITS[rest] if rest < 17 else "dix-" + _FR_UNITS[rest - 10])) if rest else ("s" if t == 8 else ""))
+    cur = r"(?:\s+(?:US|U\.S\.|canadian|american|américains?|canadiens?|états-unis))*\s+(?:dollars?|USD|\$)"
+    return rf"\b(?:{n}|{en}|{fr}){cur}(?![\w])"
+
+
 def founding_problem(html, open_, limit, after=49):
     """None, or why a rendered page words the price after the founding price wrongly (Round A1, fix round 1).
     While the founding price is open there is ONE approved form: "for the first N buyers, then US$49" (French: "pour les
@@ -2541,7 +2594,7 @@ def founding_problem(html, open_, limit, after=49):
     approved = (rf"for the first {limit} buyers, then US\$[\s\u00a0]?{after}(?!\d)"
                 rf"|pour les {limit} premiers acheteurs, puis {after},00[\s\u00a0]*\$[\s\u00a0]*US")
     rest = re.sub(approved, " ", text)
-    m = re.search(n, rest)
+    m = re.search(n, rest) or re.search(spelled_amount(after), rest, re.I)
     if m:
         return (f"the next price appears outside the one approved form \"for the first {limit} buyers, then US${after}\" "
                 f"(French: \"pour les {limit} premiers acheteurs, puis {after},00 $ US\"): …{rest[max(0, m.start() - 50):m.end() + 40].strip()}…")
@@ -3010,6 +3063,7 @@ def build():
     env.filters["usd_fr"] = usd_fr
     env.filters["isodate"] = isodate
     env.filters["numword"] = numword
+    env.filters["numword_fr"] = numword_fr
     env.filters["longdate"] = longdate
     env.globals["crumb_items"] = crumb_items
     products = {p["id"]: p for p in prices["products"]}
@@ -3026,7 +3080,8 @@ def build():
                 "preview": preview_name(), "founding_open": prices["rules"]["founding_open"],
                 "partners_meta": partners_meta(cfg["partners"], prices),
                 "refund_on": flags["refund_no_result"], "refund_reasons": refund_reasons(),
-                "stripe_promo": cfg["stripe"]["promo_codes_enabled"]}
+                "stripe_promo": cfg["stripe"]["promo_codes_enabled"],
+                "readers_untested": readers_untested()[0], "readers_all": readers_untested()[1]}
     built, rendered = [], []
 
     def render(rel, page, **more):
