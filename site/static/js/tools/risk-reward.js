@@ -10,7 +10,7 @@
 
 import { parsePositive, parseNonNegative, InputError } from './num.js';
 import { el, plain, pct, MINUS } from './format.js';
-import { clearFieldErrors, fieldError, showProblems } from './tool-state.js';
+import { clearFieldErrors, fieldError, showProblems, announceResult } from './form-errors.js';   // not tool-state.js: that pulls in the trade-file parsers
 
 const $ = (id) => document.getElementById(id);
 const LABELS = {
@@ -53,7 +53,8 @@ function syncMode() {
 }
 
 const decimalsOf = (x) => { const s = String(x); return s.includes('.') ? s.split('.')[1].length : 0; };
-const signed = (x, dp) => (x > 0 ? '+' : x < 0 ? MINUS : '') + plain(Math.abs(x), dp);
+// A value that rounds to zero carries no sign: -0.001 shows "0.00", never "−0.00" (which reads as a loss).
+const signed = (x, dp) => (Number(Math.abs(x).toFixed(dp)) === 0 ? '' : x > 0 ? '+' : MINUS) + plain(Math.abs(x), dp);
 const rText = (x) => `${plain(x, 2)}R`;
 
 function calculate(ev) {
@@ -132,6 +133,7 @@ function render(v, o) {
   $('rr-out').replaceChildren(...kids.filter(Boolean));
   $('rr-out').hidden = false;
   $('rr-out-h').focus();
+  announceResult($('rr-out'), $('rr-out-h'));
 }
 
 function init() {

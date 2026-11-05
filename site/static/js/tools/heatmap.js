@@ -59,9 +59,24 @@ function grid(h) {
     el('caption', { text: `Total result of the trades opened in each hour block (rows) and weekday (columns). Hours with no trades are left out.` }),
     el('thead', {}, el('tr', {}, el('th', { scope: 'col', text: 'Opened' }), ...days.map((wd) => el('th', { scope: 'col', class: 'num', text: WEEKDAYS[wd].slice(0, 3), title: WEEKDAYS[wd] })))),
     el('tbody', {}, ...rows.map((b) => el('tr', {}, el('th', { scope: 'row', text: blockLabel(b, h.block) }), ...days.map((wd) => cell(h.grid[wd][b], wd, b))))));
+  // On a phone the table is too wide to show the weekdays (only two fit, the rest scroll out of sight), so a second
+  // rendering of the same cells, one block per hour with the weekday named in each cell, takes its place under 560px
+  // (site.css). It has no data-cell or data-k attributes: the table stays the one the tests and the CSS-off page read.
+  const compact = el('div', { class: 'heat-compact', id: 'hm-compact' }, ...rows.map((b) => {
+    const items = days.filter((wd) => h.grid[wd][b].n).map((wd) => {
+      const c = h.grid[wd][b];
+      const lv = level(c.total, h.maxAbs);
+      return el('li', { class: `heat-c heat-${lv > 0 ? 'g' : lv < 0 ? 'l' : 'z'}${Math.abs(lv) || ''}` },
+        el('span', { class: 'heat-c-day', text: WEEKDAYS[wd].slice(0, 3), title: WEEKDAYS[wd] }),
+        el('span', { class: 'heat-c-total', text: money(c.total, state.unit) }),
+        el('span', { class: 'heat-c-n', text: plural(c.n, 'trade', 'trades') }));
+    });
+    return el('div', { class: 'heat-hour' }, el('h4', { text: blockLabel(b, h.block) }), el('ul', { class: 'heat-cells' }, ...items));
+  }));
   return el('section', { 'aria-labelledby': 'hm-grid-h' },
     el('h3', { id: 'hm-grid-h', text: 'By hour and weekday' }),
     tableWrap('Trades by hour and weekday', table),
+    compact,
     el('p', { class: 'small muted', id: 'hm-legend', text: `Shading: green cells closed with a gain in total and red cells with a loss; the darker the shade, the larger the total, relative to the largest cell (${money(h.maxAbs, state.unit, { sign: false })}). Every cell also shows its total with its sign and its number of trades.` }));
 }
 

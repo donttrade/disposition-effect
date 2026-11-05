@@ -1425,22 +1425,78 @@ def _side_letter(v):
     return None
 
 
+# Slash dates, mirroring slashVote() / slashOrder() / slashToIso() in engine/generic.js. Never guessed: the file
+# itself must show the order (2026/11/05; a first part over 12; a second part over 12).
+_RE_SLASH_Y = re.compile(r"^(\d{4})/(\d{1,2})/(\d{1,2})(?=$|[ T])")
+_RE_SLASH_L = re.compile(r"^(\d{1,2})/(\d{1,2})/(\d{4})(?=$|[ T])")
+
+
+def _slash_vote(s):
+    s = s.strip()
+    if _RE_SLASH_Y.match(s):
+        return "ymd"
+    x = _RE_SLASH_L.match(s)
+    if not x:
+        return None
+    a, b = int(x.group(1)), int(x.group(2))
+    if a > 12 and b <= 12:
+        return "dmy"
+    if b > 12 and a <= 12:
+        return "mdy"
+    return None
+
+
+def _slash_order(cells):
+    for c in cells:
+        if "/" in c:
+            v = _slash_vote(c)
+            if v:
+                return v
+    return None
+
+
+def _slash_to_iso(raw, order, row, column):
+    if "/" not in raw:
+        return raw
+    s = raw.strip()
+    y_first = _RE_SLASH_Y.match(s)
+    x = y_first or _RE_SLASH_L.match(s)
+    if not x:
+        return raw
+    vote = _slash_vote(s)
+    if order is None and not vote:
+        fail("E_AMBIGUOUS_DATE", "every slash date is 12 or less", row, column)
+    if (vote and vote != order) or ((order == "ymd") != bool(y_first)):
+        fail("E_BAD_DATE", "mixed date orders", row, column)
+    g = x.groups()
+    if order == "ymd":
+        y, mo, d = g[0], g[1], g[2]
+    elif order == "dmy":
+        y, mo, d = g[2], g[1], g[0]
+    else:
+        y, mo, d = g[2], g[0], g[1]
+    return "%s-%s-%s%s" % (y, mo.zfill(2), d.zfill(2), s[len(x.group(0)):])
+
+
 def parse_generic(rows, hi, m):
     execs, skipped = [], {}
     fees_known = "fees" in m
-    for r in rows[hi + 1:]:
+    body = rows[hi + 1:]
+    date_col = "datetime" if "datetime" in m else "date"
+    order = _slash_order([cell(r, m, date_col) for r in body if not _empty(r["cells"])])
+    neg_qty = 0
+    for r in body:
         if _empty(r["cells"]):
             continue
         row = r["row"]
         if "datetime" in m:
-            ts = parse_date(cell(r, m, "datetime"), "generic", row, "datetime")
+            ts = parse_date(_slash_to_iso(cell(r, m, "datetime"), order, row, "datetime"), "generic", row, "datetime")
         else:
             d, t = cell(r, m, "date"), cell(r, m, "time")
             if d == "":
                 fail("E_BAD_DATE", "empty", row, "date")
-            if "/" in d:
-                fail("E_AMBIGUOUS_DATE", "slash date", row, "date")
-            ts = parse_date((d + " " + t) if t != "" else d, "generic", row, "date")
+            iso = _slash_to_iso(d, order, row, "date")
+            ts = parse_date((iso + " " + t) if t != "" else iso, "generic", row, "date")
         symbol = cell(r, m, "symbol")
         side = _side_letter(cell(r, m, "side"))
         if side is None:
@@ -1449,17 +1505,21 @@ def parse_generic(rows, hi, m):
         if symbol == "":
             _skip(skipped, "no_symbol")
             continue
-        qty = abs(req_number(cell(r, m, "qty"), row, "qty"))
+        raw_qty = req_number(cell(r, m, "qty"), row, "qty")
+        qty = abs(raw_qty)
         if qty == 0:
             _skip(skipped, "zero_qty")
             continue
+        if raw_qty < 0:
+            neg_qty += 1
         price = req_number(cell(r, m, "price"), row, "price")
         fee = abs(opt_number(cell(r, m, "fees"), row, "fees")) if fees_known else 0.0
         cur = cell(r, m, "currency").upper() or None
         execs.append({"row": row, "ts": ts, "symbol": symbol, "side": side, "qty": qty, "price": price,
                       "fee": fee, "currency": cur, "oc": None, "pos_id": None, "pnl_reported": None,
                       "multiplier": 1, "_unit": cur if cur else "points", "_fx": None})
-    return {"executions": execs, "roundtrips": [], "skipped": skipped, "extra": {}}
+    return {"executions": execs, "roundtrips": [], "skipped": skipped,
+            "extra": {"negative_qty": neg_qty} if neg_qty else {}}
 
 
 def parse_generic_roundtrip(rows, hi, m):
@@ -2226,6 +2286,8 @@ def finish(fmt, verified, res, mode, tz_label):
         warnings.append(warning("W_OVERLAP_ROWS", extra["overlap_rows"]))
     if extra.get("currency_ignored"):
         warnings.append(warning("W_CURRENCY_IGNORED", 0))
+    if extra.get("negative_qty"):
+        warnings.append(warning("W_NEGATIVE_QTY", extra["negative_qty"]))
     if extra.get("wide_rows"):
         warnings.append(warning("W_WIDE_ROWS", extra["wide_rows"]))
 
@@ -2956,7 +3018,7 @@ def first_ts(res):
     return t
 
 
-_SUM_EXTRA = ["duplicate_rows", "open_positions", "pnl_sign", "wide_rows"]
+_SUM_EXTRA = ["duplicate_rows", "open_positions", "pnl_sign", "wide_rows", "negative_qty"]
 _OR_EXTRA = ["currency_ignored", "has_closed_positions", "has_deals", "zone_ignored", "offsets"]
 
 

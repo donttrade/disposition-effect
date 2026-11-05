@@ -25,11 +25,11 @@
 // Nothing here touches the network, storage or the console. Only what the pages render is
 // sent back: the trades and counts, never the raw rows.
 
-import { runFile, runFiles } from '../engine/index.js?v=8410d06a';
-import { decodeBytes, isHtml } from '../engine/csv.js?v=7dca0e6f';
+import { runFile, runFiles } from '../engine/index.js?v=b37d5118';
+import { decodeBytes, isHtml } from '../engine/csv.js?v=c56f2198';
 import { noiseChecks } from '../engine/noise.js?v=d0f6a787';
-import { inspect, REQUIRED } from '../engine/mapping.js?v=51ef176d';
-import { EngineError, MESSAGES } from '../engine/errors.js?v=8ee10796';
+import { inspect, REQUIRED } from '../engine/mapping.js?v=65a4043b';
+import { EngineError, MESSAGES } from '../engine/errors.js?v=630ae49e';
 
 // The errors a short "which column is which" step can answer (ask: true).
 const ASKABLE = new Set(['E_MISSING_COLUMN', 'E_UNKNOWN_FORMAT']);

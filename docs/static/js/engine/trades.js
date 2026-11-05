@@ -7,8 +7,8 @@
 // crosses zero closes the trade at that time and opens the opposite trade with
 // the remainder. Positions still open at the end of the file are left out.
 
-import { fail, warning } from './errors.js?v=8ee10796';
-import { spansDstNight } from './csv.js?v=7dca0e6f';
+import { fail, warning } from './errors.js?v=630ae49e';
+import { spansDstNight } from './csv.js?v=c56f2198';
 
 const DAY_MS = 86400000;
 const UNIT = 1e8; // positions tracked in 1e-8 lots, so 0.1 + 0.2 - 0.3 is exactly flat
@@ -497,6 +497,7 @@ export function finish(fmt, verified, res, mode, tzLabel) {
   if (extra.duplicate_rows) warnings.push(warning('W_DUPLICATE_ROWS', extra.duplicate_rows, `${extra.duplicate_rows} found.`));
   if (extra.overlap_rows) warnings.push(warning('W_OVERLAP_ROWS', extra.overlap_rows, `${extra.overlap_rows} found.`));
   if (extra.currency_ignored) warnings.push(warning('W_CURRENCY_IGNORED', 0));
+  if (extra.negative_qty) warnings.push(warning('W_NEGATIVE_QTY', extra.negative_qty, `${extra.negative_qty} found.`));
   if (extra.wide_rows) warnings.push(warning('W_WIDE_ROWS', extra.wide_rows, `${extra.wide_rows} found.`));
   let executions = res.executions;
   let openN = extra.open_positions || 0;

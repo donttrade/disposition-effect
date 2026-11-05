@@ -5,8 +5,8 @@
 // worker parse path. Nothing is stored, logged or sent: these pages' CSP is connect-src 'none'.
 // No noise checks run here (noise: false), whatever the build's free_badges flag.
 
-import { createFileSlot, renderReadError } from './tool-state.js?v=71ddefef';
-import { el, unitNote, day, intText } from './format.js?v=acb0db51';
+import { createFileSlot, renderReadError } from './tool-state.js?v=314f6558';
+import { el, unitNote, day, intText } from './format.js?v=e808aa0f';
 
 export const SAMPLE_LABEL = 'the synthetic sample file';
 
@@ -49,12 +49,63 @@ export function readSection(prefix, r, fileLabel) {
   if (fileLabel === SAMPLE_LABEL) {
     sec.append(el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Example data' })));
   }
-  if (r.warnings.length) {
-    sec.append(el('div', { class: 'notice notice-caution', id: `${prefix}-warnings` },
-      el('strong', { text: r.warnings.length === 1 ? '1 note about this file' : `${r.warnings.length} notes about this file` }),
-      el('ul', {}, ...r.warnings.map((w) => el('li', { 'data-code': w.code, text: w.message })))));
-  }
+  const notes = warningsNotice(prefix, r.warnings);
+  if (notes) sec.append(notes);
   return sec;
+}
+
+// The "N notes about this file" box (mixed currencies, skipped rows, ...), shared by every tool that reads a file.
+export function warningsNotice(prefix, warnings) {
+  if (!warnings || !warnings.length) return null;
+  return el('div', { class: 'notice notice-caution', id: `${prefix}-warnings` },
+    el('strong', { text: warnings.length === 1 ? '1 note about this file' : `${warnings.length} notes about this file` }),
+    el('ul', {}, ...warnings.map((w) => el('li', { 'data-code': w.code, text: w.message }))));
+}
+
+// A table whose headings leave a needed column unnamed (TradeLocker's "Amount" was one): one choice per missing
+// field, from the file's own headings, then the same table is read again with those columns. The box is
+// `#<prefix>-map`; its select ids are `<prefix>-map-<field>`. Shared by the Challenge Readiness Check and the file tools.
+const MAP_NAMES = {
+  date: 'Date and time', symbol: 'Symbol', side: 'Buy or sell', qty: 'Quantity (size)', price: 'Price',
+  open_time: 'Open time', close_time: 'Close time', direction: 'Long or short', open_price: 'Open price', close_price: 'Close price',
+};
+export function showMapStep(prefix, need, choose) {
+  const $ = (id) => document.getElementById(id);
+  const box = $(`${prefix}-map`);
+  const taken = new Set(Object.values(need.chosen));
+  const options = need.labels.map((l, i) => [i, l || `Column ${i + 1}`]).filter(([i]) => !taken.has(i));
+  const err = el('p', { class: 'error', id: `${prefix}-map-err`, hidden: true });
+  const fields = need.missing.map((f) => el('div', { class: 'field' },
+    el('label', { for: `${prefix}-map-${f}`, text: MAP_NAMES[f] || f }),
+    el('select', { id: `${prefix}-map-${f}`, 'data-field': f, 'aria-describedby': `${prefix}-map-err` },
+      el('option', { value: '', text: 'Choose a column' }), ...options.map(([i, l]) => el('option', { value: String(i), text: l })))));
+  const btn = el('button', { class: 'btn btn-secondary', type: 'button', id: `${prefix}-map-btn`, text: 'Read with these columns' });
+  btn.addEventListener('click', () => {
+    const picked = {};
+    const seen = new Set();
+    for (const f of need.missing) {
+      const v = $(`${prefix}-map-${f}`).value;
+      if (v === '' || seen.has(v)) {
+        err.textContent = v === '' ? 'Pick a column for each box.' : 'Pick a different column for each box.';
+        err.hidden = false;
+        $(`${prefix}-map-${f}`).focus();
+        return;
+      }
+      seen.add(v);
+      picked[f] = Number(v);
+    }
+    choose(picked);
+  });
+  box.replaceChildren(el('strong', { id: `${prefix}-map-h`, text: 'Which column is which?' }),
+    el('p', { text: `No heading in your ${need.missing.length === 1 ? 'table names this column' : 'table names these columns'}. Pick ${need.missing.length === 1 ? 'it' : 'each one'} from your headings.` }),
+    el('div', { class: 'field-grid' }, ...fields), err, el('p', { class: 'btn-row' }, btn));
+  box.hidden = false;
+  box.focus();
+}
+
+export function hideMap(prefix) {
+  const box = document.getElementById(`${prefix}-map`);
+  if (box) { box.hidden = true; box.replaceChildren(); }
 }
 
 // Wires the drop zone, picker and sample button of a file tool whose ids start with `prefix`.
@@ -64,7 +115,8 @@ export function wireFileTool(prefix, { onResult, onClear }) {
   const status = (text) => { const s = $(`${prefix}-status`); s.textContent = text; s.hidden = !text; };
   const slot = createFileSlot({
     progressBox: $(`${prefix}-progress`), noise: false, onStage: status,
-    onClear: () => { $(`${prefix}-error`).hidden = true; onClear(); },
+    onClear: () => { $(`${prefix}-error`).hidden = true; hideMap(prefix); onClear(); },
+    onMapNeeded: (need, choose) => showMapStep(prefix, need, choose),
     onResult: (out, label, job) => onResult(out.result, label, job),
     onError: (err, retry) => renderReadError($(`${prefix}-error`), err, retry),
   });

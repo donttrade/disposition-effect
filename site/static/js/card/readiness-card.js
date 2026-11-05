@@ -34,7 +34,13 @@ export const SHORT_RULES = Object.freeze({
 });
 const C = { bg: '#FFFFFF', text: '#16181C', muted: '#5B606A', gain: '#1F7A52', loss: '#A3264F', time: '#C7C9CE', rust: '#9A3B1C', border: '#DADCE0' };
 const fill = (tpl, v) => tpl.replace(/\{(\w+)\}/g, (_, k) => String(v[k]));
-const whole = (x) => Math.round(x * 100);
+// A whole percent, never 100 or 0 unless exactly all or none ("over 99.9" / "under 0.1", as the tool page does).
+const whole = (x) => {
+  const w = Math.round(x * 100);
+  if (x > 0 && w === 0) { const d = (x * 100).toFixed(1); return d === '0.0' ? 'under 0.1' : d; }
+  if (x < 1 && w === 100) { const d = (x * 100).toFixed(1); return d === '100.0' ? 'over 99.9' : d; }
+  return w;
+};
 const grouped = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
 export function shortRule(personal) {

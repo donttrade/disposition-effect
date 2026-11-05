@@ -102,7 +102,8 @@ def test_r1_every_tool_page_uses_the_one_state_helper():
     tools = os.path.join(REPO, "site", "static", "js", "tools")
     for name in ("trade-stats.js", "prop-sim.js", "lot-size.js"):
         src = open(os.path.join(tools, name), encoding="utf-8").read()
-        assert "from './tool-state.js'" in src, name
+        # lot-size.js takes the form-error helpers from form-errors.js (the part of tool-state.js without the file parsers)
+        assert "from './tool-state.js'" in src or "from './form-errors.js'" in src, name
         assert "readTradeFile(" not in src, f"{name} reads files itself instead of through tool-state.js"
 
 

@@ -42,6 +42,15 @@ export function pct(x, dp = 1) {
   return finite(x) ? (x < 0 ? MINUS : '') + (100 * Math.abs(x)).toFixed(dp) + '%' : DASH;
 }
 
+// A share (0 to 1) as a whole percent. Never "100%" or "0%" unless it is exactly all or none: 99.96% reads
+// "over 99.9%", 0.04% reads "under 0.1%" (as the pass-rate calculator does), and 0.4% keeps its decimal.
+export function wholePercent(x) {
+  const w = Math.round(x * 100);
+  if (x > 0 && w === 0) { const d = (x * 100).toFixed(1); return d === '0.0' ? 'under 0.1%' : `${d}%`; }
+  if (x < 1 && w === 100) { const d = (x * 100).toFixed(1); return d === '100.0' ? 'over 99.9%' : `${d}%`; }
+  return `${w}%`;
+}
+
 export function ratio(x, dp = 2) {
   return finite(x) ? x.toFixed(dp) + '×' : DASH;
 }
