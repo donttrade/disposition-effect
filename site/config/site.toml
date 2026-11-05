@@ -67,15 +67,16 @@ launch_date = "2026-10-29"
 # YYYY-MM-DD (29 Oct, one product). Set it to the day of any later legal edit; launch_date stays as it is, so
 # "called 'Trial' before <launch_date>" never moves. On or after launch_date, not after the build date;
 # empty = the build date, and ./site/run.sh bundle refuses an empty one.
-terms_date = "2026-10-29"
+terms_date = "2026-11-05"
 # T0: the day the site moved from GitHub Pages to Cloudflare Pages (the zone became Active, runbook
 # step 83), YYYY-MM-DD. Stated on /privacy/ and /fr/confidentialite/. Required: empty or a date after
 # the build date fails the build. The privacy notice's version is the later of this and launch_date.
 cloudflare_pages_since = "2026-10-24"
 # The day of the latest edit to the privacy notice alone (/privacy/, /fr/confidentialite/), YYYY-MM-DD, optional.
 # Like cloudflare_pages_since it moves only the privacy version (the latest of the three), never the terms.
-# 2 Nov: Umami Cloud named beside Cloudflare Web Analytics.
-privacy_date = "2026-11-02"
+# 2 Nov: Umami Cloud named beside Cloudflare Web Analytics. Hardening round (age clause, CASL unsubscribe,
+# early deletion, campaign tags): terms_date and privacy_date set to the build day, `date +%F` = 2026-11-05.
+privacy_date = "2026-11-05"
 # Verbatim from NON-ADVISER-DESIGN-AND-AUTORENEW A3 (the only approved wording).
 disclaimer_short = "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results."
 disclaimer_long = "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results."
@@ -161,11 +162,12 @@ text = "bsky.app/profile/donttradestudy.bsky.social"
 handle = "@donttradestudy.bsky.social"
 icon = "bluesky"
 rel_me = true
+# 3 Nov (Tester R2 I2): www.threads.com, the host www.threads.net now 301-redirects to.
 [[channels]]
 id = "threads"
 name = "Threads"
-url = "https://www.threads.net/@donttradestudy"
-text = "threads.net/@donttradestudy"
+url = "https://www.threads.com/@donttradestudy"
+text = "threads.com/@donttradestudy"
 handle = "@donttradestudy"
 icon = "threads"
 rel_me = true

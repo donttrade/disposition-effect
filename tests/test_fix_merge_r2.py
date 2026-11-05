@@ -344,7 +344,7 @@ def test_r5_no_page_of_a_paid_build_says_not_on_sale(paid_site):
                                   "/for-traders/", "/start/", "/for-traders/thanks/"])
 def test_r5_trader_blocks_sell_in_a_paid_build(paid_site, path):
     h = open(os.path.join(paid_site["out"], path.strip("/"), "index.html"), encoding="utf-8").read()
-    assert 'href="/pricing/#last-step">Take the test — $39</a>' in h   # af52207: buy buttons open the pay panel
+    assert 'href="/pricing/#last-step">Take the test for $39</a>' in h   # af52207: buy buttons open the pay panel
     assert 'product" value="waitlist"' not in h and 'id="wl"' not in h   # the waitlist form is gone
     assert "/for-traders/#waitlist" not in h
 

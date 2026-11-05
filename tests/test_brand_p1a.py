@@ -340,7 +340,7 @@ CHANNELS = [c["url"] for c in tomllib.load(open(TOML, "rb"))["channels"]]
 EXPECTED = ["https://donttrade.substack.com", "https://x.com/donttradestudy", "https://github.com/donttrade",
             "https://www.tiktok.com/@donttradestudy", "https://www.instagram.com/donttradestudy/",
             "https://www.youtube.com/@donttradestudy", "https://bsky.app/profile/donttradestudy.bsky.social",
-            "https://www.threads.net/@donttradestudy", "https://mastodon.social/@donttradestudy"]   # 2 Nov: + 3
+            "https://www.threads.com/@donttradestudy", "https://mastodon.social/@donttradestudy"]   # 2 Nov: + 3
 NAMES = ["Substack", "X", "GitHub", "TikTok", "Instagram", "YouTube", "Bluesky", "Threads", "Mastodon"]
 
 
@@ -371,7 +371,7 @@ def test_soc1_footer_follow_is_exactly_the_official_accounts(built_site):
             "<a href=\"https://www.instagram.com/donttradestudy/\" rel=\"me noopener\">instagram.com/donttradestudy</a>, "
             "<a href=\"https://www.youtube.com/@donttradestudy\" rel=\"me noopener\">youtube.com/@donttradestudy</a>, "
             "<a href=\"https://bsky.app/profile/donttradestudy.bsky.social\" rel=\"me noopener\">bsky.app/profile/donttradestudy.bsky.social</a>, "
-            "<a href=\"https://www.threads.net/@donttradestudy\" rel=\"me noopener\">threads.net/@donttradestudy</a> and "
+            "<a href=\"https://www.threads.com/@donttradestudy\" rel=\"me noopener\">threads.com/@donttradestudy</a> and "
             "<a href=\"https://mastodon.social/@donttradestudy\" rel=\"me noopener\">mastodon.social/@donttradestudy</a>. ") in about
 
 

@@ -86,7 +86,7 @@
           load unless the URL targets it or something inside it, and site.css paints them closed until then (theme.js
           .dt-pay-hash / .dt-byp-hash when the URL names them), so with JavaScript nothing changes and nothing shifts. -#}
       <details class="pay-step" id="last-step" open>
-        <summary class="btn">Take the test — {{ r.price_usd|usd }}</summary>
+        <summary class="btn">Take the test for {{ r.price_usd|usd }}</summary>
         {#- 29 Oct (owner): one click. Three facts, the complete Before-you-pay block one tap away (unchanged, on
             this page, before the Stripe button, printable: Ontario CPA s. 38 / O. Reg. 17/05 s. 32), then the button.
             The binding acceptance is the terms tick on Stripe's checkout; no second required tick here (Baymard). -#}

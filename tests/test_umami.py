@@ -2,7 +2,8 @@
 
 [analytics] umami_website_id switches it on (with [flags] analytics). The script loads on exactly the pages that
 get the Cloudflare beacon (never /before-you-pay/ or the journal), with Do Not Track respected and the address
-reduced to its path; the CSP gains cloud.umami.is (script) and gateway.umami.is (connect) only then. Funnel events:
+reduced to its path plus, since 3 Nov, the four utm_ campaign tags (umami-clean.js; the whole query is still dropped
+on /welcome/, /restore/, /help/ and noindex pages: tests/test_hardening_3nov.py); the CSP gains cloud.umami.is (script) and gateway.umami.is (connect) only then. Funnel events:
 data-umami-event on the free tools' run buttons only (buttons that neither navigate nor submit anywhere);
 pay-open and pay-continue by umami.track in pay.js, because on a link Umami's own click handler cancels the click
 and follows it only once its gateway request settles (a slow gateway would hold up the buy link or the payment).
@@ -40,6 +41,8 @@ EVENTS = {"pay-open", "pay-continue", "tool-run-readiness", "tool-run-importer",
 ATTR_EVENTS = EVENTS - {"pay-open", "pay-continue"}
 TRACKER = os.path.join(REPO, "tests", "fixtures", "umami-script.js")
 CSP_RE = re.compile(r'http-equiv="Content-Security-Policy" content="([^"]+)"')
+HOOK_TAG = re.compile(r'<script src="/static/js/umami-clean\.js\?v=[0-9a-f]{8}" defer></script>')
+STRICT = {"/welcome/index.html", "/restore/index.html", "/help/index.html"}   # + every noindex page (build.umami_strict)
 
 
 def _pages(out):
@@ -82,7 +85,7 @@ def test_setting_is_on_in_site_toml():
 
 
 def test_umami_exactly_where_the_beacon_is(built_site):
-    with_beacon = without = 0
+    with_beacon = without = strict_seen = 0
     for path, html in _pages(built_site["out"]):
         beacon = "static.cloudflareinsights.com/beacon.min.js" in html
         tags = SCRIPT_TAG.findall(html)
@@ -91,11 +94,19 @@ def test_umami_exactly_where_the_beacon_is(built_site):
             with_beacon += 1
             assert len(tags) == 1, path
             t = tags[0]
-            for a in (f'data-website-id="{UMAMI_ID}"', 'data-do-not-track="true"', 'data-exclude-search="true"',
+            for a in (f'data-website-id="{UMAMI_ID}"', 'data-do-not-track="true"', 'data-before-send="dtUmamiClean"',
                       'data-exclude-hash="true"', 'data-domains="donttrade.ca"', "defer"):
                 assert a in t, (path, a)
             for a in ("data-errors", "data-performance", "data-host-url", "data-umami-event-"):
                 assert a not in t, (path, a)
+            # 3 Nov (hardening item 7): the hook once, deferred, before the tracker; the tracker drops the whole
+            # query itself exactly on /welcome/, /restore/, /help/ and the noindex pages
+            hooks = HOOK_TAG.findall(html)
+            assert len(hooks) == 1 and html.count("umami-clean.js") == 1, path
+            assert html.index(hooks[0]) < html.index(t), path
+            strict = path in STRICT or '<meta name="robots" content="noindex">' in html
+            assert ('data-exclude-search="true"' in t) is strict, path
+            strict_seen += strict
             if csp:
                 script = re.search(r"script-src ([^;]+)", csp).group(1).split()
                 connect = re.search(r"connect-src ([^;]+)", csp).group(1).split()
@@ -105,8 +116,8 @@ def test_umami_exactly_where_the_beacon_is(built_site):
         else:
             without += 1
             assert not tags, path
-            assert "umami.is" not in csp, path
-    assert with_beacon > 40 and without >= 2
+            assert "umami.is" not in csp and "umami-clean.js" not in html, path
+    assert with_beacon > 40 and without >= 2 and strict_seen >= 3
 
 
 def test_report_page_has_the_beacon_but_no_umami(built_site):
@@ -144,6 +155,8 @@ def test_event_attributes(built_site):
     # no link carries the attribute: Umami's capture-phase handler cancels a link's click and follows it only once
     # its gateway request settles. Only <button>s (which navigate nowhere) do.
     for path, html in _pages(out):
+        # Tester R2 I1: no event property (data-umami-event-<name>="…" is sent as event data) on any built page
+        assert not re.search(r"data-umami-event-", html, re.I), path
         for tag in re.findall(r"<(\w+)\b[^>]*\bdata-umami-event=", html):
             assert tag == "button", (path, tag)
         for a in re.findall(r'<a\b[^>]*href="https://buy\.stripe\.com/[^"]*"[^>]*>', html):
@@ -177,7 +190,9 @@ def test_tracked_events_in_js():
     for d, _, files in os.walk(js):
         for f in files:
             src = open(os.path.join(d, f), encoding="utf-8", errors="ignore").read()
-            if os.path.join(d, f) != os.path.join(js, "pay.js"):
+            if os.path.join(d, f) == os.path.join(js, "umami-clean.js"):   # 3 Nov: the before-send hook, no track()
+                assert ".track(" not in src and "fetch(" not in src and "sendBeacon" not in src, f
+            elif os.path.join(d, f) != os.path.join(js, "pay.js"):
                 assert "umami" not in src, f
 
 
@@ -230,10 +245,13 @@ def test_privacy_names_umami(built_site):
     assert '<a href="https://umami.is/privacy">politique de confidentialité d’Umami</a>' in fr
     tpl = open(os.path.join(SITE, "templates", "pages", "fr", "confidentialite.html"), encoding="utf-8").read()
     assert "TRANSLATOR CHECK (2 Nov, Umami Cloud" in tpl
-    # the privacy version moves to [legal] privacy_date; the terms version does not
-    assert "version 2026-11-02" in en and "Version du 2026-11-02" in fr
+    # the privacy version moves to [legal] privacy_date; the terms version does not (3 Nov: both read from site.toml)
+    from test_legal import PRIVACY_VERSION, TERMS_VERSION
+    cfg = B.read_toml(os.path.join(SITE, "config", "site.toml"), "site.toml")
+    assert PRIVACY_VERSION == max(cfg["legal"]["privacy_date"], TERMS_VERSION, cfg["legal"]["cloudflare_pages_since"])
+    assert f"version {PRIVACY_VERSION}" in en and f"Version du {PRIVACY_VERSION}" in fr
     terms = open(B.out_file(out, "/terms/"), encoding="utf-8").read()
-    assert "2026-11-02" not in terms
+    assert f"version {TERMS_VERSION}" in terms and TERMS_VERSION == cfg["legal"]["terms_date"]
     footer = B.footer_privacy({"analytics": True, "paid_report": True, "pilot_checkout": False}, True)
     want = "Visits are counted with Cloudflare Web Analytics and Umami Cloud, which also counts some button clicks; neither sets a cookie."
     assert want in footer
@@ -299,13 +317,15 @@ def test_bad_website_id_fails(tmp_path):
 
 
 # ------------------------------------------------------------------ lint
-TAG = ('<script defer src="https://cloud.umami.is/script.js" data-website-id="x" data-do-not-track="true" '
-       'data-exclude-search="true" data-exclude-hash="true" data-domains="donttrade.ca"></script>')
+HOOK = '<script src="/static/js/umami-clean.js?v=0123abcd" defer></script>'
+TAG = HOOK + ('<script defer src="https://cloud.umami.is/script.js" data-website-id="x" data-do-not-track="true" '
+              'data-exclude-hash="true" data-domains="donttrade.ca" data-before-send="dtUmamiClean"></script>')
+STRICT_TAG = TAG.replace(' data-exclude-hash=', ' data-exclude-search="true" data-exclude-hash=')
 BEACON = '<script defer src="https://static.cloudflareinsights.com/beacon.min.js"></script>'
 
 
-def _rules(html, analytics=True):
-    return [w for r, _, w in L.umami_problems(html, "/x/", analytics)]
+def _rules(html, analytics=True, where="/x/"):
+    return [w for r, _, w in L.umami_problems(html, where, analytics)]
 
 
 def test_lint_umami_rules():
@@ -313,10 +333,29 @@ def test_lint_umami_rules():
     assert _rules(TAG) == ["Umami Cloud script on a page without the Cloudflare beacon"]
     assert "Umami Cloud script with analytics = false" in _rules(BEACON + TAG, analytics=False)
     assert "Umami Cloud script without data-do-not-track=\"true\"" in _rules(BEACON + TAG.replace(' data-do-not-track="true"', ""))
-    assert "Umami Cloud script without data-exclude-search=\"true\"" in _rules(BEACON + TAG.replace(' data-exclude-search="true"', ""))
-    assert "Umami Cloud script with data-errors" in _rules(BEACON + TAG.replace("<script ", '<script data-errors="true" '))
+    assert "Umami Cloud script without data-before-send=\"dtUmamiClean\"" in _rules(BEACON + TAG.replace(' data-before-send="dtUmamiClean"', ""))
+    assert "Umami Cloud script with data-errors" in _rules(BEACON + TAG.replace("<script defer ", '<script data-errors="true" defer '))
     assert "Umami Cloud script 2 times" in _rules(BEACON + TAG + TAG)
     assert "Umami Cloud script without data-domains=\"donttrade.ca\"" in _rules(BEACON + TAG.replace(' data-domains="donttrade.ca"', ""))
+    # 3 Nov (hardening item 7): the hook once, before the tracker
+    bare = TAG.replace(HOOK, "")
+    assert "umami-clean.js (deferred) 0 times, expected once" in _rules(BEACON + bare)
+    assert "umami-clean.js (deferred) 0 times, expected once" in _rules(BEACON + HOOK.replace(" defer", "") + bare)
+    assert "umami-clean.js after the Umami Cloud script" in _rules(BEACON + bare + HOOK)
+    assert "umami-clean.js without the Umami Cloud script" in _rules(BEACON + HOOK)
+    # data-exclude-search="true" on the pages whose address can carry a secret
+    want = ("Umami Cloud script without data-exclude-search=\"true\" on a page whose address can carry a secret "
+            "(noindex, /welcome/, /restore/, /help/)")
+    for where in ("/welcome/", "/restore/", "/help/", "/welcome/index.html"):
+        assert want in _rules(BEACON + TAG, where=where), where
+        assert _rules(BEACON + STRICT_TAG, where=where) == [], where
+    assert want in _rules('<meta name="robots" content="noindex">' + BEACON + TAG)
+    assert _rules('<meta name="robots" content="noindex">' + BEACON + STRICT_TAG) == []
+    # Tester R2 I1: an event property attribute is event data, on any page, with or without the tracker
+    prop = "Umami event property attribute data-umami-event-rows= (event data; only data-umami-event=\"<name>\")"
+    assert prop in _rules(BEACON + TAG + '<button data-umami-event="x" data-umami-event-rows="FILEDATA">')
+    assert prop in _rules('<button data-umami-event-rows="1">')
+    assert _rules('<button data-umami-event="tool-run-x">') == []
 
 
 # ------------------------------------------------------------------ in Chromium: pay-open, without the network

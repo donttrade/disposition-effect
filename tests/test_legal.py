@@ -32,11 +32,15 @@ FAKE = {"seller_legal_name": "Zzqx Qqvendor Holdings", "premises_address": "PO B
 SITE_TOML = os.path.join(REPO, "site", "config", "site.toml")
 # [legal] launch_date (Manager C3): the terms version and every launch-dated statement; empty = the build date
 _LAUNCH = B.set_launch_date(dict(__import__("tomllib").load(open(SITE_TOML, "rb"))["legal"]), SITE_TOML)
-TERMS_VERSION = _LAUNCH.isoformat()
 # T0: /privacy/ and /fr/confidentialite/ carry the later of launch_date and [legal] cloudflare_pages_since
+# 3 Nov (hardening): both versions computed the build's way, launch_date -> terms_date -> cloudflare_pages_since
+# -> privacy_date, so a later legal edit (terms_date, privacy_date) moves them here too.
 _LEGAL = dict(__import__("tomllib").load(open(SITE_TOML, "rb"))["legal"])
 B.set_launch_date(_LEGAL, SITE_TOML)
+B.set_terms_date(_LEGAL, SITE_TOML)
+TERMS_VERSION = _LEGAL["terms_version"]
 B.set_hosting_date(_LEGAL, SITE_TOML)
+B.set_privacy_date(_LEGAL, SITE_TOML)
 PRIVACY_VERSION = _LEGAL["privacy_version"]
 LAUNCH_HUMAN = f"{_LAUNCH.day} {B.MONTHS[_LAUNCH.month - 1]} {_LAUNCH.year}"
 
