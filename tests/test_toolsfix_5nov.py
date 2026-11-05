@@ -532,13 +532,13 @@ def test_headline_counts_days_like_its_trigger(browser, built_site, tmp_path):
 
 def test_no_beta_wording_on_the_tool_pages_or_pricing_faq(built_site):
     faq = re.search(r"<summary>Which files work\?</summary><p>(.*?)</p>", built(built_site, "pricing"), re.S).group(1)
-    assert "checked on sample files only" in faq and "beta" not in faq.lower()
+    assert "not yet tested on a real export" in faq and "beta" not in faq.lower()
     for rel in ("tools/trade-stats", "tools/trading-heatmap", "tools/drawdown-calculator", "tools/prop-challenge-simulator",
                 "tools/lot-size-calculator", "tools/risk-reward-calculator"):
         h = re.sub(r"<script.*?</script>", "", built(built_site, rel), flags=re.S)
         assert not re.search(r"beta", re.sub(r"<[^>]+>", " ", h), re.I), rel
     ts = built(built_site, "tools/trade-stats")
-    assert "Checked on sample files only" in ts and "tell us if a column reads wrong" in ts
+    assert "Not yet tested on a real export" in ts and "tell us if a column reads wrong" in ts
     for js in ("tools/file-tool.js", "tools/trade-stats.js", "tools/prop-sim.js", "tools/file-worker.js", "engine/errors.js"):
         src = (built_site["out"] / "static" / "js" / js).read_text(encoding="utf-8")
         assert not re.search(r"['\"`][^'\"`\n]*\bbeta\b", src, re.I), js        # no beta inside a string
@@ -549,8 +549,8 @@ def test_unverified_format_result_says_the_factual_caveat(browser, built_site):
     pg.set_input_files("#ts-file", os.path.join(FIX, "tradingview", "forty_trades.csv"))
     pg.wait_for_selector("#ts-out-h", timeout=60000)
     out = pg.inner_text("#ts-out")
-    assert "TradingView Order History export (checked on sample files only)" in out
-    assert "checked on sample files only" in pg.inner_text("#ts-warnings") and "beta" not in out.lower()
+    assert "TradingView Order History export (not yet tested on a real export)" in out
+    assert "not yet tested on a real export" in pg.inner_text("#ts-warnings") and "beta" not in out.lower()
     ctx.close()
 
 
@@ -627,4 +627,56 @@ def test_heatmap_and_drawdown_announce_key_figures(browser, built_site):
     pg.wait_for_function("() => document.getElementById('tool-live') && document.getElementById('tool-live').textContent.length > 0")
     live = pg.inner_text("#tool-live")
     assert "Enter a starting balance" in live and "—" not in live and "Largest drawdown:" in live
+    ctx.close()
+
+
+# ------------------------------------------------------------------ fix round 2
+def test_format_caveat_is_not_yet_tested_on_a_real_export(browser, built_site):
+    ts = built(built_site, "tools/trade-stats")
+    assert "Not yet tested on a real export" in ts and "tell us if a column reads wrong" in ts
+    for rel in ("tools/trade-stats", "tools/trading-heatmap", "tools/drawdown-calculator", "tools/prop-challenge-simulator", "pricing"):
+        h = re.sub(r"<script.*?</script>", "", built(built_site, rel), flags=re.S)
+        assert "sample files only" not in h, rel
+    ctx, pg, log = page_for(browser, built_site, "/tools/trade-stats/")
+    pg.set_input_files("#ts-file", os.path.join(FIX, "tradingview", "forty_trades.csv"))
+    pg.wait_for_selector("#ts-out-h", timeout=60000)
+    assert "TradingView Order History export (not yet tested on a real export)" in pg.inner_text("#ts-out")
+    w = pg.inner_text("#ts-warnings")
+    assert "not yet tested on a real export" in w and "tell us if a column reads wrong" in w and "sample files only" not in pg.inner_text("#ts-out")
+    ctx.close()
+
+
+def test_small_sample_page_shows_no_pass_rate_anywhere(browser, built_site, tmp_path):
+    ctx, pg, log = page_for(browser, built_site, "/tools/prop-challenge-simulator/")
+    pg.set_input_files("#ps-file", write_tmp(tmp_path, "d20.csv", round_trips(20, 2)))
+    pg.wait_for_selector("#ps-file-status:text-matches('^Read ')", timeout=60000)
+    ps_run(pg, target="100")
+    assert pg.inner_text("#ps-out-h").startswith("Too few trading days to read: 20 days")
+    out = pg.inner_text("#ps-out")
+    assert not re.search(r"\d(\.\d)?%\s*(passed|of 10,000)|Passed \d|Passed over|Broke a rule \d|passed \d", out), out
+    assert pg.query_selector("#ps-out .rc-legend") is None and pg.query_selector("#ps-out svg") is None
+    assert pg.is_hidden("#ps-whatif")
+    pg.click("#ps-expert summary")
+    assert "%" not in pg.inner_text("#ps-expert table")
+    label = pg.get_attribute("#ps-card-canvas", "aria-label") or ""
+    assert "Passed" not in label
+    ctx.close()
+    ctx, pg, log = page_for(browser, built_site, "/tools/prop-challenge-simulator/")
+    pg.set_input_files("#ps-file", write_tmp(tmp_path, "d40.csv", round_trips(40, 2)))      # 30 days or more: everything is back
+    pg.wait_for_selector("#ps-file-status:text-matches('^Read ')", timeout=60000)
+    ps_run(pg, target="100")
+    assert pg.query_selector("#ps-out .rc-legend") is not None and pg.query_selector("#ps-out svg") is not None
+    assert pg.is_visible("#ps-whatif")
+    ctx.close()
+
+
+def test_card_alt_text_has_no_double_full_stop(browser, built_site):
+    ctx, pg, log = page_for(browser, built_site, "/tools/prop-challenge-simulator/")
+    alts = pg.evaluate("""async () => { const m = await import('/static/js/card/readiness-card.js');
+      const base = { pass: 0.5, bust: 0.3, timeout: 0.2, runs: 10000, rule: 'daily', habit: null, rulesPct: null, whatif: null, example: true };
+      return [m.altText({ ...base, few: { days: 28, trades: 40 } }), m.altText(base)]; }""")
+    for a in alts:
+        assert ".." not in a and ". ." not in a, a
+    assert alts[0].startswith("Too few trading days to read: 28 days (40 trades). Replays of so few days lean heavily on a few days. ")
+    assert alts[1].startswith("Passed in 50% of 10,000 replays. Passed 50%, Broke a rule 30%, Out of time 20%.")
     ctx.close()

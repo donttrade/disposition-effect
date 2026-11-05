@@ -469,7 +469,10 @@ def test_every_format_end_to_end(browser, built_site, rel):
     fill(pg, {"#ps-target": "1000", "#ps-daily": "200", "#ps-maxloss": "1000", "#ps-days": "30"})
     run(pg)
     assert len(pg.query_selector_all("#ps-out .rc-visuals > .rc-card")) == 3
-    whatif(pg, "max_trades", "1")
+    if pg.is_visible("#ps-whatif"):   # 5 Nov: under 30 trading days the what-if card is hidden (it shows pass shares)
+        whatif(pg, "max_trades", "1")
+    else:
+        assert pg.inner_text("#ps-out-h").startswith("Too few trading days to read")
     pg.click("#ps-expert summary")
     with pg.expect_download() as d:
         pg.click("#ps-json")

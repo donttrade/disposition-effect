@@ -79,7 +79,8 @@ export function cardLines(data) {
 
 export function altText(data) {
   const l = cardLines(data);
-  return [l.headline + '.', l.shares.length ? l.shares.join(', ') + '.' : null, ...l.facts.map((f) => f + '.'), l.example ? l.example + '.' : null, ...l.footer]
+  const dot = (t) => (/[.!?]$/.test(t) ? t : t + '.');   // a line that already ends in a full stop gets no second one
+  return [dot(l.headline), l.shares.length ? dot(l.shares.join(', ')) : null, ...l.facts.map(dot), l.example ? dot(l.example) : null, ...l.footer]
     .filter(Boolean).join(' ');
 }
 

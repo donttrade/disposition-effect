@@ -13,8 +13,8 @@
 // importers, not from a real export; see tests/fixtures/PROVENANCE.txt.
 // tests/test_alias_parity.py checks this table equals the Python reference's.
 
-import { clean, normHeader } from './csv.js?v=94e67b7c';
-import { fail } from './errors.js?v=9df2f80c';
+import { clean, normHeader } from './csv.js?v=833cffd4';
+import { fail } from './errors.js?v=8e828461';
 
 // verified: false = column names not yet confirmed against a real export.
 export const SIGNATURES = {
@@ -73,7 +73,7 @@ export const SIGNATURES = {
   },
   // TradingView Order History export (Trading Panel → History → Export data). Column names
   // match one real paper-trading export (29 Oct 2026), but no broker-connected export has been
-  // seen, so it stays unverified like IBKR and Tradovate (owner, 29 Oct; the word "beta" itself was superseded by the owner's no-beta rule, 5 Nov: pages say "checked on sample files only"); see PROVENANCE.txt.
+  // seen, so it stays unverified like IBKR and Tradovate (owner, 29 Oct; the word "beta" itself was superseded by the owner's no-beta rule, 5 Nov: pages say "not yet tested on a real export"); see PROVENANCE.txt.
   tradingview: {
     verified: false,
     fields: {

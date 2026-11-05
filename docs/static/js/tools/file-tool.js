@@ -5,7 +5,7 @@
 // worker parse path. Nothing is stored, logged or sent: these pages' CSP is connect-src 'none'.
 // No noise checks run here (noise: false), whatever the build's free_badges flag.
 
-import { createFileSlot, renderReadError } from './tool-state.js?v=595a9d66';
+import { createFileSlot, renderReadError } from './tool-state.js?v=af9a3c71';
 import { el, unitNote, day, intText } from './format.js?v=35164924';
 
 export const SAMPLE_LABEL = 'the synthetic sample file';
@@ -43,7 +43,7 @@ export function readSection(prefix, r, fileLabel) {
   const unit = first.pnl_unit;
   const sec = el('section', { 'aria-labelledby': `${prefix}-read-h` },
     el('h3', { id: `${prefix}-read-h`, text: 'What was read' }),
-    el('p', {}, `Format: ${FORMAT_NAMES[r.format] || r.format}${r.verified_format ? '' : ' (checked on sample files only)'}. `,
+    el('p', {}, `Format: ${FORMAT_NAMES[r.format] || r.format}${r.verified_format ? '' : ' (not yet tested on a real export)'}. `,
       `${plural(r.trades.length, 'closed trade', 'closed trades')} from ${plural(r.n_fills, 'fill', 'fills')}, closed ${day(first.close_ts)} to ${day(last.close_ts)}. `,
       `Times are ${r.tz_label}. ${unitNote(unit)}`));
   if (fileLabel === SAMPLE_LABEL) {

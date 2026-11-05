@@ -17,8 +17,8 @@
 // Without it this page shows only the descriptive numbers, no checks are run, and a neutral
 // line says a check is coming.
 
-import { createFileSlot, renderReadError, fieldError, revealResult } from './tool-state.js?v=595a9d66';
-import { showMapStep, hideMap } from './file-tool.js?v=c0b1300b';
+import { createFileSlot, renderReadError, fieldError, revealResult } from './tool-state.js?v=af9a3c71';
+import { showMapStep, hideMap } from './file-tool.js?v=07779693';
 import { freeStats, equityCurve, NO_LOSSES } from '../engine/stats.js?v=b2ec2891';
 import { money, unitNote, pct, ratio, duration, day, intText, el, signClass } from './format.js?v=35164924';
 import { parsePositive, InputError } from './num.js?v=8df99e34';
@@ -147,7 +147,7 @@ async function render(focus = true) {
   const first = r.trades[0], last = r.trades[r.trades.length - 1];
   const read = el('section', { 'aria-labelledby': 'ts-read-h' },
     el('h3', { id: 'ts-read-h', text: 'What was read' }),
-    el('p', {}, `Format: ${FORMAT_NAMES[r.format] || r.format}${r.verified_format ? '' : ' (checked on sample files only)'}. `,
+    el('p', {}, `Format: ${FORMAT_NAMES[r.format] || r.format}${r.verified_format ? '' : ' (not yet tested on a real export)'}. `,
       `${plural(r.trades.length, 'closed trade', 'closed trades')} from ${plural(r.n_fills, 'fill', 'fills')}, closed ${day(first.close_ts)} to ${day(last.close_ts)}. `,
       `Times are ${r.tz_label}. ${unitNote(state.unit)}`),
   );

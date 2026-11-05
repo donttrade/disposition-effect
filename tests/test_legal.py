@@ -207,7 +207,7 @@ def test_flag_on_lint_and_wording(paid, monkeypatch):
         assert not re.search(r"standard price|after launch:|restore by email</a>|\$49|\$99", h, re.I), rel
     restore = (paid / "restore" / "index.html").read_text(encoding="utf-8")
     assert "type=\"email\"" not in restore and "r-form" not in restore
-    assert "checked on sample files only" in (paid / "pricing" / "index.html").read_text(encoding="utf-8")   # 5 Nov: no "beta" wording
+    assert "not yet tested on a real export" in (paid / "pricing" / "index.html").read_text(encoding="utf-8")   # 5 Nov: no "beta" wording
 
 
 def test_french_pages(paid):

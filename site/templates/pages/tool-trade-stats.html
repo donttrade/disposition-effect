@@ -62,16 +62,16 @@
     <table>
       <thead><tr><th scope="col">Platform</th><th scope="col">What to export</th><th scope="col">Status</th></tr></thead>
       <tbody>
-        <tr><th scope="row">MetaTrader 5</th><td>The account history report, saved as HTML (History tab, right-click, Report).</td><td>Checked on sample files only</td></tr>
-        <tr><th scope="row">MetaTrader 4</th><td>The account history statement, saved as a detailed report (HTML).</td><td>Checked on sample files only</td></tr>
-        <tr><th scope="row">Interactive Brokers</th><td>A Flex Query with the Trades section at execution level, as CSV.</td><td>Checked on sample files only</td></tr>
-        <tr><th scope="row">Tradovate</th><td>The Orders export, as CSV. Only filled orders are counted.</td><td>Checked on sample files only</td></tr>
-        <tr><th scope="row">TradingView</th><td>Trading Panel → History → ⋯ → Export data. Only filled orders are counted.</td><td>Checked on sample files only</td></tr>
+        <tr><th scope="row">MetaTrader 5</th><td>The account history report, saved as HTML (History tab, right-click, Report).</td><td>Not yet tested on a real export</td></tr>
+        <tr><th scope="row">MetaTrader 4</th><td>The account history statement, saved as a detailed report (HTML).</td><td>Not yet tested on a real export</td></tr>
+        <tr><th scope="row">Interactive Brokers</th><td>A Flex Query with the Trades section at execution level, as CSV.</td><td>Not yet tested on a real export</td></tr>
+        <tr><th scope="row">Tradovate</th><td>The Orders export, as CSV. Only filled orders are counted.</td><td>Not yet tested on a real export</td></tr>
+        <tr><th scope="row">TradingView</th><td>Trading Panel → History → ⋯ → Export data. Only filled orders are counted.</td><td>Not yet tested on a real export</td></tr>
         <tr><th scope="row">Any other platform</th><td>The CSV template below.</td><td>Ready</td></tr>
       </tbody>
     </table>
     </div>
-    <p class="small muted">“Checked on sample files only”: built from each platform’s public documentation and tested on sample files. The page says so on the results; check a few trades by hand, and tell us if a column reads wrong.</p>
+    <p class="small muted">“Not yet tested on a real export”: built from each platform’s public documentation. The page says so on the results; check a few trades by hand, and tell us if a column reads wrong.</p>
     <h4 id="template">The CSV template</h4>
     <p>One row per fill, with these columns in any order: <code>Date</code> (yyyy-mm-dd), <code>Time</code> (hh:mm:ss), <code>Symbol</code>, <code>Side</code> (Buy or Sell), <code>Quantity</code>, <code>Price</code>. Optional: <code>Currency</code> and <code>Fees</code>. A file with one row per round trip (open time, close time, symbol, direction, volume, open and close price) is read too.</p>
     <h3 id="count-h">How the numbers are counted</h3>

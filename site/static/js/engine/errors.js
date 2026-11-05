@@ -62,7 +62,7 @@ export function fail(code, detail = '', row = null, column = null) {
 
 export const WARNING_TEXT = Object.freeze({
   W_UNVERIFIED_FORMAT:
-    'This format was built from the platform’s public documentation and checked on sample files only. Check a few trades by hand, or use the generic template, and tell us if a column reads wrong.',
+    'This format was built from the platform’s public documentation and is not yet tested on a real export. Check a few trades by hand, or use the generic template, and tell us if a column reads wrong.',
   W_SKIPPED_ROWS: 'Rows that are not trades (balance, credit, cancelled or unfilled rows) were skipped.',
   W_DUPLICATE_ROWS:
     'Some rows are exact copies of an earlier row, as when two overlapping exports are pasted together. They were kept, because two identical fills can be real. If you did not expect them, remove the copies and load the file again.',
