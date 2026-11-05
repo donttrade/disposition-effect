@@ -14,7 +14,7 @@
         <h1 id="ff-h">Run our free study on your past accounts</h1>
         <p class="lede">Only totals leave your machine, and you see the result first.</p>
         <div class="notice" id="study-status"><strong>Where the study stands</strong>
-          <p>The plan is pre-registered on the Open Science Framework: registration <a href="https://osf.io/j2ypd/" rel="noopener">j2ypd</a>, public, 2 Nov 2026. No firm has run it yet, so nothing in it is validated. It covers the behaviour-risk half of the question only. Whether a trader’s edge is real or luck is a second test. We have specified it. We have not built it.</p></div>
+          <p>The plan is pre-registered on the Open Science Framework: registration <a href="https://osf.io/j2ypd/" rel="noopener">j2ypd</a>, public, 2 Nov 2026. A dated update to the registration on how firm results are counted will be posted before any firm runs the study. No firm has run it yet, so nothing in it is validated. It covers the behaviour-risk half of the question only. Whether a trader’s edge is real or luck is a second test. We have specified it. We have not built it.</p></div>
         <p class="btn-row"><a class="btn" href="#study-request">Ask for the study plan</a> <a class="btn btn-secondary" href="https://osf.io/j2ypd/" rel="noopener">Read the registration</a></p>
         <p class="small muted">Email only, no calls. The study is free. <a href="#study-price">See what comes after</a></p>
         <p class="small">Here as a trader? See <a href="/for-traders/">Individual traders</a> or the free <a href="/tools/">tools</a>. We can’t help with disputes about a firm.</p>
@@ -55,7 +55,7 @@
   <section class="section" aria-labelledby="leaves-h" data-reveal>
     <h2 id="leaves-h">What your staff run, and what leaves your machine</h2>
     <p>Your staff run a four-file Python script (standard library only, nothing to install) on two CSV files you export. One has a row per closed trade. The other has a row per account. Account IDs are pseudonyms, never a login or an email. The export guide lists every column.</p>
-    <p><strong>Only the text the script prints leaves,</strong> and you read it before you send anything. It holds counts, AUCs with intervals, p-values and signs, and banded tables. Every cell in those tables describes at least 5 breached and 5 surviving accounts; smaller counts print as “&lt;5”. No account ID, symbol, time or amount is printed. We never see a trade, an account, a trader or a name.</p>
+    <p><strong>Only the text the script prints leaves,</strong> and you read it before you send anything. It holds counts, AUCs with intervals, p-values and signs, and banded tables. Every cell in those tables describes at least 5 breached and 5 surviving accounts; smaller counts print as “&lt;5”. No account ID, symbol, time or amount is printed. The printed output holds no trade, account, trader or name.</p>
     <p>Your engineers can try the script on a synthetic file first.</p>
   </section>
 
@@ -64,7 +64,7 @@
     <h2 id="result-h">What happens to the result</h2>
     <ul>
       <li><strong>You read the output first.</strong></li>
-      <li><strong>If you send it, it is published,</strong> named or anonymised, your choice. You will not be named without your written agreement.</li>
+      <li><strong>If you send it, it is published,</strong> named or anonymised, your choice. It is anonymised unless you agree in writing to be named.</li>
       <li><strong>We publish the result whatever it shows,</strong> including a fail.</li>
       <li><strong>We will not use the result to rank or label any trader.</strong></li>
     </ul>
@@ -75,7 +75,7 @@
   <section class="section" aria-labelledby="get-h" data-reveal>
     <h2 id="get-h">What you get</h2>
     <ul>
-      <li><strong>The full result on your own accounts:</strong> the AUC with a 95% interval, whether the habits beat the size, volatility and headroom baseline, breach rates by habit decile, and calibration.</li>
+      <li><strong>The full result on your own accounts:</strong> the AUC with a 95% interval, whether the habits beat the size, volatility and headroom baseline, breach rates by habit band (deciles, with adjacent bands merged until every cell has at least 5 breached and 5 surviving accounts), and calibration.</li>
       <li><strong>One plain verdict,</strong> worded before any data was run: pass, fail, inconclusive or not measured.</li>
       <li><strong>A first look at a benchmark</strong> when more than one firm has run it.</li>
     </ul>
@@ -84,9 +84,9 @@
     <table>
       <thead><tr><th scope="col">Step</th><th scope="col">Who</th><th scope="col">When</th></tr></thead>
       <tbody>
-        <tr><th scope="row">Reply “study”</th><td>You</td><td>Day 0</td></tr>
+        <tr><th scope="row">Ask for the plan (the form below, or email)</th><td>You</td><td>Day 0</td></tr>
         <tr><th scope="row">We send the plan, the script, its fingerprints, the export guide and the parameter block</th><td>donttrade</td><td>Within 1 business day</td></tr>
-        <tr><th scope="row">You export the two files and fill in the firm fields: period, data cut, account count, day boundary, outcome source</th><td>You</td><td>About 1 day</td></tr>
+        <tr><th scope="row">You export the two files and fill in the firm fields (period, data cut, account count, day boundary, outcome source; no account data)</th><td>You</td><td>About 1 day</td></tr>
         <tr><th scope="row">We record your fields in the registration, with the date, before you run</th><td>donttrade</td><td>Same day</td></tr>
         <tr><th scope="row">You run the script and read the output</th><td>You</td><td>About 1 hour</td></tr>
         <tr><th scope="row">Questions</th><td>Both</td><td>1 to 2 days</td></tr>
@@ -103,7 +103,7 @@
   <section class="section" aria-labelledby="study-price" data-reveal>
     <h2 id="study-price">What the study costs</h2>
     <p><strong>The study is free.</strong> If the result does not pass, is inconclusive, or is not measured, you owe nothing, and we publish that too.</p>
-    <p>If the result passes the line we registered in advance, you can then buy the donttrade test per evaluation. The founding price is <strong>US{{ prices.study.founding_price_usd|usd }} per evaluation</strong> for the first {{ (["zero","one","two","three","four","five"][prices.study.founding_firms]) if prices.study.founding_firms in [0,1,2,3,4,5] else prices.study.founding_firms }} firms that pass. The list price is <strong>US{{ prices.study.list_price_usd|usd }} per evaluation, with a US{{ prices.study.monthly_minimum_usd|usd }} monthly minimum.</strong> Either price is set in writing before you run anything. One evaluation means one trader account checked once. This is separate from the monthly plan further down the page.</p>
+    <p>If the result passes the line we registered in advance, we offer to set up a per-evaluation check with the first firms that pass. That check is not built yet. The founding price is <strong>US{{ prices.study.founding_price_usd|usd }} per evaluation</strong> for the first {{ (["zero","one","two","three","four","five"][prices.study.founding_firms]) if prices.study.founding_firms in [0,1,2,3,4,5] else prices.study.founding_firms }} firms that pass. The list price is <strong>US{{ prices.study.list_price_usd|usd }} per evaluation, with a US{{ prices.study.monthly_minimum_usd|usd }} monthly minimum.</strong> Either price is set in writing before you run anything. One evaluation means one trader account checked once. The Pilot and monthly plan further down the page are separate paid tests.</p>
   </section>
 
   {#- 1g. The study request. A separate form from the Pilot request further down; its product is fixed to "study". #}
@@ -129,7 +129,7 @@
     <p>Everything from here down is the paid Pilot and monthly plan, with the copy-leader and claims tests. It is separate from the free study above and has its own extract, memo and terms. One habit today, more being added. Your staff run our public script on your records.</p>
     <details class="how-more"><summary>What the paid test measures, in full</summary>
     <p>Do your traders sell winners sooner than losers? We measure the plan gap: the difference between how your traders plan to handle wins and losses and how they actually trade. One measure is available today: the disposition effect, which is whether your traders close winning positions more readily than losing ones.</p>
-    <p>Tell us the population and the period. Your staff run a published script inside your systems. You get back <a href="/glossary/#pgr">PGR</a>, <a href="/glossary/#plr">PLR</a>, their pooled ratio and a <a href="/glossary/#t">t statistic</a>, the counts and period behind them, and a one-page memo, each month. The price is published and the same for every firm.</p>
+    <p>Tell us the population and the period. Your staff run a published script inside your systems. You get back <a href="/glossary/#pgr">PGR</a>, <a href="/glossary/#plr">PLR</a>, their pooled ratio and a <a href="/glossary/#t">t statistic</a>, the counts and period behind them, and a one-page memo, each month. The Pilot and monthly prices are published and the same for every firm.</p>
     <p>partner_disposition.py is public: free for non-commercial use from v2; the {{ pilot.name }} and the monthly plan include a commercial licence. <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/partner_disposition.py">Read the code</a></p>
     </details>
   </section>

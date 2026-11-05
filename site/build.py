@@ -512,7 +512,7 @@ PAGES += [
                  "description": "The donttrade test, a habit test on your own MT5, IBKR, Tradovate or TradingView file, "
                                 "with a real-or-noise check. One price, re-test included."}},
     {"template": "pages/for-firms.html", "path": "/for-firms/", "requires_flag": None, "updated": "2026-11-05",
-     "crumb": "Prop firms & brokers", "og_image": "/assets/og/firms.png", "scripts": [FORM_JS, MOTION_JS],
+     "crumb": "Prop firms & brokers", "og_image": "/assets/og/default.png", "scripts": [FORM_JS, MOTION_JS],
      "title": "Free Study for Prop Firms and Brokers",
      "description": "Run our free, pre-registered study on your past accounts. Only totals leave your machine, and "
                     "you see the result first. No firm has run it yet."},
