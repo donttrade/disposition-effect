@@ -40,6 +40,12 @@ def stub_umami(ctx):
     ctx.route("https://cloud.umami.is/**",
               lambda r: r.fulfill(status=200, content_type="text/javascript", body=UMAMI_STUB))
     ctx.route("https://gateway.umami.is/**", lambda r: r.fulfill(status=204, body=""))
+    # The Cloudflare beacon (analytics = true in the live site.toml, so every served docs/ page loads it): without
+    # these answers a test on the repo server reaches the real cloudflareinsights.com from 127.0.0.1 and the
+    # browser logs a CORS / ERR_FAILED console error. The beacon script is an empty stand-in; its RUM post gets 204.
+    ctx.route("https://static.cloudflareinsights.com/**",
+              lambda r: r.fulfill(status=200, content_type="text/javascript", body=""))
+    ctx.route("https://cloudflareinsights.com/**", lambda r: r.fulfill(status=204, body=""))
     return ctx
 
 

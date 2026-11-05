@@ -1,5 +1,6 @@
 """Step 3: the build — every baseline URL, byte-identical, and each failure mode fails loudly."""
 import hashlib
+import re
 import os
 import shutil
 import subprocess
@@ -42,7 +43,9 @@ def tree_hash(root):
 def toml_with(tmp_path, **flags):
     src = open(os.path.join(SITE, "config", "site.toml"), encoding="utf-8").read()
     for k, v in flags.items():
-        src = src.replace(f"{k} = false", f"{k} = {str(v).lower()}", 1)
+        # the live site.toml has some flags on and some off: set the key to v whatever it holds now
+        src, n = re.subn(rf"^({k}\s*=\s*)(true|false)\b", rf"\g<1>{str(v).lower()}", src, count=1, flags=re.M)
+        assert n == 1, k
     p = tmp_path / "site.toml"
     p.write_text(src, encoding="utf-8")
     return str(p)
@@ -74,27 +77,36 @@ def test_missing_linked_id_fails(tmp_path):
 
 
 def test_flag_mismatch_fails(tmp_path):
-    r, _ = run_build(tmp_path, "x", DT_SITE_TOML=toml_with(tmp_path, trader_first_home=True))
+    r, _ = run_build(tmp_path, "x", DT_SITE_TOML=toml_with(tmp_path, trader_first_home=False))   # paid_report is on in the live toml
     assert r.returncode == 1 and "flag mismatch" in r.stderr
 
 
 def test_analytics_without_token_fails(tmp_path):
-    r, _ = run_build(tmp_path, "x", DT_SITE_TOML=toml_with(tmp_path, analytics=True))
+    t = toml_with(tmp_path, analytics=True)   # analytics is on in the live toml; now empty the token
+    src = open(t, encoding="utf-8").read()
+    src, n = re.subn(r'^cf_beacon_token\s*=\s*"[^"]*"', 'cf_beacon_token = ""', src, count=1, flags=re.M)
+    assert n == 1
+    open(t, "w", encoding="utf-8").write(src)
+    r, _ = run_build(tmp_path, "x", DT_SITE_TOML=t)
     assert r.returncode == 1 and "cf_beacon_token" in r.stderr
 
 
 def test_paid_page_planted_with_flag_off_fails(tmp_path):
+    # The live site.toml has paid_report on (and a paid-off build is no longer possible: docs/ passthrough
+    # pages carry the paid chrome), so build the live site and verify it AS IF paid_report were off.
+    # seller=True skips the unrelated seller-disclosure check, which would otherwise fire first.
     r, out = run_build(tmp_path, "x")
     assert r.returncode == 0
     flags = {"paid_report": False}
-    (out / "welcome").mkdir()
+    (out / "welcome").mkdir(exist_ok=True)   # the live build already writes /welcome/
     (out / "welcome" / "index.html").write_text("<p>welcome</p>")
     with pytest.raises(B.BuildError, match="/welcome/"):
-        B.verify(str(out), flags)
-    shutil.rmtree(out / "welcome")
+        B.verify(str(out), flags, seller=True)
+    for p in B.PAID_ONLY_PATHS:   # the live build writes them all; the markup check comes after the path check
+        shutil.rmtree(out / p.strip("/"), ignore_errors=True)
     (out / "about" / "index.html").write_text('<div data-requires-flag="paid_report">buy</div>')
     with pytest.raises(B.BuildError, match="paid-flagged markup"):
-        B.verify(str(out), flags)
+        B.verify(str(out), flags, seller=True)
 
 
 def test_paid_on_needs_filled_private_toml(tmp_path):
@@ -129,7 +141,7 @@ def test_home_and_lifted_pages_are_templates_and_passthrough_still_works(tmp_pat
     r, out = run_build(tmp_path, "x")
     assert r.returncode == 0
     home = (out / "index.html").read_text()
-    assert "/static/css/site.css" in home and "See what your trades did, free." in home   # v3 home (ARCHITECT-V3 Q2)
+    assert "/static/css/site.css" in home and "See the habits in your trade history." in home   # current home h1
     # steps 28–29: /about/ is a lifted template page (v2 head, header and footer; old body frozen)
     about = (out / "about" / "index.html").read_text(encoding="utf-8")
     assert "/static/css/site.css" in about and '<main id="main" class="lifted">' in about
@@ -151,8 +163,12 @@ def test_home_and_lifted_pages_are_templates_and_passthrough_still_works(tmp_pat
     (docs / "about" / "index.html").write_text(old, encoding="utf-8")
     monkeypatch.setattr(B, "DOCS", str(docs))
     B.build()
-    flags = {"paid_report": False, "analytics": False, "pilot_checkout": False, "trader_first_home": False}
-    assert (tmp_path / "pt" / "about" / "index.html").read_text(encoding="utf-8") == B.fix_passthrough_chrome(old, "about/index.html", flags)
+    flags = {"paid_report": True, "analytics": True, "pilot_checkout": False, "trader_first_home": True}   # the live site.toml
+    got = (tmp_path / "pt" / "about" / "index.html").read_text(encoding="utf-8")
+    # the live build also adds the one-line business id to a passthrough footer (decisions 21 and 25 Oct)
+    got, n = re.subn(r'  <p data-business-id="short">[^\n]*</p>\n', "", got)
+    assert n == 1
+    assert got == B.fix_passthrough_chrome(old, "about/index.html", flags, umami=True)
 
 
 def test_baseline_covers_every_old_url_and_the_published_docs_hold_them():
