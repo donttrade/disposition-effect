@@ -24,6 +24,10 @@ def allowed_amounts(prices, include_retired=False):
         out.add(p["price_usd"])
         if p.get("minimum_usd") is not None:
             out.add(p["minimum_usd"])   # 29 Oct: the firm plan's monthly minimum
+    study = prices.get("study") or {}   # 5 Nov 2026: the free firm study's founding and list prices (/for-firms/ only)
+    for k in ("founding_price_usd", "list_price_usd", "monthly_minimum_usd"):
+        if study.get(k) is not None:
+            out.add(study[k])
     recheck = prices["rules"].get("recheck")
     if recheck:   # retired 29 Oct (one product); kept for an older prices.json
         pct = recheck["percent_of_engagement"]

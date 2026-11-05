@@ -1,6 +1,6 @@
 {#- Firm / platform request form (FORMS-SPEC §A; V2 step 16). Plain HTML POST to Web3Forms:
     works with JavaScript off. Set before including: fid (id prefix), product (default for the
-    hidden field), heading_id (the id of the heading that labels this form), and optionally
+    hidden field), heading_id (the id of the heading that labels this form), mail_to (optional: the address in the "Prefer email?" line, default site.contact_email), and optionally
     partner = true for the journal/platform partner form.
     form-ref.js, when it runs, copies ?ref= from the URL into the hidden ref field, and ?product=
     into the product field of the FIRM form only. The partner form's product is fixed (Tester D1):
@@ -32,4 +32,5 @@
   <p><button class="btn" type="submit">Send the request</button></p>
   <p class="small muted">We use these details only to reply. {{ site.reply_promise }} <a href="/privacy/">Privacy notice</a></p>
 </form>
-<p class="mailto-line">Prefer email? Write to <a href="mailto:{{ site.contact_email }}?subject={{ (mail_subject if mail_subject is defined else ('Partner application — [your platform]' if is_partner else 'Pilot request — [your firm]'))|urlencode }}">{{ site.contact_email }}</a>.</p>
+{%- set to_addr = mail_to if mail_to is defined else site.contact_email %}
+<p class="mailto-line">Prefer email? Write to <a href="mailto:{{ to_addr }}?subject={{ (mail_subject if mail_subject is defined else ('Partner application — [your platform]' if is_partner else 'Pilot request — [your firm]'))|urlencode }}">{{ to_addr }}</a>.</p>

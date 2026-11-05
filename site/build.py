@@ -511,11 +511,11 @@ PAGES += [
      "if_paid": {"title": "The donttrade Test for Traders",
                  "description": "The donttrade test, a habit test on your own MT5, IBKR, Tradovate or TradingView file, "
                                 "with a real-or-noise check. One price, re-test included."}},
-    {"template": "pages/for-firms.html", "path": "/for-firms/", "requires_flag": None, "updated": "2026-10-21",
+    {"template": "pages/for-firms.html", "path": "/for-firms/", "requires_flag": None, "updated": "2026-11-05",
      "crumb": "Prop firms & brokers", "og_image": "/assets/og/firms.png", "scripts": [FORM_JS, MOTION_JS],
-     "title": "The donttrade Test for Prop Firms and Brokers",
-     "description": "The donttrade test on your whole book: one habit today, more being added. A published script, "
-                    "run inside your own systems. A Pilot, then monthly."},
+     "title": "Free Study for Prop Firms and Brokers",
+     "description": "Run our free, pre-registered study on your past accounts. Only totals leave your machine, and "
+                    "you see the result first. No firm has run it yet."},
 ]
 
 # Forms and the pages around them (step 16). Thank-you pages are noindex and stay out of the sitemap.
