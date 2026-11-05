@@ -4,30 +4,29 @@
 {%- set pilot = products["pilot"] %}{%- set plan = products["plan"] %}
 <div class="wrap">
   {% include "partials/crumbs.html" %}
-  {#- 1. Hero. 29 Oct (owner: one product): the firm package of the donttrade test. Firms are told what it measures
-      today: one habit, the disposition effect, with more being added. The old H1 and paragraph sit under one tap. #}
+  {#- 1. Hero. 5 Nov 2026 (owner): the page leads with the free pre-registered study (OSF j2ypd), to match the firm
+      outreach emails of Wed 11 Nov. Source for every claim: OUTREACH-WAVE1-FIRMS-V2-2026-11-05.md, section 0 and
+      section 6 (the offer sheet). The paid Pilot and monthly plan stay further down the page. Items the sheet marks
+      [CONFIRM] (publication timing, retention, the payout clause) are deliberately left out. #}
   <section class="hero" aria-labelledby="ff-h">
     <div class="grid">
       <div class="span-7">
-        <h1 id="ff-h">The donttrade test, on your whole book</h1>
-        <p class="lede">One habit today, more being added. Your staff run our public script on your records.</p>
-        <details class="how-more"><summary>What we measure, in full</summary>
-        <p>Do your traders sell winners sooner than losers? We measure the plan gap: the difference between how your traders plan to handle wins and losses and how they actually trade. One measure is available today: the disposition effect, which is whether your traders close winning positions more readily than losing ones.</p>
-        <p>Tell us the population and the period. Your staff run a published script inside your systems. You get back <a href="/glossary/#pgr">PGR</a>, <a href="/glossary/#plr">PLR</a>, their pooled ratio and a <a href="/glossary/#t">t statistic</a>, the counts and period behind them, and a one-page memo, each month. The price is published and the same for every firm.</p>
-        </details>
-        <p class="btn-row"><a class="btn" href="#request">Start a {{ pilot.name }} — {{ pilot.price_usd|usd }} USD</a> <a class="btn btn-secondary" href="/sample-memo/">See a sample memo</a></p>
-        <p class="small">Then {{ plan.price_usd|usd }} per trader account a month, {{ plan.minimum_usd|usd }} minimum.</p>
-        <p class="small muted">Email only, no calls. <a href="#what-it-costs">See what it costs</a></p>
+        <h1 id="ff-h">Run our free study on your past accounts</h1>
+        <p class="lede">Only totals leave your machine, and you see the result first.</p>
+        <div class="notice" id="study-status"><strong>Where the study stands</strong>
+          <p>The plan is pre-registered on the Open Science Framework: registration <a href="https://osf.io/j2ypd/" rel="noopener">j2ypd</a>, public, 2 Nov 2026. No firm has run it yet, so nothing in it is validated. It covers the behaviour-risk half of the question only. Whether a trader’s edge is real or luck is a second test. We have specified it. We have not built it.</p></div>
+        <p class="btn-row"><a class="btn" href="#study-request">Ask for the study plan</a> <a class="btn btn-secondary" href="https://osf.io/j2ypd/" rel="noopener">Read the registration</a></p>
+        <p class="small muted">Email only, no calls. The study is free. <a href="#study-price">See what comes after</a></p>
         <p class="small">Here as a trader? See <a href="/for-traders/">Individual traders</a> or the free <a href="/tools/">tools</a>. We can’t help with disputes about a firm.</p>
       </div>
       <div class="span-5">
-        <ol class="pipeline" aria-label="How the measurement runs">
-          <li><strong>Your records</strong> stay on your systems</li>
-          <li><strong>Published script</strong> run by your staff</li>
-          <li><strong>Aggregate counts</strong> are all that comes back to us</li>
-          <li><strong>Number, t statistic, period and memo</strong> returned to you</li>
+        <ol class="pipeline" aria-label="How the study runs">
+          <li><strong>Your past accounts</strong> stay on your systems</li>
+          <li><strong>Our script</strong> is run by your staff</li>
+          <li><strong>Printed totals</strong> are all it produces, and you read them first</li>
+          <li><strong>You choose</strong> whether to send them to us</li>
         </ol>
-        <p class="small muted">partner_disposition.py is public: free for non-commercial use from v2; the {{ pilot.name }} and the monthly plan include a commercial licence. <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/partner_disposition.py">Read the code</a></p>
+        <p class="small muted">The script is four files of Python, standard library only. It imports no network module and writes no file. Your engineers can read all four before you run anything.</p>
       </div>
     </div>
   </section>
@@ -39,11 +38,107 @@
     <li><a href="/independence/">No firm can pay to change a number</a></li>
   </ul>
 
+  {#- 1b. The study. Sheet section 6: "What it is", "What it is not", "Conflict of interest". #}
+  <section class="section" aria-labelledby="study-h" data-reveal>
+    <h2 id="study-h">The question the study asks</h2>
+    <p>Do the trading habits in an account’s <strong>first 30 closed trades</strong> predict a <strong>daily-loss or max-loss breach in the next 30 days</strong>? And do they add anything beyond account size, activity, volatility, profit so far and how close the account already was to its loss limit?</p>
+    <p>The plan was registered in advance, before any firm’s data. It covers every account you started in a period you pick, so you export your past accounts.</p>
+    <dl class="split" data-reveal data-reveal-stagger>
+      <div><dt>What it covers</dt><dd>How risky an account’s behaviour is, read across a group of accounts.</dd></div>
+      <div><dt>What it does not cover</dt><dd>Whether a trader’s edge is real or luck. That is a separate test. It is specified and not built.</dd></div>
+      <div><dt>What it is not</dt><dd>It is not an audit. It is not a ranking and not a rating of any person. It says nothing about one trader. It is not investment advice. We are not selling a way to lower your failure rate.</dd></div>
+      <div><dt>Our interest</dt><dd>donttrade sells the donttrade test and benefits from a positive result. The registration says so. That is why the plan is fixed in advance and the result is published whatever it shows.</dd></div>
+    </dl>
+  </section>
+
+  {#- 1c. What your staff run, what leaves. #}
+  <section class="section" aria-labelledby="leaves-h" data-reveal>
+    <h2 id="leaves-h">What your staff run, and what leaves your machine</h2>
+    <p>Your staff run a four-file Python script (standard library only, nothing to install) on two CSV files you export. One has a row per closed trade. The other has a row per account. Account IDs are pseudonyms, never a login or an email. The export guide lists every column.</p>
+    <p><strong>Only the text the script prints leaves,</strong> and you read it before you send anything. It holds counts, AUCs with intervals, p-values and signs, and banded tables. Every cell in those tables describes at least 5 breached and 5 surviving accounts; smaller counts print as “&lt;5”. No account ID, symbol, time or amount is printed. We never see a trade, an account, a trader or a name.</p>
+    <p>Your engineers can try the script on a synthetic file first.</p>
+  </section>
+
+  {#- 1d. What happens to the result. The rule below is the one the registration fixes; the firm-declines amendment is not posted, so it is not cited. #}
+  <section class="section" aria-labelledby="result-h" data-reveal>
+    <h2 id="result-h">What happens to the result</h2>
+    <ul>
+      <li><strong>You read the output first.</strong></li>
+      <li><strong>If you send it, it is published,</strong> named or anonymised, your choice. You will not be named without your written agreement.</li>
+      <li><strong>We publish the result whatever it shows,</strong> including a fail.</li>
+      <li><strong>We will not use the result to rank or label any trader.</strong></li>
+    </ul>
+    <p>Our licence for the study covers running the script on your records, sending us the printed text, and our publishing it. Using the measure to monitor accounts in your own operation is separate, paid work.</p>
+  </section>
+
+  {#- 1e. What you get, steps, data needs. #}
+  <section class="section" aria-labelledby="get-h" data-reveal>
+    <h2 id="get-h">What you get</h2>
+    <ul>
+      <li><strong>The full result on your own accounts:</strong> the AUC with a 95% interval, whether the habits beat the size, volatility and headroom baseline, breach rates by habit decile, and calibration.</li>
+      <li><strong>One plain verdict,</strong> worded before any data was run: pass, fail, inconclusive or not measured.</li>
+      <li><strong>A first look at a benchmark</strong> when more than one firm has run it.</li>
+    </ul>
+    <h3>How it goes</h3>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Study steps">
+    <table>
+      <thead><tr><th scope="col">Step</th><th scope="col">Who</th><th scope="col">When</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Reply “study”</th><td>You</td><td>Day 0</td></tr>
+        <tr><th scope="row">We send the plan, the script, its fingerprints, the export guide and the parameter block</th><td>donttrade</td><td>Within 1 business day</td></tr>
+        <tr><th scope="row">You export the two files and fill in the firm fields: period, data cut, account count, day boundary, outcome source</th><td>You</td><td>About 1 day</td></tr>
+        <tr><th scope="row">We record your fields in the registration, with the date, before you run</th><td>donttrade</td><td>Same day</td></tr>
+        <tr><th scope="row">You run the script and read the output</th><td>You</td><td>About 1 hour</td></tr>
+        <tr><th scope="row">Questions</th><td>Both</td><td>1 to 2 days</td></tr>
+        <tr><th scope="row">You send the printed text, if you are content with it</th><td>You</td><td>Your pace</td></tr>
+        <tr><th scope="row">We publish the pooled result, named or anonymised as you choose</th><td>donttrade</td><td>After you send</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <h3>What your data needs</h3>
+    <p>At least <strong>100 breached and 100 surviving accounts</strong> after exclusions. Below that, the script prints “not measured” and no result. Each account needs at least 30 closed trades, with times to the minute, and a data cut that leaves 30 days after its 30th trade. Accounts that breach before trade 30, are flagged for abuse, are automated, or repeat a trader are left out and counted. So a pass means “among accounts that lasted 30 trades”.</p>
+  </section>
+
+  {#- 1f. Cost of the study. Founding price confirmed by the owner 5 Nov 2026; list price from PRICING-MUST-BUY section 3 via the offer sheet. #}
+  <section class="section" aria-labelledby="study-price" data-reveal>
+    <h2 id="study-price">What the study costs</h2>
+    <p><strong>The study is free.</strong> If the result does not pass, is inconclusive, or is not measured, you owe nothing, and we publish that too.</p>
+    <p>If the result passes the line we registered in advance, you can then buy the donttrade test per evaluation. The founding price is <strong>US{{ prices.study.founding_price_usd|usd }} per evaluation</strong> for the first {{ ["zero","one","two","three","four","five"][prices.study.founding_firms] }} firms that pass. The list price is <strong>US{{ prices.study.list_price_usd|usd }} per evaluation, with a US{{ prices.study.monthly_minimum_usd|usd }} monthly minimum.</strong> Either price is set in writing before you run anything.</p>
+  </section>
+
+  {#- 1g. The study request. A separate form from the Pilot request further down; its product is fixed to "study". #}
+  <section class="section" aria-labelledby="study-request" data-reveal>
+    <h2 id="study-request">Ask for the study plan</h2>
+    <p>Tell us your firm. We send the plan within 1 business day. Nothing is owed.</p>
+    {%- with fid = "fs", product = "study", fixed = true, heading_id = "study-request", placeholder = "e.g. the period and roughly how many accounts you could export", mail_to = "research@donttrade.ca", mail_subject = "Study plan request: [your firm]" %}{% include "partials/form_firm.html" %}{% endwith %}
+  </section>
+
+  <section class="section" aria-labelledby="dp-h" data-reveal>
+    <h2 id="dp-h">For your compliance team: the study</h2>
+    <p class="small muted">Our view, not legal advice. Your counsel decides.</p>
+    <details><summary>Do you receive our data?</summary><p>No. We receive only the printed totals, and only if you send them.</p></details>
+    <details><summary>Who controls the records?</summary><p>You do, as today. The script runs inside your systems, so we are neither controller nor processor of your records. Whether the printed totals are personal data is for your counsel. Our view is that they are not, because every cell holds at least 5 accounts and no identifier is printed.</p></details>
+    <details><summary>Could the script send data out?</summary><p>It imports no network module and writes no file. Your engineers can read all four files first.</p></details>
+    <details><summary>An NDA or a DPA?</summary><p>Signed on request. The legal contracting party is named in writing before anything is signed or paid.</p></details>
+    <details><summary>Which law applies?</summary><p>We name none as settled. Firms in the UK or EU may want a lawyer’s view on the printed totals and on cross-border transfer. We answer questions in writing.</p></details>
+  </section>
+
+  {#- Paid tests. Everything below this heading is the earlier paid offer (disposition-effect Pilot and monthly plan, copy-leader and claims tests), unchanged in substance except where marked. #}
+  <section class="section" aria-labelledby="paid-h" data-reveal>
+    <h2 id="paid-h">Paid tests</h2>
+    <p>These are separate from the free study. One habit today, more being added. Your staff run our public script on your records.</p>
+    <details class="how-more"><summary>What the paid test measures, in full</summary>
+    <p>Do your traders sell winners sooner than losers? We measure the plan gap: the difference between how your traders plan to handle wins and losses and how they actually trade. One measure is available today: the disposition effect, which is whether your traders close winning positions more readily than losing ones.</p>
+    <p>Tell us the population and the period. Your staff run a published script inside your systems. You get back <a href="/glossary/#pgr">PGR</a>, <a href="/glossary/#plr">PLR</a>, their pooled ratio and a <a href="/glossary/#t">t statistic</a>, the counts and period behind them, and a one-page memo, each month. The price is published and the same for every firm.</p>
+    <p>partner_disposition.py is public: free for non-commercial use from v2; the {{ pilot.name }} and the monthly plan include a commercial licence. <a href="https://github.com/donttrade/disposition-effect/blob/main/partner/partner_disposition.py">Read the code</a></p>
+    </details>
+  </section>
+
   {#- 2. Who it's for. #}
   <section class="section" aria-labelledby="who-h" data-reveal>
     <h2 id="who-h">Who it is for</h2>
     <ul class="tool-cards tool-cards-2">
-      <li class="tool-card"><h3>A prop firm or broker</h3><p>Do our traders close winning positions more readily than losing ones?</p></li>
+      <li class="tool-card"><h3>A prop firm or broker</h3><p>Do the early habits in an account predict a later loss-limit breach? <a href="#study-request">Free study</a></p></li>
       <li class="tool-card"><h3>A trading journal or platform</h3><p>Can we show users this measure inside our product? <a href="/for-platforms/">Journals &amp; platforms</a></p></li>
       <li class="tool-card"><h3>A copy-trading platform</h3><p>Does our leader ranking predict what followers earn? <a href="#copy-leader">Copy-leader test</a></p></li>
       <li class="tool-card"><h3>A firm making behaviour claims</h3><p>Does our claim hold on our own users’ records? <a href="#claims-test">Claims test</a></p></li>
@@ -52,8 +147,9 @@
 
   {#- 3. What it costs (existing id). Prices from prices.json. #}
   <section class="section" aria-labelledby="what-it-costs" data-reveal>
-    <h2 id="what-it-costs">What it costs</h2>
-    <p><strong>Prices in USD, before any applicable sales tax.</strong></p>
+    <h2 id="what-it-costs">The Pilot and the monthly plan: what they cost</h2>
+    <p><strong>Prices in USD, before any applicable sales tax.</strong> These are the paid disposition-effect tests. The free study is priced above.</p>
+    <p class="btn-row"><a class="btn" href="#request">Start a {{ pilot.name }}: {{ pilot.price_usd|usd }} USD</a> <a class="btn btn-secondary" href="/sample-memo/">See a sample memo</a></p>
     <div class="table-wrap" tabindex="0" role="region" aria-label="The Pilot and the monthly plan">
     <table class="price-table">
       <thead><tr><th scope="col">Package</th><th scope="col">What you get</th><th scope="col">Payment</th><th scope="col" class="num">Price (USD)</th></tr></thead>
@@ -73,13 +169,13 @@
     <p>{{ pilot.name }} refunds, from the <a href="/terms/#trial">terms</a>: {{ pt.both() }} On the monthly plan, a month whose result does not reproduce is not charged.</p>
     <p>Every invoice is in USD; pay by bank transfer, or, in Canada, the CAD equivalent by Interac e-Transfer. {% include "partials/card_timing.html" %} Cancel at the end of any month, by email; that month is invoiced as usual. <a href="/terms/#plan">Plan terms</a></p>
     <p>Delivery times are in business days. The clock starts when payment is received and the script’s output comes back without validation errors, and it pauses while a clarifying question is open.</p>
-    <p><strong>If you don’t like the number, no one else sees it.</strong> You can decline publication outright, and we publish nothing from your results. The fee is the same either way. The method is the same for every firm and for the free research. Paying buys scope and privacy, never a result. <a href="/independence/">Independence policy</a></p>
+    <p><strong>For paid work, you decide whether anything is published.</strong> The fee is the same either way. The free study works differently, as set out above: if you send its output, it is published. The method is the same for every firm and for the free research. Paying buys scope and privacy, never a result. <a href="/independence/">Independence policy</a></p>
     </details>
   </section>
 
   {#- 4. Timeline (FIRM-INBOUND-KIT §2). #}
   <section class="section" aria-labelledby="timeline-h" data-reveal>
-    <h2 id="timeline-h">From first email to monthly memo</h2>
+    <h2 id="timeline-h">Pilot and monthly plan: from first email to monthly memo</h2>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Timeline">
     <table>
       <thead><tr><th scope="col">Step</th><th scope="col">Who</th><th scope="col">When</th></tr></thead>
@@ -170,11 +266,11 @@ a7f3,2026-03-04,p91,1,240.00</pre>
 
   {#- 9. Agreement and independence. #}
   <section class="section" aria-labelledby="agree-h" data-reveal>
-    <h2 id="agree-h">The agreement, in brief</h2>
-    <details class="how-more"><summary>Published price, written scope. Publication only with your consent.</summary>
+    <h2 id="agree-h">The paid agreement, in brief</h2>
+    <details class="how-more"><summary>Published price, written scope. For paid work, publication only with your consent.</summary>
     <ul>
       <li><strong>Published price and a written scope,</strong> agreed before any data is seen.</li>
-      <li><strong>Publication only with your consent.</strong> You review anything describing your data first and may decline outright.</li>
+      <li><strong>Paid work: publication only with your consent.</strong> You review anything describing your data first and may decline outright.</li>
       <li><strong>Use of the name.</strong> You may say a figure was “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a written agreement”, and nothing stronger: never audited, certified or verified.</li>
       <li><strong>Liability</strong> is capped at the fees paid. Either side may end the monthly plan by email; it ends at the end of that calendar month. No cancellation fee. <a href="/terms/#plan">Plan terms</a></li>
     </ul>
@@ -190,16 +286,16 @@ a7f3,2026-03-04,p91,1,240.00</pre>
 
   {#- 10. FAQ (kept: questions firms ask first). #}
   <section class="section" aria-labelledby="faq-h" data-reveal>
-    <h2 id="faq-h">For your compliance team</h2>
+    <h2 id="faq-h">For your compliance team: the paid tests</h2>
     <details><summary>Who will we contract with?</summary><p>One person. {% include "partials/contracting_party.html" %} We provide whatever identity checks your due diligence needs. The pen name is how the research is published, not a contract term.</p></details>
     <details><summary>Does any account data leave our systems?</summary><p>No. Your staff run the script inside your systems; we receive only what it prints. We never need access to your systems.</p></details>
-    <details><summary>What if the number is bad for us?</summary><p>Then that is the number. You can keep it private, and we publish nothing from it. The fee is unchanged.</p></details>
-    <details><summary>Can you publish without our consent?</summary><p>No. You review anything describing your data first and may decline publication outright. We may say only that a measurement took place, without naming you or the figure.</p></details>
+    <details><summary>What if the number is bad for us?</summary><p>Then that is the number. In the free study you read the output first. If you send it, we publish it, named or anonymised as you choose, whatever it shows. In paid work you decide whether anything is published, and the fee is unchanged.</p></details>
+    <details><summary>Can you publish without our consent?</summary><p>No. In the free study we publish only the printed text you send us, and we do not name you without your written agreement. In paid work you review anything describing your data first and may decline publication outright.</p></details>
     <details><summary>Isn’t this a kind of audit?</summary><p>No. It is a measurement with its limits stated. Please don’t describe it as audited, certified or verified.</p></details>
     <details><summary>What if we stop?</summary><p>No cancellation fee. {{ pt.kickoff(pilot, "") }} The monthly plan ends at the end of the calendar month in which either side gives notice by email; that month is invoiced as usual.</p></details>
     <details><summary>How do we pay?</summary><p>Invoiced monthly in USD, in arrears, due within {{ prices.rules.plan_payment_days }} days; bank transfer, or in Canada the CAD equivalent by Interac e-Transfer. {% include "partials/card_timing.html" %}</p></details>
     <details><summary>Can we talk on a call?</summary><p>We work by email only, so every answer is in writing and can go straight to your compliance file.</p></details>
-    <details><summary>Why is there no client list?</summary><p>There are no paying clients yet. A firm that chooses to publish its result will be listed, with its consent.</p></details>
+    <details><summary>Why is there no client list?</summary><p>No firm has run the free study yet, and there are no paying clients. A firm that publishes its result under its name will be listed, with its consent.</p></details>
     <details><summary>Can we test it first?</summary><p>Yes. The licence lets any organisation run it on synthetic or test data for 32 days, and the folder includes a generator that writes a test file. <a href="https://github.com/donttrade/disposition-effect/tree/main/partner">partner/ on GitHub</a></p></details>
   </section>
 
