@@ -132,7 +132,9 @@ def test_head_rules(built_site, path):
     page = next(p for p in B.PAGES if p["path"] == path)
     assert html.count('<meta http-equiv="Content-Security-Policy"') == 1
     csp = re.search(r'Content-Security-Policy" content="([^"]+)"', html).group(1)
-    assert "script-src &#39;self&#39;;" in csp and "style-src &#39;self&#39;;" in csp
+    # script-src is 'self' plus, with analytics on, only the Cloudflare beacon and Umami Cloud script hosts
+    assert re.search(r"script-src &#39;self&#39;(?: https://(?:static\.cloudflareinsights\.com|cloud\.umami\.is))*;", csp)
+    assert "style-src &#39;self&#39;;" in csp
     assert ("donttrade.substack.com" in csp) == ('action="https://donttrade.substack.com/subscribe"' in html)
     g = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', html, re.S).group(1))["@graph"]
     types = [n["@type"] for n in g]
