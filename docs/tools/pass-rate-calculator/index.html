@@ -8,18 +8,18 @@
 <link rel="me" href="https://mastodon.social/@donttradestudy">
 <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#16181C" media="(prefers-color-scheme: dark)">
-<title>Prop-firm pass-rate calculator — donttrade</title>
+<title>Prop Firm Pass Rate Calculator for Firm Operators</title>
 <meta name="description" content="Free: a prop-firm evaluation pass rate and payout rate for one cohort, computed correctly. Runs in your browser; your numbers are never sent.">
 <link rel="canonical" href="https://donttrade.ca/tools/pass-rate-calculator/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="donttrade">
-<meta property="og:title" content="Prop-firm pass-rate calculator — donttrade">
+<meta property="og:title" content="Prop Firm Pass Rate Calculator for Firm Operators">
 <meta property="og:description" content="Free: a prop-firm evaluation pass rate and payout rate for one cohort, computed correctly. Runs in your browser; your numbers are never sent.">
 <meta property="og:url" content="https://donttrade.ca/tools/pass-rate-calculator/">
-<meta property="og:image" content="https://donttrade.ca/assets/og/default.png">
+<meta property="og:image" content="https://donttrade.ca/assets/og/tool-pass.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Prop-firm pass-rate calculator — donttrade">
+<meta property="og:image:alt" content="Prop Firm Pass Rate Calculator for Firm Operators">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:description" content="Free: a prop-firm evaluation pass rate and payout rate for one cohort, computed correctly. Runs in your browser; your numbers are never sent.">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
@@ -27,7 +27,7 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=e0f686f7">
+<link rel="stylesheet" href="/static/css/site.css?v=ea622423">
 <link rel="stylesheet" href="/static/css/tools.css?v=2117013f">
 <script src="/static/js/theme.js?v=7e47c1a9"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
@@ -38,7 +38,7 @@
 <script src="/static/js/umami-clean.js?v=56f7d1df" defer></script>
 <script defer src="https://cloud.umami.is/script.js" data-website-id="16c5fa53-e8fc-4c55-892a-5546e7d51830" data-do-not-track="true" data-exclude-hash="true" data-domains="donttrade.ca" data-before-send="dtUmamiClean"></script>
 
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "item": "https://donttrade.ca/tools/", "name": "Free tools", "position": 2}, {"@type": "ListItem", "name": "Prop-firm pass-rate calculator", "position": 3}]}, {"@id": "https://donttrade.ca/tools/pass-rate-calculator/#app", "@type": "WebApplication", "applicationCategory": "FinanceApplication", "browserRequirements": "Requires JavaScript", "description": "Free: a prop-firm evaluation pass rate and payout rate for one cohort, computed correctly. Runs in your browser; your numbers are never sent.", "isAccessibleForFree": true, "name": "Prop-firm pass-rate calculator", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "operatingSystem": "Any (runs in a web browser)", "publisher": {"@id": "https://donttrade.ca/#org"}, "url": "https://donttrade.ca/tools/pass-rate-calculator/"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "item": "https://donttrade.ca/tools/", "name": "Free tools", "position": 2}, {"@type": "ListItem", "name": "Prop-firm pass-rate calculator", "position": 3}]}, {"@id": "https://donttrade.ca/tools/pass-rate-calculator/#app", "@type": "WebApplication", "applicationCategory": "FinanceApplication", "browserRequirements": "Requires JavaScript", "description": "Free: a prop-firm evaluation pass rate and payout rate for one cohort, computed correctly. Runs in your browser; your numbers are never sent.", "isAccessibleForFree": true, "name": "Prop-firm pass-rate calculator", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "operatingSystem": "Any (runs in a web browser)", "publisher": {"@id": "https://donttrade.ca/#org"}, "url": "https://donttrade.ca/tools/pass-rate-calculator/"}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Among finished evaluations in one cohort: passed ÷ (started − still open). A cohort is everything that started in one fixed window. Open accounts are neither passes nor failures yet, so the page also shows the range if every open one fails or passes."}, "name": "How is a prop-firm pass rate calculated?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Dividing this month’s passes by this month’s starts mixes cohorts, because those passes mostly came from earlier starts. Use the same cohort for every number."}, "name": "Why does the cohort matter?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "Per evaluation is the accounts paid out ÷ the evaluations started. Per funded account is the accounts paid out ÷ the accounts that passed. The two use different denominators, so they are not interchangeable."}, "name": "What is the difference between the payout rate per evaluation and per funded account?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. The calculator runs in your browser and nothing you type is sent."}, "name": "Is my data sent anywhere?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. It checks arithmetic on the counts you enter and does not recommend any security, trade, size or exit."}, "name": "Is this investment advice?"}]}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -182,8 +182,24 @@
     <p>It checks the arithmetic. It cannot tell anyone your inputs are right: a rate a firm computes about itself is still the firm’s own claim.</p>
     <p>Our paid work measures something no pass rate shows: how your traders handle winning and losing trades, computed from your own records by someone outside the firm, with the method published.</p>
     <p><a href="/for-firms/">What firms get →</a></p>
+  </section><section class="section" aria-labelledby="faq-h">
+    <h2 id="faq-h">Questions</h2>
+    <details id="q-how-is-a-prop-firm-pass-rate-calculated"><summary>How is a prop-firm pass rate calculated?</summary><p>Among finished evaluations in one cohort: passed ÷ (started − still open). A cohort is everything that started in one fixed window. Open accounts are neither passes nor failures yet, so the page also shows the range if every open one fails or passes.</p></details>
+    <details id="q-why-does-the-cohort-matter"><summary>Why does the cohort matter?</summary><p>Dividing this month’s passes by this month’s starts mixes cohorts, because those passes mostly came from earlier starts. Use the same cohort for every number.</p></details>
+    <details id="q-what-is-the-difference-between-the-payout-rate-per-evaluatio"><summary>What is the difference between the payout rate per evaluation and per funded account?</summary><p>Per evaluation is the accounts paid out ÷ the evaluations started. Per funded account is the accounts paid out ÷ the accounts that passed. The two use different denominators, so they are not interchangeable.</p></details>
+    <details id="q-is-my-data-sent-anywhere"><summary>Is my data sent anywhere?</summary><p>No. The calculator runs in your browser and nothing you type is sent.</p></details>
+    <details id="q-is-this-investment-advice"><summary>Is this investment advice?</summary><p>No. It checks arithmetic on the counts you enter and does not recommend any security, trade, size or exit.</p></details>
   </section>
 </div>
+<aside class="wrap related" aria-labelledby="related-h">
+  <h2 id="related-h">Related</h2>
+  <ul class="related-list">
+    <li><a href="/tools/prop-challenge-simulator/">Challenge Readiness Check</a> <span class="related-why">Your past days replayed under a prop firm’s published rules.</span></li>
+    <li><a href="/tools/drawdown-calculator/">Drawdown and recovery calculator</a> <span class="related-why">The gain that recovers a drawdown, and the depth and length of yours.</span></li>
+    <li><a href="/for-firms/">For firms</a> <span class="related-why">Fixed-price measurement of your own data.</span></li>
+    <li><a href="/research/">Research</a> <span class="related-why">Every study, negative results included, with data, code and DOIs where published.</span></li>
+  </ul>
+</aside>
 
 </main>
 <footer class="site-footer"><div class="wrap"><div class="cols">
@@ -191,7 +207,9 @@
     </ul></nav>
     <nav aria-label="Firms"><h2>Firms</h2><ul><li><a href="/for-firms/">For firms</a></li><li><a href="/for-platforms/">Journals &amp; platforms</a></li><li><a href="/sample-memo/">Sample memo</a></li>
     </ul></nav>
-    <nav aria-label="Research"><h2>Research</h2><ul><li><a href="/research/">Research</a></li><li><a href="/plan-gap/">The plan gap</a></li><li><a href="/glossary/">Glossary</a></li>
+    <nav aria-label="Research"><h2>Research</h2><ul><li><a href="/research/">Research</a></li><li><a href="/plan-gap/">The plan gap</a></li><li><a href="/glossary/">Glossary</a></li><li><a href="/for-researchers/">For researchers</a></li>
+    </ul></nav>
+    <nav aria-label="Learn"><h2>Learn</h2><ul><li><a href="/learn/">Learn</a></li><li><a href="/learn/drawdown-recovery-table/">Drawdown recovery table</a></li><li><a href="/learn/losing-streak-probability/">Losing streak probability</a></li>
     </ul></nav>
     <nav aria-label="About"><h2>About</h2><ul><li><a href="/about/">About</a></li><li><a href="/help/">Questions</a></li><li><a href="/terms/">Terms</a></li><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/#cancellation">Refunds</a></li>
     </ul></nav>

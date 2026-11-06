@@ -8,7 +8,7 @@
 {#- C-14 (G16): report39 stripe_link_<mode>_fr when set, else the English link with ?locale=fr (build.report_link_fr). #}
 {%- set link = report_link_fr %}
 <div class="wrap" data-requires-flag="paid_report"><div class="prose">
-  <p class="small"><a href="/pricing/#before-you-pay" hreflang="en" lang="en">English</a></p>
+  <p class="small"><a href="/before-you-pay/" hreflang="en" lang="en">English</a></p>
   <h1>Avant de payer : ce que vous acceptez</h1>
   <section class="notice" aria-labelledby="adp-h">
     <h2 id="adp-h">Test donttrade</h2>{# TRANSLATOR CHECK (29 Oct, one product): « test donttrade » replaces « Rapport d’habitudes »; the result is « votre résultat » (EN “the donttrade test”, “your test result”). #}
@@ -36,6 +36,6 @@
     <a class="btn btn-secondary" href="/pricing/#traders">Retour</a>
     <button class="btn btn-secondary" type="button" data-print>Imprimer ou enregistrer ce résumé</button></p>
   {% if stripe_mode == "test" %}<p class="notice notice-caution"><strong>Mode test</strong> Les paiements utilisent le mode test de Stripe. Aucune vraie carte n’est débitée.</p>{% endif %}
-  <p class="small"><a href="/fr/conditions/">Conditions</a> · <a href="/fr/confidentialite/">Confidentialité</a> · <a href="/pricing/" hreflang="en" lang="en">English</a></p>
+  <p class="small"><a href="/fr/conditions/">Conditions</a> · <a href="/fr/confidentialite/">Confidentialité</a> · <a href="/before-you-pay/" hreflang="en" lang="en">English</a></p>
 </div></div>
 {% endblock %}

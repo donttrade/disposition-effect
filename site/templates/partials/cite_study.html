@@ -1,0 +1,18 @@
+{#- 6 Nov (SEO round 1, ARCHITECT-PLAN-SEO 4.4): "Cite this study" for a study that has a Zenodo DOI, from config/studies.json.
+    Rendered by build.py as an island inside the study's frozen body, right after its header lines (compare.py leaves it out
+    of the comparison with the old page; lint holds it to the full page rules). The DOI link, the APA line and the BibTeX
+    entry all come from the same record, so they cannot disagree. -#}
+<details class="studycite" id="cite-this-study">
+  <summary>Cite this study</summary>
+  <div class="studycite-body">
+    <p>Permanent record with a DOI (Zenodo, preprint): <a href="https://doi.org/{{ study.doi }}">https://doi.org/{{ study.doi }}</a>. The page you are reading is the same study; the DOI is the stable address to cite.</p>
+    <p class="studycite-label">APA</p>
+    <p class="studycite-apa">{{ apa }}</p>
+    <p class="studycite-label">BibTeX</p>
+    <pre class="studycite-bib" tabindex="0" role="region" aria-label="BibTeX entry"><code>{{ bibtex }}</code></pre>
+    {%- for d in study.based_on %}
+    <p>Built on a public dataset: <a href="https://doi.org/{{ d.doi }}">{{ d.publisher }}, doi:{{ d.doi }}</a> (CC0 1.0).</p>
+    {%- endfor %}
+    <p class="studycite-more"><a href="/for-researchers/">More for researchers and press</a> · <a href="/corrections/">Corrections</a></p>
+  </div>
+</details>

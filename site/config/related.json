@@ -1,0 +1,359 @@
+{
+ "_about": "SEO round 1 (6 Nov 2026): the 'Related' block (partials/related.html) on each page below, as the SEO plan's section 6.4 map. Every target must be a page this build publishes and indexes; build.related_for() fails the build otherwise, and checks/lint.py checks the anchors. Add a target to this file only once its page exists.",
+ "pages": {
+  "/tools/trade-stats/": [
+   {
+    "href": "/tools/trading-heatmap/",
+    "label": "Trading heatmap",
+    "why": "Your results by the hour and weekday each trade opened."
+   },
+   {
+    "href": "/tools/drawdown-calculator/",
+    "label": "Drawdown and recovery calculator",
+    "why": "The gain that recovers a drawdown, and the depth and length of yours."
+   },
+   {
+    "href": "/tools/prop-challenge-simulator/",
+    "label": "Challenge Readiness Check",
+    "why": "Your past days replayed under a prop firm’s published rules."
+   },
+   {
+    "href": "/learn/losing-streak-probability/",
+    "label": "Losing streak probability",
+    "why": "The chance of a run of losses, by win rate and number of trades."
+   }
+  ],
+  "/tools/trading-heatmap/": [
+   {
+    "href": "/tools/trade-stats/",
+    "label": "Trade stats",
+    "why": "Win rate, profit factor, streaks and drawdown from your own trade file."
+   },
+   {
+    "href": "/tools/drawdown-calculator/",
+    "label": "Drawdown and recovery calculator",
+    "why": "The gain that recovers a drawdown, and the depth and length of yours."
+   },
+   {
+    "href": "/tools/prop-challenge-simulator/",
+    "label": "Challenge Readiness Check",
+    "why": "Your past days replayed under a prop firm’s published rules."
+   }
+  ],
+  "/tools/drawdown-calculator/": [
+   {
+    "href": "/learn/drawdown-recovery-table/",
+    "label": "Drawdown recovery table",
+    "why": "The gain that gets an account back, by the size of the fall."
+   },
+   {
+    "href": "/learn/losing-streak-probability/",
+    "label": "Losing streak probability",
+    "why": "The chance of a run of losses, by win rate and number of trades."
+   },
+   {
+    "href": "/tools/prop-challenge-simulator/",
+    "label": "Challenge Readiness Check",
+    "why": "Your past days replayed under a prop firm’s published rules."
+   },
+   {
+    "href": "/tools/trade-stats/",
+    "label": "Trade stats",
+    "why": "Win rate, profit factor, streaks and drawdown from your own trade file."
+   }
+  ],
+  "/tools/prop-challenge-simulator/": [
+   {
+    "href": "/tools/drawdown-calculator/",
+    "label": "Drawdown and recovery calculator",
+    "why": "The gain that recovers a drawdown, and the depth and length of yours."
+   },
+   {
+    "href": "/learn/drawdown-recovery-table/",
+    "label": "Drawdown recovery table",
+    "why": "The gain that gets an account back, by the size of the fall."
+   },
+   {
+    "href": "/learn/losing-streak-probability/",
+    "label": "Losing streak probability",
+    "why": "The chance of a run of losses, by win rate and number of trades."
+   },
+   {
+    "href": "/tools/pass-rate-calculator/",
+    "label": "Pass-rate calculator for firms",
+    "why": "A cohort’s evaluation pass rate and payout rate."
+   }
+  ],
+  "/tools/lot-size-calculator/": [
+   {
+    "href": "/tools/risk-reward-calculator/",
+    "label": "Risk-reward calculator",
+    "why": "The R multiple, the break-even win rate and the expectancy in R."
+   },
+   {
+    "href": "/tools/drawdown-calculator/",
+    "label": "Drawdown and recovery calculator",
+    "why": "The gain that recovers a drawdown, and the depth and length of yours."
+   },
+   {
+    "href": "/tools/trade-stats/",
+    "label": "Trade stats",
+    "why": "Win rate, profit factor, streaks and drawdown from your own trade file."
+   },
+   {
+    "href": "/learn/",
+    "label": "Learn",
+    "why": "Plain explanations with sources, and a free way to measure each in your own trades."
+   }
+  ],
+  "/tools/risk-reward-calculator/": [
+   {
+    "href": "/tools/lot-size-calculator/",
+    "label": "Lot size calculator",
+    "why": "The lot size for a risk amount and a stop, with the formula filled in."
+   },
+   {
+    "href": "/tools/trade-stats/",
+    "label": "Trade stats",
+    "why": "Win rate, profit factor, streaks and drawdown from your own trade file."
+   },
+   {
+    "href": "/tools/drawdown-calculator/",
+    "label": "Drawdown and recovery calculator",
+    "why": "The gain that recovers a drawdown, and the depth and length of yours."
+   },
+   {
+    "href": "/glossary/#r-multiple",
+    "label": "Glossary: R multiple",
+    "why": "What R means, and the formulas the calculator uses."
+   }
+  ],
+  "/tools/disposition-calculator/": [
+   {
+    "href": "/research/disposition-effect/",
+    "label": "The disposition-effect study",
+    "why": "The replication on a public panel, with data, code and a DOI."
+   },
+   {
+    "href": "/research/portfolio-driven-disposition-effect/",
+    "label": "The portfolio-driven follow-up",
+    "why": "A pre-registered replication whose headline was corrected."
+   },
+   {
+    "href": "/glossary/#pgr",
+    "label": "Glossary: PGR and PLR",
+    "why": "The two proportions the calculator compares."
+   },
+   {
+    "href": "/glossary/#loss-aversion",
+    "label": "Glossary: loss aversion",
+    "why": "The idea often offered as a reason for the pattern."
+   }
+  ],
+  "/tools/pass-rate-calculator/": [
+   {
+    "href": "/tools/prop-challenge-simulator/",
+    "label": "Challenge Readiness Check",
+    "why": "Your past days replayed under a prop firm’s published rules."
+   },
+   {
+    "href": "/tools/drawdown-calculator/",
+    "label": "Drawdown and recovery calculator",
+    "why": "The gain that recovers a drawdown, and the depth and length of yours."
+   },
+   {
+    "href": "/for-firms/",
+    "label": "For firms",
+    "why": "Fixed-price measurement of your own data."
+   },
+   {
+    "href": "/research/",
+    "label": "Research",
+    "why": "Every study, negative results included, with data, code and DOIs where published."
+   }
+  ],
+  "/research/disposition-effect/": [
+   {
+    "href": "/tools/disposition-calculator/",
+    "label": "Disposition-effect calculator",
+    "why": "Four counts of positions sold and held, and the ratio between them."
+   },
+   {
+    "href": "/research/portfolio-driven-disposition-effect/",
+    "label": "The portfolio-driven follow-up",
+    "why": "A pre-registered replication whose headline was corrected."
+   },
+   {
+    "href": "/for-researchers/",
+    "label": "For researchers and press",
+    "why": "Data, code and DOIs for citing a study."
+   },
+   {
+    "href": "/glossary/#pgr",
+    "label": "Glossary: PGR and PLR",
+    "why": "The two proportions the study compares."
+   }
+  ],
+  "/research/portfolio-driven-disposition-effect/": [
+   {
+    "href": "/research/disposition-effect/",
+    "label": "The disposition-effect study",
+    "why": "The study this one follows up."
+   },
+   {
+    "href": "/tools/disposition-calculator/",
+    "label": "Disposition-effect calculator",
+    "why": "Four counts of positions sold and held, and the ratio between them."
+   },
+   {
+    "href": "/for-researchers/",
+    "label": "For researchers and press",
+    "why": "Data, code and DOIs for citing a study."
+   },
+   {
+    "href": "/corrections/",
+    "label": "Corrections",
+    "why": "Every dated correction, including this study’s."
+   }
+  ],
+  "/research/insider-buying-edge/": [
+   {
+    "href": "/research/",
+    "label": "Research",
+    "why": "Every study, negative results included, with data, code and DOIs where published."
+   },
+   {
+    "href": "/glossary/#form4",
+    "label": "Glossary: Form 4",
+    "why": "The filing the study counts."
+   },
+   {
+    "href": "/research/strategy-tests/",
+    "label": "50 strategies tested",
+    "why": "Pre-registered tests of 50 strategies, also a negative result."
+   },
+   {
+    "href": "/for-researchers/",
+    "label": "For researchers and press",
+    "why": "Data, code and DOIs for citing a study."
+   }
+  ],
+  "/research/volatility-scaled-momentum/": [
+   {
+    "href": "/research/",
+    "label": "Research",
+    "why": "Every study, negative results included, with data, code and DOIs where published."
+   },
+   {
+    "href": "/research/strategy-tests/",
+    "label": "50 strategies tested",
+    "why": "More pre-registered tests, judged net of costs."
+   },
+   {
+    "href": "/research/swing-trading-strategies/",
+    "label": "26 swing strategies tested",
+    "why": "Pre-registered tests on locked holdouts."
+   },
+   {
+    "href": "/for-researchers/",
+    "label": "For researchers and press",
+    "why": "Data, code and DOIs for citing a study."
+   }
+  ],
+  "/research/strategy-tests/": [
+   {
+    "href": "/research/swing-trading-strategies/",
+    "label": "26 swing strategies tested",
+    "why": "The earlier pre-registered test of swing rules."
+   },
+   {
+    "href": "/code/",
+    "label": "Methods and code",
+    "why": "Code and data for each study, where published."
+   },
+   {
+    "href": "/research/",
+    "label": "Research",
+    "why": "Every study, negative results included, with data, code and DOIs where published."
+   }
+  ],
+  "/research/swing-trading-strategies/": [
+   {
+    "href": "/research/strategy-tests/",
+    "label": "50 strategies tested",
+    "why": "The larger test that followed."
+   },
+   {
+    "href": "/code/",
+    "label": "Methods and code",
+    "why": "Code and data for each study, where published."
+   },
+   {
+    "href": "/research/",
+    "label": "Research",
+    "why": "Every study, negative results included, with data, code and DOIs where published."
+   }
+  ],
+  "/learn/drawdown-recovery-table/": [
+   {
+    "href": "/tools/drawdown-calculator/",
+    "label": "Drawdown and recovery calculator",
+    "why": "The gain that recovers a drawdown, and the depth and length of yours."
+   },
+   {
+    "href": "/learn/losing-streak-probability/",
+    "label": "Losing streak probability",
+    "why": "The chance of a run of losses, by win rate and number of trades."
+   },
+   {
+    "href": "/tools/prop-challenge-simulator/",
+    "label": "Challenge Readiness Check",
+    "why": "Your past days replayed under a prop firm’s published rules."
+   },
+   {
+    "href": "/learn/",
+    "label": "Learn",
+    "why": "Plain explanations with sources, and a free way to measure each in your own trades."
+   }
+  ],
+  "/learn/losing-streak-probability/": [
+   {
+    "href": "/tools/trade-stats/",
+    "label": "Trade stats",
+    "why": "Win rate, profit factor, streaks and drawdown from your own trade file."
+   },
+   {
+    "href": "/learn/drawdown-recovery-table/",
+    "label": "Drawdown recovery table",
+    "why": "The gain that gets an account back, by the size of the fall."
+   },
+   {
+    "href": "/tools/prop-challenge-simulator/",
+    "label": "Challenge Readiness Check",
+    "why": "Your past days replayed under a prop firm’s published rules."
+   },
+   {
+    "href": "/learn/",
+    "label": "Learn",
+    "why": "Plain explanations with sources, and a free way to measure each in your own trades."
+   }
+  ],
+  "/learn/": [
+   {
+    "href": "/tools/drawdown-calculator/",
+    "label": "Drawdown and recovery calculator",
+    "why": "The gain that recovers a drawdown, and the depth and length of yours."
+   },
+   {
+    "href": "/tools/trade-stats/",
+    "label": "Trade stats",
+    "why": "Win rate, profit factor, streaks and drawdown from your own trade file."
+   },
+   {
+    "href": "/research/",
+    "label": "Research",
+    "why": "Every study, negative results included, with data, code and DOIs where published."
+   }
+  ]
+ }
+}

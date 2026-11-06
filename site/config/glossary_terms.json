@@ -1,0 +1,252 @@
+{
+ "_about": "SEO round 1 (6 Nov 2026): the trading and risk terms added to /glossary/ after the twelve study terms. Rendered by partials/glossary_more.html as an island in the lifted page (the twelve frozen terms are untouched), and into the DefinedTermSet JSON-LD. A formula here must be the one the named tool uses; tests/test_seo1.py holds each to the tool's code. A source must be a key of references.json (Crossref-checked). No example numbers, so none can drift from a tool.",
+ "terms": [
+  {
+   "id": "win-rate",
+   "term": "Win rate",
+   "text": "The share of closed trades that made money. Trades that closed at exactly zero are left out of both counts.",
+   "formula": "win rate = winning trades ÷ (winning trades + losing trades)",
+   "measured_in": [
+    {
+     "label": "Trade stats",
+     "href": "/tools/trade-stats/"
+    }
+   ]
+  },
+  {
+   "id": "profit-factor",
+   "term": "Profit factor",
+   "text": "Gross profit divided by gross loss, with the loss counted as a positive number. Above 1, the winning trades added up to more than the losing ones. With no losing trade there is nothing to divide by, and trade stats says so in words instead of showing a number.",
+   "formula": "profit factor = gross profit ÷ gross loss",
+   "measured_in": [
+    {
+     "label": "Trade stats",
+     "href": "/tools/trade-stats/"
+    }
+   ]
+  },
+  {
+   "id": "expectancy",
+   "term": "Expectancy",
+   "text": "The average result per trade. In money it is the net result divided by the number of trades, which trade stats shows as the mean result per trade. In R it is the win rate times the average win in R, minus the loss rate times the average loss in R; the risk-reward calculator uses it with every win equal to the R multiple and every loss equal to 1R.",
+   "formula": "expectancy in R = win rate × average win in R − loss rate × average loss in R",
+   "measured_in": [
+    {
+     "label": "Trade stats",
+     "href": "/tools/trade-stats/"
+    },
+    {
+     "label": "Risk-reward calculator",
+     "href": "/tools/risk-reward-calculator/"
+    }
+   ]
+  },
+  {
+   "id": "r-multiple",
+   "term": "R multiple",
+   "text": "A result measured in units of the risk taken. For a plan, it is the distance from entry to target divided by the distance from entry to stop.",
+   "formula": "R = distance from entry to target ÷ distance from entry to stop",
+   "measured_in": [
+    {
+     "label": "Risk-reward calculator",
+     "href": "/tools/risk-reward-calculator/"
+    }
+   ]
+  },
+  {
+   "id": "break-even-win-rate",
+   "term": "Break-even win rate",
+   "text": "The win rate at which a given R multiple makes exactly zero before costs. Costs push the real figure higher.",
+   "formula": "break-even win rate = 1 ÷ (1 + R)",
+   "measured_in": [
+    {
+     "label": "Risk-reward calculator",
+     "href": "/tools/risk-reward-calculator/"
+    }
+   ]
+  },
+  {
+   "id": "max-drawdown",
+   "term": "Maximum drawdown",
+   "text": "The largest fall from a running high to a later low in an account’s equity or balance, in money or as a share of that high. Trade stats and the drawdown calculator measure it on the curve of closed trades; a platform that includes open positions can report a larger figure.",
+   "measured_in": [
+    {
+     "label": "Drawdown and recovery calculator",
+     "href": "/tools/drawdown-calculator/"
+    },
+    {
+     "label": "Trade stats",
+     "href": "/tools/trade-stats/"
+    }
+   ]
+  },
+  {
+   "id": "drawdown-duration",
+   "term": "Drawdown duration",
+   "text": "How long a drawdown lasts: from the high that began it to the trade that brings the account back to that high. The drawdown calculator counts it in trades and in calendar days. A drawdown still open at the end of a file has no end yet.",
+   "measured_in": [
+    {
+     "label": "Drawdown and recovery calculator",
+     "href": "/tools/drawdown-calculator/"
+    }
+   ]
+  },
+  {
+   "id": "recovery-gain",
+   "term": "Recovery gain",
+   "text": "The gain, on the smaller balance that is left, that undoes a fall of a given size. It is always larger than the fall, because the gain applies to what remains.",
+   "formula": "recovery gain = d ÷ (1 − d), for a fall of d as a fraction of the high",
+   "measured_in": [
+    {
+     "label": "Drawdown and recovery calculator",
+     "href": "/tools/drawdown-calculator/"
+    }
+   ]
+  },
+  {
+   "id": "position-size",
+   "term": "Position size",
+   "text": "How many units or lots a trade is. For a plan built from a stop, it is the amount risked divided by what one lot loses at the stop. The lot size calculator shows the formula with your own numbers and the loss after rounding down to the broker’s lot step.",
+   "formula": "position size = amount risked ÷ (stop distance × value per point for one lot)",
+   "measured_in": [
+    {
+     "label": "Lot size calculator",
+     "href": "/tools/lot-size-calculator/"
+    }
+   ]
+  },
+  {
+   "id": "lot",
+   "term": "Lot",
+   "text": "A unit of trade size set by the instrument’s contract specification. In spot forex a standard lot is usually 100,000 units of the base currency, with mini and micro lots a tenth and a hundredth of that, but contract sizes differ by instrument and broker, and the broker’s own specification is the authority.",
+   "measured_in": [
+    {
+     "label": "Lot size calculator",
+     "href": "/tools/lot-size-calculator/"
+    }
+   ]
+  },
+  {
+   "id": "point-value",
+   "term": "Point value (pip value)",
+   "text": "The money value of a one-point move, or one pip, for one lot: the “value per point” the lot size calculator asks for. It depends on the instrument, its contract size and, in forex, the account’s currency. Brokers publish it in the contract specification.",
+   "measured_in": [
+    {
+     "label": "Lot size calculator",
+     "href": "/tools/lot-size-calculator/"
+    }
+   ]
+  },
+  {
+   "id": "risk-of-ruin",
+   "term": "Risk of ruin",
+   "text": "The chance that an account falls to a stated limit, such as zero or a firm’s maximum loss, before reaching a target, given a win rate, the sizes of wins and losses, and the amount risked per trade. The usual formulas assume independent trades with fixed odds, which real records rarely meet exactly. The Challenge Readiness Check replays your own past days many times against a rule set and reports how often the maximum loss was hit.",
+   "measured_in": [
+    {
+     "label": "Challenge Readiness Check",
+     "href": "/tools/prop-challenge-simulator/"
+    }
+   ]
+  },
+  {
+   "id": "loss-aversion",
+   "term": "Loss aversion",
+   "text": "The finding that a loss weighs more heavily than a gain of the same size. Kahneman and Tversky (1979) describe it as part of prospect theory. It is often offered as one reason for the disposition effect.",
+   "source": {
+    "label": "Kahneman & Tversky (1979)",
+    "ref": "kahneman1979"
+   },
+   "see_also": [
+    {
+     "label": "Disposition-effect calculator",
+     "href": "/tools/disposition-calculator/"
+    }
+   ]
+  },
+  {
+   "id": "sunk-cost",
+   "term": "Sunk cost",
+   "text": "Letting money, time or effort already spent, and not recoverable, weigh on a choice about what to do next. Arkes and Blumer (1985) tested it in experiments. In a trade file, how long losing positions were held is one place the pattern would show.",
+   "source": {
+    "label": "Arkes & Blumer (1985)",
+    "ref": "arkes1985"
+   }
+  },
+  {
+   "id": "revenge-trading",
+   "term": "Revenge trading",
+   "text": "Opening a new trade soon after a loss in order to win the money back, often at a larger size or outside the plan. There is no single formal definition. The donttrade test’s version is a trade opened within 15 minutes of the close of a losing trade, for files that have times of day.",
+   "see_also": [
+    {
+     "label": "For traders: the five habits",
+     "href": "/for-traders/"
+    }
+   ]
+  },
+  {
+   "id": "tilt",
+   "term": "Tilt",
+   "text": "A word borrowed from poker for playing worse after a loss or a bad run because of frustration. In a trade file, the measurable part is whether the trades after a run of losses differ from the others.",
+   "see_also": [
+    {
+     "label": "For traders: the five habits",
+     "href": "/for-traders/"
+    }
+   ]
+  },
+  {
+   "id": "overtrading",
+   "term": "Overtrading",
+   "text": "Trading more often than your own plan or usual pace. Not the business sense of the word, where a company takes on more than its capital supports. One way to measure it is to compare trades per day with your own median."
+  },
+  {
+   "id": "martingale",
+   "term": "Martingale",
+   "text": "A sizing scheme that makes the next trade larger after a loss, classically by doubling it so that one win recovers every loss so far. Because each loss makes the next one larger, a run of losses grows the drawdown faster than the same run at a flat size would.",
+   "see_also": [
+    {
+     "label": "Drawdown recovery table",
+     "href": "/learn/drawdown-recovery-table/"
+    }
+   ]
+  },
+  {
+   "id": "averaging-down",
+   "term": "Averaging down",
+   "text": "Adding to a losing position at a lower price, which lowers the average entry price and makes the position larger, so a further fall costs more."
+  },
+  {
+   "id": "trailing-drawdown",
+   "term": "Trailing drawdown",
+   "text": "A loss limit measured from the highest balance, or equity, the account has reached, so the limit rises as the account does, instead of staying a fixed distance below the starting balance. Firms differ in what moves it and whether it stops rising at some level, so the firm’s published rule is the definition.",
+   "measured_in": [
+    {
+     "label": "Challenge Readiness Check",
+     "href": "/tools/prop-challenge-simulator/"
+    }
+   ]
+  },
+  {
+   "id": "daily-drawdown",
+   "term": "Daily drawdown (daily loss limit)",
+   "text": "A limit on how much the account can lose within one trading day, measured from the day’s starting balance or equity, or as a fixed amount. Firms differ in when a day starts, in a time zone and an hour, and in what counts toward the limit.",
+   "measured_in": [
+    {
+     "label": "Challenge Readiness Check",
+     "href": "/tools/prop-challenge-simulator/"
+    }
+   ]
+  },
+  {
+   "id": "pre-registration",
+   "term": "Pre-registration",
+   "text": "Writing down a study’s question, data and tests, with a date, before running them, so that results cannot be chosen afterwards. Several donttrade studies were pre-registered; each study page says how.",
+   "see_also": [
+    {
+     "label": "Research",
+     "href": "/research/"
+    }
+   ]
+  }
+ ]
+}

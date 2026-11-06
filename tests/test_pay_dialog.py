@@ -131,7 +131,8 @@ def test_details_page_is_the_block_alone_without_analytics(built_site):
     assert "cloudflareinsights" not in page   # with analytics on, every other page has it (lint flags_of_build)
     assert '<meta name="robots" content="noindex">' in page
     assert "/before-you-pay/" not in (out / "sitemap.xml").read_text(encoding="utf-8")
-    assert "Disallow: /before-you-pay/\n" in (out / "robots.txt").read_text(encoding="utf-8")
+    # 6 Nov (SEO round 1): noindex stays, the robots.txt block goes, so a crawler can read the noindex and the hreflang pair
+    assert "/before-you-pay/" not in (out / "robots.txt").read_text(encoding="utf-8")
     assert "/before-you-pay/" in B.ADDRESS_LINE_PATHS and 'data-business-id="full"' in page
 
 

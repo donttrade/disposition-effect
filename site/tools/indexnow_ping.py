@@ -20,6 +20,7 @@ import argparse
 import json
 import os
 import re
+import ssl
 import subprocess
 import sys
 import tomllib
@@ -34,8 +35,27 @@ MAX_PER_CALL = 10000
 LOC_RE = re.compile(r"<url><loc>([^<]+)</loc>(?:<lastmod>([^<]*)</lastmod>)?")
 
 
+# 6 Nov (SEO round 1): Cloudflare's bot filter answers 403 to Python's default "Python-urllib/3.x" agent, so the
+# key-file check on https://donttrade.ca/<key>.txt failed even with the file live. Every request sends this plain,
+# descriptive agent instead (it names the tool and the site, as the IndexNow documentation asks of a submitter).
+USER_AGENT = "donttrade-indexnow/1.0 (+https://donttrade.ca)"
+
+
 class Refused(Exception):
     pass
+
+
+def ssl_context(environ=None):
+    """The TLS context for every request. SSL_CERT_FILE, when set, names the CA bundle to trust (a machine behind a
+    proxy that re-signs HTTPS keeps its bundle there); a named file that is missing is refused, never ignored.
+    Verification is never switched off."""
+    environ = os.environ if environ is None else environ
+    cafile = environ.get("SSL_CERT_FILE")
+    if not cafile:
+        return ssl.create_default_context()
+    if not os.path.isfile(cafile):
+        raise Refused(f"SSL_CERT_FILE names a file that does not exist: {cafile}")
+    return ssl.create_default_context(cafile=cafile)
 
 
 def read_key(toml_path):
@@ -81,8 +101,9 @@ def git(*args):
 
 
 def http_get(url):
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     try:
-        with urllib.request.urlopen(url, timeout=20) as r:
+        with urllib.request.urlopen(req, timeout=20, context=ssl_context()) as r:
             return r.read().decode("utf-8", "replace")
     except (urllib.error.URLError, OSError):
         return None
@@ -90,9 +111,9 @@ def http_get(url):
 
 def http_post(url, payload):
     req = urllib.request.Request(url, data=json.dumps(payload).encode(), method="POST",
-                                 headers={"Content-Type": "application/json; charset=utf-8"})
+                                 headers={"Content-Type": "application/json; charset=utf-8", "User-Agent": USER_AGENT})
     try:
-        with urllib.request.urlopen(req, timeout=30) as r:
+        with urllib.request.urlopen(req, timeout=30, context=ssl_context()) as r:
             return r.status
     except urllib.error.HTTPError as e:
         return e.code

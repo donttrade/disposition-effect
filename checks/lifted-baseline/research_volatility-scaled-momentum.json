@@ -30,6 +30,14 @@
   [
    "citation_pdf_url",
    "https://donttrade.ca/research/volatility-scaled-momentum/donttrade-volatility-scaled-momentum.pdf"
+  ],
+  [
+   "citation_doi",
+   "10.5281/zenodo.23426307"
+  ],
+  [
+   "citation_public_url",
+   "https://donttrade.ca/research/volatility-scaled-momentum/"
   ]
  ],
  "fixes": [],

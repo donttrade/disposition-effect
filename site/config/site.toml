@@ -33,6 +33,7 @@ ask_box = false            # hidden until the answer engine passes a real-questi
 prediction_results = false # /research/does-the-test-predict/ (prediction study, R1): off until the OSF registration is posted
 journal = false            # the free Trading Journal + P&L Calendar (/journal/, /tools/pnl-calendar/ and their nav row): off until the Tester passes J1-J38 and the owner approves
 refund_no_result = false   # "No result, no charge" (6 Nov, addendum A7/A8): the refund wording on every page, the /refund/ form and its French twin. OFF until the owner has changed the Stripe checkout text to match (CODER-REPORT-ROUNDA); then set [legal] refund_effective and bump terms_date to that day, in the same push
+learn_nav = true           # the footer's Learn column (6 Nov, SEO round 1): /learn/ and its articles are built, in the sitemap and linked from the related blocks either way; this flag only adds the footer link to /learn/. ON: owner approved SEO 6 Nov; Claude decided footer-first per research
 whatif_ranked = false      # Challenge Readiness Check: ranked "Biggest changes on your past days" rules: off until a securities lawyer clears the strings (ARCHITECT-CHALLENGE-READINESS §2.7.5)
 
 [analytics]
@@ -207,7 +208,12 @@ heading = "Firms"
 links = [["For firms", "/for-firms/"], ["Journals & platforms", "/for-platforms/"], ["Sample memo", "/sample-memo/"]]
 [[footer]]
 heading = "Research"
-links = [["Research", "/research/"], ["The plan gap", "/plan-gap/"], ["Glossary", "/glossary/"]]
+links = [["Research", "/research/"], ["The plan gap", "/plan-gap/"], ["Glossary", "/glossary/"], ["For researchers", "/for-researchers/"]]
+# 6 Nov (SEO round 1): a Learn column, only while [flags] learn_nav is on (build.footer_for)
+[[footer]]
+heading = "Learn"
+requires_flag = "learn_nav"
+links = [["Learn", "/learn/"], ["Drawdown recovery table", "/learn/drawdown-recovery-table/"], ["Losing streak probability", "/learn/losing-streak-probability/"]]
 [[footer]]
 heading = "About"
 links = [["About", "/about/"], ["Questions", "/help/"], ["Terms", "/terms/"], ["Privacy", "/privacy/"], ["Refunds", "/terms/#cancellation"]]

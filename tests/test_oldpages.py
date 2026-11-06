@@ -138,12 +138,14 @@ def test_head_rules(built_site, path):
     assert "style-src &#39;self&#39;;" in csp
     assert ("donttrade.substack.com" in csp) == ('action="https://donttrade.substack.com/subscribe"' in html)
     g = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', html, re.S).group(1))["@graph"]
-    types = [n["@type"] for n in g]
+    # 6 Nov (SEO round 1): a study with a DOI is typed ["Article", "ScholarlyArticle"], so a node's type may be a list
+    kinds = lambda n: n["@type"] if isinstance(n["@type"], list) else [n["@type"]]   # noqa: E731
+    types = [t for n in g for t in kinds(n)]
     crumbs = next(n for n in g if n["@type"] == "BreadcrumbList")["itemListElement"]
     assert crumbs[0]["name"] == "Home" and crumbs[-1]["name"] == page["crumb"]
     if path in STUDIES:
         assert crumbs[1]["name"] == "Research" and "Article" in types
-        art = next(n for n in g if n["@type"] == "Article")
+        art = next(n for n in g if "Article" in kinds(n))
         assert art["author"] == {"@id": "https://donttrade.ca/#org"} and art["url"] == "https://donttrade.ca" + path
     assert ('<meta name="robots" content="noindex">' in html) == (path in ("/404.html", "/who-pays/"))
     if path == "/who-pays/":

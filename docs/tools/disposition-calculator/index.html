@@ -8,18 +8,18 @@
 <link rel="me" href="https://mastodon.social/@donttradestudy">
 <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#16181C" media="(prefers-color-scheme: dark)">
-<title>Disposition-effect calculator — donttrade</title>
+<title>Disposition Effect Calculator: Do You Sell Winners Early?</title>
 <meta name="description" content="Free: enter four position counts and get PGR, PLR, their ratio and a significance test. Runs in your browser; your numbers are never sent.">
 <link rel="canonical" href="https://donttrade.ca/tools/disposition-calculator/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="donttrade">
-<meta property="og:title" content="Disposition-effect calculator — donttrade">
+<meta property="og:title" content="Disposition Effect Calculator: Do You Sell Winners Early?">
 <meta property="og:description" content="Free: enter four position counts and get PGR, PLR, their ratio and a significance test. Runs in your browser; your numbers are never sent.">
 <meta property="og:url" content="https://donttrade.ca/tools/disposition-calculator/">
-<meta property="og:image" content="https://donttrade.ca/assets/og/default.png">
+<meta property="og:image" content="https://donttrade.ca/assets/og/tool-disp.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Disposition-effect calculator — donttrade">
+<meta property="og:image:alt" content="Disposition Effect Calculator: Do You Sell Winners Early?">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:description" content="Free: enter four position counts and get PGR, PLR, their ratio and a significance test. Runs in your browser; your numbers are never sent.">
 <link rel="alternate" type="application/rss+xml" title="donttrade" href="https://donttrade.substack.com/feed">
@@ -29,7 +29,7 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=e0f686f7">
+<link rel="stylesheet" href="/static/css/site.css?v=ea622423">
 <link rel="stylesheet" href="/static/css/tools.css?v=2117013f">
 <script src="/static/js/theme.js?v=7e47c1a9"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
@@ -41,7 +41,7 @@
 <script src="/static/js/umami-clean.js?v=56f7d1df" defer></script>
 <script defer src="https://cloud.umami.is/script.js" data-website-id="16c5fa53-e8fc-4c55-892a-5546e7d51830" data-do-not-track="true" data-exclude-hash="true" data-domains="donttrade.ca" data-before-send="dtUmamiClean"></script>
 
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "item": "https://donttrade.ca/tools/", "name": "Free tools", "position": 2}, {"@type": "ListItem", "name": "Disposition-effect calculator", "position": 3}]}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "item": "https://donttrade.ca/tools/", "name": "Free tools", "position": 2}, {"@type": "ListItem", "name": "Disposition-effect calculator", "position": 3}]}, {"@id": "https://donttrade.ca/tools/disposition-calculator/#app", "@type": "WebApplication", "applicationCategory": "FinanceApplication", "browserRequirements": "Requires JavaScript", "description": "Free: enter four position counts and get PGR, PLR, their ratio and a significance test. Runs in your browser; your numbers are never sent.", "isAccessibleForFree": true, "name": "Disposition-effect calculator", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "operatingSystem": "Any (runs in a web browser)", "publisher": {"@id": "https://donttrade.ca/#org"}, "url": "https://donttrade.ca/tools/disposition-calculator/"}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "The tendency to sell positions that are up more readily than positions that are down. Shefrin and Statman (1985) named it, and Odean (1998) measured it on brokerage records."}, "name": "What is the disposition effect?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "PGR is realised gains ÷ (realised gains + paper gains), and PLR is realised losses ÷ (realised losses + paper losses). Following Odean (1998), the counts are added up over the days an account sold something."}, "name": "How are PGR and PLR calculated?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "That in these counts gains were sold more readily than losses. The calculator shows the ratio, the difference and a t-statistic, and the page lists what the figure does not tell you, such as holding age."}, "name": "What does a PGR to PLR ratio above 1 mean?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "It reports a t-statistic with Odean’s standard error, which treats every position as independent. That overstates how precise the result is when a few accounts hold most of the positions."}, "name": "Does the calculator test whether the result is chance?"}, {"@type": "Question", "acceptedAnswer": {"@type": "Answer", "text": "No. It is arithmetic on counts you type in and does not recommend any security, trade, size or exit."}, "name": "Is this investment advice?"}]}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -141,7 +141,24 @@
 </div></div>
 
 
-<!--frozen:end-->
+<!--frozen:end--><div class="wrap"><section class="section" aria-labelledby="faq-h">
+  <h2 id="faq-h">Questions</h2>
+  <details><summary>What is the disposition effect?</summary><p>The tendency to sell positions that are up more readily than positions that are down. Shefrin and Statman (1985) named it, and Odean (1998) measured it on brokerage records.</p></details>
+  <details><summary>How are PGR and PLR calculated?</summary><p>PGR is realised gains ÷ (realised gains + paper gains), and PLR is realised losses ÷ (realised losses + paper losses). Following Odean (1998), the counts are added up over the days an account sold something.</p></details>
+  <details><summary>What does a PGR to PLR ratio above 1 mean?</summary><p>That in these counts gains were sold more readily than losses. The calculator shows the ratio, the difference and a t-statistic, and the page lists what the figure does not tell you, such as holding age.</p></details>
+  <details><summary>Does the calculator test whether the result is chance?</summary><p>It reports a t-statistic with Odean’s standard error, which treats every position as independent. That overstates how precise the result is when a few accounts hold most of the positions.</p></details>
+  <details><summary>Is this investment advice?</summary><p>No. It is arithmetic on counts you type in and does not recommend any security, trade, size or exit.</p></details>
+</section></div>
+
+<aside class="wrap related" aria-labelledby="related-h">
+  <h2 id="related-h">Related</h2>
+  <ul class="related-list">
+    <li><a href="/research/disposition-effect/">The disposition-effect study</a> <span class="related-why">The replication on a public panel, with data, code and a DOI.</span></li>
+    <li><a href="/research/portfolio-driven-disposition-effect/">The portfolio-driven follow-up</a> <span class="related-why">A pre-registered replication whose headline was corrected.</span></li>
+    <li><a href="/glossary/#pgr">Glossary: PGR and PLR</a> <span class="related-why">The two proportions the calculator compares.</span></li>
+    <li><a href="/glossary/#loss-aversion">Glossary: loss aversion</a> <span class="related-why">The idea often offered as a reason for the pattern.</span></li>
+  </ul>
+</aside>
 
 </main>
 <footer class="site-footer"><div class="wrap"><div class="cols">
@@ -149,7 +166,9 @@
     </ul></nav>
     <nav aria-label="Firms"><h2>Firms</h2><ul><li><a href="/for-firms/">For firms</a></li><li><a href="/for-platforms/">Journals &amp; platforms</a></li><li><a href="/sample-memo/">Sample memo</a></li>
     </ul></nav>
-    <nav aria-label="Research"><h2>Research</h2><ul><li><a href="/research/">Research</a></li><li><a href="/plan-gap/">The plan gap</a></li><li><a href="/glossary/">Glossary</a></li>
+    <nav aria-label="Research"><h2>Research</h2><ul><li><a href="/research/">Research</a></li><li><a href="/plan-gap/">The plan gap</a></li><li><a href="/glossary/">Glossary</a></li><li><a href="/for-researchers/">For researchers</a></li>
+    </ul></nav>
+    <nav aria-label="Learn"><h2>Learn</h2><ul><li><a href="/learn/">Learn</a></li><li><a href="/learn/drawdown-recovery-table/">Drawdown recovery table</a></li><li><a href="/learn/losing-streak-probability/">Losing streak probability</a></li>
     </ul></nav>
     <nav aria-label="About"><h2>About</h2><ul><li><a href="/about/">About</a></li><li><a href="/help/">Questions</a></li><li><a href="/terms/">Terms</a></li><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/#cancellation">Refunds</a></li>
     </ul></nav>

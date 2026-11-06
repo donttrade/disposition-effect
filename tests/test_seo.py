@@ -77,8 +77,9 @@ def test_jsonld_parses_and_is_honest(built_site, page):
     found = set(keys(g))
     for banned in ("aggregateRating", "review", "address", "telephone"):
         assert banned not in found, banned
-    assert "Product" not in {n["@type"] for n in g}
-    types = {n["@type"] for n in g}
+    flat = lambda n: n["@type"] if isinstance(n["@type"], list) else [n["@type"]]   # noqa: E731  (a study is ["Article", "ScholarlyArticle"])
+    assert "Product" not in {t for n in g for t in flat(n)}
+    types = {t for n in g for t in flat(n)}
     if page["path"] == "/":
         assert {"WebSite", "Organization"} <= types
     else:

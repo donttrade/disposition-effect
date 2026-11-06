@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{#- /learn/ (6 Nov, SEO round 1, ARCHITECT-PLAN-SEO item 12): the hub for the plain explanations. Template contract (checks/lint.py
+    learn_problems): one H1, the answer block (#answer, 40 to 60 words, first paragraph after the H1), at least three internal
+    links in <main>, the disclaimer in the footer, an "Updated" line equal to the sitemap date. Strictly about measuring: no page
+    here says what to trade, how much to risk or what to do about a habit. -#}
+{% block content %}
+<div class="wrap learn">
+  {% include "partials/crumbs.html" %}
+  <h1>{{ page.h1 }}</h1>
+  <section id="answer" aria-label="Short answer">
+    <p>Learn explains trading habits and risk math in plain words and shows how to measure each one in your own trade file. Every table here is computed when the site is built, every paper is linked by its DOI, and these pages are not investment advice: they say nothing about any trade, size or exit.</p>
+  </section>
+  <p class="meta small">Updated {{ page.updated|longdate }}</p>
+
+  <section class="learn-sec" aria-labelledby="risk-h">
+    <h2 id="risk-h">Risk math</h2>
+    <ul class="learn-list">
+      <li><a href="/learn/drawdown-recovery-table/">Drawdown recovery table</a><span class="learn-why">The gain that gets an account back after a fall, from {{ dd_min }}% to {{ dd_max }}%, with maximum drawdown, duration and why platforms differ.</span></li>
+      <li><a href="/learn/losing-streak-probability/">Losing streak probability</a><span class="learn-why">The chance of a run of {{ run_lengths[0] }}, {{ run_lengths[1] }} or {{ run_lengths[2] }} losses in a row, by win rate and number of trades, and when streaks are not random.</span></li>
+    </ul>
+  </section>
+
+  <section class="learn-sec" aria-labelledby="habit-h">
+    <h2 id="habit-h">Habits and the evidence</h2>
+    <ul class="learn-list">
+      <li><a href="/research/disposition-effect/">The disposition-effect study</a><span class="learn-why">Selling winners sooner than losers, measured with Odean’s method on a public panel, with its data, code and DOI.</span></li>
+      <li><a href="/research/">All studies</a><span class="learn-why">Every donttrade study, negative results included.</span></li>
+      <li><a href="/glossary/">Glossary</a><span class="learn-why">Plain definitions of the habits and the risk terms, with the formula each tool uses.</span></li>
+    </ul>
+  </section>
+
+  <section class="learn-sec" aria-labelledby="meas-h">
+    <h2 id="meas-h">Measure it in your own trades</h2>
+    <p>These free tools read your trade file in your browser. The file is not uploaded.</p>
+    <ul class="learn-list">
+      <li><a href="/tools/trade-stats/">Trade stats</a><span class="learn-why">Win rate, profit factor, longest streaks and drawdown from your file.</span></li>
+      <li><a href="/tools/drawdown-calculator/">Drawdown and recovery calculator</a><span class="learn-why">The depth and length of each of your drawdowns.</span></li>
+      <li><a href="/tools/prop-challenge-simulator/">Challenge Readiness Check</a><span class="learn-why">Your past days replayed under a prop firm’s published rules.</span></li>
+    </ul>
+  </section>
+
+  <section class="learn-sec" aria-labelledby="how-h">
+    <h2 id="how-h">How these pages are made</h2>
+    <ul>
+      <li>Every table is computed by a script in the public repository when the site is built, and the same table is offered as a CSV. The site’s tests recompute each value a second way.</li>
+      <li>A paper is cited only after its title, journal and year were confirmed with Crossref; the date is on the page.</li>
+      <li>These pages describe arithmetic and measurement. They are not investment advice and say nothing about any trade, size or exit. A mistake is logged on <a href="/corrections/">Corrections</a>.</li>
+      <li>The scripts and data behind the studies are listed on <a href="/code/">Methods and code</a>.</li>
+    </ul>
+  </section>
+</div>
+{% endblock %}

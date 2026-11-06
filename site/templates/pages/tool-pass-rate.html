@@ -88,5 +88,15 @@
     <p>Our paid work measures something no pass rate shows: how your traders handle winning and losing trades, computed from your own records by someone outside the firm, with the method published.</p>
     <p><a href="/for-firms/">What firms get →</a></p>
   </section>
+
+  {#- 6 Nov (SEO round 1, item 9): a visible FAQ; the FAQPage JSON-LD is read from this section (build.faq_from), word for word -#}
+  <section class="section" aria-labelledby="faq-h">
+    <h2 id="faq-h">Questions</h2>
+    <details><summary>How is a prop-firm pass rate calculated?</summary><p>Among finished evaluations in one cohort: passed ÷ (started − still open). A cohort is everything that started in one fixed window. Open accounts are neither passes nor failures yet, so the page also shows the range if every open one fails or passes.</p></details>
+    <details><summary>Why does the cohort matter?</summary><p>Dividing this month’s passes by this month’s starts mixes cohorts, because those passes mostly came from earlier starts. Use the same cohort for every number.</p></details>
+    <details><summary>What is the difference between the payout rate per evaluation and per funded account?</summary><p>Per evaluation is the accounts paid out ÷ the evaluations started. Per funded account is the accounts paid out ÷ the accounts that passed. The two use different denominators, so they are not interchangeable.</p></details>
+    <details><summary>Is my data sent anywhere?</summary><p>No. The calculator runs in your browser and nothing you type is sent.</p></details>
+    <details><summary>Is this investment advice?</summary><p>No. It checks arithmetic on the counts you enter and does not recommend any security, trade, size or exit.</p></details>
+  </section>
 </div>
 {% endblock %}

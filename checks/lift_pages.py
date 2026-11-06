@@ -123,6 +123,13 @@ LIFT_FIXES = {
         ('<p><a href="/sample-memo/">How we measure it on a firm’s own records →</a> · <a href="/glossary/">Glossary →</a></p>',
          '<p><a href="/glossary/">Glossary →</a></p>'),
     ],
+    # 6 Nov 2026 (SEO round 1, fix round 2): a dated correction. The scripts for two studies are not public yet, so the
+    # closing sentence no longer says every script is on the Code page.
+    "/plan-gap/": [('<p>Every study, its script and every correction are on the <a href="/research/">Research</a> and <a href="/code/">Code</a> pages.</p>',
+                    '<p>Every study is on the <a href="/research/">Research</a> page and every script that is public is on the <a href="/code/">Code</a> page; the scripts for two studies are not yet public. Every correction is logged on the <a href="/corrections/">Corrections</a> page.</p>')],
+    # 6 Nov 2026 (SEO round 1, fix round 3): the dated log row for the /plan-gap/ wording fix above.
+    "/corrections/": [('    </tbody>\n  </table></div>\n  <p class="meta">Log opened 17 Oct 2026.',
+                       '    <tr><td>6 Nov 2026</td><td><a href="/plan-gap/">The plan gap</a></td><td>The closing sentence said every study, its script and every correction are on the Research and Code pages. Scripts are public for 4 of the 6 studies, and corrections are logged on this page, not on those two.</td><td>The sentence now says every public script is on the Code page, that the scripts for two studies are not yet public, and that every correction is logged on this page. No figure changed.</td><td>Author, site review</td></tr>\n    </tbody>\n  </table></div>\n  <p class="meta">Log opened 17 Oct 2026.')],
     "/independence/": [
         ("The site header and footer link to Pricing and Start a trial on every page,",
          "The site header and footer link to Pricing and Start a Pilot on every page,"),
@@ -253,6 +260,18 @@ def old_main(html, rel):
     if not m:
         raise LiftError(f"docs/{rel}: no <main id=\"main\">")
     return m.group(1)
+
+
+# 6 Nov 2026 (SEO round 1, fix round 4; owner's wording rule): "made-up data" and "fake ..." become "simulated ..." /
+# "dummy strategy" / "spurious events" on five lifted pages. A wording change; no number or meaning changed.
+for _path, _fixes in {
+    '/plan-gap/': [('ined in writing and tested on made-up data before it is used.</li>\n', 'ined in writing and tested on simulated data before it is used.</li>\n')],
+    '/research/disposition-effect/': [('is reluctant to sell them. On made-up data with no\ndisposition effe', 'is reluctant to sell them. On simulated data with no\ndisposition effe'), ('lf evidence of look-ahead: in made-up data with no look-ahead at al', 'lf evidence of look-ahead: in simulated data with no look-ahead at al'), ('idence of look-ahead, because made-up data with no look-ahead show ', 'idence of look-ahead, because simulated data with no look-ahead show ')],
+    '/research/insider-buying-edge/': [('$10,000. But those 65 are not fake events — twenty of them clear the li', '$10,000. But those 65 are not spurious events — twenty of them clear the li')],
+    '/research/portfolio-driven-disposition-effect/': [('pass mark down, tried them on made-up data first, and sealed them b', 'pass mark down, tried them on simulated data first, and sealed them b'), ('t history.</p>\n<p><strong>The made-up data came first, and it matte', 't history.</p>\n<p><strong>The simulated data came first, and it matte'), ('st finding the effect: on the made-up\npanels with no effect, it cam', 'st finding the effect: on the simulated\npanels with no effect, it cam'), ('ed size is not supported. (On made-up panels with a real effect it ', 'ed size is not supported. (On simulated panels with a real effect it ')],
+    '/research/swing-trading-strategies/': [('ng>placebo</strong> here is a fake strategy that trades at random times i', 'ng>placebo</strong> here is a dummy strategy that trades at random times i'), ('data;</li>\n<li>they failed on random-walk fake prices (passing in no more than 10 o', 'data;</li>\n<li>they failed on simulated random-walk prices (passing in no more than 10 o'), ('ing in no more than 10 of 100 fake panels);</li>\n<li>they detected a pl', 'ing in no more than 10 of 100 simulated panels);</li>\n<li>they detected a pl')],
+}.items():
+    LIFT_FIXES.setdefault(_path, []).extend(_fixes)
 
 
 def apply_fixes(main, path):

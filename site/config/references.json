@@ -1,0 +1,60 @@
+{
+ "_about": "DOIs cited on /learn/ pages and the glossary additions, each confirmed against api.crossref.org on the date shown (title, journal, volume, pages and year as listed). A DOI not in this file may not be linked from those pages (tests/test_seo1.py). The Zenodo DOIs of donttrade's own studies are in studies.json. Crossref lists only the first page (263) for Kahneman and Tversky (1979), so only that is recorded.",
+ "refs": {
+  "odean1998": {
+   "doi": "10.1111/0022-1082.00072",
+   "authors": "Odean, T.",
+   "year": 1998,
+   "title": "Are investors reluctant to realize their losses?",
+   "journal": "The Journal of Finance",
+   "volume": "53",
+   "issue": "5",
+   "pages": "1775-1798",
+   "crossref_checked": "2026-11-06"
+  },
+  "shefrin1985": {
+   "doi": "10.1111/j.1540-6261.1985.tb05002.x",
+   "authors": "Shefrin, H., & Statman, M.",
+   "year": 1985,
+   "title": "The disposition to sell winners too early and ride losers too long: Theory and evidence",
+   "journal": "The Journal of Finance",
+   "volume": "40",
+   "issue": "3",
+   "pages": "777-790",
+   "crossref_checked": "2026-11-06"
+  },
+  "kahneman1979": {
+   "doi": "10.2307/1914185",
+   "authors": "Kahneman, D., & Tversky, A.",
+   "year": 1979,
+   "title": "Prospect theory: An analysis of decision under risk",
+   "journal": "Econometrica",
+   "volume": "47",
+   "issue": "2",
+   "pages": "263",
+   "crossref_checked": "2026-11-06"
+  },
+  "arkes1985": {
+   "doi": "10.1016/0749-5978(85)90049-4",
+   "authors": "Arkes, H. R., & Blumer, C.",
+   "year": 1985,
+   "title": "The psychology of sunk cost",
+   "journal": "Organizational Behavior and Human Decision Processes",
+   "volume": "35",
+   "issue": "1",
+   "pages": "124-140",
+   "crossref_checked": "2026-11-06"
+  },
+  "schilling1990": {
+   "doi": "10.1080/07468342.1990.11973306",
+   "authors": "Schilling, M. F.",
+   "year": 1990,
+   "title": "The longest run of heads",
+   "journal": "The College Mathematics Journal",
+   "volume": "21",
+   "issue": "3",
+   "pages": "196-207",
+   "crossref_checked": "2026-11-06"
+  }
+ }
+}

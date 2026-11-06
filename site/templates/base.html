@@ -88,6 +88,7 @@
 {%- set main_cls = page.get("main_class") or ("mkt" if page.path in mkt_pages else "") %}
 <main id="main"{% if main_cls %} class="{{ main_cls }}"{% endif %}>
 {% block content %}{% endblock %}
+{%- if related %}{% include "partials/related.html" %}{% endif %}
 </main>
 {% include "partials/footer.html" %}
 {%- if flags.paid_report %}
