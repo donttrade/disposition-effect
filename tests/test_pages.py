@@ -285,7 +285,7 @@ def test_for_firms_pilot_rename_and_prices(built_site):
     html = html_of(built_site, "/for-firms/")
     text = visible(html)
     assert "Trial" not in text   # QA 25 Oct: the rename note is only in the terms
-    assert "Start a Pilot — $745 USD" in text
+    assert "Start a Pilot: $745 USD" in text
     assert "Card payments are accepted through a secure Stripe link, sent only after you accept the scope." in text
     # pilot_checkout off: no Pilot card link. 29 Oct: the trader pay dialog (paid builds) holds the report's link only
     assert "buy.stripe.com" not in re.sub(r'(?s)<dialog class="pay-dialog".*?</dialog>', "", html)
