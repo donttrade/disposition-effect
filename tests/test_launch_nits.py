@@ -7,6 +7,7 @@ N5 they carry the Free tools breadcrumb;
 N6 /terms/ no longer shows "The anchor of this section is unchanged."
 """
 import os
+import re
 import sys
 
 import pytest
@@ -46,22 +47,31 @@ def test_n1_prop_sim_one_day(browser, built_site):
 @pytest.mark.parametrize("path", CALCS)
 def test_n4_n5_breadcrumb_and_noscript(browser, built_site, path):
     html = (built_site["out"] / path.strip("/") / "index.html").read_text(encoding="utf-8")
-    pre = html[:html.index("<!--frozen:start-->")]
+    # 6 Nov: the pass-rate calculator is a template page (no frozen body); its notice is the tools' [data-js-hide] one
+    lifted = "<!--frozen:start-->" in html
+    pre = html[:html.index("<!--frozen:start-->" if lifted else "<h1")]
     assert '<nav class="crumb small" aria-label="Breadcrumb">' in pre and '<a href="/">Home</a>' in pre
     assert '<a href="/tools/">Free tools</a>' in pre   # Home > Free tools > this calculator (Home link (c))
-    assert "<noscript>" in pre and "needs JavaScript turned on" in pre
+    if lifted:
+        assert "<noscript>" in pre and "needs JavaScript turned on" in pre
+    else:   # Fix round 1 (Tester F6): the native page has the lifted page's <noscript> notice back
+        assert re.search(r'<noscript><p class="notice notice-caution">[^<]*needs JavaScript turned on', html)
     ctx = browser.new_context(java_script_enabled=False, viewport={"width": 375, "height": 800})
     pg = ctx.new_page()
     pg.goto(built_site["url"] + path)
-    note = pg.locator(".lifted-pre .notice")
+    note = pg.locator(".lifted-pre .notice" if lifted else ".tool .notice")
     assert note.count() == 1 and note.is_visible() and "needs JavaScript turned on" in note.inner_text()
     crumb, h1 = pg.locator(".crumb").bounding_box(), pg.locator("h1").bounding_box()
     ctx.close()
-    assert 0 < h1["y"] - (crumb["y"] + crumb["height"]) < 120, (crumb, h1)
+    # the crumb sits right above the H1; since 6 Nov the tool's glyph (48 px on a phone) sits between them
+    assert 0 < h1["y"] - (crumb["y"] + crumb["height"]) < 120 + 72, (crumb, h1)
     ctx = browser.new_context()
     pg = ctx.new_page()
     pg.goto(built_site["url"] + path)
-    assert pg.locator(".lifted-pre .notice").count() == 0   # with JS on, <noscript> shows nothing
+    if lifted:
+        assert pg.locator(".lifted-pre .notice").count() == 0   # with JS on, <noscript> shows nothing
+    else:
+        assert pg.locator(".tool .notice").count() == 0   # with JS on, <noscript> shows nothing
     ctx.close()
 
 

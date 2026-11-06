@@ -61,7 +61,7 @@ COMBOS = [dict(paid_report=p, trader_first_home=p, pilot_checkout=q) for p in (F
 def test_every_flag_combo_lifted_pages_business_line_csp_compare_lint(tmp_path, flags):
     out, env = _flag_build(tmp_path, "b", **flags)
     commerce = flags["paid_report"] or flags["pilot_checkout"]
-    assert len(B.LIFTED_PATHS) == 20
+    assert len(B.LIFTED_PATHS) == 19   # 6 Nov: the pass-rate calculator became a template page
     for path in B.LIFTED_PATHS:
         text = _file(out, path).read_text(encoding="utf-8")
         assert text.count("data-business-id") == (1 if commerce else 0), path
@@ -110,6 +110,7 @@ def test_a_passthrough_fix_for_a_lifted_page_fails_loudly(tmp_path, monkeypatch)
 
 
 def test_the_no_network_guard_names_only_real_pages():
-    owned = {os.path.join(p.strip("/"), "index.html") for p in B.LIFTED_PATHS if p.endswith("/")}
+    # a lifted page, or (6 Nov: the pass-rate calculator) a template page that keeps the strict no-network CSP
+    owned = {os.path.join(p["path"].strip("/"), "index.html") for p in B.PAGES if p["path"].endswith("/")}
     for rel in B.PASSTHROUGH_CSP_PAGES:
         assert rel in owned, rel

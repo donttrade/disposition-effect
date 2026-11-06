@@ -132,12 +132,13 @@ def test_axe_and_overflow(browser, built_site, scheme, width):
 def test_tools_index_lists_eight_tools(browser, built_site, width):
     # tools batch 2 added the heatmap, the drawdown calculator and the risk-reward calculator
     ctx, pg, _ = open_tool(browser, built_site, width=width, path="/tools/", bypass_csp=True)
-    # 29 Oct (owner): all eight tools in one card grid, one link per card (file tools, calculators, then pass rate)
-    links = pg.locator("ul.tool-cards > li > a.tool-card-link")
+    # 6 Nov (owner, tools redesign B2): one module per tool, one link each, grouped by what you bring: the four
+    # file tools, the three calculators, then the firms panel's pass-rate calculator
+    links = pg.locator("ul.mods > li.md > a.tl")
     assert links.count() == 8
     hrefs = [links.nth(i).get_attribute("href") for i in range(8)]
-    assert hrefs == ["/tools/trade-stats/", "/tools/trading-heatmap/", "/tools/drawdown-calculator/",
-                     "/tools/prop-challenge-simulator/", "/tools/lot-size-calculator/", "/tools/risk-reward-calculator/",
+    assert hrefs == ["/tools/trade-stats/", "/tools/prop-challenge-simulator/", "/tools/trading-heatmap/",
+                     "/tools/drawdown-calculator/", "/tools/lot-size-calculator/", "/tools/risk-reward-calculator/",
                      "/tools/disposition-calculator/", "/tools/pass-rate-calculator/"]
     for h in hrefs:
         assert (built_site["out"] / h.strip("/") / "index.html").exists(), h

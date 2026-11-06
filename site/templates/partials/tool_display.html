@@ -1,0 +1,175 @@
+{#- The dark "display" (6 Nov, Direction B2 "Instrument panel"): each tool's output on REAL public data, on a screen
+    that stays dark in both themes, so output reads as output. Used by /tools/ (module, scope, report_art) and by every
+    tool page's header (display). Figures: site/config/tool_real.json (real), geometry: site/tool_real.py (rv); none
+    is typed here. Every block with a figure sits between <!--real-data--> and <!--/real-data-->: lint holds each $
+    amount there to tool_real.json or tool_real.report.json. Chips: "Real public data", "Real published data",
+    "Formula only" or "No public data", never "Example"/"sample"/"demo". Drawings are aria-hidden: the name, the
+    readout and the caption carry the meaning.
+    Use: {% import "partials/tool_display.html" as d with context %} -#}
+{%- import "partials/tool_glyphs.html" as g with context %}
+{%- set TS, RD, DD, HM, FX, O = real.trade_stats, real.readiness, real.drawdown, real.heatmap, real.eurusd, real.odean %}
+{%- set SRC = {
+  "acc": "Real public data: Stock Transactions Dataset (Mendeley Data), one anonymous investor, trades closed " ~ real.account.period,
+  "fx": "Real public data: Federal Reserve Board H.10 euro noon rates, " ~ FX.month_label,
+  "study": "Real published data: Odean (1998), Table I",
+  "rr": "Formula only: your numbers place the point",
+  "pass": "No public data: no firm publishes cohort counts we can show"} %}
+{%- set KEY = {"stats": "acc", "prop": "acc", "heat": "acc", "dd": "acc", "lot": "fx", "rr": "rr", "disp": "study", "pass": "pass"} %}
+{%- set CHIP = {"acc": "Real public data", "fx": "Real public data", "study": "Real published data", "rr": "Formula only", "pass": "No public data"} %}
+
+{%- macro chip(k) %}<span class="chip md-chip" aria-hidden="true">{{ CHIP[KEY[k]] }}</span>{% endmacro %}
+{%- macro source(k) %}{{ SRC[KEY[k]] }}{% endmacro %}
+
+{#- What each screen's readout line says (aria-hidden on /tools/, where the module's name and line lead). -#}
+{%- macro readout(k) -%}
+{%- if k == "stats" -%}Profit factor {{ TS.profit_factor }}; longest losing streak {{ TS.longest_losing_streak }}
+{%- elif k == "prop" -%}Whole past days drawn at random; {{ RD.days }} trading days in the file, {{ RD.min_days_needed }} needed. In real order the {{ RD.first_break.rule }} broke on day {{ RD.first_break.day }}. Rules: one-phase challenge rules, the first rule set in our library, shown without the firm’s name ({{ RD.account_size|usd }}; {{ (RD.target / RD.account_size * 100)|round|int }}% target; {{ (RD.daily_loss / RD.account_size * 100)|round|int }}% daily loss; {{ (RD.max_loss / RD.account_size * 100)|round|int }}% maximum loss). The file’s times are read as UTC, days ending at midnight UTC+3.
+{%- elif k == "heat" -%}{{ HM.readout }}. Hours as in the file, which states no time zone; hours with no trades are left out
+{%- elif k == "dd" -%}Longest: {{ DD.longest_trades }}, {{ DD.longest_days }}
+{%- endif -%}
+{%- endmacro %}
+
+{#- One sentence a screen reader gets for the drawing on a tool page (the /tools/ module has its name and line). -#}
+{%- macro said(k) -%}
+{%- if k == "stats" -%}The trade-stats tool on this account: {{ TS.trades }} closed trades, net {{ TS.net }}, {{ TS.win_rate }} won. {{ real.account.realised_only }}
+{%- elif k == "prop" -%}The Readiness Check on this account: {{ RD.label|lower }}; {{ RD.runs_passed }} of {{ "{:,}".format(RD.replays) }} replays passed. With the {{ RD.days }} days drawn again 200 times: {{ RD.range_pass }} passed. {{ RD.context }}
+{%- elif k == "heat" -%}The heatmap on this account: {{ HM.readout }}.
+{%- elif k == "dd" -%}The drawdown tool on this account: deepest {{ DD.largest }} at trade {{ real.curve_trough_trade }}; longest {{ DD.longest_trades }}, {{ DD.longest_days }}.
+{%- elif k == "lot" -%}The formula, lots = risk ÷ (stop in pips × $10), with no numbers filled in. For scale, one past month of the euro: in {{ FX.month_label }} it ranged between {{ rv.lot.low }} and {{ rv.lot.high }} and {{ FX.direction }} over the month.
+{%- elif k == "rr" -%}The break-even win rate 1 ÷ (1 + R) for R from 0.5 to 5: 50.0% at 1R, 33.3% at 2R, 25.0% at 3R, 16.7% at 5R.
+{%- elif k == "disp" -%}The calculator on Odean’s four published counts: gains sold {{ O.pgr }}, losses sold {{ O.plr }}, ratio {{ O.ratio }}, t-statistic {{ O.t }}.
+{%- elif k == "pass" -%}The two formulas and an empty funnel: no figures, because no firm publishes cohort counts we can show.
+{%- endif -%}
+{%- endmacro %}
+
+{#- ---------------------------------------------------------------- the screens -#}
+{%- macro screen(k, page=false) -%}
+{%- if k == "stats" -%}
+<span class="pv pv-stats"><span class="pv-tile"><b>{{ TS.trades }}</b>closed trades</span><span class="pv-tile{{ ' k-neg' if TS.net.startswith('−') }}"><b>{{ TS.net }}</b>net result</span><span class="pv-tile"><b>{{ TS.win_rate }}</b>won</span></span>
+{%- set u = rv.spark.use %}<svg class="pv pv-spark" aria-hidden="true" focusable="false" viewBox="0 0 {{ rv.spark.w }} {{ rv.spark.h }}" preserveAspectRatio="none"><use href="#dt-eq" x="{{ u.x }}" y="{{ u.y }}" width="{{ u.w }}" height="{{ u.h }}"/></svg>
+<svg class="pv pv-bars" aria-hidden="true" focusable="false" viewBox="0 0 {{ rv.bars.W }} 52" preserveAspectRatio="none"><line class="tb-0" x1="0" x2="{{ rv.bars.W }}" y1="{{ rv.bars.mid }}" y2="{{ rv.bars.mid }}"/><path class="tb-g" d="{{ rv.bars.gain }}"/><path class="tb-l" d="{{ rv.bars.loss }}"/><rect class="fan-cover" x="0" y="0" width="{{ rv.bars.W }}" height="52"/></svg>
+<span class="pv-bars-lab">Each closed trade, in order: {{ rv.bars.n }} results</span>
+{%- elif k == "prop" -%}
+{%- set F = rv.fan -%}
+<span class="pv pv-prop-fan"><span class="pv-head"><b>{{ RD.label.split(",")[0].replace("Passed ", "") }}</b> passed, {{ RD.runs_passed }} of {{ "{:,}".format(RD.replays) }} replays (replay error {{ RD.mc_error }})</span><span class="pv-sub">With the {{ RD.days }} days drawn again 200 times: {{ RD.range_pass }} passed</span><span class="pv-ctx">{{ RD.context }}</span>
+<svg class="pv pv-fan" aria-hidden="true" focusable="false" viewBox="0 0 {{ F.W }} {{ F.H }}"><line class="fl-t" x1="{{ F.x0 }}" x2="{{ F.x1 }}" y1="{{ F.ty }}" y2="{{ F.ty }}"/><line class="fl-f" x1="{{ F.x0 }}" x2="{{ F.x1 }}" y1="{{ F.fy }}" y2="{{ F.fy }}"/><text class="pv-ax" x="{{ F.x0 }}" y="{{ F.ax_y }}">day 0</text><text class="pv-ax" x="{{ F.x1 }}" y="{{ F.ax_y }}" text-anchor="end">day {{ F.days }}</text><text class="pv-ax" x="{{ F.x1 }}" y="{{ F.ty_lab }}" text-anchor="end">target {{ F.target }}</text><text class="pv-ax" x="{{ F.x_lab }}" y="{{ F.fy_lab }}">maximum loss, {{ RD.drawdown }}</text><g class="fan-paths">{% for p in F.paths %}<path class="fp fp-{{ p.cls }}" d="{{ p.pts }}"/>{% endfor %}</g><path class="fq fq-5" d="{{ F.p5 }}"/><path class="fq fq-50" d="{{ F.p50 }}"/><path class="fq fq-95" d="{{ F.p95 }}"/><polyline class="fr" points="{{ F.real }}"/><path class="fr-x" d="{{ F.x }}"/><rect class="fan-cover" x="0" y="0" width="{{ F.W }}" height="{{ F.H }}"/></svg>
+<span class="pv-key"><span><i class="k-p"></i>the middle by day; 9 in 10 replays between the dashed lines</span> <span><i class="k-r"></i>the days in real order</span> <span>Thin lines: a separate draw of {{ F.paths|length }} replays, for shape; green passed, red broke a rule, grey still running on day {{ F.days }}</span></span></span>
+{%- elif k == "heat" -%}
+{%- set Hm = rv.heat -%}
+<svg class="pv pv-heat" aria-hidden="true" focusable="false" viewBox="0 0 {{ Hm.w }} {{ Hm.h }}">{% for c in Hm.cols %}<text class="pv-ax" x="{{ c.x }}" y="8" text-anchor="middle">{{ c.l }}</text>{% endfor %}{% for r in Hm.rows %}<text class="pv-ax" x="0" y="{{ r.y }}">{{ r.l }}</text>{% endfor %}{% for c in Hm.cells %}<rect class="{{ c.cls }}" x="{{ c.x }}" y="{{ c.y }}" width="{{ Hm.cell }}" height="{{ Hm.cell }}" rx="4"/>{% endfor %}</svg>
+{%- if page %}<span class="pv-key">Green: a gain in total. Red: a loss. Stronger colour: a larger total. Blank: no trades.</span>{% endif %}
+{%- elif k == "dd" -%}
+{%- set u = rv.dd.use %}<svg class="pv pv-dd" aria-hidden="true" focusable="false" viewBox="0 0 {{ rv.dd.w }} {{ rv.dd.h }}" preserveAspectRatio="none"><use href="#dt-eq" x="{{ u.x }}" y="{{ u.y }}" width="{{ u.w }}" height="{{ u.h }}"/></svg>
+<span class="pv-dd-lab"><b>{{ DD.largest }}</b> deepest, at trade {{ real.curve_trough_trade }}</span>
+{%- elif k == "lot" -%}
+<span class="pv pv-calc pv-skel"><b>lots = risk ÷ (stop in pips × $10)</b><span class="pv-unlock">Type your risk and stop on the page; the lots appear here.</span></span>
+<svg class="dg" aria-hidden="true" focusable="false" viewBox="0 0 240 30">{% for x in rv.lot.ghosts %}<rect class="dg-ghost" x="{{ x }}" y="4" width="30" height="18" rx="3"/>{% endfor %}<text class="dg-q" x="204" y="18">?</text></svg>
+<span class="pv-fact">EURUSD: 1 standard lot is {{ "{:,}".format(FX.lot_fact.lot_units_eur) }} euros, so 1 pip is ${{ FX.lot_fact.usd_per_pip }}.</span>
+<svg class="dg dg-fx" aria-hidden="true" focusable="false" viewBox="0 0 {{ rv.lot.w }} {{ rv.lot.h }}" preserveAspectRatio="none"><polyline class="dg-fxl" points="{{ rv.lot.pts }}"/></svg>
+<span class="pv-fact">For scale, a real past month: in {{ FX.month_label }} the euro’s noon rate ranged between {{ rv.lot.low }} and {{ rv.lot.high }}, {{ FX.range_pips }} pips. It {{ FX.direction }} over the month, from {{ "%.4f"|format(FX.first) }} to {{ "%.4f"|format(FX.last) }}. The average day moved {{ FX.avg_daily_move_pips }} pips.</span>
+{%- elif k == "rr" -%}
+{%- set R = rv.rr -%}
+<span class="pv pv-calc pv-skel"><b>break-even = 1 ÷ (1 + R)</b><span class="pv-unlock">Type your entry, stop and target; your point lands on this curve.</span></span>
+<svg class="dg dg-curve" aria-hidden="true" focusable="false" viewBox="0 0 {{ R.w }} {{ R.h }}"><polyline class="dg-cv a-fade" points="{{ R.pts }}"/>{% for t in R.ticks %}<line class="dg-tick" x1="{{ t.x }}" x2="{{ t.x }}" y1="{{ R.y1 }}" y2="{{ R.y1t }}"/><text class="dg-t" x="{{ t.x }}" y="{{ R.ty }}" text-anchor="middle">{{ t.r }}</text><circle class="dg-dot" cx="{{ t.x }}" cy="{{ t.cy }}" r="2"/>{% if t.pct %}<text class="dg-t" x="{{ t.lx }}" y="{{ t.ly }}" text-anchor="{{ t.anchor }}">{{ t.pct }}</text>{% endif %}{% endfor %}</svg>
+{%- elif k == "disp" -%}
+{%- set Dp = rv.disp -%}
+<span class="pv pv-calc"><b>{{ O.pgr }} vs {{ O.plr }}, ratio {{ O.ratio }}, t-statistic {{ O.t }}</b></span>
+<svg class="dg" aria-hidden="true" focusable="false" viewBox="0 0 240 60"><rect class="dg-gain a-x" x="0" y="2" width="{{ Dp.gw }}" height="11" rx="2"/><rect class="dg-band" x="{{ Dp.gbx }}" y="0" width="{{ Dp.gbw }}" height="15"/><rect class="dg-loss a-x d2" x="0" y="31" width="{{ Dp.lw }}" height="11" rx="2"/><rect class="dg-band" x="{{ Dp.lbx }}" y="29" width="{{ Dp.lbw }}" height="15"/><text class="dg-t dg-t2" x="0" y="25">gains sold {{ Dp.gpct }} (95% band {{ Dp.gband }})</text><text class="dg-t dg-t2" x="0" y="55">losses sold {{ Dp.lpct }} (95% band {{ Dp.lband }})</text></svg>
+{%- elif k == "pass" -%}
+<span class="pv pv-calc pv-skel"><b>pass rate = passed ÷ finished</b><b>payout rate = paid out ÷ passed</b><span class="pv-unlock">Type your cohort’s counts; the funnel draws to scale, with a 95% band once 30 evaluations have finished.</span></span>
+<svg class="dg" aria-hidden="true" focusable="false" viewBox="0 0 240 64">{% for lab, wd in [("started", 240), ("finished: started − open", 200), ("passed", 92), ("paid out", 44)] %}<rect class="dg-ghost" x="0.5" y="{{ loop.index0 * 16 + 0.5 }}" width="{{ wd - 1 }}" height="13" rx="2"/><text class="dg-t dg-in" x="{{ 6 if wd > 120 else wd + 6 }}" y="{{ loop.index0 * 16 + 10 }}">{{ lab }}</text>{% endfor %}</svg>
+{%- endif -%}
+{%- endmacro %}
+
+{#- ---------------------------------------------------------------- one /tools/ module: ONE link. data-tool (the glyph key)
+    is the hook phase 2 marks modules by (ARCHITECT-PLAN-TOOLS-REDESIGN P2.11). -#}
+{%- macro module(t, span, big=false) -%}
+{%- set k = t.glyph %}
+<li class="md md-{{ span }}{{ ' md-big' if big }}" data-tool="{{ t.glyph }}"><a class="tl" href="{{ t.href }}">
+  <!--real-data--><span class="md-screen md-scr-{{ k }}{{ ' md-scr-calc' if t.group != 'file' }}" aria-hidden="true">{{ chip(k) }}<span class="md-pv">{{ screen(k) }}</span></span>
+  {%- if k in ("lot", "disp") %}<span class="md-src" aria-hidden="true">{{ source(k) }}</span>{% endif %}
+  {%- set ro = readout(k) %}{% if ro %}<span class="md-read" aria-hidden="true">{{ ro }}</span>{% endif %}<!--/real-data-->
+  <span class="md-body"><span class="md-head">{{ g.glyph(k, 32, "ic md-ic") }}<h3 class="md-name">{{ t.name }}</h3></span>{% if t.group == "firm" %}<span class="md-tag">For firms</span>{% endif %}<span class="md-line">{{ t.short }}</span></span><span class="visually-hidden"> Preview: {% if k == "pass" %}the formulas, with no figures.{% elif k == "rr" %}the formula itself.{% elif k == "lot" %}the formula, and one real past month of the euro for scale.{% elif k == "disp" %}the calculator on Odean’s published counts.{% else %}the tool run on real public data.{% endif %}</span>
+</a></li>
+{%- endmacro %}
+
+{#- ---------------------------------------------------------------- a tool page's header display -#}
+{%- macro display(k) -%}
+{%- if k in ("stats", "dd") %}{{ curve_defs() }}{% endif %}
+<figure class="tool-display" aria-labelledby="td-cap">
+  <!--real-data--><div class="md-screen md-scr-{{ k }}{{ ' md-scr-calc' if k in ('lot', 'rr', 'disp', 'pass') }}" aria-hidden="true">{{ chip(k) }}<span class="md-pv">{{ screen(k, true) }}</span></div>
+  {%- set ro = readout(k) %}{% if ro %}<p class="md-read" aria-hidden="true">{{ ro }}</p>{% endif %}<!--/real-data-->
+  <figcaption id="td-cap" class="td-cap"><span class="visually-hidden"><!--real-data-->{{ said(k) }}<!--/real-data--> </span>{% if k == "disp" %}Real published data: {{ credit(real.credits.odean) }}{% else %}{{ source(k) }}.{% endif %}{% if KEY[k] == "acc" %} The whole dataset, not picked by result.{% if k in ("stats", "dd", "heat") %} {{ real.account.realised_only }}{% endif %} <a href="/tools/#src-h">Where the numbers come from</a>{% elif k == "lot" %} {{ real.rules.fx }} Source file: <a href="https://www.federalreserve.gov/releases/h10/hist/dat00_eu.htm" rel="noopener">the Board’s H.10 euro rates</a>.{% endif %}</figcaption>
+</figure>
+{%- endmacro %}
+
+{#- The real equity curve, once per page that draws it (the scope, the stats and drawdown screens <use> it). -#}
+{%- macro curve_defs() -%}
+<svg class="dt-defs" aria-hidden="true" focusable="false" width="0" height="0"><symbol id="dt-eq" viewBox="0 0 {{ rv.eq.w }} 1000" preserveAspectRatio="none"><path class="cv-gap" d="{{ rv.eq.gap }}"/><path class="cv-peak" d="{{ rv.eq.peak }}"/><path class="cv-eq" d="{{ rv.eq.eq }}"/></symbol></svg>
+{%- endmacro %}
+
+{#- ---------------------------------------------------------------- the /tools/ hero scope -#}
+{%- macro scope() -%}
+{%- set S = rv.scope -%}
+{{ curve_defs() }}
+<!--real-data--><figure class="scope" data-scope data-curve="{{ S.data_curve }}" data-months="{{ S.data_months }}" data-x0="{{ S.x0 }}" data-x1="{{ S.x1 }}" data-y0="{{ S.y0 }}" data-y1="{{ S.y1 }}" data-lo="{{ S.lo }}" data-hi="{{ S.hi }}" aria-labelledby="sc-cap">
+  <div class="sc-bar"><span class="sc-t">Trade stats, equity and drawdown</span><span class="chip">Real public data</span></div>
+  <svg role="img" aria-label="{{ S.label }}" viewBox="0 0 {{ S.W }} {{ S.H }}" focusable="false">
+    {#- polish round: the grid as one path (the same lines, fewer bytes) -#}
+    <path class="sc-grid" d="{% for y in S.hgrid %}M{{ S.x0 }} {{ y }}H{{ S.x1 }}{% endfor %}{% for x in S.vgrid %}M{{ x }} {{ S.y0 }}V{{ S.y1 }}{% endfor %}"/>
+    {%- for t in S.ticks %}<text class="sc-ax" x="{{ S.x0 - 8 }}" y="{{ t.y }}" text-anchor="end">{{ t.label }}</text>{% endfor %}
+    <line class="sc-zero" x1="{{ S.x0 }}" x2="{{ S.x1 }}" y1="{{ S.zero_y }}" y2="{{ S.zero_y }}"/>
+    <use class="sc-curve" href="#dt-eq" x="{{ S.use.x }}" y="{{ S.use.y }}" width="{{ S.use.w }}" height="{{ S.use.h }}"/>
+    <rect class="sc-future" x="{{ S.tx }}" y="{{ S.y0 }}" width="{{ S.fut_w }}" height="{{ S.y1 - S.y0 }}"/>
+    <g class="sc-cursor" transform="translate({{ S.tx }} 0)"><line x1="0" x2="0" y1="{{ S.y0 }}" y2="{{ S.y1 }}"/></g>
+    <circle class="sc-dot" cx="{{ S.tx }}" cy="{{ S.ty }}" r="4.5"/>
+    <text class="sc-ax" x="{{ S.x0 }}" y="{{ S.yax }}">1</text><text class="sc-ax" x="{{ S.x1 }}" y="{{ S.yax }}" text-anchor="end">{{ S.n }}</text><text class="sc-ax sc-mid" x="{{ S.xmid }}" y="{{ S.yax }}" text-anchor="middle">closed trade</text>
+  </svg>
+  <dl class="sc-read" aria-hidden="true">
+    <div><dt>Trade</dt><dd data-out="n">{{ S.read.n }}</dd></div>
+    <div><dt>Closed</dt><dd data-out="m">{{ S.read.month }}</dd></div>
+    <div><dt>Equity</dt><dd data-out="eq">{{ S.read.eq }}</dd></div>
+    <div><dt>From the high</dt><dd data-out="dd">{{ S.read.dd }}</dd></div>
+  </dl>
+  <figcaption id="sc-cap" class="sc-src"><span class="visually-hidden">The free trade-stats tool on a real account. </span>{{ SRC.acc }}, US stocks, CC BY 4.0. The whole dataset, not picked by result. One investor, not a typical result.</figcaption>
+</figure><!--/real-data-->
+{%- endmacro %}
+
+{#- ---------------------------------------------------------------- the $39 block's table: the test's summary -#}
+{%- macro report_art() -%}
+{%- set RP = real.report -%}
+<!--real-data--><figure class="of-art" aria-labelledby="of-art-cap">
+  <div class="of-bar"><span>The test’s summary, run on a real account</span><span class="chip">Real public data</span></div>
+  <table><thead><tr><th scope="col">Habit</th><th scope="col">Result</th><th scope="col">Total</th><th scope="col">Trades</th></tr></thead>
+  <tbody>{% for r in RP.rows %}<tr><th scope="row">{{ r.habit }}</th><td><span class="v{{ ' v-yes' if r.result.startswith('Distinguishable') }}">{{ r.result }}</span></td><td class="{{ 'neg' if r.total.startswith('−') }}">{{ r.total }}</td><td>{{ r.trades }}</td></tr>{% endfor %}</tbody></table>
+  <figcaption id="of-art-cap" class="of-cap">The donttrade test’s own engine (method {{ RP.method_version }}) on the same investor’s {{ RP.n_trades }} closed trades. {% if RP.n_tested == 0 %}No habit was tested against chance on this file, so every total is a fact from the file. Why, habit by habit: {% for r in RP.rows if r.why %}{{ r.name_lower }}: {{ r.why }}{{ "; " if not loop.last else ". " }}{% endfor %}{% endif %}One investor, not a typical result.</figcaption>
+</figure><!--/real-data-->
+{%- endmacro %}
+
+{#- ---------------------------------------------------------------- where the numbers come from -#}
+{#- A credit with its sources linked (6 Nov fix round 2: the Board's H.10 file and Odean's DOI too). Each label is
+    linked at its first appearance; the text around it stays autoescaped, so only these anchors are markup. -#}
+{%- set LINKS = [("doi:10.17632/k4tnk2nggv.1", "https://doi.org/10.17632/k4tnk2nggv.1"),
+                 ("CC BY 4.0", "https://creativecommons.org/licenses/by/4.0/"),
+                 ("doi:10.1111/0022-1082.00072", "https://doi.org/10.1111/0022-1082.00072"),
+                 ("federalreserve.gov/releases/h10/hist/dat00_eu.htm", "https://www.federalreserve.gov/releases/h10/hist/dat00_eu.htm")] %}
+{%- macro credit(text, i=0) -%}
+{%- if i >= LINKS|length -%}{{ text }}
+{%- else -%}{%- set label, href = LINKS[i] -%}{%- set parts = text.split(label, 1) -%}
+{%- if parts|length == 2 -%}{{ credit(parts[0], i + 1) }}<a href="{{ href }}" rel="noopener">{{ label }}</a>{{ credit(parts[1], i + 1) }}
+{%- else -%}{{ credit(text, i + 1) }}{%- endif -%}
+{%- endif -%}
+{%- endmacro %}
+{%- macro sources() -%}
+<section class="tx-sources" aria-labelledby="src-h">
+  <h2 id="src-h">Where the numbers come from</h2>
+  <p>Every preview on this page is a tool run on real public data, recomputed by script from files whose hashes we keep. Nothing is invented and nothing was picked for how it looks.</p>
+  <!--real-data--><dl>
+    <div><dt>The trade-file tools and the test’s summary</dt><dd>{{ credit(real.credits.account) }} Why this dataset: {{ real.rules.why_account }} Rule: {{ real.rules.account }} The Readiness Check: {{ real.rules.readiness }} The heatmap: {{ real.rules.heatmap }}</dd></div>
+    <div><dt>Lot size and risk-reward</dt><dd>{{ credit(real.credits.fx) }} Rule: {{ real.rules.fx }} The month shown: {{ FX.month_label }}. The risk-reward preview shows the break-even formula itself, with no example numbers.</dd></div>
+    <div><dt>Disposition effect</dt><dd>{{ credit(real.credits.odean) }} Rule: {{ real.rules.odean }} Our 76.1% study uses a public CC0 panel (<a href="https://doi.org/10.7910/DVN/NI6SBJ" rel="noopener">doi:10.7910/DVN/NI6SBJ</a>) and a different counting rule, so its numbers are not shown in the calculator.</dd></div>
+    <div><dt>Pass-rate calculator</dt><dd>{{ real.rules.pass_rate }}</dd></div>
+  </dl><!--/real-data-->
+  <p class="tx-src-note">The scripts and input hashes are public: <a href="https://github.com/donttrade/disposition-effect/tree/main/checks/real_data" rel="noopener">checks/real_data/</a>.</p>
+</section>
+{%- endmacro %}

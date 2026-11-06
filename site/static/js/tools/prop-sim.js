@@ -127,8 +127,13 @@ const RULE_BOXES = {
   'ps-mindays-kind': 'trading', 'ps-profmin': '', 'ps-countday': 'any', 'ps-consistency': '', 'ps-stopat': '',
   'ps-targetcheck': 'eod', 'ps-daytz': 'file', 'ps-dayhour': '',
 };
-// "Example rules": the rules the example data is shown with, named as such and no firm's.
-const EXAMPLE_RULES = { 'ps-account': '10000', 'ps-target': '600', 'ps-daily': '250', 'ps-maxloss': '500', 'ps-days': '60' };
+// 6 Nov (owner, Manager review): "One-phase challenge rules" replace the invented "Example rules". They are the VALUES of
+// the first rule set in the library (file order, the selection rule of the /tools/ preview), shown without the firm's
+// or the product's name, so no firm is named beside a result on the real public data. Every box stays editable.
+const ONE_PHASE = 'onephase';
+// the same sentence as the page's header display (site/config/tool_real.json readiness.context)
+const REAL_CONTEXT = 'This investor held stocks for months to years and never took a challenge, so the result shows how the tool reads a real file, not how challenge traders do.';
+const firstRuleSet = () => presets.presets.find((x) => x.status !== 'not_quotable' && x.rules) || null;
 function resetRules(keepSize) {
   for (const [id, v] of Object.entries(RULE_BOXES)) if (!(keepSize && id === 'ps-account')) setVal(id, v);
   $('ps-trail-static').checked = true;
@@ -146,7 +151,7 @@ function fillInfo(id) {
   $('ps-preset-source').replaceChildren(...[...srcLine.childNodes].map((n) => n.cloneNode(true)));
   for (const a of $('ps-preset-source').querySelectorAll('a')) a.removeAttribute('tabindex');
   $('ps-ns').textContent = nsLine.textContent;
-  return id && id !== 'example' ? presets.presets.find((x) => x.id === id) : null;
+  return id && id !== ONE_PHASE ? presets.presets.find((x) => x.id === id) : null;
 }
 
 // keepSize: the account size was just typed (a percent preset scales to it); any other call is a preset
@@ -157,10 +162,10 @@ function applyPreset(keepSize = false) {
   for (const box of Object.values(NS_BOX)) $(box).placeholder = '';
   $('ps-limits-preset').hidden = true;
   resetRules(keepSize === true);
-  const p = fillInfo(id);
+  const named = fillInfo(id);
+  const p = named || (id === ONE_PHASE ? firstRuleSet() : null);
   if (!p) {
     current = null;
-    if (id === 'example') for (const [box, v] of Object.entries(EXAMPLE_RULES)) setVal(box, v);
     return;
   }
   let size = null;
@@ -184,6 +189,10 @@ function applyPreset(keepSize = false) {
   setVal('ps-targetcheck', r.target_check);
   setVal('ps-daytz', pr.dayStart ? pr.dayStart.tz : 'file');
   setVal('ps-dayhour', pr.dayStart ? pr.dayStart.hour : 0);
+  if (!named) {   // the unnamed rule set: its values only, as custom rules (no firm, no source line, no limits list)
+    current = null;
+    return;
+  }
   for (const f of pr.notStated) {
     for (const n of document.querySelectorAll(`.ns-note[data-ns="${f}"]`)) n.textContent = `Not stated by the firm. The check uses ${NS_DEFAULT[f]}.`;
     if (NS_BOX[f] && $(NS_BOX[f]).value === '') $(NS_BOX[f]).placeholder = `Not stated by the firm: ${NS_DEFAULT[f]}`;
@@ -289,7 +298,7 @@ function read() {
       problems.push({ id: 'ps-map', message: 'Pick the columns above, then press Read with these columns.' });
     } else if (!loaded) {
       const msg = m === 'paste' ? 'Paste a table and press Read the table, or switch to a file or summary numbers.'
-        : 'Choose a trade file, or try the example data, or switch to summary numbers.';
+        : 'Choose a trade file, or try the real public data, or switch to summary numbers.';
       problems.push({ id: m === 'paste' ? 'ps-paste' : 'ps-file', message: msg });
     }
     if (loaded && !$('ps-filetz').value) {
@@ -358,7 +367,7 @@ async function run(ev) {
   const fd = file ? dayFlags(data.flags, input.grouped.index) : null;
   last = {
     ...input, res, file, fd, data, unit: file ? data.unit : 'account', preset: current ? current.preset : null,
-    exampleRules: !current && $('ps-preset').value === 'example',
+    exampleRules: !current && $('ps-preset').value === ONE_PHASE,
     edited: current ? current.snapshot !== JSON.stringify(input.p.rules) : false,
     seq: file ? simulate({ mode: 'sequence', days: input.p.days, rules: input.p.rules }) : null,
     real: file ? realBreachDays(input.p.days, fd, input.p.rules.daily_loss, { datesOnly: data.datesOnly }) : null,
@@ -478,7 +487,7 @@ function render() {
   const headline = tooFew ? tooFewText()
     : `Passed in ${whole(s.pass)} of ${intText(res.runs)} replays`;
   const source = last.file
-    ? `whole trading days drawn at random from ${last.example ? 'the example data' : last.data.label} (${plural(p.days.length, 'day', 'days')}, ${plural(last.data.n, 'trade', 'trades')})`
+    ? `whole trading days drawn at random from ${last.example ? 'the real public data' : last.data.label} (${plural(p.days.length, 'day', 'days')}, ${plural(last.data.n, 'trade', 'trades')})`
     : `${plural(p.trades_per_day, 'trade', 'trades')} a day, each a win or a loss at the rate you entered`;
   const warn = [];
   if (tooFew) warn.push(`Your trades cover ${plural(p.days.length, 'trading day', 'trading days')}, so the results lean heavily on a few days.`);
@@ -498,7 +507,9 @@ function render() {
     el('h2', { id: 'ps-out-h', tabindex: '-1', text: headline }),
     el('p', { class: 'notice' }, el('strong', { text: 'A replay of past trades, not a prediction' }),
       `Each replay is built from ${source}. ${unitNote(last.unit)}`),
-    last.example ? el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Example data' })) : null,
+    // 6 Nov fix round 2 (Manager): say plainly whose file this is, so the result is not read as a challenge trader's
+    last.example ? el('p', { class: 'notice notice-caution', id: 'ps-real-note' }, el('strong', { text: 'Real public data: Stock Transactions Dataset (Mendeley Data), one anonymous investor, not picked by result' }),
+      REAL_CONTEXT) : null,
     warn.length ? el('div', { class: 'notice notice-caution' }, el('strong', { text: 'Note' }), el('ul', {}, ...warn.map((w) => el('li', { text: w })))) : null,
     last.file ? warningsNotice('ps', last.data.warnings) : null,   // mixed currencies, skipped rows: what was left out of the replays
     el('div', { class: 'rc-visuals' }, outcome, ruleCard(res), last.file ? habitsCard(last.real, p.rules) : null),
@@ -631,7 +642,7 @@ function rulesText() {
   const r = last.p.rules;
   const m = (n) => money(n, last.unit, { sign: false });
   const dd = { static: 'from the starting balance', trailing_eod: 'from the highest end-of-day balance', trailing_trade: 'from the highest balance after any trade' }[r.drawdown];
-  const from = last.preset ? `${last.edited ? 'Edited from' : 'As'} ${last.preset.firm}, ${last.preset.program} (rules_lib ${presets.rules_lib}). ` : last.exampleRules ? 'Example rules. ' : 'Custom rules. ';
+  const from = last.preset ? `${last.edited ? 'Edited from' : 'As'} ${last.preset.firm}, ${last.preset.program} (rules_lib ${presets.rules_lib}). ` : last.exampleRules ? 'One-phase challenge rules (the first rule set in our library, shown without the firm’s name). ' : 'Custom rules. ';
   return from + `Profit target ${m(r.target)}${r.target_check === 'intraday' ? ' (counts as soon as reached)' : ''}; daily loss limit ${r.daily_loss === null ? 'none' : m(r.daily_loss)}; ` +
     `maximum loss ${m(r.max_loss)} ${dd}${r.trail_stop_at !== null && r.drawdown !== 'static' ? `, stopping at ${m(r.trail_stop_at)}` : ''}; ` +
     `${r.time_limit === null ? `no time limit (stopped at ${NO_LIMIT_CAP} trading days)` : plural(r.time_limit, 'trading day', 'trading days')}; ` +
@@ -782,7 +793,7 @@ function exportData() {
   const outKeys = ['runs', 'pass', 'bust', 'timeout', 'bust_daily', 'bust_max', 'bust_after_streak', 'held_consistency', 'held_min_days', 'capped', 'median_pass_days', 'median_bust_days', 'trades_seen', 'trades_left_out'];
   const data = {
     schema: 'donttrade.readiness-check.results.v1', method: METHOD_VERSION.paired, rules_lib: presets.rules_lib,
-    preset_id: last.preset ? last.preset.id : last.exampleRules ? 'example' : 'custom', edited_from_preset: last.edited,
+    preset_id: last.preset ? last.preset.id : last.exampleRules ? ONE_PHASE : 'custom', edited_from_preset: last.edited,
     settings: { runs: p.runs, seed: p.seed, stream: 'paired', mode: last.file ? (last.example ? 'example' : 'file') : 'manual',
       day_start: last.dayStart, file_time_zone: last.fileTz, no_limit_cap: NO_LIMIT_CAP },
     rules: p.rules, account_size: last.accountSize,
@@ -875,11 +886,12 @@ function init() {
   });
   $('ps-file').addEventListener('change', (e) => slot.pickFile(e.target.files[0], 'your file'));
   $('ps-sample-btn').addEventListener('click', () => {
-    // The example data loads only the file: a firm's preset or rules typed by hand stay as they are. With
-    // custom rules and no target or maximum loss typed yet, the preset switches to "Example rules".
+    // The real public data loads only the file: a firm's preset or rules typed by hand stay as they are. With
+    // custom rules and no target or maximum loss typed yet, the rules switch to "One-phase challenge rules": the first
+    // rule set's values, no firm named (the rule the /tools/ preview uses; owner, 6 Nov).
     if ($('ps-preset').value === '' && $('ps-target').value.trim() === '' && $('ps-maxloss').value.trim() === '') {
-      $('ps-preset').value = 'example';
-      applyPreset(false);
+      $('ps-preset').value = ONE_PHASE;
+      $('ps-preset').dispatchEvent(new Event('change'));
     }
     slot.readBytes(new TextEncoder().encode($('ps-sample').textContent.replace(/^\s+/, '')), SAMPLE_LABEL);
   });

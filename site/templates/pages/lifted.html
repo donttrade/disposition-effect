@@ -5,6 +5,12 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="wrap lifted-pre">{% include "partials/crumbs.html" %}
+{%- if page.get("glyph") %}
+{#- 6 Nov (tools redesign B2): the calculator's glyph and its real-data display, above the frozen body (which keeps
+    its own H1, word for word). The glyph plays once on load (tools-index.js); both are aria-hidden or captioned. #}
+{%- import "partials/tool_glyphs.html" as g with context %}{% import "partials/tool_display.html" as d with context %}
+<div class="lifted-mark"><span class="tool-mark">{{ g.glyph(page.glyph, 64, "ic") }}</span>{{ d.display(page.glyph) }}</div>
+{%- endif %}
 {%- if page.get("section") == "/tools/" %}
 {#- Launch NITs N4 + N5: the old calculators get the Free tools breadcrumb the new tools have, and
     say so when JavaScript is off. Both sit outside the frozen body, which stays word for word. #}
@@ -12,9 +18,9 @@
 {%- endif %}</div>
 {#- QA 25 Oct: with paid_report, the two old calculators carry the one next-step card right after their
     form (which holds the result), as an island: compare.py leaves it out, lint holds it to the full rules. #}
-{%- set next_step = {"/tools/disposition-calculator/": false, "/tools/pass-rate-calculator/": true} %}
-{#- 5 Nov (free-tools audit F6): the pass-rate calculator is for firm operators, so its card leads with the Pilot. -#}
-{%- set next_lead = {"/tools/pass-rate-calculator/": "firm"} %}
+{%- set next_step = {"/tools/disposition-calculator/": false} %}
+{#- 6 Nov: the pass-rate calculator is a template page now (pages/tool-pass-rate.html), with its own next-step card. -#}
+{%- set next_lead = {} %}
 {%- if flags.paid_report and page.path in next_step %}
 {%- set parts = lifted_html.split("</form>", 1) %}
 <!--frozen:start-->{{ parts[0] }}</form><!--island:start-->

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+{%- import "partials/tool_glyphs.html" as g with context %}{% import "partials/tool_display.html" as d with context %}
 {%- import "partials/trader_offer.html" as offer with context %}
 {%- set r = products["report39"] %}
 <div class="wrap">
@@ -8,11 +9,11 @@
       two-line hero; how the file is read moves into one "How it works" disclosure below the tool. -#}
   <div class="tool-hero">
     <div>
-      <h1>Trade stats from your own trade file</h1>
+      <div class="tool-title"><span class="tool-mark">{{ g.glyph(page.glyph, 64, "ic") }}</span><h1>Trade stats from your own trade file</h1></div>
       <p class="lede">Drop your MT5, MT4, IBKR, Tradovate or TradingView export. Get your win rate, profit factor, drawdown and streaks in seconds.</p>
       <p class="small muted">No account. Your file is read in this tab and not uploaded.{% if flags.free_badges %} Three of the numbers get a real-or-noise check. With fewer than 30 trades it says there are not enough trades to tell, because a figure from 12 trades can swing a long way on one result.{% endif %}</p>
     </div>
-    {% include "partials/ts_mock.html" %}
+    {{ d.display(page.glyph) }}
   </div>
   {% include "partials/disclaimer.html" %}
 
@@ -27,8 +28,8 @@
           <label for="ts-file">Your trade file</label>
           <input id="ts-file" type="file" accept=".csv,.htm,.html,.txt">
         </div>
-        <p class="btn-row"><span class="muted">No file to hand?</span> <button class="btn btn-secondary" id="ts-sample-btn" type="button">Try with example data</button></p>
-        <p class="small muted">Example data: 160 trades on three symbols. <a href="/static/samples/example-trades.csv" download>Download it</a> to see the CSV template.</p>
+        <p class="btn-row"><span class="muted">No file to hand?</span> <button class="btn btn-secondary" id="ts-sample-btn" type="button">Try real public data</button></p>
+        <p class="small muted">Real public data: the Stock Transactions Dataset (Mendeley Data, CC BY 4.0), one anonymous investor’s {{ "{:,}".format(real.account.fills) }} fills in US stocks, trades closed {{ real.account.period }}; the whole dataset, not picked by result, as price gains before fees, FX and dividends; ticker names replaced with codes. <a href="/static/samples/real-trades.csv" download>Download it</a> to see the CSV template. <a href="/tools/#src-h">Where it comes from</a></p>
       </div>
       <div class="field">
         <label for="ts-balance">Starting balance (optional)</label>

@@ -1,0 +1,43 @@
+{
+ "source": "Federal Reserve Board H.10, euro, noon buying rates in New York",
+ "url": "https://www.federalreserve.gov/releases/h10/hist/dat00_eu.htm",
+ "licence": "Public domain (Board website notice); cite the Board",
+ "raw_sha256": "b4272a34a25fbe26cdbad64364d73796efdd6b5df91ce91a64e71d2d6cf9c9e3",
+ "file_last_date": "2026-10-30",
+ "month": "2026-09",
+ "month_label": "September 2026",
+ "days": 21,
+ "low": 1.1336,
+ "high": 1.1629,
+ "range_pips": 293,
+ "avg_daily_move_pips": 20.7,
+ "first": 1.1593,
+ "last": 1.1345,
+ "series": [
+  1.1593,
+  1.1592,
+  1.1623,
+  1.1618,
+  1.1627,
+  1.1627,
+  1.1629,
+  1.1604,
+  1.1549,
+  1.1542,
+  1.1538,
+  1.1479,
+  1.1464,
+  1.1469,
+  1.1432,
+  1.1394,
+  1.1373,
+  1.14,
+  1.1367,
+  1.1336,
+  1.1345
+ ],
+ "lot_fact": {
+  "lot_units_eur": 100000,
+  "usd_per_pip": 10
+ }
+}

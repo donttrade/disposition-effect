@@ -7,6 +7,7 @@ Reads the tokens straight from site/static/css/site.css:
 Also fails if the light rust #9A3B1C appears in a dark token block or in any --band-* token.
 The dark hero band's tokens (--band-*, both dark blocks) are measured as BAND_PAIRS; in light the band
 uses the page tokens (owner, 25 Oct), which PAIRS already measure.
+The tool display's screen tokens (--scr*, --s-*, every block) are measured as SCREEN_PAIRS in both themes.
 Exit code 0 = pass. Prints one line per pair.
 """
 import os
@@ -46,6 +47,16 @@ BAND_PAIRS = ([(fg, bg, 4.5, why) for fg, why in BAND_TEXT for bg in BAND_BGS]
               + [("band-on-rust", "band-rust", 4.5, "button text in the band"),
                  ("band-on-rust", "band-rust-hover", 4.5, "hovered button in the band")])
 BAND_TOKENS = sorted({t for p in BAND_PAIRS for t in p[:2]} | {"band-border"})
+
+# The tool display (6 Nov, /tools/ redesign B2; site/static/css/tools.css): a screen that stays dark in both themes,
+# with its own ink. Every text colour drawn on it, on both screen backgrounds, in both themes. The grid colour is
+# decorative (rules and the empty heatmap cell outline), so it is not measured as text.
+SCREEN_BGS = ("scr", "scr-2")
+SCREEN_TEXT = (("scr-ink", "screen text and readouts"), ("scr-mute", "screen labels, axis text, chips"),
+               ("s-gain", "gains on the screen"), ("s-loss", "losses on the screen"), ("s-plan", "plan lines on the screen"),
+               ("s-accent", "the cursor readout, the real-order path"))
+SCREEN_PAIRS = [(fg, bg, 4.5, why) for fg, why in SCREEN_TEXT for bg in SCREEN_BGS]
+SCREEN_TOKENS = sorted({t for p in SCREEN_PAIRS for t in p[:2]} | {"scr-grid"})
 
 
 def blocks(css):
@@ -88,10 +99,13 @@ def main():
         missing = [k for k in BAND_TOKENS if k not in t]
         if missing and name != "light":
             failures.append(f"{name} block lacks band token(s): {', '.join(missing)}")
+        missing = [k for k in SCREEN_TOKENS if k not in t]
+        if missing:
+            failures.append(f"{name} block lacks screen token(s): {', '.join(missing)}")
         if any(v == "#9A3B1C" for k, v in t.items() if k.startswith("band-")):
             failures.append(f"#9A3B1C (light rust) used in a --band-* token ({name} block): 2.55:1 on charcoal")
     for theme, t in themes.items():
-        for fg, bg, need, why in PAIRS + (BAND_PAIRS if theme == "dark" else []):
+        for fg, bg, need, why in PAIRS + SCREEN_PAIRS + (BAND_PAIRS if theme == "dark" else []):
             r = ratio(t[fg], t[bg])
             ok = r >= need
             print(f"{'PASS' if ok else 'FAIL'}  {theme:5}  {fg:13} on {bg:10} {r:5.2f}:1 (need {need}) {why}")

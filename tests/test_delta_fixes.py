@@ -526,7 +526,12 @@ def test_c4_old_calculators_still_work_and_cannot_send(browser, built_site, path
     errors = []
     page.on("console", lambda m: errors.append(m.text) if "Content Security Policy" in m.text else None)
     page.goto(built_site["url"] + path)
-    page.click(example)
+    if example == "#pr-example":   # 6 Nov: no example button on the pass-rate page (no invented counts): typed
+        for k, v in (("started", "1000"), ("open", "150"), ("passed", "170"), ("paid", "40")):
+            page.fill(f"#pr-{k}", v)
+        page.press("#pr-paid", "Enter")
+    else:
+        page.click(example)
     assert page.inner_text(out_id).strip() not in ("", "—"), "the calculator still computes"
     blocked = page.evaluate("""async () => { const out = [];
         for (const u of ['/x.json', 'https://example.com/x']) { try { await fetch(u); out.push('sent ' + u); } catch (e) { out.push('blocked'); } }

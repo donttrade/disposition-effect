@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
+{%- import "partials/tool_glyphs.html" as g with context %}{% import "partials/tool_display.html" as d with context %}
 {%- import "partials/trader_offer.html" as offer with context %}
 <div class="wrap">
   {#- sweep 3 (29 Oct, owner: show, don't tell): one line and a picture; the longer explanation is under
       "How it works" below, word for word. -#}
-  {%- from "partials/tool_shot.html" import shot with context %}{% set t = tools | selectattr("href", "equalto", "/tools/drawdown-calculator/") | first %}
   <div class="tool-hero">
     <div>
       <p class="crumb small"><a href="/tools/">Free tools</a></p>
-      <h1>Drawdown and recovery calculator</h1>
+      <div class="tool-title"><span class="tool-mark">{{ g.glyph(page.glyph, 64, "ic") }}</span><h1>Drawdown and recovery calculator</h1></div>
       <p class="lede">Type a drawdown to see the gain that wins it back. Or drop a trade file.</p>
     </div>
-    {{ shot("dd", t) }}
+    {{ d.display(page.glyph) }}
   </div>
   {% include "partials/disclaimer.html" %}
 
@@ -54,8 +54,8 @@
           <label for="dd-file">Your trade file</label>
           <input id="dd-file" type="file" accept=".csv,.htm,.html,.txt">
         </div>
-        <p class="btn-row"><span class="muted">No file to hand?</span> <button class="btn btn-secondary" id="dd-sample-btn" type="button">Try with example data</button></p>
-        <p class="small muted">Example data: 160 trades on three symbols. The <a href="/tools/trade-stats/#template">CSV template</a> is explained on the trade-stats page.</p>
+        <p class="btn-row"><span class="muted">No file to hand?</span> <button class="btn btn-secondary" id="dd-sample-btn" type="button">Try real public data</button></p>
+        <p class="small muted">Real public data: the Stock Transactions Dataset (Mendeley Data, CC BY 4.0), one anonymous investor’s {{ "{:,}".format(real.account.fills) }} fills in US stocks, trades closed {{ real.account.period }}; the whole dataset, not picked by result, as price gains before fees, FX and dividends; ticker names replaced with codes. <a href="/tools/#src-h">Where it comes from</a></p>
       </div>
       <div class="field">
         <label for="dd-balance">Starting balance (optional)</label>

@@ -30,7 +30,9 @@ plus the three text fixes in LIFT_FIXES, which the passthrough build already app
 frozen body) and five rewordings of "sealed" in study link and teaser text on /about/,
 /for-researchers/ and /research/ (22 Oct 2026, brand Tester D4) and two rewordings of "verified"
 to "confirmed" in the correction promise on /corrections/ and /for-researchers/ (24 Oct 2026,
-Tester §12) and two more links on /404.html, Free tools and For traders (25 Oct 2026, QA). compare.py proves that nothing else in the visible text, ids, links, tables or
+Tester §12) and two more links on /404.html, Free tools and For traders (25 Oct 2026, QA), and on
+/tools/disposition-calculator/ Odean's published counts for the made-up example and the /sample-memo/ link removed
+(6 Nov 2026, tools B2 and its fix round 2). compare.py proves that nothing else in the visible text, ids, links, tables or
 citation meta changed.
 
 This reads docs/ as it is before the step-30 bundle (old design). Once docs/ is replaced by
@@ -81,8 +83,7 @@ PAGES = [
     ("/404.html", "404.html", "Not found", None, None),
     ("/tools/disposition-calculator/", "tools/disposition-calculator/index.html",
      "Disposition-effect calculator", ("Free tools", "/tools/"), "/tools/"),
-    ("/tools/pass-rate-calculator/", "tools/pass-rate-calculator/index.html",
-     "Prop-firm pass-rate calculator", ("Free tools", "/tools/"), "/tools/"),
+    # 6 Nov 2026 (owner): the pass-rate calculator is a template page now (pages/tool-pass-rate.html), no longer lifted
 ]
 
 # Inline styles (blocked by style-src 'self') → classes in site.css with the same effect.
@@ -109,6 +110,19 @@ STYLE_CLASS = {
 # The text fixes the passthrough build already made (build.py PASSTHROUGH_FIXES and the
 # PASSTHROUGH_CHROME "Start a trial" label, D3/D9). Exact text, each must occur exactly once.
 LIFT_FIXES = {
+    # 6 Nov 2026 (owner: real public data only; ARCHITECT-PLAN-TOOLS-REDESIGN A.8-5): a dated correction. The
+    # disposition calculator's made-up example counts are replaced by Odean's (1998) published Table I counts, cited.
+    "/tools/disposition-calculator/": [
+        ('id="dc-example">Fill a made-up example</button>', 'id="dc-example">Try Odean’s 1998 counts</button>'),
+        ('<p class="fine">The example (420, 1,780, 260, 2,240) is made-up. It is not real trading data.</p>',
+         '<p class="fine">Real published data: Odean (1998), Table I, entire year: 13,883 realised gains, 79,658 paper '
+         'gains, 11,930 realised losses and 110,348 paper losses. Odean, T. (1998). Are investors reluctant to realize '
+         'their losses? <cite>Journal of Finance</cite> 53(5), 1775–1798.</p>'),
+        # 6 Nov 2026 (Manager, tools B2 fix round 2): a dated removal. The link to /sample-memo/, a memo on made-up
+        # counts, goes; the Glossary link stays.
+        ('<p><a href="/sample-memo/">How we measure it on a firm’s own records →</a> · <a href="/glossary/">Glossary →</a></p>',
+         '<p><a href="/glossary/">Glossary →</a></p>'),
+    ],
     "/independence/": [
         ("The site header and footer link to Pricing and Start a trial on every page,",
          "The site header and footer link to Pricing and Start a Pilot on every page,"),
@@ -183,15 +197,14 @@ DESC_FIX = {
     "/research/swing-trading-strategies/": "Pre-registered, hashed tests of 26 swing-trading rules on ETFs, judged "
                                            "once on locked holdouts, net of costs. None passed. Not a strategy or a signal.",
 }
-LEGACY_JS = {"/tools/disposition-calculator/": "disposition-calculator.js",
-             "/tools/pass-rate-calculator/": "pass-rate-calculator.js"}
+LEGACY_JS = {"/tools/disposition-calculator/": "disposition-calculator.js"}
 # Code fixes (not text): the calculators' logic was frozen by steps 28–29; on 21 Oct 2026 the
 # owner's pipeline fixed two recorded v1 defects in it (Manager §1.1): "1,5" read as 15 (now the
 # engine's decimal rule, static/js/legacy/numbers.js) and every box marked invalid on first load.
 # The page text is unchanged (compare.py). For these pages the lift writes the v1 inline script
 # to LEGACY_V1_DIR, so the v1 code stays on record and --check still proves it is docs/'s, and
 # the page loads numbers.js before its own script.
-CODE_FIXED = {"/tools/disposition-calculator/": "2026-10-21", "/tools/pass-rate-calculator/": "2026-10-21"}
+CODE_FIXED = {"/tools/disposition-calculator/": "2026-10-21"}
 LEGACY_DEPS = ["/static/js/legacy/numbers.js"]
 LEGACY_V1_DIR = os.path.join(HERE, "lifted-baseline", "legacy-v1")
 

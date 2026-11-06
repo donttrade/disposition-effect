@@ -523,7 +523,7 @@ def test_d3_pilot_labels_keep_urls_and_anchors(built_site):
     # of the docs/ page and gets the Pilot labels (tests/test_oldpages.py: none passes through)
     import compare as C
     pt = B.passthrough_pages({os.path.relpath(B.out_file("/x", p["path"]), "/x") for p in B.PAGES if not p["requires_flag"]})
-    assert len(pt) + len(B.LIFTED_PATHS) == 20
+    assert len(pt) + len(B.LIFTED_PATHS) == 19   # 6 Nov: the pass-rate calculator became a template page
     for path in B.LIFTED_PATHS:
         built = (built_site["out"] / B.out_file("", path).lstrip("/")).read_text(encoding="utf-8")
         assert C.diff_page(C.baselines()[path], built) == [], path
@@ -593,7 +593,8 @@ def test_d7_100k_rows_keep_the_main_thread_free(browser, built_site, tmp_path, t
     assert errors == []
     assert progress, "no progress shown while the file was read"
     assert gaps == [], f"main thread blocked: {gaps} ms"   # before the fix: 3050 ms
-    n = int(re.search(r"([\d,]+) closed trades", text).group(1).replace(",", ""))
+    # 6 Nov: the page header's real-data display says "64 closed trades" first; the file's count comes after it
+    n = int(re.findall(r"([\d,]+) closed trades", text)[-1].replace(",", ""))
     assert n == 50_000, n
 
 

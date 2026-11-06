@@ -56,6 +56,8 @@ from markupsafe import Markup
 
 SITE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(SITE)
+sys.path.insert(0, SITE)
+import tool_real  # noqa: E402  (6 Nov, tools redesign B2: the real-data displays' geometry)
 DOCS = os.path.join(REPO, "docs")
 BASELINE = os.environ.get("DT_BASELINE") or os.path.join(REPO, "checks", "urls-baseline.txt")
 
@@ -448,6 +450,15 @@ PAGES = [
 
 # Free tools (steps 10-12). connect-src stays 'none' (the csp_for default): these pages
 # cannot send anything, which is what makes "your file is not uploaded" true.
+# 6 Nov (tools redesign B2, ARCHITECT-PLAN-TOOLS-REDESIGN-2026-11-06): every tool page and /tools/ load tools.css (the
+# glyphs, the dark display, the /tools/ rack) and tools-index.js (play-once motion, the /tools/ scope); "glyph" names
+# the page's mark (partials/tool_glyphs.html). TOOL_PAGE_EXTRA is added to each tool page's dict below.
+TOOLS_CSS = "/static/css/tools.css"
+TOOLS_JS = "/static/js/tools-index.js"
+TOOL_GLYPHS = {"/tools/trade-stats/": "stats", "/tools/prop-challenge-simulator/": "prop",
+               "/tools/lot-size-calculator/": "lot", "/tools/risk-reward-calculator/": "rr",
+               "/tools/drawdown-calculator/": "dd", "/tools/trading-heatmap/": "heat",
+               "/tools/disposition-calculator/": "disp", "/tools/pass-rate-calculator/": "pass"}
 PAGES += [
     {"template": "pages/tool-trade-stats.html", "path": "/tools/trade-stats/", "requires_flag": None,
      "modules": ["/static/js/tools/trade-stats.js"], "sample": True, "app": True, "updated": "2026-10-21",
@@ -489,8 +500,8 @@ PAGES += [
      "title": "Trading Heatmap of Your Trades by Hour and Weekday",
      "description": "See your own results, win rate and trade count by the hour and weekday each trade opened, "
                     "from your trade file, in the time zone you choose. Free."},
-    {"template": "pages/tools-index.html", "path": "/tools/", "requires_flag": None, "updated": "2026-10-21",
-     "crumb": "Free tools", "itemlist": True,
+    {"template": "pages/tools-index.html", "path": "/tools/", "requires_flag": None, "updated": "2026-11-06",
+     "crumb": "Free tools", "itemlist": True, "styles": [TOOLS_CSS], "scripts": [TOOLS_JS],
      "title": "Free Trading Tools That Run in Your Browser",
      "description": "Free tools for your own trades: trade stats from your file, a Challenge Readiness "
                     "Check for prop-firm rules, a lot size calculator and more. No sign-up.",
@@ -722,40 +733,56 @@ PILOT_FLAG_MARKER = 'data-requires-flag="pilot_checkout"'
 
 # The /tools/ index rows: tool, the question it answers, input, Open (plan step 12).
 TOOLS = [
-    {"name": "Trade stats", "href": "/tools/trade-stats/",
+    {"name": "Trade stats", "href": "/tools/trade-stats/", "glyph": "stats", "group": "file",
      "short": "Your trade file → win rate, net result and streaks.", "preview": "stats", "icon": "stats",   # 25 Oct sweep: the card line and preview
      "question": "What does my own trade history show?",
      "question_if_badges": "What does my own trade history show, and which numbers are more than noise?",
      "input": "Your trade file"},
-    {"name": "Trading heatmap", "href": "/tools/trading-heatmap/",
+    {"name": "Trading heatmap", "href": "/tools/trading-heatmap/", "glyph": "heat", "group": "file",
      "short": "Your trade file → your results by hour and weekday.", "preview": "heat", "icon": "windows",   # 25 Oct sweep: the card line and preview
      "question": "How did my own trades turn out by the hour and weekday they opened?",
      "input": "Your trade file"},
-    {"name": "Drawdown and recovery calculator", "href": "/tools/drawdown-calculator/",
+    {"name": "Drawdown and recovery calculator", "href": "/tools/drawdown-calculator/", "glyph": "dd", "group": "file",
      "short": "A drawdown or your file → how deep and how long.", "preview": "dd", "icon": "split",   # 25 Oct sweep: the card line and preview
      "question": "What gain recovers a drawdown, and how deep and long were mine?",
      "input": "A drawdown in percent, or your trade file"},
-    {"name": "Challenge Readiness Check", "href": "/tools/prop-challenge-simulator/",
+    {"name": "Challenge Readiness Check", "href": "/tools/prop-challenge-simulator/", "glyph": "prop", "group": "file",
      "short": "Your file and a firm’s rules → pass, bust or out of time.", "preview": "prop", "icon": "flag",   # 25 Oct sweep: the card line and preview
      "question": "How would my past trading days have fared under a challenge’s rules?",
      "input": "Your trade file, or win rate and average win and loss; the rules"},
-    {"name": "Lot size calculator", "href": "/tools/lot-size-calculator/",
+    {"name": "Lot size calculator", "href": "/tools/lot-size-calculator/", "glyph": "lot", "group": "calc",
      "short": "Balance, risk and stop → the lot size.", "preview": "", "icon": "scale",   # 25 Oct sweep: the card line and preview
      "question": "How many lots match the amount I chose to risk at this stop?",
      "input": "Balance, risk amount, stop distance, value per point"},
-    {"name": "Risk-reward calculator", "href": "/tools/risk-reward-calculator/",
+    {"name": "Risk-reward calculator", "href": "/tools/risk-reward-calculator/", "glyph": "rr", "group": "calc",
      "short": "Entry, stop and target → the break-even win rate.", "preview": "", "icon": "percent",   # 25 Oct sweep: the card line and preview
      "question": "At what win rate does this reward-to-risk ratio break even, and what is the expectancy in R?",
      "input": "Entry, stop and target, or the ratio; optionally a win rate"},
-    {"name": "Disposition-effect calculator", "href": "/tools/disposition-calculator/",
+    {"name": "Disposition-effect calculator", "href": "/tools/disposition-calculator/", "glyph": "disp", "group": "calc",
      "short": "Four counts → did you sell winners sooner than losers?", "preview": "", "icon": "hourglass",   # 25 Oct sweep: the card line and preview
      "question": "Were winning positions sold more readily than losing ones?",
      "input": "Four counts of positions sold and held"},
-    {"name": "Pass-rate calculator (for firm operators)", "href": "/tools/pass-rate-calculator/",
+    {"name": "Pass-rate calculator (for firm operators)", "href": "/tools/pass-rate-calculator/", "glyph": "pass", "group": "firm",
      "short": "Cohort counts → pass and payout rate. For firms.", "preview": "", "icon": "check",   # 25 Oct sweep: the card line and preview
      "question": "What are one cohort’s evaluation pass rate and payout rate?",
      "input": "Cohort counts"},
 ]
+
+
+# 6 Nov (owner): the pass-rate calculator rebuilt as a native template (it was a lifted page until then); and
+# every tool page gets its glyph, tools.css and tools-index.js (TOOL_GLYPHS, above).
+PAGES += [
+    {"template": "pages/tool-pass-rate.html", "path": "/tools/pass-rate-calculator/", "requires_flag": None,
+     "scripts": ["/static/js/legacy/numbers.js", "/static/js/tools/pass-rate.js"], "app": True, "updated": "2026-11-06",
+     "crumb": "Prop-firm pass-rate calculator",
+     "title": "Prop-firm pass-rate calculator — donttrade",
+     "description": "Free: a prop-firm evaluation pass rate and payout rate for one cohort, computed correctly. Runs in "
+                    "your browser; your numbers are never sent."},
+]
+for _p in PAGES:
+    if _p["path"] in TOOL_GLYPHS:
+        _p.update({"glyph": TOOL_GLYPHS[_p["path"]], "styles": _p.get("styles", []) + [TOOLS_CSS],
+                   "scripts": _p.get("scripts", []) + [TOOLS_JS]})
 
 
 def tools_for(flags):
@@ -780,6 +807,28 @@ def tool_previews():
         die(f"{TOOL_PREVIEWS_JSON} was captured from another sample file: rerun python3 checks/make_tool_previews.py")
     return tp
 
+
+
+def tool_real_data():
+    """6 Nov (tools redesign B2): the real public data behind /tools/ and the tool-page displays,
+    site/config/tool_real.json (checks/real_data/make_tool_real.py). Refused when its shipped trade file or the test's report
+    changed since it was made, or when that report's method is not the one the report page accepts."""
+    data = tool_real.load()
+    # 6 Nov fix round 2: the file with the real tickers (checks/real_data/raw/real-trades.csv) is not committed, so
+    # the build checks the coded copy it ships; make_tool_real.py --check recomputes from the original where fetched.
+    with open(tool_real.TOOL_REAL_REPORT_JSON, "rb") as f:
+        rep_bytes = f.read()
+    ins = data["inputs"]
+    with open(REAL_SAMPLE_CSV, "rb") as f:   # the shipped copy, tickers replaced with codes
+        if ins["checks/real_data/real-trades.coded.csv"]["sha256"] != hashlib.sha256(f.read()).hexdigest():
+            die("checks/real_data/real-trades.coded.csv changed since tool_real.json was made: rerun "
+                "checks/real_data/make_coded_csv.py and make_tool_real.py")
+    if ins["site/config/tool_real.report.json"]["sha256"] != hashlib.sha256(rep_bytes).hexdigest():
+        die("site/config/tool_real.json was made from another tool_real.report.json: rerun checks/real_data/make_tool_real.py")
+    if data["report"]["method_version"] != page_method_version():
+        die(f"site/config/tool_real.json: the real account's report is method {data['report']['method_version']}, the "
+            f"report page accepts {page_method_version()}: rerun checks/real_data/run_report.py and make_tool_real.py")
+    return data
 
 
 def evidence():
@@ -965,6 +1014,26 @@ def sample_csv():
         text = f.read()
     if "<" in text or "&" in text:
         die("example-trades.csv contains '<' or '&'; it cannot be inlined safely")
+    return text
+
+
+# 6 Nov (owner rule "real public data, no worked examples"; Tester F12): the four file tools' "Try with real public
+# data" button loads the real public-data account (checks/real_data/real-trades.coded.csv, a coded copy of the file every /tools/ figure is
+# made from, CC BY 4.0), inlined the same way. The journal keeps the synthetic file (flag-off, not a /tools/ page);
+# home's hero and cards keep tool_previews.json (the synthetic file) until /sample-report/ and home are switched.
+# Its tickers are replaced with neutral codes ("Stock 01", ...; checks/real_data/make_coded_csv.py): the plan shows no
+# tickers, and every other byte is the same, so every figure is too.
+REAL_SAMPLE_CSV = os.path.join(REPO, "checks", "real_data", "real-trades.coded.csv")
+REAL_SAMPLE_PATHS = ("/tools/trade-stats/", "/tools/trading-heatmap/", "/tools/drawdown-calculator/",
+                     "/tools/prop-challenge-simulator/")
+REAL_SAMPLE_URL = "/static/samples/real-trades.csv"
+
+
+def real_sample_csv():
+    with open(REAL_SAMPLE_CSV, encoding="utf-8") as f:
+        text = f.read()
+    if "<" in text or "&" in text:
+        die("real-trades.coded.csv contains '<' or '&'; it cannot be inlined safely")
     return text
 
 
@@ -1218,15 +1287,9 @@ PAID_LIFTED_SWAPS = {
                     "<a href=\"/sample-report/\">Read the sample report →</a>",
                     "What the donttrade test’s result looks like, from its own engine, run on example data. "
                     "<a href=\"/sample-report/\">Read the example report →</a>")],
-    # 29 Oct (owner): sample data is labelled with the one word "Example", never "made-up"
-    "/tools/disposition-calculator/": [
-        ('id="dc-example">Fill a made-up example</button>', 'id="dc-example">Try with example data</button>'),
-        ("The example (420, 1,780, 260, 2,240) is made-up. It is not real trading data.",
-         "Example data: 420, 1,780, 260 and 2,240.")],
-    "/tools/pass-rate-calculator/": [
-        ('id="pr-example">Fill a made-up example</button>', 'id="pr-example">Try with example data</button>'),
-        ("The example (1,000 started, 150 open, 170 passed, 40 paid, 800 traders) is made-up. It is not a real firm’s data.",
-         "Example data: 1,000 started, 150 open, 170 passed, 40 paid, 800 traders.")],
+    # 29 Oct (owner): sample data was labelled "Example data" here. 6 Nov (owner: real public data only): the
+    # disposition calculator's frozen body now fills Odean's (1998) published counts in every build (a dated
+    # correction in its baseline), and the pass-rate calculator is a template page with no invented example.
 }
 PAID_LIFTED_DESCRIPTIONS = {   # the same, for the page description (head only, outside the frozen body)
     "/about/": "Who writes donttrade, what the plan gap is and how it is measured, why no author name is published, "
@@ -1262,6 +1325,8 @@ def lifted_pages():
                 page[k] = m[k]
         if m["path"] in PAID_LIFTED_DESCRIPTIONS:
             page["if_paid"] = {"description": PAID_LIFTED_DESCRIPTIONS[m["path"]]}
+        if m["path"] in TOOL_GLYPHS:   # 6 Nov (B2): the glyph and the real-data display, in pages/lifted.html's header
+            page.update({"glyph": TOOL_GLYPHS[m["path"]], "styles": [TOOLS_CSS], "scripts": page["scripts"] + [TOOLS_JS]})
         pages.append(page)
     return pages
 
@@ -1514,6 +1579,7 @@ def apply_file_fixes(out):
 # style attributes for styles; neither lets the page send anything (connect-src and form-action 'none').
 # Since steps 28–29 both are lifted template pages: csp_for gives them the same directives without
 # 'unsafe-inline', and the build fails if either path is neither a template page nor in docs/.
+# 6 Nov: the pass-rate calculator is a native template page now (pages/tool-pass-rate.html); it keeps this policy.
 PASSTHROUGH_CSP = ("default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
                    "img-src 'self' data:; font-src 'self'; connect-src 'none'; worker-src 'none'; "
                    "form-action 'none'; base-uri 'none'; object-src 'none'")
@@ -3020,6 +3086,8 @@ def build():
         owned[os.path.relpath(out_file(out, page["path"]), out)] = page
 
     check_hero_dashboard()
+    real_ = {"real": tool_real_data()}   # 6 Nov (B2): the real-data figures and their drawing geometry, every page
+    real_["rv"] = tool_real.view(real_["real"])
 
     # 1. passthrough of every docs/ file a template does not own yet. docs/static/ is the last bundle's
     # copy of site/static/ (step 30), never a source: skipped, so a file deleted from site/static/
@@ -3056,6 +3124,7 @@ def build():
                 or (not flags["journal"] and (rel.startswith(JOURNAL_JS_DIR) or rel == os.path.join("css", "journal.css"))))   # ARCHITECT-V3 D7: out of the build until approved
     copy_tree_sorted(os.path.join(SITE, "static"), os.path.join(out, "static"), skip=static_left_out)
     set_ranked_flag(os.path.join(out, "static", RANKED_JS), flags["whatif_ranked"])
+    shutil.copyfile(REAL_SAMPLE_CSV, os.path.join(out, REAL_SAMPLE_URL.lstrip("/")))   # the download beside the button
     # 3. dev pages, only on request; never bundled
     if os.environ.get("DT_DEV") == "1":
         copy_tree_sorted(os.path.join(SITE, "dev"), os.path.join(out, "dev"))
@@ -3100,7 +3169,8 @@ def build():
             page.update(page.get("if_badges", {}))  # C1: the copy that names the free check
         if not flags["ask_box"]:
             page["scripts"] = [s for s in page["scripts"] if s not in ASK_SCRIPTS]
-        extra = {"sample_csv": sample_csv()} if page.get("sample") else {}
+        extra = {"sample_csv": real_sample_csv() if page["path"] in REAL_SAMPLE_PATHS else sample_csv()} if page.get("sample") else {}
+        extra.update(real_)
         # the trader Stripe link, built here only: every page's copy names the page it is on (client_reference_id)
         extra["pay_link"] = with_client_ref(products["report39"]["stripe_link_" + cfg["stripe"]["mode"]], page["path"])
         extra["report_link_fr"] = with_client_ref(report_link_fr(products["report39"], cfg["stripe"]["mode"]), page["path"])

@@ -29,13 +29,15 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=47f22130">
+<link rel="stylesheet" href="/static/css/site.css?v=e0f686f7">
+<link rel="stylesheet" href="/static/css/tools.css?v=2117013f">
 <script src="/static/js/theme.js?v=7e47c1a9"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
 <script src="/static/js/pay.js?v=169a9640" defer></script>
 <script src="/static/js/lifted.js?v=ea2af7c3" defer></script>
 <script src="/static/js/legacy/numbers.js?v=bf5c1378" defer></script>
-<script src="/static/js/legacy/disposition-calculator.js?v=1523855e" defer></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "6ed43d34957a49fcb90ec8e43f7db523"}'></script>
+<script src="/static/js/legacy/disposition-calculator.js?v=3e694875" defer></script>
+<script src="/static/js/tools-index.js?v=43b103ee" defer></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "6ed43d34957a49fcb90ec8e43f7db523"}'></script>
 <script src="/static/js/umami-clean.js?v=56f7d1df" defer></script>
 <script defer src="https://cloud.umami.is/script.js" data-website-id="16c5fa53-e8fc-4c55-892a-5546e7d51830" data-do-not-track="true" data-exclude-hash="true" data-domains="donttrade.ca" data-before-send="dtUmamiClean"></script>
 
@@ -73,6 +75,12 @@
 
 <div class="wrap lifted-pre"><nav class="crumb small" aria-label="Breadcrumb"><ol class="crumbs"><li><a href="/">Home</a><span class="crumb-sep" aria-hidden="true">›</span></li><li><a href="/tools/">Free tools</a><span class="crumb-sep" aria-hidden="true">›</span></li><li><span aria-current="page">Disposition-effect calculator</span></li></ol></nav>
 
+<div class="lifted-mark"><span class="tool-mark"><svg class="ic ic-disp" aria-hidden="true" focusable="false" width="64" height="64" viewBox="0 0 48 48" fill="none"><line class="i-base" x1="5" x2="5" y1="8" y2="40"/><rect class="i-gain-f a-x" x="6" y="12" width="36" height="7" rx="1.5"/><rect class="i-loss-f a-x d3" x="6" y="29" width="23.7" height="7" rx="1.5"/></svg></span>
+<figure class="tool-display" aria-labelledby="td-cap">
+  <!--real-data--><div class="md-screen md-scr-disp md-scr-calc" aria-hidden="true"><span class="chip md-chip" aria-hidden="true">Real published data</span><span class="md-pv"><span class="pv pv-calc"><b>0.1484 vs 0.0976, ratio 1.52, t-statistic 35.33</b></span>
+<svg class="dg" aria-hidden="true" focusable="false" viewBox="0 0 240 60"><rect class="dg-gain a-x" x="0" y="2" width="211.5" height="11" rx="2"/><rect class="dg-band" x="208.2" y="0" width="6.6" height="15"/><rect class="dg-loss a-x d2" x="0" y="31" width="139" height="11" rx="2"/><rect class="dg-band" x="136.7" y="29" width="4.7" height="15"/><text class="dg-t dg-t2" x="0" y="25">gains sold 14.84% (95% band 14.61–15.07%)</text><text class="dg-t dg-t2" x="0" y="55">losses sold 9.76% (95% band 9.59–9.92%)</text></svg></span></div><!--/real-data-->
+  <figcaption id="td-cap" class="td-cap"><span class="visually-hidden"><!--real-data-->The calculator on Odean’s four published counts: gains sold 0.1484, losses sold 0.0976, ratio 1.52, t-statistic 35.33.<!--/real-data--> </span>Real published data: Odean, T. (1998). Are investors reluctant to realize their losses? Journal of Finance 53(5), 1775–1798, Table I, entire year. <a href="https://doi.org/10.1111/0022-1082.00072" rel="noopener">doi:10.1111/0022-1082.00072</a>.</figcaption>
+</figure></div>
 <noscript><p class="notice notice-caution">This calculator runs in your browser and needs JavaScript turned on.</p></noscript></div>
 <!--frozen:start-->
 
@@ -91,10 +99,10 @@
     <div class="calc-field"><label for="dc-pl">Paper losses</label><input id="dc-pl" type="text" inputmode="numeric" autocomplete="off" aria-describedby="dc-msg"><p class="hint">Positions held at a loss</p></div>
   </div>
   <div class="btn-row">
-    <button type="button" class="btn" id="dc-example">Try with example data</button>
+    <button type="button" class="btn" id="dc-example">Try Odean’s 1998 counts</button>
     <button type="button" class="btn-2" id="dc-clear">Clear</button>
   </div>
-  <p class="fine">Example data: 420, 1,780, 260 and 2,240.</p>
+  <p class="fine">Real published data: Odean (1998), Table I, entire year: 13,883 realised gains, 79,658 paper gains, 11,930 realised losses and 110,348 paper losses. Odean, T. (1998). Are investors reluctant to realize their losses? <cite>Journal of Finance</cite> 53(5), 1775–1798.</p>
   <p class="calc-msg" id="dc-msg" role="status" aria-live="polite"></p>
 
   <div id="dc-results" hidden>
@@ -114,7 +122,7 @@
 <aside class="notice notice-gap next-step" aria-labelledby="next-step-h" data-requires-flag="paid_report">
   <h2 id="next-step-h">Is this habit real, or luck?</h2>
   <p>The donttrade test checks your own trades against chance. $39, re-test included.</p>
-  <p class="btn-row"><a class="btn" href="/pricing/#last-step">Take the test for $39</a> <a href="/sample-report/">See the example report</a></p>
+  <p class="btn-row"><a class="btn" href="/pricing/#last-step">Take the test for $39</a></p>
   <p class="small">Bring an export of your trade history from your broker or platform: the test works from that file, not from typed numbers.</p>
 </aside>
 
@@ -124,7 +132,7 @@
   <h3>What this does not tell you</h3>
   <p>This pools every position as if each one were independent. That overstates how precise the result is when a few accounts account for most of the positions. It is not the method of our client script, and it is not an audit.</p>
   <p>It also ignores holding age. Positions are sold less often the longer they are held, so if your losing positions are older than your winning ones, these four counts can show an effect that is only an age pattern. Controlling for it needs each position’s open date, which four totals do not carry.</p>
-  <p><a href="/sample-memo/">How we measure it on a firm’s own records →</a> · <a href="/glossary/">Glossary →</a></p>
+  <p><a href="/glossary/">Glossary →</a></p>
 </div>
 <div class="box"><h2 class="ls-boxhead">What this calculator can’t do</h2>
 <p>It needs the four counts already worked out, and that is the hard part: on every day an account sold anything, each position it still held has to be classed as a gain or a loss, from the full trade history. Done by hand, that stops being practical after a few dozen trades.</p>

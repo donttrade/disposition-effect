@@ -496,6 +496,7 @@ def without_tool_previews(html, where=None):
     check only when every dollar amount in it is one the tools printed on the sample file
     (site/config/tool_previews.json); a block with any other figure, or a price, is checked as usual. Only on
     SAMPLE_OUT_PATHS, and only when the block is one of the two preview elements (SAMPLE_OUT_ELEMENT)."""
+    html = without_real_data(html, where)   # 6 Nov (tools redesign B2): the real-data displays, by their own rule
     if where not in SAMPLE_OUT_PATHS:
         return html
     blocks = [b for b in SAMPLE_OUT_RE.findall(html) if SAMPLE_OUT_ELEMENT.match(b)]
@@ -506,6 +507,52 @@ def without_tool_previews(html, where=None):
     for b in blocks:
         found = amounts_in(b)
         if all(round(a, 2) in allowed for a in found):
+            html = html.replace(b, " ", 1)
+    return html
+
+
+# 6 Nov (tools redesign B2, ARCHITECT-PLAN-TOOLS-REDESIGN A.8-3): /tools/ and the tool pages show the tools run on REAL
+# public data, between <!--real-data--> and <!--/real-data-->. Such a block is left out of the price check only when
+# every $ amount in it is in site/config/tool_real.json or tool_real.report.json (a printed amount, or a dollar value
+# under REAL_MONEY_KEYS); a block with any other figure, or a price, is checked as usual. Only on REAL_DATA_PATHS.
+REAL_DATA_RE = re.compile(r"(?s)<!--real-data-->.*?<!--/real-data-->")
+REAL_DATA_PATHS = frozenset({"/tools/", "/tools/trade-stats/", "/tools/trading-heatmap/", "/tools/drawdown-calculator/",
+                             "/tools/prop-challenge-simulator/", "/tools/lot-size-calculator/",
+                             "/tools/risk-reward-calculator/", "/tools/disposition-calculator/",
+                             "/tools/pass-rate-calculator/"})
+REAL_MONEY_KEYS = frozenset({"curve", "curve_high", "curve_low", "slices", "real_order_path", "target", "daily_loss",
+                             "max_loss", "account_size", "usd_per_pip", "amount"})
+
+
+def real_data_amounts():
+    """Every dollar figure the real-data JSONs hold: amounts printed in their strings, and numeric dollar values."""
+    from harvest_prices import amounts_in
+    out = set()
+
+    def walk(v, key=None):
+        if isinstance(v, dict):
+            for k, x in v.items():
+                walk(x, k)
+        elif isinstance(v, list):
+            for x in v:
+                walk(x, key)
+        elif isinstance(v, str):
+            out.update(round(a, 2) for a in amounts_in(v.replace("−", "-")))
+        elif isinstance(v, (int, float)) and not isinstance(v, bool) and key in REAL_MONEY_KEYS:
+            out.add(round(abs(v), 2))
+    for name in ("tool_real.json", "tool_real.report.json"):
+        with open(os.path.join(REPO, "site", "config", name), encoding="utf-8") as f:
+            walk(json.load(f))
+    return out
+
+
+def without_real_data(html, where=None):
+    if where not in REAL_DATA_PATHS or "<!--real-data-->" not in html:
+        return html
+    from harvest_prices import amounts_in
+    allowed = real_data_amounts()
+    for b in REAL_DATA_RE.findall(html):
+        if all(round(a, 2) in allowed for a in amounts_in(b)):
             html = html.replace(b, " ", 1)
     return html
 

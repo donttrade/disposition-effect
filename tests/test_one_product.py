@@ -103,7 +103,9 @@ def test_no_study_figure_or_sample_figure_on_pricing(built_site):
 
 
 # ------------------------------------------------------------------ "Free for everyone"
-@pytest.mark.parametrize("path,present", [("/pricing/", True), ("/", True), ("/tools/", True), ("/for-firms/", False)])
+# 6 Nov (owner, tools redesign B2): the strip is left out on /tools/ only, where its facts are the hero line and its
+# links are the modules right under it; home and /pricing/ keep it.
+@pytest.mark.parametrize("path,present", [("/pricing/", True), ("/", True), ("/tools/", False), ("/for-firms/", False)])
 def test_free_strip_placement(built_site, path, present):
     h = html(built_site, path)
     m = re.search(r'(?s)<section class="free-strip".*?</section>', h)

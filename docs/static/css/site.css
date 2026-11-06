@@ -26,6 +26,10 @@
   --gain: #1F7A52;
   --loss: #A3264F;
   --caution: #8C6A1E;
+  /* the tool display (6 Nov, /tools/ redesign B2): a screen that stays dark in both themes, with its own ink, so
+     output reads as output (tools.css). Measured by checks/contrast.py SCREEN_PAIRS. */
+  --scr: #101215; --scr-2: #171A1E; --scr-ink: #ECEAE5; --scr-mute: #A2A7AF; --scr-grid: #262A30;
+  --s-gain: #3FB37F; --s-loss: #EC7598; --s-plan: #7F9BC0; --s-accent: #E8875F;
   /* the hero band (ARCHITECT-BRAND §2.2; owner, 25 Oct): in light it uses these page tokens, so only
      its plot-paper motif is set here; the charcoal --band-* set is in the dark blocks. Never #9A3B1C on dark. */
   --band-grid: rgb(154 59 28 / 0.07);
@@ -65,6 +69,8 @@
     --gain: #3FB37F;
     --loss: #E86A8E;
     --caution: #D9A441;
+    --scr: #0B0D10; --scr-2: #121418; --scr-ink: #ECEAE5; --scr-mute: #A2A7AF; --scr-grid: #22262B;
+    --s-gain: #3FB37F; --s-loss: #EC7598; --s-plan: #7F9BC0; --s-accent: #E8875F;
     --band-bg: #0E1013;   /* deeper than the dark page, so the band still reads as a band */
     --band-surface: #16181C;
     --band-text: #F2F1EE;
@@ -99,6 +105,8 @@
   --gain: #3FB37F;
   --loss: #E86A8E;
   --caution: #D9A441;
+  --scr: #0B0D10; --scr-2: #121418; --scr-ink: #ECEAE5; --scr-mute: #A2A7AF; --scr-grid: #22262B;
+  --s-gain: #3FB37F; --s-loss: #EC7598; --s-plan: #7F9BC0; --s-accent: #E8875F;
   --band-bg: #0E1013;   /* deeper than the dark page, so the band still reads as a band */
   --band-surface: #16181C;
   --band-text: #F2F1EE;

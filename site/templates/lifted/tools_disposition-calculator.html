@@ -15,10 +15,10 @@
     <div class="calc-field"><label for="dc-pl">Paper losses</label><input id="dc-pl" type="text" inputmode="numeric" autocomplete="off" aria-describedby="dc-msg"><p class="hint">Positions held at a loss</p></div>
   </div>
   <div class="btn-row">
-    <button type="button" class="btn" id="dc-example">Fill a made-up example</button>
+    <button type="button" class="btn" id="dc-example">Try Odean’s 1998 counts</button>
     <button type="button" class="btn-2" id="dc-clear">Clear</button>
   </div>
-  <p class="fine">The example (420, 1,780, 260, 2,240) is made-up. It is not real trading data.</p>
+  <p class="fine">Real published data: Odean (1998), Table I, entire year: 13,883 realised gains, 79,658 paper gains, 11,930 realised losses and 110,348 paper losses. Odean, T. (1998). Are investors reluctant to realize their losses? <cite>Journal of Finance</cite> 53(5), 1775–1798.</p>
   <p class="calc-msg" id="dc-msg" role="status" aria-live="polite"></p>
 
   <div id="dc-results" hidden>
@@ -40,7 +40,7 @@
   <h3>What this does not tell you</h3>
   <p>This pools every position as if each one were independent. That overstates how precise the result is when a few accounts account for most of the positions. It is not the method of our client script, and it is not an audit.</p>
   <p>It also ignores holding age. Positions are sold less often the longer they are held, so if your losing positions are older than your winning ones, these four counts can show an effect that is only an age pattern. Controlling for it needs each position’s open date, which four totals do not carry.</p>
-  <p><a href="/sample-memo/">How we measure it on a firm’s own records →</a> · <a href="/glossary/">Glossary →</a></p>
+  <p><a href="/glossary/">Glossary →</a></p>
 </div>
 <div class="box"><h2 class="ls-boxhead">What this calculator can’t do</h2>
 <p>It needs the four counts already worked out, and that is the hard part: on every day an account sold anything, each position it still held has to be classed as a gain or a loss, from the full trade history. Done by hand, that stops being practical after a few dozen trades.</p>

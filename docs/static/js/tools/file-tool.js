@@ -8,7 +8,8 @@
 import { createFileSlot, renderReadError } from './tool-state.js?v=af9a3c71';
 import { el, unitNote, day, intText } from './format.js?v=35164924';
 
-export const SAMPLE_LABEL = 'the synthetic sample file';
+// 6 Nov (owner: real public data, no worked examples): the button loads the real public-data account
+export const SAMPLE_LABEL = 'real public data: the Stock Transactions Dataset (Mendeley Data, CC BY 4.0)';
 
 export const FORMAT_NAMES = {
   mt5: 'MetaTrader 5 report', mt4: 'MetaTrader 4 statement', ibkr_flex: 'Interactive Brokers Flex Query',
@@ -47,7 +48,7 @@ export function readSection(prefix, r, fileLabel) {
       `${plural(r.trades.length, 'closed trade', 'closed trades')} from ${plural(r.n_fills, 'fill', 'fills')}, closed ${day(first.close_ts)} to ${day(last.close_ts)}. `,
       `Times are ${r.tz_label}. ${unitNote(unit)}`));
   if (fileLabel === SAMPLE_LABEL) {
-    sec.append(el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Example data' })));
+    sec.append(el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Real public data: Stock Transactions Dataset (Mendeley Data), one anonymous investor, not picked by result' })));
   }
   const notes = warningsNotice(prefix, r.warnings);
   if (notes) sec.append(notes);
