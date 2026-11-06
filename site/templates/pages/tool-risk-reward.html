@@ -8,18 +8,18 @@
       </div>
 {%- endmacro %}
 {% block content %}
+{%- import "partials/tool_glyphs.html" as g with context %}{% import "partials/tool_display.html" as d with context %}
 {%- import "partials/trader_offer.html" as offer with context %}
 <div class="wrap">
   {#- sweep 3 (29 Oct, owner: show, don't tell): one line and a picture; the longer explanation is under
       "How it works" below, word for word. -#}
-  {%- from "partials/tool_shot.html" import shot with context %}
   <div class="tool-hero">
     <div>
       <p class="crumb small"><a href="/tools/">Free tools</a></p>
-      <h1>Risk-reward calculator</h1>
+      <div class="tool-title"><span class="tool-mark">{{ g.glyph(page.glyph, 64, "ic") }}</span><h1>Risk-reward calculator</h1></div>
       <p class="lede">Entry, stop and target give your R multiple and the win rate that breaks even.</p>
     </div>
-    {{ shot("rr") }}
+    {{ d.display(page.glyph) }}
   </div>
   {% include "partials/disclaimer.html" %}
 

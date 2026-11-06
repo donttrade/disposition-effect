@@ -9,6 +9,8 @@
  *   - each refused box gets its own message next to it, and the summary below the buttons;
  *   - the boxes take whole numbers only, so "1,780" (the page's own example) is 1780 (launch NIT N3).
  * compute() and the results are unchanged, so the worked example gives the same figures.
+ * 6 Nov 2026 (owner: real public data only): the example button fills Odean's (1998) published Table I counts for
+ * the entire year (13,883 / 79,658 / 11,930 / 110,348) instead of made-up ones; the page cites the paper.
  */
 (function (root) {
   'use strict';
@@ -162,7 +164,7 @@
         if (e.key === 'Enter' && e.target && e.target.tagName === 'INPUT') { e.preventDefault(); touchAll(); update(); reveal(); }
       });
       $('dc-example').addEventListener('click', function () {
-        $('dc-rg').value = '420'; $('dc-pg').value = '1780'; $('dc-rl').value = '260'; $('dc-pl').value = '2240';
+        $('dc-rg').value = '13883'; $('dc-pg').value = '79658'; $('dc-rl').value = '11930'; $('dc-pl').value = '110348';
         touchAll(); update(); reveal();
       });
       $('dc-clear').addEventListener('click', function () { ids.forEach(function (id) { $(id).value = ''; }); touched = {}; shownOnce = false; update(); });

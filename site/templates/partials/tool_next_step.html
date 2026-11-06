@@ -5,6 +5,8 @@
     teaser box is left out (the tool scripts skip a missing box).
     5 Nov (free-tools audit F4, F6): a "typed" page (no trade file) adds one line after the buttons saying what to bring
     (a trade-history export), and the firm tool (lead = "firm") leads with the Pilot and keeps the trader test second.
+    6 Nov (owner, Manager review): no link to the made-up /sample-report/ or the sample memo from a tool page while the
+    tool pages show real public data; those pages are switched in a later branch.
     Use: {% with source = "file" | "typed", firm_line = false, lead = "firm" | none %}{% include "partials/tool_next_step.html" %}{% endwith %} -#}
 {%- if flags.paid_report %}
 {%- set r = products["report39"] %}{%- set pl = products["pilot"] %}
@@ -12,14 +14,14 @@
 <aside class="notice notice-gap next-step" aria-labelledby="next-step-h" data-requires-flag="paid_report" data-lead="firm">
   <h2 id="next-step-h">Test your whole book</h2>
   <p>The donttrade test, on your whole book: your staff run our public script on your own records, and you get the figure and a one-page memo back. One habit today, more being added.</p>
-  <p class="btn-row"><a class="btn" href="/for-firms/#request">Start a {{ pl.name }}, {{ pl.price_usd|usd }}</a> <a href="/sample-memo/">See a sample memo</a></p>
+  <p class="btn-row"><a class="btn" href="/for-firms/#request">Start a {{ pl.name }}, {{ pl.price_usd|usd }}</a></p>
   <p class="small">Trading your own account? <a href="/pricing/#last-step">The donttrade test for one trader is {{ r.price_usd|usd }}</a>.</p>
 </aside>
 {%- else %}
 <aside class="notice notice-gap next-step" aria-labelledby="next-step-h" data-requires-flag="paid_report">
   <h2 id="next-step-h">Is this habit real, or luck?</h2>
   <p>The donttrade test checks your own trades against chance. {{ r.price_usd|usd }}, re-test included.</p>
-  <p class="btn-row"><a class="btn" href="/pricing/#last-step">Take the test for {{ r.price_usd|usd }}</a> <a href="/sample-report/">See the example report</a></p>
+  <p class="btn-row"><a class="btn" href="/pricing/#last-step">Take the test for {{ r.price_usd|usd }}</a></p>
   {%- if source == "typed" %}
   <p class="small">Bring an export of your trade history from your broker or platform: the test works from that file, not from typed numbers.</p>
   {%- endif %}

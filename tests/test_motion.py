@@ -324,7 +324,9 @@ def test_i9_non_motion_pages_run_no_animation_and_tools_are_untouched(browser, b
         pg.goto(built_site["url"] + path)
         pg.evaluate("window.scrollTo(0, document.documentElement.scrollHeight)")
         pg.wait_for_timeout(150)
-        assert pg.evaluate(ANIMS) == [], path
+        # 6 Nov (tools redesign B2): the tool pages' glyph and real-data display play once (tools.css ic-*/tx-*
+        # keyframes, transform and opacity only, never under reduced motion); nothing else animates
+        assert [n for n in pg.evaluate(ANIMS) if not str(n).startswith(("ic-", "tx-"))] == [], path
     pg.goto(built_site["url"] + "/tools/trade-stats/")
     pg.click("#ts-sample-btn")
     pg.wait_for_selector("#ts-out dl.stats dd")

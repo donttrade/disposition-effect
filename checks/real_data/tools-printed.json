@@ -1,0 +1,570 @@
+{
+ "csv_sha256": "b20de3f29d48d91ea6bc5e3f903b1a4114ff1d2465be927c0852c0131d0ea518",
+ "site": "http://127.0.0.1:8766",
+ "trade_stats": {
+  "trades": "64",
+  "net": "−$31,040.32",
+  "win_rate": "32.8%",
+  "profit_factor": "0.26",
+  "mean": "−$485.00",
+  "largest_drawdown": "−$36,929.88",
+  "notes": [
+   "3 notes about this file",
+   "Positions still open at the end of the file were left out. 31 left out.",
+   "Some trades were open during a daylight-saving clock change (US or EU dates). The file's times have no time zone, so the hold time of these trades may be off by one hour, and a buy and a sell in the repeated hour may be in the wrong order. 60 found.",
+   "Win rate (break-even trades left out)\t32.8%"
+  ],
+  "rows": [
+   [
+    "Trade",
+    "Closed"
+   ],
+   [
+    "2",
+    "2021-02-10"
+   ],
+   [
+    "4",
+    "2021-02-17"
+   ],
+   [
+    "6",
+    "2021-02-19"
+   ],
+   [
+    "8",
+    "2021-04-07"
+   ],
+   [
+    "10",
+    "2021-04-12"
+   ],
+   [
+    "12",
+    "2021-04-19"
+   ],
+   [
+    "14",
+    "2021-09-27"
+   ],
+   [
+    "16",
+    "2022-05-18"
+   ],
+   [
+    "18",
+    "2022-11-09"
+   ],
+   [
+    "20",
+    "2023-02-06"
+   ],
+   [
+    "22",
+    "2023-03-30"
+   ],
+   [
+    "24",
+    "2023-07-05"
+   ],
+   [
+    "26",
+    "2023-07-05"
+   ],
+   [
+    "28",
+    "2023-08-14"
+   ],
+   [
+    "30",
+    "2023-08-23"
+   ],
+   [
+    "32",
+    "2023-08-23"
+   ],
+   [
+    "34",
+    "2023-09-06"
+   ],
+   [
+    "36",
+    "2023-09-19"
+   ],
+   [
+    "38",
+    "2023-10-09"
+   ],
+   [
+    "40",
+    "2023-10-11"
+   ],
+   [
+    "42",
+    "2023-10-16"
+   ],
+   [
+    "44",
+    "2023-11-06"
+   ],
+   [
+    "46",
+    "2023-11-07"
+   ],
+   [
+    "48",
+    "2023-11-10"
+   ],
+   [
+    "50",
+    "2023-11-16"
+   ],
+   [
+    "52",
+    "2023-11-29"
+   ],
+   [
+    "54",
+    "2024-01-30"
+   ],
+   [
+    "56",
+    "2024-03-08"
+   ],
+   [
+    "58",
+    "2024-03-15"
+   ],
+   [
+    "60",
+    "2024-04-30"
+   ],
+   [
+    "62",
+    "2024-05-16"
+   ],
+   [
+    "64",
+    "2024-07-01"
+   ],
+   [
+    "Statistic",
+    "Value"
+   ],
+   [
+    "Winning / losing / break-even trades",
+    "21 / 43 / 0"
+   ],
+   [
+    "Win rate (break-even trades left out)",
+    "32.8%"
+   ],
+   [
+    "Gross profit",
+    "+$10,821.94"
+   ],
+   [
+    "Gross loss",
+    "−$41,862.25"
+   ],
+   [
+    "Profit factor (gross profit ÷ gross loss)",
+    "0.26"
+   ],
+   [
+    "Mean result per trade (expectancy)",
+    "−$485.00"
+   ],
+   [
+    "Average winning trade",
+    "+$515.33"
+   ],
+   [
+    "Average losing trade",
+    "−$973.54"
+   ],
+   [
+    "Largest winning trade",
+    "+$2,530.62"
+   ],
+   [
+    "Largest losing trade",
+    "−$4,623.99"
+   ],
+   [
+    "Longest winning streak",
+    "4 trades, +$682.59"
+   ],
+   [
+    "Longest losing streak",
+    "10 trades, −$14,713.38"
+   ],
+   [
+    "Largest drawdown (closed-trade equity)",
+    "−$36,929.88"
+   ],
+   [
+    "Deepest drawdown by %, as % of its high (starting balance plus profit at the high)",
+    "enter a starting balance above"
+   ],
+   [
+    "Median hold, winning trades",
+    "567d 1h"
+   ],
+   [
+    "Median hold, losing trades",
+    "932d 22h"
+   ],
+   [
+    "Losing hold ÷ winning hold",
+    "1.65×"
+   ],
+   [
+    "Side",
+    "Trades"
+   ],
+   [
+    "Long",
+    "64"
+   ],
+   [
+    "Short",
+    "0"
+   ]
+  ]
+ },
+ "heatmap": {
+  "cols": [
+   "Mon",
+   "Tue",
+   "Wed",
+   "Thu",
+   "Fri"
+  ],
+  "rows": [
+   {
+    "hour": "13:00–14:00",
+    "cells": [
+     [
+      "−$1,120.59",
+      "3 trades"
+     ],
+     [
+      "−$330.39",
+      "3 trades"
+     ],
+     [
+      "+$1,768.28",
+      "2 trades"
+     ],
+     [
+      "−$1,287.98",
+      "2 trades"
+     ],
+     [
+      "−$655.80",
+      "3 trades"
+     ]
+    ]
+   },
+   {
+    "hour": "14:00–15:00",
+    "cells": [
+     [
+      "−$9,088.62",
+      "9 trades"
+     ],
+     [
+      "−$3,051.12",
+      "2 trades"
+     ],
+     [
+      "−$216.49",
+      "1 trade"
+     ],
+     [
+      "−$2,029.59",
+      "6 trades"
+     ],
+     [
+      "−$3,897.29",
+      "2 trades"
+     ]
+    ]
+   },
+   {
+    "hour": "15:00–16:00",
+    "cells": [
+     null,
+     null,
+     null,
+     [
+      "−$406.75",
+      "1 trade"
+     ],
+     [
+      "−$152.11",
+      "2 trades"
+     ]
+    ]
+   },
+   {
+    "hour": "16:00–17:00",
+    "cells": [
+     null,
+     [
+      "−$4,323.64",
+      "2 trades"
+     ],
+     [
+      "−$9,629.40",
+      "14 trades"
+     ],
+     null,
+     [
+      "−$1,921.37",
+      "1 trade"
+     ]
+    ]
+   },
+   {
+    "hour": "17:00–18:00",
+    "cells": [
+     [
+      "+$3,569.58",
+      "3 trades"
+     ],
+     null,
+     [
+      "−$39.69",
+      "3 trades"
+     ],
+     [
+      "−$138.27",
+      "1 trade"
+     ],
+     [
+      "+$2,493.49",
+      "1 trade"
+     ]
+    ]
+   },
+   {
+    "hour": "19:00–20:00",
+    "cells": [
+     [
+      "−$572.16",
+      "1 trade"
+     ],
+     null,
+     [
+      "+$40.00",
+      "1 trade"
+     ],
+     null,
+     null
+    ]
+   },
+   {
+    "hour": "20:00–21:00",
+    "cells": [
+     null,
+     null,
+     null,
+     [
+      "−$50.40",
+      "1 trade"
+     ],
+     null
+    ]
+   }
+  ],
+  "caption": "Total result of the trades opened in each hour block (rows) and weekday (columns). Hours with no trades are left out."
+ },
+ "drawdown": {
+  "largest": "−$36,929.88",
+  "text": "Results: your file\nWhat was read\n\nFormat: donttrade CSV template (one row per fill). 64 closed trades from 1,648 fills, closed 2020-12-23 to 2024-07-01. Times are as in the file. Amounts are in US dollars.\n\n3 notes about this file\nSome rows are exact copies of an earlier row, as when two overlapping exports are pasted together. They were kept, because two identical fills can be real. If you did not expect them, remove the copies and load the file again. 8 found.\nPositions still open at the end of the file were left out. 31 left out.\nSome trades were open during a daylight-saving clock change (US or EU dates). The file's times have no time zone, so the hold time of these trades may be off by one hour, and a buy and a sell in the repeated hour may be in the wrong order. 60 found.\nHeadline numbers\nLargest drawdown\n−$36,929.88\nLargest drawdown, % of its high\n—\nGain that recovers it\n—\nLongest drawdown, in trades\n50 trades\nLongest drawdown, in calendar days\n1,008 calendar days\nCurrent drawdown\n−$31,905.77\n\nEnter a starting balance above to see drawdowns as a percentage and the gain that recovers them.\n\nClosed-trade equity: open-trade swings between trades are not in a trade file, so a pl"
+ },
+ "prop_presets_first": [
+  [
+   "",
+   "Custom rules (type your own)"
+  ],
+  [
+   "example",
+   "Example rules"
+  ],
+  [
+   "alpha-capital-group-alpha-pro-10-phase-1",
+   "Alpha Pro 10%, Phase 1"
+  ],
+  [
+   "blue-guardian-1-step-standard",
+   "1 Step Standard"
+  ]
+ ],
+ "prop_rule": {
+  "preset_id": "alpha-capital-group-alpha-pro-10-phase-1",
+  "account_size": 100000,
+  "rules": {
+   "target": 10000,
+   "target_check": "not stated",
+   "daily_loss": 5000,
+   "max_loss": 10000,
+   "drawdown": "static",
+   "trail_stop_at": null,
+   "consistency": "not stated",
+   "min_days_kind": "trading",
+   "min_days": 3,
+   "count_day_if": "not stated",
+   "profitable_day_min": 0,
+   "time_limit": "not stated",
+   "day_start": {
+    "tz": "Etc/GMT-3",
+    "hour": 0
+   }
+  }
+ },
+ "prop_pre": {
+  "run_disabled": false,
+  "status": "Read your file: 64 closed trades on 54 trading days (donttrade CSV template (one row per fill)). Times are as in the file.",
+  "tz": "Times in this file are in\nDaily limits group trades by day, so the time zone matters.\nChoose one\nMy computer’s time zone\nUTC\nBroker server time (GMT+2, GMT+3 in summer)\nAnother offset from UTC",
+  "tz_value": "UTC",
+  "rules": [
+   [
+    "ps-preset",
+    "alpha-capital-group-alpha-pro-10-phase-1"
+   ],
+   [
+    "ps-account",
+    "100000"
+   ],
+   [
+    "ps-target",
+    "10000"
+   ],
+   [
+    "ps-daily",
+    "5000"
+   ],
+   [
+    "ps-maxloss",
+    "10000"
+   ],
+   [
+    "ps-days",
+    ""
+   ],
+   [
+    "ps-mindays",
+    "3"
+   ],
+   [
+    "ps-mindays-kind",
+    "trading"
+   ],
+   [
+    "ps-profmin",
+    ""
+   ],
+   [
+    "ps-countday",
+    "any"
+   ],
+   [
+    "ps-consistency",
+    ""
+   ],
+   [
+    "ps-stopat",
+    ""
+   ],
+   [
+    "ps-targetcheck",
+    "eod"
+   ],
+   [
+    "ps-daytz",
+    "Etc/GMT-3"
+   ],
+   [
+    "ps-dayhour",
+    "0"
+   ],
+   [
+    "ps-seed",
+    "20261022"
+   ],
+   [
+    "ps-filetz",
+    "UTC"
+   ],
+   [
+    "ps-filetz-offset",
+    ""
+   ],
+   [
+    "ps-wr",
+    ""
+   ],
+   [
+    "ps-avgwin",
+    ""
+   ],
+   [
+    "ps-avgloss",
+    ""
+   ],
+   [
+    "ps-tpd",
+    ""
+   ]
+  ]
+ },
+ "prop_sim_rules_used": [
+  [
+   "ps-preset",
+   "alpha-capital-group-alpha-pro-10-phase-1"
+  ],
+  [
+   "ps-account",
+   "100000"
+  ],
+  [
+   "ps-target",
+   "10000"
+  ],
+  [
+   "ps-daily",
+   "5000"
+  ],
+  [
+   "ps-maxloss",
+   "10000"
+  ],
+  [
+   "ps-days",
+   ""
+  ],
+  [
+   "ps-mindays",
+   "3"
+  ]
+ ],
+ "prop_sim": {
+  "label": "Passed under 0.1%, broke a rule over 99.9%, out of time 0%",
+  "text": "Passed in under 0.1% of 10,000 replays\n\nA replay of past trades, not a prediction\nEach replay is built from whole trading days drawn at random from your file (54 days, 64 trades). Amounts are in US dollars.\n\n3 notes about this file\nSome rows are exact copies of an earlier row, as when two overlapping exports are pasted together. They were kept, because two identical fills can be real. If you did not expect them, remove the copies and load the file again. 8 found.\nPositions still open at the end of the file were left out. 31 left out.\nSome trades were open during a daylight-saving clock change (US or EU dates). The file's times have no time zone, so the hold time of these trades may be off by one hour, and a buy and a sell in the repeated hour may be in the wrong order. 60 found.\nHow the replays ended\nPassed under 0.1%\nBroke a rule over 99.9%\nOut of time 0%\n\nOf 10,000 replays of your past days, under 0.1% passed, over 99.9% broke a rule and 0% ran out of time.\n\nIn their real order, your days first broke the maximum loss on day 24.\n\nRule that broke most\n\nMaximum loss · 74% of busts\n\nOf the replays that broke a rule, 26% broke the daily loss limit and 74% the maximum loss.\n\nHabits on breach days\n\n1 past day reached the daily loss limit; 33 other losing days.\n\nRe-entering soon after a loss\nToo few breach days to describe\nTrading after a losing streak\nToo few breach days to describe\nSize after a loss\nToo few breach days to describe\nLosses much larger than your usual loss\nToo few b"
+ },
+ "prop_expert": "Expert details\nSimulation settings\nSimulation settings\nSetting\tValue\nReplays\t10,000\nSeed\t20261022\nStream\tpaired (method 2026-10-29.r1)\nDraw unit\tone whole past trading day, with replacement\nDay boundary\tEtc/GMT-3, hour 0\nFile time zone used\tUTC\nNo-limit cap\t250 trading days\nTrades read\t64\nDays read\t54\nDates but no times\tno\nRules library\t2026-10-29.2\n\nRules used: As Alpha Capital Group, Alpha Pro 10%, Phase 1 (rules_lib 2026-10-29.2). Profit target $10,000.00; daily loss limit $5,000.00; maximum loss $10,000.00 from the starting balance; no time limit (stopped at 250 trading days); at least 3 trading days.\n\nUncertainty\n\nMonte Carlo error: the ± column above is 1.96 × √(p(1 − p) / 10,000), about ±1 point for a 50% share.\n\nOutcome of 10,000 replays\nOutcome\tRuns\tShare\t± (95%)\nPassed\t3\t0.0%\t± 0.0%\nBusted\t9,997\t100.0%\t± 0.0%\nRan out of time\t0\t0.0%\t± 0.0%\n\nFile uncertainty: 200 resamples of your days with replacement, 1,000 replays each; 90% percentile intervals.\n\nCompute range\n\nPer-rule counts\nBusted on the daily loss limit\n2,576\nBusted on the maximum loss\n7,421\nHeld by the best-day share\n0\nHeld by the minimum days\n0\nMedian trading days to pass\n14\nMedian trading days to bust\n16\nStopped at the no-limit cap\nno\n\n69.7% of the busted runs broke a limit on a trade that came after 2 or more losses in a row (6,967 of 9,997).\n\nHabits, raw\nHabit counts (breach days: 1; fewer than 5 is too few; replays: fewer than 30 busts is too few)\nHabit\tFlagged trades\tBreach days\tOther losing days\tReplay busts\tDrawn losing days\nRe-entering soon after a loss\t0\t0 / 1\t0 / 33\t0 / 9,997\t0 / 111,796\nTrading after a losing streak\t4\t0 / 1\t3 / 33\t202 / 9,997\t10,014 / 111,796\nSize after a loss\t0\t0 / 1\t0 / 33\t0 / 9,997\t0 / 111,796\nLosses much larger than your usual loss\t14\t1 / 1\t11 / 33\t8,763 / 9,997\t39,501 / 111,796\nYour days in their real order\n\nIn their real order, your days first broke the maximum loss on day 24.\n\nOne cell per day, in order; the darkest red cell is the day a rule broke.\nExport\n\nResults only: the rules, the settings and the numbers above. No trades, no daily results, no symbols, no times.\n\nDownload CSV\nDownload JSON",
+ "prop_range": "90% range over 200 resamples of your days\nOutcome\tShare\nPassed\t0.0% to 2.6%\nBusted\t97.4% to 100.0%\nRan out of time\t0.0% to 0.0%",
+ "disposition_tool": {
+  "inputs": [
+   13883,
+   79658,
+   11930,
+   110348
+  ],
+  "source": "Odean (1998), Table I, entire year",
+  "results": "Result\n\nGains were sold about 1.52 times as readily as losses.\n\nPGR (share of gains sold)\n0.1484\nPLR (share of losses sold)\n0.0976\nRatio PGR / PLR\n1.52\nDifference PGR − PLR\n0.0509\nStandard error (Odean 1998)\n0.0014\nt-statistic\n35.33\n\nPGR = realised gains ÷ (realised gains + paper gains). PLR = realised losses ÷ (realised losses + paper losses). A t-statistic beyond about ±1.96 is conventionally treated as unlikely to be noise alone."
+ }
+}

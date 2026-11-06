@@ -49,18 +49,18 @@
       </div>
 {%- endmacro %}
 {% block content %}
+{%- import "partials/tool_glyphs.html" as g with context %}{% import "partials/tool_display.html" as d with context %}
 {%- set r = products["report39"] %}
 <div class="wrap">
-  {%- from "partials/tool_shot.html" import shot with context %}{% set t = tools | selectattr("href", "equalto", "/tools/prop-challenge-simulator/") | first %}
   <div class="tool-hero">
     <div>
       {% include "partials/crumbs.html" %}
-      <h1>Challenge Readiness Check</h1>
+      <div class="tool-title"><span class="tool-mark">{{ g.glyph(page.glyph, 64, "ic") }}</span><h1>Challenge Readiness Check</h1></div>
       <p class="lede">Your past days, their published rules.</p>
       <p>{% if flags.analytics %}Only anonymous counts of visits and finished steps are sent; your file is never sent.{% else %}Your file never leaves this tab.{% endif %}</p>
       <p><strong>A replay of your past trades, not a prediction.</strong></p>
     </div>
-    {{ shot("prop", t) }}
+    {{ d.display(page.glyph) }}
   </div>
   {% include "partials/disclaimer.html" %}
 
@@ -74,7 +74,7 @@
         <span class="hint" id="ps-preset-hint">A firm’s rules as published, or your own. Every box stays editable.</span>
         <select id="ps-preset" aria-describedby="ps-preset-hint ps-preset-info">
           <option value="">Custom rules (type your own)</option>
-          <option value="example">Example rules</option>
+          <option value="onephase">One-phase challenge rules (no firm named)</option>
           {%- for firm in presets.firms %}
           <optgroup label="{{ firm }}">
             {%- for p in presets.presets if p.firm == firm %}<option value="{{ p.id }}">{{ p.program }}</option>{% endfor %}
@@ -91,7 +91,7 @@
         <div id="ps-preset-info" class="preset-info small">
           <div class="pi-live"><p id="ps-preset-source" class="muted">Custom rules: type your own in the boxes below.</p><p id="ps-ns" class="ns-line"></p></div>
           <div class="pi-ghost" aria-hidden="true" data-info=""><p class="muted">Custom rules: type your own in the boxes below.</p><p class="ns-line"></p></div>
-          <div class="pi-ghost" aria-hidden="true" data-info="example"><p class="muted">Example rules, not any firm’s. Every box stays editable.</p><p class="ns-line"></p></div>
+          <div class="pi-ghost" aria-hidden="true" data-info="onephase"><p class="muted">One-phase challenge rules: the first rule set in our library, shown without the firm’s name. Every box stays editable.</p><p class="ns-line"></p></div>
           {%- for p in presets.presets %}
           <div class="pi-ghost" aria-hidden="true" data-info="{{ p.id }}"><p class="muted">Read on {{ p.read_text }} from {{ p.firm }}’s <a href="{{ p.url }}" rel="nofollow noopener" tabindex="-1">rules page</a>. Check the firm’s current page: rules change.</p><p class="ns-line">{% if p.not_stated %}Not stated by {{ p.firm }}: {% for f in p.not_stated %}{{ ns_names[f] }}{% if not loop.last %}; {% endif %}{% endfor %}. These run with the defaults in each box.{% endif %}</p></div>
           {%- endfor %}
@@ -142,7 +142,8 @@
           <label for="ps-file">Your trade file</label>
           <input id="ps-file" type="file" accept=".csv,.htm,.html,.txt,.tsv" aria-describedby="ps-file-status ps-file-error">
         </div>
-        <p class="btn-row"><span class="muted">No file to hand?</span> <button class="btn btn-secondary" id="ps-sample-btn" type="button">Try with example data</button></p>
+        <p class="btn-row"><span class="muted">No file to hand?</span> <button class="btn btn-secondary" id="ps-sample-btn" type="button">Try real public data</button></p>
+        <p class="small muted">Real public data: the Stock Transactions Dataset (Mendeley Data, CC BY 4.0), one anonymous investor’s {{ "{:,}".format(real.account.fills) }} fills in US stocks, trades closed {{ real.account.period }}; the whole dataset, not picked by result, as price gains before fees, FX and dividends; ticker names replaced with codes. With no rules chosen, the button uses one-phase challenge rules (the first rule set in our library, shown without the firm’s name), as the /tools/ preview does. <a href="/tools/#src-h">Where it comes from</a></p>
         <p class="small muted">Same formats as <a href="/tools/trade-stats/">trade stats</a>: MT5/MT4 report, IBKR Flex Query, Tradovate Orders, TradingView Order History, the CSV template, and other platforms’ exports the site’s importer knows.</p>
       </div>
       <div id="ps-paste-fields" class="dropzone" hidden>

@@ -432,7 +432,7 @@ def test_result_landmarks_have_unique_names_and_the_result_is_announced(browser,
     assert len(names) == len(set(names)), names
     pg.wait_for_function("() => document.getElementById('tool-live') && document.getElementById('tool-live').textContent.length > 0")
     live = pg.eval_on_selector("#tool-live", "e => [e.getAttribute('role'), e.getAttribute('aria-live'), e.textContent]")
-    assert live[0] == "status" and live[1] == "polite" and live[2].startswith("Results: example data.")
+    assert live[0] == "status" and live[1] == "polite" and live[2].startswith("Results: real public data.")   # Fix round 1 (F12)
     assert clean(log) == []
     ctx.close()
 

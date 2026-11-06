@@ -22,3 +22,6 @@ hl-dryrun/
 derived*.csv
 prereg-internal.md
 INTERNAL-RESULT.txt
+
+# /tools/ real public data (checks/real_data): the raw downloads are never committed (fetch.py gets them)
+checks/real_data/raw/

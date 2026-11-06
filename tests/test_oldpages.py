@@ -35,7 +35,8 @@ OLD = ["/404.html", "/about/", "/code/", "/corrections/", "/for-researchers/", "
        "/plan-gap/", "/research/", "/research/disposition-effect/", "/research/insider-buying-edge/",
        "/research/portfolio-driven-disposition-effect/", "/research/strategy-tests/",
        "/research/swing-trading-strategies/", "/research/volatility-scaled-momentum/", "/sample-memo/",
-       "/sample-report/", "/tools/disposition-calculator/", "/tools/pass-rate-calculator/", "/who-pays/"]
+       "/sample-report/", "/tools/disposition-calculator/", "/who-pays/"]
+# 6 Nov (owner): /tools/pass-rate-calculator/ is a template page now (pages/tool-pass-rate.html), no longer lifted
 STUDIES = [p for p in OLD if p.startswith("/research/") and p != "/research/"]
 
 
@@ -52,7 +53,7 @@ def test_all_twenty_are_lifted_and_nothing_passes_through():
 
 def test_compare_zero_differences(built_site):
     assert C.compare_site(str(built_site["out"])) == []
-    assert len(C.baselines()) == 20
+    assert len(C.baselines()) == 19   # 6 Nov: the pass-rate calculator became a template page (20 lifted before)
 
 
 def test_fragments_are_what_docs_gives(tmp_path):
@@ -253,13 +254,15 @@ def test_calculators_still_compute_under_the_csp(browser, built_site):
     pg.goto(built_site["url"] + "/tools/disposition-calculator/")
     pg.click("#dc-example")
     got = {k: pg.inner_text(f"#dc-{k}") for k in ("pgr", "plr", "ratio", "diff", "se", "t")}
-    rg, pgn, rl, pl = 420, 1780, 260, 2240
+    rg, pgn, rl, pl = 13883, 79658, 11930, 110348   # 6 Nov: the example is Odean's (1998) Table I counts
     pgr, plr = rg / (rg + pgn), rl / (rl + pl)
     se = math.sqrt(pgr * (1 - pgr) / (rg + pgn) + plr * (1 - plr) / (rl + pl))
     assert got == {"pgr": f"{pgr:.4f}", "plr": f"{plr:.4f}", "ratio": f"{pgr/plr:.2f}",
                    "diff": f"{pgr-plr:.4f}", "se": f"{se:.4f}", "t": f"{(pgr-plr)/se:.2f}"}
     pg.goto(built_site["url"] + "/tools/pass-rate-calculator/")
-    pg.click("#pr-example")
+    for sel, v in zip(["#pr-started", "#pr-open", "#pr-passed", "#pr-paid", "#pr-traders"], ["1000", "150", "170", "40", "800"]):   # 6 Nov: no example button (no invented counts); typed
+        pg.fill(sel, v)
+    pg.press("#pr-traders", "Enter")
     got = {k: pg.inner_text(f"#pr-{k}") for k in ("rate", "range", "perEval", "perFunded", "perTrader")}
     assert got == {"rate": "20.0%", "range": "17.0% to 32.0%", "perEval": "4.0%",
                    "perFunded": "23.5%", "perTrader": "1.25"}

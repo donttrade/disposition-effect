@@ -62,8 +62,20 @@ def fill(pg, values):
         pg.fill(k, v)
 
 
+
+# Fix round 1 (6 Nov, owner rule; Tester F12): the page's "Try real public data" button now loads the real public-data
+# account. These tests check the page's behaviour on the synthetic file their figures were worked out on, so they put
+# that file into the button's data block first (test-only); tests/test_tools_b2.py checks the real file and its labels.
+SYNTH = open(os.path.join(REPO, "site", "static", "samples", "example-trades.csv"), encoding="utf-8").read()
+
+
+def synthetic(pg, prefix="ps"):
+    pg.evaluate("([id, t]) => { document.getElementById(id).textContent = t; }", [f"{prefix}-sample", SYNTH])
+
+
 def sample(pg, rules=None):
     fill(pg, rules or {"#ps-account": "10000", "#ps-target": "300", "#ps-daily": "40", "#ps-maxloss": "300", "#ps-days": "60"})
+    synthetic(pg)
     pg.click("#ps-sample-btn")
     pg.wait_for_selector("#ps-file-status:text-matches('^Read ')")
 
@@ -133,7 +145,8 @@ def test_plain_words_in_the_default_view(browser, built_site):
 def test_presets_alphabetical_no_default_and_notes(browser, built_site):
     ctx, pg, _ = open_page(browser, built_site)
     opts = pg.eval_on_selector_all("#ps-preset option", "os => os.map((o) => [o.value, o.parentElement.tagName === 'OPTGROUP' ? o.parentElement.label : ''])")
-    assert opts[0] == ["", ""] and opts[1] == ["example", ""] and pg.input_value("#ps-preset") == ""
+    # 6 Nov fix round 2: "Example rules" became "One-phase challenge rules (no firm named)", value "onephase"
+    assert opts[0] == ["", ""] and opts[1] == ["onephase", ""] and pg.input_value("#ps-preset") == ""
     firms = [f for _, f in opts[2:]]
     assert firms == sorted(firms, key=str.lower) and len(set(firms)) == 8
     lib = C.load()
@@ -200,7 +213,8 @@ def test_results_go_stale_after_a_change_until_the_next_run(browser, built_site)
 
 
 def test_example_data_never_changes_a_preset(browser, built_site):
-    """F4: the example button loads only the file; example rules come as a preset named "Example rules"."""
+    """F4: the example button loads only the file; with no rules yet, the rules come as "One-phase challenge rules"
+    (6 Nov fix round 2: the first rule set's values, no firm named beside the result)."""
     ctx, pg, _ = open_page(browser, built_site)
     pg.select_option("#ps-preset", "ftmo-1-step")
     before = [pg.input_value(b) for b in ("#ps-account", "#ps-target", "#ps-daily", "#ps-maxloss", "#ps-days")]
@@ -218,16 +232,19 @@ def test_example_data_never_changes_a_preset(browser, built_site):
     pg.wait_for_selector("#ps-file-status:text-matches('^Read ')")
     assert pg.input_value("#ps-preset") == "" and pg.input_value("#ps-target") == "300" and pg.input_value("#ps-daily") == ""
     ctx.close()
-    # no rules yet: the preset switches to "Example rules", named as such
+    # no rules yet: the rules switch to the first entry of the firm-rules library's values, the rule the /tools/
+    # preview uses (Fix round 1, 6 Nov), shown without the firm's name (fix round 2, 6 Nov: Manager decision)
+    first = next(p for p in C.load()["presets"] if p["status"] != "not_quotable")
     ctx, pg, _ = open_page(browser, built_site)
     pg.click("#ps-sample-btn")
     pg.wait_for_selector("#ps-file-status:text-matches('^Read ')")
-    assert pg.input_value("#ps-preset") == "example"
-    assert pg.eval_on_selector("#ps-preset", "s => s.selectedOptions[0].textContent") == "Example rules"
-    assert [pg.input_value(b) for b in ("#ps-account", "#ps-target", "#ps-daily", "#ps-maxloss", "#ps-days")] == ["10000", "600", "250", "500", "60"]
-    assert pg.inner_text("#ps-preset-source").startswith("Example rules, not any firm’s.")
+    assert pg.input_value("#ps-preset") == "onephase"
+    assert pg.input_value("#ps-target") == str(first["rules"]["target"])
     run(pg)
-    assert pg.text_content("#ps-rules-used").startswith("Rules used: Example rules.")
+    used = pg.text_content("#ps-rules-used")
+    assert used.startswith("Rules used: One-phase challenge rules (the first rule set in our library, shown without "
+                           "the firm’s name)")
+    assert first["firm"] not in used and first["program"] not in used
     ctx.close()
 
 
@@ -259,6 +276,7 @@ def test_a_new_file_ends_a_running_check(browser, built_site):
     ctx, pg, log = open_page(browser, built_site)
     sample(pg)
     # the second click lands while the replays run (both in one task, so the run cannot finish first)
+    synthetic(pg)
     pg.evaluate("() => { document.getElementById('ps-run').click(); document.getElementById('ps-sample-btn').click(); }")
     pg.wait_for_selector("#ps-file-status:text-matches('^Read ')")
     pg.wait_for_timeout(2500)
@@ -389,7 +407,7 @@ def test_card_strings_and_image(browser, built_site):
     pg.check("#ps-wi-card")
     pg.wait_for_timeout(300)
     alt = pg.get_attribute("#ps-card-canvas", "aria-label")
-    assert alt.startswith("Passed in 6% of 10,000 replays.") and "Example data." in alt and "not a real" not in alt.lower()
+    assert alt.startswith("Passed in 6% of 10,000 replays.") and "Real public data: Stock Transactions Dataset." in alt and "not a real" not in alt.lower()
     assert "With stop after 1 loss: passed 6% →" in alt and "3% target · 0.4% daily · 3% max (fixed floor)" in alt
     firms = {p["firm"] for p in C.load()["presets"]}
     for bad in ["$", "USD", "buy", "purchase", "challenge fee", "funded", "price", *firms]:
@@ -564,7 +582,7 @@ def test_layout_axe_cls(browser, built_site, width, scheme):
 
 
 @pytest.mark.parametrize("width", [390, 768, 1280])
-@pytest.mark.parametrize("preset", ["ftmo-1-step", "topstep-50k-trading-combine", "example"])
+@pytest.mark.parametrize("preset", ["ftmo-1-step", "topstep-50k-trading-combine", "onephase"])   # 6 Nov: was "example"
 def test_first_preset_pick_does_not_shift_the_page(browser, built_site, width, preset):
     """Tester page report F5: the notes a preset brings fill space kept for them."""
     ctx, pg, _ = open_page(browser, built_site, width=width)

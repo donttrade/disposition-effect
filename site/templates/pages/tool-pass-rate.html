@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{#- The prop-firm pass-rate calculator, rebuilt as a native template (owner, 6 Nov; ARCHITECT-PLAN-TOOLS-REDESIGN
+    A.10-1). Same URL, title, description and crumb as the lifted page it replaces, and the same words, except the
+    made-up example button and its line, which are gone (owner rule: no invented counts). The maths is the lifted
+    script's, kept as the test oracle (static/js/legacy/pass-rate-calculator.js; tests/test_tools_b2.py checks
+    static/js/tools/pass-rate.js gives the same results). New: a Wilson 95% band on the pass rate among finished
+    evaluations, shown only from 30 finished evaluations (the site's small-sample rule), and the funnel drawn to scale
+    on the dark display once the counts are typed. -#}
+{%- macro field(id, label, hint, optional=false) %}
+      <div class="field">
+        <label for="{{ id }}">{{ label }}</label>
+        <span class="hint" id="{{ id }}-hint">{{ hint }}</span>
+        <input id="{{ id }}" type="text" inputmode="numeric" autocomplete="off" aria-describedby="{{ id }}-hint pr-msg">
+        <p class="error" id="{{ id }}-err" hidden></p>
+      </div>
+{%- endmacro %}
+{% block content %}
+{%- import "partials/tool_glyphs.html" as g with context %}
+{%- import "partials/tool_display.html" as d with context %}
+<div class="wrap">
+  <div class="tool-hero">
+    <div>
+      {% include "partials/crumbs.html" %}
+      <div class="tool-title"><span class="tool-mark">{{ g.glyph("pass", 64, "ic") }}</span><h1>Prop-firm pass-rate calculator</h1></div>
+      <p class="lede">For firm operators. Enter the counts for one cohort and get pass and payout rates that say what they measure. Free. It runs in your browser and nothing is sent anywhere.</p>
+    </div>
+    {{ d.display("pass") }}
+  </div>
+
+  <section class="tool" aria-labelledby="pr-cohort">
+    <p id="pr-cohort">A cohort is all the evaluations that started in one fixed window, for example everything started in March. Use the same cohort for every number below.</p>
+    {#- the notice the lifted page had (launch NIT N5), in a <noscript>: with JavaScript on it is never shown -#}
+    <noscript><p class="notice notice-caution">This calculator runs in your browser and needs JavaScript turned on.</p></noscript>
+    <form id="pr-form" novalidate hidden data-js-show>
+      <div class="field-grid">
+        {{ field("pr-started", "Evaluations started", "Accounts, not people") }}
+        {{ field("pr-open", "Still open at the cut-off", "Neither passed nor failed yet") }}
+        {{ field("pr-passed", "Passed all stages (funded)", "Accounts") }}
+        {{ field("pr-paid", "Funded with at least one payout", "Accounts") }}
+        {{ field("pr-traders", "Unique traders (optional)", "People behind the started accounts", true) }}
+      </div>
+      <p class="btn-row"><button type="button" class="btn btn-secondary" id="pr-clear">Clear</button></p>
+      <p class="calc-msg" id="pr-msg" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <div id="pr-results" class="tool-out" hidden>
+    <h2>Result</h2>
+    <dl class="stats">
+      <div class="stat"><dt>Pass rate among finished evaluations (passed ÷ (started − open))</dt><dd id="pr-rate">–</dd></div>
+      <div class="stat" id="pr-band-wrap" hidden><dt>95% band for that pass rate (Wilson), if this cohort is a sample of a steady process</dt><dd id="pr-band">–</dd></div>
+      <div class="stat"><dt>Range if every open one fails / passes</dt><dd id="pr-range">–</dd></div>
+      <div class="stat"><dt>Payout rate per evaluation (paid ÷ started)</dt><dd id="pr-perEval">–</dd></div>
+      <div class="stat"><dt>Payout rate per funded account (paid ÷ passed)</dt><dd id="pr-perFunded">–</dd></div>
+      <div class="stat" id="pr-trader-wrap" hidden><dt>Accounts per trader</dt><dd id="pr-perTrader">–</dd></div>
+    </dl>
+    <ul class="calc-notes" id="pr-notes"></ul>
+    <figure class="tool-display pr-funnel" aria-labelledby="pr-funnel-cap">
+      <div class="md-screen md-scr-calc" aria-hidden="true">
+        <svg class="dg pr-fun" id="pr-fun" focusable="false" viewBox="0 0 240 64">
+          {%- for k, lab in [("started", "started"), ("finished", "finished"), ("passed", "passed"), ("paid", "paid out")] %}
+          <rect class="pf-bar pf-{{ k }}" id="pf-{{ k }}" x="0" y="{{ loop.index0 * 16 }}" width="0" height="11" rx="2"/>
+          <text class="dg-t pf-lab" id="pf-{{ k }}-t" x="4" y="{{ loop.index0 * 16 + 9 }}">{{ lab }}</text>
+          {%- endfor %}
+          <rect class="pf-band" id="pf-band" x="0" y="30" width="0" height="15"/>
+        </svg>
+      </div>
+      <figcaption id="pr-funnel-cap" class="td-cap">The same counts to scale: each bar is a share of the evaluations started. The band on the passed bar is the 95% band above, drawn on the finished evaluations.</figcaption>
+    </figure>
+  </div>
+  {%- if flags.paid_report %}
+  {%- with source = "typed", firm_line = true, lead = "firm" %}{% include "partials/tool_next_step.html" %}{% endwith %}
+  {%- endif %}
+
+  <section class="section" aria-labelledby="pr-mistakes-h">
+    <h2 id="pr-mistakes-h">Common mistakes</h2>
+    <ul>
+      <li>Mixing cohorts, such as dividing this month’s passes by this month’s starts. Those passes mostly came from earlier starts.</li>
+      <li>Dropping open accounts. They are neither passes nor failures yet, so show the range.</li>
+      <li>Counting resets and retries as new people. They are new accounts, but not new traders.</li>
+      <li>Quoting the payout rate per funded account as if it were per evaluation. The two use different denominators.</li>
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="pr-cant-h">
+    <h2 id="pr-cant-h">What this calculator can’t do</h2>
+    <p>It checks the arithmetic. It cannot tell anyone your inputs are right: a rate a firm computes about itself is still the firm’s own claim.</p>
+    <p>Our paid work measures something no pass rate shows: how your traders handle winning and losing trades, computed from your own records by someone outside the firm, with the method published.</p>
+    <p><a href="/for-firms/">What firms get →</a></p>
+  </section>
+</div>
+{% endblock %}

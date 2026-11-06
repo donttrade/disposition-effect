@@ -22,24 +22,23 @@
 <meta property="og:image:alt" content="Prop-firm pass-rate calculator — donttrade">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:description" content="Free: a prop-firm evaluation pass rate and payout rate for one cohort, computed correctly. Runs in your browser; your numbers are never sent.">
-<link rel="alternate" type="application/rss+xml" title="donttrade" href="https://donttrade.substack.com/feed">
-<link rel="alternate" type="application/atom+xml" title="donttrade: studies and corrections" href="/feed.xml">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=47f22130">
+<link rel="stylesheet" href="/static/css/site.css?v=e0f686f7">
+<link rel="stylesheet" href="/static/css/tools.css?v=2117013f">
 <script src="/static/js/theme.js?v=7e47c1a9"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
 <script src="/static/js/pay.js?v=169a9640" defer></script>
-<script src="/static/js/lifted.js?v=ea2af7c3" defer></script>
 <script src="/static/js/legacy/numbers.js?v=bf5c1378" defer></script>
-<script src="/static/js/legacy/pass-rate-calculator.js?v=9a21cee7" defer></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "6ed43d34957a49fcb90ec8e43f7db523"}'></script>
+<script src="/static/js/tools/pass-rate.js?v=4b252b48" defer></script>
+<script src="/static/js/tools-index.js?v=43b103ee" defer></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "6ed43d34957a49fcb90ec8e43f7db523"}'></script>
 <script src="/static/js/umami-clean.js?v=56f7d1df" defer></script>
 <script defer src="https://cloud.umami.is/script.js" data-website-id="16c5fa53-e8fc-4c55-892a-5546e7d51830" data-do-not-track="true" data-exclude-hash="true" data-domains="donttrade.ca" data-before-send="dtUmamiClean"></script>
 
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "item": "https://donttrade.ca/tools/", "name": "Free tools", "position": 2}, {"@type": "ListItem", "name": "Prop-firm pass-rate calculator", "position": 3}]}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "item": "https://donttrade.ca/", "name": "Home", "position": 1}, {"@type": "ListItem", "item": "https://donttrade.ca/tools/", "name": "Free tools", "position": 2}, {"@type": "ListItem", "name": "Prop-firm pass-rate calculator", "position": 3}]}, {"@id": "https://donttrade.ca/tools/pass-rate-calculator/#app", "@type": "WebApplication", "applicationCategory": "FinanceApplication", "browserRequirements": "Requires JavaScript", "description": "Free: a prop-firm evaluation pass rate and payout rate for one cohort, computed correctly. Runs in your browser; your numbers are never sent.", "isAccessibleForFree": true, "name": "Prop-firm pass-rate calculator", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "operatingSystem": "Any (runs in a web browser)", "publisher": {"@id": "https://donttrade.ca/#org"}, "url": "https://donttrade.ca/tools/pass-rate-calculator/"}]}</script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -69,73 +68,122 @@
   <button class="theme-toggle" type="button" data-theme-toggle hidden><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg><span class="tt-label">Dark mode</span></button>
 </div></header>
 
-<main id="main" class="lifted">
+<main id="main">
 
-<div class="wrap lifted-pre"><nav class="crumb small" aria-label="Breadcrumb"><ol class="crumbs"><li><a href="/">Home</a><span class="crumb-sep" aria-hidden="true">›</span></li><li><a href="/tools/">Free tools</a><span class="crumb-sep" aria-hidden="true">›</span></li><li><span aria-current="page">Prop-firm pass-rate calculator</span></li></ol></nav>
+<div class="wrap">
+  <div class="tool-hero">
+    <div>
+      <nav class="crumb small" aria-label="Breadcrumb"><ol class="crumbs"><li><a href="/">Home</a><span class="crumb-sep" aria-hidden="true">›</span></li><li><a href="/tools/">Free tools</a><span class="crumb-sep" aria-hidden="true">›</span></li><li><span aria-current="page">Prop-firm pass-rate calculator</span></li></ol></nav>
 
-<noscript><p class="notice notice-caution">This calculator runs in your browser and needs JavaScript turned on.</p></noscript></div>
-<!--frozen:start-->
-
-<div class="wrap page-head"><div class="col">
-<h1>Prop-firm pass-rate calculator</h1>
-<p class="lede">For firm operators. Enter the counts for one cohort and get pass and payout rates that say what they measure. Free. It runs in your browser and nothing is sent anywhere.</p>
-
-<p>A cohort is all the evaluations that started in one fixed window, for example everything started in March. Use the same cohort for every number below.</p>
-
-<form class="calc" id="pr-form" novalidate>
-  <div class="calc-grid">
-    <div class="calc-field"><label for="pr-started">Evaluations started</label><input id="pr-started" type="text" inputmode="numeric" autocomplete="off" aria-describedby="pr-msg"><p class="hint">Accounts, not people</p></div>
-    <div class="calc-field"><label for="pr-open">Still open at the cut-off</label><input id="pr-open" type="text" inputmode="numeric" autocomplete="off" aria-describedby="pr-msg"><p class="hint">Neither passed nor failed yet</p></div>
-    <div class="calc-field"><label for="pr-passed">Passed all stages (funded)</label><input id="pr-passed" type="text" inputmode="numeric" autocomplete="off" aria-describedby="pr-msg"><p class="hint">Accounts</p></div>
-    <div class="calc-field"><label for="pr-paid">Funded with at least one payout</label><input id="pr-paid" type="text" inputmode="numeric" autocomplete="off" aria-describedby="pr-msg"><p class="hint">Accounts</p></div>
-    <div class="calc-field"><label for="pr-traders">Unique traders (optional)</label><input id="pr-traders" type="text" inputmode="numeric" autocomplete="off" aria-describedby="pr-msg"><p class="hint">People behind the started accounts</p></div>
+      <div class="tool-title"><span class="tool-mark"><svg class="ic ic-pass" aria-hidden="true" focusable="false" width="64" height="64" viewBox="0 0 48 48" fill="none"><rect class="i-mute-f" x="6" y="9" width="36" height="7" rx="1.5"/><rect class="i-gain-f a-x d1" x="6" y="21" width="16" height="7" rx="1.5"/><rect class="i-plan-f a-x d3" x="6" y="33" width="7" height="7" rx="1.5"/></svg></span><h1>Prop-firm pass-rate calculator</h1></div>
+      <p class="lede">For firm operators. Enter the counts for one cohort and get pass and payout rates that say what they measure. Free. It runs in your browser and nothing is sent anywhere.</p>
+    </div>
+    
+<figure class="tool-display" aria-labelledby="td-cap">
+  <!--real-data--><div class="md-screen md-scr-pass md-scr-calc" aria-hidden="true"><span class="chip md-chip" aria-hidden="true">No public data</span><span class="md-pv"><span class="pv pv-calc pv-skel"><b>pass rate = passed ÷ finished</b><b>payout rate = paid out ÷ passed</b><span class="pv-unlock">Type your cohort’s counts; the funnel draws to scale, with a 95% band once 30 evaluations have finished.</span></span>
+<svg class="dg" aria-hidden="true" focusable="false" viewBox="0 0 240 64"><rect class="dg-ghost" x="0.5" y="0.5" width="239" height="13" rx="2"/><text class="dg-t dg-in" x="6" y="10">started</text><rect class="dg-ghost" x="0.5" y="16.5" width="199" height="13" rx="2"/><text class="dg-t dg-in" x="6" y="26">finished: started − open</text><rect class="dg-ghost" x="0.5" y="32.5" width="91" height="13" rx="2"/><text class="dg-t dg-in" x="98" y="42">passed</text><rect class="dg-ghost" x="0.5" y="48.5" width="43" height="13" rx="2"/><text class="dg-t dg-in" x="50" y="58">paid out</text></svg></span></div><!--/real-data-->
+  <figcaption id="td-cap" class="td-cap"><span class="visually-hidden"><!--real-data-->The two formulas and an empty funnel: no figures, because no firm publishes cohort counts we can show.<!--/real-data--> </span>No public data: no firm publishes cohort counts we can show.</figcaption>
+</figure>
   </div>
-  <div class="btn-row">
-    <button type="button" class="btn" id="pr-example">Try with example data</button>
-    <button type="button" class="btn-2" id="pr-clear">Clear</button>
-  </div>
-  <p class="fine">Example data: 1,000 started, 150 open, 170 passed, 40 paid, 800 traders.</p>
-  <p class="calc-msg" id="pr-msg" role="status" aria-live="polite"></p>
 
-  <div id="pr-results" hidden>
+  <section class="tool" aria-labelledby="pr-cohort">
+    <p id="pr-cohort">A cohort is all the evaluations that started in one fixed window, for example everything started in March. Use the same cohort for every number below.</p><noscript><p class="notice notice-caution">This calculator runs in your browser and needs JavaScript turned on.</p></noscript>
+    <form id="pr-form" novalidate hidden data-js-show>
+      <div class="field-grid">
+        
+      <div class="field">
+        <label for="pr-started">Evaluations started</label>
+        <span class="hint" id="pr-started-hint">Accounts, not people</span>
+        <input id="pr-started" type="text" inputmode="numeric" autocomplete="off" aria-describedby="pr-started-hint pr-msg">
+        <p class="error" id="pr-started-err" hidden></p>
+      </div>
+        
+      <div class="field">
+        <label for="pr-open">Still open at the cut-off</label>
+        <span class="hint" id="pr-open-hint">Neither passed nor failed yet</span>
+        <input id="pr-open" type="text" inputmode="numeric" autocomplete="off" aria-describedby="pr-open-hint pr-msg">
+        <p class="error" id="pr-open-err" hidden></p>
+      </div>
+        
+      <div class="field">
+        <label for="pr-passed">Passed all stages (funded)</label>
+        <span class="hint" id="pr-passed-hint">Accounts</span>
+        <input id="pr-passed" type="text" inputmode="numeric" autocomplete="off" aria-describedby="pr-passed-hint pr-msg">
+        <p class="error" id="pr-passed-err" hidden></p>
+      </div>
+        
+      <div class="field">
+        <label for="pr-paid">Funded with at least one payout</label>
+        <span class="hint" id="pr-paid-hint">Accounts</span>
+        <input id="pr-paid" type="text" inputmode="numeric" autocomplete="off" aria-describedby="pr-paid-hint pr-msg">
+        <p class="error" id="pr-paid-err" hidden></p>
+      </div>
+        
+      <div class="field">
+        <label for="pr-traders">Unique traders (optional)</label>
+        <span class="hint" id="pr-traders-hint">People behind the started accounts</span>
+        <input id="pr-traders" type="text" inputmode="numeric" autocomplete="off" aria-describedby="pr-traders-hint pr-msg">
+        <p class="error" id="pr-traders-err" hidden></p>
+      </div>
+      </div>
+      <p class="btn-row"><button type="button" class="btn btn-secondary" id="pr-clear">Clear</button></p>
+      <p class="calc-msg" id="pr-msg" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <div id="pr-results" class="tool-out" hidden>
     <h2>Result</h2>
-    <dl class="calc-out">
-      <div><dt>Pass rate among finished evaluations (passed ÷ (started − open))</dt><dd id="pr-rate">–</dd></div>
-      <div><dt>Range if every open one fails / passes</dt><dd id="pr-range">–</dd></div>
-      <div><dt>Payout rate per evaluation (paid ÷ started)</dt><dd id="pr-perEval">–</dd></div>
-      <div><dt>Payout rate per funded account (paid ÷ passed)</dt><dd id="pr-perFunded">–</dd></div>
-      <div id="pr-trader-wrap" hidden><dt>Accounts per trader</dt><dd id="pr-perTrader">–</dd></div>
+    <dl class="stats">
+      <div class="stat"><dt>Pass rate among finished evaluations (passed ÷ (started − open))</dt><dd id="pr-rate">–</dd></div>
+      <div class="stat" id="pr-band-wrap" hidden><dt>95% band for that pass rate (Wilson), if this cohort is a sample of a steady process</dt><dd id="pr-band">–</dd></div>
+      <div class="stat"><dt>Range if every open one fails / passes</dt><dd id="pr-range">–</dd></div>
+      <div class="stat"><dt>Payout rate per evaluation (paid ÷ started)</dt><dd id="pr-perEval">–</dd></div>
+      <div class="stat"><dt>Payout rate per funded account (paid ÷ passed)</dt><dd id="pr-perFunded">–</dd></div>
+      <div class="stat" id="pr-trader-wrap" hidden><dt>Accounts per trader</dt><dd id="pr-perTrader">–</dd></div>
     </dl>
     <ul class="calc-notes" id="pr-notes"></ul>
+    <figure class="tool-display pr-funnel" aria-labelledby="pr-funnel-cap">
+      <div class="md-screen md-scr-calc" aria-hidden="true">
+        <svg class="dg pr-fun" id="pr-fun" focusable="false" viewBox="0 0 240 64">
+          <rect class="pf-bar pf-started" id="pf-started" x="0" y="0" width="0" height="11" rx="2"/>
+          <text class="dg-t pf-lab" id="pf-started-t" x="4" y="9">started</text>
+          <rect class="pf-bar pf-finished" id="pf-finished" x="0" y="16" width="0" height="11" rx="2"/>
+          <text class="dg-t pf-lab" id="pf-finished-t" x="4" y="25">finished</text>
+          <rect class="pf-bar pf-passed" id="pf-passed" x="0" y="32" width="0" height="11" rx="2"/>
+          <text class="dg-t pf-lab" id="pf-passed-t" x="4" y="41">passed</text>
+          <rect class="pf-bar pf-paid" id="pf-paid" x="0" y="48" width="0" height="11" rx="2"/>
+          <text class="dg-t pf-lab" id="pf-paid-t" x="4" y="57">paid out</text>
+          <rect class="pf-band" id="pf-band" x="0" y="30" width="0" height="15"/>
+        </svg>
+      </div>
+      <figcaption id="pr-funnel-cap" class="td-cap">The same counts to scale: each bar is a share of the evaluations started. The band on the passed bar is the 95% band above, drawn on the finished evaluations.</figcaption>
+    </figure>
   </div>
-</form><!--island:start-->
 <aside class="notice notice-gap next-step" aria-labelledby="next-step-h" data-requires-flag="paid_report" data-lead="firm">
   <h2 id="next-step-h">Test your whole book</h2>
   <p>The donttrade test, on your whole book: your staff run our public script on your own records, and you get the figure and a one-page memo back. One habit today, more being added.</p>
-  <p class="btn-row"><a class="btn" href="/for-firms/#request">Start a Pilot, $745</a> <a href="/sample-memo/">See a sample memo</a></p>
+  <p class="btn-row"><a class="btn" href="/for-firms/#request">Start a Pilot, $745</a></p>
   <p class="small">Trading your own account? <a href="/pricing/#last-step">The donttrade test for one trader is $39</a>.</p>
 </aside>
 
-<!--island:end-->
 
-<div class="box">
-  <h2 class="ls-boxhead">Common mistakes</h2>
-  <ul>
-    <li>Mixing cohorts, such as dividing this month’s passes by this month’s starts. Those passes mostly came from earlier starts.</li>
-    <li>Dropping open accounts. They are neither passes nor failures yet, so show the range.</li>
-    <li>Counting resets and retries as new people. They are new accounts, but not new traders.</li>
-    <li>Quoting the payout rate per funded account as if it were per evaluation. The two use different denominators.</li>
-  </ul>
+  <section class="section" aria-labelledby="pr-mistakes-h">
+    <h2 id="pr-mistakes-h">Common mistakes</h2>
+    <ul>
+      <li>Mixing cohorts, such as dividing this month’s passes by this month’s starts. Those passes mostly came from earlier starts.</li>
+      <li>Dropping open accounts. They are neither passes nor failures yet, so show the range.</li>
+      <li>Counting resets and retries as new people. They are new accounts, but not new traders.</li>
+      <li>Quoting the payout rate per funded account as if it were per evaluation. The two use different denominators.</li>
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="pr-cant-h">
+    <h2 id="pr-cant-h">What this calculator can’t do</h2>
+    <p>It checks the arithmetic. It cannot tell anyone your inputs are right: a rate a firm computes about itself is still the firm’s own claim.</p>
+    <p>Our paid work measures something no pass rate shows: how your traders handle winning and losing trades, computed from your own records by someone outside the firm, with the method published.</p>
+    <p><a href="/for-firms/">What firms get →</a></p>
+  </section>
 </div>
-
-<div class="box"><h2 class="ls-boxhead">What this calculator can’t do</h2>
-<p>It checks the arithmetic. It cannot tell anyone your inputs are right: a rate a firm computes about itself is still the firm’s own claim.</p>
-<p>Our paid work measures something no pass rate shows: how your traders handle winning and losing trades, computed from your own records by someone outside the firm, with the method published.</p>
-<p><a href="/for-firms/">What firms get →</a></p></div>
-</div></div>
-
-
-<!--frozen:end-->
 
 </main>
 <footer class="site-footer"><div class="wrap"><div class="cols">

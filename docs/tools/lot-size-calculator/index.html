@@ -27,10 +27,12 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=47f22130">
+<link rel="stylesheet" href="/static/css/site.css?v=e0f686f7">
+<link rel="stylesheet" href="/static/css/tools.css?v=2117013f">
 <script src="/static/js/theme.js?v=7e47c1a9"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
 <script src="/static/js/pay.js?v=169a9640" defer></script>
+<script src="/static/js/tools-index.js?v=43b103ee" defer></script>
 <script src="/static/js/tools/lot-size.js?v=3d36f7cf" type="module"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "6ed43d34957a49fcb90ec8e43f7db523"}'></script>
 <script src="/static/js/umami-clean.js?v=56f7d1df" defer></script>
 <script defer src="https://cloud.umami.is/script.js" data-website-id="16c5fa53-e8fc-4c55-892a-5546e7d51830" data-do-not-track="true" data-exclude-hash="true" data-domains="donttrade.ca" data-before-send="dtUmamiClean"></script>
@@ -67,29 +69,21 @@
 
 <main id="main">
 
-<div class="wrap">
-  <div class="tool-hero">
+<div class="wrap"><div class="tool-hero">
     <div>
       <nav class="crumb small" aria-label="Breadcrumb"><ol class="crumbs"><li><a href="/">Home</a><span class="crumb-sep" aria-hidden="true">›</span></li><li><a href="/tools/">Free tools</a><span class="crumb-sep" aria-hidden="true">›</span></li><li><span aria-current="page">Lot size calculator</span></li></ol></nav>
 
-      <h1>Lot size calculator</h1>
+      <div class="tool-title"><span class="tool-mark"><svg class="ic ic-lot" aria-hidden="true" focusable="false" width="64" height="64" viewBox="0 0 48 48" fill="none"><line class="i-ink-s" x1="4" x2="28" y1="13" y2="13"/><line class="i-loss-d" x1="4" x2="28" y1="33" y2="33"/><path class="i-mute-s a-grow-y" d="M9 13v20M7 13h4M7 33h4"/><line class="i-base" x1="32" x2="45" y1="42" y2="42"/><rect class="i-plan-f a-up d2" x="33" y="35.5" width="11" height="4.6" rx="1"/><rect class="i-plan-f a-up d3" x="33" y="29.5" width="11" height="4.6" rx="1"/><rect class="i-plan-f a-up d4" x="33" y="23.5" width="11" height="4.6" rx="1"/><rect class="i-plan-f a-up d5" x="33" y="17.5" width="11" height="4.6" rx="1"/></svg></span><h1>Lot size calculator</h1></div>
       <p class="lede">Your balance, risk and stop give the lot size, with the sum shown.</p>
     </div>
     
-<figure class="tool-shot" aria-labelledby="shot-cap">
-  <div class="shot-card tool-shot-card">
-    <span class="tp-tag" aria-hidden="true">Example</span>
-    <table class="mini-shot">
-      <tbody>
-        <tr><th scope="row">Risk amount</th><td>200</td></tr>
-        <tr><th scope="row">Stop distance</th><td>40 points</td></tr>
-        <tr><th scope="row">Value per point, 1 lot</th><td>1</td></tr>
-        <tr class="mini-total"><th scope="row">Lot size</th><td>5 lots</td></tr>
-      </tbody>
-    </table>
-    <p class="shot-line"><span class="muted">200 ÷ (40 × 1) = 5</span></p>
-  </div>
-  <figcaption id="shot-cap">Example numbers.</figcaption>
+<figure class="tool-display" aria-labelledby="td-cap">
+  <!--real-data--><div class="md-screen md-scr-lot md-scr-calc" aria-hidden="true"><span class="chip md-chip" aria-hidden="true">Real public data</span><span class="md-pv"><span class="pv pv-calc pv-skel"><b>lots = risk ÷ (stop in pips × $10)</b><span class="pv-unlock">Type your risk and stop on the page; the lots appear here.</span></span>
+<svg class="dg" aria-hidden="true" focusable="false" viewBox="0 0 240 30"><rect class="dg-ghost" x="0" y="4" width="30" height="18" rx="3"/><rect class="dg-ghost" x="36" y="4" width="30" height="18" rx="3"/><rect class="dg-ghost" x="72" y="4" width="30" height="18" rx="3"/><rect class="dg-ghost" x="108" y="4" width="30" height="18" rx="3"/><rect class="dg-ghost" x="144" y="4" width="30" height="18" rx="3"/><text class="dg-q" x="204" y="18">?</text></svg>
+<span class="pv-fact">EURUSD: 1 standard lot is 100,000 euros, so 1 pip is $10.</span>
+<svg class="dg dg-fx" aria-hidden="true" focusable="false" viewBox="0 0 240 46" preserveAspectRatio="none"><polyline class="dg-fxl" points="2,8.7 13.8,8.8 25.6,4.8 37.4,5.4 49.2,4.3 61,4.3 72.8,4 84.6,7.2 96.4,14.4 108.2,15.3 120,15.8 131.8,23.5 143.6,25.4 155.4,24.8 167.2,29.5 179,34.5 190.8,37.2 202.6,33.7 214.4,38 226.2,42 238,40.8"/></svg>
+<span class="pv-fact">For scale, a real past month: in September 2026 the euro’s noon rate ranged between 1.1336 and 1.1629, 293 pips. It fell over the month, from 1.1593 to 1.1345. The average day moved 20.7 pips.</span></span></div><!--/real-data-->
+  <figcaption id="td-cap" class="td-cap"><span class="visually-hidden"><!--real-data-->The formula, lots = risk ÷ (stop in pips × $10), with no numbers filled in. For scale, one past month of the euro: in September 2026 it ranged between 1.1336 and 1.1629 and fell over the month.<!--/real-data--> </span>Real public data: Federal Reserve Board H.10 euro noon rates, September 2026. The calendar month before the month of the H.10 file’s latest rate, so that the month is complete. Shown for scale only: no entry, stop, target or size is taken from it. Source file: <a href="https://www.federalreserve.gov/releases/h10/hist/dat00_eu.htm" rel="noopener">the Board’s H.10 euro rates</a>.</figcaption>
 </figure>
   </div>
   
@@ -149,7 +143,7 @@
 <aside class="notice notice-gap next-step" aria-labelledby="next-step-h" data-requires-flag="paid_report">
   <h2 id="next-step-h">Is this habit real, or luck?</h2>
   <p>The donttrade test checks your own trades against chance. $39, re-test included.</p>
-  <p class="btn-row"><a class="btn" href="/pricing/#last-step">Take the test for $39</a> <a href="/sample-report/">See the example report</a></p>
+  <p class="btn-row"><a class="btn" href="/pricing/#last-step">Take the test for $39</a></p>
   <p class="small">Bring an export of your trade history from your broker or platform: the test works from that file, not from typed numbers.</p>
 </aside>
 

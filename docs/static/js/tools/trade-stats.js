@@ -18,7 +18,7 @@
 // line says a check is coming.
 
 import { createFileSlot, renderReadError, fieldError, revealResult } from './tool-state.js?v=af9a3c71';
-import { showMapStep, hideMap } from './file-tool.js?v=07779693';
+import { showMapStep, hideMap, SAMPLE_LABEL } from './file-tool.js?v=be4a8bf8';
 import { freeStats, equityCurve, NO_LOSSES } from '../engine/stats.js?v=b2ec2891';
 import { money, unitNote, pct, ratio, duration, day, intText, el, signClass } from './format.js?v=35164924';
 import { parsePositive, InputError } from './num.js?v=8df99e34';
@@ -82,7 +82,7 @@ function fromFile(file) { slot.pickFile(file, 'your file'); }
 
 function fromSample() {
   const text = $('ts-sample').textContent.replace(/^\s+/, '');
-  slot.readBytes(new TextEncoder().encode(text), 'the synthetic sample file');
+  slot.readBytes(new TextEncoder().encode(text), SAMPLE_LABEL);
 }
 
 // Hand the main thread back between the heavy steps, so a 50,000-trade file never blocks it
@@ -141,7 +141,7 @@ async function render(focus = true) {
   if (!state || state.result !== r) return; // another file arrived meanwhile
   state.stats = s; // the hold-time figures do not depend on the balance; the teaser reuses them
   const out = $('ts-out');
-  out.replaceChildren(el('h2', { id: 'ts-out-h', tabindex: '-1', text: state.fileLabel === 'the synthetic sample file' ? 'Results: example data' : 'Results: your file' }));
+  out.replaceChildren(el('h2', { id: 'ts-out-h', tabindex: '-1', text: state.fileLabel === SAMPLE_LABEL ? 'Results: real public data' : 'Results: your file' }));
 
   // What was read
   const first = r.trades[0], last = r.trades[r.trades.length - 1];
@@ -151,8 +151,8 @@ async function render(focus = true) {
       `${plural(r.trades.length, 'closed trade', 'closed trades')} from ${plural(r.n_fills, 'fill', 'fills')}, closed ${day(first.close_ts)} to ${day(last.close_ts)}. `,
       `Times are ${r.tz_label}. ${unitNote(state.unit)}`),
   );
-  if (state.fileLabel === 'the synthetic sample file') {
-    read.append(el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Example data' })));
+  if (state.fileLabel === SAMPLE_LABEL) {
+    read.append(el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Real public data: Stock Transactions Dataset (Mendeley Data), one anonymous investor, not picked by result' })));
   }
   if (r.warnings.length) {
     read.append(el('div', { class: 'notice notice-caution', id: 'ts-warnings' },
@@ -276,7 +276,7 @@ function chart(points) {
   return el('section', { 'aria-labelledby': 'ts-chart-h' },
     el('h3', { id: 'ts-chart-h', text: 'Equity and drawdown' }),
     el('figure', { class: 'chart' }, svg,
-      el('figcaption', { text: `n = ${plural(n, 'closed trade', 'closed trades')}, in closing order · ${state.fileLabel === 'the synthetic sample file' ? 'example data' : 'from your file'} · equity starts at 0` }),
+      el('figcaption', { text: `n = ${plural(n, 'closed trade', 'closed trades')}, in closing order · ${state.fileLabel === SAMPLE_LABEL ? 'real public data' : 'from your file'} · equity starts at 0` }),
       el('details', {}, el('summary', { text: 'Show the chart as a table' }), tableWrap('Equity and drawdown as a table', table))));
 }
 

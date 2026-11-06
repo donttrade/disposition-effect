@@ -274,7 +274,7 @@ def test_disposition_example_matches_hand_arithmetic(browser):
     page.goto(DC)
     page.click("#dc-example")
     got = {k: page.inner_text(f"#dc-{k}") for k in ("pgr", "plr", "ratio", "diff", "se", "t")}
-    rg, pg, rl, pl = 420, 1780, 260, 2240
+    rg, pg, rl, pl = 13883, 79658, 11930, 110348   # 6 Nov: the example is Odean's (1998) Table I counts
     pgr, plr = rg / (rg + pg), rl / (rl + pl)
     se = math.sqrt(pgr * (1 - pgr) / (rg + pg) + plr * (1 - plr) / (rl + pl))
     want = {"pgr": f"{pgr:.4f}", "plr": f"{plr:.4f}", "ratio": f"{pgr/plr:.2f}",
@@ -286,7 +286,9 @@ def test_disposition_example_matches_hand_arithmetic(browser):
 def test_pass_rate_example_matches_hand_arithmetic(browser):
     page = browser.new_page()
     page.goto(PR)
-    page.click("#pr-example")
+    for sel, v in zip(["#pr-started", "#pr-open", "#pr-passed", "#pr-paid", "#pr-traders"], ["1000", "150", "170", "40", "800"]):   # 6 Nov: no example button (no invented counts); typed
+        page.fill(sel, v)
+    page.press("#pr-traders", "Enter")
     got = {k: page.inner_text(f"#pr-{k}") for k in ("rate", "range", "perEval", "perFunded", "perTrader")}
     page.close()
     assert got == {"rate": "20.0%", "range": "17.0% to 32.0%", "perEval": "4.0%",

@@ -1,19 +1,81 @@
 {% extends "base.html" %}
 {% block content %}
-{#- 29 Oct (owner): /tools/ is the one-screen overview the header's "Free tools" link opens: all eight tools in one
-    card grid, each card one link with a preview of the tool's own output on example data (or its icon), the name
-    and one short line. The trade-stats output itself is on /tools/trade-stats/. -#}
-{%- from "partials/tool_cards.html" import tool_cards with context %}
-{%- set by = {} %}{% for t in tools %}{% set _ = by.update({t.href: t}) %}{% endfor %}
-<div class="wrap">
-  {% include "partials/crumbs.html" %}
-  <h1>Free trading tools</h1>
-  <p class="lede">No account. Your file is not uploaded.</p>
-  {#- 29 Oct (one product): "Free for everyone" at the top; links only, no buy button. -#}
-  {% include "partials/free_strip.html" %}
-  {{ tool_cards([by["/tools/trade-stats/"], by["/tools/trading-heatmap/"], by["/tools/drawdown-calculator/"], by["/tools/prop-challenge-simulator/"],
-                 by["/tools/lot-size-calculator/"], by["/tools/risk-reward-calculator/"], by["/tools/disposition-calculator/"], by["/tools/pass-rate-calculator/"]],
-                h="h2", cls="tool-cards-4 tool-cards-all") }}
-  {% include "partials/disclaimer.html" %}
+{#- 6 Nov (owner approved Direction B2, "Instrument panel"; ARCHITECT-PLAN-TOOLS-REDESIGN-2026-11-06): a hero with
+    the real account's equity scope, the tools grouped by what you bring (a file, or nothing), the $39 block with the
+    test's real summary rows, the research strip, the firms path, and where every number comes from. Every preview is
+    a tool run on REAL public data (site/config/tool_real.json); the "Free for everyone" strip is left out on this
+    page only (owner, 6 Nov; home and /pricing/ keep it). The old tool cards (partials/tool_cards.html) stay as they
+    are for home and /for-traders/. -#}
+{%- import "partials/tool_display.html" as d with context %}
+{%- import "partials/trader_offer.html" as offer with context %}
+{%- set by = {} %}{% for t in tools %}{% set _ = by.update({t.glyph: t}) %}{% endfor %}
+{%- set pilot = products["pilot"] %}
+<div class="wrap tx">
+<section class="tx-hero" aria-labelledby="tx-h1">
+  <div class="tx-copy">
+    {% include "partials/crumbs.html" %}
+    <h1 id="tx-h1">Eight free tools for your own trades</h1>
+    <p class="lede">Trade stats, a heatmap, drawdowns, a challenge check and four calculators. Your file is read in your browser and is not uploaded. No account, no card.</p>
+    <p class="tx-btns"><a class="btn" href="/tools/trade-stats/">Open trade stats</a> <a class="btn btn-secondary" href="#calc-h">The calculators</a></p>
+    <ul class="tx-ev" aria-label="What you can check">
+      <li><a href="/research/">{{ evidence.studies }} published studies</a></li>
+      <li><a href="/code/">Scripts public for {{ evidence.scripts_public }} of {{ evidence.studies }}</a></li>
+      <li><a href="/corrections/">{{ evidence.corrections }} corrections, dated and logged</a></li>
+    </ul>
+  </div>
+  {{ d.scope() }}
+</section>
+
+<section class="tx-rack" aria-labelledby="rack-h">
+  <div class="rk-head"><h2 id="rack-h">From your trade file</h2><p>Each preview is the tool run on one real account: an anonymous investor’s {{ real.account.trades }} closed trades in US stocks. They closed from {{ real.account.period }}. They come from the public Stock Transactions Dataset (Mendeley Data, CC BY 4.0). We use the whole dataset, not picked by result. {{ real.rules.why_account }} {{ real.account.realised_only }}</p></div>
+  <ul class="mods">
+    {{ d.module(by.stats, 6, true) }}{{ d.module(by.prop, 6, true) }}
+    {{ d.module(by.heat, 6) }}{{ d.module(by.dd, 6) }}
+  </ul>
+</section>
+<section class="tx-rack" aria-labelledby="calc-h">
+  <div class="rk-head"><h2 id="calc-h">No file needed</h2><p>Your risk, stop and target are your choices, so these start empty. They show the formula, the real contract facts and one past month of the euro, for scale. The disposition calculator shows the four counts Odean published in 1998.</p></div>
+  <ul class="mods">
+    {{ d.module(by.lot, 4) }}{{ d.module(by.rr, 4) }}{{ d.module(by.disp, 4) }}
+  </ul>
+</section>
+
+<section class="tx-offer" aria-labelledby="of-h">
+  <div class="of-copy">
+    <h2 id="of-h">Is a habit in your trades real, or luck?</h2>
+    <p>{{ offer.lead() }} checks five habits in your own trade file, tests up to two of them against chance, and totals the dollars on the matching trades.</p>
+    <p class="of-note">{{ offer.note() }}</p>
+  </div>
+  <div class="of-act">
+    {#- 6 Nov (owner rule, Tester F12): no link to /sample-report/ here until that page shows the real account too -#}
+    <p class="of-btns">{{ offer.button() }}</p>
+    {%- if flags.paid_report %}
+    <p class="of-small">The test sends our server stripped trade numbers, not your file. <a href="/privacy/">What is sent and kept</a></p>
+    {%- endif %}
+  </div>
+  {{ d.report_art() }}
+</section>
+
+<section class="tx-study" aria-labelledby="st-h">
+  <h2 id="st-h" class="visually-hidden">From our research</h2>
+  <p class="st-big"><a href="{{ evidence.finding.url }}">{{ evidence.finding.pct }}</a></p>
+  <p class="st-line">{{ evidence.finding.rest[:-1] }}. Our replication of the disposition effect on a public CC0 panel (Jin, Li &amp; Zhu, 2021). It counts every held day, so its levels differ from Odean’s, which count sale days; both put the ratio above 1.</p>
+</section>
+
+<section class="tx-firms" aria-labelledby="fm-h">
+  <div class="fm-copy">
+    <h2 id="fm-h">Run a prop firm or broker?</h2>
+    {%- if prices.get("study") %}
+    <p>Run our free, pre-registered study on your past accounts. Only totals leave your machine, and you see the result first. The plan is registered on the Open Science Framework as <a href="https://osf.io/j2ypd/" rel="noopener">j2ypd</a>.</p>
+    <p class="fm-links"><a href="/for-firms/">About the free study</a> <a href="/for-firms/#what-it-costs">The {{ pilot.name }}, US{{ pilot.price_usd|usd }}</a></p>
+    {%- else %}
+    <p class="fm-links"><a href="/for-firms/#what-it-costs">The {{ pilot.name }}, US{{ pilot.price_usd|usd }}</a></p>
+    {%- endif %}
+  </div>
+  <ul class="mods mods-firm">{{ d.module(by.pass, 12) }}</ul>
+</section>
+
+{{ d.sources() }}
+{% include "partials/disclaimer.html" %}
 </div>
 {% endblock %}

@@ -173,6 +173,8 @@ def test_home_hero_is_the_real_dashboard_capture(browser, built_site):
     ctx = browser.new_context(viewport={"width": 1280, "height": 900})
     pg = ctx.new_page()
     pg.goto(built_site["url"] + "/tools/trade-stats/")
+    # Fix round 1: the button loads the real public data now; the home hero is a capture of the synthetic file (test-only)
+    pg.evaluate("([id, t]) => { document.getElementById(id).textContent = t; }", ["ts-sample", open(os.path.join(REPO, "site", "static", "samples", "example-trades.csv"), encoding="utf-8").read()])
     pg.click("#ts-sample-btn")
     pg.wait_for_selector("#ts-out dl.stats dd")
     tool = pg.eval_on_selector_all("#ts-out dl.stats dd", "ds => ds.map(d => d.textContent)")

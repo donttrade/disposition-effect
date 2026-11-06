@@ -20,7 +20,8 @@ def test_contrast_script_passes():
 
 def test_fonts_budget_and_licence():
     woff = [f for f in os.listdir(FONTS) if f.endswith(".woff2")]
-    assert len(woff) == 3
+    # 6 Nov (tools redesign B2): Plex Serif 600 for the /tools/ headings, loaded only by tools.css (no preload)
+    assert len(woff) == 4 and "ibm-plex-serif-latin-600.woff2" in woff
     total = sum(os.path.getsize(os.path.join(FONTS, f)) for f in woff)
     assert total <= 90 * 1024, total
     for f in woff:

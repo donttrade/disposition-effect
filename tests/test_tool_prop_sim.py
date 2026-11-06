@@ -182,6 +182,8 @@ def test_hand_checks_in_the_page(browser, built_site):
 
 def test_sample_run_is_repeatable_local_and_clean(browser, built_site):
     ctx, pg, log = open_tool(browser, built_site)
+    # Fix round 1: the button loads the real public data now; this test's figures are the synthetic file's (test-only)
+    pg.evaluate("([id, t]) => { document.getElementById(id).textContent = t; }", ["ps-sample", open(os.path.join(REPO, "site", "static", "samples", "example-trades.csv"), encoding="utf-8").read()])
     pg.click("#ps-sample-btn")
     pg.evaluate("document.getElementById('ps-more').open = true")
     fill(pg, {"#ps-target": "600", "#ps-daily": "250", "#ps-maxloss": "500", "#ps-days": "60", "#ps-mindays": "5"})

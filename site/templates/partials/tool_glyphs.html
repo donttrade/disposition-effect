@@ -1,0 +1,38 @@
+{#- The eight tool glyphs (6 Nov, Direction B2): original marks on a 48-unit grid, drawn for donttrade (no icon set,
+    no brand imitated). Each draws its tool's real output in miniature, from site/config/tool_real.json through
+    site/tool_real.py glyphs() (rv.glyph):
+      stats  the 64 real trades in 8 slices of 8, summed: up for a net gain, down for a net loss
+      heat   the real heatmap (hour blocks x weekdays), the tool's own shading level; cells play largest first
+      dd     the real closed-trade equity curve, its running high and the gap; the dot is the trough
+      prop   the real days in real order against the rule's target and maximum loss; the x is the day it broke
+      lot    structure only (entry, stop bracket, lots): the risk and the stop are the reader's
+      rr     the break-even curve 1 / (1 + R): a property of the formula
+      disp   two sell-rate bars to scale: Odean (1998) Table I, PGR against PLR
+      pass   structure only (finished, passed, paid out); it encodes no figure: no public cohort counts exist
+    Always aria-hidden: the name beside it carries the meaning. Colours are classes only (tools.css); a-* says what
+    moves and d* when, under prefers-reduced-motion: no-preference only. The resting state is the finished drawing.
+    Use: {% import "partials/tool_glyphs.html" as g with context %} {{ g.glyph("stats", 32, "ic md-ic") }} -#}
+{%- macro glyph(key, size=48, cls="ic") -%}
+{%- set G = rv.glyph -%}
+<svg class="{{ cls }} ic-{{ key }}" aria-hidden="true" focusable="false" width="{{ size }}" height="{{ size }}" viewBox="0 0 48 48" fill="none">
+{%- if key == "stats" -%}
+<line class="i-base" x1="4" x2="44" y1="{{ G.stats.base }}" y2="{{ G.stats.base }}"/>
+{%- for b in G.stats.bars %}<rect class="{{ 'i-gain-f a-up' if b.up else 'i-loss-f a-dn' }} d{{ b.d }}" x="{{ b.x }}" y="{{ b.y }}" width="3.2" height="{{ b.h }}" rx=".8"/>{% endfor -%}
+{%- elif key == "heat" -%}
+{%- for c in G.heat %}<rect class="{{ c.cls }}" x="{{ c.x }}" y="{{ c.y }}" width="5.4" height="5.4" rx="1.1"/>{% endfor -%}
+{%- elif key == "dd" -%}
+<line class="i-plan-d" x1="4" x2="44" y1="{{ G.dd.high_y }}" y2="{{ G.dd.high_y }}"/><polygon class="i-loss-a a-fade d5" points="{{ G.dd.gap }}"/><polyline class="i-ink-s i-thin" points="{{ G.dd.eq }}"/><rect class="i-wipe a-wipe" x="3" y="4" width="43" height="38"/><circle class="i-loss-f a-pop d6" cx="{{ G.dd.tx }}" cy="{{ G.dd.ty }}" r="2.2"/>
+{%- elif key == "prop" -%}
+<line class="i-gain-d" x1="5" x2="44" y1="{{ G.prop.ty }}" y2="{{ G.prop.ty }}"/><line class="i-loss-d" x1="5" x2="44" y1="{{ G.prop.fy }}" y2="{{ G.prop.fy }}"/><polyline class="i-ink-s i-thin" points="{{ G.prop.pts }}"/><rect class="i-wipe a-wipe" x="7" y="5" width="39" height="38"/><circle class="i-ink-f" cx="6" cy="24" r="2"/><path class="i-loss-s a-pop d7" d="{{ G.prop.x }}"/>
+{%- elif key == "lot" -%}
+<line class="i-ink-s" x1="4" x2="28" y1="13" y2="13"/><line class="i-loss-d" x1="4" x2="28" y1="33" y2="33"/><path class="i-mute-s a-grow-y" d="M9 13v20M7 13h4M7 33h4"/><line class="i-base" x1="32" x2="45" y1="42" y2="42"/>
+{%- for i in range(4) %}<rect class="i-plan-f a-up d{{ i + 2 }}" x="33" y="{{ 35.5 - i * 6 }}" width="11" height="4.6" rx="1"/>{% endfor -%}
+{%- elif key == "rr" -%}
+<line class="i-base" x1="5" x2="44" y1="42" y2="42"/><line class="i-base" x1="5" x2="5" y1="6" y2="42"/><polyline class="i-ink-s i-thin a-fade" points="{{ G.rr }}"/><circle class="i-gain-f a-pop d4" cx="14" cy="22.1" r="2.2"/><circle class="i-plan-f a-pop d6" cx="22" cy="28.8" r="2.2"/>
+{%- elif key == "disp" -%}
+<line class="i-base" x1="5" x2="5" y1="8" y2="40"/><rect class="i-gain-f a-x" x="6" y="12" width="{{ G.disp.g }}" height="7" rx="1.5"/><rect class="i-loss-f a-x d3" x="6" y="29" width="{{ G.disp.l }}" height="7" rx="1.5"/>
+{%- elif key == "pass" -%}
+<rect class="i-mute-f" x="6" y="9" width="36" height="7" rx="1.5"/><rect class="i-gain-f a-x d1" x="6" y="21" width="16" height="7" rx="1.5"/><rect class="i-plan-f a-x d3" x="6" y="33" width="7" height="7" rx="1.5"/>
+{%- endif -%}
+</svg>
+{%- endmacro %}
