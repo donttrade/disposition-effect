@@ -5,6 +5,7 @@
     "waitlist" then, and lint fails a paid build that does (claim:not_on_sale).
     Use: {% import "partials/trader_offer.html" as offer with context %} -#}
 {%- set r = products["report39"] %}
+{%- import "partials/refund_copy.html" as refund with context %}
 
 {#- The one call-to-action button. -#}
 {%- macro button() -%}
@@ -18,7 +19,7 @@
 {#- One line on where the offer stands. -#}
 {%- macro note() -%}
 {%- if flags.paid_report -%}
-{{ r.price_usd|usd }}, one time, in US dollars, with one free re-test 30 to 60 days after your first result. A full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying.
+{{ r.price_usd|usd }}, one time, in US dollars, with one free re-test 30 to 60 days after your first result. {{ refund.tier2() }}
 {%- else -%}
 Not on sale yet: nothing is charged now. The free tools stay free.
 {%- endif -%}
@@ -26,7 +27,7 @@ Not on sale yet: nothing is charged now. The free tools stay free.
 
 {#- A word or two for link lists: "The donttrade test for traders (…)". -#}
 {%- macro short_state() -%}
-{%- if flags.paid_report %}{{ r.price_usd|usd }} founding price{% else %}waitlist{% endif -%}
+{%- if flags.paid_report %}{{ r.price_usd|usd }}{% if founding_open %} founding price{% endif %}{% else %}waitlist{% endif -%}
 {%- endmacro %}
 
 {#- How a sentence about the test starts: "… describes, from your own trade file, your median size after a loss".
@@ -71,7 +72,7 @@ data-on-sale="{{ 'true' if flags.paid_report else 'false' }}"
     {%- if intro %}
     <p>The donttrade test is on sale: {{ r.price_usd|usd }}, one time, with one free re-test. <a href="/for-traders/">What it measures</a></p>
     {%- endif %}
-    <p>Read the “Before you pay” summary on the pricing page, then pay by card on Stripe’s page. A full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying.</p>
+    <p>Read the “Before you pay” summary on the pricing page, then pay by card on Stripe’s page. {{ refund.tier2() }}</p>
     <p>{{ button() }}</p>
 {%- else %}
     {%- if intro %}

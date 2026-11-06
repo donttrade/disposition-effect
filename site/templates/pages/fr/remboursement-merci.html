@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{#- /fr/remboursement/merci/ (6 Nov, Round A8): the French thank-you page. noindex; no reason, no query string. TRANSLATOR CHECK. -#}
+{% block content %}
+<div class="wrap" data-requires-flag="paid_report"><div class="prose">
+  <h1>Nous avons reçu votre demande.</h1>
+  <p class="lede">Nous répondons dans les {{ prices.rules.refund_reply_business_days }} jours ouvrables, du lundi au vendredi, heure de l’Est. La réponse est envoyée au courriel que vous avez indiqué.</p>
+  <p class="small"><a href="/fr/conditions/#remboursements-traders">Conditions de remboursement</a> · <a href="/">Retour à l’accueil</a></p>
+</div></div>
+{% endblock %}

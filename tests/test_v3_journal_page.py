@@ -131,7 +131,7 @@ def test_import_a_real_format_file_and_account_naming(browser, journal_site):
     pg.set_input_files("#j-file", os.path.join(REPO, "tests", "fixtures", "mt5", "deals.csv"))
     pg.wait_for_selector("#j-imp-add")
     text = pg.inner_text("#j-preview")
-    assert "MetaTrader 5" in text and "(beta)" in text and "times: broker server time" in text
+    assert "MetaTrader 5" in text and "(not yet tested on a real export)" in text and "times: broker server time" in text
     assert pg.input_value("#j-imp-name") == "MT5 account 1"
     pg.fill("#j-imp-name", "My MT5")
     pg.wait_for_timeout(300)

@@ -29,6 +29,9 @@
     <p class="small">Email <a href="mailto:{{ site.contact_email }}?subject={{ ('donttrade test access')|urlencode }}">{{ site.contact_email }}</a>. {{ site.reply_promise }}</p>
   </section>
   </div>
+  {%- if refund_on %}
+  <p class="small muted">Something went wrong? <a href="/refund/">Ask for a refund</a> · <a href="/terms/#trader-refunds">Refund terms</a></p>
+  {%- endif %}
   {% include "partials/disclaimer.html" %}
 </div>
 {% endblock %}

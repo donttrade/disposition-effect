@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{#- /refund/thanks/ (6 Nov, Round A8): where Web3Forms sends the browser after the refund form. noindex. Says nothing about the
+    request itself: no reason, no query string. -#}
+{% block content %}
+<div class="wrap" data-requires-flag="paid_report"><div class="prose">
+  <h1>We have your request.</h1>
+  <p class="lede">We reply within {{ prices.rules.refund_reply_business_days }} business days, Monday to Friday, Eastern Time. The reply goes to the email you gave.</p>
+  <p class="small"><a href="/terms/#trader-refunds">Refund terms</a> · <a href="/">Back to the home page</a></p>
+</div></div>
+{% endblock %}

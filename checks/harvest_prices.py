@@ -20,6 +20,12 @@ def allowed_amounts(prices, include_retired=False):
     """Amounts a page may show. include_retired is for the harvest of today's OLD page only."""
     out = set(prices["retired_amounts"]["amounts"]) if include_retired else set()
     out.add(0)   # the free tier's "$0" (v3 value ladder): no price, so nothing in prices.json can drift from it
+    # 6 Nov 2026 (Round A): the price after the founding price, and the partner payout minimum, both from prices.json
+    for p in prices["products"]:
+        if (p.get("after_founding") or {}).get("price_usd") is not None:
+            out.add(p["after_founding"]["price_usd"])
+    if (prices.get("partner") or {}).get("minimum_payout_usd") is not None:
+        out.add(prices["partner"]["minimum_payout_usd"])
     for p in prices["products"]:
         out.add(p["price_usd"])
         if p.get("minimum_usd") is not None:

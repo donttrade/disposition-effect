@@ -147,7 +147,7 @@ def test_flag_off_legal_pages(built_site):
             assert f'id="{i}"' in html, (path, i)
         v = PRIVACY_VERSION if path == "/privacy/" else TERMS_VERSION
         assert "tally" not in html.lower() and f"Version {v}" in html
-        assert not re.search(r"standard price|after launch|\$49|\$99|restore by email", html, re.I)
+        assert not re.search(r"standard price|after launch|\$99|restore by email", html, re.I)   # 6 Nov: $49 is allowed, as the price after the first 100 buyers (build.founding_problem)
     privacy = (built_site["out"] / "privacy" / "index.html").read_text(encoding="utf-8")
     assert "Web3Forms" in privacy and "pen name" in privacy and "runs no analytics" in privacy
     terms = (built_site["out"] / "terms" / "index.html").read_text(encoding="utf-8")
@@ -204,7 +204,7 @@ def test_flag_on_lint_and_wording(paid, monkeypatch):
     monkeypatch.setenv("DT_PRIVATE_TOML", str(paid.parent / "paid-private.toml"))   # delta N2: the build's file
     assert L.lint_build(str(paid), paid=True) == []
     for rel, h in all_html(paid).items():
-        assert not re.search(r"standard price|after launch:|restore by email</a>|\$49|\$99", h, re.I), rel
+        assert not re.search(r"standard price|after launch:|restore by email</a>|\$99", h, re.I), rel
     restore = (paid / "restore" / "index.html").read_text(encoding="utf-8")
     assert "type=\"email\"" not in restore and "r-form" not in restore
     assert "not yet tested on a real export" in (paid / "pricing" / "index.html").read_text(encoding="utf-8")   # 5 Nov: no "beta" wording
