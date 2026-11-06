@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{#- /learn/losing-streak-probability/ (SEO-PLAN-AND-TOOL-PAGES A9; ARCHITECT-PLAN-SEO P13). Every probability comes from
+    site/learn_tables.py through build.learn_context(); nothing is copied from another site. -#}
+{% block content %}
+<div class="wrap learn">
+  {% include "partials/crumbs.html" %}
+  <h1>{{ page.h1 }}</h1>
+  <section id="answer" aria-label="Short answer">
+    <p>At a 50% win rate, the chance of at least one run of 5 or more losses in 100 trades is {{ prob_for(100, 50, 5) }}, and of 10 or more is {{ prob_for(100, 50, 10) }}. The tables below cover win rates from {{ win_rates[0] }}% to {{ win_rates[-1] }}% and {{ trade_counts[0] }}, {{ trade_counts[1] }} and {{ trade_counts[2] }} trades, computed when this page is built, assuming each trade is independent of the last.</p>
+  </section>
+  <p class="meta small">Published {{ page.learn.published|longdate }} · Updated {{ page.updated|longdate }}</p>
+  <p class="learn-cta">See it in your own trades: <a href="/tools/trade-stats/">trade stats</a> lists the longest winning and losing streaks in your file, with what each one totalled. Your file is read in your browser and is not uploaded.</p>
+
+  <section class="learn-sec" aria-labelledby="feel-h">
+    <h2 id="feel-h">Streaks are longer than they feel</h2>
+    <p>In a long sequence of independent trades, a run of the same outcome is more likely to turn up somewhere than the chance of a run starting at any single trade suggests, because a record has many places for one to start. A trading record is long enough for this to matter. The tables put numbers on it: how likely a run of a given length is somewhere in a record of a given size.</p>
+  </section>
+
+  <section class="learn-sec" aria-labelledby="tables-h">
+    <h2 id="tables-h">The chance of a run of losses, by win rate and number of trades</h2>
+    <p>Each cell is the chance of at least one run of that many losses or more somewhere in the record. Trades are assumed independent, each with the same chance of winning, and a win ends a run.</p>
+    {%- for t in streak_tables %}
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Chance of a losing run in {{ t.n }} trades">
+      <table class="learn-table">
+        <caption>{{ t.n }} trades: chance of a run of at least</caption>
+        <thead><tr><th scope="col">Win rate</th>{% for k in run_lengths %}<th scope="col">{{ k }} losses</th>{% endfor %}</tr></thead>
+        <tbody>
+        {%- for r in t.rows %}
+          <tr><th scope="row">{{ r.w }}%</th>{% for c in r.cells %}<td>{{ c }}</td>{% endfor %}</tr>
+        {%- endfor %}
+        </tbody>
+      </table>
+    </div>
+    {%- endfor %}
+    <p class="small">Computed by <code>site/learn_tables.py</code> when this page is built. A cell shown as &lt;0.1% or &gt;99.9% is rounded to that bound, never to 0 or 100. <a href="/data/losing-streak-probability.csv" download>Download every value (CSV)</a>.</p>
+  </section>
+
+  <section class="learn-sec" aria-labelledby="how-h">
+    <h2 id="how-h">How the calculation works</h2>
+    <p>Take three trades at a 50% win rate and ask for a run of at least 2 losses. There are 8 equally likely win-loss sequences, listed below with their longest run of losses.</p>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="All eight sequences of three trades">
+      <table class="learn-table learn-table-seq">
+        <caption>Every sequence of three trades (W win, L loss)</caption>
+        <thead><tr><th scope="col">Sequence</th><th scope="col">Longest run of losses</th><th scope="col">A run of 2 or more?</th></tr></thead>
+        <tbody>
+        {%- for e in enum %}
+          <tr><th scope="row">{{ e.seq }}</th><td>{{ e.longest }}</td><td>{{ "yes" if e.hit else "no" }}</td></tr>
+        {%- endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p>{{ enum|selectattr("hit")|list|length }} of the {{ enum|length }} sequences have such a run, which is {{ enum_prob }}. The tables above use the same idea for any number of trades and any win rate, without listing the sequences. After each trade, the calculation keeps the chance of being at each current run length, 0 up to one less than the run asked about. A win sends every state back to 0, a loss moves a state up by one, and the chance that reaches the run length is set aside as a hit. What is left at the end is the chance of no such run, and one minus it is the answer.</p>
+    <p>For a published treatment of the longest run in a sequence of independent trials, see Schilling (1990), <a href="https://doi.org/{{ learn_refs.schilling1990.doi }}">“The longest run of heads”</a>, <cite>The College Mathematics Journal</cite> 21(3), 196–207.</p>
+  </section>
+
+  <section class="learn-sec" aria-labelledby="notrandom-h">
+    <h2 id="notrandom-h">When streaks are not random</h2>
+    <p>The tables assume that every trade has the same chance of winning and that no trade affects the next. Real records can break both. Market conditions change, positions overlap, and a trader’s size or rules can change midway, any of which can make losses bunch together.</p>
+    <p>One way to look for bunching is to reorder the same trades at random many times and count how often the longest losing run in a reordering matches or beats the real one. A real streak that reorderings rarely match points to clustering. Trade stats lists your longest losing streak; it does not run that comparison.</p>
+  </section>
+
+  <section class="learn-sec" aria-labelledby="cost-h">
+    <h2 id="cost-h">What a run of losses does to the balance</h2>
+    <p>If every loss takes the same share f of what is left, k losses in a row take 1 − (1 − f)<sup>k</sup> of the balance. The table is that arithmetic. Its rows are examples chosen to show the shape, and they say nothing about what size anyone trades.</p>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Fall after a run of losses">
+      <table class="learn-table">
+        <caption>Fall from the high after a run of losses, each loss taking a share of what is left</caption>
+        <thead><tr><th scope="col">Share lost on each loss</th>{% for k in run_lengths %}<th scope="col">{{ k }} in a row</th>{% endfor %}</tr></thead>
+        <tbody>
+        {%- for r in streak_cost %}
+          <tr><th scope="row">{{ r.f }}%</th>{% for c in r.cells %}<td>{{ c }}</td>{% endfor %}</tr>
+        {%- endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p>Reading a fall back into the gain that undoes it is the <a href="/learn/drawdown-recovery-table/">drawdown recovery table</a>.</p>
+  </section>
+
+  <section class="learn-sec" aria-labelledby="faq-h">
+    <h2 id="faq-h">Questions</h2>
+    <details><summary>How many losing trades in a row are normal?</summary><p>It depends on the win rate and the number of trades. At a 50% win rate over 100 trades, the chance of at least one run of 5 or more losses is {{ prob_for(100, 50, 5) }}. The tables give the figure for other win rates and trade counts.</p></details>
+    <details><summary>How is the probability of a losing streak calculated?</summary><p>By tracking the length of the current run of losses after each trade and setting aside the chance of reaching the run length asked about. It assumes that each trade has the same chance of winning and does not depend on the trade before.</p></details>
+    <details><summary>Does a long losing streak mean a strategy has stopped working?</summary><p>Not by itself. Long runs turn up by chance in long records, as the tables show. A streak says what happened, and the tables say how often a run that long appears by chance under independence. They do not judge any strategy.</p></details>
+    <details><summary>Are trades really independent?</summary><p>Often not exactly. Market conditions, overlapping positions and changes in size can make losses cluster. Independence is the assumption behind the tables, so they are a yardstick and not a verdict.</p></details>
+    <details><summary>Where can I see my own longest losing streak?</summary><p>Trade stats lists the longest winning and losing streak in your file, with what each one totalled. The file is read in your browser and is not uploaded.</p></details>
+    <details><summary>Is this investment advice?</summary><p>No. It is arithmetic and does not recommend any security, trade, size or exit. Past results do not predict future results.</p></details>
+  </section>
+
+  <section class="learn-sec" aria-labelledby="src-h">
+    <h2 id="src-h">Method and sources</h2>
+    <ul>
+      <li>The tables are computed by <code>site/learn_tables.py</code>, listed on <a href="/code/">Methods and code</a>. The site’s tests recompute every value a second way: an exact-fraction recurrence, and a count of every sequence for short records.</li>
+      <li>Schilling (1990), doi:{{ learn_refs.schilling1990.doi }}: the title, journal, volume, pages and year were confirmed with Crossref on {{ learn_refs.schilling1990.crossref_checked|longdate }}. The page cites it for its subject and does not quote it.</li>
+      <li>The numbers as a file: <a href="/data/losing-streak-probability.csv" download>losing-streak-probability.csv</a>.</li>
+      <li>Published {{ page.learn.published|longdate }}, updated {{ page.updated|longdate }}. A mistake would be logged on <a href="/corrections/">Corrections</a>.</li>
+    </ul>
+  </section>
+</div>
+{% endblock %}

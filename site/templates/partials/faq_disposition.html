@@ -1,0 +1,11 @@
+{#- 6 Nov (SEO round 1, item 9): the disposition calculator's visible FAQ, outside the frozen body (which stays word for word).
+    build.faq_from() reads this section for the FAQPage JSON-LD, so the markup and the visible text cannot differ. The answers
+    restate what the frozen body already says. -#}
+<div class="wrap"><section class="section" aria-labelledby="faq-h">
+  <h2 id="faq-h">Questions</h2>
+  <details><summary>What is the disposition effect?</summary><p>The tendency to sell positions that are up more readily than positions that are down. Shefrin and Statman (1985) named it, and Odean (1998) measured it on brokerage records.</p></details>
+  <details><summary>How are PGR and PLR calculated?</summary><p>PGR is realised gains ÷ (realised gains + paper gains), and PLR is realised losses ÷ (realised losses + paper losses). Following Odean (1998), the counts are added up over the days an account sold something.</p></details>
+  <details><summary>What does a PGR to PLR ratio above 1 mean?</summary><p>That in these counts gains were sold more readily than losses. The calculator shows the ratio, the difference and a t-statistic, and the page lists what the figure does not tell you, such as holding age.</p></details>
+  <details><summary>Does the calculator test whether the result is chance?</summary><p>It reports a t-statistic with Odean’s standard error, which treats every position as independent. That overstates how precise the result is when a few accounts hold most of the positions.</p></details>
+  <details><summary>Is this investment advice?</summary><p>No. It is arithmetic on counts you type in and does not recommend any security, trade, size or exit.</p></details>
+</section></div>

@@ -1,7 +1,7 @@
 {
  "citation": [],
  "crumb": "Methods and code",
- "description": "Every published donttrade script with the data each study used.",
+ "description": "Where each study’s code and data are published: the scripts, the data used and each licence. Code for two studies, and part of two more, is not yet public.",
  "form_action": [
   "https://donttrade.substack.com"
  ],
@@ -12,5 +12,5 @@
  "source": "docs/code/index.html",
  "source_sha256": "6595c9c054951ddf26650051edb7483c94e544cf9272de3db161835dafbbe8c9",
  "title": "Methods and code — donttrade",
- "updated": "2026-10-19"
+ "updated": "2026-11-06"
 }

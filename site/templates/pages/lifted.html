@@ -29,6 +29,7 @@
 {%- else %}
 <!--frozen:start-->{{ lifted_html }}<!--frozen:end-->
 {%- endif %}
+{%- if page.get("lifted") == "tools_disposition-calculator" %}{% include "partials/faq_disposition.html" %}{% endif %}
 {%- if page.path == "/corrections/" %}
 {#- The Lead's decision (23 Oct): the donttrade test's dated method versions, outside the frozen log. #}
 {% include "partials/report_methods.html" %}

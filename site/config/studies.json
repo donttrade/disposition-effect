@@ -1,0 +1,82 @@
+{
+ "_about": "SEO round 1 (6 Nov 2026): the citation layer of the four studies that have a Zenodo DOI. One entry per study; the build reads it for the 'Cite this study' box, the Highwire citation_doi and citation_public_url meta, the ScholarlyArticle JSON-LD and /llms.txt. DOIs and titles were read from the Zenodo API (zenodo.org/api/records/<id>) on 6 Nov 2026; doi.org answers 302 to zenodo.org for each. title is the page H1 without its full stop, the Zenodo record title and citation_title: tests/test_seo1.py holds them equal.",
+ "datasets": {
+  "xueqiu_panel": {
+   "name": "Replication Data for: Could social interaction decrease disposition effect? Evidence from retail investors in a directed social trading network",
+   "doi": "10.7910/DVN/NI6SBJ",
+   "license": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "publisher": "Harvard Dataverse",
+   "checked": "2026-11-06",
+   "license_name": "CC0 1.0"
+  }
+ },
+ "studies": [
+  {
+   "path": "/research/disposition-effect/",
+   "zenodo_id": "23426301",
+   "doi": "10.5281/zenodo.23426301",
+   "title": "76.1% of 4,659 retail traders realised their gains more readily than their losses",
+   "published": "2026-10-06",
+   "slug": "disposition",
+   "key_result": "76.1% of 4,659 eligible retail traders (3,547 of them) realised gains more readily than losses; 95% interval 74.9–77.3%. 4,731 traders were in the data.",
+   "based_on": [
+    "xueqiu_panel"
+   ],
+   "cites": [
+    "odean1998",
+    "shefrin1985"
+   ],
+   "datasets": [
+    {
+     "name": "Disposition-effect replication: summary figures",
+     "csv": "/data/disposition-pgr-plr.csv",
+     "description": "PGR, PLR and their ratio per trader and pooled, and the counts of traders behind them, as computed by reproduce.py."
+    }
+   ]
+  },
+  {
+   "path": "/research/insider-buying-edge/",
+   "zenodo_id": "23426303",
+   "doi": "10.5281/zenodo.23426303",
+   "title": "We looked for the insider-buying edge in 470,754 Form 4 records and, outside 2008–09, did not find it",
+   "published": "2026-10-11",
+   "slug": "insider",
+   "key_result": "In 470,754 SEC Form 4 records, two years supplied 94% of the excess return; outside 2008–09 the edge was not found.",
+   "based_on": [],
+   "cites": [],
+   "datasets": [
+    {
+     "name": "Insider-buying study: 95% interval against two published estimates",
+     "csv": "/data/insider-interval.csv",
+     "description": "The study's 95% interval, in percent over 21 trading days, outside 2008 and 2009, beside two published estimates."
+    }
+   ]
+  },
+  {
+   "path": "/research/portfolio-driven-disposition-effect/",
+   "zenodo_id": "23426305",
+   "doi": "10.5281/zenodo.23426305",
+   "title": "Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)",
+   "published": "2026-10-16",
+   "slug": "pdde",
+   "key_result": "The \"about twice as strong\" headline did not survive a stricter within-trader test (corrected 17 Oct 2026).",
+   "based_on": [
+    "xueqiu_panel"
+   ],
+   "cites": [],
+   "datasets": []
+  },
+  {
+   "path": "/research/volatility-scaled-momentum/",
+   "zenodo_id": "23426307",
+   "doi": "10.5281/zenodo.23426307",
+   "title": "A pre-registered test of volatility-scaled momentum failed its own kill criteria at five positions",
+   "published": "2026-10-16",
+   "slug": "volmom",
+   "key_result": "The mechanism passed on factor data; the five-position version with costs failed its own kill criteria.",
+   "based_on": [],
+   "cites": [],
+   "datasets": []
+  }
+ ]
+}

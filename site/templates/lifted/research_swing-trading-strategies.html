@@ -45,7 +45,7 @@
 <li><strong>Breakeven cost.</strong> The round-trip cost at which the profit disappears had to be at least 0.50%. A <strong>round trip</strong> is one buy plus the matching sell.</li>
 <li><strong>Drawdown halts.</strong> A <strong>drawdown</strong> is a fall from a running peak in account value. A halt "trips" whenever the simulated account falls 10% below its peak, and the peak resets at each trip. At most 2 trips per 10 years were allowed.</li>
 <li><strong>Sample size.</strong> At least 100 completed round trips. The monthly round also needed at least 120 holdout months.</li>
-<li><strong>Placebo.</strong> A <strong>placebo</strong> here is a fake strategy that trades at random times in the same instruments, with the same holding lengths and the same costs. We ran 1,000 of them. The real strategy had to beat nearly all of them. That meant the 98.333rd percentile in the monthly round and the 95th in the final of the daily tournament.</li>
+<li><strong>Placebo.</strong> A <strong>placebo</strong> here is a dummy strategy that trades at random times in the same instruments, with the same holding lengths and the same costs. We ran 1,000 of them. The real strategy had to beat nearly all of them. That meant the 98.333rd percentile in the monthly round and the 95th in the final of the daily tournament.</li>
 <li><strong>Deflated Sharpe.</strong> The <strong>deflated Sharpe ratio</strong> (Bailey and López de Prado, 2014) asks how likely it is that a Sharpe ratio this high is real, given how many strategies were tried in total. It returns a probability between 0 and 1. We required at least 0.95.</li>
 </ul>
 <p><strong>Bonferroni</strong> is the simplest correction for multiple testing. If you test k strategies at once, you divide the allowed error rate by k, which raises the t-statistic bar. With k = 3 the two-sided bar is 2.394. With k = 1 it is 1.96. Only one daily strategy reached the final, so its bar was 1.96.</p>
@@ -57,7 +57,7 @@
 <p>Before the holdout was opened, the monthly strategies also had to show that the machinery worked:</p>
 <ul>
 <li>they reached a t of at least 2.0 on the in-sample data;</li>
-<li>they failed on random-walk fake prices (passing in no more than 10 of 100 fake panels);</li>
+<li>they failed on simulated random-walk prices (passing in no more than 10 of 100 simulated panels);</li>
 <li>they detected a planted +1% signal (t of at least 2.0);</li>
 <li>their loader refused an unauthorised read of the holdout.</li>
 </ul>

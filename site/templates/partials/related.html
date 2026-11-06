@@ -1,0 +1,11 @@
+{#- 6 Nov (SEO round 1, ARCHITECT-PLAN-SEO 6.4): the "Related" block, from config/related.json through build.related_for(),
+    which fails the build for a target this build does not publish. Plain internal links in the page's own words; no
+    ranking, no "best". Placed last in <main> (so /tools/'s main stays inside its weight budget: that page has none). -#}
+<aside class="wrap related" aria-labelledby="related-h">
+  <h2 id="related-h">Related</h2>
+  <ul class="related-list">
+  {%- for r in related %}
+    <li><a href="{{ r.href }}">{{ r.label }}</a> <span class="related-why">{{ r.why }}</span></li>
+  {%- endfor %}
+  </ul>
+</aside>

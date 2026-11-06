@@ -1,0 +1,12 @@
+{#- 6 Nov (SEO round 1, ARCHITECT-PLAN-SEO item 11): the trading and risk terms, after the twelve study terms. An island inside
+    /glossary/'s frozen body (build.insert_island): the twelve terms and their ids are untouched. Each <dt id> is a stable
+    anchor (#profit-factor, #revenge-trading, ...), and the DefinedTermSet JSON-LD is built from these very elements
+    (build.glossary_graph). A formula is the one the named tool uses; a source is a DOI in config/references.json. -#}
+<h2 id="trading-risk-terms">Trading and risk terms</h2>
+<p class="lede ls-measure">The terms the free tools and the <a href="/learn/">Learn pages</a> use. Where a tool calculates the term, its formula here is the one the tool uses. The terms above are the ones the studies use, each with its source. Below, an entry has a source line where a published source exists; the others have no single formal definition and describe the term as traders use it.</p>
+<dl class="gloss">
+{%- for t in terms %}<dt id="{{ t.id }}"><dfn>{{ t.term }}</dfn></dt><dd>{{ t.text }}{% if t.get("formula") %} <span class="gloss-formula">Formula: <code>{{ t.formula }}</code></span>{% endif %}
+{%- if t.get("source") %} <span class="src">Source: <a href="https://doi.org/{{ refs[t.source.ref].doi }}">{{ t.source.label }}</a></span>{% endif %}
+{%- if t.get("measured_in") %} <span class="meas">Measured in: {% for m in t.measured_in %}<a href="{{ m.href }}">{{ m.label }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</span>{% endif %}
+{%- if t.get("see_also") %} <span class="meas">See also: {% for m in t.see_also %}<a href="{{ m.href }}">{{ m.label }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</span>{% endif %}</dd>{% endfor %}
+</dl>

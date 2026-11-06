@@ -1433,3 +1433,42 @@ details.legal-sec[open] { padding-bottom: var(--s2); }
 .sf-hn { font-weight: 600; }
 .sf-hg { color: var(--muted); }
 @media print { .sf-tile, .sf-habit { break-inside: avoid; border-color: #999; } }
+
+/* ------------------------------------------------------------------ SEO round 1 (6 Nov 2026): Related, Cite this study, /learn/, glossary additions */
+.related { margin-top: var(--s5); padding-top: var(--s3); border-top: 1px solid var(--border); }
+.related h2 { font-size: var(--fs-2); margin: 0 0 var(--s1); }
+.related-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 2px; max-width: var(--prose); }
+.related-list li { margin: 0; }
+.related-list a { display: inline-flex; align-items: center; min-height: var(--target); font-weight: 600; }
+.related-why { color: var(--muted); font-size: var(--fs-0); }
+.learn { padding-bottom: var(--s5); }
+.learn > h1, .learn > section, .learn > p { max-width: var(--prose); }
+.learn .meta { color: var(--muted); }
+#answer { margin: var(--s2) 0; padding: var(--s2) var(--s3); border-left: 4px solid var(--rust); background: var(--surface); border-radius: 0 var(--radius) var(--radius) 0; }
+#answer p { margin: 0; font-size: var(--fs-2); line-height: 1.45; }
+.learn-cta { padding: var(--s2) 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.learn-sec { margin-top: var(--s4); }
+.learn-sec h2 { margin: 0 0 var(--s1); }
+.learn-list { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s1); }
+.learn-list li { margin: 0; }
+.learn-list a { font-weight: 600; }
+.learn-why { display: block; color: var(--muted); font-size: var(--fs-0); }
+.learn .table-wrap { margin: var(--s2) 0; }
+.learn-table { width: auto; min-width: 20rem; font-variant-numeric: tabular-nums; }
+.learn-table caption { text-align: left; color: var(--muted); font-size: var(--fs-0); padding-bottom: var(--s1); }
+.learn-table th, .learn-table td { padding: 6px var(--s2); border-bottom: 1px solid var(--border); text-align: right; white-space: nowrap; }
+.learn-table thead th { border-bottom: 2px solid var(--field-border); }
+.learn-table th[scope="row"], .learn-table thead th:first-child { text-align: left; }
+.learn details { max-width: var(--prose); border-top: 1px solid var(--border); padding: var(--s1) 0; }
+.learn details summary { min-height: var(--target); display: flex; align-items: center; cursor: pointer; font-weight: 600; }
+.learn details p { margin: 4px 0 var(--s1); }
+.studycite { max-width: var(--measure, 68ch); margin: 0 0 var(--s3); border: 1px solid var(--border); border-radius: var(--radius); padding: 0 var(--s2); background: var(--surface); }
+.studycite summary { min-height: var(--target); display: flex; align-items: center; cursor: pointer; font-weight: 600; }
+.studycite-body { padding-bottom: var(--s2); }
+.studycite-body p { margin: 0 0 var(--s1); }
+.studycite-label { font-size: var(--fs-0); font-weight: 600; color: var(--muted); margin-bottom: 2px !important; }
+.studycite-bib { margin: 0 0 var(--s1); padding: var(--s1) var(--s2); overflow-x: auto; max-width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); font-size: var(--fs-0); white-space: pre; }
+.studycite-apa { overflow-wrap: anywhere; }
+.lifted .meas, .lifted .gloss-formula { font-size: var(--fs-0); color: var(--muted); }
+.lifted .gloss-formula code { overflow-wrap: anywhere; }
+.lifted .meas a { color: var(--muted); }

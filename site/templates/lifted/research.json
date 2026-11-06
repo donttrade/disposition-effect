@@ -1,7 +1,7 @@
 {
  "citation": [],
  "crumb": "Research",
- "description": "Dated archive of every donttrade study, with scripts and data linked as they are published. Negative results included.",
+ "description": "Every donttrade study, negative results included: the disposition effect in 4,659 traders, 50 strategies, insider buying. Data, code, DOIs where published.",
  "form_action": [
   "https://donttrade.substack.com"
  ],
@@ -11,6 +11,6 @@
  "section": "/research/",
  "source": "docs/research/index.html",
  "source_sha256": "ac0b96f0f10eb0a3ee1adf4ef14e24eabb3e84f30c8e47cb9d4dbee433545de1",
- "title": "Research — donttrade",
- "updated": "2026-10-19"
+ "title": "Research: Trader Behaviour, Markets and Strategy Tests",
+ "updated": "2026-11-06"
 }

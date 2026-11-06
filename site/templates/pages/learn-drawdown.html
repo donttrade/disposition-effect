@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{#- /learn/drawdown-recovery-table/ (SEO-PLAN-AND-TOOL-PAGES A10; ARCHITECT-PLAN-SEO P12). Every number on this page comes from
+    site/learn_tables.py through build.learn_context(); nothing is typed in. The answer block's two figures are the table's rows. -#}
+{% block content %}
+<div class="wrap learn">
+  {% include "partials/crumbs.html" %}
+  <h1>{{ page.h1 }}</h1>
+  <section id="answer" aria-label="Short answer">
+    <p>A drawdown of 10% takes a gain of {{ gain_for(10) }} to undo, and a drawdown of 50% takes {{ gain_for(50) }}, because the gain is earned on the smaller balance that is left. The formula is d ÷ (1 − d). The table below runs it from {{ dd_min }}% to {{ dd_max }}%, computed when this page is built.</p>
+  </section>
+  <p class="meta small">Published {{ page.learn.published|longdate }} · Updated {{ page.updated|longdate }}</p>
+  <p class="learn-cta">See it in your own trades: the <a href="/tools/drawdown-calculator/">drawdown and recovery calculator</a> draws your closed trades against their running high. Your file is read in your browser and is not uploaded.</p>
+
+  <section class="learn-sec" aria-labelledby="formula-h">
+    <h2 id="formula-h">The formula, and why the gain is larger than the fall</h2>
+    <p>If an account falls by a fraction d of its high, it keeps 1 − d of it. To get back to the high, that smaller balance has to grow by the factor 1 ÷ (1 − d), which is a gain of d ÷ (1 − d). The gain is always larger than the fall, and the gap widens quickly as the fall deepens.</p>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Gain needed to recover each drawdown">
+      <table class="learn-table">
+        <caption>The gain on the remaining balance that gets back to the high</caption>
+        <thead><tr><th scope="col">Fall from the high</th><th scope="col">Gain on what is left</th></tr></thead>
+        <tbody>
+        {%- for r in recovery %}
+          <tr><th scope="row">{{ r.d }}%</th><td>{{ r.gain }}</td></tr>
+        {%- endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="small">Computed by <code>site/learn_tables.py</code> when this page is built. <a href="/data/drawdown-recovery.csv" download>Download the table (CSV)</a>.</p>
+  </section>
+
+  <section class="learn-sec" aria-labelledby="time-h">
+    <h2 id="time-h">How long can it take? Arithmetic with a steady gain</h2>
+    <p>How long a recovery takes depends on what the account earns each period, and real trading does not earn a steady amount. The table below is only arithmetic: the number of periods that a constant gain per period, compounded, would take to cover each fall. It is not a forecast for any account.</p>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Periods to recover at a steady gain">
+      <table class="learn-table">
+        <caption>Periods of a steady gain that cover each fall (whole periods, rounded up)</caption>
+        <thead><tr><th scope="col">Fall from the high</th>{% for g in period_gains %}<th scope="col">{{ g }}% per period</th>{% endfor %}</tr></thead>
+        <tbody>
+        {%- for r in periods %}
+          <tr><th scope="row">{{ r.d }}%</th>{% for n in r.n %}<td>{{ n }}</td>{% endfor %}</tr>
+        {%- endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="small">Each cell is the smallest whole number n with (1 + gain)<sup>n</sup> ≥ 1 ÷ (1 − fall). The gains in the column heads are examples of the arithmetic, not a level any account earns.</p>
+  </section>
+
+  <section class="learn-sec" aria-labelledby="terms-h">
+    <h2 id="terms-h">Maximum drawdown, current drawdown and duration</h2>
+    <ul>
+      <li><strong><a href="/glossary/#max-drawdown">Maximum drawdown</a></strong> is the largest fall from a running high to a later low, in money or as a share of that high.</li>
+      <li><strong>Current drawdown</strong> is how far below its running high the account is now. It is zero at a new high.</li>
+      <li><strong><a href="/glossary/#drawdown-duration">Drawdown duration</a></strong> is how long a drawdown lasted, from the high that began it to the trade that brought the account back to that high. One still open at the end of a file has no end yet.</li>
+    </ul>
+    <p>A deep drawdown can be short and a shallow one long, so the three numbers answer different questions.</p>
+  </section>
+
+  <section class="learn-sec" aria-labelledby="why-h">
+    <h2 id="why-h">Why platforms report different drawdown figures</h2>
+    <ul>
+      <li><strong>The baseline differs.</strong> A figure can be measured from the starting balance, from the highest balance so far, from the highest equity so far or from the start of the day.</li>
+      <li><strong>Closed trades or equity.</strong> A file of closed trades shows what was realised. A platform that counts open positions can show a deeper dip that never appears in the closed-trade file.</li>
+      <li><strong>Money or percent.</strong> The same fall is a different percentage depending on which balance it is measured against.</li>
+      <li><strong>A firm’s rule is its own definition.</strong> <a href="/glossary/#trailing-drawdown">Trailing</a> and <a href="/glossary/#daily-drawdown">daily</a> limits are set out in each firm’s published rules, and the <a href="/tools/prop-challenge-simulator/">Challenge Readiness Check</a> takes them as rules you pick or enter.</li>
+    </ul>
+  </section>
+
+  <section class="learn-sec" aria-labelledby="own-h">
+    <h2 id="own-h">Read your own drawdowns</h2>
+    <p>The <a href="/tools/drawdown-calculator/">drawdown and recovery calculator</a> draws the equity of your closed trades against its running high and lists each drawdown’s depth, number of trades and calendar days. <a href="/tools/trade-stats/">Trade stats</a> reports the largest one in your file beside your win rate and streaks.</p>
+  </section>
+
+  <section class="learn-sec" aria-labelledby="faq-h">
+    <h2 id="faq-h">Questions</h2>
+    <details><summary>How do you calculate the gain needed to recover from a drawdown?</summary><p>Divide the fall by what is left: d ÷ (1 − d). A fall of 20% leaves 80% of the high, and the gain on that 80% that gets back to 100% is 20 ÷ 80, which is {{ gain_for(20) }}.</p></details>
+    <details><summary>Why does a 50% drawdown need a 100% gain?</summary><p>The account has half of its high left, and doubling half gets back to the whole. The table gives {{ gain_for(50) }} for a 50% fall.</p></details>
+    <details><summary>What is the difference between maximum drawdown and drawdown duration?</summary><p>Maximum drawdown is the depth of the largest fall from a running high. Duration is how long a fall lasted, from the high to the trade that brought the account back to it.</p></details>
+    <details><summary>Is drawdown measured on closed trades or on equity?</summary><p>Both are used. A file of closed trades gives the closed-trade drawdown. A platform or a firm’s rule can use equity that includes open positions, measured from the start of the day or from the highest balance. The figures differ because the baseline differs.</p></details>
+    <details><summary>How long does a drawdown last?</summary><p>It depends on what the account earns afterwards, which no table can say. The second table shows only the arithmetic for a steady gain per period, which real trading does not have.</p></details>
+    <details><summary>Is this investment advice?</summary><p>No. It is arithmetic and does not recommend any security, trade, size or exit. Past results do not predict future results.</p></details>
+  </section>
+
+  <section class="learn-sec" aria-labelledby="src-h">
+    <h2 id="src-h">Method and sources</h2>
+    <ul>
+      <li>The recovery formula is arithmetic, so there is no paper to cite. The tables are computed by <code>site/learn_tables.py</code>, listed on <a href="/code/">Methods and code</a>, and the site’s tests recompute every value a second way.</li>
+      <li>The numbers as a file: <a href="/data/drawdown-recovery.csv" download>drawdown-recovery.csv</a>.</li>
+      <li>Published {{ page.learn.published|longdate }}, updated {{ page.updated|longdate }}. A mistake would be logged on <a href="/corrections/">Corrections</a>.</li>
+    </ul>
+  </section>
+</div>
+{% endblock %}

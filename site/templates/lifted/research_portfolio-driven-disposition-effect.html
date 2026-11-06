@@ -335,9 +335,9 @@ at the same holding age. Holding age itself turned out not to be the reason; dif
 the habit of selling winners is concentrated in positions held a day or less, and that mixing holding ages
 distorts the figures. This study compares that habit between two kinds of day. On this panel, positions on days
 when the rest of the book was mostly down were younger (median 25 days held, against 30). So I wrote a new test and
-a pass mark down, tried them on made-up data first, and sealed them before running them on this panel. The seal
+a pass mark down, tried them on simulated data first, and sealed them before running them on this panel. The seal
 hash is recorded in SEAL-ROBUST-PDDE.md and will be published in the study repository’s commit history.</p>
-<p><strong>The made-up data came first, and it matters.</strong> In synthetic panels where the rest of the book has no influence on
+<p><strong>The simulated data came first, and it matters.</strong> In synthetic panels where the rest of the book has no influence on
 selling at all, only the habit of selling winners and the fact that old positions are sold less, the specification
 this study used found the effect, in the published direction, in 25, 37 and 30 of 40 panels, depending on the
 setup. In one setup its typical ratio was 1.72, not far from the 2.04 published here.</p>
@@ -382,9 +382,9 @@ letting each trader have their own winner–loser gap: done that way, in a check
 effect is gone. Traders differ in how strongly they sell winners. If the traders with the strongest habit also spend
 more days with their book down, a single pooled gap makes it look as if being down strengthens the habit. That is a
 difference between people, not a change within the same person, and the study’s hypothesis is about the second.</p>
-<p><strong>Two caveats that limit this result.</strong> First, the stricter test leans against finding the effect: on the made-up
+<p><strong>Two caveats that limit this result.</strong> First, the stricter test leans against finding the effect: on the simulated
 panels with no effect, it came out below 1 more often than above. So 1.03 does not show the effect is zero; it
-shows the published size is not supported. (On made-up panels with a real effect it did find it, every time.)
+shows the published size is not supported. (On simulated panels with a real effect it did find it, every time.)
 Second, it can use only the trader-and-holding-day groups that contain a winner and a loser on both kinds of day,
 about a quarter of the rows. Using each position’s gain or loss from the day before, instead of the same day, makes
 the effect weaker in every version, not stronger.</p>

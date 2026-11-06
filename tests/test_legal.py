@@ -211,7 +211,7 @@ def test_flag_on_lint_and_wording(paid, monkeypatch):
 
 
 def test_french_pages(paid):
-    pairs = {"fr/conditions/": "/terms/", "fr/confidentialite/": "/privacy/", "fr/avant-de-payer/": "/pricing/"}
+    pairs = {"fr/conditions/": "/terms/", "fr/confidentialite/": "/privacy/", "fr/avant-de-payer/": "/before-you-pay/"}   # 6 Nov (SEO round 1): the true English twin
     for fr, en in pairs.items():
         h = (paid / fr / "index.html").read_text(encoding="utf-8")
         assert h.startswith('<!doctype html>\n<html lang="fr">')

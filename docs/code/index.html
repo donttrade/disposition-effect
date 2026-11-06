@@ -9,19 +9,19 @@
 <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#16181C" media="(prefers-color-scheme: dark)">
 <title>Methods and code — donttrade</title>
-<meta name="description" content="Every published donttrade script with the data each study used.">
+<meta name="description" content="Where each study’s code and data are published: the scripts, the data used and each licence. Code for two studies, and part of two more, is not yet public.">
 <link rel="canonical" href="https://donttrade.ca/code/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="donttrade">
 <meta property="og:title" content="Methods and code — donttrade">
-<meta property="og:description" content="Every published donttrade script with the data each study used.">
+<meta property="og:description" content="Where each study’s code and data are published: the scripts, the data used and each licence. Code for two studies, and part of two more, is not yet public.">
 <meta property="og:url" content="https://donttrade.ca/code/">
 <meta property="og:image" content="https://donttrade.ca/assets/og/default.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Methods and code — donttrade">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:description" content="Every published donttrade script with the data each study used.">
+<meta name="twitter:description" content="Where each study’s code and data are published: the scripts, the data used and each licence. Code for two studies, and part of two more, is not yet public.">
 <link rel="alternate" type="application/rss+xml" title="donttrade" href="https://donttrade.substack.com/feed">
 <link rel="alternate" type="application/atom+xml" title="donttrade: studies and corrections" href="/feed.xml">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
@@ -29,7 +29,7 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=e0f686f7">
+<link rel="stylesheet" href="/static/css/site.css?v=ea622423">
 <script src="/static/js/theme.js?v=7e47c1a9"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
 <script src="/static/js/pay.js?v=169a9640" defer></script>
@@ -88,7 +88,9 @@
       <tr><td><a href="/sample-report/">Example report</a></td><td><a href="https://github.com/donttrade/disposition-effect/blob/main/samples/sample_trader_report.py">samples/sample_trader_report.py</a></td><td>The same CC0 panel as the disposition-effect study (Harvard Dataverse file 4053809)</td><td>MIT</td></tr>
       <tr><td>Measurement script for a firm’s own records</td><td><a href="https://github.com/donttrade/disposition-effect/tree/main/partner">partner/</a></td><td>A five-column extract: one row per position per day. Standard-library Python with no network calls: the script itself sends nothing anywhere.</td><td>PolyForm Noncommercial 1.0.0 from v2 (v1 was MIT). Free for non-commercial use; businesses need a licence, included with the firm plan and the Pilot. See the <a href="https://github.com/donttrade/disposition-effect/tree/main/partner">partner/ folder</a>.</td></tr>
     </tbody>
-  </table></div>
+  </table></div><!--island:start--><h2 id="site-scripts">Scripts that build this site’s tables</h2>
+<p class="ls-measure"><code>site/learn_tables.py</code> computes the drawdown recovery table and the losing-streak table on the <a href="/learn/">Learn pages</a> when the site is built, and writes the CSV of each. It is in the same public repository, <a href="https://github.com/donttrade/disposition-effect">github.com/donttrade/disposition-effect</a>, under the repository’s MIT licence. The site’s tests recompute every value a second way.</p>
+<!--island:end-->
   <p>Each study whose script is published reproduces from a clean checkout. If it does not, that is a bug, and it belongs on the <a href="/corrections/">Corrections</a> page — write to <a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a>.</p>
   <p>Study write-ups and charts are licensed <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>. The numbers in them are facts and may be quoted freely, with a link. A figure may be described as “computed with donttrade’s published script (version stated in the memo) and written up by donttrade under a fixed-scope agreement” only when it comes from a signed engagement; no one may describe it as audited, certified or verified.</p>
   <p>Open Behavioural Measurement Spec (coming).</p>
@@ -107,7 +109,9 @@
     </ul></nav>
     <nav aria-label="Firms"><h2>Firms</h2><ul><li><a href="/for-firms/">For firms</a></li><li><a href="/for-platforms/">Journals &amp; platforms</a></li><li><a href="/sample-memo/">Sample memo</a></li>
     </ul></nav>
-    <nav aria-label="Research"><h2>Research</h2><ul><li><a href="/research/">Research</a></li><li><a href="/plan-gap/">The plan gap</a></li><li><a href="/glossary/">Glossary</a></li>
+    <nav aria-label="Research"><h2>Research</h2><ul><li><a href="/research/">Research</a></li><li><a href="/plan-gap/">The plan gap</a></li><li><a href="/glossary/">Glossary</a></li><li><a href="/for-researchers/">For researchers</a></li>
+    </ul></nav>
+    <nav aria-label="Learn"><h2>Learn</h2><ul><li><a href="/learn/">Learn</a></li><li><a href="/learn/drawdown-recovery-table/">Drawdown recovery table</a></li><li><a href="/learn/losing-streak-probability/">Losing streak probability</a></li>
     </ul></nav>
     <nav aria-label="About"><h2>About</h2><ul><li><a href="/about/">About</a></li><li><a href="/help/">Questions</a></li><li><a href="/terms/">Terms</a></li><li><a href="/privacy/">Privacy</a></li><li><a href="/terms/#cancellation">Refunds</a></li>
     </ul></nav>

@@ -1059,6 +1059,10 @@ def lint_build(out_dir, paid=False, analytics=False, pilot=False, seller=None, b
                 problems.append(("flag:umami", rel, "Umami Cloud on /report/ (owner rule 2 Nov)"))
             if not badges and name.endswith((".html", ".js")):
                 problems += free_badge_problems(s, rel)
+    # 6 Nov (SEO round 1): the site-wide SEO checks (checks/seo_lint.py): one H1, JSON-LD, titles, cards, related links,
+    # hreflang, llms.txt and the /learn/ template and claim lint
+    import seo_lint
+    problems += seo_lint.seo_problems(out_dir)
     return problems
 
 

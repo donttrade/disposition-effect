@@ -1,0 +1,33 @@
+# donttrade
+
+> Independent research on how retail traders behave, with data and code where published, and free in-browser tools that measure habits in your own trade file. Not investment advice; not a registered adviser.
+
+## Studies (negative results included; DOIs where a study has one)
+- [76.1% of 4,659 retail traders realised their gains more readily than their losses](https://donttrade.ca/research/disposition-effect/): 76.1% of 4,659 eligible retail traders (3,547 of them) realised gains more readily than losses; 95% interval 74.9–77.3%. 4,731 traders were in the data. DOI 10.5281/zenodo.23426301
+- [Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)](https://donttrade.ca/research/portfolio-driven-disposition-effect/): The "about twice as strong" headline did not survive a stricter within-trader test (corrected 17 Oct 2026). DOI 10.5281/zenodo.23426305
+- [We looked for the insider-buying edge in 470,754 Form 4 records and, outside 2008–09, did not find it](https://donttrade.ca/research/insider-buying-edge/): In 470,754 SEC Form 4 records, two years supplied 94% of the excess return; outside 2008–09 the edge was not found. DOI 10.5281/zenodo.23426303
+- [A pre-registered test of volatility-scaled momentum failed its own kill criteria at five positions](https://donttrade.ca/research/volatility-scaled-momentum/): The mechanism passed on factor data; the five-position version with costs failed its own kill criteria. DOI 10.5281/zenodo.23426307
+- [50 trading strategies tested: none survived](https://donttrade.ca/research/strategy-tests/): Swing, investing, overnight and day-trading rules, judged net of costs: 50 strategies, 44 fingerprinted in advance; none passed. Not a strategy or signal.
+- [26 swing-trading strategies, pre-registered: none survived](https://donttrade.ca/research/swing-trading-strategies/): Pre-registered, hashed tests of 26 swing-trading rules on ETFs, judged once on locked holdouts, net of costs. None passed. Not a strategy or a signal.
+
+## Learn
+- [Learn: Trading Habits, Risk Math and the Evidence](https://donttrade.ca/learn/): Plain explanations of trading habits and risk math, each with sources and a free way to measure it in your own trades.
+- [Drawdown Recovery Table: Gain Needed to Get Back](https://donttrade.ca/learn/drawdown-recovery-table/): The gain that gets an account back after a drawdown of 1% to 90%, computed at build time, plus max drawdown vs duration and why platforms differ.
+- [Losing Streak Probability: Losses in a Row by Win Rate](https://donttrade.ca/learn/losing-streak-probability/): The chance of 5, 8 or 10 losses in a row at win rates from 30% to 70%, computed with a run-length recurrence, and when streaks are not random.
+
+## Free tools (run in your browser; your file is not uploaded)
+- [Trade stats](https://donttrade.ca/tools/trade-stats/): What does my own trade history show?
+- [Trading heatmap](https://donttrade.ca/tools/trading-heatmap/): How did my own trades turn out by the hour and weekday they opened?
+- [Drawdown and recovery calculator](https://donttrade.ca/tools/drawdown-calculator/): What gain recovers a drawdown, and how deep and long were mine?
+- [Challenge Readiness Check](https://donttrade.ca/tools/prop-challenge-simulator/): How would my past trading days have fared under a challenge’s rules?
+- [Lot size calculator](https://donttrade.ca/tools/lot-size-calculator/): How many lots match the amount I chose to risk at this stop?
+- [Risk-reward calculator](https://donttrade.ca/tools/risk-reward-calculator/): At what win rate does this reward-to-risk ratio break even, and what is the expectancy in R?
+- [Disposition-effect calculator](https://donttrade.ca/tools/disposition-calculator/): Were winning positions sold more readily than losing ones?
+- [Pass-rate calculator (for firm operators)](https://donttrade.ca/tools/pass-rate-calculator/): What are one cohort’s evaluation pass rate and payout rate?
+
+## Reference
+- [Glossary](https://donttrade.ca/glossary/)
+- [Methods and code](https://donttrade.ca/code/)
+- [Corrections](https://donttrade.ca/corrections/)
+- [For researchers and press](https://donttrade.ca/for-researchers/)
+- [All studies](https://donttrade.ca/research/)

@@ -54,6 +54,8 @@ from html.parser import HTMLParser as _HTMLParser
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from markupsafe import Markup
 
+import learn_tables as LT   # 6 Nov (SEO round 1): the computed tables on /learn/ (site/learn_tables.py)
+
 SITE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(SITE)
 sys.path.insert(0, SITE)
@@ -461,21 +463,20 @@ TOOL_GLYPHS = {"/tools/trade-stats/": "stats", "/tools/prop-challenge-simulator/
                "/tools/disposition-calculator/": "disp", "/tools/pass-rate-calculator/": "pass"}
 PAGES += [
     {"template": "pages/tool-trade-stats.html", "path": "/tools/trade-stats/", "requires_flag": None,
-     "modules": ["/static/js/tools/trade-stats.js"], "sample": True, "app": True, "updated": "2026-10-21",
+     "modules": ["/static/js/tools/trade-stats.js"], "sample": True, "app": True, "updated": "2026-11-06",
      "crumb": "Trade stats from your own trade file",
-     "title": "Free MT5 Report Analyzer: Trade Stats From Your File",
-     "description": "Drop your MT5, MT4, IBKR, Tradovate or TradingView file and get profit factor, expectancy, "
-                    "drawdown and streaks. Runs in your browser.",
-     "if_badges": {"description": "Drop your MT5, MT4, IBKR, Tradovate or TradingView file: profit factor, expectancy, "
-                                  "drawdown and streaks, with a real-or-noise check. Runs in your browser."}},
+     "title": "Trade Stats for Your File: Win Rate, Profit Factor, Drawdown",
+     "description": "Win rate, profit factor, expectancy, drawdown and streaks from your own trade file. It runs in your browser and your file is not uploaded. Free.",
+     "if_badges": {"description": "Win rate, profit factor, expectancy, drawdown and streaks from your own trade file, with a "
+                                  "real-or-noise check. Runs in your browser and your file is not uploaded."}},
     {"template": "pages/tool-prop-sim.html", "path": "/tools/prop-challenge-simulator/", "requires_flag": None,
-     "modules": ["/static/js/tools/prop-sim.js"], "sample": True, "app": True, "updated": "2026-10-29",
+     "modules": ["/static/js/tools/prop-sim.js"], "sample": True, "app": True, "updated": "2026-11-06",
      "presets": True, "crumb": "Challenge Readiness Check",
-     "title": "Challenge Readiness Check: Your Past Days, Firm Rules",
+     "title": "Prop Firm Challenge Simulator: Readiness Check on Your Days",   # 6 Nov (SEO round 1, owner-approved): the query phrase the page's search evidence supports, 59 characters; the H1 stays "Challenge Readiness Check"
      "description": "Replay your past trading days 10,000 times under a prop firm's published rules or your own: "
                     "pass, bust and time-out shares. Free, in your browser."},
     {"template": "pages/tool-lot-size.html", "path": "/tools/lot-size-calculator/", "requires_flag": None,
-     "modules": ["/static/js/tools/lot-size.js"], "app": True, "updated": "2026-10-21",
+     "modules": ["/static/js/tools/lot-size.js"], "app": True, "updated": "2026-11-06",
      "crumb": "Lot size calculator",
      "title": "Lot Size Calculator: Forex, Gold, Indices and Futures",
      "description": "Work out position size in lots from your balance, risk amount and stop distance. Shows the "
@@ -483,25 +484,25 @@ PAGES += [
     # Batch 2 (V2-BUILD-PLAN free-tools list; SEO-PLAN T4, T5, T9). Descriptive only in every build:
     # no "real or noise" check runs on these pages, so they carry no if_badges copy.
     {"template": "pages/tool-risk-reward.html", "path": "/tools/risk-reward-calculator/", "requires_flag": None,
-     "modules": ["/static/js/tools/risk-reward.js"], "app": True, "updated": "2026-10-21",
+     "modules": ["/static/js/tools/risk-reward.js"], "app": True, "updated": "2026-11-06",
      "crumb": "Risk-reward calculator",
      "title": "Risk-Reward Calculator With Break-Even Win Rate",
      "description": "Enter entry, stop and target to get your R multiple, the win rate that breaks even, and the "
                     "expectancy per trade in R, with every formula shown. Free."},
     {"template": "pages/tool-drawdown.html", "path": "/tools/drawdown-calculator/", "requires_flag": None,
-     "modules": ["/static/js/tools/drawdown.js"], "sample": True, "app": True, "updated": "2026-10-21",
+     "modules": ["/static/js/tools/drawdown.js"], "sample": True, "app": True, "updated": "2026-11-06",
      "crumb": "Drawdown and recovery calculator",
      "title": "Drawdown Recovery Calculator and Max Drawdown Report",
      "description": "How much gain recovers a drawdown, plus your own largest drawdown, longest drawdown and "
                     "recovery times from your trade file. Free, in your browser."},
     {"template": "pages/tool-heatmap.html", "path": "/tools/trading-heatmap/", "requires_flag": None,
-     "modules": ["/static/js/tools/heatmap.js"], "sample": True, "app": True, "updated": "2026-10-21",
+     "modules": ["/static/js/tools/heatmap.js"], "sample": True, "app": True, "updated": "2026-11-06",
      "crumb": "Your trades by hour and weekday",
      "title": "Trading Heatmap of Your Trades by Hour and Weekday",
      "description": "See your own results, win rate and trade count by the hour and weekday each trade opened, "
                     "from your trade file, in the time zone you choose. Free."},
     {"template": "pages/tools-index.html", "path": "/tools/", "requires_flag": None, "updated": "2026-11-06",
-     "crumb": "Free tools", "itemlist": True, "styles": [TOOLS_CSS], "scripts": [TOOLS_JS],
+     "crumb": "Free tools", "itemlist": True, "styles": [TOOLS_CSS], "scripts": [TOOLS_JS], "og_image": "/assets/og/tools.png",
      "title": "Free Trading Tools That Run in Your Browser",
      "description": "Free tools for your own trades: trade stats from your file, a Challenge Readiness "
                     "Check for prop-firm rules, a lot size calculator and more. No sign-up.",
@@ -597,8 +598,8 @@ PAGES += [
 # commerce flag as the English consumer clauses. Unreviewed drafts: lawyer + legal translator first.
 PAGES += [
     {"template": "pages/fr/avant-de-payer.html", "path": "/fr/avant-de-payer/", "requires_flag": "paid_report",
-     "lang": "fr", "crumb": "Avant de payer", "updated": "2026-11-06", "scripts": ["/static/js/print.js"],
-     "alternates": [("fr", "/fr/avant-de-payer/"), ("en", "/pricing/"), ("x-default", "/pricing/")],
+     "lang": "fr", "crumb": "Avant de payer", "updated": "2026-11-06", "scripts": ["/static/js/print.js"], "noindex": True,
+     "alternates": [("fr", "/fr/avant-de-payer/"), ("en", "/before-you-pay/"), ("x-default", "/before-you-pay/")],
      "title": "Avant de payer : test donttrade — donttrade",
      "description": "Ce que vous acceptez avant de payer le test donttrade : vendeur, prix en dollars américains, "
                     "exigences techniques, remboursements et restrictions."},
@@ -775,14 +776,149 @@ PAGES += [
     {"template": "pages/tool-pass-rate.html", "path": "/tools/pass-rate-calculator/", "requires_flag": None,
      "scripts": ["/static/js/legacy/numbers.js", "/static/js/tools/pass-rate.js"], "app": True, "updated": "2026-11-06",
      "crumb": "Prop-firm pass-rate calculator",
-     "title": "Prop-firm pass-rate calculator — donttrade",
+     "title": "Prop Firm Pass Rate Calculator for Firm Operators",
      "description": "Free: a prop-firm evaluation pass rate and payout rate for one cohort, computed correctly. Runs in "
                     "your browser; your numbers are never sent."},
 ]
 for _p in PAGES:
     if _p["path"] in TOOL_GLYPHS:
         _p.update({"glyph": TOOL_GLYPHS[_p["path"]], "styles": _p.get("styles", []) + [TOOLS_CSS],
-                   "scripts": _p.get("scripts", []) + [TOOLS_JS]})
+                   "scripts": _p.get("scripts", []) + [TOOLS_JS],
+                   "og_image": f"/assets/og/tool-{TOOL_GLYPHS[_p['path']]}.png"})   # 6 Nov (SEO round 1): one card per tool
+
+
+
+# /learn/ (6 Nov, SEO round 1, ARCHITECT-PLAN-SEO phase 1 items 12 and 13). Plain explanations that measure and do not advise:
+# every table is computed by site/learn_tables.py when the site is built, every DOI is in config/references.json (checked
+# against Crossref), and nothing on these pages says what to do. The hub and both articles are in the sitemap and linked
+# from the related blocks and the tool pages; the footer's Learn column waits on [flags] learn_nav (default off).
+# "h1" and "learn" are read by the templates and by jsonld(); "published" is the first day, "updated" the content date
+# (the sitemap lastmod and the Article dateModified, changed only when the content changes).
+LEARN_HUB = "/learn/"
+LEARN_LICENSE = "https://creativecommons.org/licenses/by-nc/4.0/"
+PAGES += [
+    {"template": "pages/learn-hub.html", "path": "/learn/", "requires_flag": None, "updated": "2026-11-06",
+     "crumb": "Learn", "og_image": "/assets/og/learn.png", "learn": {"kind": "hub", "published": "2026-11-06"},
+     "h1": "Learn: trading habits, risk math and the evidence",
+     "title": "Learn: Trading Habits, Risk Math and the Evidence",
+     "description": "Plain explanations of trading habits and risk math, each with sources and a free way to measure it in your own trades."},
+    {"template": "pages/learn-drawdown.html", "path": "/learn/drawdown-recovery-table/", "requires_flag": None,
+     "updated": "2026-11-06", "crumb": "Drawdown recovery table", "parent": ("Learn", LEARN_HUB),
+     "og_image": "/assets/og/learn-drawdown.png",
+     "h1": "Drawdown recovery table: the gain that gets an account back",
+     "learn": {"kind": "article", "published": "2026-11-06", "refs": [],
+               "datasets": [{"name": "Drawdown recovery table", "csv": "/data/drawdown-recovery.csv",
+                             "description": "For falls of 1% to 90%: the gain on the smaller balance that undoes the fall, and the periods a steady gain per period would take. Computed by site/learn_tables.py."}]},
+     "title": "Drawdown Recovery Table: Gain Needed to Get Back",
+     "description": "The gain that gets an account back after a drawdown of 1% to 90%, computed at build time, plus max drawdown vs duration and why platforms differ."},
+    {"template": "pages/learn-streaks.html", "path": "/learn/losing-streak-probability/", "requires_flag": None,
+     "updated": "2026-11-06", "crumb": "Losing streak probability", "parent": ("Learn", LEARN_HUB),
+     "og_image": "/assets/og/learn-streaks.png",
+     "h1": "Losing streak probability: how many losses in a row to expect",
+     "learn": {"kind": "article", "published": "2026-11-06", "refs": ["schilling1990"],
+               "datasets": [{"name": "Losing streak probability table", "csv": "/data/losing-streak-probability.csv",
+                             "description": "The chance of a run of 5, 8 or 10 or more losses in 50, 100 and 500 trades at win rates of 30% to 70%, assuming independent trades. Computed by site/learn_tables.py."}]},
+     "title": "Losing Streak Probability: Losses in a Row by Win Rate",
+     "description": "The chance of 5, 8 or 10 losses in a row at win rates from 30% to 70%, computed with a run-length recurrence, and when streaks are not random."},
+]
+LEARN_PATHS = [p["path"] for p in PAGES if p["path"].startswith("/learn/")]
+
+# Config the SEO round reads (config/studies.json, related.json, glossary_terms.json, references.json).
+STUDIES_JSON = os.path.join(SITE, "config", "studies.json")
+RELATED_JSON = os.path.join(SITE, "config", "related.json")
+GLOSSARY_JSON = os.path.join(SITE, "config", "glossary_terms.json")
+REFERENCES_JSON = os.path.join(SITE, "config", "references.json")
+DOI_RE = re.compile(r"10\.\d{4,9}/[^\s\"<>]+")
+ABOUT_LINE = ("donttrade is one person measuring the plan gap: the difference between how traders plan to act and how they "
+              "actually act, from account-level data.")   # the first sentence of /about/ (the Organization description; checked in build())
+ORG_LOGO = "/assets/logo-512.png"   # 512 x 512, made by checks/make_seo_assets.py from assets/favicon.svg
+
+
+def _load_json(path):
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def studies():
+    """{path: study} from studies.json (the four studies that have a Zenodo DOI), with the datasets they rest on resolved."""
+    cfg = _load_json(STUDIES_JSON)
+    out = {}
+    for st in cfg["studies"]:
+        if not re.fullmatch(r"10\.5281/zenodo\.\d+", st["doi"]) or not st["doi"].endswith(st["zenodo_id"]):
+            die(f"studies.json: {st['path']} has a DOI that is not its Zenodo record's ({st['doi']!r})")
+        st = dict(st)
+        st["based_on"] = [dict(cfg["datasets"][k], key=k) for k in st["based_on"]]
+        out[st["path"]] = st
+    return out
+
+
+def references():
+    return _load_json(REFERENCES_JSON)["refs"]
+
+
+def apa_line(st):
+    """APA 7 style, for the cite box: author (the site), year, title [Preprint], repository, DOI link."""
+    year = st["published"][:4]
+    return f"donttrade. ({year}). {st['title']} [Preprint]. Zenodo. https://doi.org/{st['doi']}"
+
+
+def bibtex_entry(st):
+    def esc(t):
+        return t.replace("\\", "\\textbackslash{}").replace("%", "\\%").replace("&", "\\&").replace("#", "\\#").replace("_", "\\_")
+    key = "donttrade" + st["published"][:4] + st["slug"]
+    return ("@misc{" + key + ",\n  author = {{donttrade}},\n  title = {" + esc(st["title"]) + "},\n  year = {" + st["published"][:4] +
+            "},\n  publisher = {Zenodo},\n  doi = {" + st["doi"] + "},\n  url = {https://doi.org/" + st["doi"] + "}\n}")
+
+
+def related_for(path, pages_by_path):
+    """The Related block's entries for this page (config/related.json). Every target must be a page this build
+    publishes and indexes (no noindex, no missing flag): a link to a page that is not there fails the build."""
+    cfg = _load_json(RELATED_JSON)["pages"]
+    out = []
+    for r in cfg.get(path, []):
+        target = r["href"].split("#")[0]
+        pg = pages_by_path.get(target)
+        if pg is None or pg.get("noindex"):
+            die(f"related.json: {path} links {r['href']}, which this build does not publish as an indexable page")
+        if target == path:
+            die(f"related.json: {path} links itself")
+        out.append(r)
+    return out
+
+
+def glossary_terms():
+    return _load_json(GLOSSARY_JSON)["terms"]
+
+
+def learn_context():
+    """What the /learn/ templates print: every figure comes from site/learn_tables.py, none is typed in."""
+    gains = {r["drawdown_pct"]: r["gain_pct"] for r in LT.recovery_rows()}
+    streaks = LT.streak_tables()
+    return {
+        "lt": LT,
+        "recovery": [{"d": r["drawdown_pct"], "gain": LT.format_gain(r["gain_pct"])} for r in LT.recovery_rows()],
+        "gain_for": lambda d: LT.format_gain(gains[d], prose=True),   # in sentences: "25%", "100%"
+        "period_gains": LT.PERIOD_GAINS,
+        "periods": [{"d": r["drawdown_pct"], "n": r["periods"]} for r in LT.periods_rows()],
+        "streak_tables": [{"n": n, "rows": [{"w": r["win_rate"], "cells": [LT.format_prob(x) for x in r["probs"]]} for r in rows]}
+                          for n, rows in streaks.items()],
+        "run_lengths": LT.RUN_LENGTHS,
+        "prob_for": lambda n, w, k: LT.format_prob(LT.prob_run_at_least(n, w, k)),
+        "streak_cost": [{"f": f, "cells": [f"{LT.streak_cost(f, k):.1f}%" for k in LT.RUN_LENGTHS]} for f in LT.COST_FRACTIONS],
+        "enum": LT.enumerate_runs(3, 2),
+        "enum_prob": LT.format_prob(LT.prob_run_at_least(3, 50, 2)),
+        "win_rates": LT.WIN_RATES, "trade_counts": LT.TRADE_COUNTS,
+        "dd_min": LT.DRAWDOWNS[0], "dd_max": LT.DRAWDOWNS[-1],
+    }
+
+
+def write_learn_data(out):
+    """/data/*.csv for the two /learn/ tables, from the same functions the page tables use."""
+    d = os.path.join(out, "data")
+    os.makedirs(d, exist_ok=True)
+    for name, text in (("drawdown-recovery.csv", LT.recovery_csv()), ("losing-streak-probability.csv", LT.streak_csv())):
+        with open(os.path.join(d, name), "w", encoding="utf-8", newline="\n") as f:
+            f.write(text)
 
 
 def tools_for(flags):
@@ -1220,19 +1356,22 @@ PAGES += PAID_PAGES
 # The printable "Before you pay" block (print.js). 25 Oct sweep: traders only, no Traders | Firms tabs.
 PAGES.append({"template": "pages/pricing.html", "path": "/pricing/", "requires_flag": None,
               "scripts_if_paid": ["/static/js/print.js"], "product": PRODUCT_TEXT,
-              # Tester D6: the reverse of /fr/avant-de-payer/'s alternates, so the pair counts
-              "alternates_if_paid": [("en", "/pricing/"), ("fr", "/fr/avant-de-payer/"), ("x-default", "/pricing/")],
+              # 6 Nov (SEO round 1): /pricing/ no longer declares the French page as its alternate. The French "Avant de
+              # payer" is the twin of /before-you-pay/ (below), not of /pricing/; the old pair named the wrong English page.
               "crumb": "Pricing", "updated": "2026-11-06", "og_image": "/assets/og/pricing.png",
               "title": "Pricing: Published Prices for Firms and Traders",
               "description": "Published prices in USD for prop firms, brokers, trading platforms and traders, the "
                              "same for everyone and fixed in writing before anyone sees data."})
 # /before-you-pay/ (29 Oct): the pay dialog's "Full details before you pay" is copied from this page (static/js/pay.js,
 # a hidden same-origin frame), not from /pricing/, so opening it is not counted as a /pricing/ pageview. No analytics
-# (as the journal), noindex, disallowed in robots.txt (PAID_DETAILS_PATHS), on ADDRESS_LINE_PATHS (the block names the
+# (as the journal), noindex (not disallowed in robots.txt since 6 Nov: see write_sitemap_and_robots), on ADDRESS_LINE_PATHS (the block names the
 # seller). The block is partials/before_you_pay.html, the same one /pricing/ shows.
 PAID_DETAILS_PATHS = ["/before-you-pay/"]
 PAGES.append({"template": "pages/before-you-pay.html", "path": "/before-you-pay/", "requires_flag": "paid_report",
               "noindex": True, "no_analytics": True, "no_ask": True, "scripts": ["/static/js/print.js"],
+              # 6 Nov (SEO round 1): the true English twin of /fr/avant-de-payer/. Both are noindex (a legal summary, not a
+              # search page); robots.txt no longer blocks this one, so a crawler can read the noindex and the pair.
+              "alternates": [("en", "/before-you-pay/"), ("fr", "/fr/avant-de-payer/"), ("x-default", "/before-you-pay/")],
               "crumb": "Before you pay", "title": "Before you pay — donttrade",
               "description": "What you agree to before paying for the donttrade test: seller, price, "
                              "files, restrictions and refunds."})
@@ -1326,7 +1465,8 @@ def lifted_pages():
         if m["path"] in PAID_LIFTED_DESCRIPTIONS:
             page["if_paid"] = {"description": PAID_LIFTED_DESCRIPTIONS[m["path"]]}
         if m["path"] in TOOL_GLYPHS:   # 6 Nov (B2): the glyph and the real-data display, in pages/lifted.html's header
-            page.update({"glyph": TOOL_GLYPHS[m["path"]], "styles": [TOOLS_CSS], "scripts": page["scripts"] + [TOOLS_JS]})
+            page.update({"glyph": TOOL_GLYPHS[m["path"]], "styles": [TOOLS_CSS], "scripts": page["scripts"] + [TOOLS_JS],
+                         "og_image": f"/assets/og/tool-{TOOL_GLYPHS[m['path']]}.png", "app": True})   # SEO round 1: its own card; WebApplication + FAQ JSON-LD
         pages.append(page)
     return pages
 
@@ -1617,9 +1757,9 @@ def die(msg):
 
 
 FLAGS = ("paid_report", "analytics", "trader_first_home", "pilot_checkout", "free_badges", "journal", "ask_box", "whatif_ranked",
-         "prediction_results", "refund_no_result")
+         "prediction_results", "refund_no_result", "learn_nav")
 OPTIONAL_FLAGS = {"pilot_checkout": False, "free_badges": False, "journal": False, "ask_box": False,
-                  "whatif_ranked": False, "prediction_results": False,
+                  "whatif_ranked": False, "prediction_results": False, "learn_nav": False,
                   "refund_no_result": False}  # older site.toml files may lack the line
 # ARCHITECT-CHALLENGE-READINESS §2.7.3: [flags] whatif_ranked switches the ranked "Biggest changes on your past
 # days" rules. Off until a Canadian securities lawyer clears the strings. The build writes the flag into the
@@ -1690,6 +1830,13 @@ def nav_for(nav, flags):
         return {**it, "label": it.get("label_if_paid", it["label"]) if flags["paid_report"] else it["label"]}
     return [{**g, "items": [label(i) for i in g.get("items", []) if keep(i)],
              "foot": [label(i) for i in g.get("foot", []) if keep(i)]} for g in nav]
+
+
+def footer_for(footer, flags):
+    """[[footer]] as this build renders it: a column with requires_flag is dropped while that flag is off
+    (6 Nov, SEO round 1: the Learn column waits on [flags] learn_nav)."""
+    return [{k: v for k, v in col.items() if k != "requires_flag"}
+            for col in footer if not col.get("requires_flag") or flags[col["requires_flag"]]]
 
 
 def nav_current(nav, page):
@@ -2505,6 +2652,55 @@ def product_jsonld(page, cfg, r, org):
                                                             "transitTime": dict(zero)}}}}
 
 
+def doi_url(doi):
+    return "https://doi.org/" + doi
+
+
+def scholarly_ref(r):
+    """A cited work as a ScholarlyArticle: only what references.json (Crossref-checked) holds."""
+    return {"@type": "ScholarlyArticle", "name": r["title"], "datePublished": str(r["year"]),
+            "isPartOf": {"@type": "Periodical", "name": r["journal"]}, "sameAs": doi_url(r["doi"]),
+            "identifier": {"@type": "PropertyValue", "propertyID": "DOI", "value": r["doi"]}}
+
+
+def dataset_nodes(page, base, org, items):
+    """Dataset JSON-LD for each CSV a page offers (items: dicts with name, csv, description)."""
+    return [{"@type": "Dataset", "@id": base + page["path"] + f"#dataset-{i + 1}", "name": d["name"],
+             "description": d["description"], "license": LEARN_LICENSE, "creator": org, "isAccessibleForFree": True,
+             "isPartOf": {"@id": base + page["path"] + "#article"}, "url": base + page["path"],
+             "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": base + d["csv"]}]}
+            for i, d in enumerate(items)]
+
+
+def study_article(page, base, org, st, refs):
+    """The study's old Article, now also a ScholarlyArticle with its DOI (identifier and sameAs), the dataset it
+    rests on (isBasedOn) and the works it cites; the Article's own fields (dates, licence, image) are kept."""
+    node = {**page["article"], "@id": base + page["path"] + "#article", "@type": ["Article", "ScholarlyArticle"],
+            "name": st["title"], "author": org, "publisher": org,
+            "identifier": {"@type": "PropertyValue", "propertyID": "DOI", "value": st["doi"]}, "sameAs": doi_url(st["doi"])}
+    if st["based_on"]:
+        node["isBasedOn"] = [{"@type": "Dataset", "name": d["name"], "sameAs": doi_url(d["doi"]), "license": d["license"],
+                              "publisher": {"@type": "Organization", "name": d["publisher"]}} for d in st["based_on"]]
+    if st["cites"]:
+        node["citation"] = [scholarly_ref(refs[k]) for k in st["cites"]]
+    return node
+
+
+GLOSS_DT = re.compile(r'(?s)<dt id="([^"]+)"><dfn>(.*?)</dfn></dt><dd>(.*?)</dd>')
+
+
+def glossary_graph(base, html):
+    """DefinedTermSet for /glossary/: one DefinedTerm per <dt id> on the page (the frozen twelve and the added ones),
+    its definition the <dd> text without the "Source:" line, so the data cannot drift from the visible text."""
+    terms = []
+    for tid, name, dd in GLOSS_DT.findall(html):
+        dd = re.sub(r'(?s)<span class="(?:src|meas)">.*?</span>', "", dd)
+        terms.append({"@type": "DefinedTerm", "@id": base + "/glossary/#" + tid, "name": _text(name), "description": _text(dd),
+                      "url": base + "/glossary/#" + tid, "inDefinedTermSet": {"@id": base + "/glossary/#set"}})
+    return [{"@type": "DefinedTermSet", "@id": base + "/glossary/#set", "name": "donttrade glossary",
+             "url": base + "/glossary/", "hasDefinedTerm": [{"@id": t["@id"]} for t in terms]}] + terms
+
+
 def jsonld(page, cfg, html, flags, products):
     """One @graph per page. No address, phone, rating or review anywhere (SEO-PLAN §3.2)."""
     base = cfg["site"]["base_url"]
@@ -2514,14 +2710,41 @@ def jsonld(page, cfg, html, flags, products):
         graph.append({"@type": "WebSite", "@id": base + "/#website", "name": cfg["site"]["name"],
                       "url": base + "/", "publisher": org})
         graph.append({"@type": "Organization", "@id": base + "/#org", "name": cfg["site"]["name"],
-                      "url": base + "/", "email": cfg["site"]["contact_email"], "sameAs": [c["url"] for c in cfg["channels"]]})
+                      "url": base + "/", "email": cfg["site"]["contact_email"], "sameAs": [c["url"] for c in cfg["channels"]],
+                      "description": ABOUT_LINE,
+                      "logo": {"@type": "ImageObject", "url": base + ORG_LOGO, "width": 512, "height": 512}})
     else:
         items = [(n, base + u if u else None) for n, u in crumb_items(page)]
         graph.append({"@type": "BreadcrumbList", "itemListElement": [
             {"@type": "ListItem", "position": i + 1, "name": n, **({"item": u} if u else {})}
             for i, (n, u) in enumerate(items)]})
-    if page.get("article"):  # lifted study pages: their old Article, by the site Organization
+    st = studies().get(page["path"])
+    if page.get("article") and st:   # the four studies with a DOI (6 Nov, SEO round 1): Article + ScholarlyArticle
+        graph.append(study_article(page, base, org, st, references()))
+        graph += dataset_nodes(page, base, org, st["datasets"])
+    elif page.get("article"):  # lifted study pages: their old Article, by the site Organization
         graph.append({**page["article"], "author": org, "publisher": org})
+    if page.get("learn"):
+        lp = page["learn"]
+        if lp["kind"] == "hub":
+            graph.append({"@type": "CollectionPage", "@id": base + page["path"] + "#page", "name": page["h1"],
+                          "description": page["description"], "url": base + page["path"], "isPartOf": {"@id": base + "/#website"},
+                          "publisher": org})
+            graph.append({"@type": "ItemList", "itemListElement": [
+                {"@type": "ListItem", "position": i + 1, "name": pg["crumb"], "url": base + pg["path"]}
+                for i, pg in enumerate(p for p in PAGES if p["path"].startswith("/learn/") and p["path"] != "/learn/")]})
+        else:
+            refs = references()
+            art = {"@type": "Article", "@id": base + page["path"] + "#article", "headline": page["h1"],
+                   "description": page["description"], "datePublished": lp["published"], "dateModified": page["updated"],
+                   "author": org, "publisher": org, "isAccessibleForFree": True, "license": LEARN_LICENSE,
+                   "image": base + page["og_image"], "mainEntityOfPage": base + page["path"], "url": base + page["path"]}
+            if lp["refs"]:
+                art["citation"] = [scholarly_ref(refs[k]) for k in lp["refs"]]
+            graph.append(art)
+            graph += dataset_nodes(page, base, org, lp["datasets"])
+    if page["path"] == "/glossary/":
+        graph += glossary_graph(base, html)
     if page.get("app"):
         graph.append({"@type": "WebApplication", "@id": base + page["path"] + "#app", "name": page["crumb"],
                       "url": base + page["path"], "applicationCategory": "FinanceApplication",
@@ -2707,6 +2930,60 @@ def headers_problem(text):
     return None
 
 
+
+ISLAND_OPEN, ISLAND_CLOSE = "<!--island:start-->", "<!--island:end-->"
+META_P_RE = re.compile(r'(?s)<p class="meta">.*?</p>')
+
+
+def insert_island(fragment, anchor, island, path):
+    """Put new markup INSIDE a lifted page's frozen body, between island markers, right after the first match of
+    `anchor` (a compiled regex, or the string "</dl>"). checks/compare.py leaves islands out of the comparison with the
+    old page, so the frozen words are untouched; lint holds the island to the full page rules (lint.split_frozen)."""
+    if isinstance(anchor, str):
+        i = fragment.find(anchor)
+        end = i + len(anchor) if i >= 0 else -1
+    else:
+        m = anchor.search(fragment)
+        end = m.end() if m else -1
+    if end < 0:
+        die(f"{path}: the lifted body has no place for the island (anchor {getattr(anchor, 'pattern', anchor)!r})")
+    return fragment[:end] + ISLAND_OPEN + island + ISLAND_CLOSE + fragment[end:]
+
+
+def llms_txt(cfg, pages, studies_by_path):
+    """/llms.txt (SEO plan 4.3): the site in plain text for agents, from the same config as the pages, so it cannot drift.
+    Studies come from studies.json (the headline string and DOI each page shows), the rest from PAGES and TOOLS."""
+    base = cfg["site"]["base_url"]
+    by_path = {p["path"]: p for p in pages}
+    lines = ["# donttrade", "",
+             "> Independent research on how retail traders behave, with data and code where published, and free in-browser tools "
+             "that measure habits in your own trade file. Not investment advice; not a registered adviser.", "",
+             "## Studies (negative results included; DOIs where a study has one)"]
+    for path in ("/research/disposition-effect/", "/research/portfolio-driven-disposition-effect/", "/research/insider-buying-edge/",
+                 "/research/volatility-scaled-momentum/", "/research/strategy-tests/", "/research/swing-trading-strategies/"):
+        pg = by_path.get(path)
+        if pg is None:
+            continue
+        st = studies_by_path.get(path)
+        if st:
+            lines.append(f"- [{st['title']}]({base}{path}): {st['key_result']} DOI {st['doi']}")
+        else:
+            lines.append(f"- [{pg['title'].replace(' — donttrade', '')}]({base}{path}): {pg['description']}")
+    lines += ["", "## Learn"]
+    for pg in sorted((p for p in pages if p["path"].startswith("/learn/")), key=lambda p: LEARN_PATHS.index(p["path"])):
+        if True:
+            lines.append(f"- [{pg['title']}]({base}{pg['path']}): {pg['description']}")
+    lines += ["", "## Free tools (run in your browser; your file is not uploaded)"]
+    for t in TOOLS:
+        lines.append(f"- [{t['name']}]({base}{t['href']}): {t['question']}")
+    lines += ["", "## Reference"]
+    for path, label in (("/glossary/", "Glossary"), ("/code/", "Methods and code"), ("/corrections/", "Corrections"),
+                        ("/for-researchers/", "For researchers and press"), ("/research/", "All studies")):
+        if path in by_path:
+            lines.append(f"- [{label}]({base}{path})")
+    return "\n".join(lines) + "\n"
+
+
 def write_sitemap_and_robots(out, cfg, built_pages, flags):
     """sitemap.xml: today's entries (their dates kept), with template pages dated by their
     content date (page["updated"]), never the build date. Pages with noindex are left out.
@@ -2733,7 +3010,9 @@ def write_sitemap_and_robots(out, cfg, built_pages, flags):
         f.write("\n".join(lines) + "\n")
     robots = ["User-agent: *", "Allow: /"]
     if flags["paid_report"]:
-        robots += [f"Disallow: {p}" for p in PAID_APP_PATHS + PAID_DETAILS_PATHS]
+        # 6 Nov (SEO round 1): /before-you-pay/ is noindex but no longer disallowed. A disallowed page's noindex is never
+        # read (the crawler does not fetch it), and its hreflang pair with /fr/avant-de-payer/ must be readable.
+        robots += [f"Disallow: {p}" for p in PAID_APP_PATHS]
     if flags["analytics"]:
         robots.append(f"Disallow: {COUNT_BASE}")
     robots.append(f"Sitemap: {base}/sitemap.xml")
@@ -3141,7 +3420,7 @@ def build():
     products = {p["id"]: p for p in prices["products"]}
     nav = nav_for(cfg["nav"], flags)
     base_ctx = {"site": cfg["site"], "flags": flags, "nav": nav, "nav_current": lambda pg: nav_current(nav, pg),
-                "footer": cfg["footer"], "vt_pages": VT_PAGES, "mkt_pages": MOTION_PAGES, "channels": cfg["channels"],
+                "footer": footer_for(cfg["footer"], flags), "vt_pages": VT_PAGES, "mkt_pages": MOTION_PAGES, "channels": cfg["channels"],
                 "legal": cfg["legal"], "forms": cfg["forms"], "analytics": cfg["analytics"],
                 "worker": cfg["worker"], "prices": prices, "products": products, "private": private,
                 "stripe_mode": cfg["stripe"]["mode"], "lift": lift_sections, "tools": tools_for(flags),
@@ -3155,6 +3434,15 @@ def build():
                 "stripe_promo": cfg["stripe"]["promo_codes_enabled"],
                 "readers_untested": readers_untested()[0], "readers_all": readers_untested()[1]}
     built, rendered = [], []
+    pages_by_path = {pg["path"]: pg for pg in owned.values()}
+    STUDIES, REFS = studies(), references()
+    for pth in STUDIES:   # a study entry for a page this build does not publish is a typo
+        if pth not in pages_by_path:
+            die(f"studies.json: {pth} is not a page of this build")
+    if ABOUT_LINE not in lifted_fragment("about"):
+        die("ABOUT_LINE (the Organization description) is no longer the first sentence of /about/: update both together")
+    if not os.path.exists(os.path.join(DOCS, ORG_LOGO.lstrip("/"))):
+        die(f"Organization logo {ORG_LOGO} is missing from docs/ (run checks/make_seo_assets.py)")
 
     def render(rel, page, **more):
         page = {"scripts": [], "modules": [], "og_image": "/assets/og/default.png", "lang": "en",
@@ -3186,8 +3474,27 @@ def build():
             rep_ = sample_report()
             extra["sample_report"] = rep_
             extra["sample_report_json"] = Markup(json.dumps(rep_, sort_keys=True, ensure_ascii=False).replace("</", "<\\/"))
+        extra["related"] = related_for(page["path"], pages_by_path)   # 6 Nov (SEO round 1): the Related block
+        st = STUDIES.get(page["path"])
+        extra["study"] = st
+        if st:   # Highwire meta (Google Scholar): the DOI and the public URL, after the page's own citation_* lines
+            page["citation"] = list(page.get("citation", [])) + [["citation_doi", st["doi"]],
+                                                                 ["citation_public_url", cfg["site"]["base_url"] + page["path"]]]
+        if page.get("learn"):
+            extra.update(learn_context())
+            extra["learn_refs"] = {k: REFS[k] for k in page["learn"].get("refs", [])}
+        if page["path"] == "/glossary/":
+            extra["glossary_terms"] = glossary_terms()
         if page.get("lifted"):
-            extra["lifted_html"] = Markup(paid_lifted(page["path"], lifted_fragment(page["lifted"]), flags["paid_report"]))
+            frag = paid_lifted(page["path"], lifted_fragment(page["lifted"]), flags["paid_report"])
+            if st:   # "Cite this study" under the study's header lines, as an island: the frozen words stay as they were
+                frag = insert_island(frag, META_P_RE, env.get_template("partials/cite_study.html").render(study=st, site=cfg["site"],
+                                     apa=apa_line(st), bibtex=bibtex_entry(st)), page["path"])
+            if page["path"] == "/glossary/":   # the trading and risk terms, after the twelve study terms
+                frag = insert_island(frag, "</dl>", env.get_template("partials/glossary_more.html").render(terms=extra["glossary_terms"], refs=REFS), page["path"])
+            if page["path"] == "/code/":   # the site's own table script, which the /learn/ pages cite
+                frag = insert_island(frag, "</table></div>", env.get_template("partials/code_more.html").render(), page["path"])
+            extra["lifted_html"] = Markup(frag)
             if page["path"] == "/corrections/":
                 extra["report_methods"] = report_methods()
                 extra["report_methods_renamed"] = report_methods_renamed()
@@ -3225,6 +3532,9 @@ def build():
     for rel, page in sorted(later.items()):
         render(rel, page, answer_units=units)
     write_sitemap_and_robots(out, cfg, built, flags)
+    write_learn_data(out)
+    with open(os.path.join(out, "llms.txt"), "w", encoding="utf-8", newline="\n") as f:
+        f.write(llms_txt(cfg, [pg for pg in built if not pg.get("noindex")], STUDIES))
     with open(os.path.join(out, "_headers"), "w", encoding="utf-8", newline="\n") as f:
         f.write(headers_file())
     version_assets(out, left_out=static_left_out)
