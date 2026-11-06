@@ -511,11 +511,11 @@ PAGES += [
      "if_paid": {"title": "The donttrade Test for Traders",
                  "description": "The donttrade test, a habit test on your own MT5, IBKR, Tradovate or TradingView file, "
                                 "with a real-or-noise check. One price, re-test included."}},
-    {"template": "pages/for-firms.html", "path": "/for-firms/", "requires_flag": None, "updated": "2026-10-21",
-     "crumb": "Prop firms & brokers", "og_image": "/assets/og/firms.png", "scripts": [FORM_JS, MOTION_JS],
-     "title": "The donttrade Test for Prop Firms and Brokers",
-     "description": "The donttrade test on your whole book: one habit today, more being added. A published script, "
-                    "run inside your own systems. A Pilot, then monthly."},
+    {"template": "pages/for-firms.html", "path": "/for-firms/", "requires_flag": None, "updated": "2026-11-05",
+     "crumb": "Prop firms & brokers", "og_image": "/assets/og/default.png", "scripts": [FORM_JS, MOTION_JS],
+     "title": "Free Study for Prop Firms and Brokers",
+     "description": "Run our free, pre-registered study on your past accounts. Only totals leave your machine, and "
+                    "you see the result first. No firm has run it yet."},
 ]
 
 # Forms and the pages around them (step 16). Thank-you pages are noindex and stay out of the sitemap.
@@ -536,6 +536,9 @@ PAGES += [
     {"template": "pages/start-thanks.html", "path": "/start/thanks/", "requires_flag": None, "noindex": True,
      "crumb": "Thank you", "title": "Request received — donttrade",
      "description": "Your request reached donttrade. You get a reply within 1 business day, Eastern Time, Monday to Friday."},
+    {"template": "pages/study-thanks.html", "path": "/for-firms/study-thanks/", "requires_flag": None, "noindex": True,
+     "crumb": "Thank you", "title": "Study request received — donttrade",
+     "description": "Your study request reached donttrade. We reply from research@donttrade.ca."},
     {"template": "pages/trader-thanks.html", "path": "/for-traders/thanks/", "requires_flag": None, "noindex": True,
      "crumb": "Thank you", "title": "You are on the waitlist — donttrade",
      "description": "You joined the donttrade trader waitlist. Nothing is charged; one email when the report launches.",
