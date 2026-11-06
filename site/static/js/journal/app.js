@@ -262,7 +262,7 @@ function preview() {
   const first = parsed.date_from, last = parsed.date_to;
   box.replaceChildren(...[
     el('h3', { id: 'j-prev-h', tabindex: '-1', text: sample ? 'Check before adding: the example data' : 'Check before adding' }),
-    el('p', {}, `File: ${FORMAT_NAMES[parsed.format] || parsed.format}${parsed.verified_format ? '' : ' (beta)'} · `,
+    el('p', {}, `File: ${FORMAT_NAMES[parsed.format] || parsed.format}${parsed.verified_format ? '' : ' (not yet tested on a real export)'} · `,
       `${plural(parsed.trades.length, 'closed trade', 'closed trades')}`,
       first !== null ? ` · closed ${M.dayKey(first)} to ${M.dayKey(last)}` : '', ` · times: ${parsed.tz_label}. ${unitNote(parsed.pnl_unit)}`),
     sample ? el('p', { class: 'notice notice-caution' }, el('strong', { text: 'Example data' }), 'These trades go into their own account.') : null,

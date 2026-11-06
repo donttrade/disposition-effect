@@ -28,15 +28,18 @@
   function labelOf(el) {
     var fs = el.type === 'radio' && el.closest('fieldset');
     var l = fs ? fs.querySelector('legend') : document.querySelector('label[for="' + el.id + '"]');
-    var t = l ? l.textContent.replace(/\(required[^)]*\)/, '').trim() : '';
+    // any parenthesis in the label ("(required)", "(obligatoire)", "(optional, except for …)") is a hint, not the name
+    var t = l ? l.textContent.replace(/\s*\([^)]*\)/g, '').trim() : '';
     return t.replace(/[?.:]$/, '');
   }
+  // 6 Nov (fix round 1): the messages follow the page language, so the French forms show French errors
+  var FR = (document.documentElement.getAttribute('lang') || '').slice(0, 2) === 'fr';
   function message(el) {
-    if (el.type === 'checkbox') return 'Tick this box to continue.';
-    if (el.type === 'radio') return 'Choose one answer.';
-    if (el.validity.valueMissing) return labelOf(el) + ' is required.';
-    if (el.type === 'email') return 'Enter a full email address, like name@example.com.';
-    return 'Check this field.';
+    if (el.type === 'checkbox') return FR ? 'Cochez cette case pour continuer.' : 'Tick this box to continue.';
+    if (el.type === 'radio') return FR ? 'Choisissez une réponse.' : 'Choose one answer.';
+    if (el.validity.valueMissing) return FR ? labelOf(el) + ' est obligatoire.' : labelOf(el) + ' is required.';
+    if (el.type === 'email') return FR ? 'Entrez une adresse courriel complète, comme nom@exemple.com.' : 'Enter a full email address, like name@example.com.';
+    return FR ? 'Vérifiez ce champ.' : 'Check this field.';
   }
   function errBox(el) {
     var key = el.type === 'radio' ? el.name : el.id;

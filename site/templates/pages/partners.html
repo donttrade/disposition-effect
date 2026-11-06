@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{#- /partners/ (6 Nov, Round A6; ARCHITECT-PLAN-CODES-PRICING-COPY A6, owner decision 5 Nov). The partner terms in plain words. Every number
+    comes from prices.json "partner". noindex and linked from nowhere on the site: the plan keeps the partner page and
+    codes unannounced until the live test-mode run passes (drop "noindex" in build.PAGES and link it then).
+    Wording avoids the banned list (advice, guarantee, profit claims) because the rule it states is no profit or results
+    claims. LAWYER: the whole page; the agreement itself is signed by the seller named in the terms. -#}
+{% block content %}
+{%- set pt = prices.partner %}
+<div class="wrap" data-requires-flag="paid_report"><div class="prose">
+  {% include "partials/crumbs.html" %}
+  <h1>Partners</h1>
+  <p class="lede">A partner shares the donttrade test with their audience. People who use the partner’s code get {{ pt.discount_percent }}% off, and the partner earns a commission on the sale.</p>
+  <h2 id="deal">The deal</h2>
+  <ul>
+    <li><strong>For the buyer:</strong> {{ pt.discount_percent }}% off the price of the donttrade test, with the partner’s code.</li>
+    <li><strong>For the partner:</strong> {{ pt.commission_percent }}% of the amount actually paid on each sale made with the partner’s code, on orders placed on or before {{ pt.commission_high_until|longdate }} (Eastern Time); {{ pt.commission_percent_after }}% after that. One time per sale.</li>
+    <li><strong>When it is paid:</strong> {{ pt.payout_wait_days }} days after the order, once the refund window has passed. The minimum payout is {{ pt.minimum_payout_usd|usd }}; smaller amounts carry forward.</li>
+    <li><strong>When it is cancelled:</strong> a refund or a lost payment dispute cancels the commission on that order. If it was already paid, it is taken off the next payout.</li>
+    <li><strong>Free tests do not earn a commission</strong>, and neither does a partner’s own purchase.</li>
+  </ul>
+  <h2 id="rules">Rules for partners</h2>
+  <ul>
+    <li>Partners are 18 or older. The partner agreement is signed by the seller named in the <a href="/terms/#seller">terms</a>.</li>
+    <li>Say plainly that you earn a commission, in the post or message itself and close to the mention, for example “I earn a commission if you buy.” A code on its own is not a disclosure.</li>
+    <li>Make no claims about trading results or earnings, and do not suggest that a result is typical.</li>
+    <li>Your pay never depends on what you say about donttrade, good or bad.</li>
+    <li>Do not link brokers or prop firms to a code. Do not post a code on coupon sites; we may switch off a code that appears there or breaks these rules.</li>
+    <li>What a partner writes is never shown on donttrade.ca as a testimonial.</li>
+  </ul>
+  <h2 id="free-tests">Free tests</h2>
+  <p>donttrade sometimes gives a free test to a few people or groups. It is always disclosed as free, asks for nothing in return and is not a request for a review. If you write or post about it, say you received it free.</p>
+  <h2 id="contact">Talk to us</h2>
+  <p>Email <a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>. {{ site.reply_promise }}</p>
+  {% include "partials/disclaimer.html" %}
+</div></div>
+{% endblock %}

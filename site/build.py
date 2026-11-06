@@ -275,7 +275,9 @@ ANSWERS_MAX = 150 * 1024
 ANSWER_MAX_CHARS = 700
 ANSWER_SKIP = ("/research/", "/fr/", "/help/")
 ANSWER_SECTIONS = {"/pricing/": "price", "/terms/": "terms", "/privacy/": "privacy"}
-ANSWER_SECTION_SKIP = {"faq-h", "ladder-h", "history"}
+# 6 Nov (Round A7): "last-step-h" is the pay panel's chip list; as an answer it would repeat the short refund claim without
+# its limits (the chip is a link in the page, plain text in a blockquote), so it is not an answer unit.
+ANSWER_SECTION_SKIP = {"faq-h", "ladder-h", "history", "last-step-h"}
 INLINE_TAGS = frozenset("a abbr b bdi bdo cite code data del dfn em font i ins kbd mark nobr q s samp small span "
                         "strong sub sup time tt u var wbr".split())   # = checks/lint.py INLINE
 
@@ -441,7 +443,7 @@ PAGES = [
      "description": "Free in-browser tools: trade stats, prop challenge odds, drawdown and risk-reward. "
                     "Research on how traders behave. For firms: fixed-price measurement.",
      "og_image": "/assets/og/home.png",
-     "updated": "2026-10-21"},
+     "updated": "2026-11-06"},
 ]
 
 # Free tools (steps 10-12). connect-src stays 'none' (the csp_for default): these pages
@@ -501,9 +503,18 @@ PAGES += [
 FORM_JS = "/static/js/form-ref.js"
 # The Product JSON-LD description (paid_report only): the same words as the pricing table row.
 # R-D3 I-3b: the same text as the /pricing/ row (the JSON-LD Product description; tests/test_r_d2_pages.py checks both)
-PRODUCT_TEXT = "Up to five habits measured in your own trades, with the dollar totals of the matching trades; up to two of them tested against chance in this version; plus one re-test 30 to 60 days after your first result."
+PRODUCT_TEXT_FMT = "Up to {measured} habits measured in your own trades, with the dollar totals of the matching trades; up to {tested} of them tested against chance in this version; plus one re-test 30 to 60 days after your first result."
+
+
+def product_text(rules):
+    """6 Nov (Round A2): the two numbers come from prices.json rules.habits_measured / habits_tested, so the pricing
+    row, the Product JSON-LD and the home page cannot disagree. When the engine tests three habits, change one number."""
+    return PRODUCT_TEXT_FMT.format(measured=numword(rules["habits_measured"]), tested=numword(rules["habits_tested"]))
+
+
+PRODUCT_TEXT = PRODUCT_TEXT_FMT.format(measured="five", tested="two")   # the committed default; a test holds product_text equal to it
 PAGES += [
-    {"template": "pages/for-traders.html", "path": "/for-traders/", "requires_flag": None, "updated": "2026-10-21",
+    {"template": "pages/for-traders.html", "path": "/for-traders/", "requires_flag": None, "updated": "2026-11-06",
      "crumb": "Individual traders", "og_image": "/assets/og/traders.png", "scripts": [FORM_JS, MOTION_JS],
      "title": "The donttrade Test for Traders: Waitlist",
      "description": "The donttrade test, a habit test on your own MT5, IBKR, Tradovate or TradingView file, with a "
@@ -559,12 +570,12 @@ PAGES += [
 # Legal pages (step 17). The French versions (/fr/…) exist only with paid_report on; the
 # hreflang pair is declared only then (alternates_if_paid).
 PAGES += [
-    {"template": "pages/privacy.html", "path": "/privacy/", "requires_flag": None, "updated": "2026-11-05",
+    {"template": "pages/privacy.html", "path": "/privacy/", "requires_flag": None, "updated": "2026-11-06",
      "crumb": "Privacy", "alternates_if_paid": [("en", "/privacy/"), ("fr", "/fr/confidentialite/"), ("x-default", "/privacy/")],
      "title": "Privacy Notice — donttrade",
      "description": "What donttrade collects and why: no cookies, free tools that read your file in your browser, "
                     "Web3Forms forms, Gmail, Stripe and your rights."},
-    {"template": "pages/terms.html", "path": "/terms/", "requires_flag": None, "updated": "2026-11-05",
+    {"template": "pages/terms.html", "path": "/terms/", "requires_flag": None, "updated": "2026-11-06",
      "crumb": "Terms", "alternates_if_paid": [("en", "/terms/"), ("fr", "/fr/conditions/"), ("x-default", "/terms/")],
      "title": "Terms, Refunds and the Pilot — donttrade",
      "description": "Payment, delivery and refund terms for the donttrade test, the Pilot and the monthly plan for "
@@ -575,25 +586,49 @@ PAGES += [
 # commerce flag as the English consumer clauses. Unreviewed drafts: lawyer + legal translator first.
 PAGES += [
     {"template": "pages/fr/avant-de-payer.html", "path": "/fr/avant-de-payer/", "requires_flag": "paid_report",
-     "lang": "fr", "crumb": "Avant de payer", "updated": "2026-10-21", "scripts": ["/static/js/print.js"],
+     "lang": "fr", "crumb": "Avant de payer", "updated": "2026-11-06", "scripts": ["/static/js/print.js"],
      "alternates": [("fr", "/fr/avant-de-payer/"), ("en", "/pricing/"), ("x-default", "/pricing/")],
      "title": "Avant de payer : test donttrade — donttrade",
      "description": "Ce que vous acceptez avant de payer le test donttrade : vendeur, prix en dollars américains, "
                     "exigences techniques, remboursements et restrictions."},
     {"template": "pages/fr/conditions.html", "path": "/fr/conditions/", "requires_flag": "paid_report",
-     "lang": "fr", "crumb": "Conditions", "updated": "2026-11-05",
+     "lang": "fr", "crumb": "Conditions", "updated": "2026-11-06",
      "alternates": [("fr", "/fr/conditions/"), ("en", "/terms/"), ("x-default", "/terms/")],
      "title": "Conditions de service et de vente — donttrade",
      "description": "Conditions du test donttrade : prix, paiement, livraison, nouveau test, "
                     "remboursements et droit de rétractation."},
     {"template": "pages/fr/confidentialite.html", "path": "/fr/confidentialite/", "requires_flag": "paid_report",
-     "lang": "fr", "crumb": "Confidentialité", "updated": "2026-11-05",
+     "lang": "fr", "crumb": "Confidentialité", "updated": "2026-11-06",
      "alternates": [("fr", "/fr/confidentialite/"), ("en", "/privacy/"), ("x-default", "/privacy/")],
      "title": "Politique de confidentialité — donttrade",
      "description": "Ce que donttrade recueille et pourquoi : aucun témoin, fichier lu dans votre navigateur, "
                     "chiffres épurés pour le test payant, et vos droits."},
 ]
 PAID_ONLY_PATHS_FR = ["/fr/avant-de-payer/", "/fr/conditions/", "/fr/confidentialite/"]
+
+# Refund request pages and the partner terms (6 Nov, Round A6/A8). The refund pages exist only with [flags]
+# refund_no_result; all are noindex, out of the sitemap, and the partner page is linked from nowhere (the plan keeps it
+# and the codes unannounced until the live test-mode run passes). The refund form posts to Web3Forms (the default
+# form-action) and its thank-you page is the form's `redirect`.
+PAGES += [
+    {"template": "pages/refund.html", "path": "/refund/", "requires_flag": "refund_no_result", "noindex": True,
+     "no_ask": True, "crumb": "Ask for a refund", "scripts": [FORM_JS, "/static/js/refund.js"],
+     "title": "Ask for a refund — donttrade",
+     "description": "Ask for a refund of the donttrade test. A person reads every request and replies within 2 business days."},
+    {"template": "pages/refund-thanks.html", "path": "/refund/thanks/", "requires_flag": "refund_no_result", "noindex": True,
+     "no_ask": True, "crumb": "Thank you", "title": "Refund request received — donttrade",
+     "description": "Your refund request reached donttrade. You get a reply within 2 business days, Eastern Time, Monday to Friday."},
+    {"template": "pages/fr/remboursement.html", "path": "/fr/remboursement/", "requires_flag": "refund_no_result",
+     "noindex": True, "no_ask": True, "lang": "fr", "crumb": "Demander un remboursement",
+     "scripts": [FORM_JS, "/static/js/refund.js"], "title": "Demander un remboursement — donttrade",
+     "description": "Demandez le remboursement du test donttrade. Une personne lit chaque demande et répond dans les 2 jours ouvrables."},
+    {"template": "pages/fr/remboursement-merci.html", "path": "/fr/remboursement/merci/", "requires_flag": "refund_no_result",
+     "noindex": True, "no_ask": True, "lang": "fr", "crumb": "Merci", "title": "Demande de remboursement reçue — donttrade",
+     "description": "Votre demande de remboursement est arrivée chez donttrade. Réponse dans les 2 jours ouvrables, heure de l’Est."},
+    {"template": "pages/partners.html", "path": "/partners/", "requires_flag": "paid_report", "requires_promo": True, "noindex": True,
+     "no_ask": True, "crumb": "Partners", "title": "Partners — donttrade",
+     "description": "How partners work with donttrade: a code for the buyer, a commission for the partner, and the rules for both."},
+]
 
 # The free Trading Journal (ARCHITECT-V3 §d, J3; [flags] journal). connect-src 'none' (the default),
 # form-action 'none', and no analytics even when the analytics flag is on (D12, journal_problem): the page
@@ -612,7 +647,7 @@ PAGES += [
 # /help/ (ARCHITECT-V3 §c.5, Q-A1): every answer unit, grouped; the answer box's no-JS landing page.
 # Rendered after every other page, from their HTML (build.answer_units).
 PAGES += [
-    {"template": "pages/help.html", "path": "/help/", "requires_flag": None, "updated": "2026-11-05",
+    {"template": "pages/help.html", "path": "/help/", "requires_flag": None, "updated": "2026-11-06",
      "crumb": "Questions", "scripts": ["/static/js/answers.js", "/static/js/answer-ui.js"], "title": "Questions: Prices, Refunds, Files and Privacy",
      "description": "Every answer on donttrade in one place: prices, refunds, what the free tools do with your file, "
                     "privacy and the terms, each with a link to its page."},
@@ -796,7 +831,7 @@ def challenge_presets():
     spec.loader.exec_module(cr)
     lib = cr.load(CHALLENGE_RULES_JSON)
     import datetime
-    today = datetime.date.fromisoformat(os.environ["DT_TODAY"]) if os.environ.get("DT_TODAY") else datetime.date.today()
+    today = _today()
     probs = cr.validate(lib, today)
     if probs:
         die("challenge rules: " + "; ".join(probs[:5]) + (" …" if len(probs) > 5 else ""))
@@ -1118,7 +1153,7 @@ PAGES.append({"template": "pages/pricing.html", "path": "/pricing/", "requires_f
               "scripts_if_paid": ["/static/js/print.js"], "product": PRODUCT_TEXT,
               # Tester D6: the reverse of /fr/avant-de-payer/'s alternates, so the pair counts
               "alternates_if_paid": [("en", "/pricing/"), ("fr", "/fr/avant-de-payer/"), ("x-default", "/pricing/")],
-              "crumb": "Pricing", "updated": "2026-10-21", "og_image": "/assets/og/pricing.png",
+              "crumb": "Pricing", "updated": "2026-11-06", "og_image": "/assets/og/pricing.png",
               "title": "Pricing: Published Prices for Firms and Traders",
               "description": "Published prices in USD for prop firms, brokers, trading platforms and traders, the "
                              "same for everyone and fixed in writing before anyone sees data."})
@@ -1516,9 +1551,10 @@ def die(msg):
 
 
 FLAGS = ("paid_report", "analytics", "trader_first_home", "pilot_checkout", "free_badges", "journal", "ask_box", "whatif_ranked",
-         "prediction_results")
+         "prediction_results", "refund_no_result")
 OPTIONAL_FLAGS = {"pilot_checkout": False, "free_badges": False, "journal": False, "ask_box": False,
-                  "whatif_ranked": False, "prediction_results": False}  # older site.toml files may lack the line
+                  "whatif_ranked": False, "prediction_results": False,
+                  "refund_no_result": False}  # older site.toml files may lack the line
 # ARCHITECT-CHALLENGE-READINESS §2.7.3: [flags] whatif_ranked switches the ranked "Biggest changes on your past
 # days" rules. Off until a Canadian securities lawyer clears the strings. The build writes the flag into the
 # copied engine (prop-sim-core.js), whose source line must read exactly RANKED_LINE.
@@ -1636,12 +1672,12 @@ SITE_SCHEMA = {
     "site": ({"name", "base_url", "contact_email", "reply_promise"}, None),
     "flags": (set(), None),
     "analytics": ({"cf_beacon_token"}, {"cf_beacon_token", "umami_website_id"}),
-    "stripe": ({"mode"}, {"mode"}),
+    "stripe": ({"mode"}, {"mode", "promo_codes_enabled"}),
     "forms": ({"endpoint", "firm_key", "trader_key", "redirect_firm", "redirect_trader"}, None),
     "worker": ({"api_base"}, {"api_base"}),
     "legal": ({"launch_date", "terms_date", "cloudflare_pages_since", "disclaimer_short", "disclaimer_long"},
               {"launch_date", "terms_date", "cloudflare_pages_since", "disclaimer_short", "disclaimer_long",
-               "show_seller_for_pilot", "privacy_date"}),
+               "show_seller_for_pilot", "privacy_date", "refund_effective"}),
 }  # table: (required keys, every allowed key or None when the table is open)
 
 
@@ -1767,13 +1803,45 @@ def check_stripe_link(link, mode, what):
 MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
 
+_DT_TODAY_NOTED = []
+
+
+def real_today():
+    """The machine's date, never DT_TODAY (the date guards on docs/ compare with this one)."""
+    import datetime as dt
+    return dt.date.today()
+
+
+def _today():
+    """The build date: today, or DT_TODAY (YYYY-MM-DD) for a build made ahead of a dated push (6 Nov round: the terms
+    version is the push day, so a local build before it is made as of that day). A bad value is a one-line BUILD FAILED;
+    a value that is not today prints a NOTE on stderr, once. Such a build is for tests and previews: ./site/run.sh bundle
+    refuses it (docs/ is never stamped later than the real date unless it is a preview, DT_PREVIEW), and
+    checks/docs_date.py fails ./site/run.sh check on a docs/ dated in the future."""
+    import datetime as dt
+    raw = os.environ.get("DT_TODAY")
+    if not raw:
+        return dt.date.today()
+    try:
+        d = dt.date.fromisoformat(raw)
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", raw):
+            raise ValueError(raw)
+    except ValueError:
+        die(f"DT_TODAY={raw!r} is not a date, YYYY-MM-DD (for example DT_TODAY=2026-11-06)")
+    if d != dt.date.today() and not _DT_TODAY_NOTED:
+        _DT_TODAY_NOTED.append(1)
+        print(f"NOTE: DT_TODAY={raw} is not today ({dt.date.today().isoformat()}): this build is dated ahead. "
+              "Use it for tests or a preview only; never bundle or deploy it.", file=sys.stderr)
+    return d
+
+
 def set_launch_date(legal, toml_path, today=None):
     """Manager C3: [legal] launch_date (YYYY-MM-DD; empty = the build date) dates every launch
     statement. Sets legal.terms_version (ISO, the terms/privacy version) and legal.launch_human
     ("23 Oct 2026"). A future date fails: no page may state a date that has not come yet.
     DT_REQUIRE_LAUNCH_DATE=1 (./site/run.sh bundle) refuses an empty one."""
     import datetime as dt
-    today = today or dt.date.today()
+    today = today or _today()
     raw = legal.get("launch_date")
     if not isinstance(raw, str):
         die(f"[legal] launch_date must be a string, YYYY-MM-DD or empty ({toml_path})")
@@ -1803,7 +1871,7 @@ def set_terms_date(legal, toml_path, today=None):
     launch_date and not after the build date; DT_REQUIRE_LAUNCH_DATE=1 (./site/run.sh bundle) refuses an empty one.
     Call it after set_launch_date: it replaces legal.terms_version."""
     import datetime as dt
-    today = today or dt.date.today()
+    today = today or _today()
     raw = legal.get("terms_date")
     if not isinstance(raw, str):
         die(f"[legal] terms_date must be a string, YYYY-MM-DD or empty ({toml_path})")
@@ -1841,7 +1909,7 @@ def set_hosting_date(legal, toml_path, today=None):
     terms version (launch_date) and this date, because the hosting sentence changed the privacy notice
     only (the terms keep launch_date). Call it after set_launch_date."""
     import datetime as dt
-    today = today or dt.date.today()
+    today = today or _today()
     raw = legal.get("cloudflare_pages_since")
     if not isinstance(raw, str) or raw == "":
         die(f"[legal] cloudflare_pages_since must be the day the site moved to Cloudflare Pages, YYYY-MM-DD, "
@@ -1867,7 +1935,7 @@ def set_privacy_date(legal, toml_path, today=None):
     legal.privacy_version (the later of the two and the terms version), never the terms. A future date fails.
     Call it after set_hosting_date."""
     import datetime as dt
-    today = today or dt.date.today()
+    today = today or _today()
     raw = legal.get("privacy_date", "")
     if raw == "":
         return None
@@ -1882,6 +1950,117 @@ def set_privacy_date(legal, toml_path, today=None):
             f"state a version that has not come yet ({toml_path})")
     legal["privacy_version"] = max(legal["privacy_version"], d.isoformat())
     return d
+
+
+PARTNER_SLUG_RE = re.compile(r"[a-z0-9-]{2,30}")
+PARTNER_CODE_RE = re.compile(r"[A-Z0-9]{3,20}")
+PARTNER_NAME_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9 .&'’-]{0,58}[A-Za-z0-9.]")
+INDEXNOW_KEY_RE = re.compile(r"[A-Za-z0-9-]{8,128}")
+COUNTRY_RE = re.compile(r"[A-Z]{2}")
+
+
+def apply_founding(prices, toml_path):
+    """6 Nov (Round A1): the founding price is config. prices.json keeps report39 price_usd = the founding price and
+    holds the next price in report39.after_founding; rules.founding_open says which one is current. Every template
+    reads products.report39.price_usd, so with founding_open = false the build swaps in the next price and its links
+    in memory (the file itself is edited only to flip the switch). Adds founding_price_usd and after_price_usd to
+    the product for the one macro that words both (partials/price_line.html). Returns founding_open."""
+    rules = prices["rules"]
+    r = next(p for p in prices["products"] if p["id"] == "report39")
+    open_ = rules.get("founding_open")
+    if type(open_) is not bool:
+        die("prices.json rules.founding_open must be true or false without quotes")
+    af = r.get("after_founding")
+    if not isinstance(af, dict) or type(af.get("price_usd")) not in (int, float) or isinstance(af.get("price_usd"), bool):
+        die("prices.json report39.after_founding.price_usd (the price after the first founding buyers) is missing")
+    if af["price_usd"] <= r["price_usd"]:
+        die(f"prices.json: the price after the founding price ({af['price_usd']}) must be higher than {r['price_usd']}")
+    r["founding_price_usd"], r["after_price_usd"] = r["price_usd"], af["price_usd"]
+    for m in ("live", "test"):
+        for suf in ("", "_fr"):
+            link = af.get(f"stripe_link_{m}{suf}")
+            if link:
+                check_stripe_link(link, m, f"prices.json report39.after_founding.stripe_link_{m}{suf}")
+    if not open_:
+        for m in ("live", "test"):
+            for suf in ("", "_fr"):
+                r[f"stripe_link_{m}{suf}"] = af.get(f"stripe_link_{m}{suf}")
+        r["price_usd"], r["founding"] = af["price_usd"], False
+    return open_
+
+
+def load_partners(cfg, toml_path):
+    """6 Nov (Round A6): site/config/partners.json (DT_PARTNERS_JSON for tests), {slug: {code, name, active}}.
+    Public by design. The slug is what a partner link carries (?via=<slug>); pay.js looks it up in the active entries
+    only. A non-empty file needs [stripe] promo_codes_enabled = true, the owner's tick that the Payment Link takes
+    promotion codes (a code Stripe ignores would promise a discount the buyer never gets)."""
+    path = os.environ.get("DT_PARTNERS_JSON") or os.path.join(SITE, "config", "partners.json")
+    if not os.path.exists(path):
+        return {}
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+    if not isinstance(data, dict):
+        die(f"{path}: partners.json must be an object, {{slug: {{code, name, active}}}}")
+    codes = set()
+    for slug, e in data.items():
+        if not PARTNER_SLUG_RE.fullmatch(slug):
+            die(f"partners.json: slug {slug!r} must be 2 to 30 of a-z, 0-9 and -")
+        if not isinstance(e, dict) or set(e) != {"code", "name", "active"}:
+            die(f"partners.json: {slug} must hold exactly code, name and active")
+        if not isinstance(e["code"], str) or not PARTNER_CODE_RE.fullmatch(e["code"]):
+            die(f"partners.json: {slug} code must be 3 to 20 of A-Z and 0-9")
+        if not isinstance(e["name"], str) or not PARTNER_NAME_RE.fullmatch(e["name"]):
+            die(f"partners.json: {slug} name must be 2 to 60 letters, digits, spaces and . & ' -")
+        if type(e["active"]) is not bool:
+            die(f"partners.json: {slug} active must be true or false")
+        if e["code"] in codes:
+            die(f"partners.json: code {e['code']} is used twice")
+        codes.add(e["code"])
+    if data and cfg["stripe"].get("promo_codes_enabled") is not True:
+        die("partners.json lists partners but [stripe] promo_codes_enabled is not true: switch on Allow promotion codes "
+            "on the Payment Link first, then set it (a code Stripe ignores promises a discount the buyer never gets)")
+    return data
+
+
+def check_round_a_settings(cfg, toml_path):
+    """6 Nov (Round A): the small site.toml settings of the codes/pricing/refund round."""
+    import datetime as dt
+    site, legal, flags = cfg["site"], cfg["legal"], cfg["flags"]
+    mc = site.setdefault("merchant_countries", ["CA", "US"])
+    if (not isinstance(mc, list) or not mc or len(set(mc)) != len(mc)
+            or any(not isinstance(c, str) or not COUNTRY_RE.fullmatch(c) for c in mc)):
+        die(f"[site] merchant_countries must be a list of unique two-letter country codes, like [\"CA\", \"US\"] ({toml_path})")
+    pc = cfg["stripe"].get("promo_codes_enabled", False)
+    if type(pc) is not bool:
+        die(f"[stripe] promo_codes_enabled must be true or false ({toml_path})")
+    cfg["stripe"]["promo_codes_enabled"] = pc
+    ix = cfg.get("indexnow")
+    if ix is not None:
+        if not isinstance(ix, dict) or set(ix) - {"key"} or not isinstance(ix.get("key"), str) or not INDEXNOW_KEY_RE.fullmatch(ix["key"]):
+            die(f"[indexnow] key must be 8 to 128 of letters, digits and - ({toml_path})")
+    # the refund policy switch: "No result, no charge" is worded on the site only while the owner has changed the
+    # Stripe checkout text to match, so it needs its own effective date and a terms version no older than it
+    raw = legal.get("refund_effective", "")
+    legal["refund_effective_human"] = legal["refund_effective_fr"] = ""
+    if flags["refund_no_result"]:
+        if not flags["paid_report"]:
+            die(f"[flags] refund_no_result = true needs paid_report = true ({toml_path})")
+        if not isinstance(raw, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", raw):
+            die(f"[flags] refund_no_result = true needs [legal] refund_effective = \"YYYY-MM-DD\", the day the new refund "
+                f"terms and Stripe's checkout text go live ({toml_path})")
+        try:
+            d = dt.date.fromisoformat(raw)
+        except ValueError:
+            die(f"[legal] refund_effective {raw!r} is not a real date ({toml_path})")
+        if d > _today():
+            die(f"[legal] refund_effective {raw} is after the build date {_today().isoformat()} ({toml_path})")
+        if legal["terms_version"] < raw:
+            die(f"[legal] terms_date {legal['terms_version']} is before refund_effective {raw}: the refund wording is a "
+                f"legal change, so the terms version must be that day or later ({toml_path})")
+        legal["refund_effective_human"] = f"{d.day} {MONTHS[d.month - 1]} {d.year}"
+        legal["refund_effective_fr"] = f"{d.day} {MONTHS_FR[d.month - 1]} {d.year}"
+    elif raw:
+        die(f"[legal] refund_effective is set but [flags] refund_no_result is off: remove the date or turn the flag on ({toml_path})")
 
 
 CHANNEL_HOSTS = {"x.com", "github.com", "donttrade.substack.com", "www.linkedin.com", "www.tiktok.com", "www.youtube.com",
@@ -1938,6 +2117,7 @@ def load_config():
         die(f"[site] manual_restore must be true or false, not {cfg['site']['manual_restore']!r} ({toml_path})")
     flags = cfg["flags"]
     check_flags(flags, toml_path)
+    check_round_a_settings(cfg, toml_path)
     if flags["trader_first_home"] != flags["paid_report"]:
         die(f"flag mismatch: trader_first_home={flags['trader_first_home']} must equal "
             f"paid_report={flags['paid_report']} ({toml_path})")
@@ -1967,6 +2147,8 @@ def load_config():
         private = check_private(read_toml(p, "private.toml"), on)
     if flags["paid_report"]:
         check_api_base(cfg["worker"]["api_base"])
+    apply_founding(prices, toml_path)
+    cfg["partners"] = load_partners(cfg, toml_path)
     products = {p["id"]: p for p in prices["products"]}
     if flags["pilot_checkout"]:
         if not products["pilot"]["stripe_link_live"]:
@@ -2033,6 +2215,76 @@ def lift_sections(rel_path):
         end = cuts[k + 1][0] if k + 1 < len(cuts) else len(main)
         out[sid] = main[start:end]
     return out
+
+
+NUMWORDS = ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
+
+
+NUMWORDS_FR = ("zéro", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf")
+
+
+def numword_fr(n):
+    """4 -> "quatre" (0 to 9)."""
+    if type(n) is not int or not 0 <= n <= 9:
+        die(f"numword_fr: {n!r} is not a whole number from 0 to 9")
+    return NUMWORDS_FR[n]
+
+
+def numword(n):
+    """5 -> "five" (rules.habits_measured / habits_tested are written once, in prices.json, and spelled out on the pages)."""
+    if type(n) is not int or not 0 <= n <= 9:
+        die(f"numword: {n!r} is not a whole number from 0 to 9")
+    return NUMWORDS[n]
+
+
+def longdate(iso):
+    """"2027-01-31" -> "31 January 2027"."""
+    import datetime as dt
+    d = dt.date.fromisoformat(iso)
+    return f"{d.day} {d.strftime('%B')} {d.year}"
+
+
+IMPORTERS_JSON = os.path.join(SITE, "config", "importers.json")
+
+
+def readers_untested():
+    """[reader name] of the broker file readers not yet tested on a real export, from site/config/importers.json (a
+    reader is untested while any of its formats has verified = false). Fix round 2: the beta-removal sentence says exactly
+    this, so it changes when a format flips."""
+    with open(IMPORTERS_JSON, encoding="utf-8") as f:
+        fm = json.load(f)["formats"]
+    names, out = [], []
+    for x in fm:
+        if x.get("reader") and x["reader"] not in names:
+            names.append(x["reader"])
+    return [n for n in names if any(not x["verified"] for x in fm if x.get("reader") == n)], names
+
+
+def partners_meta(partners, prices):
+    """The <meta name="dt-partners"> content for pay.js: the active partners only, as compact JSON, or "" (no tag).
+    {"d": percent off, "p": {slug: [code, name]}}. Public by design; pay.js never reads a code from the URL."""
+    active = {k: [v["code"], v["name"]] for k, v in sorted(partners.items()) if v["active"]}
+    if not active:
+        return ""
+    return json.dumps({"d": prices["partner"]["discount_percent"], "p": active}, ensure_ascii=False, sort_keys=True,
+                      separators=(",", ":"))
+
+
+REFUND_REASONS_JSON = os.path.join(SITE, "config", "refund_reasons.json")
+
+
+def refund_reasons():
+    """site/config/refund_reasons.json: the nine reasons on /refund/ (slug, EN and FR label, class). The radios, the
+    refund.js whitelist (a test holds them equal) and the Worker repo's summary script read this one list."""
+    with open(REFUND_REASONS_JSON, encoding="utf-8") as f:
+        data = json.load(f)
+    slugs = [e["slug"] for e in data["reasons"]]
+    if len(set(slugs)) != len(slugs) or any(not re.fullmatch(r"[a-z]+(?:-[a-z]+)*", x) for x in slugs):
+        die("refund_reasons.json: slugs must be unique, lower case, words joined by -")
+    for e in data["reasons"]:
+        if set(e) != {"slug", "en", "fr", "class"} or e["class"] not in ("eligible", "check", "goodwill", "review"):
+            die(f"refund_reasons.json: {e.get('slug')} needs exactly slug, en, fr and a known class")
+    return data["reasons"]
 
 
 def _cents(n):
@@ -2158,6 +2410,35 @@ def crumb_items(page):
     return items
 
 
+PRODUCT_IMAGE = "/assets/product/donttrade-test-1200.png"     # the square product picture, when it exists
+PRODUCT_IMAGE_FALLBACK = "/assets/og/pricing.png"            # 1200x630: validates, not ideal
+
+
+def product_jsonld(page, cfg, r, org):
+    """Round A4 (Google Merchant "invalid Product"): name, description, image, brand, sku, one Offer with price,
+    currency, availability, item condition, url and digital shipping details (free, no delay) for each country in
+    [site] merchant_countries. NOT here, on purpose: aggregateRating, review, priceValidUntil (lint holds all three
+    out), and any hasMerchantReturnPolicy. Addendum 2.7 (6 Nov): the plan's FullRefund / 14 days block said "full
+    refund" with no condition, which "No result, no charge" is not, so the markup carries no return policy at all.
+    Price = the current price (the founding price while it is open, then the next one)."""
+    base = cfg["site"]["base_url"]
+    image = PRODUCT_IMAGE if os.path.exists(os.path.join(DOCS, PRODUCT_IMAGE.lstrip("/"))) else PRODUCT_IMAGE_FALLBACK
+    if not os.path.exists(os.path.join(DOCS, image.lstrip("/"))):
+        die(f"Product JSON-LD: the image {image} is missing from docs/")
+    regions = [{"@type": "DefinedRegion", "addressCountry": c} for c in cfg["site"]["merchant_countries"]]
+    zero = {"@type": "QuantitativeValue", "minValue": 0, "maxValue": 0, "unitCode": "DAY"}
+    return {"@type": "Product", "@id": base + page["path"] + "#product", "name": r["name"],
+            "description": page["product"], "image": [base + image], "brand": org, "sku": "donttrade-test",
+            "offers": {"@type": "Offer", "price": str(int(r["price_usd"])), "priceCurrency": "USD",
+                       "availability": "https://schema.org/InStock", "url": base + page["path"],
+                       "itemCondition": "https://schema.org/NewCondition",
+                       "shippingDetails": {"@type": "OfferShippingDetails",
+                                           "shippingRate": {"@type": "MonetaryAmount", "value": "0", "currency": "USD"},
+                                           "shippingDestination": regions,
+                                           "deliveryTime": {"@type": "ShippingDeliveryTime", "handlingTime": zero,
+                                                            "transitTime": dict(zero)}}}}
+
+
 def jsonld(page, cfg, html, flags, products):
     """One @graph per page. No address, phone, rating or review anywhere (SEO-PLAN §3.2)."""
     base = cfg["site"]["base_url"]
@@ -2186,16 +2467,141 @@ def jsonld(page, cfg, html, flags, products):
             {"@type": "ListItem", "position": i + 1, "name": t["name"], "url": base + t["href"]}
             for i, t in enumerate(TOOLS)]})
     if page.get("product") and flags["paid_report"]:
-        r = products["report39"]
-        graph.append({"@type": "Product", "name": r["name"], "description": page["product"], "brand": org,
-                      "offers": {"@type": "Offer", "price": str(int(r["price_usd"])), "priceCurrency": "USD",
-                                 "availability": "https://schema.org/InStock", "url": base + page["path"]}})
+        graph.append(product_jsonld(page, cfg, products["report39"], org))
     faq = faq_from(html)
     if faq:
         graph.append({"@type": "FAQPage", "mainEntity": [
             {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]})
     data = json.dumps({"@context": "https://schema.org", "@graph": graph}, ensure_ascii=False, sort_keys=True)
     return '<script type="application/ld+json">' + data.replace("</", "<\\/") + "</script>"
+
+
+_DENY_CACHE = {}
+REFUND_MACRO_CALLS = ("r.chip()", "r.chip_fr()", "r.short()", "r.tier2()", "r.pricing_line()", "r.faq_answer()", "r.terms_item()", "r.terms_summary()",
+                      "r.dispute_ask_first()", "r.misuse_item()", "r.eu_uk()", "r.byp_dd()", "r.formats_caveat()",
+                      "f.terms_p()", "f.eu_uk()", "f.byp_dd()", "f.formats_caveat()")
+DENY_GRAM = 4
+# Words the flag-on wording has and the flag-off wording lacks, but that flag-off pages use for other things. Everything
+# else that is flag-on-only (and said twice or more, 7+ letters: goodwill, customer, discretion, gracieux …) is denied.
+# Phrases the flag-on wording repeats from text that flag-off pages already carry (the "not enough trades to tell" rule, the
+# card-dispute sentence, the reply promise): a run of words inside one of these is not new refund wording.
+DENY_NEUTRAL = ("not enough trades to tell the file has dates but no times a person reviews it and writes to you a refund or a lost "
+                "payment dispute pas assez de transactions pour conclure affiche pas assez de transactions pour conclure "
+                "auprès de l'émetteur de votre carte nous répondons dans les du lundi au vendredi "
+                "habit shows not enough trades to tell these terms apply to the donttrade test bought for personal use")
+DENY_WORD_OK = frozenset("delivered analysis request re-test purchases habitude analyse remboursons personne demander formulaire "
+                         "demande répondons nouveau gratuit commande d'abord".split())
+
+
+def _gram_words(html):
+    import html as _h
+    t = _h.unescape(re.sub(r"<[^>]+>", " ", html)).lower().replace("\u2019", "'")
+    return re.findall(r"[a-zà-ÿ0-9'-]+", t)
+
+
+def refund_denylist():
+    """Fix round 1 (6 Nov): what a page may NOT say while [flags] refund_no_result is off, DERIVED from the flag-on
+    strings so the two cannot drift. The refund macros (partials/refund_copy*.html) are rendered twice, flag on and flag
+    off. Denied: every two-word run, every href and every id that the flag-on rendering has and the flag-off one has
+    not ("goodwill refund", "no refund", "once your result", "apart from", the /refund/ and /fr/remboursement/ links,
+    the #trader-refunds anchors, and the French twins). Runs of DENY_GRAM = 4 words catch whole phrases ("once your
+    result is delivered"); single words catch short ones ("goodwill", "gracieux"): flag-on-only words of 7+ letters used
+    twice or more, minus DENY_WORD_OK (a hand list of words flag-off pages use for other things; a new flag-on word is
+    denied until someone decides). Returns {"grams", "words", "hrefs", "ids"}."""
+    key = os.environ.get("DT_PRICES_JSON", "")
+    if _DENY_CACHE.get("key") == key:
+        return _DENY_CACHE
+    with open(os.environ.get("DT_PRICES_JSON") or os.path.join(SITE, "config", "prices.json"), encoding="utf-8") as f:
+        prices = json.load(f)
+    env = Environment(loader=FileSystemLoader(os.path.join(SITE, "templates")), undefined=StrictUndefined, autoescape=True)
+    env.filters["numword"], env.filters["numword_fr"], env.filters["usd"], env.filters["usd_fr"] = numword, numword_fr, usd, usd_fr
+    legal = {"refund_effective_human": "1 Jan 2000", "refund_effective_fr": "1 janvier 2000"}
+    src = ('{% import "partials/refund_copy.html" as r with context %}{% import "partials/refund_copy_fr.html" as f with context %}'
+           + "".join("{{ " + c + " }}\n" for c in REFUND_MACRO_CALLS))
+    out = {}
+    ru = readers_untested()
+    for on in (True, False):
+        out[on] = env.from_string(src).render(prices=prices, legal=legal, refund_on=on, readers_untested=ru[0], readers_all=ru[1])
+    grams = lambda h: set(zip(*[_gram_words(h)[i:] for i in range(DENY_GRAM)]))
+    attr = lambda h, a: set(re.findall(a + r'="([^"]+)"', h))
+    import collections
+    on_count, off_words = collections.Counter(_gram_words(out[True])), set(_gram_words(out[False]))
+    words = {w for w, c in on_count.items() if w not in off_words and len(w) >= 7 and c >= 2} - DENY_WORD_OK
+    _DENY_CACHE.clear()
+    _DENY_CACHE.update({"key": key, "grams": grams(out[True]) - grams(out[False]), "words": words, "hrefs": attr(out[True], "href") - attr(out[False], "href"),
+                        "ids": attr(out[True], "id") - attr(out[False], "id")})
+    return _DENY_CACHE
+
+
+def refund_off_problems(html):
+    """[what] a flag-off page says from the flag-on refund wording (see refund_denylist). Visible text, hrefs and ids."""
+    deny = refund_denylist()
+    found = []
+    body = re.sub(r"(?s)<script.*?</script>|<style.*?</style>", " ", html)
+    words = _gram_words(body)
+    seen = {g for g in set(zip(*[words[i:] for i in range(DENY_GRAM)])) & deny["grams"] if " ".join(g) not in DENY_NEUTRAL}
+    if seen:
+        found.append("new refund wording: " + ", ".join(sorted('"' + " ".join(g) + '"' for g in seen)[:3]))
+    loose = sorted(set(words) & deny["words"])
+    if loose:
+        found.append("new refund word: " + ", ".join(f'"{w}"' for w in loose[:4]))
+    for h in sorted(deny["hrefs"]):
+        if f'href="{h}"' in body:
+            found.append(f"link to {h}")
+    for i in sorted(deny["ids"]):
+        if f'id="{i}"' in body:
+            found.append(f"anchor #{i}")
+    return found
+
+
+_EN_UNITS = ("zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen "
+             "eighteen nineteen").split()
+_EN_TENS = "x x twenty thirty forty fifty sixty seventy eighty ninety".split()
+_FR_UNITS = ("zéro un deux trois quatre cinq six sept huit neuf dix onze douze treize quatorze quinze seize").split()
+_FR_TENS = {2: "vingt", 3: "trente", 4: "quarante", 5: "cinquante", 6: "soixante"}
+
+
+def spelled_amount(n):
+    """Regex for the amount n (10 to 99) written in words before "dollars", English and French: "forty-nine dollars",
+    "forty nine US dollars", "49 dollars", "quarante-neuf dollars américains". Fix round 2: the digit patterns missed these."""
+    t, u = divmod(n, 10)
+    en = _EN_UNITS[n] if n < 20 else _EN_TENS[t] + (r"[\s-]" + _EN_UNITS[u] if u else "")
+    if n < 17:
+        fr = _FR_UNITS[n]
+    elif n < 20:
+        fr = "dix-" + _FR_UNITS[u]
+    elif t in _FR_TENS:
+        fr = _FR_TENS[t] + ((r"(?:\s+et\s+|-)" + _FR_UNITS[u]) if u else "")
+    else:   # 70 to 99
+        base = "soixante" if t < 8 else "quatre-vingt"
+        rest = (10 if t in (7, 9) else 0) + u
+        fr = base + ((r"(?:\s+et\s+|-)" + (_FR_UNITS[rest] if rest < 17 else "dix-" + _FR_UNITS[rest - 10])) if rest else ("s" if t == 8 else ""))
+    cur = r"(?:\s+(?:US|U\.S\.|canadian|american|américains?|canadiens?|états-unis))*\s+(?:dollars?|USD|\$)"
+    return rf"\b(?:{n}|{en}|{fr}){cur}(?![\w])"
+
+
+def founding_problem(html, open_, limit, after=49):
+    """None, or why a rendered page words the price after the founding price wrongly (Round A1, fix round 1).
+    While the founding price is open there is ONE approved form: "for the first N buyers, then US$49" (French: "pour les
+    N premiers acheteurs, puis 49,00 $ US"). The check removes every use of that exact phrase and then fails on ANY other
+    mention of the next price: a sentence-final "$49.", a bare "$49", "US$49 after that", "49 $ US", "49 USD", "was $49".
+    It also fails when the next price is crossed out (<s>, <del>, <strike>), open or ended. Ended, the next price is the
+    price, so only the crossed-out rule applies. Retired amounts and the words regular/standard price are checked by lint."""
+    body = re.sub(r"(?s)<script.*?</script>|<style.*?</style>", " ", html)
+    n = r"(?:\$\s?%d(?!\d)|(?<![\d,.])%d(?:[.,]00)?[\s\u00a0]*(?:\$|USD\b|US\b))" % (after, after)
+    if re.search(r"(?is)<(?:s|del|strike)\b[^>]*>[^<]*" + n, body):
+        return "the next price is crossed out (<s>, <del> or <strike>): it is never a reference price"
+    if not open_:
+        return None
+    text = _text(body)
+    approved = (rf"for the first {limit} buyers, then US\$[\s\u00a0]?{after}(?!\d)"
+                rf"|pour les {limit} premiers acheteurs, puis {after},00[\s\u00a0]*\$[\s\u00a0]*US")
+    rest = re.sub(approved, " ", text)
+    m = re.search(n, rest) or re.search(spelled_amount(after), rest, re.I)
+    if m:
+        return (f"the next price appears outside the one approved form \"for the first {limit} buyers, then US${after}\" "
+                f"(French: \"pour les {limit} premiers acheteurs, puis {after},00 $ US\"): …{rest[max(0, m.start() - 50):m.end() + 40].strip()}…")
+    return None
 
 
 # Security headers (hardening plan item 1, 3 Nov). Cloudflare Pages reads _headers from the root of the folder it
@@ -2580,9 +2986,24 @@ def verify(out, flags, seller=None, base_url=None):
                 die(f"business line: {href} has no single {SELLER_ANCHOR} for the footer's details link")
 
 
+def future_dated(cfg):
+    """[(what, date)] stamped later than the machine's real date: the terms and privacy versions, and the content
+    dates that become the sitemap's <lastmod>. A bundle (docs/) must have none of them (6 Nov, fix round 1)."""
+    rt = real_today().isoformat()
+    found = [(k, cfg["legal"][k]) for k in ("terms_version", "privacy_version") if cfg["legal"][k] > rt]
+    found += [(f"{pg['path']} updated", pg["updated"]) for pg in PAGES if pg.get("updated", "") > rt]
+    return found
+
+
 def build():
     cfg, prices, private = load_config()
     flags = cfg["flags"]
+    if os.environ.get("DT_REQUIRE_LAUNCH_DATE") == "1" and not preview_name():
+        ahead = future_dated(cfg)
+        if ahead:
+            die("docs/ would be stamped later than today's real date " + real_today().isoformat() + " ("
+                + ", ".join(f"{k} {v}" for k, v in ahead[:4]) + (" …" if len(ahead) > 4 else "")
+                + "): bundle on that day without DT_TODAY. Only a preview build (DT_PREVIEW) may be dated ahead.")
     out = os.environ.get("DT_OUT") or os.path.join(SITE, "_site")
     if os.path.exists(out):
         shutil.rmtree(out)
@@ -2592,6 +3013,8 @@ def build():
     for page in PAGES:
         if page["requires_flag"] and not flags[page["requires_flag"]]:
             continue
+        if page.get("requires_promo") and not cfg["stripe"]["promo_codes_enabled"]:
+            continue   # fix round 1: /partners/ exists only while promotion codes are switched on (Round B codes are not live)
         if flags["paid_report"] and page.get("lifted") and page["path"] in PAID_REPLACES_LIFTED:
             page = SAMPLE_PAGE   # C-12 final: the real sample report replaces the lifted research figure
         owned[os.path.relpath(out_file(out, page["path"]), out)] = page
@@ -2642,6 +3065,9 @@ def build():
     env.filters["usd"] = usd
     env.filters["usd_fr"] = usd_fr
     env.filters["isodate"] = isodate
+    env.filters["numword"] = numword
+    env.filters["numword_fr"] = numword_fr
+    env.filters["longdate"] = longdate
     env.globals["crumb_items"] = crumb_items
     products = {p["id"]: p for p in prices["products"]}
     nav = nav_for(cfg["nav"], flags)
@@ -2654,12 +3080,18 @@ def build():
                 "strings": read_toml(os.path.join(SITE, "config", "strings.toml"), "strings.toml"),
                 "paid_method": paid_method(),
                 "method_name": next((e.get("name") for e in report_methods() if e["method"] == page_method_version()), None),
-                "preview": preview_name()}
+                "preview": preview_name(), "founding_open": prices["rules"]["founding_open"],
+                "partners_meta": partners_meta(cfg["partners"], prices),
+                "refund_on": flags["refund_no_result"], "refund_reasons": refund_reasons(),
+                "stripe_promo": cfg["stripe"]["promo_codes_enabled"],
+                "readers_untested": readers_untested()[0], "readers_all": readers_untested()[1]}
     built, rendered = [], []
 
     def render(rel, page, **more):
         page = {"scripts": [], "modules": [], "og_image": "/assets/og/default.png", "lang": "en",
                 "alternates": [], **page}
+        if page.get("product"):
+            page["product"] = product_text(prices["rules"])   # Round A2: one source for the habit counts
         if flags["paid_report"]:
             page["scripts"] = page["scripts"] + page.get("scripts_if_paid", [])
             page["alternates"] = page.get("alternates_if_paid", page["alternates"])
@@ -2698,6 +3130,14 @@ def build():
         if html.count(LD_MARKER) != 1:
             die(f"{page['template']}: the JSON-LD marker must appear exactly once")
         html = html.replace(LD_MARKER, jsonld(page, cfg, html, flags, products))
+        if not flags["refund_no_result"] and not page.get("lifted"):
+            off = refund_off_problems(html)
+            if off:
+                die(f"{page['path']}: refund_no_result is off but the page says the new policy: " + "; ".join(off))
+        why = founding_problem(html, prices["rules"]["founding_open"], prices["rules"]["founding_limit"],
+                               products["report39"]["after_founding"]["price_usd"])
+        if why:
+            die(f"{page['path']}: {why}")
         fp = os.path.join(out, rel)
         os.makedirs(os.path.dirname(fp), exist_ok=True)
         with open(fp, "w", encoding="utf-8", newline="\n") as f:
@@ -2718,6 +3158,14 @@ def build():
     with open(os.path.join(out, "_headers"), "w", encoding="utf-8", newline="\n") as f:
         f.write(headers_file())
     version_assets(out, left_out=static_left_out)
+    ix = cfg.get("indexnow")
+    if ix and not preview_name():
+        # Round A5: IndexNow ownership file, <key>.txt at the site root, holding the key and nothing else. The key is
+        # public by design. Not in a preview build (a preview is noindex and must not be announced to search engines).
+        with open(os.path.join(out, ix["key"] + ".txt"), "w", encoding="utf-8", newline="") as f:
+            f.write(ix["key"])
+    elif ix and os.path.exists(os.path.join(out, ix["key"] + ".txt")):
+        os.remove(os.path.join(out, ix["key"] + ".txt"))   # docs/ carries it from the last bundle: a preview build must not
 
     verify(out, flags, seller=show_seller(cfg), base_url=cfg["site"]["base_url"])
     legal = paid_legal_problems(out, cfg)

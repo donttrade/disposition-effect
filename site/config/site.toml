@@ -17,6 +17,9 @@ manual_restore = true
 # Mastodon profile verification (owner decision 2 Nov): every page's <head> carries <link rel="me"> to this
 # profile, so Mastodon shows donttrade.ca as verified on it. Empty = no link.
 mastodon_url = "https://mastodon.social/@donttradestudy"
+# Countries the Product JSON-LD on /pricing/ lists for digital delivery (Round A4, 6 Nov). The Stripe link has no
+# country limit, so widen the list if Google Merchant asks for more. Two-letter codes, unique.
+merchant_countries = ["CA", "US"]
 
 [flags]
 paid_report = true        # the $39 report, its pages and the trader Stripe links
@@ -29,6 +32,7 @@ free_badges = false        # free tools' "real or noise" badges + footnote (off:
 ask_box = false            # hidden until the answer engine passes a real-question test
 prediction_results = false # /research/does-the-test-predict/ (prediction study, R1): off until the OSF registration is posted
 journal = false            # the free Trading Journal + P&L Calendar (/journal/, /tools/pnl-calendar/ and their nav row): off until the Tester passes J1-J38 and the owner approves
+refund_no_result = false   # "No result, no charge" (6 Nov, addendum A7/A8): the refund wording on every page, the /refund/ form and its French twin. OFF until the owner has changed the Stripe checkout text to match (CODER-REPORT-ROUNDA); then set [legal] refund_effective and bump terms_date to that day, in the same push
 whatif_ranked = false      # Challenge Readiness Check: ranked "Biggest changes on your past days" rules: off until a securities lawyer clears the strings (ARCHITECT-CHALLENGE-READINESS §2.7.5)
 
 [analytics]
@@ -40,6 +44,13 @@ umami_website_id = "16c5fa53-e8fc-4c55-892a-5546e7d51830"
 
 [stripe]
 mode = "live"              # which prices.json link the paid build renders: "test" or "live"
+# The owner's tick (6 Nov, Round A6) that the Payment Link takes promotion codes. partners.json must stay empty until true.
+promo_codes_enabled = false
+
+# IndexNow (Round A5): the key is public by design; the build writes docs/<key>.txt holding the key and nothing else.
+# site/tools/indexnow_ping.py announces changed URLs after a deploy.
+[indexnow]
+key = "09f6f1a6d9f63d54b0bfb51f9e902180"
 
 [forms]
 endpoint = "https://api.web3forms.com/submit"
@@ -49,6 +60,8 @@ redirect_firm = "https://donttrade.ca/start/thanks/"
 redirect_study = "https://donttrade.ca/for-firms/study-thanks/"   # the free firm study form (5 Nov 2026): its own thank-you page
 redirect_trader = "https://donttrade.ca/for-traders/thanks/"
 redirect_pilot = "https://donttrade.ca/start/pilot-thanks/"   # used only with pilot_checkout = true
+redirect_refund = "https://donttrade.ca/refund/thanks/"      # the refund request form (6 Nov, only with refund_no_result = true)
+redirect_refund_fr = "https://donttrade.ca/fr/remboursement/merci/"   # its French twin
 
 [worker]
 api_base = "https://donttrade-api.donttrade-research.workers.dev"  # local dev server only; no production value yet
@@ -68,7 +81,7 @@ launch_date = "2026-10-29"
 # YYYY-MM-DD (29 Oct, one product). Set it to the day of any later legal edit; launch_date stays as it is, so
 # "called 'Trial' before <launch_date>" never moves. On or after launch_date, not after the build date;
 # empty = the build date, and ./site/run.sh bundle refuses an empty one.
-terms_date = "2026-11-05"
+terms_date = "2026-11-06"
 # T0: the day the site moved from GitHub Pages to Cloudflare Pages (the zone became Active, runbook
 # step 83), YYYY-MM-DD. Stated on /privacy/ and /fr/confidentialite/. Required: empty or a date after
 # the build date fails the build. The privacy notice's version is the later of this and launch_date.
@@ -77,7 +90,11 @@ cloudflare_pages_since = "2026-10-24"
 # Like cloudflare_pages_since it moves only the privacy version (the latest of the three), never the terms.
 # 2 Nov: Umami Cloud named beside Cloudflare Web Analytics. Hardening round (age clause, CASL unsubscribe,
 # early deletion, campaign tags): terms_date and privacy_date set to the build day, `date +%F` = 2026-11-05.
-privacy_date = "2026-11-05"
+# 6 Nov (Round A): "beta" removed from the legal copy, the founding price worded as "first 100 buyers, then the next
+# price", partner and free-test lines in the privacy notice: terms_date and privacy_date = 2026-11-06. Build ahead of
+# that day with DT_TODAY=2026-11-06; on the day itself no variable is needed. When refund_no_result goes on, set
+# refund_effective = "YYYY-MM-DD" under [legal] to the push day and move terms_date to that day or later.
+privacy_date = "2026-11-06"
 # Verbatim from NON-ADVISER-DESIGN-AND-AUTORENEW A3 (the only approved wording).
 disclaimer_short = "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results."
 disclaimer_long = "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results."
