@@ -72,7 +72,8 @@ MIN_CELL = 10  # ANALYSIS-PLAN.md section 7: cells under 10 wallets are suppress
 # What the published study says for 5 November (SUMMARY.json / the study page). build stops if the per-market data disagree.
 EXPECT = {"hip3_liq_wallets": 9054, "liq_wallets": 18813}
 COLUMNS = ["date_utc", "row_type", "scope", "dex", "market", "wallets_force_closed", "value_force_closed_usd", "force_close_fills",
-           "long_share_of_value", "sum_of_market_wallet_counts", "market_median_wallets_30d", "ratio_5nov_to_median"]
+           "long_share_of_value", "sum_of_market_wallet_counts", "market_median_wallets_30d", "ratio_5nov_to_median",
+           "median_uses_unlisted_days"]
 
 
 def sha256(path):
@@ -199,6 +200,10 @@ def build(days_dir):
         for dex, mk, w, n, fills, nl in r["markets"]:
             per.setdefault((dex, mk), {})[d] = w
     med = {key: st.median([v.get(d, 0) for d in BASELINE]) for key, v in per.items()}
+    # A day with 1 to 9 wallets in a market is counted at its true value in that market's median, but it has no row of its own
+    # (the under-10 rule). median_uses_unlisted_days is "yes" when those unlisted days change the median, i.e. when the median
+    # cannot be recomputed from the CSV alone (taking a missing day as 0 gives another number); "no" means the CSV reproduces it.
+    unlisted = {key: med[key] != st.median([v.get(d, 0) if v.get(d, 0) >= MIN_CELL else 0 for d in BASELINE]) for key, v in per.items()}
 
     rows = []
     full_event = []
@@ -216,7 +221,8 @@ def build(days_dir):
                 m30 = med[(dex, mk)] if d == EVENT else None
                 rows.append([d, "market", scope, dex, mk, w, money(n), fills, share(nl / n) if n else "", "",
                              ("%g" % m30) if m30 is not None else "",
-                             (f"{w / m30:.2f}" if m30 else "") if m30 is not None else ""])
+                             (f"{w / m30:.2f}" if m30 else "") if m30 is not None else "",
+                             ("yes" if unlisted[(dex, mk)] else "no") if m30 is not None else ""])
             if small:
                 sw = sum(m[2] for m in small)
                 sn = sum(m[3] for m in small)
@@ -225,14 +231,14 @@ def build(days_dir):
                 # (that total is published anyway). Its wallet column stays blank; its count of (wallet, market) pairs is
                 # shown only when it is 10 or more.
                 rows.append([d, "markets_under_10_wallets_combined", scope, "", f"{len(small)} markets", "",
-                             money(sn), sum(m[4] for m in small), share(snl / sn) if sn else "", sw if sw >= MIN_CELL else "", "", ""])
+                             money(sn), sum(m[4] for m in small), share(snl / sn) if sn else "", sw if sw >= MIN_CELL else "", "", "", ""])
             pre = "hip3" if scope == "builder_listed" else "core"
             tot_n = r[f"{pre}_liq_notional"]
             rows.append([d, "scope_total_unique_wallets", scope, "", "", r[f"{pre}_liq_wallets"], money(tot_n), r[f"{pre}_liq_trades"],
-                         share(r[f"{pre}_liq_notional_long"] / tot_n) if tot_n else "", r[f"{pre}_wallet_market_pairs"], "", ""])
+                         share(r[f"{pre}_liq_notional_long"] / tot_n) if tot_n else "", r[f"{pre}_wallet_market_pairs"], "", "", ""])
         n = r["liq_notional"]
         rows.append([d, "scope_total_unique_wallets", "all_markets", "", "", r["liq_wallets"], money(n), r["liq_trades"],
-                     share(r["liq_notional_long"] / n) if n else "", sum(m[2] for m in r["markets"]), "", ""])
+                     share(r["liq_notional_long"] / n) if n else "", sum(m[2] for m in r["markets"]), "", "", ""])
     return rows, rec, full_event
 
 

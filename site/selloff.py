@@ -416,6 +416,7 @@ def permarket(E, ev, by_day):
     if any(x["status"] == "builders_docs" and not x["source_url"].startswith("https://") for x in verified.values()):
         raise SellOffError("MARKETS-VERIFIED.csv: a builders_docs row has no source URL")
     return {"top": table[:PM_TOP], "rest": table[PM_TOP:], "n_markets": len(table),
+            "med_unlisted": sum(1 for r in mk if r["median_uses_unlisted_days"] == "yes"),
             "small_n": small["market"].split()[0], "small_value": musd(float(small["value_force_closed_usd"])),
             "small_pairs": i(int(small["sum_of_market_wallet_counts"])) if small["sum_of_market_wallet_counts"] else "",
             "unique": i(int(hip["wallets_force_closed"])), "pairs": i(int(hip["sum_of_market_wallet_counts"])),

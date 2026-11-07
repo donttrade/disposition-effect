@@ -32,6 +32,7 @@ sys.path.insert(0, os.path.join(REPO, "checks"))
 sys.path.insert(0, os.path.join(REPO, "site"))
 import lint as L  # noqa: E402
 from harvest_prices import amounts_in  # noqa: E402
+from a11y import axe_violations, horizontal_overflow  # noqa: E402
 
 DATA = os.path.join(REPO, "site", "data", "selloff-2026-11-05.json")
 PACK = os.path.join(REPO, "checks", "selloff", "zenodo")
@@ -531,3 +532,64 @@ def test_broken_study_data_gives_the_real_message_not_a_name_error(tmp_path, bre
     if breakage == "figure":
         assert "the analysis summary says" in r.stderr
     assert not (tmp_path / "_site").exists()
+
+
+# ------------------------------------------------------------------ 7 Nov, Tester round: medians, sources, accessibility
+def test_median_is_recomputed_exactly_from_the_csv_where_it_uses_no_unlisted_day():
+    rows = pm_rows()
+    base = sorted({r["date_utc"] for r in rows})[:-1]
+    assert len(base) == 30 and EVENT not in base
+    listed = {(r["date_utc"], r["scope"], r["market"]): int(r["wallets_force_closed"]) for r in rows if r["row_type"] == "market"}
+    ev = [r for r in rows if r["date_utc"] == EVENT and r["row_type"] == "market"]
+    assert {r["median_uses_unlisted_days"] for r in ev} == {"yes", "no"}
+    assert all(r["median_uses_unlisted_days"] == "" for r in rows if r["date_utc"] != EVENT or r["row_type"] != "market")
+    n_no = 0
+    for r in ev:
+        m = med([listed.get((d, r["scope"], r["market"]), 0) for d in base])
+        if r["median_uses_unlisted_days"] == "no":
+            n_no += 1
+            assert f"{m:g}" == r["market_median_wallets_30d"], r["market"]
+        else:   # "yes" is said only where the CSV alone really gives another number, and the true median is never smaller
+            assert f"{m:g}" != r["market_median_wallets_30d"] and float(r["market_median_wallets_30d"]) > m, r["market"]
+    assert n_no >= 40
+
+
+def test_price_source_column_has_a_url_or_says_not_checked_and_sources_are_the_describing_pages():
+    mv = list(csv.DictReader(open(MV, encoding="utf-8")))
+    spec = "https://docs.trade.xyz/perpetuals/specifications-and-schedules/specification-index"
+    for r in mv:
+        assert (r["price_source"] == "not checked") == (r["price_source_url"] == ""), r["market_as_listed"]
+        assert r["price_source_url"] == "" or r["price_source_url"].startswith("https://"), r["market_as_listed"]
+    by = {r["market_as_listed"]: r for r in mv}
+    assert by["xyz:SP500-PERP"]["source_url"] == spec and by["xyz:XYZ100-PERP"]["source_url"] == spec
+    assert by["xyz:SP500-PERP"]["price_source_url"].endswith("/perpetuals/markets/equity-indices")
+    for fund in ("xyz:SOXL-PERP", "xyz:KORU-PERP", "xyz:DRAM-PERP"):
+        assert by[fund]["price_source"] == "not checked"
+    assert "Blue Ocean" not in "".join(r["price_source"] for r in mv if not r["price_source_url"].endswith("/stocks/us"))
+
+
+def test_source_links_have_unique_names_and_the_command_box_is_a_labelled_region(built_site):
+    h = page(built_site, S)
+    sec = h[h.index('aria-labelledby="sell-pm-h"'):h.index('aria-labelledby="sell-15-h"')]
+    names = [text(a).strip() for a in re.findall(r'(?s)<a href="https://[^"]+" rel="noopener">(.*?)</a>', sec)]
+    assert len(names) == 20 and len(set(names)) == 20 and all(n.startswith("source for ") for n in names)
+    assert re.search(r'<pre class="pm-cmd" tabindex="0" role="region" aria-label="Commands to re-run the per-market count">', sec)
+    css = open(os.path.join(REPO, "site", "static", "css", "site.css"), encoding="utf-8").read()
+    assert ".pm-cmd:focus-visible" in css
+
+
+@pytest.mark.parametrize("width", [390, 1280])
+@pytest.mark.parametrize("scheme", ["light", "dark"])
+def test_study_page_axe_clean_with_details_open(browser, built_site, width, scheme):
+    ctx = browser.new_context(viewport={"width": width, "height": 900}, color_scheme=scheme, bypass_csp=True)
+    pg = ctx.new_page()
+    pg.goto(built_site["url"] + S)
+    pg.evaluate("() => document.querySelectorAll('details').forEach(d => d.open = true)")
+    assert pg.evaluate("() => [...document.querySelectorAll('details')].every(d => d.open)")
+    assert horizontal_overflow(pg) == []
+    v = axe_violations(pg)
+    assert v == [], v
+    # the command box can be reached by keyboard
+    pg.focus("pre.pm-cmd")
+    assert pg.evaluate("() => document.activeElement.matches('pre.pm-cmd')")
+    ctx.close()

@@ -27,7 +27,15 @@ Rows of the CSV (column row_type)
                                      day's value. Its wallet column is blank; sum_of_market_wallet_counts is shown when 10 or more.
   scope_total_unique_wallets         the day's total for builder_listed, core (dex empty) or all_markets. wallets_force_closed counts
                                      each wallet once; sum_of_market_wallet_counts counts it once per market it was force-closed in.
-  A day and market with no row had no force-close. The 30-day median counts such a day as 0.
+  A day and market with no "market" row had either no force-close or 1 to 9 wallets (not listed one by one).
+
+The 30-day median of each market (5 November rows only)
+  market_median_wallets_30d is the median of that market's wallets on the 30 days 6 October to 4 November, each day at its TRUE
+  count: a day with no force-close counts as 0, and a day with 1 to 9 wallets counts at its real value even though it has no row
+  of its own here. So for some markets the median cannot be recomputed from this CSV alone. The column median_uses_unlisted_days
+  says which: "no" means taking every missing day as 0 gives exactly the published median (77 markets on 5 November, 45 of them
+  builder-listed); "yes" means the unlisted 1-to-9 days change it (81 markets, 50 builder-listed). per_market.py run on the
+  Ironflow files reproduces every median exactly. A median is a summary of 30 days, not a list of wallets; it can be below 10.
 
 Reconciliation, 5 November 2026
   Builder-listed: market rows plus the combined row = 140,556,424.23 USD = the study's value (141 million).
@@ -46,7 +54,7 @@ How to check it yourself (Python 3.10 or later, about 5 GB free while it runs)
   python3 -m pip install duckdb==1.1.3
   python3 -I per_market.py run ironflow-files per-market-days --delete
   python3 -I per_market.py build per-market-days 5-november-2026-per-market.csv && sha256sum 5-november-2026-per-market.csv
-  Expected SHA-256: 62cb49d6cf0d54887512572239766c4c784acff6361b77f2552b5bdbd638eae9
+  Expected SHA-256: d68c058c0a8b03989f36b41eb1376ef73d6c9aeee6b9423c8b7881dcbe9d1c59
   We counted 5 November twice from the same file and got the same numbers to the last digit. If a value ever differs in its last
   cent, the cause would be the order in which the computer adds numbers, not the data.
 
@@ -56,20 +64,24 @@ What each market tracks (MARKETS-VERIFIED.csv)
   Sources, in this order:
     1. The builder's own public documentation. trade[XYZ] (dex xyz): https://docs.trade.xyz (Specification Index, Stocks: US and
        Korea, Equity Indices, Oracle Price; also its machine-readable copy https://docs.trade.xyz/llms-full.txt). Entropy (dex io):
-       https://docs.entropy.io (Equity Assets, Oracle Price).
+       https://docs.entropy.io (Equity Assets, Equity Perpetuals).
     2. Hyperliquid's public metadata: POST https://api.hyperliquid.xyz/info with {"type":"perpDexs"} (which builder runs each dex)
        and {"type":"meta","dex":"xyz"} or "io" (each market's maximum leverage and margin mode). The API answered from our machine.
   Status (the study page shows the same words: "builder's docs", "partly sourced", "no source found"):
-    builders_docs    the builder's documents name what the market tracks (the share or index) and how its price is taken, and the
-                     maximum leverage and margin mode in those documents equal Hyperliquid's metadata.
+    builders_docs    the page in source_url names what the market tracks (the share or index), and the maximum leverage and
+                     margin mode in the builder's documents equal Hyperliquid's metadata.
     partly_sourced   the builder names the issuer or underlying but something is still open (the notes column says what).
     no_source_found  no primary source was found.
   Only a builders_docs market's underlying is named on the study page; any other keeps its name "as listed".
   A ticker name alone is never treated as evidence. Example: the market listed as PURRDAT references Nasdaq: PURR.
   Result: 19 builders_docs, 1 partly_sourced (io:NBIS-PERP), 0 no_source_found.
   Limits: the documents were read on 7 November 2026 (UTC) and describe each market on that day, not on 5 November. trade[XYZ]'s
-  changelog lists no change to these markets' underlying between 6 October and 7 November 2026. The price-source text is a short
-  summary of the builder's own description; we did not check the oracle prices themselves.
+  changelog lists no change to these markets' underlying between 6 October and 7 November 2026.
+  Price source: the price_source column says only what the page in price_source_url states. For the three funds (SOXL, KORU, DRAM)
+  no page we can cite states how their price is taken (the builder's U.S. page speaks of stocks), so the column says "not checked"
+  and the URL is empty. We did not check the oracle prices themselves.
+  Re-check, 7 November 2026 (UTC): for every row, the quoted builder words were found in the page at source_url, and the leverage
+  and margin mode in the Specification Index (or Entropy's Equity Assets) equal Hyperliquid's metadata read again that day.
 
 Wallets, not people. No wallet address is in any of these files. Not investment advice.
 Data: Ironflow (ironflow.sh), Hyperliquid trades, CC BY 4.0; changes made: aggregated into counts and sums. Builder documents are
