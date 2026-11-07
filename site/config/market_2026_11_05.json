@@ -1,0 +1,33 @@
+{
+ "_about": "The market facts of 5 November 2026 (6 Nov 2026 read). Single closing levels from the Federal Reserve Bank of St. Louis FRED series, quoted with credit; the full series is NOT republished here (NASDAQCOM and NASDAQ100 are copyright Nasdaq, SP500 copyright S&P Dow Jones Indices, VIXCLS copyright Cboe). site/learn_tables.market_view() computes every change, drawdown and recovery gain from these levels; tests/test_selloff.py recomputes them a second way and asserts 11.90, 13.51, 14.72 and 17.25. The 'reported' block holds figures read in a news report, quoted with credit and not recomputed.",
+ "date": "2026-11-05",
+ "read_on": "2026-11-06",
+ "source": {"name": "FRED, Federal Reserve Bank of St. Louis", "url": "https://fred.stlouisfed.org/",
+            "credit": "Closing levels: Nasdaq, S&P Dow Jones Indices and Cboe, via FRED (Federal Reserve Bank of St. Louis), read 6 Nov 2026."},
+ "input_sha256": {
+  "fa_NASDAQCOM.csv": "a27a1ac37f687022e06c8aaf02080c923d48477ec800f67503b49ce927fe82d3",
+  "fa_NASDAQ100.csv": "c62a0ce7227655ddd02090559d036cbf995d505855abad6215cd1572feda968c",
+  "fa_SP500.csv": "e3d7566c49052717d5f4afd0dd50c0c7056f6e5859c5dc83d2f71437c17c2c77",
+  "fred_DJIA.csv": "83bb882f7f2d34cd21c26b167c8d00da3843beb1242576eb06c4c262a46f422a",
+  "fred_VIXCLS.csv": "a0fe83919b37394f40a4bbafdeb1dbfcc216269e8ab7226cc5636a57f6a06990"
+ },
+ "indices": {
+  "nasdaq_composite": {"name": "Nasdaq Composite", "series": "NASDAQCOM", "url": "https://fred.stlouisfed.org/series/NASDAQCOM",
+                       "close": 24315.00, "prior_close": 25736.51, "prior_date": "2026-11-04", "record_close": 27599.89, "record_date": "2026-10-06",
+                       "larger_fall_since": {"date": "2025-04-04", "change_pct": -5.82, "note": "the last one-day fall of the series larger than 5 Nov, read from the full FRED series (history from 2015-01-02)"}},
+  "nasdaq_100": {"name": "Nasdaq-100", "series": "NASDAQ100", "url": "https://fred.stlouisfed.org/series/NASDAQ100",
+                 "close": 26629.81, "prior_close": 28437.17, "prior_date": "2026-11-04", "record_close": 31224.69, "record_date": "2026-10-06"},
+  "sp500": {"name": "S&P 500", "series": "SP500", "url": "https://fred.stlouisfed.org/series/SP500",
+            "close": 7353.73, "prior_close": 7688.62, "prior_date": "2026-11-04", "record_close": 7818.93, "record_date": "2026-10-06"},
+  "djia": {"name": "Dow Jones Industrial Average", "series": "DJIA", "url": "https://fred.stlouisfed.org/series/DJIA",
+           "close": 51523.06, "prior_close": 53356.12, "prior_date": "2026-11-04"},
+  "vix": {"name": "Cboe Volatility Index (VIX)", "series": "VIXCLS", "url": "https://fred.stlouisfed.org/series/VIXCLS",
+          "close": 28.18, "prior_close": 16.61, "prior_date": "2026-11-04"}
+ },
+ "reported": {
+  "reuters": {"outlet": "Reuters, Trading Day (Jamie McGeever), via Investing.com", "date": "2026-11-05",
+              "url": "https://www.investing.com/news/economy-news/trading-day-a-november-5-market-bonfire-5005919",
+              "chip_index_fall_pct": 12, "chip_index_note": "its second-biggest fall on record",
+              "cause": "fears that the Democrats' midterm wins would slow the building of AI data centres"}
+ }
+}

@@ -1,0 +1,9 @@
+{#- A thin dated band above the home hero (sell-off campaign K5; fix round 1, F3 option b). It carries the FRED market figure only and links
+    to the study page, where the study figures live: NO study finding sits on the home page, so none sits next to the offer
+    (tests/test_selloff.py holds that). The build renders it only while the build date is before data-expires (build.py dated_band());
+    band-expiry.js also hides it in a browser on or after that date. No motion. -#}
+<div class="dated-band" data-dated-band data-expires="{{ dated_band.expires }}" role="region" aria-label="Dated note: {{ dated_band.date_label }}">
+  <div class="wrap">
+    <p><strong>Nasdaq Composite −{{ dated_band.nasdaq }} on {{ dated_band.date_long }}.</strong> What did your account do that day? <a href="{{ dated_band.link }}">See what one crypto exchange’s wallets did <span aria-hidden="true">→</span></a></p>
+  </div>
+</div>

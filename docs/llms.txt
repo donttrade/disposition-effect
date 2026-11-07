@@ -9,6 +9,7 @@
 - [A pre-registered test of volatility-scaled momentum failed its own kill criteria at five positions](https://donttrade.ca/research/volatility-scaled-momentum/): The mechanism passed on factor data; the five-position version with costs failed its own kill criteria. DOI 10.5281/zenodo.23426307
 - [50 trading strategies tested: none survived](https://donttrade.ca/research/strategy-tests/): Swing, investing, overnight and day-trading rules, judged net of costs: 50 strategies, 44 fingerprinted in advance; none passed. Not a strategy or signal.
 - [26 swing-trading strategies, pre-registered: none survived](https://donttrade.ca/research/swing-trading-strategies/): Pre-registered, hashed tests of 26 swing-trading rules on ETFs, judged once on locked holdouts, net of costs. None passed. Not a strategy or a signal.
+- [5 Nov 2026 Sell-Off: 9,054 Hyperliquid Wallets Force-Closed](https://donttrade.ca/research/5-november-2026-sell-off/): On 5 Nov 2026, 9,054 Hyperliquid wallets were force-closed on builder-listed markets, about 4.7 times the median weekday. Method set down first, open data.
 
 ## Learn
 - [Learn: Trading Habits, Risk Math and the Evidence](https://donttrade.ca/learn/): Plain explanations of trading habits and risk math, each with sources and a free way to measure it in your own trades.
@@ -20,6 +21,7 @@
 - [Trading heatmap](https://donttrade.ca/tools/trading-heatmap/): How did my own trades turn out by the hour and weekday they opened?
 - [Drawdown and recovery calculator](https://donttrade.ca/tools/drawdown-calculator/): What gain recovers a drawdown, and how deep and long were mine?
 - [Challenge Readiness Check](https://donttrade.ca/tools/prop-challenge-simulator/): How would my past trading days have fared under a challenge’s rules?
+- [Bad-day check](https://donttrade.ca/tools/bad-day-check/): How did one day compare with my typical day?
 - [Lot size calculator](https://donttrade.ca/tools/lot-size-calculator/): How many lots match the amount I chose to risk at this stop?
 - [Risk-reward calculator](https://donttrade.ca/tools/risk-reward-calculator/): At what win rate does this reward-to-risk ratio break even, and what is the expectancy in R?
 - [Disposition-effect calculator](https://donttrade.ca/tools/disposition-calculator/): Were winning positions sold more readily than losing ones?

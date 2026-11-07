@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
+{#- 6 Nov (sell-off campaign): the dated band above the hero shows a FRED market figure and a link to the study, never a study finding, so the rule
+    below ("no study finding on this page, none next to an offer") still holds. tests/test_selloff.py fails if a study figure reaches this page. -#}
+{%- if dated_band %}{% include "partials/dated_band.html" %}{% endif %}
 {%- set r = products["report39"] %}
 {%- set ev = evidence %}
 {%- from "partials/hero_band.html" import hero_band with context %}

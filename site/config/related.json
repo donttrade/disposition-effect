@@ -21,6 +21,11 @@
     "href": "/learn/losing-streak-probability/",
     "label": "Losing streak probability",
     "why": "The chance of a run of losses, by win rate and number of trades."
+   },
+   {
+    "href": "/tools/bad-day-check/",
+    "label": "Bad-day check",
+    "why": "One day of your file beside your typical day."
    }
   ],
   "/tools/trading-heatmap/": [
@@ -38,6 +43,11 @@
     "href": "/tools/prop-challenge-simulator/",
     "label": "Challenge Readiness Check",
     "why": "Your past days replayed under a prop firm’s published rules."
+   },
+   {
+    "href": "/tools/bad-day-check/",
+    "label": "Bad-day check",
+    "why": "One day of your file beside your typical day."
    }
   ],
   "/tools/drawdown-calculator/": [
@@ -314,6 +324,11 @@
     "href": "/learn/",
     "label": "Learn",
     "why": "Plain explanations with sources, and a free way to measure each in your own trades."
+   },
+   {
+    "href": "/tools/bad-day-check/",
+    "label": "Bad-day check",
+    "why": "One day of your file beside your typical day."
    }
   ],
   "/learn/losing-streak-probability/": [
@@ -336,6 +351,11 @@
     "href": "/learn/",
     "label": "Learn",
     "why": "Plain explanations with sources, and a free way to measure each in your own trades."
+   },
+   {
+    "href": "/tools/bad-day-check/",
+    "label": "Bad-day check",
+    "why": "One day of your file beside your typical day."
    }
   ],
   "/learn/": [
@@ -353,6 +373,50 @@
     "href": "/research/",
     "label": "Research",
     "why": "Every study, negative results included, with data, code and DOIs where published."
+   }
+  ],
+  "/research/5-november-2026-sell-off/": [
+   {
+    "href": "/tools/bad-day-check/",
+    "label": "Bad-day check",
+    "why": "One day of your file beside your typical day."
+   },
+   {
+    "href": "/learn/drawdown-recovery-table/",
+    "label": "Drawdown recovery table",
+    "why": "The gain that gets an account back to its high."
+   },
+   {
+    "href": "/learn/losing-streak-probability/",
+    "label": "Losing streak probability",
+    "why": "The chance of a run of losses, by win rate and number of trades."
+   },
+   {
+    "href": "/tools/trade-stats/",
+    "label": "Trade stats",
+    "why": "Win rate, profit factor, streaks and drawdown from your own trade file."
+   }
+  ],
+  "/tools/bad-day-check/": [
+   {
+    "href": "/research/5-november-2026-sell-off/",
+    "label": "5 Nov 2026 sell-off",
+    "why": "Forced closes on one crypto exchange, counted against the 30 days before."
+   },
+   {
+    "href": "/tools/trade-stats/",
+    "label": "Trade stats",
+    "why": "Win rate, profit factor, streaks and drawdown from your own trade file."
+   },
+   {
+    "href": "/tools/trading-heatmap/",
+    "label": "Trading heatmap",
+    "why": "Your results by the hour and weekday each trade opened."
+   },
+   {
+    "href": "/learn/drawdown-recovery-table/",
+    "label": "Drawdown recovery table",
+    "why": "The gain that gets an account back to its high."
    }
   ]
  }

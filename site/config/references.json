@@ -1,5 +1,5 @@
 {
- "_about": "DOIs cited on /learn/ pages and the glossary additions, each confirmed against api.crossref.org on the date shown (title, journal, volume, pages and year as listed). A DOI not in this file may not be linked from those pages (tests/test_seo1.py). The Zenodo DOIs of donttrade's own studies are in studies.json. Crossref lists only the first page (263) for Kahneman and Tversky (1979), so only that is recorded.",
+ "_about": "DOIs cited on /learn/ pages, the glossary additions and the 5 November 2026 sell-off study, each confirmed against api.crossref.org on the date shown (title, journal, volume, pages and year as listed). A DOI not in this file may not be linked from those pages (tests/test_seo1.py). The Zenodo DOIs of donttrade's own studies are in studies.json. Crossref lists only the first page (263) for Kahneman and Tversky (1979), so only that is recorded.",
  "refs": {
   "odean1998": {
    "doi": "10.1111/0022-1082.00072",
@@ -54,6 +54,28 @@
    "volume": "21",
    "issue": "3",
    "pages": "196-207",
+   "crossref_checked": "2026-11-06"
+  },
+  "imas2016": {
+   "doi": "10.1257/aer.20140386",
+   "authors": "Imas, A.",
+   "year": 2016,
+   "title": "The Realization Effect: Risk-Taking After Realized Versus Paper Losses",
+   "journal": "American Economic Review",
+   "volume": "106",
+   "issue": "8",
+   "pages": "2086-2109",
+   "crossref_checked": "2026-11-06"
+  },
+  "coval2005": {
+   "doi": "10.1111/j.1540-6261.2005.00723.x",
+   "authors": "Coval, J. D., & Shumway, T.",
+   "year": 2005,
+   "title": "Do Behavioral Biases Affect Prices?",
+   "journal": "The Journal of Finance",
+   "volume": "60",
+   "issue": "1",
+   "pages": "1-34",
    "crossref_checked": "2026-11-06"
   }
  }

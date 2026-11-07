@@ -13,9 +13,10 @@
   "fx": "Real public data: Federal Reserve Board H.10 euro noon rates, " ~ FX.month_label,
   "study": "Real published data: Odean (1998), Table I",
   "rr": "Formula only: your numbers place the point",
-  "pass": "No public data: no firm publishes cohort counts we can show"} %}
-{%- set KEY = {"stats": "acc", "prop": "acc", "heat": "acc", "dd": "acc", "lot": "fx", "rr": "rr", "disp": "study", "pass": "pass"} %}
-{%- set CHIP = {"acc": "Real public data", "fx": "Real public data", "study": "Real published data", "rr": "Formula only", "pass": "No public data"} %}
+  "pass": "No public data: no firm publishes cohort counts we can show",
+  "bd": "No public data: your own days are not published, so none is shown"} %}
+{%- set KEY = {"stats": "acc", "prop": "acc", "heat": "acc", "dd": "acc", "lot": "fx", "rr": "rr", "disp": "study", "pass": "pass", "badday": "bd"} %}
+{%- set CHIP = {"acc": "Real public data", "fx": "Real public data", "study": "Real published data", "rr": "Formula only", "pass": "No public data", "bd": "No public data"} %}
 
 {%- macro chip(k) %}<span class="chip md-chip" aria-hidden="true">{{ CHIP[KEY[k]] }}</span>{% endmacro %}
 {%- macro source(k) %}{{ SRC[KEY[k]] }}{% endmacro %}
@@ -38,6 +39,7 @@
 {%- elif k == "lot" -%}The formula, lots = risk ÷ (stop in pips × $10), with no numbers filled in. For scale, one past month of the euro: in {{ FX.month_label }} it ranged between {{ rv.lot.low }} and {{ rv.lot.high }} and {{ FX.direction }} over the month.
 {%- elif k == "rr" -%}The break-even win rate 1 ÷ (1 + R) for R from 0.5 to 5: 50.0% at 1R, 33.3% at 2R, 25.0% at 3R, 16.7% at 5R.
 {%- elif k == "disp" -%}The calculator on Odean’s four published counts: gains sold {{ O.pgr }}, losses sold {{ O.plr }}, ratio {{ O.ratio }}, t-statistic {{ O.t }}.
+{%- elif k == "badday" -%}One day beside a typical day, with no figures: your own file fills it in.
 {%- elif k == "pass" -%}The two formulas and an empty funnel: no figures, because no firm publishes cohort counts we can show.
 {%- endif -%}
 {%- endmacro %}
@@ -75,6 +77,9 @@
 {%- set Dp = rv.disp -%}
 <span class="pv pv-calc"><b>{{ O.pgr }} vs {{ O.plr }}, ratio {{ O.ratio }}, t-statistic {{ O.t }}</b></span>
 <svg class="dg" aria-hidden="true" focusable="false" viewBox="0 0 240 60"><rect class="dg-gain a-x" x="0" y="2" width="{{ Dp.gw }}" height="11" rx="2"/><rect class="dg-band" x="{{ Dp.gbx }}" y="0" width="{{ Dp.gbw }}" height="15"/><rect class="dg-loss a-x d2" x="0" y="31" width="{{ Dp.lw }}" height="11" rx="2"/><rect class="dg-band" x="{{ Dp.lbx }}" y="29" width="{{ Dp.lbw }}" height="15"/><text class="dg-t dg-t2" x="0" y="25">gains sold {{ Dp.gpct }} (95% band {{ Dp.gband }})</text><text class="dg-t dg-t2" x="0" y="55">losses sold {{ Dp.lpct }} (95% band {{ Dp.lband }})</text></svg>
+{%- elif k == "badday" -%}
+<span class="pv pv-calc pv-skel"><b>your day | your typical day</b>{% if page %}<span class="pv-unlock">Drop your file and a date; the trades, net result, largest loss and quick re-entries of that day appear here, beside the median of your other days.</span>{% endif %}</span>
+{%- if page %}<svg class="dg" aria-hidden="true" focusable="false" viewBox="0 0 240 40"><rect class="dg-ghost" x="0.5" y="4.5" width="150" height="12" rx="2"/><rect class="dg-ghost" x="0.5" y="22.5" width="86" height="12" rx="2"/></svg>{% endif %}
 {%- elif k == "pass" -%}
 <span class="pv pv-calc pv-skel"><b>pass rate = passed ÷ finished</b><b>payout rate = paid out ÷ passed</b><span class="pv-unlock">Type your cohort’s counts; the funnel draws to scale, with a 95% band once 30 evaluations have finished.</span></span>
 <svg class="dg" aria-hidden="true" focusable="false" viewBox="0 0 240 64">{% for lab, wd in [("started", 240), ("finished: started − open", 200), ("passed", 92), ("paid out", 44)] %}<rect class="dg-ghost" x="0.5" y="{{ loop.index0 * 16 + 0.5 }}" width="{{ wd - 1 }}" height="13" rx="2"/><text class="dg-t dg-in" x="{{ 6 if wd > 120 else wd + 6 }}" y="{{ loop.index0 * 16 + 10 }}">{{ lab }}</text>{% endfor %}</svg>

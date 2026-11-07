@@ -51,7 +51,7 @@ REAL = json.load(open(TOOL_REAL, encoding="utf-8"))
 TOOL_PAGES = {"/tools/trade-stats/": "stats", "/tools/trading-heatmap/": "heat", "/tools/drawdown-calculator/": "dd",
               "/tools/prop-challenge-simulator/": "prop", "/tools/lot-size-calculator/": "lot",
               "/tools/risk-reward-calculator/": "rr", "/tools/disposition-calculator/": "disp",
-              "/tools/pass-rate-calculator/": "pass"}
+              "/tools/pass-rate-calculator/": "pass", "/tools/bad-day-check/": "badday"}
 CHIPS = {"Real public data", "Real published data", "Formula only", "No public data"}
 # Architect plan A.1, the attribution text, word for word
 A1 = ("Laramee, R. (2025). Stock Transactions Dataset. Mendeley Data, V1. doi:10.17632/k4tnk2nggv.1. Licensed CC BY 4.0. "
@@ -195,8 +195,8 @@ def test_tools_index_structure(built_site):
         assert glyphs == [k]
         chips = re.findall(r'<span class="chip md-chip" aria-hidden="true">([^<]+)</span>', body)
         assert len(chips) == 1 and chips[0] in CHIPS
-    assert len(set(re.findall(r'<a class="tl" href="(/tools/[^"]+)"', h))) == 8
-    assert "<h1" in h and "Eight free tools for your own trades" in h
+    assert len(set(re.findall(r'<a class="tl" href="(/tools/[^"]+)"', h))) == 9
+    assert "<h1" in h and "Nine free tools for your own trades" in h
     assert 'class="free-strip"' not in h   # owner, 6 Nov: off /tools/ only
 
 
@@ -828,8 +828,12 @@ def test_r2_non_tools_docs_pages_differ_from_main_only_by_asset_hashes():
     names = subprocess.run(["git", "-C", REPO, "diff", "--name-only", BASE, "--", "docs"], capture_output=True,
                            text=True, check=True).stdout.split()
     norm = lambda t: re.sub(r"\?v=[0-9a-f]{8}", "?v=", t)   # noqa: E731
+    # the 5 Nov sell-off campaign (6 Nov) changes these on purpose: the Bad-day check's questions in Help, the dated callout and
+    # related links on the two Learn pages, and the new study in the Research list (tests/test_selloff.py holds each change)
+    selloff = ("docs/help/index.html", "docs/learn/drawdown-recovery-table/index.html",
+               "docs/learn/losing-streak-probability/index.html", "docs/research/index.html")
     for n in names:
-        if n.startswith(("docs/tools/", "docs/static/")) or not n.endswith(".html") or n == "docs/index.html":
+        if n.startswith(("docs/tools/", "docs/static/")) or not n.endswith(".html") or n == "docs/index.html" or n in selloff:
             continue
         try:
             was = subprocess.run(["git", "-C", REPO, "show", f"{BASE}:{n}"], capture_output=True, text=True,
