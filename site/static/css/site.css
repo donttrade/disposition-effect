@@ -1491,6 +1491,20 @@ details.legal-sec[open] { padding-bottom: var(--s2); }
 .sell-hash, .sell-sec code { overflow-wrap: anywhere; word-break: break-all; font-family: var(--font-mono); font-size: var(--fs-0); }
 .sell-refs li { margin-bottom: var(--s1); }
 .sell-sec .table-wrap, .sell-sec details { max-width: 100%; }
+/* 7 Nov: Market by market. A status is never colour alone: icon + word. */
+.pm-table { max-width: none; }
+.pm-table thead th.num { white-space: normal; min-width: 5.5em; }   /* long headers wrap; the numbers below stay on one line */
+.pm-table td:nth-child(3) { min-width: 15em; }
+.pm-badge { min-height: 0; padding: 0 8px; margin-left: 2px; font-weight: 600; }
+.badge-ver { color: var(--text); }
+.badge-ver::before { content: "✓"; }
+.badge-part { color: var(--caution); }
+.badge-part::before { content: "◐"; }
+.badge-none { color: var(--muted); border-style: dashed; }
+.badge-none::before { content: "…"; }
+.pm-check { max-width: var(--prose); }
+.pm-check h3 { font-size: var(--fs-1); margin: 0 0 var(--s1); }
+.pm-cmd { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: var(--s1) var(--s2); font-size: var(--fs-0); }
 
 /* a thin dated band above the home hero; the build leaves it out after data-expires */
 .dated-band { background: var(--surface); border-bottom: 1px solid var(--border); font-size: var(--fs-0); }

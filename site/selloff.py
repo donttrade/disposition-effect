@@ -25,7 +25,13 @@ PACK_DIR = os.path.join(os.path.dirname(SITE), "checks", "selloff", "zenodo")
 CSV_PATH = "/data/5-november-2026-hyperliquid-daily.csv"
 PACK_URL = "/data/5-november-2026/"
 PACK_FILES = ("README.txt", "ANALYSIS-PLAN.md", "ANALYSIS-PLAN.sha256", "RUN-LOG.txt", "run_day.py", "summarize.py", "s3_exact.py",
-              "SUMMARY.json", "S3_exact.json")
+              "SUMMARY.json", "S3_exact.json",
+              # 7 Nov: the market-by-market breakdown (descriptive, added after the plan) and the check of what each market tracks
+              "per_market.py", "markets_verified.py", "MARKETS-VERIFIED.csv", "MARKETS-README.txt")
+PM_CSV = "5-november-2026-per-market.csv"       # served at /data/ like the daily CSV, byte for byte from the pack
+PM_CSV_PATH = "/data/" + PM_CSV
+PM_TOP = 15                                      # rows shown before the <details>
+MIN_CELL = 10                                    # ANALYSIS-PLAN.md section 7
 CSV_COLUMNS = ("date_utc", "wallets_force_closed", "value_force_closed_usd", "active_wallets", "share_of_active_force_closed",
                "hip3_markets_wallets_force_closed", "hip3_markets_value_force_closed_usd", "long_share_of_value",
                "wallets_in_new_order_count_15min", "wallets_in_new_order_count_60min", "wallets_in_new_order_denominator",
@@ -349,7 +355,73 @@ def context(data=None):
             "plan_sha": data["provenance"]["analysis_plan"]["sha256"], "plan_logged": data["provenance"]["analysis_plan"]["logged_utc"],
             "csv_url": CSV_PATH, "pack_url": PACK_URL, "pack_files": PACK_FILES, "n_inputs": len(data["provenance"]["inputs"]),
             "event_input_sha": next(x["sha256"] for x in data["provenance"]["inputs"] if x["day"] == ev),
-            "S": S}
+            "pm": permarket(E, ev), "S": S}
+
+
+# ------------------------------------------------------------------ market by market (descriptive, added after the plan)
+# The CSV's status codes are the brief's words; the page shows them in words the site's wording lint accepts ("verified" is a
+# banned assurance word on pages, checks/banned.toml).
+STATUS = {"verified": ("builder’s docs", "badge-ver"), "partly verified": ("partly sourced", "badge-part"),
+          "not verified": ("no source found", "badge-none")}
+
+
+def _sha(path):
+    import hashlib
+    with open(path, "rb") as f:
+        return hashlib.sha256(f.read()).hexdigest()
+
+
+def permarket(E, ev):
+    """The 'Market by market' section from checks/selloff/zenodo/5-november-2026-per-market.csv and MARKETS-VERIFIED.csv.
+    FAILS the build unless the rows add up to the study's own figures: the builder-listed values sum to the day's force-closed
+    value there, the unique-wallet total is the page's wallet count, and the same for all markets."""
+    pm_file = os.path.join(PACK_DIR, PM_CSV)
+    rows = [r for r in csv.DictReader(open(pm_file, encoding="utf-8")) if r["date_utc"] == ev]
+    tot = {r["scope"]: r for r in rows if r["row_type"] == "scope_total_unique_wallets"}
+    hip, allm = tot["builder_listed"], tot["all_markets"]
+    if int(hip["wallets_force_closed"]) != E["hip3_liq_wallets"] or int(allm["wallets_force_closed"]) != E["liq_wallets"]:
+        raise SellOffError("per-market totals: unique wallets differ from the study's figures")
+    if not math.isclose(float(hip["value_force_closed_usd"]), E["hip3_liq_notional"], abs_tol=0.01) or \
+            not math.isclose(float(allm["value_force_closed_usd"]), E["liq_notional"], abs_tol=0.01):
+        raise SellOffError("per-market totals: value differs from the study's figures")
+    for scope, t in (("builder_listed", hip), ("all_markets", allm)):
+        parts = [r for r in rows if r["row_type"] != "scope_total_unique_wallets" and (scope == "all_markets" or r["scope"] == scope)]
+        if any(r["row_type"] == "markets_under_10_wallets_combined" and not r["value_force_closed_usd"] for r in parts):
+            raise SellOffError("per-market: a combined small-market row is blank, so the rows cannot be added up")
+        s = sum(float(r["value_force_closed_usd"]) for r in parts)
+        if abs(s - float(t["value_force_closed_usd"])) > 0.01 * len(parts):
+            raise SellOffError(f"per-market: the {scope} rows add up to {s:.2f}, not {t['value_force_closed_usd']}")
+    verified = {r["market_as_listed"]: r for r in csv.DictReader(open(os.path.join(PACK_DIR, "MARKETS-VERIFIED.csv"), encoding="utf-8"))}
+    total_v = float(hip["value_force_closed_usd"])
+    mk = sorted((r for r in rows if r["scope"] == "builder_listed" and r["row_type"] == "market"),
+                key=lambda r: -float(r["value_force_closed_usd"]))
+    table = []
+    for r in mk:
+        v = float(r["value_force_closed_usd"])
+        m30 = float(r["market_median_wallets_30d"])
+        chk = verified.get(r["market"])
+        st_label, st_cls = STATUS[chk["status"]] if chk else ("not checked", "badge-none")
+        table.append({"market": r["market"].partition(":")[2].removesuffix("-PERP"), "builder": r["dex"],
+                      "wallets": i(int(r["wallets_force_closed"])), "value": musd(v) if v >= 5000 else "under 0.01",
+                      "share": pct(v / total_v, 2) if v / total_v >= 0.0001 else "under 0.01%", "long": pct(float(r["long_share_of_value"]), 0),
+                      "median": f"{m30:,.1f}".removesuffix(".0"), "ratio": times(float(r["ratio_5nov_to_median"])) if r["ratio_5nov_to_median"] else "–",
+                      "tracks": chk["what_it_tracks"] if chk and chk["status"] == "verified" else "",
+                      "status": st_label, "status_cls": st_cls, "src": chk["source_url"] if chk else None})
+    small = next(r for r in rows if r["scope"] == "builder_listed" and r["row_type"] == "markets_under_10_wallets_combined")
+    n_checked = len(verified)
+    counts = {k: sum(1 for x in verified.values() if x["status"] == k) for k in STATUS}
+    if any(x["status"] == "verified" and not x["source_url"].startswith("https://") for x in verified.values()):
+        raise SellOffError("MARKETS-VERIFIED.csv: a verified row has no source URL")
+    return {"top": table[:PM_TOP], "rest": table[PM_TOP:], "n_markets": len(table),
+            "small_n": small["market"].split()[0], "small_value": musd(float(small["value_force_closed_usd"])),
+            "small_pairs": i(int(small["sum_of_market_wallet_counts"])) if small["sum_of_market_wallet_counts"] else "",
+            "unique": i(int(hip["wallets_force_closed"])), "pairs": i(int(hip["sum_of_market_wallet_counts"])),
+            "overlap": i(int(hip["sum_of_market_wallet_counts"]) - int(hip["wallets_force_closed"])),
+            "all_unique": i(int(allm["wallets_force_closed"])), "all_pairs": i(int(allm["sum_of_market_wallet_counts"])),
+            "all_overlap": i(int(allm["sum_of_market_wallet_counts"]) - int(allm["wallets_force_closed"])),
+            "value": musd(total_v), "csv_url": PM_CSV_PATH, "csv_sha": _sha(pm_file), "verified_url": PACK_URL + "MARKETS-VERIFIED.csv",
+            "readme_url": PACK_URL + "MARKETS-README.txt", "script_url": PACK_URL + "per_market.py", "n_checked": n_checked,
+            "counts": counts, "checked_on": next(iter(verified.values()))["checked_utc_date"]}
 
 
 # ------------------------------------------------------------------ the CSV download
