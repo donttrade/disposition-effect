@@ -61,6 +61,18 @@ REPO = os.path.dirname(SITE)
 sys.path.insert(0, SITE)
 import tool_real  # noqa: E402  (6 Nov, tools redesign B2: the real-data displays' geometry)
 import selloff as SO  # noqa: E402  (6 Nov, the sell-off study: its figures, charts and CSV)
+
+
+# 7 Nov: defined before any module-level code that can fail (selloff_ctx() runs at import, when the page list is made);
+# defined further down, die() was a NameError there and hid the real message.
+class BuildError(Exception):
+    pass
+
+
+def die(msg):
+    raise BuildError(msg)
+
+
 DOCS = os.path.join(REPO, "docs")
 BASELINE = os.environ.get("DT_BASELINE") or os.path.join(REPO, "checks", "urls-baseline.txt")
 
@@ -889,7 +901,11 @@ def selloff_page():
                             f"{F['hip3_wd_ratio']} times the median weekday. Method set down first, open data.")}
 
 
-PAGES += [selloff_page()]
+try:
+    PAGES += [selloff_page()]
+except BuildError as _e:   # this runs at import, before main(): fail the way main() does, with the real message
+    print(f"BUILD FAILED: {_e}", file=sys.stderr)
+    sys.exit(1)
 
 # Config the SEO round reads (config/studies.json, related.json, glossary_terms.json, references.json).
 RESEARCH_LIST_END = re.compile(r'(?s)</li>\s*(?=</ul>\s*<h2 id="sample-report">)')   # the end of /research/'s list of all studies
@@ -1838,12 +1854,6 @@ def passthrough_pages(owned):
     return pages
 
 
-class BuildError(Exception):
-    pass
-
-
-def die(msg):
-    raise BuildError(msg)
 
 
 FLAGS = ("paid_report", "analytics", "trader_first_home", "pilot_checkout", "free_badges", "journal", "ask_box", "whatif_ranked",

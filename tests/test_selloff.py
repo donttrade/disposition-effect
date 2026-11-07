@@ -508,3 +508,26 @@ def test_check_box_states_the_ironflow_replacement_and_the_pinned_revision(built
     box = text(h[h.index('id="sell-pm-check-h"'):h.index('aria-labelledby="sell-15-h"')])
     assert pm.REVISION in box and "23:24 UTC" in box and "18,815" in box and "18,813" in box and "1,142" in box and "1,129" in box
     assert "builder-listed figures do not change" in box
+
+
+# ------------------------------------------------------------------ 7 Nov: a broken study-data file fails the build with its real message
+@pytest.mark.parametrize("breakage", ["not json", "figure"])
+def test_broken_study_data_gives_the_real_message_not_a_name_error(tmp_path, breakage):
+    bad = tmp_path / "selloff-broken.json"
+    if breakage == "not json":
+        bad.write_text("{ this is not json", encoding="utf-8")
+    else:
+        d = json.loads(open(DATA, encoding="utf-8").read())
+        d["days"][-1]["hip3_liq_wallets"] += 1          # the days no longer reproduce the analysis summary
+        bad.write_text(json.dumps(d), encoding="utf-8")
+    code = ("import runpy, sys; sys.path.insert(0, sys.argv[1]); import selloff; selloff.DATA_JSON = sys.argv[2]; "
+            "runpy.run_path(sys.argv[3], run_name='__main__')")
+    env = {**os.environ, "DT_OUT": str(tmp_path / "_site")}
+    r = subprocess.run([sys.executable, "-c", code, os.path.join(REPO, "site"), str(bad), os.path.join(REPO, "site", "build.py")],
+                       env=env, capture_output=True, text=True)
+    assert r.returncode != 0
+    assert "NameError" not in r.stderr and "Traceback" not in r.stderr, r.stderr[-800:]
+    assert "BUILD FAILED: sell-off study data:" in r.stderr, r.stderr[-800:]
+    if breakage == "figure":
+        assert "the analysis summary says" in r.stderr
+    assert not (tmp_path / "_site").exists()
