@@ -6,11 +6,11 @@ Which markets: every builder-listed (HIP-3) market with at least 1% of the value
 5 Nov 2026 (read from 5-november-2026-per-market.csv), plus any market the study page names (SOXL, MU, SP500, XYZ100, AMD are
 already in that set).
 
-Status:
-  verified          the builder's own documentation names the underlying (the security or index) and how the price is taken,
+Status (the same words the study page shows):
+  builders_docs     the builder's own documentation names the underlying (the security or index) and how the price is taken,
                     and its contract details (maximum leverage, margin mode) agree with Hyperliquid's public metadata;
-  partly verified   the builder's documentation names the issuer or underlying but leaves something open (said in notes);
-  not verified      no primary source found. The page then keeps the name "as listed".
+  partly_sourced    the builder's documentation names the issuer or underlying but leaves something open (said in notes);
+  no_source_found   no primary source found. The page then keeps the name "as listed".
 A ticker name alone is never taken as evidence: e.g. the builder's PURRDAT market references Nasdaq: PURR.
 
 The documents describe each market as of the check date (7 Nov 2026, UTC), not as of 5 Nov. The builder changelog
@@ -47,7 +47,7 @@ IDX_PRICE = ("Spot index value in the US cash session; outside it, the dated ind
 
 def stock(market, what, spec_quote, lev, margin, src=XYZ_SPEC, price=US_PRICE, notes=""):
     return {"market": market, "what": what, "quote": spec_quote, "lev": lev, "margin": margin, "src": src, "price": price,
-            "status": "verified", "notes": notes}
+            "status": "builders_docs", "notes": notes}
 
 
 # Evidence, market by market. "quote" is the builder's own words (shortened with "..." only).
@@ -62,11 +62,11 @@ EVIDENCE = [
     {"market": "xyz:SP500-PERP", "what": "the S&P 500 index",
      "quote": "S&P500 references the S&P 500 Index ... The S&P 500 Index is a product of S&P Dow Jones Indices LLC and has been "
               "licensed for use by trade[XYZ].", "lev": "50x", "margin": "cross", "src": XYZ_IDX, "price": IDX_PRICE,
-     "status": "verified", "notes": "Also in the Specification Index (" + XYZ_SPEC + ")."},
+     "status": "builders_docs", "notes": "Also in the Specification Index (" + XYZ_SPEC + ")."},
     {"market": "xyz:XYZ100-PERP", "what": "the builder's own XYZ U.S. 100 index (100 large US-listed non-financial companies)",
      "quote": "XYZ100 tracks a modified market-capitalization-weighted index of 100 of the largest, most actively-traded, "
               "non-financial companies that are listed on a U.S. stock exchange.", "lev": "30x", "margin": "cross", "src": XYZ_IDX,
-     "price": IDX_PRICE, "status": "verified",
+     "price": IDX_PRICE, "status": "builders_docs",
      "notes": "The index is the builder's own (XYZ U.S. 100 Index). The builder does not call it the Nasdaq-100, so we do not either."},
     stock("xyz:AMD-PERP", "1 share of Advanced Micro Devices (Nasdaq: AMD)",
           "AMD references 1 share of Advanced Micro Devices, Inc. common stock (Nasdaq: AMD), quoted in USD.", "10x", "isolated only"),
@@ -99,7 +99,7 @@ EVIDENCE = [
               "Margin mode Isolated; Market Type US Equity.", "lev": "15x", "margin": "isolated only", "src": ENT_EQ,
      "price": "The price on the underlying's primary public listing venue in its regular session; outside it, an internal price "
               "anchored to the last public price (an approved after-hours venue if there is one)",
-     "status": "partly verified",
+     "status": "partly_sourced",
      "notes": "The builder (Entropy, 'ticker: io') names the issuer but not the exact share or exchange, and the deployer address in "
               "its docs differs from Hyperliquid's perpDexs entry for io (the oracle updater address matches). Leverage and margin "
               "mode agree with Hyperliquid's metadata. The page keeps this market's name as listed."},
@@ -141,7 +141,7 @@ def main():
         e = ev[m]
         dex = m.split(":")[0]
         b, full, link = BUILDERS[dex]
-        if e["status"] == "verified" and not (e["what"] and e["src"].startswith("https://")):
+        if e["status"] == "builders_docs" and not (e["what"] and e["src"].startswith("https://")):
             raise SystemExit(f"{m}: a verified row needs what it tracks and a source URL")
         out.append([dex, b, full, m, f"{share[m]:.4f}", e["status"], e["what"], e["price"], f"{e['lev']}, {e['margin']}", e["quote"],
                     e["src"], link, f"{HL}: max leverage {e['lev']} and margin mode agree", CHECKED, e["notes"]])
@@ -149,7 +149,7 @@ def main():
         w = csv.writer(f, lineterminator="\n")
         w.writerow(COLUMNS)
         w.writerows(out)
-    print(f"{OUT}: {len(out)} markets; " + ", ".join(f"{s}: {sum(1 for r in out if r[5] == s)}" for s in ("verified", "partly verified", "not verified")))
+    print(f"{OUT}: {len(out)} markets; " + ", ".join(f"{s}: {sum(1 for r in out if r[5] == s)}" for s in ("builders_docs", "partly_sourced", "no_source_found")))
 
 
 if __name__ == "__main__":
