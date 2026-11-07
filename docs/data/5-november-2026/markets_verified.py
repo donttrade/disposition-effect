@@ -7,8 +7,9 @@ Which markets: every builder-listed (HIP-3) market with at least 1% of the value
 already in that set).
 
 Status (the same words the study page shows):
-  builders_docs     the builder's own documentation names the underlying (the security or index) and how the price is taken,
-                    and its contract details (maximum leverage, margin mode) agree with Hyperliquid's public metadata;
+  builders_docs     the page in source_url names the underlying (the security or index), and the contract details in the
+                    builder's documents (maximum leverage, margin mode) agree with Hyperliquid's public metadata. How the price
+                    is taken is a separate column with its own URL (price_source_url), or "not checked";
   partly_sourced    the builder's documentation names the issuer or underlying but leaves something open (said in notes);
   no_source_found   no primary source found. The page then keeps the name "as listed".
 A ticker name alone is never taken as evidence: e.g. the builder's PURRDAT market references Nasdaq: PURR.
@@ -36,23 +37,32 @@ XYZ_KR = "https://docs.trade.xyz/perpetuals/markets/stocks/korea"
 XYZ_IDX = "https://docs.trade.xyz/perpetuals/markets/equity-indices"
 XYZ_ARCH = "trade[XYZ] docs, Relationship to Hyperliquid and Perpetuals Architecture: perpetuals are deployed under the xyz HIP-3 deployment; the deployer address they state equals Hyperliquid's perpDexs entry for xyz"
 ENT_EQ = "https://docs.entropy.io/asset-directory/equity-assets"
+ENT_PRICE = "https://docs.entropy.io/market-types/equity-perpetuals"
 HL = "Hyperliquid info API (perpDexs; meta for the dex)"
-US_PRICE = ("Builder's relayer takes the stock's own price 24/5 (pre-market, regular, post-market, and overnight via Blue Ocean ATS); "
-            "outside those hours an internal price from the market's own order book")
-KR_PRICE = ("Korea Exchange price in won divided by the USD/KRW rate during Korean sessions; an internal price from the market's own "
-            "order book outside them")
-IDX_PRICE = ("Spot index value in the US cash session; outside it, the dated index futures price discounted to spot; an internal "
-             "price when neither is available")
+# 7 Nov (Tester D3): each price text says only what the page in price_source_url states.
+US_PRICE = ("For U.S. stocks the builder's relayer derives external prices 24/5 (Sunday 8:05 PM to Friday 8:00 PM ET) from the "
+            "pre-market, market, post-market and overnight sessions; the overnight session is Blue Ocean ATS")
+KR_PRICE = ("Prices from the Korean main and after-hours sessions, converted from won to US dollars at the USD/KRW rate; internal "
+            "pricing outside those sessions and when external data has a gap of more than 15 seconds")
+IDX_PRICE = ("Spot index value during the cash session; outside it, the dated index futures price discounted to an implied spot value")
+ENT_PRICE_TEXT = ("In the regular session of the underlying's primary listing venue the oracle is pinned to that venue's price; outside "
+                  "it the oracle is built from the exchange's own book, anchored to the last public print of the session")
+NOT_CHECKED = "not checked"   # no page we can cite states the price method for this kind of underlying
 
 
-def stock(market, what, spec_quote, lev, margin, src=XYZ_SPEC, price=US_PRICE, notes=""):
+def stock(market, what, spec_quote, lev, margin, src=XYZ_SPEC, price=US_PRICE, price_url=XYZ_US, notes=""):
     return {"market": market, "what": what, "quote": spec_quote, "lev": lev, "margin": margin, "src": src, "price": price,
-            "status": "builders_docs", "notes": notes}
+            "price_url": price_url, "status": "builders_docs", "notes": notes}
+
+
+def etf(*a, **kw):
+    """An exchange-traded fund: the builder's U.S. page speaks of stocks, so its price method is not taken to cover funds."""
+    return stock(*a, price=NOT_CHECKED, price_url="", **kw)
 
 
 # Evidence, market by market. "quote" is the builder's own words (shortened with "..." only).
 EVIDENCE = [
-    stock("xyz:SOXL-PERP", "1 share of the Direxion Daily Semiconductor Bull 3X Shares ETF (NYSE Arca: SOXL)",
+    etf("xyz:SOXL-PERP", "1 share of the Direxion Daily Semiconductor Bull 3X Shares ETF (NYSE Arca: SOXL)",
           "SOXL references 1 share of the Direxion Daily Semiconductor Bull 3X Shares (NYSE Arca: SOXL), quoted in USD. The fund seeks "
           "daily investment results of 300% of the daily performance of the ICE Semiconductor Index ...; leverage resets daily.",
           "10x", "isolated only",
@@ -61,12 +71,12 @@ EVIDENCE = [
           "MU references 1 share of Micron Technology, Inc. common stock (Nasdaq: MU), quoted in USD.", "10x", "cross"),
     {"market": "xyz:SP500-PERP", "what": "the S&P 500 index",
      "quote": "S&P500 references the S&P 500 Index ... The S&P 500 Index is a product of S&P Dow Jones Indices LLC and has been "
-              "licensed for use by trade[XYZ].", "lev": "50x", "margin": "cross", "src": XYZ_IDX, "price": IDX_PRICE,
-     "status": "builders_docs", "notes": "Also in the Specification Index (" + XYZ_SPEC + ")."},
+              "licensed for use by trade[XYZ].", "lev": "50x", "margin": "cross", "src": XYZ_SPEC, "price": IDX_PRICE,
+     "price_url": XYZ_IDX, "status": "builders_docs", "notes": ""},
     {"market": "xyz:XYZ100-PERP", "what": "the builder's own XYZ U.S. 100 index (100 large US-listed non-financial companies)",
      "quote": "XYZ100 tracks a modified market-capitalization-weighted index of 100 of the largest, most actively-traded, "
-              "non-financial companies that are listed on a U.S. stock exchange.", "lev": "30x", "margin": "cross", "src": XYZ_IDX,
-     "price": IDX_PRICE, "status": "builders_docs",
+              "non-financial companies that are listed on a U.S. stock exchange.", "lev": "30x", "margin": "cross", "src": XYZ_SPEC,
+     "price": IDX_PRICE, "price_url": XYZ_IDX, "status": "builders_docs",
      "notes": "The index is the builder's own (XYZ U.S. 100 Index). The builder does not call it the Nasdaq-100, so we do not either."},
     stock("xyz:AMD-PERP", "1 share of Advanced Micro Devices (Nasdaq: AMD)",
           "AMD references 1 share of Advanced Micro Devices, Inc. common stock (Nasdaq: AMD), quoted in USD.", "10x", "isolated only"),
@@ -74,10 +84,10 @@ EVIDENCE = [
           "SNDK references 1 share of Sandisk Corporation common stock (Nasdaq: SNDK), quoted in USD.", "10x", "cross"),
     stock("xyz:NBIS-PERP", "1 share of Nebius Group (Nasdaq: NBIS)",
           "NBIS references 1 Nebius Group N.V. Class A ordinary share (Nasdaq: NBIS), quoted in USD.", "10x", "isolated only"),
-    stock("xyz:DRAM-PERP", "1 share of the Roundhill Memory ETF (Cboe BZX: DRAM)",
+    etf("xyz:DRAM-PERP", "1 share of the Roundhill Memory ETF (Cboe BZX: DRAM)",
           "DRAM references 1 share of the Roundhill Memory ETF (Cboe BZX: DRAM), quoted in USD.", "20x", "cross",
           notes="The underlying is a fund of memory-chip companies, not the memory chips themselves."),
-    stock("xyz:KORU-PERP", "1 share of the Direxion Daily MSCI South Korea Bull 3X ETF (NYSE Arca: KORU)",
+    etf("xyz:KORU-PERP", "1 share of the Direxion Daily MSCI South Korea Bull 3X ETF (NYSE Arca: KORU)",
           "KORU references 1 share of the Direxion Daily MSCI South Korea Bull 3X ETF (NYSE Arca: KORU), quoted in USD. The fund seeks "
           "daily investment results ... of 300% of the performance of the MSCI Korea 25/50 Index.", "10x", "isolated only",
           notes="The underlying is itself a leveraged fund (3 times a Korean stock index, daily)."),
@@ -86,19 +96,20 @@ EVIDENCE = [
           "20x", "cross", notes="Listed first as a pre-IPO market; the builder's Pre-IPO Specification Index marks it as converted."),
     stock("xyz:SKHX-PERP", "1 share of SK hynix (Korea Exchange: 000660), in US dollars",
           "The SKHX oracle price tracks the USD value of 1 common share of SK Hynix Inc. The oracle price can be replicated by dividing "
-          "the KRW price of 000660 KS Equity by the USD/KRW exchange rate.", "10x", "cross", src=XYZ_KR, price=KR_PRICE,
-          notes="The Specification Index lists this market as SKHYNIX; the builder's pre-IPO page says xyz:SKHX is that market."),
+          "the KRW price of 000660 KS Equity by the USD/KRW exchange rate.", "10x", "cross", src=XYZ_KR, price=KR_PRICE, price_url=XYZ_KR,
+          notes="The Specification Index lists this market as SKHYNIX (10x, cross margin there); the builder's Pre-IPO Specification "
+                "Index says xyz:SKHX is that market."),
     stock("xyz:NVDA-PERP", "1 share of NVIDIA (Nasdaq: NVDA)",
           "NVDA references 1 share of NVIDIA Corporation common stock (Nasdaq: NVDA), quoted in USD.", "20x", "cross"),
     stock("xyz:SMSN-PERP", "1 share of Samsung Electronics (Korea Exchange: 005930), in US dollars",
           "The SMSN oracle price tracks the USD value of 1 common share of Samsung Electronics Co., Ltd. The oracle price can be "
           "replicated by dividing the KRW price of 005930 KS Equity ... by the USD/KRW exchange rate.", "10x", "isolated only",
-          src=XYZ_KR, price=KR_PRICE, notes="The Specification Index lists this market as SAMSUNG."),
+          src=XYZ_KR, price=KR_PRICE, price_url=XYZ_KR,
+          notes="The Specification Index lists this market as SAMSUNG (10x, normal isolated there)."),
     {"market": "io:NBIS-PERP", "what": "",
-     "quote": "NBIS (Nebius Group NV): Symbol NBIS; Reference issuer Nebius Group NV; Quote asset USDC; Maximum leverage 15x; "
-              "Margin mode Isolated; Market Type US Equity.", "lev": "15x", "margin": "isolated only", "src": ENT_EQ,
-     "price": "The price on the underlying's primary public listing venue in its regular session; outside it, an internal price "
-              "anchored to the last public price (an approved after-hours venue if there is one)",
+     "quote": "Table 'NBIS (Nebius Group NV)', cell by cell: Symbol | NBIS; Reference issuer | Nebius Group NV; Quote asset | USDC; "
+              "Maximum leverage | 15x; Margin mode | Isolated; Market Type | US Equity", "lev": "15x", "margin": "isolated only",
+     "src": ENT_EQ, "price": ENT_PRICE_TEXT, "price_url": ENT_PRICE,
      "status": "partly_sourced",
      "notes": "The builder (Entropy, 'ticker: io') names the issuer but not the exact share or exchange, and the deployer address in "
               "its docs differs from Hyperliquid's perpDexs entry for io (the oracle updater address matches). Leverage and margin "
@@ -119,7 +130,7 @@ EVIDENCE = [
 ]
 BUILDERS = {"xyz": ("trade[XYZ]", "XYZ", XYZ_ARCH), "io": ("Entropy", "EntropyIO", "Entropy docs, Entropy Architecture: 'Entropy (ticker: io)'")}
 COLUMNS = ["dex", "builder", "hyperliquid_dex_full_name", "market_as_listed", "share_of_builder_listed_value_5nov", "status",
-           "what_it_tracks", "price_source", "max_leverage_and_margin", "builder_words", "source_url", "dex_link_source",
+           "what_it_tracks", "price_source", "price_source_url", "max_leverage_and_margin", "builder_words", "source_url", "dex_link_source",
            "cross_check", "checked_utc_date", "notes"]
 
 
@@ -143,7 +154,9 @@ def main():
         b, full, link = BUILDERS[dex]
         if e["status"] == "builders_docs" and not (e["what"] and e["src"].startswith("https://")):
             raise SystemExit(f"{m}: a verified row needs what it tracks and a source URL")
-        out.append([dex, b, full, m, f"{share[m]:.4f}", e["status"], e["what"], e["price"], f"{e['lev']}, {e['margin']}", e["quote"],
+        if (e["price"] == NOT_CHECKED) != (e["price_url"] == ""):
+            raise SystemExit(f"{m}: a price text needs its URL, and 'not checked' has none")
+        out.append([dex, b, full, m, f"{share[m]:.4f}", e["status"], e["what"], e["price"], e["price_url"], f"{e['lev']}, {e['margin']}", e["quote"],
                     e["src"], link, f"{HL}: max leverage {e['lev']} and margin mode agree", CHECKED, e["notes"]])
     with open(OUT, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f, lineterminator="\n")

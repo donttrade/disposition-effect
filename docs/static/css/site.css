@@ -1504,6 +1504,7 @@ details.legal-sec[open] { padding-bottom: var(--s2); }
 .badge-none::before { content: "…"; }
 .pm-check { max-width: var(--prose); }
 .pm-check h3 { font-size: var(--fs-1); margin: 0 0 var(--s1); }
+.pm-cmd:focus-visible { outline: 3px solid var(--rust); outline-offset: 2px; }
 .pm-cmd { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: var(--s1) var(--s2); font-size: var(--fs-0); }
 
 /* a thin dated band above the home hero; the build leaves it out after data-expires */
