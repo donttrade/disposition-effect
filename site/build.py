@@ -1004,6 +1004,11 @@ def write_selloff_data(out):
         if not os.path.exists(src):
             die(f"sell-off pack: checks/selloff/zenodo/{name} is missing (run checks/selloff/make_zenodo_pack.py)")
         shutil.copyfile(src, os.path.join(pack, name))
+    # 7 Nov: the market-by-market CSV sits next to the daily CSV, byte for byte from the pack (its SHA-256 is printed on the page)
+    src = os.path.join(SO.PACK_DIR, SO.PM_CSV)
+    if not os.path.exists(src):
+        die(f"sell-off pack: checks/selloff/zenodo/{SO.PM_CSV} is missing (run checks/selloff/per_market.py build)")
+    shutil.copyfile(src, os.path.join(d, SO.PM_CSV))
 
 
 def tools_for(flags):
@@ -2792,7 +2797,15 @@ def selloff_nodes(page, base, org):
           "license": src["licence_url"], "creator": org, "isAccessibleForFree": True, "temporalCoverage": "2026-10-06/2026-11-05",
           "isBasedOn": based, "isPartOf": {"@id": url + "#article"}, "url": url,
           "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": base + SO.CSV_PATH}]}
-    return [art, ds]
+    ds2 = {"@type": "Dataset", "@id": url + "#dataset-2",
+           "name": "Hyperliquid forced closes, 6 October to 5 November 2026: market by market",
+           "description": "For each UTC day 2026-10-06 to 2026-11-05 and each perpetual market with 10 or more force-closed wallets: wallets "
+                          "force-closed, value force-closed, fills and the long share, with day totals for reconciliation. Descriptive, added after "
+                          "the analysis plan. Aggregated from Ironflow's CC BY 4.0 data; no wallet address.",
+           "license": src["licence_url"], "creator": org, "isAccessibleForFree": True, "temporalCoverage": "2026-10-06/2026-11-05",
+           "isBasedOn": based, "isPartOf": {"@id": url + "#article"}, "url": url + "#sell-pm-h",
+           "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": base + SO.PM_CSV_PATH}]}
+    return [art, ds, ds2]
 
 
 GLOSS_DT = re.compile(r'(?s)<dt id="([^"]+)"><dfn>(.*?)</dfn></dt><dd>(.*?)</dd>')

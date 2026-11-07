@@ -15,6 +15,7 @@ What is held here:
 """
 import csv
 import hashlib
+import html
 import io
 import json
 import math
@@ -197,7 +198,7 @@ def test_seo_lint_passes_for_the_new_pages(built_site):
 
 def test_pack_is_served_byte_for_byte(built_site):
     for f in os.listdir(PACK):
-        if f.endswith(".csv"):
+        if f.endswith(".csv") and f.startswith("5-november-2026-"):   # the daily and the per-market CSV sit at /data/
             assert (built_site["out"] / "data" / f).read_bytes() == open(os.path.join(PACK, f), "rb").read()
         else:
             assert (built_site["out"] / "data" / "5-november-2026" / f).read_bytes() == open(os.path.join(PACK, f), "rb").read()
@@ -379,3 +380,108 @@ def test_fix_round_2_wording(built_site):
     tool = text(page(built_site, B))
     assert "will usually also have more losses" not in tool and "almost by construction" in tool
     assert "See what one crypto exchange’s wallets did" in text(page(built_site, "/"))
+
+
+# ------------------------------------------------------------------ 7 Nov: market by market (descriptive, added after the plan)
+PM = os.path.join(PACK, "5-november-2026-per-market.csv")
+MV = os.path.join(PACK, "MARKETS-VERIFIED.csv")
+ADDR = re.compile(r"0x[0-9a-fA-F]{8,}")
+
+
+def pm_rows():
+    return list(csv.DictReader(open(PM, encoding="utf-8")))
+
+
+def test_per_market_uses_run_day_sql_character_for_character():
+    run_day = open(os.path.join(PACK, "run_day.py"), encoding="utf-8").read().splitlines()
+    pm = open(os.path.join(REPO, "checks", "selloff", "per_market.py"), encoding="utf-8").read()
+    block = run_day[5:12] + [run_day[16]]          # lines 6 to 12 and 17: the filters, the taker rule, the liquidation flag
+    assert "taker_side='buy' THEN buyer ELSE seller END taker" in block[4] and "WHERE liq" in block[-1]
+    pm_lines = [x.strip() for x in pm.splitlines()]
+    for line in block:
+        assert line.strip() in pm_lines, line
+    # the copy in the pack is the same file
+    for name in ("per_market.py", "markets_verified.py"):
+        assert open(os.path.join(PACK, name), "rb").read() == open(os.path.join(REPO, "checks", "selloff", name), "rb").read(), name
+
+
+def test_per_market_reconciles_with_the_study_on_every_day():
+    rows = pm_rows()
+    days = {d["day"]: d for d in D["days"]}
+    assert sorted({r["date_utc"] for r in rows}) == sorted(days)
+    for day, d in days.items():
+        rs = [r for r in rows if r["date_utc"] == day]
+        tot = {r["scope"]: r for r in rs if r["row_type"] == "scope_total_unique_wallets"}
+        assert int(tot["builder_listed"]["wallets_force_closed"]) == d["hip3_liq_wallets"], day
+        assert int(tot["all_markets"]["wallets_force_closed"]) == d["liq_wallets"], day
+        assert tot["builder_listed"]["value_force_closed_usd"] == f"{d['hip3_liq_notional']:.2f}", day
+        assert tot["all_markets"]["value_force_closed_usd"] == f"{d['liq_notional']:.2f}", day
+        for scope in ("builder_listed", "core"):
+            parts = [r for r in rs if r["scope"] == scope and r["row_type"] != "scope_total_unique_wallets"]
+            s = sum(float(r["value_force_closed_usd"]) for r in parts)
+            assert abs(s - float(tot[scope]["value_force_closed_usd"])) <= 0.01 * len(parts), (day, scope)
+            assert all(int(r["wallets_force_closed"]) >= 10 for r in parts if r["row_type"] == "market"), (day, scope)
+        assert float(tot["builder_listed"]["value_force_closed_usd"]) + float(tot["core"]["value_force_closed_usd"]) == \
+            pytest.approx(float(tot["all_markets"]["value_force_closed_usd"]), abs=0.02)
+
+
+def test_per_market_5_nov_figures_and_overlap():
+    ev = [r for r in pm_rows() if r["date_utc"] == EVENT]
+    hip = next(r for r in ev if r["row_type"] == "scope_total_unique_wallets" and r["scope"] == "builder_listed")
+    allm = next(r for r in ev if r["row_type"] == "scope_total_unique_wallets" and r["scope"] == "all_markets")
+    assert hip["value_force_closed_usd"] == "140556424.23" and round(float(hip["value_force_closed_usd"]) / 1e6) == 141
+    assert int(hip["wallets_force_closed"]) == 9054 and int(hip["sum_of_market_wallet_counts"]) == 13460   # 4,406 repeats
+    assert int(allm["wallets_force_closed"]) == 18813 and int(allm["sum_of_market_wallet_counts"]) == 26439
+    # the market rows (10+ wallets) alone already add up to more wallets than the unique count
+    assert sum(int(r["wallets_force_closed"]) for r in ev if r["row_type"] == "market" and r["scope"] == "builder_listed") > 9054
+    # the page's top five are the per-market file's top five
+    mk = sorted((r for r in ev if r["row_type"] == "market" and r["scope"] == "builder_listed"), key=lambda r: -float(r["value_force_closed_usd"]))
+    assert [(r["market"], int(r["wallets_force_closed"])) for r in mk[:5]] == [(m, w) for m, w, _ in D["summary"]["S1_top5_E"]]
+    for r, (_, _, v) in zip(mk[:5], D["summary"]["S1_top5_E"]):
+        assert r["value_force_closed_usd"] == f"{v:.2f}"
+
+
+def test_no_address_in_the_public_csvs():
+    for p in (PM, MV, os.path.join(PACK, "5-november-2026-hyperliquid-daily.csv"), os.path.join(PACK, "MARKETS-README.txt")):
+        assert not ADDR.search(open(p, encoding="utf-8").read()), p
+
+
+def test_every_verified_market_has_a_source_url_and_every_large_market_is_checked():
+    mv = list(csv.DictReader(open(MV, encoding="utf-8")))
+    assert {r["status"] for r in mv} <= {"verified", "partly verified", "not verified"}
+    for r in mv:
+        if r["status"] == "verified":
+            assert r["source_url"].startswith("https://") and r["what_it_tracks"] and r["checked_utc_date"], r["market_as_listed"]
+        else:
+            assert r["notes"], r["market_as_listed"]
+    ev = [r for r in pm_rows() if r["date_utc"] == EVENT and r["scope"] == "builder_listed"]
+    tot = float(next(r for r in ev if r["row_type"] == "scope_total_unique_wallets")["value_force_closed_usd"])
+    big = {r["market"] for r in ev if r["row_type"] == "market" and float(r["value_force_closed_usd"]) >= 0.01 * tot}
+    named = {f"{m}" for m, _, _ in D["summary"]["S1_top5_E"]}
+    assert big | named <= {r["market_as_listed"] for r in mv}
+
+
+def test_market_by_market_section(built_site):
+    h = page(built_site, S)
+    sec = h[h.index('aria-labelledby="sell-pm-h"'):h.index('aria-labelledby="sell-15-h"')]
+    t = text(sec)
+    assert "4. Market by market" in t and "Added after the written plan" in t and "not one of the measures the plan set" in t
+    assert "these rows add up to more than 9,054" in t and "13,460 wallet-and-market pairs" in t and "4,406" in t
+    assert sec.count("<caption>") == 2 and "<details" in sec and 'scope="col"' in sec and 'scope="row"' in sec
+    assert re.search(r'<td class="num">1,347</td>', sec)                       # numbers right-aligned
+    assert 'href="/data/5-november-2026-per-market.csv"' in sec and 'href="/data/5-november-2026/MARKETS-VERIFIED.csv"' in sec
+    assert hashlib.sha256(open(PM, "rb").read()).hexdigest() in t and "per_market.py build" in t and "sha256sum" in t
+    assert (built_site["out"] / "data" / "5-november-2026" / "per_market.py").exists()
+    # a market is named only where its status is verified; the partly verified one stays "as listed"
+    mv = {r["market_as_listed"]: r for r in csv.DictReader(open(MV, encoding="utf-8"))}
+    rows = re.findall(r'(?s)<tr><th scope="row">(.*?)</th><td>(.*?)</td><td>(.*?)</td>', sec)
+    assert len(rows) >= 20
+    for name, dex, cell in rows:
+        r = mv.get(f"{dex}:{name}-PERP")
+        if r and r["status"] == "verified":
+            assert html.unescape(text(cell)).strip().startswith(r["what_it_tracks"][:20]) and "builder’s docs" in cell
+        else:
+            assert text(cell).strip().startswith("As listed"), (dex, name)
+    assert "Nasdaq-100" not in t
+    # no offer, price or pay link anywhere near it
+    assert not re.search(r"\$\s?\d|/pricing/|checkout|buy now", sec, re.I)
