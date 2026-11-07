@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block content %}
+{%- import "partials/tool_glyphs.html" as g with context %}{% import "partials/tool_display.html" as d with context %}
+{%- import "partials/trader_offer.html" as offer with context %}
+{#- /tools/bad-day-check/ (sell-off campaign K6). One or more days of the visitor's file beside the visitor's typical day: counts only.
+    The sell-off study (/research/5-november-2026-sell-off/) links here with ?d=2026-11-05,2026-11-06. The reading code is the other file
+    tools' (file-tool.js); the counting is bad-day-core.js. -#}
+<div class="wrap">
+  <div class="tool-hero">
+    <div>
+      <p class="crumb small"><a href="/tools/">Free tools</a></p>
+      <div class="tool-title"><span class="tool-mark">{{ g.glyph(page.glyph, 64, "ic") }}</span><h1>Bad-day check: one day beside your typical day</h1></div>
+      <p class="lede">Drop a trade file and pick a day, such as 5 November 2026. See your trades, net result, largest loss and quick re-entries that day, next to your typical day.</p>
+    </div>
+    {{ d.display(page.glyph) }}
+  </div>
+  {% include "partials/disclaimer.html" %}
+
+  <section class="tool" aria-labelledby="bd-tool-h">
+    <h2 id="bd-tool-h">Your file</h2>
+    <p id="bd-js-needed" class="notice notice-caution" data-js-hide>This tool runs in your browser and needs JavaScript turned on.</p>
+    <div id="bd-controls" hidden data-js-show>
+      <div class="dropzone" id="bd-drop">
+        <p><strong>Drop a trade file here</strong>, or choose one from your computer.</p>
+        <p class="small muted">MT5 or MT4 report (.htm, .html), IBKR Flex Query (.csv), Tradovate Orders (.csv), TradingView Order History (.csv), or the CSV template. Up to 50 MB and 200,000 rows.</p>
+        <div class="file-pick">
+          <label for="bd-file">Your trade file</label>
+          <input id="bd-file" type="file" accept=".csv,.htm,.html,.txt">
+        </div>
+        <p class="btn-row"><span class="muted">No file to hand?</span> <button class="btn btn-secondary" id="bd-sample-btn" type="button">Try real public data</button></p>
+        <p class="small muted">Real public data: the Stock Transactions Dataset (Mendeley Data, CC BY 4.0), one anonymous investor’s {{ "{:,}".format(real.account.fills) }} fills in US stocks, trades closed {{ real.account.period }}; the whole dataset, not picked by result, as price gains before fees, FX and dividends; ticker names replaced with codes. It holds no trades on 5 November 2026, so the check shows its day with the lowest net result. <a href="/tools/#src-h">Where it comes from</a></p>
+      </div>
+      <form id="bd-days-form" class="field-grid" novalidate>
+        <div class="field">
+          <label for="bd-days">Day or days</label>
+          <span class="hint" id="bd-days-hint">Up to 5 dates as year-month-day, separated by commas, for example 2026-11-05, 2026-11-06. Leave it empty to see the day with the lowest net result in your file.</span>
+          <input id="bd-days" type="text" inputmode="text" autocomplete="off" spellcheck="false" aria-describedby="bd-days-hint" value="{{ page.check_days_default }}">
+        </div>
+        <div class="field">
+          <label for="bd-shift">Time shift</label>
+          <span class="hint" id="bd-shift-hint">A trade counts on the day it closed. The shift adds the hours you choose to every time in the file; for example −7 turns a broker server time of GMT+2 into New York winter time (UTC−5). Whole hours only, and no daylight-saving adjustment: a file that crosses a clock change is cut an hour off on one side of it.</span>
+          <select id="bd-shift" aria-describedby="bd-shift-hint">
+            {%- for h in range(-12, 15) %}
+            <option value="{{ h }}"{% if h == 0 %} selected{% endif %}>{% if h == 0 %}None (as in the file){% elif h > 0 %}+{{ h }} hour{{ "" if h == 1 else "s" }}{% else %}−{{ -h }} hour{{ "" if h == -1 else "s" }}{% endif %}</option>
+            {%- endfor %}
+          </select>
+        </div>
+      </form>
+    </div>
+    <p id="bd-status" class="muted" role="status" hidden></p>
+    <p id="bd-progress" class="progress-line small muted" hidden><progress aria-label="Reading your file"></progress> <span data-elapsed aria-hidden="true"></span></p>
+    <div id="bd-error" class="notice notice-error" role="alert" tabindex="-1" hidden></div>
+    <div id="bd-map" class="notice rc-map" role="group" aria-labelledby="bd-map-h" tabindex="-1" hidden></div>
+  </section>
+
+  <div id="bd-out" class="tool-out" hidden></div>
+  {%- with source = "file", firm_line = false %}{% include "partials/tool_next_step.html" %}{% endwith %}
+
+  {%- if not flags.paid_report %}
+  <aside id="bd-teaser" class="notice notice-gap teaser" aria-labelledby="bd-teaser-h" {{ offer.on_sale_attr() }}>
+    <strong id="bd-teaser-h">{{ offer.teaser_heading() }}</strong>
+    <p id="bd-teaser-text">{{ offer.lead() }} looks at what you do after a loss, such as trades opened within 15 minutes of one, and compares it with chance.</p>
+    {{- offer.teaser() }}
+  </aside>
+  {%- endif %}
+
+  <section class="section" aria-labelledby="count-h">
+    <h2 id="count-h">How it works</h2>
+    <details class="how-group"><summary>What is counted, and what is not</summary>
+    <p>Pick a day and the page sets it beside your typical day: the number of closed trades, their net result, the largest single loss, and four counts of what happened around losses. Every row is a count or a sum from your file. Nothing is tested or called a mistake.</p>
+    <ul>
+      <li>A trade counts on the day it closed, after the time shift you choose.</li>
+      <li>Your typical day is, for each row, the median of your other days with trades. It is shown only when the file has at least 10 other days; with fewer, a median says little.</li>
+      <li>Re-entries: trades opened within 15 minutes after a losing trade closed. Trades after 2 or more losses in a row: trades opened when the last trade closed before them was the second or later loss in a row. Bigger size after a loss: the last trade closed before it was a loss and the size is 1.5 times the symbol’s median size or more. Losses over 2 times your median loss: losing trades larger than twice the median of all your losses.</li>
+      <li>A file with dates but no times of day cannot show re-entries or sizes after a loss, and the page leaves those rows out.</li>
+      <li>A day with many losses will show more trades after losses almost by construction. The counts describe that day; they do not say why it went as it did.</li>
+    </ul>
+    <p>{% if flags.analytics %}Only anonymous counts of visits and finished steps are sent; your file is never sent.{% else %}Everything runs in this browser tab, and the page’s security policy blocks every outgoing network request, so your file is not uploaded anywhere.{% endif %} It reads MT5 and MT4 HTML reports, IBKR Flex Query trade files, Tradovate order exports and TradingView order history, and a plain CSV template.</p>
+    </details>
+  </section>
+
+  <section class="section" aria-labelledby="faq-h">
+    <h2 id="faq-h">Questions</h2>
+    <details><summary>Why did you build this for 5 November 2026?</summary><p>It was a sharp day for stocks, and for the builder-listed markets on one crypto exchange. We counted forced closes there in <a href="{{ page.study_path }}">a study</a> whose method was written down first. This page lets you look at your own account that day, privately.</p></details>
+    <details><summary>Does a high count mean I did something wrong?</summary><p>No. The counts describe what is in your file. A day with many losses will show more trades after losses almost by construction. The page does not judge a day and does not tell you what to do.</p></details>
+    <details><summary>Why is there no typical day?</summary><p>The file has fewer than 10 other days with trades. Add an earlier export, or read the day’s counts on their own.</p></details>
+    <details><summary>Is my file uploaded?</summary><p>{% if flags.analytics %}No. The analysis runs in your browser tab. Only anonymous counts of visits and finished steps are sent; your file is never sent.{% else %}No. The analysis runs in your browser tab, and the page’s security policy blocks it from making network requests. You can watch your browser’s Network tab stay empty while it works.{% endif %}</p></details>
+    <details><summary>Is this investment advice?</summary><p>No. It counts your own past trades and does not recommend any security, trade, size or exit. Past results do not predict future results.</p></details>
+  </section>
+
+  <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR, Tradovate and TradingView are trademarks of their owners. donttrade is not affiliated with any of them.</p>
+</div>
+<script type="text/csv" id="bd-sample">
+{{ sample_csv|safe }}</script>
+{% endblock %}

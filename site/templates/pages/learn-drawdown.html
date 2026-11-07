@@ -11,6 +11,14 @@
   <p class="meta small">Published {{ page.learn.published|longdate }} · Updated {{ page.updated|longdate }}</p>
   <p class="learn-cta">See it in your own trades: the <a href="/tools/drawdown-calculator/">drawdown and recovery calculator</a> draws your closed trades against their running high. Your file is read in your browser and is not uploaded.</p>
 
+  {%- set nc = mkt.indices.nasdaq_composite %}{% set n1 = mkt.indices.nasdaq_100 %}
+  {#- 6 Nov 2026 dated callout (sell-off campaign K4). Figures from site/config/market_2026_11_05.json through learn_tables.market_view(). -#}
+  <aside class="dated-callout" aria-labelledby="dd-nov5-h">
+    <h2 id="dd-nov5-h">Worked example: the {{ mkt.date|longdate }} close</h2>
+    <p>The {{ nc.name }} closed {{ nc.drawdown }} below its record ({{ nc.record }}, {{ nc.record_date }}). From that close it needs a gain of {{ nc.need }} to get back to the record. The {{ n1.name }} closed {{ n1.drawdown }} below its record and needs {{ n1.need }}.</p>
+    <p class="small">{{ mkt.credit }} The same arithmetic as the table below. This is a worked example of the formula, not a forecast. <a href="/research/5-november-2026-sell-off/">What happened to wallets on one crypto exchange that day</a>.</p>
+  </aside>
+
   <section class="learn-sec" aria-labelledby="formula-h">
     <h2 id="formula-h">The formula, and why the gain is larger than the fall</h2>
     <p>If an account falls by a fraction d of its high, it keeps 1 − d of it. To get back to the high, that smaller balance has to grow by the factor 1 ÷ (1 − d), which is a gain of d ÷ (1 − d). The gain is always larger than the fall, and the gap widens quickly as the fall deepens.</p>

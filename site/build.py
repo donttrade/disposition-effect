@@ -60,6 +60,7 @@ SITE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(SITE)
 sys.path.insert(0, SITE)
 import tool_real  # noqa: E402  (6 Nov, tools redesign B2: the real-data displays' geometry)
+import selloff as SO  # noqa: E402  (6 Nov, the sell-off study: its figures, charts and CSV)
 DOCS = os.path.join(REPO, "docs")
 BASELINE = os.environ.get("DT_BASELINE") or os.path.join(REPO, "checks", "urls-baseline.txt")
 
@@ -442,7 +443,7 @@ COUNT_BASE = "/tools/prop-challenge-simulator/e/"
 COUNT_EVENTS = ("ran", "ran-sample", "whatif", "expert", "export", "card")
 CHALLENGE_RULES_JSON = os.path.join(SITE, "config", "challenge_rules.json")
 PAGES = [
-    {"template": "pages/home.html", "path": "/", "requires_flag": None, "scripts": [MOTION_JS],
+    {"template": "pages/home.html", "path": "/", "requires_flag": None, "scripts": [MOTION_JS, "/static/js/band-expiry.js"],
      "title": "donttrade - free trading tools and research on trader habits",
      "description": "Free in-browser tools: trade stats, prop challenge odds, drawdown and risk-reward. "
                     "Research on how traders behave. For firms: fixed-price measurement.",
@@ -460,7 +461,8 @@ TOOLS_JS = "/static/js/tools-index.js"
 TOOL_GLYPHS = {"/tools/trade-stats/": "stats", "/tools/prop-challenge-simulator/": "prop",
                "/tools/lot-size-calculator/": "lot", "/tools/risk-reward-calculator/": "rr",
                "/tools/drawdown-calculator/": "dd", "/tools/trading-heatmap/": "heat",
-               "/tools/disposition-calculator/": "disp", "/tools/pass-rate-calculator/": "pass"}
+               "/tools/disposition-calculator/": "disp", "/tools/pass-rate-calculator/": "pass",
+               "/tools/bad-day-check/": "badday"}
 PAGES += [
     {"template": "pages/tool-trade-stats.html", "path": "/tools/trade-stats/", "requires_flag": None,
      "modules": ["/static/js/tools/trade-stats.js"], "sample": True, "app": True, "updated": "2026-11-06",
@@ -501,6 +503,12 @@ PAGES += [
      "title": "Trading Heatmap of Your Trades by Hour and Weekday",
      "description": "See your own results, win rate and trade count by the hour and weekday each trade opened, "
                     "from your trade file, in the time zone you choose. Free."},
+    {"template": "pages/tool-bad-day.html", "path": "/tools/bad-day-check/", "requires_flag": None,
+     "modules": ["/static/js/tools/bad-day.js"], "sample": True, "app": True, "updated": "2026-11-06",
+     "crumb": "Bad-day check", "check_days_default": "", "study_path": "/research/5-november-2026-sell-off/",
+     "title": "Bad-Day Check: Your Trades on One Day Beside a Typical Day",
+     "description": "Pick a day, such as 5 November 2026, and see your trades, net result, largest loss and quick "
+                    "re-entries beside your typical day. Free, in your browser."},
     {"template": "pages/tools-index.html", "path": "/tools/", "requires_flag": None, "updated": "2026-11-06",
      "crumb": "Free tools", "itemlist": True, "styles": [TOOLS_CSS], "scripts": [TOOLS_JS], "og_image": "/assets/og/tools.png",
      "title": "Free Trading Tools That Run in Your Browser",
@@ -751,6 +759,10 @@ TOOLS = [
      "short": "Your file and a firm’s rules → pass, bust or out of time.", "preview": "prop", "icon": "flag",   # 25 Oct sweep: the card line and preview
      "question": "How would my past trading days have fared under a challenge’s rules?",
      "input": "Your trade file, or win rate and average win and loss; the rules"},
+    {"name": "Bad-day check", "href": "/tools/bad-day-check/", "glyph": "badday", "group": "file",
+     "short": "Your file and a date → that day beside a typical one.", "preview": "badday", "icon": "list",
+     "question": "How did one day compare with my typical day?",
+     "input": "Your trade file and a date"},
     {"name": "Lot size calculator", "href": "/tools/lot-size-calculator/", "glyph": "lot", "group": "calc",
      "short": "Balance, risk and stop → the lot size.", "preview": "", "icon": "scale",   # 25 Oct sweep: the card line and preview
      "question": "How many lots match the amount I chose to risk at this stop?",
@@ -823,7 +835,64 @@ PAGES += [
 ]
 LEARN_PATHS = [p["path"] for p in PAGES if p["path"].startswith("/learn/")]
 
+# The 5 November 2026 sell-off (ARCHITECT-PLAN-SELLOFF-2026-11-06; CODER-REPORT-SELLOFF-2026-11-06). One study page, built from
+# site/data/selloff-2026-11-05.json through site/selloff.py and site/config/market_2026_11_05.json through learn_tables.market_view,
+# so no figure is typed in a template. It carries no price and no buy link (no study figure next to an offer). The Bad-day check
+# (BADDAY_PATH) is the free tool it points to. SELLOFF_PUBLISHED is the day the figures were made: the build refuses a content date
+# later than the real date (future_dated), so a later deploy day does not move it; change it only with a dated update.
+SELLOFF_PATH = "/research/5-november-2026-sell-off/"
+BADDAY_PATH = "/tools/bad-day-check/"
+SELLOFF_PUBLISHED = "2026-11-06"
+SELLOFF_REFS = ("imas2016", "coval2005")
+SELLOFF_CHECK_DAYS = "2026-11-05,2026-11-06"
+_SELL = []
+
+
+def selloff_ctx():
+    if not _SELL:
+        try:
+            _SELL.append(SO.context())
+        except (SO.SellOffError, OSError, KeyError, ValueError) as e:
+            die(f"sell-off study data: {e}")
+    return _SELL[0]
+
+
+SELLOFF_BAND_EXPIRES = "2026-11-21"   # the home band's last day (owner decision, plan section d)
+
+
+def dated_band(today=None):
+    """The home band's text, or None on SELLOFF_BAND_EXPIRES and after (fix round 1, F4: gone in a build dated 21 Nov and later).
+    It holds the FRED market figure only; no study figure may sit on the home page (tests/test_selloff.py)."""
+    import datetime as dt
+    today = today or _today()
+    if today >= dt.date.fromisoformat(SELLOFF_BAND_EXPIRES):
+        return None
+    F = selloff_ctx()["F"]
+    nc = LT.market_view()["indices"]["nasdaq_composite"]
+    return {"expires": SELLOFF_BAND_EXPIRES, "date_label": F["event_long"], "date_long": "5 November", "nasdaq": f"{abs(nc['raw']['change_pct']):.1f}%",
+            "link": SELLOFF_PATH}
+
+
+def selloff_page():
+    F = selloff_ctx()["F"]
+    h1 = (f"{F['event_long']}: {F['hip3']} wallets were force-closed on Hyperliquid’s builder-listed markets, about {F['hip3_wd_ratio']} times the median weekday")
+    return {"template": "pages/research-selloff-2026-11-05.html", "path": SELLOFF_PATH, "requires_flag": None, "selloff": True,
+            "updated": SELLOFF_PUBLISHED, "published": SELLOFF_PUBLISHED, "crumb": f"{F['event_short']} 2026 sell-off",
+            "parent": ("Research", "/research/"), "og_image": "/assets/og/selloff.png", "h1": h1,
+            "check_path": BADDAY_PATH, "check_days": SELLOFF_CHECK_DAYS,
+            "dek": (f"On the Nasdaq Composite’s largest one-day fall since April 2025, forced closes on the builder-listed markets of one crypto "
+                    f"exchange ran at about {F['hip3_wd_ratio']} times the median weekday. We counted them with a method we wrote down first."),
+            "citation": [["citation_title", h1], ["citation_author", "donttrade"],
+                         ["citation_publication_date", SELLOFF_PUBLISHED.replace("-", "/")]],
+            "title": f"{F['event_short']} 2026 Sell-Off: {F['hip3']} Hyperliquid Wallets Force-Closed",
+            "description": (f"On {F['event_short']} 2026, {F['hip3']} Hyperliquid wallets were force-closed on builder-listed markets, about "
+                            f"{F['hip3_wd_ratio']} times the median weekday. Method set down first, open data.")}
+
+
+PAGES += [selloff_page()]
+
 # Config the SEO round reads (config/studies.json, related.json, glossary_terms.json, references.json).
+RESEARCH_LIST_END = re.compile(r'(?s)</li>\s*(?=</ul>\s*<h2 id="sample-report">)')   # the end of /research/'s list of all studies
 STUDIES_JSON = os.path.join(SITE, "config", "studies.json")
 RELATED_JSON = os.path.join(SITE, "config", "related.json")
 GLOSSARY_JSON = os.path.join(SITE, "config", "glossary_terms.json")
@@ -919,6 +988,22 @@ def write_learn_data(out):
     for name, text in (("drawdown-recovery.csv", LT.recovery_csv()), ("losing-streak-probability.csv", LT.streak_csv())):
         with open(os.path.join(d, name), "w", encoding="utf-8", newline="\n") as f:
             f.write(text)
+
+
+def write_selloff_data(out):
+    """/data/5-november-2026-hyperliquid-daily.csv (from the same rows the page's tables use) and /data/5-november-2026/, the plan,
+    its hash, the code, the run log (the 31 input hashes) and the outputs, copied byte for byte from checks/selloff/zenodo/."""
+    d = os.path.join(out, "data")
+    os.makedirs(d, exist_ok=True)
+    with open(os.path.join(d, os.path.basename(SO.CSV_PATH)), "w", encoding="utf-8", newline="\n") as f:
+        f.write(SO.csv_text())
+    pack = os.path.join(d, os.path.basename(SO.PACK_URL.rstrip("/")))
+    os.makedirs(pack, exist_ok=True)
+    for name in SO.PACK_FILES:
+        src = os.path.join(SO.PACK_DIR, name)
+        if not os.path.exists(src):
+            die(f"sell-off pack: checks/selloff/zenodo/{name} is missing (run checks/selloff/make_zenodo_pack.py)")
+        shutil.copyfile(src, os.path.join(pack, name))
 
 
 def tools_for(flags):
@@ -1161,7 +1246,7 @@ def sample_csv():
 # tickers, and every other byte is the same, so every figure is too.
 REAL_SAMPLE_CSV = os.path.join(REPO, "checks", "real_data", "real-trades.coded.csv")
 REAL_SAMPLE_PATHS = ("/tools/trade-stats/", "/tools/trading-heatmap/", "/tools/drawdown-calculator/",
-                     "/tools/prop-challenge-simulator/")
+                     "/tools/prop-challenge-simulator/", "/tools/bad-day-check/")
 REAL_SAMPLE_URL = "/static/samples/real-trades.csv"
 
 
@@ -2686,6 +2771,30 @@ def study_article(page, base, org, st, refs):
     return node
 
 
+def selloff_nodes(page, base, org):
+    """Article + ScholarlyArticle and Dataset for the sell-off study. No identifier/DOI until Zenodo mints one (then the study moves
+    to config/studies.json and study_article takes over). The Dataset is our aggregate of Ironflow's CC BY 4.0 data: licence CC BY 4.0,
+    isBasedOn the two source datasets, the CSV as its distribution."""
+    sell = selloff_ctx()
+    src = sell["source"]
+    refs = references()
+    url = base + page["path"]
+    based = [{"@type": "Dataset", "name": n, "url": u, "license": src["licence_url"], "creator": {"@type": "Organization", "name": "Ironflow", "url": "https://ironflow.sh"}}
+             for n, u in (("Hyperliquid Trades", src["trades_url"]), ("Hyperliquid Liquidations", src["liquidations_url"]))]
+    art = {"@type": ["Article", "ScholarlyArticle"], "@id": url + "#article", "headline": page["h1"], "name": page["h1"],
+           "description": page["description"], "datePublished": page["published"], "dateModified": page["updated"],
+           "author": org, "publisher": org, "isAccessibleForFree": True, "license": LEARN_LICENSE, "image": base + page["og_image"],
+           "mainEntityOfPage": url, "url": url, "isBasedOn": based, "citation": [scholarly_ref(refs[k]) for k in SELLOFF_REFS]}
+    ds = {"@type": "Dataset", "@id": url + "#dataset-1",
+          "name": "Hyperliquid forced closes, 6 October to 5 November 2026: daily counts",
+          "description": "Daily counts of force-closed (liquidated) Hyperliquid perpetual-futures wallets, the value force-closed, and the share that placed a "
+                         "new market order within 15 and 60 minutes, for the 31 UTC days 2026-10-06 to 2026-11-05. Aggregated from Ironflow's CC BY 4.0 data; no wallet address.",
+          "license": src["licence_url"], "creator": org, "isAccessibleForFree": True, "temporalCoverage": "2026-10-06/2026-11-05",
+          "isBasedOn": based, "isPartOf": {"@id": url + "#article"}, "url": url,
+          "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": base + SO.CSV_PATH}]}
+    return [art, ds]
+
+
 GLOSS_DT = re.compile(r'(?s)<dt id="([^"]+)"><dfn>(.*?)</dfn></dt><dd>(.*?)</dd>')
 
 
@@ -2722,6 +2831,8 @@ def jsonld(page, cfg, html, flags, products):
     if page.get("article") and st:   # the four studies with a DOI (6 Nov, SEO round 1): Article + ScholarlyArticle
         graph.append(study_article(page, base, org, st, references()))
         graph += dataset_nodes(page, base, org, st["datasets"])
+    elif page.get("selloff"):   # the sell-off study: Article + ScholarlyArticle (no DOI yet) and the Dataset of its CSV, CC BY 4.0 data credited
+        graph += selloff_nodes(page, base, org)
     elif page.get("article"):  # lifted study pages: their old Article, by the site Organization
         graph.append({**page["article"], "author": org, "publisher": org})
     if page.get("learn"):
@@ -2960,7 +3071,7 @@ def llms_txt(cfg, pages, studies_by_path):
              "that measure habits in your own trade file. Not investment advice; not a registered adviser.", "",
              "## Studies (negative results included; DOIs where a study has one)"]
     for path in ("/research/disposition-effect/", "/research/portfolio-driven-disposition-effect/", "/research/insider-buying-edge/",
-                 "/research/volatility-scaled-momentum/", "/research/strategy-tests/", "/research/swing-trading-strategies/"):
+                 "/research/volatility-scaled-momentum/", "/research/strategy-tests/", "/research/swing-trading-strategies/", SELLOFF_PATH):
         pg = by_path.get(path)
         if pg is None:
             continue
@@ -3483,6 +3594,15 @@ def build():
         if page.get("learn"):
             extra.update(learn_context())
             extra["learn_refs"] = {k: REFS[k] for k in page["learn"].get("refs", [])}
+            if page["path"] == "/learn/drawdown-recovery-table/":
+                extra["mkt"] = LT.market_view()   # the dated callout: closes of 5 Nov 2026, computed by learn_tables
+        if page["path"] == "/":
+            extra["dated_band"] = dated_band()
+        if page.get("selloff"):
+            extra["sell"] = selloff_ctx()
+            extra["mkt"] = LT.market_view()
+            extra["study_refs"] = {k: REFS[k] for k in SELLOFF_REFS}
+            extra["study_refs_checked"] = max(REFS[k]["crossref_checked"] for k in SELLOFF_REFS)
         if page["path"] == "/glossary/":
             extra["glossary_terms"] = glossary_terms()
         if page.get("lifted"):
@@ -3492,6 +3612,9 @@ def build():
                                      apa=apa_line(st), bibtex=bibtex_entry(st)), page["path"])
             if page["path"] == "/glossary/":   # the trading and risk terms, after the twelve study terms
                 frag = insert_island(frag, "</dl>", env.get_template("partials/glossary_more.html").render(terms=extra["glossary_terms"], refs=REFS), page["path"])
+            if page["path"] == "/research/":   # the newest study, last in the chronological list, as an island (the frozen words stay as they were)
+                frag = insert_island(frag, RESEARCH_LIST_END, env.get_template("partials/selloff_listing.html").render(
+                    sell=selloff_ctx(), mkt=LT.market_view(), page={"path": SELLOFF_PATH, "published": SELLOFF_PUBLISHED}), page["path"])
             if page["path"] == "/code/":   # the site's own table script, which the /learn/ pages cite
                 frag = insert_island(frag, "</table></div>", env.get_template("partials/code_more.html").render(), page["path"])
             extra["lifted_html"] = Markup(frag)
@@ -3533,6 +3656,7 @@ def build():
         render(rel, page, answer_units=units)
     write_sitemap_and_robots(out, cfg, built, flags)
     write_learn_data(out)
+    write_selloff_data(out)
     with open(os.path.join(out, "llms.txt"), "w", encoding="utf-8", newline="\n") as f:
         f.write(llms_txt(cfg, [pg for pg in built if not pg.get("noindex")], STUDIES))
     with open(os.path.join(out, "_headers"), "w", encoding="utf-8", newline="\n") as f:

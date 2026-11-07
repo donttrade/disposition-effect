@@ -1,0 +1,20 @@
+{#- A bar chart drawn at build time by site/selloff.py (bar_chart): inline SVG, no script. The caller sets c (the geometry) and the
+    figure's caption holds the plain description; each bar has a <title> for hover, and the same numbers are in the tables under the
+    charts. Bars of the day studied use .bar-event (orange); the dashed line is the median of the 30 days before (.line-median). -#}
+<svg viewBox="0 0 {{ c.w }} {{ c.h }}" width="{{ c.w }}" height="{{ c.h }}" role="img" aria-label="{{ c.alt }}">
+  {%- if c.shade %}
+  <rect class="shade-band" x="{{ c.shade.x }}" y="{{ c.pt }}" width="{{ c.shade.w }}" height="{{ c.pb - c.pt }}"/>
+  {%- endif %}
+  {%- for t in c.ticks %}
+  <line class="grid-line" x1="{{ c.pl }}" x2="{{ c.pr }}" y1="{{ t.y }}" y2="{{ t.y }}"/>
+  <text class="axis" x="{{ c.pl - 6 }}" y="{{ t.y + 4 }}" text-anchor="end">{{ t.label }}</text>
+  {%- endfor %}
+  {%- for b in c.bars %}
+  {%- if b.h > 0 %}<rect class="{{ 'bar-event' if b.event else 'bar-plain' }}" x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" rx="1.5"><title>{{ b.tip }}</title></rect>{% endif %}
+  {%- if b.label %}<text class="axis" x="{{ b.cx }}" y="{{ c.ly }}" text-anchor="middle">{{ b.label }}</text>{% endif %}
+  {%- endfor %}
+  {%- if c.median_y %}
+  <line class="line-median" x1="{{ c.pl }}" x2="{{ c.pr }}" y1="{{ c.median_y }}" y2="{{ c.median_y }}"/>
+  {%- endif %}
+  {%- if c.shade %}<text class="axis" x="{{ c.shade.x + 4 }}" y="{{ c.pt + 12 }}">US stock hours</text>{% endif %}
+</svg>

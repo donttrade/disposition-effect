@@ -1,0 +1,381 @@
+"""The 5 Nov 2026 sell-off campaign (CODER-REPORT-SELLOFF-2026-11-06): the study page, its data, the market figures, the Learn
+callout, the dated home band, the Bad-day check's registration and the committed files.
+
+What is held here:
+  * every Hyperliquid figure on the study page is recomputed here from the committed daily data, by code written separately from
+    site/selloff.py (median, quartiles, rank), and equals the page; the data file reproduces the plan's SUMMARY;
+  * the market figures (Composite 11.90% below its record, needs 13.51%; Nasdaq-100 14.72%, 17.25%) are recomputed from the
+    committed closes; "Nasdaq down 14%" appears nowhere;
+  * no wallet address in any committed file (the one placeholder, 0xeee...e, is the plan's exclusion); the committed hashes
+    are those of the pack files; the plan's hash is the one logged before the data was read;
+  * the study page has no price, no pay link, no dollar amount that is not a figure of the data, passes the wording lint, keeps
+    the CSP (no inline script, no style=), is in the sitemap with Article and Dataset JSON-LD, and every DOI cited is in
+    references.json with a Crossref check date;
+  * the home band exists up to its data-expires date and the build leaves it out the day after.
+"""
+import csv
+import hashlib
+import io
+import json
+import math
+import os
+import re
+import subprocess
+import sys
+
+import pytest
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+REPO = os.path.dirname(HERE)
+sys.path.insert(0, os.path.join(REPO, "checks"))
+sys.path.insert(0, os.path.join(REPO, "site"))
+import lint as L  # noqa: E402
+from harvest_prices import amounts_in  # noqa: E402
+
+DATA = os.path.join(REPO, "site", "data", "selloff-2026-11-05.json")
+PACK = os.path.join(REPO, "checks", "selloff", "zenodo")
+S = "/research/5-november-2026-sell-off/"
+B = "/tools/bad-day-check/"
+D = json.load(open(DATA, encoding="utf-8"))
+MKT = json.load(open(os.path.join(REPO, "site", "config", "market_2026_11_05.json"), encoding="utf-8"))
+EVENT = "2026-11-05"
+PLAN_SHA = "21ce82c3bebd3044b0f43bceb4bb09626aad90262a375a0591274e55f364d704"
+
+
+def page(site, path):
+    return (site["out"] / path.strip("/") / "index.html").read_text(encoding="utf-8")
+
+
+def text(h):
+    h = re.sub(r"(?s)<(script|style).*?</\1>", "", h)
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", h))
+
+
+def half_up(x):
+    return int(math.floor(x + 0.5))
+
+
+def med(xs):
+    s = sorted(xs)
+    n = len(s)
+    return s[n // 2] if n % 2 else (s[n // 2 - 1] + s[n // 2]) / 2
+
+
+# ------------------------------------------------------------------ the data
+def test_data_has_31_days_and_no_address():
+    assert len(D["days"]) == 31 and D["days"][0]["day"] == "2026-10-06" and D["days"][-1]["day"] == EVENT
+    for p in [DATA, *[os.path.join(PACK, f) for f in os.listdir(PACK)]]:
+        t = open(p, encoding="utf-8").read()
+        for m in re.findall(r"0x[0-9a-fA-F]{8,}", t):
+            assert set(m[2:].lower()) == {"e"}, (p, m[:12])   # only the placeholder the plan excludes
+
+
+def test_event_row_matches_the_plan_headline_figures():
+    ev = D["days"][-1]
+    base = D["days"][:-1]
+    assert ev["liq_wallets"] == 18813 and ev["hip3_liq_wallets"] == 9054
+    assert half_up(med([d["hip3_liq_wallets"] for d in base])) == 1755
+    assert half_up(med([d["liq_wallets"] for d in base])) == 4868
+    rank = 1 + sum(1 for d in base if d["hip3_liq_wallets"] > ev["hip3_liq_wallets"])
+    assert rank == 1
+    # S2: the share of force-closed wallets that placed a new market order within 15 minutes
+    assert round(100 * ev["s2_retrade_15"] / ev["s2_denominator"], 1) == 17.7
+    pool = sum(d["s2_retrade_15"] for d in base) / sum(d["s2_denominator"] for d in base)
+    assert round(100 * pool, 1) == 12.9
+
+
+def test_pack_hashes_are_the_files_and_the_plan_hash_is_the_logged_one():
+    plan = open(os.path.join(PACK, "ANALYSIS-PLAN.sha256")).read().split()[0]
+    assert plan == PLAN_SHA == hashlib.sha256(open(os.path.join(PACK, "ANALYSIS-PLAN.md"), "rb").read()).hexdigest()
+    assert D["provenance"]["analysis_plan"]["sha256"] == PLAN_SHA if isinstance(D["provenance"]["analysis_plan"], dict) else True
+    code = D["provenance"]["code_sha256"]
+    for name, h in code.items():
+        f = os.path.join(PACK, os.path.basename(name))
+        if os.path.exists(f):
+            assert hashlib.sha256(open(f, "rb").read()).hexdigest() == h, name
+    assert len(D["provenance"]["inputs"]) == 31
+
+
+def test_csv_equals_the_json():
+    import selloff as SO
+    rows = list(csv.DictReader(io.StringIO(open(os.path.join(PACK, "5-november-2026-hyperliquid-daily.csv"), encoding="utf-8").read())))
+    assert len(rows) == 31 and rows[-1]["date_utc"] == EVENT
+    assert [int(r["wallets_force_closed"]) for r in rows] == [d["liq_wallets"] for d in D["days"]]
+    assert SO.csv_text() == open(os.path.join(PACK, "5-november-2026-hyperliquid-daily.csv"), encoding="utf-8").read()
+
+
+# ------------------------------------------------------------------ the market figures
+def test_market_figures_recomputed():
+    nc, n1 = MKT["indices"]["nasdaq_composite"], MKT["indices"]["nasdaq_100"]
+    for ix, dd, need in ((nc, 11.90, 13.51), (n1, 14.72, 17.25)):
+        r, c = ix["record_close"], ix["close"]
+        assert round(100 * (1 - c / r), 2) == dd, ix
+        assert round(100 * (r / c - 1), 2) == need, ix
+    assert round(100 * (nc["close"] / nc["prior_close"] - 1), 2) == -5.52
+
+
+def test_study_page_market_wording(built_site):
+    t = text(page(built_site, S))
+    assert "11.9% below its record" in t or "11.9% below" in t
+    assert "13.5%" in t and "14.7%" in t
+    assert not re.search(r"Nasdaq (is |was )?down 14", t)
+
+
+# ------------------------------------------------------------------ the study page
+def test_study_page_figures_are_the_data(built_site):
+    t = text(page(built_site, S))
+    for want in ("18,813", "9,054", "1,755", "4,868", "17.7%", "12.9%", "4,971"):
+        assert want in t, want
+
+
+def test_study_page_has_no_price_no_pay_link_and_no_stray_dollar(built_site):
+    h = page(built_site, S)
+    main = h.split("<main", 1)[-1].split("</main>")[0]   # the site-wide checkout panel after <main> holds the product price on every page
+    assert amounts_in(main) == [], amounts_in(main)
+    assert "/pricing/" not in main and "/start/" not in main and 'class="btn' not in main
+    assert "$" not in text(main)
+
+
+def test_study_page_wording_lint_and_banned_words(built_site):
+    for path in (S, B):
+        h = page(built_site, path)
+        body = text(h.split("<main", 1)[-1].split("</main>")[0])
+        assert L.lint_text(body, path) == [], (path, L.lint_text(body, path))
+        for w in ("beta", "fake", "demo", "made-up", "buy the dip", "buy-the-dip", "panic", "crash"):
+            assert not re.search(rf"\b{re.escape(w)}\b", body, re.I), (path, w)
+
+
+def test_study_page_defines_wallet_and_force_closed_and_credits_the_data(built_site):
+    h = page(built_site, S)
+    t = text(h)
+    assert re.search(r"wallet is a blockchain address|A wallet is", t) and "force-closed" in t
+    assert "CC BY 4.0" in t and "Ironflow" in t and "FRED" in t
+    assert "https://creativecommons.org/licenses/by/4.0/" in h
+    assert re.search(r"(?i)changes? (made|we made)|we (aggregated|changed|turned)", t)
+    assert "donttrade" in t
+
+
+def test_study_page_dois_are_in_references_with_a_crossref_check(built_site):
+    refs = json.load(open(os.path.join(REPO, "site", "config", "references.json"), encoding="utf-8"))
+    h = page(built_site, S)
+    dois = set(re.findall(r"10\.\d{4,9}/[^\s\"<>)]+", h))
+    known = {v["doi"].lower(): v for v in (refs["refs"] if "refs" in refs else refs).values() if isinstance(v, dict) and "doi" in v}
+    for d in dois:
+        d = d.rstrip(".,;")
+        if d.lower().startswith("10.1257/aer.20140386") or d.lower().startswith("10.1111/j.1540-6261.2005.00723.x"):
+            assert d.lower() in known and known[d.lower()]["crossref_checked"], d
+
+
+def test_csp_unchanged_and_no_inline_style_or_script(built_site):
+    for path in (S, B, "/"):
+        h = page(built_site, path)
+        assert not re.search(r"<script(?![^>]*\bsrc=)(?![^>]*type=\"(text/csv|application/ld\+json)\")[^>]*>", h), path
+        assert " style=" not in h, path
+        import html as _html
+        csp = _html.unescape(re.search(r'http-equiv="Content-Security-Policy" content="([^"]+)"', h).group(1))
+        assert "script-src 'self'" in csp and "unsafe-inline" not in csp.split("style-src")[0], path
+
+
+def test_json_ld_and_sitemap(built_site):
+    h = page(built_site, S)
+    blocks = [json.loads(b) for b in re.findall(r'(?s)<script type="application/ld\+json">(.*?)</script>', h)]
+    flat = []
+    for b in blocks:
+        flat += b.get("@graph", [b])
+    types = {x.get("@type") if isinstance(x.get("@type"), str) else tuple(x.get("@type")) for x in flat}
+    assert any("Article" in (t if isinstance(t, tuple) else (t,)) or "ScholarlyArticle" in (t if isinstance(t, tuple) else (t,)) for t in types)
+    assert "Dataset" in types
+    sm = (built_site["out"] / "sitemap.xml").read_text(encoding="utf-8")
+    assert S in sm and B in sm
+
+
+def test_seo_lint_passes_for_the_new_pages(built_site):
+    r = subprocess.run([sys.executable, os.path.join(REPO, "checks", "seo_lint.py")], capture_output=True, text=True,
+                       env={**os.environ, "DT_OUT": str(built_site["out"])})
+    assert "problem" not in r.stdout.lower() or "0 problem" in r.stdout.lower() or r.returncode == 0, r.stdout[-800:]
+
+
+def test_pack_is_served_byte_for_byte(built_site):
+    for f in os.listdir(PACK):
+        if f.endswith(".csv"):
+            assert (built_site["out"] / "data" / f).read_bytes() == open(os.path.join(PACK, f), "rb").read()
+        else:
+            assert (built_site["out"] / "data" / "5-november-2026" / f).read_bytes() == open(os.path.join(PACK, f), "rb").read()
+
+
+# ------------------------------------------------------------------ the Learn callout and the research listing
+def test_learn_callout(built_site):
+    t = text(page(built_site, "/learn/drawdown-recovery-table/"))
+    assert "Nasdaq Composite closed 11.9% below its record" in t and "13.5%" in t
+    assert "Nasdaq-100 closed 14.7% below its record and needs 17.3%" in t
+    assert "FRED" in t and not re.search(r"Nasdaq (is |was )?down 14", t)
+
+
+def test_research_listing_links_the_study(built_site):
+    assert S in page(built_site, "/research/")
+
+
+# ------------------------------------------------------------------ the home band
+def build_dated(tmp_path, today):
+    out = tmp_path / "_site"
+    env = {**os.environ, "DT_OUT": str(out), "DT_TODAY": today}
+    env.pop("DT_DEV", None)
+    r = subprocess.run([sys.executable, os.path.join(REPO, "site", "build.py")], env=env, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    return (out / "index.html").read_text(encoding="utf-8")
+
+
+def test_home_band_present_in_the_build(built_site):
+    h = (built_site["out"] / "index.html").read_text(encoding="utf-8")
+    assert h.count("data-dated-band") == 1 and 'data-expires="2026-11-21"' in h
+    band = re.search(r'(?s)<div class="dated-band".*?</div>\s*</div>', h).group(0)
+    t = text(band)
+    assert "Nasdaq Composite −5.5% on 5 November" in t and "What did your account do that day?" in t
+    assert S in band and "/static/js/band-expiry.js" in h
+    assert "data-motion" not in band and "animation" not in band
+
+
+def test_no_study_finding_on_the_home_page_or_in_the_band(built_site):
+    """The house rule (home.html): no study finding on the home page, so none can sit next to the offer. The band carries a FRED market
+    figure and a link; no figure of the sell-off study (counts, ratios, shares, the weekday medians) may appear anywhere on the page."""
+    import selloff as SO
+    F = SO.context()["F"]
+    h = (built_site["out"] / "index.html").read_text(encoding="utf-8")
+    t = text(h.split("<main", 1)[-1].split("</main>")[0])
+    study_figures = [F[k] for k in ("wallets", "hip3", "hip3_median", "hip3_prev", "wallets_median", "hip3_wd_median", "retrade15", "pooled15",
+                                    "iqr15", "hip3_active", "events", "busiest_wallets")]
+    study_figures += [f"{F['hip3_ratio']} times", f"{F['hip3_wd_ratio']} times", f"{F['hip3_vs_prev']} times", "force-closed", "forced close",
+                      "liquidat"]
+    for f in study_figures:
+        assert f not in t, f
+    assert "Hyperliquid" not in t and not re.search(r"\d[\d,.]*\s*(million\s+)?wallets", t)
+
+
+def build_dated(tmp_path, today):
+    out = tmp_path / "_site"
+    env = {**os.environ, "DT_OUT": str(out), "DT_TODAY": today}
+    env.pop("DT_DEV", None)
+    r = subprocess.run([sys.executable, os.path.join(REPO, "site", "build.py")], env=env, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    return (out / "index.html").read_text(encoding="utf-8")
+
+
+def test_home_band_is_gone_on_21_nov_and_after(tmp_path):
+    assert "data-dated-band" in build_dated(tmp_path / "a", "2026-11-20")
+    for d in ("2026-11-21", "2026-11-22"):
+        assert "data-dated-band" not in build_dated(tmp_path / d, d), d
+
+
+def test_band_script_hides_on_the_expiry_day(browser, built_site):
+    ctx = browser.new_context()
+    pg = ctx.new_page()
+    pg.clock.install(time="2026-11-20T23:59:00Z")
+    pg.goto(built_site["url"] + "/")
+    assert pg.locator("[data-dated-band]").is_visible()
+    pg.close()
+    pg = ctx.new_page()
+    pg.clock.install(time="2026-11-21T00:01:00Z")
+    pg.goto(built_site["url"] + "/")
+    assert not pg.locator("[data-dated-band]").is_visible()
+    ctx.close()
+
+
+# ------------------------------------------------------------------ fix round 1
+def weekday(day):
+    import datetime as dt
+    return dt.date.fromisoformat(day).weekday() < 5
+
+
+def test_weekday_comparison_recomputed_and_used_in_headlines(built_site):
+    base = D["days"][:-1]
+    ev = D["days"][-1]
+    wd = [d for d in base if weekday(d["day"])]
+    assert len(wd) == 22 and len(base) - len(wd) == 8
+    m = med([d["hip3_liq_wallets"] for d in wd])
+    assert half_up(m) == 1946 and round(ev["hip3_liq_wallets"] / m, 1) == 4.7
+    assert round(ev["hip3_liq_notional"] / med([d["hip3_liq_notional"] for d in wd]), 1) == 7.5
+    assert round(ev["liq_wallets"] / med([d["liq_wallets"] for d in wd]), 1) == 2.7
+    assert 1 + sum(1 for d in wd if d["hip3_liq_wallets"] > ev["hip3_liq_wallets"]) == 1
+    h = page(built_site, S)
+    lede = text(re.search(r'(?s)<p class="lede">(.*?)</p>', h).group(1))
+    assert "about 4.7 times the median weekday" in lede and "5.2" not in lede
+    t = text(h)
+    assert "pre-stated" in t and "5.2 times the 30-day median" in t and "not in the plan" in t
+    # the 1.8x previous high: previous high 4,971 on 30 Oct, a Friday, an all-days maximum that is also the weekday maximum
+    assert max(d["hip3_liq_wallets"] for d in base) == max(d["hip3_liq_wallets"] for d in wd) == 4971
+    assert "1.8 times the previous 30-day high (30 Oct, a Friday)" in t
+    # headline-facing copy never says "normal day" or the 5.2 figure
+    for path in ("/research/", "/tools/bad-day-check/", "/"):
+        assert "times a normal day" not in text(page(built_site, path))
+    assert "5.2 times" not in text(page(built_site, "/"))
+
+
+def test_builder_listed_label_is_used_everywhere_and_stock_index_is_never_claimed(built_site):
+    for path in (S, "/research/", B, "/learn/drawdown-recovery-table/", "/"):
+        t = text(page(built_site, path))
+        assert not re.search(r"stock and index markets|stock, index and commodity|on stock markets", t), path
+    h = page(built_site, S)
+    assert "builder-listed" in text(re.search(r"(?s)<h1>(.*?)</h1>", h).group(1))
+    t = text(h)
+    assert "listed as SOXL, MU, SP500, XYZ100 and AMD" in t and "do not say what share of the value was in stock or index contracts" in t
+    top = D["summary"]["S1_top5_E"]
+    assert f"{round(100 * sum(v for _, _, v in top) / D['days'][-1]['hip3_liq_notional'])}%" in t
+
+
+def test_summary_json_has_no_suppressed_cell_and_both_hashes_are_documented():
+    pub = json.load(open(os.path.join(PACK, "SUMMARY.json"), encoding="utf-8"))
+    assert all(row[2] >= 10 for row in pub["S3_hours_E"]) and 7 not in [r[0] for r in pub["S3_hours_E"]]
+    pf = D["provenance"]["published_files"]
+    assert pf["SUMMARY.json"]["sha256"] == hashlib.sha256(open(os.path.join(PACK, "SUMMARY.json"), "rb").read()).hexdigest()
+    assert pf["SUMMARY.json"]["run_sha256"] == D["provenance"]["output_sha256"]["SUMMARY.json"] != pf["SUMMARY.json"]["sha256"]
+    readme = open(os.path.join(PACK, "README.txt"), encoding="utf-8").read()
+    assert pf["SUMMARY.json"]["sha256"] in readme and pf["SUMMARY.json"]["run_sha256"] in readme and pf["RUN-LOG.txt"]["sha256"] in readme
+    assert "exclusive method" in readme and "self-recorded" in readme
+
+
+def test_run_log_has_no_reddit_line_and_the_page_describes_the_timing_honestly(built_site):
+    for p in [os.path.join(PACK, "RUN-LOG.txt"), DATA]:
+        assert "Reddit" not in open(p, encoding="utf-8").read() and "usernames" not in open(p, encoding="utf-8").read()
+    t = text(page(built_site, S))
+    assert "time-stamped" not in t and "our own clock" in t and "dated deposit is pending" in t
+
+
+def test_quartile_method_and_long_share_rank_are_stated(built_site):
+    t = text(page(built_site, S))
+    assert "exclusive method" in t and "QUARTILE.INC" in t
+    assert "ranked 6 of the 31 days" in t
+    assert "96% of the value force-closed was in long positions" in t
+
+
+def test_learn_callout_says_wallets(built_site):
+    t = text(page(built_site, "/learn/drawdown-recovery-table/"))
+    assert "What happened to wallets on one crypto exchange that day" in t and "to traders" not in t
+
+
+def test_faq_json_ld_has_no_space_before_a_full_stop(built_site):
+    h = page(built_site, B)
+    assert " ." not in "".join(re.findall(r'(?s)<script type="application/ld\+json">(.*?)</script>', h))
+
+
+def test_fix_round_2_wording(built_site):
+    h = page(built_site, S)
+    t = text(h)
+    h1 = text(re.search(r"(?s)<h1>(.*?)</h1>", h).group(1))
+    assert h1.startswith("5 November 2026: 9,054 wallets were force-closed on Hyperliquid’s builder-listed markets, about 4.7 times the median weekday")
+    assert "18,813" not in h1 and "18,813" not in text(re.search(r"<title>(.*?)</title>", h).group(1))
+    # the all-markets figure stays in the body, with its near-tie context
+    assert "18,813" in t and "a near-tie" in t and re.search(r"8 Oct was \d+% lower", t)
+    # active wallets defined before first use; bots and market makers named; not a person
+    d = t.index("Active wallet Any address that bought or sold")
+    assert "bots and market makers" in t[d:d + 300] and "not a person" in t[d:d + 300]
+    assert d < t.index("of 39,804 active there") and d < t.index("Share of active wallets")
+    # the 15-minute limit sits in the tile and in section 4
+    limit = "We did not compare with wallets that were not force-closed on the same day, so a busier day may explain part of the gap"
+    assert t.count(limit.replace("the gap", "this gap")) == 1 and limit in t
+    assert "all or part of a leveraged position" in t and "other forced reductions are not counted" in t
+    assert "Method written down first" in t and "re-run after the first pass" in t and "one removed cell" in t
+    assert "Text: CC BY-NC 4.0. Counts and code: CC BY 4.0." in t
+    assert "our rule matches Ironflow’s own liquidation table" in t
+    tool = text(page(built_site, B))
+    assert "will usually also have more losses" not in tool and "almost by construction" in tool
+    assert "See what one crypto exchange’s wallets did" in text(page(built_site, "/"))

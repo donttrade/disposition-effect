@@ -1,0 +1,1050 @@
+{
+ "_about": "Aggregate counts only, made by checks/selloff/make_selloff_data.py from the outputs of the pre-stated analysis (checks/selloff/zenodo/ANALYSIS-PLAN.md). No wallet address is in this file: the script refuses to write one. Cells under 10 wallets are suppressed. site/selloff.py recomputes every statistic from `days` and fails the build if it differs from `summary`; tests/test_selloff.py recomputes them a second way.",
+ "baseline": {
+  "days": 30,
+  "first": "2026-10-06",
+  "last": "2026-11-04"
+ },
+ "days": [
+  {
+   "active_wallets": 64868,
+   "day": "2026-10-06",
+   "hip3_active_wallets": 21903,
+   "hip3_liq_notional": 17914789.602976993,
+   "hip3_liq_wallets": 852,
+   "liq_events": 2209,
+   "liq_notional": 23176959.595141962,
+   "liq_notional_long": 10979073.841203991,
+   "liq_wallets": 2052,
+   "perp_trades": 4708755,
+   "s2_denominator": 2032,
+   "s2_retrade_15": 227,
+   "s2_retrade_60": 377
+  },
+  {
+   "active_wallets": 80940,
+   "day": "2026-10-07",
+   "hip3_active_wallets": 22805,
+   "hip3_liq_notional": 10512196.700001992,
+   "hip3_liq_wallets": 1376,
+   "liq_events": 16409,
+   "liq_notional": 179805961.80738556,
+   "liq_notional_long": 176263673.16155356,
+   "liq_wallets": 11836,
+   "perp_trades": 5855984,
+   "s2_denominator": 11834,
+   "s2_retrade_15": 1512,
+   "s2_retrade_60": 2350
+  },
+  {
+   "active_wallets": 90890,
+   "day": "2026-10-08",
+   "hip3_active_wallets": 24495,
+   "hip3_liq_notional": 34555179.3867311,
+   "hip3_liq_wallets": 2195,
+   "liq_events": 28439,
+   "liq_notional": 336699429.53399634,
+   "liq_notional_long": 327046944.7886914,
+   "liq_wallets": 18391,
+   "perp_trades": 7631694,
+   "s2_denominator": 18388,
+   "s2_retrade_15": 2140,
+   "s2_retrade_60": 3699
+  },
+  {
+   "active_wallets": 61871,
+   "day": "2026-10-09",
+   "hip3_active_wallets": 18744,
+   "hip3_liq_notional": 12978530.512072,
+   "hip3_liq_wallets": 406,
+   "liq_events": 2501,
+   "liq_notional": 39862981.609780006,
+   "liq_notional_long": 13643306.322473003,
+   "liq_wallets": 2213,
+   "perp_trades": 4727948,
+   "s2_denominator": 2210,
+   "s2_retrade_15": 276,
+   "s2_retrade_60": 480
+  },
+  {
+   "active_wallets": 46639,
+   "day": "2026-10-10",
+   "hip3_active_wallets": 10055,
+   "hip3_liq_notional": 8715.440200000001,
+   "hip3_liq_wallets": 10,
+   "liq_events": 1406,
+   "liq_notional": 3309321.426133004,
+   "liq_notional_long": 97271.73047800004,
+   "liq_wallets": 1129,
+   "perp_trades": 2905934,
+   "s2_denominator": 1125,
+   "s2_retrade_15": 248,
+   "s2_retrade_60": 365
+  },
+  {
+   "active_wallets": 54274,
+   "day": "2026-10-11",
+   "hip3_active_wallets": 10904,
+   "hip3_liq_notional": 133984.70879799998,
+   "hip3_liq_wallets": 29,
+   "liq_events": 2805,
+   "liq_notional": 22145824.187830992,
+   "liq_notional_long": 828953.3989969998,
+   "liq_wallets": 2416,
+   "perp_trades": 3696900,
+   "s2_denominator": 2306,
+   "s2_retrade_15": 328,
+   "s2_retrade_60": 581
+  },
+  {
+   "active_wallets": 74051,
+   "day": "2026-10-12",
+   "hip3_active_wallets": 21430,
+   "hip3_liq_notional": 13233850.289974997,
+   "hip3_liq_wallets": 1907,
+   "liq_events": 13554,
+   "liq_notional": 74284991.75774993,
+   "liq_notional_long": 69870764.07070191,
+   "liq_wallets": 10048,
+   "perp_trades": 6640941,
+   "s2_denominator": 8071,
+   "s2_retrade_15": 1061,
+   "s2_retrade_60": 1853
+  },
+  {
+   "active_wallets": 70871,
+   "day": "2026-10-13",
+   "hip3_active_wallets": 23029,
+   "hip3_liq_notional": 16465895.545096936,
+   "hip3_liq_wallets": 1985,
+   "liq_events": 9360,
+   "liq_notional": 82186040.51130272,
+   "liq_notional_long": 64198984.100371964,
+   "liq_wallets": 7474,
+   "perp_trades": 6280278,
+   "s2_denominator": 7474,
+   "s2_retrade_15": 808,
+   "s2_retrade_60": 1379
+  },
+  {
+   "active_wallets": 72313,
+   "day": "2026-10-14",
+   "hip3_active_wallets": 27847,
+   "hip3_liq_notional": 54593968.96448824,
+   "hip3_liq_wallets": 4205,
+   "liq_events": 10477,
+   "liq_notional": 86337372.25170928,
+   "liq_notional_long": 84281416.19117431,
+   "liq_wallets": 8226,
+   "perp_trades": 6225733,
+   "s2_denominator": 7856,
+   "s2_retrade_15": 940,
+   "s2_retrade_60": 1618
+  },
+  {
+   "active_wallets": 82684,
+   "day": "2026-10-15",
+   "hip3_active_wallets": 27854,
+   "hip3_liq_notional": 29304168.449975092,
+   "hip3_liq_wallets": 3017,
+   "liq_events": 18742,
+   "liq_notional": 201112112.27142504,
+   "liq_notional_long": 181999193.52364096,
+   "liq_wallets": 13216,
+   "perp_trades": 8332161,
+   "s2_denominator": 13170,
+   "s2_retrade_15": 1627,
+   "s2_retrade_60": 2574
+  },
+  {
+   "active_wallets": 66440,
+   "day": "2026-10-16",
+   "hip3_active_wallets": 24635,
+   "hip3_liq_notional": 26874712.466190014,
+   "hip3_liq_wallets": 2194,
+   "liq_events": 6602,
+   "liq_notional": 56613193.92034332,
+   "liq_notional_long": 49403322.37280315,
+   "liq_wallets": 5467,
+   "perp_trades": 6200003,
+   "s2_denominator": 5436,
+   "s2_retrade_15": 655,
+   "s2_retrade_60": 1210
+  },
+  {
+   "active_wallets": 50914,
+   "day": "2026-10-17",
+   "hip3_active_wallets": 16249,
+   "hip3_liq_notional": 24921699.562622085,
+   "hip3_liq_wallets": 1980,
+   "liq_events": 5524,
+   "liq_notional": 61127130.70489694,
+   "liq_notional_long": 56644046.53038788,
+   "liq_wallets": 4403,
+   "perp_trades": 3423681,
+   "s2_denominator": 4390,
+   "s2_retrade_15": 456,
+   "s2_retrade_60": 753
+  },
+  {
+   "active_wallets": 57537,
+   "day": "2026-10-18",
+   "hip3_active_wallets": 16132,
+   "hip3_liq_notional": 1125807.5250390011,
+   "hip3_liq_wallets": 522,
+   "liq_events": 6267,
+   "liq_notional": 58429796.45925368,
+   "liq_notional_long": 36393998.33446116,
+   "liq_wallets": 5042,
+   "perp_trades": 4413926,
+   "s2_denominator": 4775,
+   "s2_retrade_15": 483,
+   "s2_retrade_60": 812
+  },
+  {
+   "active_wallets": 61646,
+   "day": "2026-10-19",
+   "hip3_active_wallets": 22976,
+   "hip3_liq_notional": 5171523.147332998,
+   "hip3_liq_wallets": 694,
+   "liq_events": 2340,
+   "liq_notional": 25924456.834933057,
+   "liq_notional_long": 1912525.6936599994,
+   "liq_wallets": 2049,
+   "perp_trades": 5571455,
+   "s2_denominator": 2046,
+   "s2_retrade_15": 232,
+   "s2_retrade_60": 423
+  },
+  {
+   "active_wallets": 66297,
+   "day": "2026-10-20",
+   "hip3_active_wallets": 23903,
+   "hip3_liq_notional": 13857956.503754968,
+   "hip3_liq_wallets": 1717,
+   "liq_events": 5380,
+   "liq_notional": 47839367.138444915,
+   "liq_notional_long": 10246263.016431998,
+   "liq_wallets": 4569,
+   "perp_trades": 6239517,
+   "s2_denominator": 4565,
+   "s2_retrade_15": 717,
+   "s2_retrade_60": 1206
+  },
+  {
+   "active_wallets": 70966,
+   "day": "2026-10-21",
+   "hip3_active_wallets": 24505,
+   "hip3_liq_notional": 12403439.736627964,
+   "hip3_liq_wallets": 1118,
+   "liq_events": 4626,
+   "liq_notional": 51600836.74759003,
+   "liq_notional_long": 3681788.6450019954,
+   "liq_wallets": 3932,
+   "perp_trades": 6348524,
+   "s2_denominator": 3900,
+   "s2_retrade_15": 618,
+   "s2_retrade_60": 1065
+  },
+  {
+   "active_wallets": 76318,
+   "day": "2026-10-22",
+   "hip3_active_wallets": 28217,
+   "hip3_liq_notional": 51018224.70240484,
+   "hip3_liq_wallets": 3491,
+   "liq_events": 11398,
+   "liq_notional": 120807470.19307734,
+   "liq_notional_long": 118641628.22154716,
+   "liq_wallets": 8772,
+   "perp_trades": 6505009,
+   "s2_denominator": 8711,
+   "s2_retrade_15": 886,
+   "s2_retrade_60": 1553
+  },
+  {
+   "active_wallets": 64854,
+   "day": "2026-10-23",
+   "hip3_active_wallets": 24877,
+   "hip3_liq_notional": 12105094.06191994,
+   "hip3_liq_wallets": 1811,
+   "liq_events": 7834,
+   "liq_notional": 47443566.26915287,
+   "liq_notional_long": 42886819.36845304,
+   "liq_wallets": 6505,
+   "perp_trades": 5586551,
+   "s2_denominator": 6274,
+   "s2_retrade_15": 718,
+   "s2_retrade_60": 1210
+  },
+  {
+   "active_wallets": 62740,
+   "day": "2026-10-24",
+   "hip3_active_wallets": 13489,
+   "hip3_liq_notional": 4181579.9788349997,
+   "hip3_liq_wallets": 280,
+   "liq_events": 10427,
+   "liq_notional": 135309993.62335402,
+   "liq_notional_long": 132186551.08181094,
+   "liq_wallets": 8369,
+   "perp_trades": 3685530,
+   "s2_denominator": 8303,
+   "s2_retrade_15": 881,
+   "s2_retrade_60": 1468
+  },
+  {
+   "active_wallets": 46282,
+   "day": "2026-10-25",
+   "hip3_active_wallets": 13448,
+   "hip3_liq_notional": 1343670.8180899988,
+   "hip3_liq_wallets": 168,
+   "liq_events": 1054,
+   "liq_notional": 4563732.326403992,
+   "liq_notional_long": 2694685.8554529953,
+   "liq_wallets": 978,
+   "perp_trades": 3020536,
+   "s2_denominator": 735,
+   "s2_retrade_15": 75,
+   "s2_retrade_60": 129
+  },
+  {
+   "active_wallets": 61443,
+   "day": "2026-10-26",
+   "hip3_active_wallets": 24486,
+   "hip3_liq_notional": 19567906.41921308,
+   "hip3_liq_wallets": 1792,
+   "liq_events": 3921,
+   "liq_notional": 30370906.423863184,
+   "liq_notional_long": 16104357.370003013,
+   "liq_wallets": 3360,
+   "perp_trades": 5688970,
+   "s2_denominator": 3326,
+   "s2_retrade_15": 545,
+   "s2_retrade_60": 814
+  },
+  {
+   "active_wallets": 61089,
+   "day": "2026-10-27",
+   "hip3_active_wallets": 23749,
+   "hip3_liq_notional": 4644843.911547007,
+   "hip3_liq_wallets": 1087,
+   "liq_events": 2992,
+   "liq_notional": 18855815.56237203,
+   "liq_notional_long": 4164326.028267995,
+   "liq_wallets": 2595,
+   "perp_trades": 4833611,
+   "s2_denominator": 2541,
+   "s2_retrade_15": 343,
+   "s2_retrade_60": 558
+  },
+  {
+   "active_wallets": 66927,
+   "day": "2026-10-28",
+   "hip3_active_wallets": 27921,
+   "hip3_liq_notional": 32911002.257071823,
+   "hip3_liq_wallets": 2255,
+   "liq_events": 5615,
+   "liq_notional": 60436507.17145812,
+   "liq_notional_long": 15843124.131501041,
+   "liq_wallets": 4694,
+   "perp_trades": 5920059,
+   "s2_denominator": 4693,
+   "s2_retrade_15": 745,
+   "s2_retrade_60": 1233
+  },
+  {
+   "active_wallets": 94001,
+   "day": "2026-10-29",
+   "hip3_active_wallets": 30446,
+   "hip3_liq_notional": 35230278.216716066,
+   "hip3_liq_wallets": 3496,
+   "liq_events": 27299,
+   "liq_notional": 251928156.15585643,
+   "liq_notional_long": 217805116.27644035,
+   "liq_wallets": 18121,
+   "perp_trades": 9722571,
+   "s2_denominator": 16838,
+   "s2_retrade_15": 2936,
+   "s2_retrade_60": 4507
+  },
+  {
+   "active_wallets": 89648,
+   "day": "2026-10-30",
+   "hip3_active_wallets": 33163,
+   "hip3_liq_notional": 40803903.59579099,
+   "hip3_liq_wallets": 4971,
+   "liq_events": 20307,
+   "liq_notional": 215758622.29957342,
+   "liq_notional_long": 178329361.06454977,
+   "liq_wallets": 14526,
+   "perp_trades": 7872123,
+   "s2_denominator": 14503,
+   "s2_retrade_15": 1943,
+   "s2_retrade_60": 3089
+  },
+  {
+   "active_wallets": 48444,
+   "day": "2026-10-31",
+   "hip3_active_wallets": 13340,
+   "hip3_liq_notional": 607526.5794660001,
+   "hip3_liq_wallets": 74,
+   "liq_events": 1103,
+   "liq_notional": 8379283.316506986,
+   "liq_notional_long": 5820554.731027001,
+   "liq_wallets": 1067,
+   "perp_trades": 3023809,
+   "s2_denominator": 1067,
+   "s2_retrade_15": 55,
+   "s2_retrade_60": 107
+  },
+  {
+   "active_wallets": 46857,
+   "day": "2026-11-01",
+   "hip3_active_wallets": 13065,
+   "hip3_liq_notional": 26639.759745999992,
+   "hip3_liq_wallets": 28,
+   "liq_events": 1129,
+   "liq_notional": 25766426.460735016,
+   "liq_notional_long": 8551345.11728399,
+   "liq_wallets": 1035,
+   "perp_trades": 2976988,
+   "s2_denominator": 913,
+   "s2_retrade_15": 79,
+   "s2_retrade_60": 137
+  },
+  {
+   "active_wallets": 71858,
+   "day": "2026-11-02",
+   "hip3_active_wallets": 29160,
+   "hip3_liq_notional": 21646522.80306913,
+   "hip3_liq_wallets": 3058,
+   "liq_events": 9926,
+   "liq_notional": 73043572.39951265,
+   "liq_notional_long": 59402235.19180612,
+   "liq_wallets": 7882,
+   "perp_trades": 5909564,
+   "s2_denominator": 7859,
+   "s2_retrade_15": 997,
+   "s2_retrade_60": 1640
+  },
+  {
+   "active_wallets": 67502,
+   "day": "2026-11-03",
+   "hip3_active_wallets": 26977,
+   "hip3_liq_notional": 9558784.657200985,
+   "hip3_liq_wallets": 1686,
+   "liq_events": 4975,
+   "liq_notional": 31614940.922504187,
+   "liq_notional_long": 20042222.620347988,
+   "liq_wallets": 4460,
+   "perp_trades": 5140576,
+   "s2_denominator": 4450,
+   "s2_retrade_15": 502,
+   "s2_retrade_60": 816
+  },
+  {
+   "active_wallets": 87785,
+   "day": "2026-11-04",
+   "hip3_active_wallets": 34065,
+   "hip3_liq_notional": 60228127.70609807,
+   "hip3_liq_wallets": 4492,
+   "liq_events": 17201,
+   "liq_notional": 214085855.53322095,
+   "liq_notional_long": 76520648.606864,
+   "liq_wallets": 12692,
+   "perp_trades": 7936745,
+   "s2_denominator": 12682,
+   "s2_retrade_15": 1787,
+   "s2_retrade_60": 2885
+  },
+  {
+   "active_wallets": 93973,
+   "day": "2026-11-05",
+   "hip3_active_wallets": 39804,
+   "hip3_liq_notional": 140556424.22779006,
+   "hip3_liq_wallets": 9054,
+   "liq_events": 30990,
+   "liq_notional": 283196131.5251029,
+   "liq_notional_long": 272450221.9647623,
+   "liq_wallets": 18813,
+   "perp_trades": 9181740,
+   "s2_denominator": 17105,
+   "s2_retrade_15": 3031,
+   "s2_retrade_60": 4989
+  }
+ ],
+ "event": {
+  "hourly": [
+   {
+    "hour_utc": 0,
+    "suppressed": false,
+    "value": 2036799.4791669988,
+    "wallets": 236
+   },
+   {
+    "hour_utc": 1,
+    "suppressed": false,
+    "value": 6731506.937178001,
+    "wallets": 831
+   },
+   {
+    "hour_utc": 2,
+    "suppressed": false,
+    "value": 237495.38558099995,
+    "wallets": 69
+   },
+   {
+    "hour_utc": 3,
+    "suppressed": false,
+    "value": 36193.659718999996,
+    "wallets": 32
+   },
+   {
+    "hour_utc": 4,
+    "suppressed": false,
+    "value": 100248.64112399999,
+    "wallets": 33
+   },
+   {
+    "hour_utc": 5,
+    "suppressed": false,
+    "value": 3554338.591125999,
+    "wallets": 225
+   },
+   {
+    "hour_utc": 6,
+    "suppressed": false,
+    "value": 142131.67362700007,
+    "wallets": 196
+   },
+   {
+    "hour_utc": 7,
+    "suppressed": true,
+    "value": null,
+    "wallets": null
+   },
+   {
+    "hour_utc": 8,
+    "suppressed": false,
+    "value": 6061.987603999998,
+    "wallets": 15
+   },
+   {
+    "hour_utc": 9,
+    "suppressed": false,
+    "value": 11840.867652,
+    "wallets": 20
+   },
+   {
+    "hour_utc": 10,
+    "suppressed": false,
+    "value": 93712.22939999998,
+    "wallets": 35
+   },
+   {
+    "hour_utc": 11,
+    "suppressed": false,
+    "value": 642252.7963619998,
+    "wallets": 72
+   },
+   {
+    "hour_utc": 12,
+    "suppressed": false,
+    "value": 9192686.361164007,
+    "wallets": 1178
+   },
+   {
+    "hour_utc": 13,
+    "suppressed": false,
+    "value": 2235236.531786,
+    "wallets": 138
+   },
+   {
+    "hour_utc": 14,
+    "suppressed": false,
+    "value": 57133501.4516548,
+    "wallets": 5793
+   },
+   {
+    "hour_utc": 15,
+    "suppressed": false,
+    "value": 131084019.47541189,
+    "wallets": 8980
+   },
+   {
+    "hour_utc": 16,
+    "suppressed": false,
+    "value": 3248563.5205019973,
+    "wallets": 349
+   },
+   {
+    "hour_utc": 17,
+    "suppressed": false,
+    "value": 2998623.8891150025,
+    "wallets": 581
+   },
+   {
+    "hour_utc": 18,
+    "suppressed": false,
+    "value": 8594609.469077999,
+    "wallets": 780
+   },
+   {
+    "hour_utc": 19,
+    "suppressed": false,
+    "value": 1910879.4961529986,
+    "wallets": 98
+   },
+   {
+    "hour_utc": 20,
+    "suppressed": false,
+    "value": 6133992.769717004,
+    "wallets": 781
+   },
+   {
+    "hour_utc": 21,
+    "suppressed": false,
+    "value": 9534696.425700007,
+    "wallets": 1019
+   },
+   {
+    "hour_utc": 22,
+    "suppressed": false,
+    "value": 3348845.612645997,
+    "wallets": 299
+   },
+   {
+    "hour_utc": 23,
+    "suppressed": false,
+    "value": 34187774.27663793,
+    "wallets": 2828
+   }
+  ],
+  "s3_exact": {
+   "top15": [
+    [
+     "2026-11-05 15:00",
+     44252257.695327304,
+     3811
+    ],
+    [
+     "2026-11-05 15:15",
+     43126576.25209102,
+     2251
+    ],
+    [
+     "2026-11-05 15:45",
+     41855725.05890572,
+     3922
+    ]
+   ],
+   "total": 283196131.5251029,
+   "us_session_notional": 206955086.67340475,
+   "us_session_share": 0.7307835935430493,
+   "us_session_wallets": 14335
+  }
+ },
+ "event_day": "2026-11-05",
+ "provenance": {
+  "analysis_plan": {
+   "file": "ANALYSIS-PLAN.md",
+   "logged_utc": "2026-11-06T19:44:00Z",
+   "sha256": "21ce82c3bebd3044b0f43bceb4bb09626aad90262a375a0591274e55f364d704"
+  },
+  "code_sha256": {
+   "run_day.py": "557c7e5b943fa5ee3e493ead5933800bb6091921832089d28ee5b9d25ade17f9",
+   "s3_exact.py": "16934b832b2ea3663bb9541aca30f6de441be9aa42949b6f0c62e4299609fc44",
+   "summarize.py": "79226d27e4f470b778470b24e1bec1ffabe1e615938c3a053e7b481434ad6e72"
+  },
+  "inputs": [
+   {
+    "bytes": 126153787,
+    "day": "2026-10-06",
+    "sha256": "487d5d211b64de742b2d0cfdcdcd9bf6c1786b12bd9b5989449b0604a0f5d842"
+   },
+   {
+    "bytes": 155823063,
+    "day": "2026-10-07",
+    "sha256": "81372a3595b99b93771b737f1e3fc4933661c534b03288dd250176dcfed9e984"
+   },
+   {
+    "bytes": 199650996,
+    "day": "2026-10-08",
+    "sha256": "58bd62009f36c8c3e805d0571103647accfc852815cf67777bd718a866c0b9a5"
+   },
+   {
+    "bytes": 129115436,
+    "day": "2026-10-09",
+    "sha256": "f6bd44f375732900a7e0b73a7da0950a321c981d7dbee8379e0a866faf2f64b7"
+   },
+   {
+    "bytes": 79922441,
+    "day": "2026-10-10",
+    "sha256": "f35687b00fdca24ae3bf7bbf9e54b428173f5840875b485104ddcc90276aa2aa"
+   },
+   {
+    "bytes": 99675368,
+    "day": "2026-10-11",
+    "sha256": "dd61c2930ff0a1aba03bd4d600410d7589552306fc2f4f7323831ab72d9ff86d"
+   },
+   {
+    "bytes": 170583232,
+    "day": "2026-10-12",
+    "sha256": "dfbe490e4f2d983de74fa7da73e81d2ac51778eeec6d75db4f96a06fe3684142"
+   },
+   {
+    "bytes": 164395081,
+    "day": "2026-10-13",
+    "sha256": "6689e6801cb6ad1e10ffafaae236a6e478b7f4f6e0a401ebd07193b0084764dc"
+   },
+   {
+    "bytes": 161864600,
+    "day": "2026-10-14",
+    "sha256": "3373e2ff133f4b4413f4323fca616706647f470d21d16dae56276c278b4aa709"
+   },
+   {
+    "bytes": 213596797,
+    "day": "2026-10-15",
+    "sha256": "5655ac641563ab4c191bb39697c703f17f8432b7be3567700891e9ebde25f729"
+   },
+   {
+    "bytes": 160738549,
+    "day": "2026-10-16",
+    "sha256": "bacaffd2569e9c996ae859c851a82637aa48784b4332a2a4f492ba28a30a2dbc"
+   },
+   {
+    "bytes": 91613057,
+    "day": "2026-10-17",
+    "sha256": "42772f54f7743008f251e7068637a8b0327eda81eb43f1f51e6eadabd55de4a6"
+   },
+   {
+    "bytes": 116494907,
+    "day": "2026-10-18",
+    "sha256": "496c3f5d15a0b5831afe5c3a6006c8bcaa1b20639f2fd705e337ada54c1e2059"
+   },
+   {
+    "bytes": 144781070,
+    "day": "2026-10-19",
+    "sha256": "0acacbc192dff1cc403dd45a196a12985d1dd730089dc709b047f6536e4aa213"
+   },
+   {
+    "bytes": 162260586,
+    "day": "2026-10-20",
+    "sha256": "350bab81e189bd14bcc2a5264746f9b4ae7744ae8b3d689794e45705fdfea1e9"
+   },
+   {
+    "bytes": 164014799,
+    "day": "2026-10-21",
+    "sha256": "1d9ffee7a99ba86c75b6912c0052f6001d68e9dbc53a77cbad0e791845585788"
+   },
+   {
+    "bytes": 166410221,
+    "day": "2026-10-22",
+    "sha256": "10b1f1f01ddfa88cb9bbf9b57280109e4bb5a54497b85a5647ad1e2280c20371"
+   },
+   {
+    "bytes": 145926845,
+    "day": "2026-10-23",
+    "sha256": "3241a0c72399c37317c47963157e6df3f880c4882681dc6275396df1687d2d15"
+   },
+   {
+    "bytes": 99653497,
+    "day": "2026-10-24",
+    "sha256": "403cd1703518c0f4f4046d99b18ab7122de8ee1aff15bb3c4ce429e7d3320f89"
+   },
+   {
+    "bytes": 81847399,
+    "day": "2026-10-25",
+    "sha256": "35c9f3db6844818d0167e0fd7d958ae5b20ff0346566816d29a51a9165a6600a"
+   },
+   {
+    "bytes": 148768600,
+    "day": "2026-10-26",
+    "sha256": "abfaf921c7f991cf2c44b6f18ade53b10d052ea33056d319b08239ae8e51244a"
+   },
+   {
+    "bytes": 127991213,
+    "day": "2026-10-27",
+    "sha256": "aa5855e53f17888ac2decdb3593228079c6c2aa2825fc48ec7704b1bd6675354"
+   },
+   {
+    "bytes": 153443121,
+    "day": "2026-10-28",
+    "sha256": "0e5b5371ffe4f7010976cc1d3a618a18573ad16b069eebc962a52694f6fc9a3b"
+   },
+   {
+    "bytes": 244567820,
+    "day": "2026-10-29",
+    "sha256": "6a513feeba4376e88ac913c44579dfde41063059be10f15e287a47d739d88558"
+   },
+   {
+    "bytes": 206051680,
+    "day": "2026-10-30",
+    "sha256": "51c08e5e59e6815211372e396788b14ea350fb8e281d5b13dabc2b007e3821a7"
+   },
+   {
+    "bytes": 82718998,
+    "day": "2026-10-31",
+    "sha256": "c53069998ebaafad0ed346e83665ddc7390159171495bb78937aae3b0c440b8f"
+   },
+   {
+    "bytes": 79691791,
+    "day": "2026-11-01",
+    "sha256": "df5849caa2e47972d6b612893170dfa2a4c3a982ab0e83901c860928d78fa572"
+   },
+   {
+    "bytes": 151762600,
+    "day": "2026-11-02",
+    "sha256": "d3832ef1d5f16fa791db1bb759506eee53c4c796f8011763488b933f61a2c28e"
+   },
+   {
+    "bytes": 136401275,
+    "day": "2026-11-03",
+    "sha256": "84d914df5fe60fde8d64f91b9b6e8cdd81f163754636be39fbc9a6f62a14e3c2"
+   },
+   {
+    "bytes": 202744532,
+    "day": "2026-11-04",
+    "sha256": "1c3051344b7ab4b9f9ca65377571f704f4b98bcc4d653710a222c5bf75ac4210"
+   },
+   {
+    "bytes": 234539088,
+    "day": "2026-11-05",
+    "sha256": "decf2e1e65508794133e938c5bce4d74daf8d524df9cf749a31de64d63c0a46d"
+   }
+  ],
+  "output_sha256": {
+   "2026-10-06.json": "26966397c3415cf98c896eced86ca5e31697f58fa02661d70ed387085b04554a",
+   "2026-10-07.json": "b03936bef4e83b9e66ccd033321a519a070360027d4fa1b80a01d8a81232dcb1",
+   "2026-10-08.json": "b42647c02a248a1bab0cb76822036a5af00d72ffcacb7df9cc60444cc64932fb",
+   "2026-10-09.json": "aefee757e4d73bbbb365d1f0cbf64934c7e75df15ae2ae41f0f34dfafd22c5b1",
+   "2026-10-10.json": "a5148aead6def1ccb70fca3c3e7faa2f4d28668c3d695bf8ff7bb7cc66b9e24c",
+   "2026-10-11.json": "828e9f9eb308225cd89903af285aaab4e12693dcfb4978dd976ec73d11661875",
+   "2026-10-12.json": "ee2c0e1879bcf5b120d814e7977659b8bd4cdaf8be4504a14283b6cd7e9275c4",
+   "2026-10-13.json": "75f8a3d1ff553fce8c3c7cc5a4c09e914e8ebb336dd556b6a97a694e50c6b961",
+   "2026-10-14.json": "e9107bd4a67e98f8dcb8582aa5f08f6c285ca76387914800ec5e6c62f4a65b1a",
+   "2026-10-15.json": "157f78dae31b99f41b76ac62602b7312947695522a8c979e8688ad0f8e1a8b39",
+   "2026-10-16.json": "cd845d5aa1f199699af6c8c8bcad0b154a66e599b481385d768277a1f4ea01d7",
+   "2026-10-17.json": "d162fa9d458489334406fd490c7bbb5b7f2b6ea478f18d640aefba662e618aef",
+   "2026-10-18.json": "1778c023ae94856c28d9cd5272920808dfbc34e74d2cfca51cc4a917c5df63c0",
+   "2026-10-19.json": "c83be6ef614785533e7bb92abce0dff37982c46de7335767fdf1053d1c95b36b",
+   "2026-10-20.json": "3afb71294fb653d360c54e6db0d18bc24e393fe62c10f1926a0145f15035d91e",
+   "2026-10-21.json": "4c49e4fb33b0372f4b52af736c29f98b7c7be0ee5281173a45f1f172dd7e77d0",
+   "2026-10-22.json": "19cb1ae6d1b4ec46b1f3098108883f5253618bcd682b8f772519fb670c397f2b",
+   "2026-10-23.json": "631a96251a0a4a7b3436f932f57b834190be9bc91904401e4c1277c9af74fef9",
+   "2026-10-24.json": "601843f2c8d0616abb37ff9ed4bde529da81213a1d8cffdf1d66e5fe83098921",
+   "2026-10-25.json": "6da1440a4709d4c92d431eaeeb99568e92b5d64d5b40c2a9016bbca091aefa3b",
+   "2026-10-26.json": "054fd1b7d3cf23bd440cd23d2c1e0d02d79ad29a56347ab262180e117c02c0bd",
+   "2026-10-27.json": "50c101ab42110a8db3ae754ab6a28a4058e13144e7d5aa19a9e087c2f060406c",
+   "2026-10-28.json": "83d5474ada35e3c05de260b4e40438bfbab232a73f6471d06baa2e9d0cb88ba5",
+   "2026-10-29.json": "0feb4d009291752f39d77380eec19785bef6255b749350fd5cdea3f91d64d240",
+   "2026-10-30.json": "e190b3ed54d5ae82e12f10380050faea3535f1935d6cddfd9d9b5dc91def3aae",
+   "2026-10-31.json": "c81f7100bb09bd1da40af85a30df2aacc86ca8c6e601da831f09657fec84c9f7",
+   "2026-11-01.json": "aea6fd978627b3950805f83315cf9e7947455d0171d876987c04c2466c3cae3d",
+   "2026-11-02.json": "b2e1486fe7072ddae0e3a2cc558c5149563f102aeeabb8b24fe48430646275b2",
+   "2026-11-03.json": "8c9fbe2505bb4c17f28892f9d1ee2a2643b949cb9911580ca7ed56c8c4821619",
+   "2026-11-04.json": "478a50f58cdddc04419bc008a2805494411fb838a0cb38a89d41b454ab69ea9b",
+   "2026-11-05.json": "e0e2f5697c3dfeab4a325f71b4dc4b286524c5cd6758b62211d6471525eae8be",
+   "SUMMARY.json": "b78d39097dea2e2ad5b449cf7d67522c7d95a1155125411523c56bf7a4c185e8"
+  },
+  "published_files": {
+   "RUN-LOG.txt": {
+    "edit": "one cleanup line that named unrelated work is removed; every input hash and every timestamp is kept",
+    "sha256": "f52525ba859c4726513f6756839855f19a78088f1bd7aa4db13ea945a845ab08"
+   },
+   "SUMMARY.json": {
+    "edit": "the hourly cell for hour 07 UTC (fewer than 10 wallets) is removed; nothing else changes",
+    "run_sha256": "b78d39097dea2e2ad5b449cf7d67522c7d95a1155125411523c56bf7a4c185e8",
+    "sha256": "7989008f27d5ee91af639b2a28a9137fee738544b3d37ca9da4154db431772c8"
+   }
+  },
+  "run_log": [
+   "run start 2026-11-06T19:44:44Z code sha256 557c7e5b943fa5ee3e493ead5933800bb6091921832089d28ee5b9d25ade17f9  run_day.py",
+   "run end 2026-11-06T19:49:43Z",
+   "summary run 2026-11-06T19:50:25Z; V1 precision 0.99876 recall 0.99899 (>=95%: wallet measures reported as stated); no code change after first baseline file; outputs hashed in out/OUTPUT.sha256",
+   "S3-exact rerun 2026-11-06T19:55:28Z file sha256 decf2e1e65508794133e938c5bce4d74daf8d524df9cf749a31de64d63c0a46d (must equal decf2e1e...); reason: hourly bins cannot split 14:00-14:30 for S3 as pre-stated",
+   "S3-exact rerun2 2026-11-06T19:55:41Z sha decf2e1e65508794; fix: bucket label formatted as text (pytz missing)"
+  ]
+ },
+ "source": {
+  "licence": "CC BY 4.0",
+  "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+  "liquidations_url": "https://huggingface.co/datasets/ironflow/hyperliquid-liquidations",
+  "name": "Ironflow (ironflow.sh), Hyperliquid trades and liquidations",
+  "read_on": "2026-11-06",
+  "trades_url": "https://huggingface.co/datasets/ironflow/hyperliquid-trades"
+ },
+ "summary": {
+  "P1_liq_wallets": {
+   "E": 18813,
+   "max": 18391,
+   "max_day_baseline": "2026-10-08",
+   "measure": "P1",
+   "median": 4868.0,
+   "min": 978,
+   "q1": 2365.25,
+   "q3": 9091.0,
+   "rank_of_31": 1,
+   "ratio_E_over_median": 3.8646261298274447
+  },
+  "P2_liq_notional": {
+   "E": 283196131.5251029,
+   "max": 336699429.53399634,
+   "max_day_baseline": "2026-10-08",
+   "measure": "P2",
+   "median": 57521495.189798504,
+   "min": 3309321.426133004,
+   "q1": 25884949.241383545,
+   "q3": 124433101.05064651,
+   "rank_of_31": 2,
+   "ratio_E_over_median": 4.923309635653005
+  },
+  "P3_share_active_liquidated": {
+   "E": 0.2001958009215413,
+   "max": 0.202343492133348,
+   "max_day_baseline": "2026-10-08",
+   "measure": "P3",
+   "median": 0.08438196457498646,
+   "min": 0.02113132535326909,
+   "q1": 0.040801246739872885,
+   "q3": 0.1339663985659075,
+   "rank_of_31": 2,
+   "ratio_E_over_median": 2.3724951407553005
+  },
+  "S1_hip3_liq_notional": {
+   "E": 140556424.22779006,
+   "max": 60228127.70609807,
+   "max_day_baseline": "2026-11-04",
+   "measure": "S1n",
+   "median": 13545903.396864982,
+   "min": 8715.440200000001,
+   "q1": 4529027.928369005,
+   "q3": 30205876.901749276,
+   "rank_of_31": 1,
+   "ratio_E_over_median": 10.376304932184881
+  },
+  "S1_hip3_liq_wallets": {
+   "E": 9054,
+   "max": 4971,
+   "max_day_baseline": "2026-10-30",
+   "measure": "S1w",
+   "median": 1754.5,
+   "min": 10,
+   "q1": 493.0,
+   "q3": 2445.5,
+   "rank_of_31": 1,
+   "ratio_E_over_median": 5.160444571102878
+  },
+  "S1_top5_E": [
+   [
+    "xyz:SOXL-PERP",
+    1347,
+    22770793.08452003
+   ],
+   [
+    "xyz:MU-PERP",
+    582,
+    20336058.97277003
+   ],
+   [
+    "xyz:SP500-PERP",
+    679,
+    12231339.821799986
+   ],
+   [
+    "xyz:XYZ100-PERP",
+    552,
+    10903168.453200025
+   ],
+   [
+    "xyz:AMD-PERP",
+    355,
+    5596945.785249994
+   ]
+  ],
+  "S2_E_counts": {
+   "s2_denominator": 17105,
+   "s2_retrade_15": 3031,
+   "s2_retrade_60": 4989
+  },
+  "S2_retrade_15_daily": {
+   "E": 0.1771996492253727,
+   "max": 0.22044444444444444,
+   "max_day_baseline": "2026-10-10",
+   "measure": "S2",
+   "median": 0.12201567714435611,
+   "min": 0.05154639175257732,
+   "q1": 0.10760763774734629,
+   "q3": 0.14124069078928922,
+   "rank_of_31": 2,
+   "ratio_E_over_median": 1.4522695228395013
+  },
+  "S2_retrade_15_pooled_baseline": 0.12895315187065198,
+  "S2_retrade_60_daily": {
+   "E": 0.29166910260157847,
+   "max": 0.3244444444444444,
+   "max_day_baseline": "2026-10-10",
+   "measure": "S2",
+   "median": 0.2063510490888784,
+   "min": 0.10028116213683223,
+   "q1": 0.18209817368972978,
+   "q3": 0.23337516492422594,
+   "rank_of_31": 2,
+   "ratio_E_over_median": 1.4134607208900223
+  },
+  "S2_retrade_60_pooled_baseline": 0.2124505774835951,
+  "S3_share_hours_14_20_utc": 0.745434582509179,
+  "S3_share_hours_15_20_utc": 0.5436892368225278,
+  "S4_long_share_E": 0.9620548857695533,
+  "S4_long_share_baseline_median": 0.6642920780986232,
+  "S5_liq_events": {
+   "E": 30990,
+   "max": 28439,
+   "max_day_baseline": "2026-10-08",
+   "measure": "S5",
+   "median": 5941.0,
+   "min": 1054,
+   "q1": 2729.0,
+   "q3": 11937.0,
+   "rank_of_31": 1,
+   "ratio_E_over_median": 5.21629355327386
+  },
+  "V1": {
+   "both_wm": 214921,
+   "days": 26,
+   "events_notional": 2244486864.9065266,
+   "events_rows": 229527,
+   "events_wm": 215139,
+   "mine_wm": 215188,
+   "my_events": 228591,
+   "my_notional": 2244309830.099535,
+   "precision": 0.998759224492072,
+   "recall": 0.9989867016208126
+  },
+  "active_wallets": {
+   "E": 93973,
+   "max": 94001,
+   "max_day_baseline": "2026-10-29",
+   "measure": "ctx",
+   "median": 66368.5,
+   "min": 46282,
+   "q1": 60201.0,
+   "q3": 74617.75,
+   "rank_of_31": 2,
+   "ratio_E_over_median": 1.4159277368028507
+  },
+  "hip3_active_E": 39804,
+  "perp_trades": {
+   "E": 9181740,
+   "max": 9722571,
+   "max_day_baseline": "2026-10-29",
+   "measure": "ctx",
+   "median": 5772477.0,
+   "min": 2905934,
+   "q1": 4234669.5,
+   "q3": 6387645.25,
+   "rank_of_31": 2,
+   "ratio_E_over_median": 1.59060659747973
+  },
+  "rows_outside_day_total": 0
+ }
+}

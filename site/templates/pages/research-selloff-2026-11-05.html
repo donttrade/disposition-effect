@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{#- /research/5-november-2026-sell-off/ (ARCHITECT-PLAN-SELLOFF-2026-11-06 section c; CODER-REPORT-SELLOFF-2026-11-06).
+    Every number below is a variable: the Hyperliquid figures come from site/selloff.py (site/data/selloff-2026-11-05.json,
+    recomputed from the 31 daily rows on every build and checked against the analysis's own summary), the market figures from
+    learn_tables.market_view() (site/config/market_2026_11_05.json). Nothing is typed in. No price, no buy link and no offer on this
+    page (site rule: no study figure next to an offer); the one link out to the product side is the free Bad-day check.
+    The word "wallet" is never "trader" or "retail"; "force-closed (liquidated)", never "wiped out". No dollar sign: money is
+    "millions of US dollars" (the price lint reads "$283" as a price). -#}
+{% block content %}
+{%- set F = sell.F %}
+{%- set nc = mkt.indices.nasdaq_composite %}{% set nd = mkt.indices.nasdaq_100 %}{% set sp = mkt.indices.sp500 %}{% set dj = mkt.indices.djia %}{% set vix = mkt.indices.vix %}
+{%- set rt = mkt.reported.reuters %}
+<div class="wrap study">
+  {% include "partials/crumbs.html" %}
+  <header class="sell-head">
+    <p class="kicker">Study · Method written down first · {{ page.published|longdate }}</p>
+    <h1>{{ page.h1 }}</h1>
+    <p class="lede">{{ page.dek }}</p>
+    <p class="meta">Published {{ page.published|longdate }} · Data: <a href="{{ sell.source.trades_url }}" rel="noopener">Ironflow</a>, <a href="{{ sell.source.licence_url }}" rel="noopener">{{ sell.source.licence }}</a> · Method written down and hashed before the data was opened (our own clock; the hash is published): <a href="#sell-method">plan, hash and code</a></p>
+  </header>
+
+  <section class="sell-sec" aria-labelledby="sell-keys-h">
+    <h2 id="sell-keys-h">The key numbers</h2>
+    <dl class="stats sell-tiles">
+      <div class="stat"><dt>Wallets force-closed on builder-listed (HIP-3) markets</dt><dd>{{ F.hip3 }}</dd><dd class="stat-note">About {{ F.hip3_wd_ratio }} times the median weekday of the 30 days before. Previous 30-day high: {{ F.hip3_prev }}.</dd></div>
+      <div class="stat"><dt>Wallets force-closed, all markets</dt><dd>{{ F.wallets }}</dd><dd class="stat-note">The most of the 31 days, but a near-tie: {{ sell.runner[0].day }} was {{ sell.runner[0].below }} lower. Median of the 30 days before: {{ F.wallets_median }}.</dd></div>
+      <div class="stat"><dt>Value force-closed</dt><dd>{{ F.value }} million</dd><dd class="stat-note">US dollars. {{ F.long }} of it was long.</dd></div>
+      <div class="stat"><dt>Placed a new market order within 15 minutes</dt><dd>{{ F.retrade15 }}</dd><dd class="stat-note">Of force-closed wallets. The 30 days before: {{ F.pooled15 }}. We did not compare with wallets that were not force-closed on the same day, so a busier day may explain part of this gap.</dd></div>
+    </dl>
+    <p class="small">UTC days, {{ F.event_short }} against the 30 days {{ F.base_first }} to {{ F.base_last }}. A wallet is an address, not a person. One crypto exchange, not the US stock market.</p>
+  </section>
+
+  <section class="sell-sec" aria-labelledby="sell-what-h">
+    <h2 id="sell-what-h">1. What happened that day</h2>
+    <p>On {{ F.event_weekday }} {{ F.event_long }} the {{ nc.name }} fell {{ nc.change_text }} to {{ nc.close }}, its largest one-day fall since {{ nc.larger_fall.date }}, and closed {{ nc.drawdown }} below its record close of {{ nc.record_date }}; from that close it needs a gain of {{ nc.need }} to get back to the record. The {{ nd.name }} fell {{ nd.change_text }} and closed {{ nd.drawdown }} below its record, and needs {{ nd.need }}. The {{ sp.name }} fell {{ sp.change_text }} and the Dow {{ dj.change_text }}. The VIX volatility index closed at {{ vix.close }}, up {{ "%.0f"|format(vix.change) }}%.</p>
+    <p>{{ rt.outlet }}, reported on {{ rt.date|longdate }} that the Philadelphia chip index fell {{ rt.chip_index_fall_pct }}%, {{ rt.chip_index_note }}, and linked the fall to {{ rt.cause }}. <span class="small">(<a href="{{ rt.url }}" rel="noopener">Reuters report</a>; reported, not recomputed here.)</span></p>
+    <p class="small">{{ mkt.credit }} Series: <a href="{{ nc.url }}" rel="noopener">{{ nc.series }}</a>, <a href="{{ nd.url }}" rel="noopener">{{ nd.series }}</a>, <a href="{{ sp.url }}" rel="noopener">{{ sp.series }}</a>, <a href="{{ dj.url }}" rel="noopener">{{ dj.series }}</a>, <a href="{{ vix.url }}" rel="noopener">{{ vix.series }}</a>. Single closing levels are quoted with credit; the series are not republished.</p>
+  </section>
+
+  <section class="sell-sec" aria-labelledby="sell-measure-h">
+    <h2 id="sell-measure-h">2. What we measured, and why there</h2>
+    <p>Stock brokers do not publish what their customers do. One venue publishes every trade: Hyperliquid, a crypto exchange whose trades are recorded on a public blockchain. Besides crypto, it lists perpetual futures, which are contracts with no expiry date that are usually traded with borrowed money, called leverage. Some of its markets are listed by outside builders (Hyperliquid calls them HIP-3 markets) and carry labels such as Micron, AMD and the S&amp;P 500. We call them builder-listed markets and name the largest as they are listed. When a leveraged position loses enough, the exchange closes it automatically.</p>
+    <dl class="byp sell-defs">
+      <dt>Wallet</dt><dd>One blockchain address that trades on the exchange. It is not a person: one person can hold several, and some wallets are bots or funds. This page says “wallets”, never “traders”.</dd>
+      <dt>Active wallet</dt><dd>Any address that bought or sold at least one perpetual on that UTC day. It includes automated wallets such as bots and market makers, and, like every wallet here, it is not a person.</dd>
+      <dt>Force-closed (liquidated)</dt><dd>The exchange closed all or part of a leveraged position by itself, because its losses had used up the money backing it. The wallet did not pick the moment. In the data, a trade carries a liquidation flag, and the force-closed wallet is the one that took the market order in that trade. We count that flag and nothing else: other forced reductions are not counted.</dd>
+    </dl>
+    <p>We counted force-closed wallets on {{ F.event_short }} and compared the count with each of the 30 days before ({{ F.base_first }} to {{ F.base_last }}). We wrote the method down and hashed it before opening the data. The time is from our own clock; the hash is published and a dated deposit is pending. <a href="#sell-method">The plan and its hash</a>.</p>
+  </section>
+
+  <section class="sell-sec" aria-labelledby="sell-results-h">
+    <h2 id="sell-results-h">3. Results</h2>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Results for {{ F.event_short }} against the 30 days before">
+      <table class="sell-table">
+        <caption>{{ F.event_short }} against the 30 days {{ F.base_first }} to {{ F.base_last }} (UTC days)</caption>
+        <thead><tr><th scope="col">Measure</th><th scope="col" class="num">{{ F.event_short }}</th><th scope="col" class="num">Median of the 30 days</th><th scope="col" class="num">Middle half of the 30 days</th><th scope="col" class="num">Lowest to highest</th><th scope="col" class="num">Times the median of the 30 days</th><th scope="col" class="num">Rank of 31</th></tr></thead>
+        <tbody>
+        {%- for r in sell.rows %}
+          <tr><th scope="row">{{ r.label }}</th><td class="num">{{ r.e }}</td><td class="num">{{ r.median }}</td><td class="num">{{ r.iqr }}</td><td class="num">{{ r.range }}</td><td class="num">{{ r.ratio }}</td><td class="num">{{ r.rank }}</td></tr>
+        {%- endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="small">Rank 1 is the highest of the 31 days. Ranks describe the 31 days; they are not a test of cause, and the days are not independent draws. The share rows use the daily median; pooled over all wallets in the 30 days the 15-minute share is {{ F.pooled15 }} and the 60-minute share {{ F.pooled60 }}. “Middle half” is the first to third quartile of the 30 daily values by the exclusive method (Python <code>statistics.quantiles</code>); a spreadsheet’s QUARTILE.INC gives slightly different ends.</p>
+    <p><strong>Two ways to say “a normal day”.</strong> The table’s “times the median” is the plan’s measure, fixed before the data was opened: the median of all 30 days before, weekends included. {{ F.event_short }} was a {{ F.event_weekday }}, and the builder-listed markets are close to idle at weekends ({{ F.we_n }} of the 30 days were weekend days). So we also show, as an extra that is not in the plan, the median of the {{ F.wd_n }} weekdays among them: builder-listed wallets {{ F.hip3_wd_ratio }} times that median ({{ F.hip3_wd_median }}), value {{ F.hip3_value_wd_ratio }} times; all wallets {{ F.wallets_wd_ratio }} times ({{ F.wallets_wd_median }}), value {{ F.value_wd_ratio }} times. Headlines use the weekday figure because it is the smaller. {{ F.event_short }} still ranks {{ F.hip3_wd_rank }} of the {{ F.wd_n + 1 }} weekdays for builder-listed wallets.</p>
+
+    <figure class="chart sell-chart">
+      <figcaption class="chart-title">Wallets force-closed each day, all markets (UTC days). {{ F.event_short }} in orange; dashed line: median of the 30 days before.</figcaption>
+      {%- set c = sell.c1 %}{% include "partials/selloff_bars.html" %}
+    </figure>
+    <figure class="chart sell-chart">
+      <figcaption class="chart-title">Wallets force-closed each day on builder-listed (HIP-3) markets. {{ F.event_short }} in orange; dashed line: median of the 30 days before.</figcaption>
+      {%- set c = sell.c2 %}{% include "partials/selloff_bars.html" %}
+    </figure>
+    <figure class="chart sell-chart">
+      <figcaption class="chart-title">Value force-closed in each hour of {{ F.event_short }} (UTC), in millions of US dollars. The shaded band is the US stock-market session, {{ F.cash_utc }} ({{ F.cash_open }} to {{ F.cash_close }} New York time).{% if sell.suppressed %} Hour {{ "%02d"|format(sell.suppressed[0]) }} UTC had fewer than 10 wallets and is not shown.{% endif %}</figcaption>
+      {%- set c = sell.c3 %}{% include "partials/selloff_bars.html" %}
+    </figure>
+    <details class="sell-numbers">
+      <summary>The numbers behind the charts, as tables</summary>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Daily counts">
+        <table class="sell-table">
+          <caption>Daily counts</caption>
+          <thead><tr><th scope="col">Day (UTC)</th><th scope="col" class="num">Wallets force-closed</th><th scope="col" class="num">Value, millions of US dollars</th><th scope="col" class="num">Builder-listed (HIP-3) markets, wallets</th></tr></thead>
+          <tbody>{% for d in sell.day_rows %}<tr><th scope="row">{{ d.date }}{% if d.event %} (the day studied){% endif %}</th><td class="num">{{ d.wallets }}</td><td class="num">{{ d.value }}</td><td class="num">{{ d.hip3 }}</td></tr>{% endfor %}</tbody>
+        </table>
+      </div>
+      <div class="table-wrap" tabindex="0" role="region" aria-label="Hourly value on the day studied">
+        <table class="sell-table">
+          <caption>{{ F.event_short }}, by hour (UTC)</caption>
+          <thead><tr><th scope="col">Hour</th><th scope="col" class="num">Value, millions of US dollars</th><th scope="col" class="num">Wallets</th></tr></thead>
+          <tbody>{% for h in sell.hour_rows %}<tr><th scope="row">{{ h.hour }}:00</th><td class="num">{{ h.value }}</td><td class="num">{{ h.wallets }}</td></tr>{% endfor %}</tbody>
+        </table>
+      </div>
+      <p class="small"><a href="{{ sell.csv_url }}" download>Download the daily counts (CSV)</a></p>
+    </details>
+
+    <h3 id="sell-read-h">Reading the table</h3>
+    <ul>
+      <li>Across all markets, {{ F.event_short }} had the most force-closed wallets of the 31 days, but not by much: {{ sell.runner[0].day }} was {{ sell.runner[0].below }} lower and {{ sell.runner[1].day }} {{ sell.runner[1].below }} lower. By value it ranked {{ F.value_rank }}: {{ F.value }} million US dollars against a median of {{ F.value_median }} million.</li>
+      <li>On the builder-listed markets it stood alone: {{ F.hip3 }} wallets (of {{ F.hip3_active }} active there), {{ F.hip3_vs_prev }} times the previous 30-day high ({{ F.hip3_prev_day }}, a {{ F.hip3_prev_weekday }}), {{ F.hip3_ratio }} times the 30-day median (the pre-stated measure) and {{ F.hip3_wd_ratio }} times the median weekday. The value force-closed there, {{ F.hip3_value }} million US dollars, was {{ F.hip3_value_ratio }} times the 30-day median and {{ F.hip3_value_wd_ratio }} times the median weekday.</li>
+      <li>{{ F.session_share }} of the day’s force-closed value ({{ F.session_value }} million US dollars, {{ F.session_wallets }} wallets) fell inside US stock-market hours. The busiest 15 minutes were {{ F.busiest_from }} to {{ F.busiest_to }} New York time: {{ F.busiest_value }} million US dollars, {{ F.busiest_wallets }} wallets.</li>
+      <li>{{ F.long }} of the value force-closed was in long positions, which are bets on a price rising. On a typical day in the 30 days before it was {{ F.long_median }}; {{ F.event_short }} ranked {{ F.long_rank }} of the 31 days on this share, and the 30 days before ranged from {{ F.long_min }} to {{ F.long_max }}.</li>
+    </ul>
+    <h3 id="sell-top-h">The five markets with the most value force-closed</h3>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Top five builder-listed markets">
+      <table class="sell-table">
+        <caption>Builder-listed (HIP-3) markets with the most value force-closed, {{ F.event_short }}</caption>
+        <thead><tr><th scope="col">Market, as listed</th><th scope="col">Builder</th><th scope="col" class="num">Wallets force-closed</th><th scope="col" class="num">Value, millions of US dollars</th></tr></thead>
+        <tbody>{% for m in sell.top5 %}<tr><th scope="row">{{ m.market }}</th><td>{{ m.builder }}</td><td class="num">{{ m.wallets }}</td><td class="num">{{ m.value }}</td></tr>{% endfor %}</tbody>
+      </table>
+    </div>
+    <p class="small">Market names are the labels the exchange lists. The five together hold {{ sell.top5_share }} of the value force-closed on builder-listed markets. We did not check what each market tracks.</p>
+  </section>
+
+  <section class="sell-sec" aria-labelledby="sell-15-h">
+    <h2 id="sell-15-h">4. Fifteen minutes later</h2>
+    <p>Of the {{ F.retrade_den }} wallets force-closed before 23:00 UTC, {{ F.retrade15_n }} ({{ F.retrade15 }}) placed at least one new market order in the next 15 minutes, against {{ F.pooled15 }} on the 30 days before. Within an hour: {{ F.retrade60 }} ({{ F.retrade60_n }} wallets) against {{ F.pooled60 }}. The daily median of the 30 days was {{ F.median15 }} at 15 minutes, with the middle half of days between {{ F.iqr15 }}. One quiet day was higher: {{ F.quiet_day }}, with {{ F.quiet_share }} of about {{ F.quiet_wallets }} force-closed wallets.</p>
+    <p>What this can and cannot say. We did not compare with wallets that were not force-closed on the same day, so a busier day may explain part of the gap. The data also show an order, not its purpose. A new order may open a fresh position, close another one, or be a stop order placed earlier. The data carry no field that separates them. Studies of other groups have found more risk-taking after losses that have not been closed (Imas, 2016) and after morning losses (Coval and Shumway, 2005). This count does not test that: it counts orders, not risk.</p>
+  </section>
+
+  <section class="sell-sec" aria-labelledby="sell-limits-h">
+    <h2 id="sell-limits-h">5. Limits</h2>
+    <ul>
+      <li>A wallet is an address, not a person. Some are bots or funds, and one person can hold several. This page says “wallets”, never “traders” or “retail”.</li>
+      <li>This is one crypto venue. It is not the US stock market or its retail investors, and it says nothing about them.</li>
+      <li>We identify the builder-listed markets by the dataset’s builder field. We did not check what each market tracks, so we do not say what share of the value was in stock or index contracts. The largest are listed as {{ sell.top5_names }}.</li>
+      <li>Days are UTC days (7 p.m. to 7 p.m. New York time on {{ F.event_short }}).</li>
+      <li>The comparison is a rank among 31 days. It is not a test of cause.</li>
+      <li>A wallet force-closed in the last hour of a UTC day is left out of the 15-minute and 60-minute shares, so the same rule applies on every day.</li>
+      <li>The day after, 6 November, is not included. Its file had not been published when this was written. It will be reported separately.</li>
+    </ul>
+  </section>
+
+  <section class="sell-sec" aria-labelledby="sell-method">
+    <h2 id="sell-method">6. Method, data and credit</h2>
+    <p>Data: Ironflow (ironflow.sh), <a href="{{ sell.source.trades_url }}" rel="noopener">Hyperliquid Trades</a> and <a href="{{ sell.source.liquidations_url }}" rel="noopener">Hyperliquid Liquidations</a>, licensed under <a href="{{ sell.source.licence_url }}" rel="noopener">{{ sell.source.licence }}</a>, read on {{ sell.source.read_on|longdate }}. Changes made: we aggregated the data into the daily counts and sums shown here. No trade rows and no wallet address are published. Ironflow has not reviewed or endorsed this analysis.</p>
+    <ul>
+      <li><strong>Plan.</strong> The analysis plan was logged at {{ sell.plan_logged }} by our own clock and hashed before any trade or liquidation row was read. The hash is published here, and a dated deposit is pending. Section 0 of the plan lists what we had looked at before: the dataset cards, file sizes and news reports. One step was re-run after the first pass, to split the 14:30 UTC market open exactly; it is logged. SHA-256 <code class="sell-hash">{{ sell.plan_sha }}</code>. Read it: <a href="{{ sell.pack_url }}ANALYSIS-PLAN.md">ANALYSIS-PLAN.md</a>, <a href="{{ sell.pack_url }}ANALYSIS-PLAN.sha256">its hash</a>.</li>
+      <li><strong>Inputs.</strong> {{ sell.n_inputs }} daily files, each hashed when read and then deleted. Hash of the {{ F.event_short }} file: <code class="sell-hash">{{ sell.event_input_sha }}</code>. All {{ sell.n_inputs }} hashes: <a href="{{ sell.pack_url }}RUN-LOG.txt">RUN-LOG.txt</a>. Two published files differ from the run’s own copies by one removed line (RUN-LOG.txt) and one removed cell (SUMMARY.json); both edits and both hashes are in the <a href="{{ sell.pack_url }}README.txt">read me</a>.</li>
+      <li><strong>Code and outputs.</strong> <a href="{{ sell.pack_url }}run_day.py">run_day.py</a>, <a href="{{ sell.pack_url }}summarize.py">summarize.py</a>, <a href="{{ sell.pack_url }}s3_exact.py">s3_exact.py</a>, <a href="{{ sell.pack_url }}SUMMARY.json">SUMMARY.json</a> and <a href="{{ sell.pack_url }}S3_exact.json">S3_exact.json</a>. Only counts leave the code. <a href="{{ sell.pack_url }}README.txt">Read me</a>.</li>
+      <li><strong>Check of the wallet rule.</strong> We attributed each liquidation trade to the wallet that took the market order. For 6 to 31 October our rule matches Ironflow’s own liquidation table: {{ F.v1_prec }} of our wallet-and-market pairs were in its table, and {{ F.v1_rec }} of its pairs were in ours ({{ F.v1_mine }} ours, {{ F.v1_wm }} its, over {{ F.v1_days }} days). The plan required 95%.</li>
+      <li><strong>Counts.</strong> Perpetual futures only, spot excluded; the exchange’s placeholder address is left out. Counts are exact; values are given to three significant figures. The statistics are the plan’s: the median and the middle half (first to third quartile, exclusive method) of the 30 days before, the lowest and highest, and the rank among the 31 days. The weekday median is an added descriptive extra, not in the plan. No other test was run.</li>
+      <li><strong>Download.</strong> <a href="{{ sell.csv_url }}" download>Daily counts as a CSV</a>, 31 rows.</li>
+    </ul>
+    <p>Cite this page as: donttrade ({{ page.published[:4] }}). {{ page.h1 }}. {{ site.base_url }}{{ page.path }}. A permanent copy with a DOI is being deposited; this page will link it when it exists. Text: CC BY-NC 4.0. Counts and code: CC BY 4.0. Corrections go on <a href="/corrections/">the corrections page</a>.</p>
+  </section>
+
+  <section class="sell-sec" aria-labelledby="sell-own-h">
+    <h2 id="sell-own-h">7. See your own {{ F.event_short }}</h2>
+    <p>These are counts across many wallets. Your own file can show what you did that day, next to your typical day. The <a href="{{ page.check_path }}?d={{ page.check_days }}">Bad-day check</a> runs in your browser: the file is not uploaded. It counts and does not judge.</p>
+    <p class="small">Related: <a href="/learn/drawdown-recovery-table/">how much gain a fall takes to undo</a> · <a href="/learn/losing-streak-probability/">losing streak probability</a></p>
+  </section>
+
+  <section class="sell-sec" aria-labelledby="sell-refs-h">
+    <h2 id="sell-refs-h">References</h2>
+    <ul class="sell-refs">
+    {%- for k, r in study_refs.items() %}
+      <li>{{ r.authors }} ({{ r.year }}). {{ r.title }}{% if r.title[-1] not in "?.!" %}.{% endif %} <em>{{ r.journal }}</em>, {{ r.volume }}({{ r.issue }}), {{ r.pages }}. <a href="https://doi.org/{{ r.doi }}" rel="noopener">doi:{{ r.doi }}</a></li>
+    {%- endfor %}
+    </ul>
+    <p class="small">Both DOIs were checked against Crossref on {{ study_refs_checked|longdate }}. Not investment advice.</p>
+  </section>
+</div>
+{% endblock %}

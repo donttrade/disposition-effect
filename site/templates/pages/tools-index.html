@@ -14,8 +14,8 @@
 <section class="tx-hero" aria-labelledby="tx-h1">
   <div class="tx-copy">
     {% include "partials/crumbs.html" %}
-    <h1 id="tx-h1">Eight free tools for your own trades</h1>
-    <p class="lede">Trade stats, a heatmap, drawdowns, a challenge check and four calculators. Your file is read in your browser and is not uploaded. No account, no card.</p>
+    <h1 id="tx-h1">Nine free tools for your own trades</h1>
+    <p class="lede">Trade stats, a heatmap, a bad-day check, drawdowns, a challenge check and four calculators. Your file is read in your browser and is not uploaded. No account, no card.</p>
     <p class="tx-btns"><a class="btn" href="/tools/trade-stats/">Open trade stats</a> <a class="btn btn-secondary" href="#calc-h">The calculators</a></p>
     <ul class="tx-ev" aria-label="What you can check">
       <li><a href="/research/">{{ evidence.studies }} published studies</a></li>
@@ -30,7 +30,7 @@
   <div class="rk-head"><h2 id="rack-h">From your trade file</h2><p>Each preview is the tool run on one real account: an anonymous investor’s {{ real.account.trades }} closed trades in US stocks. They closed from {{ real.account.period }}. They come from the public Stock Transactions Dataset (Mendeley Data, CC BY 4.0). We use the whole dataset, not picked by result. {{ real.rules.why_account }} {{ real.account.realised_only }}</p></div>
   <ul class="mods">
     {{ d.module(by.stats, 6, true) }}{{ d.module(by.prop, 6, true) }}
-    {{ d.module(by.heat, 6) }}{{ d.module(by.dd, 6) }}
+    {{ d.module(by.heat, 6) }}{{ d.module(by.dd, 6) }}{{ d.module(by.badday, 6) }}
   </ul>
 </section>
 <section class="tx-rack" aria-labelledby="calc-h">

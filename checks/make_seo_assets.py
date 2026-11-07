@@ -95,11 +95,12 @@ def specs(site_dir):
         if not m:
             raise SystemExit(f"{t['href']}: no .tool-mark glyph in the built page")
         out.append((f"tool-{key}.png", t["name"], t["short"], m.group(1)))
-    out += [("tools.png", "Free trading tools", "Eight tools that run in your browser. Your file is not uploaded.", None),
+    out += [("tools.png", "Free trading tools", "Nine tools that run in your browser. Your file is not uploaded.", None),
             ("glossary.png", "Glossary", "Plain definitions of trading habits and risk terms.", None),
             ("learn.png", "Learn", "Trading habits and risk math, measured.", None),
             ("learn-drawdown.png", "Drawdown recovery table", "The gain that gets an account back.", None),
-            ("learn-streaks.png", "Losing streak probability", "How many losses in a row to expect.", None)]
+            ("learn-streaks.png", "Losing streak probability", "How many losses in a row to expect.", None),
+            ("selloff.png", "5 Nov 2026 sell-off", "Forced closes on one crypto exchange, counted against the 30 days before.", None)]
     return out
 
 
@@ -118,7 +119,11 @@ def cards():
     with sync_playwright() as p:
         b = p.chromium.launch(args=CHROME)
         ctx = b.new_context(viewport={"width": 1200, "height": 630}, color_scheme="light", reduced_motion="reduce")
+        only = [a.split("=", 1)[1] for a in sys.argv if a.startswith("--only=")]   # --only=selloff.png,tool-badday.png
+        names = only[0].split(",") if only else None
         for name, title, sub, glyph in specs(tmp):
+            if names and name not in names:
+                continue
             well = f'<div class="well"><span class="tool-mark">{glyph}</span></div>' if glyph else ""
             doc = CARD % {"tw": 640 if glyph else 900, "well": well, "title": html.escape(title), "sub": html.escape(sub)}
             pg = ctx.new_page()
@@ -144,6 +149,7 @@ def cards():
 
 
 if __name__ == "__main__":
-    logo()
+    if not any(a.startswith("--only=") for a in sys.argv):
+        logo()
     if "--logo" not in sys.argv:
         cards()

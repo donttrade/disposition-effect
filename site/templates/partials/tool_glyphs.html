@@ -1,4 +1,4 @@
-{#- The eight tool glyphs (6 Nov, Direction B2): original marks on a 48-unit grid, drawn for donttrade (no icon set,
+{#- The nine tool glyphs (6 Nov, Direction B2): original marks on a 48-unit grid, drawn for donttrade (no icon set,
     no brand imitated). Each draws its tool's real output in miniature, from site/config/tool_real.json through
     site/tool_real.py glyphs() (rv.glyph):
       stats  the 64 real trades in 8 slices of 8, summed: up for a net gain, down for a net loss
@@ -8,6 +8,7 @@
       lot    structure only (entry, stop bracket, lots): the risk and the stop are the reader's
       rr     the break-even curve 1 / (1 + R): a property of the formula
       disp   two sell-rate bars to scale: Odean (1998) Table I, PGR against PLR
+      badday structure only (a tall day bar beside a shorter typical-day bar): it encodes no figure
       pass   structure only (finished, passed, paid out); it encodes no figure: no public cohort counts exist
     Always aria-hidden: the name beside it carries the meaning. Colours are classes only (tools.css); a-* says what
     moves and d* when, under prefers-reduced-motion: no-preference only. The resting state is the finished drawing.
@@ -31,6 +32,8 @@
 <line class="i-base" x1="5" x2="44" y1="42" y2="42"/><line class="i-base" x1="5" x2="5" y1="6" y2="42"/><polyline class="i-ink-s i-thin a-fade" points="{{ G.rr }}"/><circle class="i-gain-f a-pop d4" cx="14" cy="22.1" r="2.2"/><circle class="i-plan-f a-pop d6" cx="22" cy="28.8" r="2.2"/>
 {%- elif key == "disp" -%}
 <line class="i-base" x1="5" x2="5" y1="8" y2="40"/><rect class="i-gain-f a-x" x="6" y="12" width="{{ G.disp.g }}" height="7" rx="1.5"/><rect class="i-loss-f a-x d3" x="6" y="29" width="{{ G.disp.l }}" height="7" rx="1.5"/>
+{%- elif key == "badday" -%}
+<line class="i-base" x1="4" x2="44" y1="40" y2="40"/><rect class="i-loss-f a-up d1" x="9" y="10" width="11" height="30" rx="1.5"/><rect class="i-plan-f a-up d3" x="28" y="26" width="11" height="14" rx="1.5"/><line class="i-plan-d" x1="25" x2="44" y1="26" y2="26"/>
 {%- elif key == "pass" -%}
 <rect class="i-mute-f" x="6" y="9" width="36" height="7" rx="1.5"/><rect class="i-gain-f a-x d1" x="6" y="21" width="16" height="7" rx="1.5"/><rect class="i-plan-f a-x d3" x="6" y="33" width="7" height="7" rx="1.5"/>
 {%- endif -%}

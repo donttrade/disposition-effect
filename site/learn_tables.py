@@ -14,8 +14,11 @@ force over every sequence for short runs, and the closed form for the recovery g
    sequences that reach k are set aside. The chance of NO such run is the weight left in the other states.
 """
 import csv
+import datetime
 import io
+import json
 import math
+import os
 
 # ---- the grids (the page shows exactly these; the tests read them from here) -----------------------------------
 DRAWDOWNS = (1, 2, 3, 5, 10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 75, 80, 90)   # percent
@@ -130,6 +133,56 @@ def streak_csv():
             for k, p in zip(RUN_LENGTHS, r["probs"]):
                 w.writerow([r["win_rate"], n, k, f"{p:.6f}"])
     return out.getvalue()
+
+
+# ---- the closes of 5 November 2026 (config/market_2026_11_05.json; the dated callout on the drawdown article and the
+# ---- sell-off study read these; the arithmetic is the table's own recovery_gain) --------------------------------
+MARKET_JSON = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config", "market_2026_11_05.json")
+
+
+def drawdown_from_record(close, record):
+    """The fall, in percent of the record close, that the close is below it: 100 * (1 - close / record)."""
+    if not (record > 0 and 0 < close <= record):
+        raise ValueError("needs a close at or below a positive record")
+    return 100.0 * (1.0 - close / record)
+
+
+def day_change(close, prior):
+    """The one-day change in percent."""
+    return 100.0 * (close / prior - 1.0)
+
+
+def _long_date(iso):
+    d = datetime.date.fromisoformat(iso)
+    return f"{d.day} {d.strftime('%B')}"
+
+
+def market_view(path=None):
+    """Closes, one-day changes, drawdowns from the record and the gain each needs (recovery_gain of the drawdown), for the
+    indices in the market file. Raw floats under 'raw'; the strings the pages print under the other keys."""
+    with open(path or MARKET_JSON, encoding="utf-8") as f:
+        m = json.load(f)
+    out = {"read_on": m["read_on"], "credit": m["source"]["credit"], "date": m["date"], "reported": m["reported"], "indices": {}}
+    for key, x in m["indices"].items():
+        v = {"name": x["name"], "series": x["series"], "url": x["url"], "close": f"{x['close']:,.2f}", "prior_close": f"{x['prior_close']:,.2f}",
+             "change": day_change(x["close"], x["prior_close"])}
+        v["change_text"] = f"{abs(v['change']):.2f}%"
+        v["raw"] = {"close": x["close"], "prior_close": x["prior_close"], "change_pct": v["change"]}
+        if "record_close" in x:
+            dd = drawdown_from_record(x["close"], x["record_close"])
+            need = recovery_gain(dd)
+            v.update({"record": f"{x['record_close']:,.2f}", "record_date": _long_date(x["record_date"]), "drawdown": f"{dd:.1f}%",
+                      "need": f"{need:.1f}%", "drawdown_2": f"{dd:.2f}", "need_2": f"{need:.2f}"})
+            v["raw"].update({"record": x["record_close"], "drawdown_pct": dd, "need_pct": need})
+        if "larger_fall_since" in x:
+            v["larger_fall"] = {"date": _long_date(x["larger_fall_since"]["date"]) + " " + x["larger_fall_since"]["date"][:4],
+                                "change_pct": x["larger_fall_since"]["change_pct"]}
+        out["indices"][key] = v
+    vix = out["indices"]["vix"]
+    vix["points"] = f"{m['indices']['vix']['close'] - m['indices']['vix']['prior_close']:+.2f}"
+    dj = out["indices"]["djia"]
+    dj["points_text"] = f"{abs(m['indices']['djia']['close'] - m['indices']['djia']['prior_close']):,.2f}"
+    return out
 
 
 if __name__ == "__main__":   # python3 site/learn_tables.py: print both CSVs
