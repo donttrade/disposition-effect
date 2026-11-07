@@ -87,7 +87,7 @@ def stats_block(data):
     out["pooled_60"] = sum(d["s2_retrade_60"] for d in base) / sum(d["s2_denominator"] for d in base)
     out["event"] = ed
     # Not pre-stated (fix round 1): the same four measures against the 22 weekdays among the 30 days before. 5 Nov was a Thursday and the
-    # stock-style markets are nearly idle at weekends, so the weekday median is the fairer "normal". The page labels it as an extra.
+    # builder-listed markets are much quieter at weekends, so the weekday median is the fairer "normal". The page labels it as an extra.
     wd = {}
     is_wd = lambda day: dt.date.fromisoformat(day).weekday() < 5   # noqa: E731
     if not is_wd(ev):
@@ -99,6 +99,9 @@ def stats_block(data):
         wd[k] = {"median": m, "ratio": fn(ed) / m, "n": len(b), "max": max(b), "rank": 1 + sum(v > fn(ed) for v in b)}
     out["wd"] = wd
     out["n_weekend"] = sum(1 for d in base if not is_wd(d["day"]))
+    # 6 Nov: replaces the unsupported "close to idle at weekends" with the weekend numbers themselves.
+    we = sorted((d["hip3_liq_wallets"], d["day"]) for d in base if not is_wd(d["day"]))
+    out["we_hip3"] = {"median": st.median(v for v, _ in we), "max": we[-1][0], "max_day": we[-1][1]}
     return out
 
 
@@ -266,6 +269,8 @@ def context(data=None):
         "hip3_prev_weekday": weekday_long(prev_high_hip3["day"]),
         "hip3_vs_prev": times(E["hip3_liq_wallets"] / prev_high_hip3["hip3_liq_wallets"]), "hip3_active": i(E["hip3_active_wallets"]),
         "wd_n": S["wd"]["S1w"]["n"], "we_n": S["n_weekend"],
+        "hip3_we_median": i(S["we_hip3"]["median"]), "hip3_we_max": i(S["we_hip3"]["max"]),
+        "hip3_we_max_day": dt.date.fromisoformat(S["we_hip3"]["max_day"]).strftime("%A %-d %b"),
         "hip3_wd_median": i(S["wd"]["S1w"]["median"]), "hip3_wd_ratio": times(S["wd"]["S1w"]["ratio"]),
         "hip3_value_wd_ratio": times(S["wd"]["S1n"]["ratio"]), "wallets_wd_median": i(S["wd"]["P1"]["median"]),
         "wallets_wd_ratio": times(S["wd"]["P1"]["ratio"]), "value_wd_ratio": times(S["wd"]["P2"]["ratio"]),

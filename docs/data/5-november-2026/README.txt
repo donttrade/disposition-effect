@@ -9,7 +9,13 @@ What this is
 
 What is NOT here
   The input files themselves (Ironflow's daily Parquet files, about 150 MB each) and any wallet address. Every file here holds counts only.
-  To re-run, download the same files from the dataset page, check each SHA-256 against RUN-LOG.txt, and run run_day.py, summarize.py and
+  Dated note, 6 Nov 2026 23:24 UTC: after this study ran, Ironflow replaced 5 of the 31 daily trade files, so today's files from the
+  dataset's main branch do not match the SHA-256 values in RUN-LOG.txt. Download the files this study read from dataset revision
+  8e0c2f593fdbf324772db734747ccfce597f3b80 of ironflow/hyperliquid-trades:
+  https://huggingface.co/datasets/ironflow/hyperliquid-trades/resolve/8e0c2f593fdbf324772db734747ccfce597f3b80/data/<YYYY-MM-DD>.parquet
+  On the replaced files the builder-listed figures are unchanged; all-markets wallets become 18,815 for 5 Nov (published 18,813) and
+  1,142 for 10 Oct (published 1,129). The published figures stay as the run made them.
+  To re-run, download the same files from that revision, check each SHA-256 against RUN-LOG.txt, and run run_day.py, summarize.py and
   s3_exact.py. The scripts name the folders of the machine they were run on (/home/claude/...); change those paths first. The scripts and the plan are published
   unchanged, so that their hashes (in RUN-LOG.txt and on the study page) stay true.
 
