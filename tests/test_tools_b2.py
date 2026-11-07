@@ -831,7 +831,9 @@ def test_r2_non_tools_docs_pages_differ_from_main_only_by_asset_hashes():
     # the 5 Nov sell-off campaign (6 Nov) changes these on purpose: the Bad-day check's questions in Help, the dated callout and
     # related links on the two Learn pages, and the new study in the Research list (tests/test_selloff.py holds each change)
     selloff = ("docs/help/index.html", "docs/learn/drawdown-recovery-table/index.html",
-               "docs/learn/losing-streak-probability/index.html", "docs/research/index.html")
+               "docs/learn/losing-streak-probability/index.html", "docs/research/index.html",
+               # 6 Nov: the study page itself gains the "Market by market" section (tests/test_selloff.py holds it)
+               "docs/research/5-november-2026-sell-off/index.html")
     for n in names:
         if n.startswith(("docs/tools/", "docs/static/")) or not n.endswith(".html") or n == "docs/index.html" or n in selloff:
             continue
