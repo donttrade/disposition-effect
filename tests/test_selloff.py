@@ -446,11 +446,11 @@ def test_no_address_in_the_public_csvs():
         assert not ADDR.search(open(p, encoding="utf-8").read()), p
 
 
-def test_every_verified_market_has_a_source_url_and_every_large_market_is_checked():
+def test_every_builders_docs_market_has_a_source_url_and_every_large_market_is_checked():
     mv = list(csv.DictReader(open(MV, encoding="utf-8")))
-    assert {r["status"] for r in mv} <= {"verified", "partly verified", "not verified"}
+    assert {r["status"] for r in mv} <= {"builders_docs", "partly_sourced", "no_source_found"}
     for r in mv:
-        if r["status"] == "verified":
+        if r["status"] == "builders_docs":
             assert r["source_url"].startswith("https://") and r["what_it_tracks"] and r["checked_utc_date"], r["market_as_listed"]
         else:
             assert r["notes"], r["market_as_listed"]
@@ -478,10 +478,33 @@ def test_market_by_market_section(built_site):
     assert len(rows) >= 20
     for name, dex, cell in rows:
         r = mv.get(f"{dex}:{name}-PERP")
-        if r and r["status"] == "verified":
+        if r and r["status"] == "builders_docs":
             assert html.unescape(text(cell)).strip().startswith(r["what_it_tracks"][:20]) and "builder’s docs" in cell
         else:
             assert text(cell).strip().startswith("As listed"), (dex, name)
     assert "Nasdaq-100" not in t
     # no offer, price or pay link anywhere near it
     assert not re.search(r"\$\s?\d|/pricing/|checkout|buy now", sec, re.I)
+
+
+def test_status_words_are_the_same_on_the_page_and_in_the_csv(built_site):
+    import selloff as SO
+    codes = {r["status"] for r in csv.DictReader(open(MV, encoding="utf-8"))}
+    assert codes <= set(SO.STATUS)
+    for code, (word, _) in SO.STATUS.items():
+        assert code == word.replace("’", "").replace(" ", "_"), (code, word)
+    t = text(page(built_site, S))
+    assert "verified" not in t.lower()
+
+
+def test_check_box_states_the_ironflow_replacement_and_the_pinned_revision(built_site):
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("pm", os.path.join(REPO, "checks", "selloff", "per_market.py"))
+    pm = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(pm)
+    import selloff as SO
+    assert SO.PM_REVISION == pm.REVISION
+    h = page(built_site, S)
+    box = text(h[h.index('id="sell-pm-check-h"'):h.index('aria-labelledby="sell-15-h"')])
+    assert pm.REVISION in box and "23:24 UTC" in box and "18,815" in box and "18,813" in box and "1,142" in box and "1,129" in box
+    assert "builder-listed figures do not change" in box

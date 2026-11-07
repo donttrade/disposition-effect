@@ -10,7 +10,8 @@ Files
                                   force-closed (USD), number of force-close fills and the share of the value that was long; on the
                                   5 November rows also the market's own 30-day median of wallets and 5 November's ratio to it.
   per_market.py                   the code that makes it (identical to checks/selloff/per_market.py in the site's repository).
-  MARKETS-VERIFIED.csv            what each large builder-listed market tracks, with the source and the date it was checked.
+  MARKETS-VERIFIED.csv            what each large builder-listed market tracks, with the source, the date it was checked and a
+                                  status (builders_docs, partly_sourced or no_source_found; the study page uses the same words).
   markets_verified.py             the code that writes MARKETS-VERIFIED.csv from its evidence table.
 
 Same rule as the study
@@ -58,14 +59,14 @@ What each market tracks (MARKETS-VERIFIED.csv)
        https://docs.entropy.io (Equity Assets, Oracle Price).
     2. Hyperliquid's public metadata: POST https://api.hyperliquid.xyz/info with {"type":"perpDexs"} (which builder runs each dex)
        and {"type":"meta","dex":"xyz"} or "io" (each market's maximum leverage and margin mode). The API answered from our machine.
-  Status:
-    verified         the builder's documents name what the market tracks (the share or index) and how its price is taken, and the
+  Status (the study page shows the same words: "builder's docs", "partly sourced", "no source found"):
+    builders_docs    the builder's documents name what the market tracks (the share or index) and how its price is taken, and the
                      maximum leverage and margin mode in those documents equal Hyperliquid's metadata.
-    partly verified  the builder names the issuer or underlying but something is still open (the notes column says what).
-    not verified     no primary source was found.
-  Only a verified market's underlying is named on the study page; any other keeps its name "as listed".
+    partly_sourced   the builder names the issuer or underlying but something is still open (the notes column says what).
+    no_source_found  no primary source was found.
+  Only a builders_docs market's underlying is named on the study page; any other keeps its name "as listed".
   A ticker name alone is never treated as evidence. Example: the market listed as PURRDAT references Nasdaq: PURR.
-  Result: 19 verified, 1 partly verified (io:NBIS-PERP), 0 not verified.
+  Result: 19 builders_docs, 1 partly_sourced (io:NBIS-PERP), 0 no_source_found.
   Limits: the documents were read on 7 November 2026 (UTC) and describe each market on that day, not on 5 November. trade[XYZ]'s
   changelog lists no change to these markets' underlying between 6 October and 7 November 2026. The price-source text is a short
   summary of the builder's own description; we did not check the oracle prices themselves.
