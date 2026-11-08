@@ -25,8 +25,12 @@ import build as B  # noqa: E402
 import lint as L  # noqa: E402
 import indexnow_ping as IX  # noqa: E402
 
-os.environ.setdefault("DT_TODAY", "2026-11-06")
+# 8 Nov go-live: these tests pin the round-A terms version (6 Nov). They build from a copy of site.toml with the legal
+# dates set back to that day, and pass DT_TODAY per build instead of setting it for the whole session (it leaked
+# into other test files run after this one).
+ROUND_A_TODAY = os.environ.get("DT_TODAY", "2026-11-06")
 TOML = open(os.path.join(SITE, "config", "site.toml"), encoding="utf-8").read()
+TOML = re.sub(r'^(terms_date|privacy_date) = "\d{4}-\d\d-\d\d"', r'\1 = "2026-11-06"', TOML, flags=re.M)
 PRICES = json.load(open((os.environ.get("DT_PRICES_JSON") or os.path.join(SITE, "config", "prices.json")), encoding="utf-8"))
 REASONS = json.load(open(os.path.join(SITE, "config", "refund_reasons.json"), encoding="utf-8"))["reasons"]
 KEY = re.search(r'\[indexnow\]\s*key = "([^"]+)"', TOML).group(1)
@@ -34,8 +38,10 @@ KEY = re.search(r'\[indexnow\]\s*key = "([^"]+)"', TOML).group(1)
 
 def build(tmp_path, name, toml=None, prices=None, partners=None, **env):
     out = tmp_path / name
-    e = {**os.environ, "DT_OUT": str(out), "DT_TODAY": os.environ.get("DT_TODAY", "2026-11-06"), **env}
+    e = {**os.environ, "DT_OUT": str(out), "DT_TODAY": ROUND_A_TODAY, **env}
     e.pop("DT_DEV", None)
+    if toml is None:
+        toml = TOML
     if toml is not None:
         (tmp_path / f"{name}.toml").write_text(toml, encoding="utf-8")
         e["DT_SITE_TOML"] = str(tmp_path / f"{name}.toml")

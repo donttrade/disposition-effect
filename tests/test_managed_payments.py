@@ -110,11 +110,12 @@ def read(out, rel):
 
 
 # ------------------------------------------------------------------ the committed config and the link guard
-def test_committed_config_is_managed_with_the_placeholder_and_the_old_link_listed():
+def test_committed_config_is_managed_with_the_live_link_and_the_old_link_listed():
+    # 8 Nov go-live: the placeholder was replaced by the founding Managed link (plink_1UZckbBI5xp0gJsLUbUWmz4Y).
     cfg = open(SITE_TOML, encoding="utf-8").read()
     assert re.search(r"(?m)^managed_payments = true$", cfg) and re.search(r"(?m)^tax_included = true$", cfg)
     r = r39(committed_prices())
-    assert r["stripe_link_live"] == B.PENDING_MANAGED_LINK
+    assert r["stripe_link_live"] == "https://buy.stripe.com/4gMcN4fHh9Jw8xCeImdwc06"
     assert r["non_managed_links"] == [OLD_LINK]
 
 
