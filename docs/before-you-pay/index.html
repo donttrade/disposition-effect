@@ -31,7 +31,7 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=8414f36d">
+<link rel="stylesheet" href="/static/css/site.css?v=421482fb">
 <script src="/static/js/theme.js?v=7e47c1a9"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
 <script src="/static/js/pay.js?v=169a9640" defer></script>
@@ -76,7 +76,8 @@
   <p class="small"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Version française</a></p>
   <dl class="byp">
     
-    <dt data-seller-block>Seller</dt><dd>donttrade, a sole proprietorship (Ontario, Canada). The owner’s legal name is shown on the secure payment page, before you pay.</dd>
+    <dt data-seller-block>Seller</dt><dd>Link, Stripe’s checkout service, as merchant of record. Your payment page, receipt and card statement say “Sold through Link” or LINK.COM. Link takes your payment, charges and pays any sales tax, VAT or GST, sends your receipt and answers payment questions.</dd>
+    <dt>Service provider</dt><dd>donttrade, a sole proprietorship (Ontario, Canada). donttrade makes and runs the report, gives you your result and re-test, answers your questions about them, and makes the refunds described here.</dd>
     <dt>Business address</dt><dd>2482 Yonge Street #1216, Toronto, ON M4P 2H5, Canada</dd>
     <dt>Phone</dt><dd>+1 437-600-3946</dd>
     <dt>Email</dt><dd><a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a>. We reply within 1 business day (Eastern Time, Monday to Friday).</dd>
@@ -87,11 +88,9 @@
     <dt>Technical requirements</dt><dd>A current version of Chrome, Edge, Firefox or Safari. Files: MetaTrader 5 or 4 HTML report,
       Interactive Brokers Flex Query CSV, Tradovate Orders CSV or TradingView Order History CSV, or the donttrade CSV
       template. The four broker file readers (MetaTrader 4/5, IBKR, Tradovate and TradingView) are built from each platform’s published format and have not yet been tested on a real export; the donttrade CSV template has. Your result states how many trades were read and over how many weeks, so you can compare with your platform. If the file does not read correctly, use the CSV template or ask for a full refund within 14 days. Your browser reads the file. Your browser sends our server only stripped trade numbers: open and close times, buy or sell, relative size, the realised result, a random symbol number and a scrambled fingerprint of each row. No name, account number or ticker is sent. The numbers are not kept; we keep only a scrambled fingerprint of each trade row from your first result, so a re-test can be matched to the same history, and we delete it on the dates in our privacy notice.</dd>
-    <dt>Price</dt><dd>$39 USD, one time (founding price: for the first 100 buyers, then US$49). No sales tax is charged. Total: $39 USD.</dd>
-    <dt>Currency and fees</dt><dd>Priced in US dollars. Stripe’s payment page may offer to charge you in your own currency instead, at
-      Stripe’s exchange rate, which includes a 2–4% conversion fee. If you pay in US dollars, your card issuer may
-      charge a currency conversion fee. donttrade receives neither fee.</dd>
-    <dt>Payment</dt><dd>Card, through Stripe's checkout page.</dd>
+    <dt>Price</dt><dd>$39 USD, one time (founding price: for the first 100 buyers, then US$49). Any sales tax, VAT or GST is included in this price: Link works it out from your billing address and shows it on your receipt. Total: $39 USD.</dd>
+    <dt>Currency and fees</dt><dd>Priced in US dollars. Link’s payment page may show and charge the price in your own currency instead, at Stripe’s exchange rate, which includes a 2–4% conversion fee. If you pay in US dollars, your card issuer may charge a currency conversion fee. donttrade receives neither fee.</dd>
+    <dt>Payment</dt><dd>In full at checkout, on Link’s secure payment page, run by Stripe: card, Apple Pay, Google Pay, Link or another method it offers where you live. donttrade never sees your card number.</dd>
     <dt>When you get it</dt><dd>Right after payment, in your browser. One re-test is included, to run 30 to 60 days after your first result.
       Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.
       Access lasts 90 days after purchase, or until 75 days after your first result if that is later.</dd>
@@ -150,7 +149,8 @@
       <summary>Full details before you pay</summary>
       <div class="pd-full" data-pay-full><p class="small"><a href="/pricing/#before-you-pay">Read the full details on the pricing page</a></p></div>
     </details>
-    <p class="pay-go no-print"><a class="btn" href="https://buy.stripe.com/eVq14m66H9Jw15a0Rwdwc04?client_reference_id=before-you-pay" rel="noopener" data-pay-continue>Continue to secure payment</a></p>
+    <p class="pay-seller small">The payment page is run by Link (Stripe), the seller of record.</p>
+    <p class="pay-go no-print"><a class="btn" href="https://buy.stripe.com/4gMcN4fHh9Jw8xCeImdwc06?client_reference_id=before-you-pay" rel="noopener" data-pay-continue>Continue to secure payment</a></p>
     <p class="small muted pd-links no-print"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a> · <a href="/terms/#seller">Business details</a></p>
     
   </div>

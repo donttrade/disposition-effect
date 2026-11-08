@@ -29,7 +29,7 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=8414f36d">
+<link rel="stylesheet" href="/static/css/site.css?v=421482fb">
 <script src="/static/js/theme.js?v=7e47c1a9"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
 <script src="/static/js/pay.js?v=169a9640" defer></script>
@@ -81,7 +81,12 @@
   <h2>Data</h2>
   <ul>
     <li><a href="/data/disposition-pgr-plr.csv" download>Disposition-effect replication — summary figures (CSV)</a></li>
-    <li><a href="/data/insider-interval.csv" download>Insider-buying study — interval (CSV)</a></li>
+    <li><a href="/data/insider-interval.csv" download>Insider-buying study — interval (CSV)</a></li><!--island:start--><li><a href="/data/5-november-2026-hyperliquid-daily.csv" download>5 Nov 2026 sell-off, force-closed wallets per day (CSV)</a></li>
+    <li><a href="/data/5-november-2026-hyperliquid-hourly.csv" download>5 Nov 2026 sell-off, value force-closed per hour (CSV)</a></li>
+    <li><a href="/data/5-november-2026-per-market.csv" download>5 Nov 2026 sell-off, every market, every day (CSV)</a></li>
+    <li><a href="/data/5-november-2026/MARKETS-VERIFIED.csv" download>5 Nov 2026 sell-off, what each market tracks, with sources (CSV)</a></li>
+    <li><a href="/data/5-november-2026/README.txt">5 Nov 2026 sell-off, plan, hash, code and run log</a></li>
+<!--island:end-->
     <li>The upstream sources, as listed on the <a href="/code/">Code</a> page.</li>
   </ul>
   <h2>Code and method</h2>
@@ -92,9 +97,10 @@
     <li><a href="/glossary/">Glossary</a></li>
   </ul>
   <h2>The studies</h2>
-  <ul><li><a href="/research/disposition-effect/">Disposition-effect replication (6 Oct 2026)</a></li><li><a href="/research/insider-buying-edge/">Insider-buying study, a negative result (11 Oct 2026)</a></li><li><a href="/research/portfolio-driven-disposition-effect/">Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)</a></li><li><a href="/research/volatility-scaled-momentum/">Volatility-scaled momentum, a pre-registered negative result (16 Oct 2026)</a></li><li><a href="/research/swing-trading-strategies/">Swing-trading strategies under hashed pre-registration, a negative result (16 Oct 2026)</a></li><li><a href="/research/strategy-tests/">Fifty trading strategies across four styles, a combined negative result (17 Oct 2026)</a></li></ul>
+  <ul><li><a href="/research/disposition-effect/">Disposition-effect replication (6 Oct 2026)</a></li><li><a href="/research/insider-buying-edge/">Insider-buying study, a negative result (11 Oct 2026)</a></li><li><a href="/research/portfolio-driven-disposition-effect/">Portfolio-driven disposition effect: the headline did not survive a stricter test (corrected 17 Oct 2026)</a></li><li><a href="/research/volatility-scaled-momentum/">Volatility-scaled momentum, a pre-registered negative result (16 Oct 2026)</a></li><li><a href="/research/swing-trading-strategies/">Swing-trading strategies under hashed pre-registration, a negative result (16 Oct 2026)</a></li><li><a href="/research/strategy-tests/">Fifty trading strategies across four styles, a combined negative result (17 Oct 2026)</a></li><!--island:start--><li><a href="/research/5-november-2026-sell-off/">The 5 Nov 2026 sell-off: force-closed wallets on one crypto exchange (6 November 2026)</a></li>
+<!--island:end--></ul>
   <h2>Licences and citing</h2>
-  <p>Write-ups and charts CC BY-NC 4.0; study code MIT; the partner script from v2: PolyForm Noncommercial 1.0.0, free for research; v1 stays MIT. Each study page has a “Cite this study” block.</p>
+  <p>Write-ups CC BY-NC 4.0; charts CC BY-NC 4.0, except those of the 5 Nov 2026 study, which are CC BY 4.0; study code MIT; the partner script from v2: PolyForm Noncommercial 1.0.0, free for research; v1 stays MIT. Each study page has a “Cite this study” block.</p>
   <h2>Corrections</h2>
   <p>Found an error? Email with the subject “Correction”. Confirmed errors are corrected within 30 days and logged permanently. <a href="/corrections/">Corrections →</a></p>
   <h2>Press</h2>
@@ -145,7 +151,8 @@
       <summary>Full details before you pay</summary>
       <div class="pd-full" data-pay-full><p class="small"><a href="/pricing/#before-you-pay">Read the full details on the pricing page</a></p></div>
     </details>
-    <p class="pay-go no-print"><a class="btn" href="https://buy.stripe.com/eVq14m66H9Jw15a0Rwdwc04?client_reference_id=for-researchers" rel="noopener" data-pay-continue>Continue to secure payment</a></p>
+    <p class="pay-seller small">The payment page is run by Link (Stripe), the seller of record.</p>
+    <p class="pay-go no-print"><a class="btn" href="https://buy.stripe.com/4gMcN4fHh9Jw8xCeImdwc06?client_reference_id=for-researchers" rel="noopener" data-pay-continue>Continue to secure payment</a></p>
     <p class="small muted pd-links no-print"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a> · <a href="/terms/#seller">Business details</a></p>
     
   </div>
