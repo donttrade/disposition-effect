@@ -7,11 +7,12 @@
 {%- from "partials/seller.html" import seller_rows %}
 {%- import "partials/refund_copy.html" as refund with context %}
 {%- from "partials/price_line.html" import byp_note %}
+{%- import "partials/mor.html" as mor with context %}
 <section class="notice" id="before-you-pay" aria-labelledby="byp-h" data-requires-flag="paid_report">
   <{{ byp_h }} id="byp-h">Before you pay: what you’re agreeing to</{{ byp_h }}>
   <p class="small"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Version française</a></p>
   <dl class="byp">
-    {{ seller_rows(private, site, "en") }}
+    {{ seller_rows(private, site, "en", managed_pay, true) }}
     <dt>What you buy</dt><dd>The {{ r.name }}: a habit test on your own past trades, from a trade file you choose.
       It measures and describes up to five habits, with the dollar totals of the matching trades, and tests up to two of them
       against chance in this version. It includes one re-test 30 to 60 days after your first result. It describes what
@@ -19,15 +20,13 @@
     <dt>Technical requirements</dt><dd>A current version of Chrome, Edge, Firefox or Safari. Files: MetaTrader 5 or 4 HTML report,
       Interactive Brokers Flex Query CSV, Tradovate Orders CSV or TradingView Order History CSV, or the donttrade CSV
       template. {{ refund.formats_caveat() }} Your browser reads the file. {{ strings.p5.long }}</dd>
-    <dt>Price</dt><dd>{{ r.price_usd|usd }} USD, one time{{ byp_note(r, prices.rules) }}. No sales tax is charged. Total: {{ r.price_usd|usd }} USD{% if stripe_promo %}, before any promotion code you enter; Stripe’s payment page shows the exact total{% endif %}.</dd>
-    <dt>Currency and fees</dt><dd>Priced in US dollars. Stripe’s payment page may offer to charge you in your own currency instead, at
-      Stripe’s exchange rate, which includes a 2–4% conversion fee. If you pay in US dollars, your card issuer may
-      charge a currency conversion fee. donttrade receives neither fee.</dd>
-    <dt>Payment</dt><dd>Card, through Stripe's checkout page.</dd>
+    <dt>Price</dt><dd>{{ r.price_usd|usd }} USD, one time{{ byp_note(r, prices.rules) }}. {{ mor.byp_price_tail(r) }}{% if stripe_promo %}, before any promotion code you enter; {% if managed_pay %}Link’s{% else %}Stripe’s{% endif %} payment page shows the exact total{% endif %}.</dd>
+    <dt>Currency and fees</dt><dd>{{ mor.byp_currency() }}</dd>
+    <dt>Payment</dt><dd>{{ mor.byp_payment() }}</dd>
     <dt>When you get it</dt><dd>Right after payment, in your browser. One re-test is included, to run 30 to 60 days after your first result.
-      Your re-test runs on the version of the test that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.
+      Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.
       Access lasts 90 days after purchase, or until 75 days after your first result if that is later.</dd>
-    <dt>Restrictions</dt><dd>Two runs: the test and one re-test of the same account (the re-test file has to share at least
+    <dt>Restrictions</dt><dd>Two runs: the report and one re-test of the same account (the re-test file has to share at least
       half of the first file's trades). At most 20,000 rows per file. A tested habit with fewer than 30 trades in either group
       is shown as "not enough trades to tell". If 5% or more of a file's rows open at exactly 00:00 and are held a whole
       number of days, as in exports with dates but no times, no habit is tested, and the habits that depend on the order

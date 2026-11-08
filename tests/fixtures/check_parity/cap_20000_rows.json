@@ -1,0 +1,44 @@
+{
+  "fixture": "cap_20000_rows",
+  "method_version": "2026-10-23.stats2f",
+  "n_rows": 20000,
+  "n_trades": 20000,
+  "dates_only": false,
+  "habits": {
+    "hold_gap": {
+      "n_a": 9874,
+      "n_b": 10126,
+      "dollars": {
+        "n_trades": 4909
+      }
+    },
+    "revenge": {
+      "n_a": 9856,
+      "n_b": 10143,
+      "dollars": {
+        "n_trades": 9856
+      }
+    },
+    "size_up": {
+      "n_a": 9873,
+      "n_b": 10126,
+      "dollars": {
+        "n_trades": 4686
+      }
+    },
+    "tilt": {
+      "n_a": 4890,
+      "n_b": 15109,
+      "dollars": {
+        "n_trades": 4890
+      }
+    },
+    "oversized_loss": {
+      "n_a": 822,
+      "n_b": 9874,
+      "dollars": {
+        "n_trades": 822
+      }
+    }
+  }
+}

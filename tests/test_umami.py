@@ -213,7 +213,7 @@ def test_pay_ref_slug():
 
 def test_every_stripe_link_names_its_page(built_site):
     import json
-    prices = json.load(open(os.path.join(SITE, "config", "prices.json"), encoding="utf-8"))
+    prices = json.load(open((os.environ.get("DT_PRICES_JSON") or os.path.join(SITE, "config", "prices.json")), encoding="utf-8"))
     link = next(p for p in prices["products"] if p["id"] == "report39")["stripe_link_live"]
     seen = 0
     for path, html in _pages(built_site["out"]):

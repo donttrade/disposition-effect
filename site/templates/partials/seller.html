@@ -2,15 +2,45 @@
     email. The values come ONLY from the gitignored private.toml, which the build reads only
     while a commerce flag (paid_report or pilot_checkout) is on. build.verify() fails if a
     data-seller-block element appears in a build with both flags off.
-    Usage: {% from "partials/seller.html" import seller_rows %}<dl>{{ seller_rows(private, site, "en") }}</dl> -#}
-{%- macro seller_rows(private, site, lang="en") -%}
+    Usage: {% from "partials/seller.html" import seller_rows %}<dl>{{ seller_rows(private, site, "en", managed_pay, sale) }}</dl>
+    7 Nov (Managed Payments, ARCHITECT-PLAN-MANAGED-PAYMENTS §6.1): mp = [stripe] managed_payments (context managed_pay;
+    a macro imported without context cannot see it, so callers pass it). sale = true where the rows describe the US$39
+    sale (Before you pay, the traders' terms): the Seller row then names Link (Stripe), the merchant of record, and a
+    "Service provider" row names donttrade. Elsewhere (privacy, contact) the Seller row is donttrade with one sentence
+    on Link. mp off: the rows of 7 Nov (sellerfix). The firm Pilot page passes mp = false (its link is not Managed).
+    LAWYER: the whole block (plan §6.3). French: TODO-FR-REVIEW. -#}
+
+{%- macro seller_rows(private, site, lang="en", mp=false, sale=false) -%}
+{%- set tradename = (private.seller_legal_name|lower) == (site.name|lower) %}
 {%- if lang == "fr" %}
+    {%- if mp and sale %}
+    <dt data-seller-block>Vendeur</dt><dd>Link, le service de paiement de Stripe, à titre de marchand officiel (merchant of record). La page de paiement, votre reçu et votre relevé de carte indiquent « Sold through Link » ou LINK.COM. Link encaisse votre paiement, perçoit et verse les taxes de vente, la TVA ou la TPS applicables, vous envoie le reçu et répond aux questions sur le paiement.</dd>
+    <dt>Fournisseur du service</dt><dd>{% if tradename %}{{ site.name }}, entreprise individuelle (Ontario, Canada){% else %}{{ private.seller_legal_name }}, faisant affaire sous le nom {{ site.name }} (Ontario, Canada){% endif %}. donttrade conçoit et exploite le rapport, vous remet vos résultats, répond à vos questions à leur sujet et effectue les remboursements prévus ici.</dd>
+    {%- elif mp and tradename %}
+    <dt data-seller-block>Entreprise</dt><dd>{{ site.name }}, entreprise individuelle (Ontario, Canada). Le rapport donttrade sur le revenge trading est vendu par l’intermédiaire de Link, le service de paiement de Stripe, à titre de marchand officiel.</dd>
+    {%- elif mp %}
+    <dt data-seller-block>Entreprise</dt><dd>{{ private.seller_legal_name }}, faisant affaire sous le nom {{ site.name }} (Ontario, Canada). Le rapport donttrade sur le revenge trading est vendu par l’intermédiaire de Link, le service de paiement de Stripe, à titre de marchand officiel.</dd>
+    {%- elif tradename %}
+    <dt data-seller-block>Vendeur</dt><dd>{{ site.name }}, entreprise individuelle (Ontario, Canada). Le nom légal du propriétaire figure sur la page de paiement sécurisée, avant que vous payiez.</dd>
+    {%- else %}
     <dt data-seller-block>Vendeur</dt><dd>{{ private.seller_legal_name }}, faisant affaire sous le nom {{ site.name }} (Ontario, Canada)</dd>
+    {%- endif %}
     <dt>Adresse de l’établissement</dt><dd>{{ private.premises_address }}</dd>
     <dt>Téléphone</dt><dd>{{ private.phone }}</dd>
     <dt>Courriel</dt><dd><a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>. Réponse en 1 jour ouvrable (heure de l’Est, du lundi au vendredi).</dd>
 {%- else %}
+    {%- if mp and sale %}
+    <dt data-seller-block>Seller</dt><dd>Link, Stripe’s checkout service, as merchant of record. Your payment page, receipt and card statement say “Sold through Link” or LINK.COM. Link takes your payment, charges and pays any sales tax, VAT or GST, sends your receipt and answers payment questions.</dd>
+    <dt>Service provider</dt><dd>{% if tradename %}{{ site.name }}, a sole proprietorship (Ontario, Canada){% else %}{{ private.seller_legal_name }}, doing business as {{ site.name }} (Ontario, Canada){% endif %}. donttrade makes and runs the report, gives you your result and re-test, answers your questions about them, and makes the refunds described here.</dd>
+    {%- elif mp and tradename %}
+    <dt data-seller-block>Business</dt><dd>{{ site.name }}, a sole proprietorship (Ontario, Canada). The Revenge Trading Report is sold through Link, Stripe’s checkout service, as merchant of record.</dd>
+    {%- elif mp %}
+    <dt data-seller-block>Business</dt><dd>{{ private.seller_legal_name }}, doing business as {{ site.name }} (Ontario, Canada). The Revenge Trading Report is sold through Link, Stripe’s checkout service, as merchant of record.</dd>
+    {%- elif tradename %}
+    <dt data-seller-block>Seller</dt><dd>{{ site.name }}, a sole proprietorship (Ontario, Canada). The owner’s legal name is shown on the secure payment page, before you pay.</dd>
+    {%- else %}
     <dt data-seller-block>Seller</dt><dd>{{ private.seller_legal_name }}, doing business as {{ site.name }} (Ontario, Canada)</dd>
+    {%- endif %}
     <dt>Business address</dt><dd>{{ private.premises_address }}</dd>
     <dt>Phone</dt><dd>{{ private.phone }}</dd>
     <dt>Email</dt><dd><a href="mailto:{{ site.contact_email }}">{{ site.contact_email }}</a>. {{ site.reply_promise }}</dd>

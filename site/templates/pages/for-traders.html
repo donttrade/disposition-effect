@@ -15,10 +15,11 @@
   <section class="section" aria-labelledby="ft-h">
     <div class="showcase ft-hero">
       <div class="showcase-copy">
-        <h1 id="ft-h">The donttrade test, on your own trades</h1>
+        <h1 id="ft-h">The Revenge Trading Report, on your own trades</h1>
         <p class="lede">Up to five habits in your past trades, with the dollar total of each. It tests up to two of these habits against chance in this version.</p>
         <p class="btn-row">{{ offer.button() }} <a href="/sample-report/">See the example report</a></p>
         <p class="small">{{ r.price_usd|usd }} once · one re-test · {{ refund.short() }}</p>
+        <p class="small"><a href="/check/">Check your trades free first</a>: it counts them in your browser, no upload.</p>
       </div>
       {% include "partials/hero_media_report.html" %}
     </div>
@@ -64,7 +65,7 @@
       <tbody>
         <tr><th scope="row">Logs your trades</th><td>Yes</td><td>{% if flags.journal %}Yes: the free journal keeps them in your browser, on your device{% else %}No: it reads the export your platform already makes{% endif %}</td></tr>
         <tr><th scope="row">Needs an account</th><td>Usually</td><td>No account or login</td></tr>
-        <tr><th scope="row">Tests whether a habit is more than chance</th><td>Varies</td><td>Yes, in the donttrade test: up to two habits in this version, with a stated statistical check, and “not enough trades to tell” when either group of a tested habit has fewer than 30 trades</td></tr>
+        <tr><th scope="row">Tests whether a habit is more than chance</th><td>Varies</td><td>Yes, in the Revenge Trading Report: up to two habits in this version, with a stated statistical check, and “not enough trades to tell” when either group of a tested habit has fewer than 30 trades</td></tr>
         <tr><th scope="row">Shows its method and code</th><td>Rarely</td><td>The method, yes. The scripts behind {{ evidence.scripts_public }} of the {{ evidence.studies }} studies are public (<a href="/code/">Methods and code</a>); the test’s own engine is not</td></tr>
         <tr><th scope="row">Tells you what to buy or sell</th><td>Some do</td><td>No</td></tr>
       </tbody>
@@ -75,8 +76,8 @@
   <section class="section" aria-labelledby="faq-h" data-reveal>
     <h2 id="faq-h"><span id="founding">Questions</span></h2>
     <details><summary>Is this investment advice?</summary><p>No. It describes your own past trades. It does not recommend any security, trade, size or exit, and past results do not predict future results.</p></details>
-    <details><summary>What does the re-test do?</summary><p>It runs the same test on a newer export of the same account, 30 to 60 days after your first result. Your re-test runs on the version of the test that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.</p></details>
-    <details><summary>How do I buy it?</summary><p>On the pricing page: read the “Before you pay” summary, then pay {{ r.price_usd|usd }} by card on Stripe’s page. Your result opens in your browser right after payment.</p></details>
+    <details><summary>What does the re-test do?</summary><p>It runs the same test on a newer export of the same account, 30 to 60 days after your first result. Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.</p></details>
+    <details><summary>How do I buy it?</summary><p>On the pricing page: read the “Before you pay” summary, then pay {{ r.price_usd|usd }} by card on {% if managed_pay %}Link’s secure page (Stripe){% else %}Stripe’s page{% endif %}. Your result opens in your browser right after payment.</p></details>
     <details><summary>Can I get a refund?</summary><p>{{ refund.faq_answer() }}</p></details>
     <details><summary>What can I use today for free?</summary><p>The free <a href="/tools/trade-stats/">trade-stats dashboard</a> reads the same files and shows the core numbers: win rate, profit factor, drawdown and streaks, in your browser.</p></details>
   </section>
@@ -90,10 +91,10 @@
     <div class="grid">
       <div class="span-7">
         {%- if sale %}
-        <h1 id="ft-h">The donttrade test, on your own trades.</h1>
+        <h1 id="ft-h">The Revenge Trading Report, on your own trades.</h1>
         <p class="lede">It measures and describes up to five habits in your own past trades, like opening a new trade soon after a loss, with the dollar totals of the matching trades, and tests up to two of these habits against chance in this version. It includes one re-test 30 to 60 days after your first result. It doesn’t tell you what to trade.</p>
         {%- else %}
-        <h1 id="ft-h">The donttrade test, on your own trades. Coming soon.</h1>
+        <h1 id="ft-h">The Revenge Trading Report, on your own trades. Coming soon.</h1>
         <p class="lede">It will measure and describe up to five habits in your own past trades, like opening a new trade soon after a loss, with the dollar totals of the matching trades, and test up to two of these habits against chance in this version. It will include one re-test 30 to 60 days after your first result. It will not tell you what to trade.</p>
         {%- endif %}
         {{- offer.status() }}
@@ -135,7 +136,7 @@
 
   <section class="section" aria-labelledby="founding" data-reveal>
     <h2 id="founding">The founding offer</h2>
-    <p>The donttrade test is {{ r.price_usd|usd }}, one time, in US dollars. It includes one re-test of the same account. Your re-test runs on the version of the test that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.</p>
+    <p>The Revenge Trading Report is {{ r.price_usd|usd }}, one time, in US dollars. It includes one re-test of the same account. Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.</p>
     {%- if sale %}
     <p>The price, the seller’s details and the terms are in the “Before you pay” summary, shown before you pay. {{ refund.tier2() }}{% if not refund_on %} <a href="/terms/#traders">Trader terms</a>{% endif %}</p>
     {%- else %}
@@ -166,7 +167,7 @@
       <tbody>
         <tr><th scope="row">Logs your trades</th><td>Yes</td><td>{% if flags.journal %}Yes: the free journal keeps them in your browser, on your device{% else %}No: it reads the export your platform already makes{% endif %}</td></tr>
         <tr><th scope="row">Needs an account</th><td>Usually</td><td>No account or login</td></tr>
-        <tr><th scope="row">Tests whether a habit is more than chance</th><td>Varies</td><td>{% if flags.paid_report %}Yes, in the donttrade test{% else %}The donttrade test will{% endif %}: up to two habits in this version, with a stated statistical check, and “not enough trades to tell” when either group of a tested habit has fewer than 30 trades</td></tr>
+        <tr><th scope="row">Tests whether a habit is more than chance</th><td>Varies</td><td>{% if flags.paid_report %}Yes, in the Revenge Trading Report{% else %}The Revenge Trading Report will{% endif %}: up to two habits in this version, with a stated statistical check, and “not enough trades to tell” when either group of a tested habit has fewer than 30 trades</td></tr>
         <tr><th scope="row">Shows its method and code</th><td>Rarely</td><td>The method, yes. The scripts behind {{ evidence.scripts_public }} of the {{ evidence.studies }} studies are public (<a href="/code/">Methods and code</a>); the test’s own engine is not</td></tr>
         <tr><th scope="row">Tells you what to buy or sell</th><td>Some do</td><td>No</td></tr>
       </tbody>
@@ -178,7 +179,7 @@
     <h2 id="faq-h">Questions</h2>
     <details><summary>Is this investment advice?</summary><p>No. It {{ "describes" if sale else "will describe" }} your own past trades. It does not recommend any security, trade, size or exit, and past results do not predict future results.</p></details>
     {%- if sale %}
-    <details><summary>How do I buy it?</summary><p>On the pricing page: read the “Before you pay” summary, then pay {{ r.price_usd|usd }} by card on Stripe’s page. Your result opens in your browser right after payment.</p></details>
+    <details><summary>How do I buy it?</summary><p>On the pricing page: read the “Before you pay” summary, then pay {{ r.price_usd|usd }} by card on {% if managed_pay %}Link’s secure page (Stripe){% else %}Stripe’s page{% endif %}. Your result opens in your browser right after payment.</p></details>
     <details><summary>Can I get a refund?</summary><p>{{ refund.faq_answer(false) }}</p></details>
     {%- else %}
     <details><summary>When does it launch?</summary><p>There is no launch date yet. Everyone on the waitlist gets one email when it does.</p></details>

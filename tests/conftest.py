@@ -8,6 +8,40 @@ import pytest
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# 7 Nov 2026 (Managed Payments, CODER-REPORT-MANAGED-PAYMENTS-2026-11-07): until the owner creates the Managed Payments
+# Payment Link, the committed prices.json holds a placeholder for report39.stripe_link_live, which every live build
+# refuses (tests/test_managed_payments.py pins that). The rest of the suite builds the committed config, so it gets a
+# copy of prices.json with a fake live link through DT_PRICES_JSON, which every build subprocess inherits and which
+# committed_prices_path() returns to tests that copy the file. Nothing changes once the real link is set.
+FIXTURE_MANAGED_LINK = "https://buy.stripe.com/fixtureMPzqx0000"
+COMMITTED_PRICES = os.path.join(REPO, "site", "config", "prices.json")
+
+
+def _pending_link_copy():
+    import json
+    import tempfile
+    with open(COMMITTED_PRICES, encoding="utf-8") as f:
+        d = json.load(f)
+    r39 = next(p for p in d["products"] if p["id"] == "report39")
+    if not str(r39.get("stripe_link_live") or "").startswith("PENDING"):
+        return None
+    r39["stripe_link_live"] = FIXTURE_MANAGED_LINK
+    fd, path = tempfile.mkstemp(prefix="dt-prices-", suffix=".json")
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        json.dump(d, f, ensure_ascii=False, indent=1)
+    return path
+
+
+if "DT_PRICES_JSON" not in os.environ:
+    _copy = _pending_link_copy()
+    if _copy:
+        os.environ["DT_PRICES_JSON"] = _copy
+
+
+def committed_prices_path():
+    """The prices.json a test should copy: the committed one, or its fake-link copy while the link is the placeholder."""
+    return os.environ.get("DT_PRICES_JSON") or COMMITTED_PRICES
+
 
 class _Quiet(http.server.SimpleHTTPRequestHandler):
     extensions_map = {**http.server.SimpleHTTPRequestHandler.extensions_map, ".js": "text/javascript",
@@ -96,7 +130,9 @@ def badges_site(tmp_path_factory):
     assert n == 1
     (tmp / "site.toml").write_text(src, encoding="utf-8")
     out = tmp / "_site"
-    env = {**os.environ, "DT_OUT": str(out), "DT_SITE_TOML": str(tmp / "site.toml")}
+    # The free_badges guard (build.leak_guard_problem) refuses this flag next to paid_report, and a free-launch build cannot be made from this
+    # tree (docs/ is a paid bundle, so the passthrough-chrome check fails). DT_BADGES_TEST_BUILD=1 is honoured only with DT_OUT set.
+    env = {**os.environ, "DT_OUT": str(out), "DT_SITE_TOML": str(tmp / "site.toml"), "DT_BADGES_TEST_BUILD": "1"}
     env.pop("DT_DEV", None)
     r = subprocess.run([sys.executable, os.path.join(REPO, "site", "build.py")], env=env, capture_output=True, text=True)
     assert r.returncode == 0, r.stderr

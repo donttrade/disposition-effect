@@ -1,0 +1,44 @@
+{
+  "fixture": "overlapping_trades",
+  "method_version": "2026-10-23.stats2f",
+  "n_rows": 300,
+  "n_trades": 300,
+  "dates_only": false,
+  "habits": {
+    "hold_gap": {
+      "n_a": 138,
+      "n_b": 162,
+      "dollars": {
+        "n_trades": 73
+      }
+    },
+    "revenge": {
+      "n_a": 17,
+      "n_b": 282,
+      "dollars": {
+        "n_trades": 17
+      }
+    },
+    "size_up": {
+      "n_a": 113,
+      "n_b": 182,
+      "dollars": {
+        "n_trades": 0
+      }
+    },
+    "tilt": {
+      "n_a": 53,
+      "n_b": 242,
+      "dollars": {
+        "n_trades": 53
+      }
+    },
+    "oversized_loss": {
+      "n_a": 0,
+      "n_b": 138,
+      "dollars": {
+        "n_trades": 0
+      }
+    }
+  }
+}

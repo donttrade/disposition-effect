@@ -173,6 +173,10 @@ LIFT_FIXES = {
         # these two are our own correction promise, not a quotation, so they say "confirmed"
         ("Verified errors are corrected within 30 days and logged permanently.",
          "Confirmed errors are corrected within 30 days and logged permanently."),
+        # 7 Nov 2026: owner approved CC BY 4.0 for charts. The 5 Nov 2026 study's charts are CC BY 4.0; the older studies' charts
+        # stay as their pages say (CC BY-NC 4.0). Write-ups stay CC BY-NC 4.0.
+        ("Write-ups and charts CC BY-NC 4.0; study code MIT;",
+         "Write-ups CC BY-NC 4.0; charts CC BY-NC 4.0, except those of the 5 Nov 2026 study, which are CC BY 4.0; study code MIT;"),
     ],
     "/corrections/": [
         ("Corrections are made within 30 days of a verified factual error and logged here permanently.",

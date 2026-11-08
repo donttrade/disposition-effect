@@ -73,7 +73,7 @@ def private_with(tmp, name="private.toml", **over):
 def prices_with_test_link(tmp, link=FAKE_TEST_LINK):
     """A copy of prices.json with a report39 test Payment Link (the committed file has none yet)."""
     import json
-    d = json.load(open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8"))
+    d = json.load(open((os.environ.get("DT_PRICES_JSON") or os.path.join(REPO, "site", "config", "prices.json")), encoding="utf-8"))
     for p in d["products"]:
         if p["id"] == "report39":
             p["stripe_link_test"] = link

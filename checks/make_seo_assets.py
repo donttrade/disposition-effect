@@ -99,8 +99,8 @@ def specs(site_dir):
             ("glossary.png", "Glossary", "Plain definitions of trading habits and risk terms.", None),
             ("learn.png", "Learn", "Trading habits and risk math, measured.", None),
             ("learn-drawdown.png", "Drawdown recovery table", "The gain that gets an account back.", None),
-            ("learn-streaks.png", "Losing streak probability", "How many losses in a row to expect.", None),
-            ("selloff.png", "5 Nov 2026 sell-off", "Forced closes on one crypto exchange, counted against the 30 days before.", None)]
+            ("learn-streaks.png", "Losing streak probability", "How many losses in a row to expect.", None)]
+    # selloff.png is drawn by checks/make_study_assets.py since 7 Nov 2026 (the finding and the lead chart), not here
     return out
 
 

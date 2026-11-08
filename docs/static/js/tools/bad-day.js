@@ -6,8 +6,8 @@
 
 import { badDay, parseDays, MEASURES, MIN_OTHER_DAYS } from './bad-day-core.js?v=ca834630';
 import { money, intText, el } from './format.js?v=35164924';
-import { revealResult, announce } from './tool-state.js?v=af9a3c71';
-import { wireFileTool, readSection, tableWrap, rowsTable, plural, SAMPLE_LABEL } from './file-tool.js?v=be4a8bf8';
+import { revealResult, announce } from './tool-state.js?v=bc577236';
+import { wireFileTool, readSection, tableWrap, rowsTable, plural, SAMPLE_LABEL } from './file-tool.js?v=e714ff11';
 
 const $ = (id) => document.getElementById(id);
 let state = null; // {result, unit, fileLabel}; never persisted

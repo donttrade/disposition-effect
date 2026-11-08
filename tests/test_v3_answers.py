@@ -351,3 +351,13 @@ def test_a12_phone_no_overflow_axe_clean_with_an_answer(browser, built_site, sch
         assert horizontal_overflow(pg) == []
         assert axe_violations(pg) == [], (path, scheme)
         ctx.close()
+
+
+def test_a1_trade_name_seller_does_not_hide_answers_that_say_donttrade():
+    """7 Nov (studyv2 D1b): seller_legal_name = "donttrade" (the trade name) is not private, so an answer that says
+    "donttrade" stays in the index; an answer that quotes the real address or phone is still left out."""
+    page = {"path": "/x/", "crumb": "X", "updated": "2026-11-07"}
+    html = ('<main><section aria-labelledby="faq-h"><details id="q-a"><summary>Who runs it?</summary><p>donttrade does.</p>'
+            '</details><details id="q-b"><summary>Where?</summary><p>Call 555-0100 today.</p></details></section></main>')
+    private = {"seller_legal_name": "donttrade", "premises_address": "1 Example Street, Toronto", "phone": "555-0100"}
+    assert [u["url"] for u in B.answer_units([(page, html)], private)] == ["/x/#q-a"]

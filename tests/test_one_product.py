@@ -1,4 +1,4 @@
-"""29 Oct 2026 (owner): one product, the donttrade test, in two packages (Traders $39 once; Firms $0.50 per trader
+"""29 Oct 2026 (owner): one product, the Revenge Trading Report, in two packages (Traders $39 once; Firms $0.50 per trader
 account a month, $500 minimum, the $745 Pilot as the first month, credited). Everything else is free.
 Pins the Architect plan's acceptance checks for batches 1-5 on the live-config build (paid_report on)."""
 import json
@@ -16,7 +16,7 @@ import build as B  # noqa: E402
 import lint as L  # noqa: E402
 from harvest_prices import allowed_amounts, amounts_in  # noqa: E402
 
-PRICES = json.load(open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8"))
+PRICES = json.load(open((os.environ.get("DT_PRICES_JSON") or os.path.join(REPO, "site", "config", "prices.json")), encoding="utf-8"))
 TOOL_PAGES = ["/tools/trade-stats/", "/tools/trading-heatmap/", "/tools/drawdown-calculator/",
               "/tools/prop-challenge-simulator/", "/tools/lot-size-calculator/", "/tools/risk-reward-calculator/"]
 
@@ -72,9 +72,9 @@ def test_dt1_is_always_named_with_its_descriptor(built_site):
         t = text(h)
         for m in re.finditer(r"\bDT-\d+\b", t):
             win = t[max(0, m.start() - 250):m.end() + 250]
-            assert "the donttrade test" in win.lower() or "test donttrade" in win.lower(), (path, win)
+            assert "the revenge trading report" in win.lower() or "rapport donttrade sur le revenge trading" in win.lower(), (path, win)
     assert "DT-1" in text(html(built_site, "/corrections/"))
-    assert "Method DT-1 of the donttrade test, a habit test on your own trades" in text(html(built_site, "/sample-report/"))
+    assert "Method DT-1 of the Revenge Trading Report, a habit test on your own trades" in text(html(built_site, "/sample-report/"))
 
 
 # ------------------------------------------------------------------ /pricing/: two packages
@@ -83,7 +83,7 @@ def test_pricing_shows_two_packages_and_one_stripe_link(built_site):
     main = re.search(r"(?s)<main.*?</main>", h).group(0)
     assert len(re.findall(r'<section class="price-card[^"]*"', main)) == 2
     t = text(main)
-    assert "One test. Two ways to buy it." in t and "Traders" in t and "Firms" in t
+    assert "One report. Two ways to buy it." in t and "The Revenge Trading Report" in t and "Firms" in t
     assert "$0.50 per trader account a month" in t and "$500 monthly minimum" in t
     assert "The $745 Pilot is your first month" in t and "Its $745 counts toward your plan’s invoices" in t
     assert "15% off when you pay a year upfront" in t and "credited" not in t   # 30 Oct (Tester #4): one reading only
@@ -123,7 +123,7 @@ def test_every_tool_points_to_the_one_test_with_the_same_words(built_site):
         assert a, path
         t = text(a.group(0))
         seen.add(t)
-        assert t.startswith("Is this habit real, or luck?") and "Take the test for $39" in t
+        assert t.startswith("Is this habit real, or luck?") and "Get the report for $39" in t
         assert set(amounts_in(t)) == {39.0}
     assert len(seen) == 1, seen
 
@@ -191,7 +191,7 @@ def test_terms_plan_section_and_versions(built_site):
               "monthly in arrears, by email, in USD, due within 15 days of the invoice date",
               "It ends at the end of the calendar month in which notice is given.",
               "Its $745 counts toward your plan’s invoices: if the monthly plan starts within 60 days of Pilot delivery, the $745 is deducted once from the plan’s invoices, starting with the first, until it is used up.",
-              "the donttrade test, a habit test on your own trades: a one-off measurement"):
+              "the Revenge Trading Report, a habit test on your own trades: a one-off measurement"):
         assert s in t, s
     assert "called “Trial” before 29 Oct 2026" in t
 
@@ -202,7 +202,7 @@ def test_word_budgets_on_new_strings(built_site):
     for v in re.findall(r'<p class="pc-value">(.*?)</p>', h):
         assert len(v.split()) <= 12, v
     for b in set(re.findall(r'class="btn[^"]*"[^>]*>([^<]+)</a>', h)) | set(re.findall(r'<summary class="btn">([^<]+)</summary>', h)):
-        assert len(b.replace("—", "").split()) <= 5, b   # 3 Nov: "Take the test for $39" is 5 words (was 4 with the dash)
+        assert len(b.replace("—", "").split()) <= 5, b   # 3 Nov: "Get the report for $39" is 5 words (was 4 with the dash)
     strip = text(re.search(r'(?s)<section class="free-strip".*?</section>', h).group(0))
     assert L.lint_text(strip) == []
 
@@ -301,3 +301,15 @@ def test_could_be_luck_label_never_returns():
                 if re.search(r"could\s+be\s+luck", s, re.I):
                     hits.append(os.path.relpath(p, REPO))
     assert hits == [], hits
+
+
+def test_the_product_is_not_called_a_test_in_buyer_copy(built_site):
+    """D5: the product is the report. The word 'test' stays for statistical tests and the dated history."""
+    bad = re.compile(r"(?i)(?:your|the) test(?:'s|’s)? (?:result|runs)\b|run your test|already run (?:your )?test"
+                     r"|For that test your browser|The test on your whole book|One test\. Two ways|your test and one re-test"
+                     r"|the test and one re-test|version of the test that is live")
+    for path in ("/terms/", "/pricing/", "/before-you-pay/", "/privacy/", "/for-traders/", "/start/", "/welcome/", "/"):
+        t = text(html(built_site, path))
+        assert not bad.search(t), (path, bad.search(t).group(0))
+    assert "bought for personal use" in text(html(built_site, "/terms/"))
+    assert "apply to the Revenge Trading Report bought" in text(html(built_site, "/terms/"))

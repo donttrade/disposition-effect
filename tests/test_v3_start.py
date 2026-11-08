@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.join(REPO, "checks"))
 import build as B  # noqa: E402
 from a11y import axe_violations, horizontal_overflow  # noqa: E402
 
-PRICES = json.load(open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8"))
+PRICES = json.load(open((os.environ.get("DT_PRICES_JSON") or os.path.join(REPO, "site", "config", "prices.json")), encoding="utf-8"))
 FIRM = [p for p in PRICES["products"] if p["audience"] == "firm"]
 IDS = [p["id"] for p in FIRM]
 SHOWN = "() => [...document.querySelectorAll('.choice')].filter(s => getComputedStyle(s).display !== 'none').map(s => s.id)"

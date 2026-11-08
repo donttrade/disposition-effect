@@ -26,7 +26,7 @@ from lint import lint_text  # noqa: E402
 import build as B  # noqa: E402
 
 SITE_TOML = os.path.join(REPO, "site", "config", "site.toml")
-PRICES = os.path.join(REPO, "site", "config", "prices.json")
+PRICES = (os.environ.get("DT_PRICES_JSON") or os.path.join(REPO, "site", "config", "prices.json"))
 FAKE = {"seller_legal_name": "Zzqx Qqvendor Holdings", "premises_address": "PO Box 9917, Zzqxville ON K9Z 9Z9",
         "phone": "+1 555 555 0234"}
 TEST_LINK = "https://buy.stripe.com/test_fixture0000zqx"
@@ -39,15 +39,17 @@ OUTAGE = ("If our server is down, your purchase is not lost and no analysis is c
 # The first sentence is the one /welcome/ and /restore/ show (tests/test_delta_fixes.py MANUAL), kept word for word.
 RESTORE = ("If your access link stops working, email us from the address you paid with and we’ll send a new one. "
            "We send it by hand, and only to the email address on the payment.")
-BUYER = ("If you buy the donttrade test: Stripe shows us the name and email address you enter at checkout. We use them "
-         "only to send you the copy of your agreement, to answer your emails (a refund, a new access link) and to deal "
-         "with a payment dispute. If you dispute the payment with your card issuer, we may give Stripe the dates of "
+# 7 Nov (Managed Payments, committed managed_payments = true): Link (Stripe) is the merchant of record and also shows us
+# the billing address, which we do not use (tests/test_managed_payments.py has the non-Managed sentence too).
+BUYER = ("If you buy the Revenge Trading Report: Link (Stripe) shows us the name, email address and billing address you enter at "
+         "checkout. We do not use your billing address. We use your name and email only to send you the copy of your "
+         "agreement, to answer your emails (a refund, a new access link) and to deal with a payment dispute. If you dispute the payment with your card issuer, we may give Stripe the dates of "
          "your purchase and of your analyses, and the number of analyses used, as evidence. Our emails with you stay "
          "in our Gmail inbox, and a private list of sales (the checkout code, the date, your name and email, and the "
          "dates we sent the copy of your agreement or a refund) is kept on our own computer, not on our server. Both are kept for the "
          "same period as purchase records (below).")
-FOOTER_PAID = ("It stores your light/dark choice in your own browser and, if you buy the donttrade test, your access key "
-               "there too. For that test your browser sends our server only stripped trade numbers. The server does "
+FOOTER_PAID = ("It stores your light/dark choice in your own browser and, if you buy the Revenge Trading Report, your access key "
+               "there too. For the report your browser sends our server only stripped trade numbers. The server does "
                "not keep them: of those numbers it keeps only a scrambled fingerprint of each trade row from your first "
                "result, to match a re-test to the same history. Your file itself is not uploaded.")
 

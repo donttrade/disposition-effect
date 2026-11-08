@@ -26,7 +26,7 @@ from a11y import axe_violations, horizontal_overflow  # noqa: E402
 from test_legal import FAKE, build, private_with, toml_with  # noqa: E402
 
 FIRM_KEY = "f8fdba04-71bb-4856-b700-01ac6796c252"
-PRICES = json.load(open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8"))
+PRICES = json.load(open((os.environ.get("DT_PRICES_JSON") or os.path.join(REPO, "site", "config", "prices.json")), encoding="utf-8"))
 PILOT = next(p for p in PRICES["products"] if p["id"] == "pilot")
 PILOT_PAGES = ["/start/", "/for-firms/"]
 # v3 A3 (ARCHITECT-V3-PLAN §c.6, C2): /start/ is a chooser; the Pilot block sits in its #pilot section, which
@@ -171,7 +171,7 @@ def test_axe_keyboard(browser, pilot_site, path):
 
 
 def test_pilot_checkout_needs_a_live_stripe_link(tmp_path):
-    prices = os.path.join(REPO, "site", "config", "prices.json")
+    prices = (os.environ.get("DT_PRICES_JSON") or os.path.join(REPO, "site", "config", "prices.json"))
     backup = tmp_path / "prices.bak"
     shutil.copyfile(prices, backup)
     try:

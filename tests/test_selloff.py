@@ -376,7 +376,7 @@ def test_fix_round_2_wording(built_site):
     assert t.count(limit.replace("the gap", "this gap")) == 1 and limit in t
     assert "all or part of a leveraged position" in t and "other forced reductions are not counted" in t
     assert "Method written down first" in t and "re-run after the first pass" in t and "one removed cell" in t
-    assert "Text: CC BY-NC 4.0. Counts and code: CC BY 4.0." in t
+    assert "Text: CC BY-NC 4.0. Charts, counts and code: CC BY 4.0." in t   # 7 Nov 2026: owner approved CC BY 4.0 for charts
     assert "our rule matches Ironflow’s own liquidation table" in t
     tool = text(page(built_site, B))
     assert "will usually also have more losses" not in tool and "almost by construction" in tool

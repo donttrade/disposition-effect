@@ -64,7 +64,7 @@ def test_claims_flip_with_flags():
 
 def test_allowlisted_negations_and_disclaimer_pass():
     ok = (f"<p>{DISCLAIMER}</p><p>Nothing here is investment advice.</p><p>Published price, $745, $0.50 and $500.</p>"
-          "<p>Method DT-1 of the donttrade test, a habit test on your own trades.</p>")
+          "<p>Method DT-1 of the Revenge Trading Report, a habit test on your own trades.</p>")
     assert rules(ok) == set()
 
 
@@ -74,7 +74,7 @@ def test_real_build_passes():
 
 
 # 29 Oct (one product): every retired amount fails on a templated page and on a passthrough page.
-RETIRED = json.load(open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8"))["retired_amounts"]["amounts"]
+RETIRED = json.load(open((os.environ.get("DT_PRICES_JSON") or os.path.join(REPO, "site", "config", "prices.json")), encoding="utf-8"))["retired_amounts"]["amounts"]
 
 
 def _money(a):
@@ -89,7 +89,7 @@ def test_every_retired_amount_fails_on_a_templated_and_a_passthrough_page(amount
 
 
 def test_retired_products_are_gone_from_prices_json():
-    d = json.load(open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8"))
+    d = json.load(open((os.environ.get("DT_PRICES_JSON") or os.path.join(REPO, "site", "config", "prices.json")), encoding="utf-8"))
     assert [p["id"] for p in d["products"]] == ["pilot", "plan", "report39"]
     assert "recheck" not in d["rules"]
     assert sorted(RETIRED) == sorted([99, 79, 2500, 6000, 12000, 625, 1500, 3000, 186.25])   # 49 left the list on 6 Nov

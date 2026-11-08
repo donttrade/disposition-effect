@@ -5,9 +5,17 @@
   <id>https://donttrade.ca/feed.xml</id>
   <link rel="self" type="application/atom+xml" href="https://donttrade.ca/feed.xml"/>
   <link rel="alternate" type="text/html" href="https://donttrade.ca/research/"/>
-  <updated>2026-11-06T00:00:00Z</updated>
+  <updated>2026-11-07T00:00:00Z</updated>
   <author><name>donttrade</name><email>donttrade.research@gmail.com</email></author>
   <rights>Text CC BY-NC 4.0</rights>
+  <entry>
+    <title>Study: 9,054 wallets were force-closed on builder-listed markets on 5 Nov, about 4.7 times the median weekday (6 Nov 2026)</title>
+    <id>tag:donttrade.github.io,2026-11-06:study/research/5-november-2026-sell-off/</id>
+    <link rel="alternate" type="text/html" href="https://donttrade.ca/research/5-november-2026-sell-off/"/>
+    <published>2026-11-06T00:00:00Z</published>
+    <updated>2026-11-07T00:00:00Z</updated>
+    <summary>A new study, with its plan, code and data linked. Counts of wallets, not people, on one crypto exchange, not the US stock market; the method was written down before the data was opened. Updated 7 Nov 2026.</summary>
+  </entry>
   <entry>
     <title>Correction: The plan gap page, closing sentence (6 Nov 2026)</title>
     <id>tag:donttrade.github.io,2026-11-06:correction-7</id>

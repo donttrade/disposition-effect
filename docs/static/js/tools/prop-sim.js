@@ -10,14 +10,14 @@
 // Nothing is stored. With [flags] analytics on, a finished step loads a counting page in a hidden frame (count()).
 // Ranked suggestions are not on this page (whatif_ranked); neither is saving.
 
-import { createFileSlot, renderReadError, whileBusy, clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js?v=af9a3c71';
+import { createFileSlot, renderReadError, whileBusy, clearFieldErrors, fieldError, showProblems, revealResult } from './tool-state.js?v=bc577236';
 import { RUNS, DEFAULT_SEED, NO_LIMIT_CAP, METHOD_VERSION, WHATIF_TEXT, groupDays, simulate, ruleLabel, mcError, unavailableText, personalUnavailable, normRules } from './prop-sim-core.js?v=7c28de14';
 import { presetRules, NOT_STATED } from './challenge-presets.js?v=2e7fd947';
 import { HABITS, HABIT_TEXT, itemsFromTrades, isDatesOnly, habitFlags, dayFlags, realBreachDays, simulatedHabits, countFlags, MIN_BREACH_DAYS, MIN_BUSTS } from './habit-flags.js?v=72b76dd0';
 import { drawCard, cardBlob, altText } from '../card/readiness-card.js?v=e8fda6bc';
 import { money, unitNote, pct, intText, el, DASH, wholePercent } from './format.js?v=35164924';
 import { parseStrict, parsePositive, parseNonNegative, parseWhole, InputError } from './num.js?v=8df99e34';
-import { SAMPLE_LABEL, FORMAT_NAMES, plural, tableWrap, rowsTable, warningsNotice, showMapStep } from './file-tool.js?v=be4a8bf8';
+import { SAMPLE_LABEL, FORMAT_NAMES, plural, tableWrap, rowsTable, warningsNotice, showMapStep } from './file-tool.js?v=e714ff11';
 
 const $ = (id) => document.getElementById(id);
 const MIN_DAYS = 30;         // fewer trading days in the file: the replays lean on a few days, and the headline says so

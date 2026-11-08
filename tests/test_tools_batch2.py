@@ -545,7 +545,7 @@ def test_paid_build_sells_and_teasers_follow(browser, paid_tools_site):
     # container; the teaser box (which quoted the visitor's figures) is gone, and a run changes nothing in it.
     for path in PATHS:
         h = (paid_tools_site["out"] / path.strip("/") / "index.html").read_text(encoding="utf-8")
-        assert 'href="/pricing/#last-step">Take the test for $39</a>' in h and "/for-traders/#waitlist" not in h, path
+        assert 'href="/pricing/#last-step">Get the report for $39</a>' in h and "/for-traders/#waitlist" not in h, path
         assert h.count('class="notice notice-gap next-step"') == 1 and "notice-gap teaser" not in h, path
         assert not L.not_on_sale_claims(L.readable_text(h), path), path
     ctx, pg, _ = open_page(browser, paid_tools_site, DD)

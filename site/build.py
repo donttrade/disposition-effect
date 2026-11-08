@@ -262,6 +262,11 @@ def check_private(private, on):
         if not isinstance(v, str) or not INVISIBLE.sub("", v):
             die(f"{', '.join(on)} = true but private.toml is missing {k} (or it is empty)")
         why = seller_problem(k, v)
+        # 7 Nov (owner): the legal name is not published on the site; the value "donttrade" (the trade
+        # name) tells the seller partial to show the trade name and point to the payment page, where the
+        # owner's legal name is disclosed before payment (O. Reg. 17/05 s. 32 para 1).
+        if k == "seller_legal_name" and INVISIBLE.sub("", v).strip().lower() == "donttrade":
+            why = None
         if why and not escape("DT_ALLOW_PLACEHOLDERS"):
             die(f"private.toml {k} is not a real value yet: {why}. Fill it in "
                 "(or set DT_ALLOW_PLACEHOLDERS=1 for a local test build only)")
@@ -372,6 +377,9 @@ def answer_units(rendered, private=None):
     is left out, so /help/ and the answer index never repeat them (they stay on their own pages)."""
     units, ids = [], set()
     keep_out = [v for v in ((private or {}).get(k) for k in PRIVATE_FIELDS) if isinstance(v, str) and v.strip()]
+    # 7 Nov (studyv2 D1b): seller_legal_name = the trade name (check_private) is not a private value, and every unit
+    # that says "donttrade" would be left out: the 5 help-page answers that went missing in the sellerfix bundle.
+    keep_out = [v for v in keep_out if v.strip().lower() != "donttrade"]
     keep_out.append("called \u201cTrial\u201d")
     ev = evidence()
     bad_numbers = [ev["finding"]["pct"], re.search(r"[\d,]{4,}", ev["finding"]["rest"]).group(0)]
@@ -460,7 +468,11 @@ PAGES = [
      "description": "Free in-browser tools: trade stats, prop challenge odds, drawdown and risk-reward. "
                     "Research on how traders behave. For firms: fixed-price measurement.",
      "og_image": "/assets/og/home.png",
-     "updated": "2026-11-06"},
+     # 7 Nov (free check, plan G; §4.2): once the report is on sale the home says what the free check and the report are.
+     "if_paid": {"title": "The Revenge Trading Report and free check · donttrade",
+                 "description": "Revenge trading, measured in your own trades. Free check in your browser; the report totals the dollars "
+                                "and tests them for chance. Not investment advice."},
+     "updated": "2026-11-07"},
 ]
 
 # Free tools (steps 10-12). connect-src stays 'none' (the csp_for default): these pages
@@ -521,6 +533,14 @@ PAGES += [
      "title": "Bad-Day Check: Your Trades on One Day Beside a Typical Day",
      "description": "Pick a day, such as 5 November 2026, and see your trades, net result, largest loss and quick "
                     "re-entries beside your typical day. Free, in your browser."},
+    # 7 Nov (free check, plan C2): the visitor's file counted with the report's own rules. paid_report only: it leads to the
+    # report and shows its price. connect-src stays 'none' (plus the beacon hosts); no count or row ever leaves the tab.
+    {"template": "pages/check.html", "path": "/check/", "requires_flag": "paid_report",
+     "modules": ["/static/js/check.js"], "sample": True, "app": True, "updated": "2026-11-07",
+     "crumb": "Free revenge trading check",
+     "title": "Free revenge trading check · donttrade",
+     "description": "Revenge trading, measured in your own trades. Free check in your browser: how many of your trades "
+                    "came right after a loss. Not investment advice."},
     {"template": "pages/tools-index.html", "path": "/tools/", "requires_flag": None, "updated": "2026-11-06",
      "crumb": "Free tools", "itemlist": True, "styles": [TOOLS_CSS], "scripts": [TOOLS_JS], "og_image": "/assets/og/tools.png",
      "title": "Free Trading Tools That Run in Your Browser",
@@ -548,11 +568,11 @@ PRODUCT_TEXT = PRODUCT_TEXT_FMT.format(measured="five", tested="two")   # the co
 PAGES += [
     {"template": "pages/for-traders.html", "path": "/for-traders/", "requires_flag": None, "updated": "2026-11-06",
      "crumb": "Individual traders", "og_image": "/assets/og/traders.png", "scripts": [FORM_JS, MOTION_JS],
-     "title": "The donttrade Test for Traders: Waitlist",
-     "description": "The donttrade test, a habit test on your own MT5, IBKR, Tradovate or TradingView file, with a "
+     "title": "The Revenge Trading Report for Traders: Waitlist",
+     "description": "The Revenge Trading Report, a habit test on your own MT5, IBKR, Tradovate or TradingView file, with a "
                     "real-or-noise check for each tested habit. Coming soon; join the waitlist.",
-     "if_paid": {"title": "The donttrade Test for Traders",
-                 "description": "The donttrade test, a habit test on your own MT5, IBKR, Tradovate or TradingView file, "
+     "if_paid": {"title": "The Revenge Trading Report for Traders",
+                 "description": "The Revenge Trading Report, a habit test on your own MT5, IBKR, Tradovate or TradingView file, "
                                 "with a real-or-noise check. One price, re-test included."}},
     {"template": "pages/for-firms.html", "path": "/for-firms/", "requires_flag": None, "updated": "2026-11-05",
      "crumb": "Prop firms & brokers", "og_image": "/assets/og/default.png", "scripts": [FORM_JS, MOTION_JS],
@@ -568,9 +588,9 @@ PAGES += [
      "title": "Start a Pilot, Apply to Partner or Join the Waitlist",
      "description": "Request a Pilot measurement, apply to partner as a journal or platform, or join the trader "
                     "waitlist. A short form or an email; no calls.",
-     "if_paid": {"title": "Start a Pilot, Apply to Partner or Take the Test",
+     "if_paid": {"title": "Start a Pilot, Apply to Partner or Get the Report",
                  "description": "Request a Pilot measurement, apply to partner as a journal or platform, or get "
-                                "the donttrade test. A short form or an email; no calls."}},
+                                "the Revenge Trading Report. A short form or an email; no calls."}},
     {"template": "pages/for-platforms.html", "path": "/for-platforms/", "requires_flag": None, "updated": "2026-10-21",
      "crumb": "Journals & platforms", "og_image": "/assets/og/platforms.png", "scripts": [FORM_JS, MOTION_JS],
      "title": "Behavioural Measurement for Trading Journals and Platforms",
@@ -586,7 +606,7 @@ PAGES += [
      "crumb": "Thank you", "title": "You are on the waitlist — donttrade",
      "description": "You joined the donttrade trader waitlist. Nothing is charged; one email when the report launches.",
      "if_paid": {"title": "Thank you — donttrade",
-                 "description": "Thank you. The donttrade test for traders is on sale now."}},
+                 "description": "Thank you. The Revenge Trading Report for traders is on sale now."}},
     {"template": "pages/thanks.html", "path": "/thanks/", "requires_flag": None, "noindex": True,
      "crumb": "Thank you", "title": "Thank you — donttrade",
      "description": "Your message reached donttrade. Firms get a reply within 1 business day; traders get one email at launch.",
@@ -610,24 +630,24 @@ PAGES += [
     {"template": "pages/terms.html", "path": "/terms/", "requires_flag": None, "updated": "2026-11-06",
      "crumb": "Terms", "alternates_if_paid": [("en", "/terms/"), ("fr", "/fr/conditions/"), ("x-default", "/terms/")],
      "title": "Terms, Refunds and the Pilot — donttrade",
-     "description": "Payment, delivery and refund terms for the donttrade test, the Pilot and the monthly plan for "
+     "description": "Payment, delivery and refund terms for the Revenge Trading Report, the Pilot and the monthly plan for "
                     "firms, in plain language."},
 ]
 
-# French versions (FRENCH-LEGAL-AND-CHECKOUT-DRAFTS §8.1), donttrade test only, behind the same
+# French versions (FRENCH-LEGAL-AND-CHECKOUT-DRAFTS §8.1), Revenge Trading Report only, behind the same
 # commerce flag as the English consumer clauses. Unreviewed drafts: lawyer + legal translator first.
 PAGES += [
     {"template": "pages/fr/avant-de-payer.html", "path": "/fr/avant-de-payer/", "requires_flag": "paid_report",
      "lang": "fr", "crumb": "Avant de payer", "updated": "2026-11-06", "scripts": ["/static/js/print.js"], "noindex": True,
      "alternates": [("fr", "/fr/avant-de-payer/"), ("en", "/before-you-pay/"), ("x-default", "/before-you-pay/")],
-     "title": "Avant de payer : test donttrade — donttrade",
-     "description": "Ce que vous acceptez avant de payer le test donttrade : vendeur, prix en dollars américains, "
+     "title": "Avant de payer : rapport donttrade sur le revenge trading — donttrade",   # TODO-FR-REVIEW
+     "description": "Ce que vous acceptez avant de payer le rapport donttrade sur le revenge trading : vendeur, prix en dollars américains, "   # TODO-FR-REVIEW
                     "exigences techniques, remboursements et restrictions."},
     {"template": "pages/fr/conditions.html", "path": "/fr/conditions/", "requires_flag": "paid_report",
      "lang": "fr", "crumb": "Conditions", "updated": "2026-11-06",
      "alternates": [("fr", "/fr/conditions/"), ("en", "/terms/"), ("x-default", "/terms/")],
      "title": "Conditions de service et de vente — donttrade",
-     "description": "Conditions du test donttrade : prix, paiement, livraison, nouveau test, "
+     "description": "Conditions du rapport donttrade sur le revenge trading : prix, paiement, livraison, nouveau test, "   # TODO-FR-REVIEW
                     "remboursements et droit de rétractation."},
     {"template": "pages/fr/confidentialite.html", "path": "/fr/confidentialite/", "requires_flag": "paid_report",
      "lang": "fr", "crumb": "Confidentialité", "updated": "2026-11-06",
@@ -646,14 +666,14 @@ PAGES += [
     {"template": "pages/refund.html", "path": "/refund/", "requires_flag": "refund_no_result", "noindex": True,
      "no_ask": True, "crumb": "Ask for a refund", "scripts": [FORM_JS, "/static/js/refund.js"],
      "title": "Ask for a refund — donttrade",
-     "description": "Ask for a refund of the donttrade test. A person reads every request and replies within 2 business days."},
+     "description": "Ask for a refund of the Revenge Trading Report. A person reads every request and replies within 2 business days."},
     {"template": "pages/refund-thanks.html", "path": "/refund/thanks/", "requires_flag": "refund_no_result", "noindex": True,
      "no_ask": True, "crumb": "Thank you", "title": "Refund request received — donttrade",
      "description": "Your refund request reached donttrade. You get a reply within 2 business days, Eastern Time, Monday to Friday."},
     {"template": "pages/fr/remboursement.html", "path": "/fr/remboursement/", "requires_flag": "refund_no_result",
      "noindex": True, "no_ask": True, "lang": "fr", "crumb": "Demander un remboursement",
      "scripts": [FORM_JS, "/static/js/refund.js"], "title": "Demander un remboursement — donttrade",
-     "description": "Demandez le remboursement du test donttrade. Une personne lit chaque demande et répond dans les 2 jours ouvrables."},
+     "description": "Demandez le remboursement du rapport donttrade sur le revenge trading. Une personne lit chaque demande et répond dans les 2 jours ouvrables."},   # TODO-FR-REVIEW
     {"template": "pages/fr/remboursement-merci.html", "path": "/fr/remboursement/merci/", "requires_flag": "refund_no_result",
      "noindex": True, "no_ask": True, "lang": "fr", "crumb": "Merci", "title": "Demande de remboursement reçue — donttrade",
      "description": "Votre demande de remboursement est arrivée chez donttrade. Réponse dans les 2 jours ouvrables, heure de l’Est."},
@@ -695,7 +715,7 @@ PREDICTION_VERDICTS = ("NOT MEASURED", "FAIL: does not predict usefully", "FAIL:
 PAGES += [
     {"template": "pages/research-prediction.html", "path": PREDICTION_PATH, "requires_flag": "prediction_results",
      "prediction": True, "updated": "2026-10-30", "crumb": "Does the test predict?", "parent": ("Research", "/research/"),
-     "title": "Does the donttrade Test Predict Prop-Challenge Breaches? A Pre-Registered Study",
+     "title": "Does the Revenge Trading Report Predict Prop-Challenge Breaches? A Pre-Registered Study",
      "description": "A pre-registered study of past prop-firm accounts: do habits in the first 30 trades rank the "
                     "accounts that broke a loss rule in the next 30 days? The plan, the code and every result."},
 ]
@@ -855,6 +875,7 @@ LEARN_PATHS = [p["path"] for p in PAGES if p["path"].startswith("/learn/")]
 SELLOFF_PATH = "/research/5-november-2026-sell-off/"
 BADDAY_PATH = "/tools/bad-day-check/"
 SELLOFF_PUBLISHED = "2026-11-06"
+SELLOFF_UPDATED = "2026-11-07"   # the content date (sitemap lastmod, dateModified): "Market by market" and the study-page improvements were added on 7 Nov
 SELLOFF_REFS = ("imas2016", "coval2005")
 SELLOFF_CHECK_DAYS = "2026-11-05,2026-11-06"
 _SELL = []
@@ -889,8 +910,10 @@ def selloff_page():
     F = selloff_ctx()["F"]
     h1 = (f"{F['event_long']}: {F['hip3']} wallets were force-closed on Hyperliquid’s builder-listed markets, about {F['hip3_wd_ratio']} times the median weekday")
     return {"template": "pages/research-selloff-2026-11-05.html", "path": SELLOFF_PATH, "requires_flag": None, "selloff": True,
-            "updated": SELLOFF_PUBLISHED, "published": SELLOFF_PUBLISHED, "crumb": f"{F['event_short']} 2026 sell-off",
+            "updated": SELLOFF_UPDATED, "published": SELLOFF_PUBLISHED, "crumb": f"{F['event_short']} 2026 sell-off",
             "parent": ("Research", "/research/"), "og_image": "/assets/og/selloff.png", "h1": h1,
+            "og_alt": SO.short_title(F).rstrip(".") + ". Bar chart of 31 days.",
+            "form_action": ["https://donttrade.substack.com"],   # the email box at the end (7 Nov), a Substack GET form as on /research/
             "check_path": BADDAY_PATH, "check_days": SELLOFF_CHECK_DAYS,
             "dek": (f"On the Nasdaq Composite’s largest one-day fall since April 2025, forced closes on the builder-listed markets of one crypto "
                     f"exchange ran at about {F['hip3_wd_ratio']} times the median weekday. We counted them with a method we wrote down first."),
@@ -1020,6 +1043,14 @@ def write_selloff_data(out):
         if not os.path.exists(src):
             die(f"sell-off pack: checks/selloff/zenodo/{name} is missing (run checks/selloff/make_zenodo_pack.py)")
         shutil.copyfile(src, os.path.join(pack, name))
+    with open(os.path.join(d, os.path.basename(SO.HOURLY_CSV_PATH)), "w", encoding="utf-8", newline="\n") as f:   # 7 Nov: the hourly chart's numbers
+        f.write(SO.hourly_csv_text())
+    ctx = SO.context()   # 7 Nov: each chart as a self-contained SVG (title, source and licence inside); the PNGs are drawn from these
+    cd = os.path.join(out, "assets", "charts", "selloff")
+    os.makedirs(cd, exist_ok=True)
+    for fg in ctx["figs"]:
+        with open(os.path.join(cd, fg["id"] + ".svg"), "w", encoding="utf-8", newline="\n") as f:
+            f.write(SO.standalone_svg(ctx[fg["key"]], fg))
     # 7 Nov: the market-by-market CSV sits next to the daily CSV, byte for byte from the pack (its SHA-256 is printed on the page)
     src = os.path.join(SO.PACK_DIR, SO.PM_CSV)
     if not os.path.exists(src):
@@ -1142,20 +1173,24 @@ def challenge_presets():
 
 
 def report_methods_renamed():
-    """The dated rename line under the method table (29 Oct: the habit report became the donttrade test), or None."""
+    """The dated rename lines under the method table (29 Oct: the habit report became the donttrade test; 7 Nov: the
+    donttrade test became the Revenge Trading Report), oldest first, or []. "renamed" is one object or a list."""
     path = os.environ.get("DT_REPORT_METHODS_JSON") or REPORT_METHODS_JSON
     with open(path, encoding="utf-8") as f:
-        r = json.load(f).get("renamed")
-    if r is None:
-        return None
-    if sorted(r) != ["date", "text"] or not re.fullmatch(r"2[0-9]{3}-[0-9]{2}-[0-9]{2}", r["date"]) or not r["text"].strip():
-        die(f"report methods: malformed renamed {r!r} ({path})")
-    y, mo, d = (int(x) for x in r["date"].split("-"))
-    return {**r, "date_text": f"{d} {MONTHS[mo - 1]} {y}"}
+        raw = json.load(f).get("renamed")
+    if raw is None:
+        return []
+    out = []
+    for r in (raw if isinstance(raw, list) else [raw]):
+        if sorted(r) != ["date", "text"] or not re.fullmatch(r"2[0-9]{3}-[0-9]{2}-[0-9]{2}", r["date"]) or not r["text"].strip():
+            die(f"report methods: malformed renamed {r!r} ({path})")
+        y, mo, d = (int(x) for x in r["date"].split("-"))
+        out.append({**r, "date_text": f"{d} {MONTHS[mo - 1]} {y}"})
+    return out
 
 
 def report_methods():
-    """The donttrade test's dated method versions for /corrections/#report-method (the Lead's decision, 23 Oct:
+    """The Revenge Trading Report's dated method versions for /corrections/#report-method (the Lead's decision, 23 Oct:
     the re-test sentence says every change is dated there). DT_REPORT_METHODS_JSON reads another file (tests).
     Fails when the page's METHOD_VERSION has no entry, so no build can promise a dated log it does not show."""
     path = os.environ.get("DT_REPORT_METHODS_JSON") or REPORT_METHODS_JSON
@@ -1267,7 +1302,7 @@ def sample_csv():
 # tickers, and every other byte is the same, so every figure is too.
 REAL_SAMPLE_CSV = os.path.join(REPO, "checks", "real_data", "real-trades.coded.csv")
 REAL_SAMPLE_PATHS = ("/tools/trade-stats/", "/tools/trading-heatmap/", "/tools/drawdown-calculator/",
-                     "/tools/prop-challenge-simulator/", "/tools/bad-day-check/")
+                     "/tools/prop-challenge-simulator/", "/tools/bad-day-check/", "/check/")
 REAL_SAMPLE_URL = "/static/samples/real-trades.csv"
 
 
@@ -1447,15 +1482,15 @@ def unversioned_problem(html):
 PAID_PAGES = [
     {"template": "pages/welcome.html", "path": "/welcome/", "requires_flag": "paid_report", "connect_worker": True,
      "noindex": True, "crumb": "Thank you", "modules": ["/static/js/paid/welcome.js"], "title": "Thank you — donttrade",
-     "description": "Your donttrade test result is ready."},
+     "description": "Your Revenge Trading Report result is ready."},
     {"template": "pages/restore.html", "path": "/restore/", "requires_flag": "paid_report", "connect_worker": True,
      "noindex": True, "crumb": "Restore access", "modules": ["/static/js/paid/restore.js"], "title": "Restore access — donttrade",
-     "description": "Reopen your donttrade test result on this browser."},
+     "description": "Reopen your Revenge Trading Report result on this browser."},
     {"template": "pages/report.html", "path": "/report/", "requires_flag": "paid_report", "connect_worker": True,
      "presets": True,  # S4: the firm-rules library for the rule check
      "no_umami": True,  # owner rule 2 Nov: no analytics beyond the Cloudflare beacon on the page that reads the file
-     "noindex": True, "crumb": "Your test result", "modules": ["/static/js/paid/report.js"], "title": "Your test result — donttrade",
-     "description": "Your donttrade test result, from your own trade file."},
+     "noindex": True, "crumb": "Your report", "modules": ["/static/js/paid/report.js"], "title": "Your report — donttrade",
+     "description": "Your Revenge Trading Report result, from your own trade file."},
 ]
 PAGES += PAID_PAGES
 # /pricing/ (step 15): one template. Flag off: sections stacked, firms first. Flag on:
@@ -1479,7 +1514,7 @@ PAGES.append({"template": "pages/before-you-pay.html", "path": "/before-you-pay/
               # search page); robots.txt no longer blocks this one, so a crawler can read the noindex and the pair.
               "alternates": [("en", "/before-you-pay/"), ("fr", "/fr/avant-de-payer/"), ("x-default", "/before-you-pay/")],
               "crumb": "Before you pay", "title": "Before you pay — donttrade",
-              "description": "What you agree to before paying for the donttrade test: seller, price, "
+              "description": "What you agree to before paying for the Revenge Trading Report: seller, price, "
                              "files, restrictions and refunds."})
 
 # Lifted pages (plan steps 28–29): the 20 pages that passed through from docs/ in the old design.
@@ -1499,23 +1534,25 @@ LIFTED_JS = "/static/js/lifted.js"
 # page word for word. checks/compare.py and lint undo the same pairs before comparing a paid build with
 # checks/lifted-baseline/, so these are the only frozen-body differences a paid build may have. No other name
 # is added: the author stays unnamed.
-_SELLER_WHERE = ('the seller’s legal name is given for buyers in <a href="/pricing/#before-you-pay">Before you pay</a>, '
-                 'the terms and the privacy notice')
+# 7 Nov (Managed Payments, studyv2 D1): no personal name is printed anywhere. The seller details (who sells the report,
+# a business address, phone and email) are in the seller block of Before you pay, the terms and the privacy notice.
+_SELLER_WHERE = ('the seller block in <a href="/pricing/#before-you-pay">Before you pay</a>, the terms and the privacy notice '
+                 'gives who sells the report and a business address, phone and email, and prints no personal name')
 PAID_LIFTED_SWAPS = {
-    # 2 Nov (owner): with the donttrade test on sale, "Readers pay nothing" is out of date. A free build keeps it.
+    # 2 Nov (owner): with the Revenge Trading Report on sale, "Readers pay nothing" is out of date. A free build keeps it.
     # 3 Nov (Tester R2 I3, Manager): "for traders, the only paid product", since the sentence before says firms pay too.
     "/independence/": [("Readers pay nothing; the newsletter is free.",
                         "The research, the newsletter and the free tools cost readers nothing; for traders, the only "
-                        "paid product is <a href=\"/pricing/#traders\">the donttrade test</a>.")],
+                        "paid product is <a href=\"/pricing/#traders\">the Revenge Trading Report</a>.")],
     "/about/": [("There’s no name on it on purpose: every study",
                  "No author name is published here, on purpose (" + _SELLER_WHERE + "): every study"),
-                # 2 Nov (owner): as on /independence/, with the donttrade test on sale. A free build keeps both.
+                # 2 Nov (owner): as on /independence/, with the Revenge Trading Report on sale. A free build keeps both.
                 ('<span class="ls-sum">Firms pay for measurements. Readers pay nothing.</span>',
                  '<span class="ls-sum">Firms pay for measurements. The research and free tools cost readers nothing.</span>'),
                 ("Firms pay for fixed-scope measurements of their own data; readers pay nothing; no firm can change a number.",
                  "Firms pay for fixed-scope measurements of their own data; the research and free tools cost readers "
-                 "nothing, and for traders the only paid product is <a href=\"/pricing/#traders\">the donttrade "
-                 "test</a>; no firm can change a number.")],
+                 "nothing, and for traders the only paid product is <a href=\"/pricing/#traders\">the Revenge "
+                 "Trading Report</a>; no firm can change a number.")],
     "/code/": [("There is no name on this site; the scripts are what you check instead.",
                 "No author name is published on this site (" + _SELLER_WHERE + "); the scripts are what you check "
                 "instead."),
@@ -1525,12 +1562,12 @@ PAID_LIFTED_SWAPS = {
                ("businesses need a licence, included in every engagement.",
                 "businesses need a licence, included with the firm plan and the Pilot.")],
     # 29 Oct (owner): one visible name for /sample-report/, "Example report". In a paid build that page is the
-    # donttrade test's own engine on example data, not the lifted research figure this sentence described.
+    # Revenge Trading Report's own engine on example data, not the lifted research figure this sentence described.
     "/research/": [('<h2 id="sample-report">Sample trader report</h2>', '<h2 id="sample-report">Example report</h2>'),
                    ("What the coming trader report looks like, run on one real trader from the same public CC0 panel as "
                     "the disposition-effect study, chosen by a rule fixed before any individual result was looked at. "
                     "<a href=\"/sample-report/\">Read the sample report →</a>",
-                    "What the donttrade test’s result looks like, from its own engine, run on example data. "
+                    "What the Revenge Trading Report’s result looks like, from its own engine, run on example data. "
                     "<a href=\"/sample-report/\">Read the example report →</a>")],
     # 29 Oct (owner): sample data was labelled "Example data" here. 6 Nov (owner: real public data only): the
     # disposition calculator's frozen body now fills Odean's (1998) published counts in every build (a dated
@@ -1553,6 +1590,11 @@ def paid_lifted(path, html, paid):
     return html
 
 
+# A lifted page's own JSON holds the date the frozen body was lifted; a page that has since gained an island has a later content date.
+# Never later than the machine's date (future_dated refuses a bundle that is).
+LIFTED_UPDATED = {"/for-researchers/": "2026-11-07"}
+
+
 def lifted_pages():
     pages = []
     for name in sorted(os.listdir(LIFTED_DIR)) if os.path.isdir(LIFTED_DIR) else []:
@@ -1568,6 +1610,8 @@ def lifted_pages():
         for k in ("updated", "noindex", "redirect_to", "article", "form_action", "parent", "section"):
             if m.get(k):
                 page[k] = m[k]
+        if m["path"] in LIFTED_UPDATED:   # 7 Nov: the content date of a lifted page that gained an island (sitemap lastmod, dateModified)
+            page["updated"] = LIFTED_UPDATED[m["path"]]
         if m["path"] in PAID_LIFTED_DESCRIPTIONS:
             page["if_paid"] = {"description": PAID_LIFTED_DESCRIPTIONS[m["path"]]}
         if m["path"] in TOOL_GLYPHS:   # 6 Nov (B2): the glyph and the real-data display, in pages/lifted.html's header
@@ -1587,15 +1631,15 @@ PAGES += LIFTED
 LIFTED_PATHS = [p["path"] for p in LIFTED]
 
 # Delivery plan C-12 final (Tester T-3 T3-E): with paid_report on, /sample-report/ is no longer the lifted research
-# figure but a real donttrade test: dt-private's analyse() on a committed synthetic file
+# figure but a real Revenge Trading Report: dt-private's analyse() on a committed synthetic file
 # (site/config/sample-report.report.json, made by tests/fixtures/paid/make_sample_report.py), rendered by the real
-# report.js. The lifted page stays in flag-off builds, where its lead already says it is not the donttrade test.
+# report.js. The lifted page stays in flag-off builds, where its lead already says it is not the Revenge Trading Report.
 PAID_REPLACES_LIFTED = ("/sample-report/",)
 SAMPLE_REPORT_JSON = os.path.join(SITE, "config", "sample-report.report.json")
 SAMPLE_PAGE = {"template": "pages/sample-report.html", "path": "/sample-report/", "requires_flag": None,
                "modules": ["/static/js/paid/sample.js"], "crumb": "Example report", "og_image": "/assets/og/default.png",
                "title": "Example report — donttrade", "sample_report": True, "presets": True, "sample_trades": True,
-               "description": "An example report of the donttrade test: the test's own engine and page, run on example data. "
+               "description": "An example report of the Revenge Trading Report: the test's own engine and page, run on example data. "
                               "Not advice.", "updated": "2026-10-23"}
 
 
@@ -1657,8 +1701,8 @@ def footer_privacy(flags, umami=False, page=None):
         # NIT 13: complete, matching /privacy/#report (the fingerprints kept for the re-test match)
         # C-14: the server keeps more than fingerprints (a purchase record, hourly counters; /privacy/#report),
         # so "only" now bounds what is kept OF the trade numbers, not what the server keeps.
-        parts.append("It stores your light/dark choice in your own browser and, if you buy the donttrade test, your "
-                     "access key there too. For that test your browser sends our server only stripped trade "
+        parts.append("It stores your light/dark choice in your own browser and, if you buy the Revenge Trading Report, your "
+                     "access key there too. For the report your browser sends our server only stripped trade "
                      "numbers. The server does not keep them: of those numbers it keeps only a scrambled fingerprint "
                      "of each trade row from your first result, to match a re-test to the same history. Your file "
                      "itself is not uploaded.")
@@ -1768,7 +1812,7 @@ PASSTHROUGH_CHROME = [
     ("Firms: start a trial</a>", "Firms: start a Pilot</a>", 2),        # desktop nav + mobile menu
     (">Firms: trial</a>", ">Firms: Pilot</a>", 1),                       # mobile header button
     ('<a href="/start/">Start a trial</a>', '<a href="/start/">Start a Pilot</a>', None),  # footer (+ 404 body)
-    # R5: the old nav says the donttrade test is "coming soon"; with paid_report on it is sold
+    # R5: the old nav says the Revenge Trading Report is "coming soon"; with paid_report on it is sold
     ('Individual traders <span class="soon">coming soon</span></a>', trader_nav_label, 2),  # desktop nav + mobile menu
 ]
 
@@ -1816,6 +1860,37 @@ def apply_file_fixes(out):
                 die(f"passthrough file fix: {rel} holds neither the old nor the new text exactly once: {old!r}")
         with open(fp, "w", encoding="utf-8", newline="") as f:
             f.write(text)
+
+
+def add_study_feed_entries(out):
+    """feed.xml (7 Nov): the sell-off study joins the hand-kept feed as an entry the build writes, from the same facts as the page
+    (its title, its dates), so the feed and the page cannot disagree. The feed itself still passes through from docs/. An entry with
+    this id already there (docs/ after a bundle) is replaced, never doubled. The feed's own <updated> is the newest entry's date."""
+    import datetime as _dt
+    import html as _h
+    fp = os.path.join(out, "feed.xml")
+    if not os.path.exists(fp):
+        die("feed.xml is not in the build (not in docs/)")
+    with open(fp, encoding="utf-8") as f:
+        text = f.read()
+    F = selloff_ctx()["F"]
+    base = "https://donttrade.ca"
+    eid = f"tag:donttrade.github.io,{SELLOFF_PUBLISHED}:study{SELLOFF_PATH}"
+    title = f"Study: {SO.short_title(F)} ({_dt.date.fromisoformat(SELLOFF_PUBLISHED).strftime('%-d %b %Y')})"
+    summary = (f"A new study, with its plan, code and data linked. Counts of wallets, not people, on one crypto exchange, not the US stock market; "
+               f"the method was written down before the data was opened. Updated {_dt.date.fromisoformat(SELLOFF_UPDATED).strftime('%-d %b %Y')}.")
+    entry = (f"  <entry>\n    <title>{_h.escape(title)}</title>\n    <id>{eid}</id>\n"
+             f'    <link rel="alternate" type="text/html" href="{base}{SELLOFF_PATH}"/>\n'
+             f"    <published>{SELLOFF_PUBLISHED}T00:00:00Z</published>\n    <updated>{SELLOFF_UPDATED}T00:00:00Z</updated>\n"
+             f"    <summary>{_h.escape(summary)}</summary>\n  </entry>\n")
+    text = re.sub(r"(?s)  <entry>\n    <title>[^\n]*</title>\n    <id>" + re.escape(eid) + r"</id>.*?</entry>\n", "", text)
+    first = text.find("  <entry>")
+    if first < 0:
+        die("feed.xml holds no entry to put the study before")
+    text = text[:first] + entry + text[first:]
+    text = re.sub(r"<updated>[^<]*</updated>(?=\s*<author>)", f"<updated>{SELLOFF_UPDATED}T00:00:00Z</updated>", text, count=1)
+    with open(fp, "w", encoding="utf-8", newline="") as f:
+        f.write(text)
 
 
 # Manager C4: /privacy/ (and the home FAQ, /for-traders/) say the free tool pages "block outgoing
@@ -1867,6 +1942,22 @@ OPTIONAL_FLAGS = {"pilot_checkout": False, "free_badges": False, "journal": Fals
 RANKED_JS = os.path.join("js", "tools", "prop-sim-core.js")
 RANKED_LINE = "export const WHATIF_RANKED = false;"
 RANK_JS = os.path.join("js", "tools", "prop-sim-rank.js")   # the ranked rules and their strings: only with the flag
+# 7 Nov (free check, plan G): the habits the paid report sells that no free page may test or badge. free_badges puts a "real or noise"
+# badge on the free tools' numbers, and the hold gap (losers held longer than the median win) is a habit the report describes with
+# dollars, so a badge there would give the paid result away. The flag stays off while a paid habit is on this list.
+PAID_ONLY_HABITS = ("hold_gap",)
+
+
+def leak_guard_problem(flags, test_build=False):
+    """The build refusal for free_badges while the paid method holds a habit the free pages must not badge, or None.
+    test_build: only the test suite's badges_site fixture (DT_BADGES_TEST_BUILD=1 with DT_OUT set, so it never reaches docs/); a free-launch
+    build cannot be made from this tree (docs/ is a paid bundle), and the badge tests need the badges on a built site."""
+    if flags.get("free_badges") and flags.get("paid_report") and PAID_ONLY_HABITS and not test_build:
+        return (f"free_badges = true while the paid report holds {', '.join(PAID_ONLY_HABITS)}: the free tools' real-or-noise "
+                "badge would test a habit the report sells (turn free_badges off)")
+    return None
+
+
 # Free-launch condition C1 (21 Oct 2026): free_badges turns on the free tools' "real or noise"
 # badges and their footnote, which the Architect is redesigning. Off (the committed default): the
 # free tools show only the descriptive numbers, static/js/tools/trade-stats-badges.js is left out
@@ -1935,8 +2026,14 @@ def nav_for(nav, flags):
 def footer_for(footer, flags):
     """[[footer]] as this build renders it: a column with requires_flag is dropped while that flag is off
     (6 Nov, SEO round 1: the Learn column waits on [flags] learn_nav)."""
-    return [{k: v for k, v in col.items() if k != "requires_flag"}
-            for col in footer if not col.get("requires_flag") or flags[col["requires_flag"]]]
+    out = []
+    for col in footer:
+        if col.get("requires_flag") and not flags[col["requires_flag"]]:
+            continue
+        # 7 Nov (D8): a link may carry a third item, the flag it needs ("Free check" exists only with paid_report)
+        links = [[l[0], l[1]] for l in col["links"] if len(l) < 3 or flags[l[2]]]
+        out.append({**{k: v for k, v in col.items() if k != "requires_flag"}, "links": links})
+    return out
 
 
 def nav_current(nav, page):
@@ -1985,7 +2082,7 @@ SITE_SCHEMA = {
     "site": ({"name", "base_url", "contact_email", "reply_promise"}, None),
     "flags": (set(), None),
     "analytics": ({"cf_beacon_token"}, {"cf_beacon_token", "umami_website_id"}),
-    "stripe": ({"mode"}, {"mode", "promo_codes_enabled"}),
+    "stripe": ({"mode"}, {"mode", "promo_codes_enabled", "managed_payments", "tax_included"}),
     "forms": ({"endpoint", "firm_key", "trader_key", "redirect_firm", "redirect_trader"}, None),
     "worker": ({"api_base"}, {"api_base"}),
     "legal": ({"launch_date", "terms_date", "cloudflare_pages_since", "disclaimer_short", "disclaimer_long"},
@@ -2087,7 +2184,7 @@ def warn(msg):
 ESCAPES = {
     "DT_ALLOW_PLACEHOLDERS": "private.toml values that look like placeholders",
     "DT_ALLOW_LOCAL_API": "a loopback http [worker] api_base",
-    "DT_ALLOW_NO_STRIPE_LINK": "no Stripe Payment Link for the donttrade test",
+    "DT_ALLOW_NO_STRIPE_LINK": "no Stripe Payment Link for the Revenge Trading Report",
 }
 # Stripe Payment Links: https://buy.stripe.com/<id>; test-mode links carry "test_" (UNVERIFIED
 # beyond the links seen so far; a link that differs fails loudly and this pattern is the place to fix).
@@ -2347,6 +2444,20 @@ def check_round_a_settings(cfg, toml_path):
     if type(pc) is not bool:
         die(f"[stripe] promo_codes_enabled must be true or false ({toml_path})")
     cfg["stripe"]["promo_codes_enabled"] = pc
+    # 7 Nov (ARCHITECT-PLAN-MANAGED-PAYMENTS): the US$39 Payment Link sold through Stripe Managed Payments, Link (Stripe)
+    # being the merchant of record. On: the seller rows, the price/tax, payment, withdrawal and privacy words name Link,
+    # and a live build refuses the old (non-Managed) link and the placeholder. tax_included: the price's Stripe
+    # tax_behavior is "inclusive" (true) or tax is added on top (false); required while managed_payments is on.
+    mp = cfg["stripe"].get("managed_payments", False)
+    if type(mp) is not bool:
+        die(f"[stripe] managed_payments must be true or false ({toml_path})")
+    ti = cfg["stripe"].get("tax_included")
+    if mp and type(ti) is not bool:
+        die(f"[stripe] managed_payments = true needs tax_included = true or false: is the price's Stripe tax behaviour "
+            f"inclusive (true) or is tax added on top (false)? ({toml_path})")
+    if ti is not None and type(ti) is not bool:
+        die(f"[stripe] tax_included must be true or false ({toml_path})")
+    cfg["stripe"]["managed_payments"], cfg["stripe"]["tax_included"] = mp, bool(ti)
     ix = cfg.get("indexnow")
     if ix is not None:
         if not isinstance(ix, dict) or set(ix) - {"key"} or not isinstance(ix.get("key"), str) or not INDEXNOW_KEY_RE.fullmatch(ix["key"]):
@@ -2434,6 +2545,9 @@ def load_config():
     if flags["trader_first_home"] != flags["paid_report"]:
         die(f"flag mismatch: trader_first_home={flags['trader_first_home']} must equal "
             f"paid_report={flags['paid_report']} ({toml_path})")
+    problem = leak_guard_problem(flags, os.environ.get("DT_BADGES_TEST_BUILD") == "1" and bool(os.environ.get("DT_OUT")))
+    if problem:
+        die(problem)
     if flags["analytics"] and not cfg["analytics"]["cf_beacon_token"]:
         die("analytics = true but [analytics] cf_beacon_token is empty")
     uid = cfg["analytics"].get("umami_website_id", "")
@@ -2469,6 +2583,7 @@ def load_config():
         check_stripe_link(products["pilot"]["stripe_link_live"], "live", "prices.json pilot stripe_link_live")
     if flags["paid_report"]:
         link = products["report39"]["stripe_link_" + mode]
+        check_managed_link(products["report39"], link, mode, cfg["stripe"]["managed_payments"])
         if link:
             check_stripe_link(link, mode, f"prices.json report39 stripe_link_{mode}")
         elif not escape("DT_ALLOW_NO_STRIPE_LINK"):
@@ -2481,6 +2596,30 @@ def load_config():
             if fr is not None:
                 check_stripe_link(fr, m, f"prices.json report39 stripe_link_{m}_fr")
     return cfg, prices, private
+
+
+# 7 Nov: the value prices.json holds for report39.stripe_link_live until the owner creates the Managed Payments link
+# (CODER-REPORT-MANAGED-PAYMENTS, go-live step 2). Never a URL, so it can never reach a page.
+PENDING_MANAGED_LINK = "PENDING-OWNER: the new Managed Payments Payment Link (https://buy.stripe.com/...)"
+
+
+def check_managed_link(product, link, mode, managed):
+    """7 Nov (Managed Payments): a live build with managed_payments on refuses the placeholder and every link listed in
+    report39.non_managed_links (the old link, which still names the owner as seller), so the site never says "Sold
+    through Link" above a link that is not. With managed_payments off, the placeholder is refused too."""
+    if link == PENDING_MANAGED_LINK or (isinstance(link, str) and link.startswith("PENDING-OWNER")):
+        die(f"prices.json report39 stripe_link_{mode} is still the placeholder: create the Managed Payments Payment Link "
+            "and put its https://buy.stripe.com/... URL here (CODER-REPORT-MANAGED-PAYMENTS-2026-11-07, go-live step 2)")
+    old = product.get("non_managed_links") or []
+    if not isinstance(old, list) or any(not isinstance(u, str) for u in old):
+        die("prices.json report39.non_managed_links must be a list of Payment Link URLs")
+    if managed:
+        for m in ("live", "test"):
+            for suf in ("", "_fr"):
+                u = product.get(f"stripe_link_{m}{suf}")
+                if u and u in old:
+                    die(f"[stripe] managed_payments = true but prices.json report39 stripe_link_{m}{suf} is {u}, a link "
+                        "without Managed Payments (report39.non_managed_links): use the new Managed Payments link")
 
 
 def report_link_fr(product, mode):
@@ -2911,7 +3050,7 @@ DENY_GRAM = 4
 DENY_NEUTRAL = ("not enough trades to tell the file has dates but no times a person reviews it and writes to you a refund or a lost "
                 "payment dispute pas assez de transactions pour conclure affiche pas assez de transactions pour conclure "
                 "auprès de l'émetteur de votre carte nous répondons dans les du lundi au vendredi "
-                "habit shows not enough trades to tell these terms apply to the donttrade test bought for personal use")
+                "habit shows not enough trades to tell these terms apply to the Revenge Trading Report bought for personal use")
 DENY_WORD_OK = frozenset("delivered analysis request re-test purchases habitude analyse remboursons personne demander formulaire "
                          "demande répondons nouveau gratuit commande d'abord".split())
 
@@ -3067,6 +3206,9 @@ def headers_problem(text):
 
 ISLAND_OPEN, ISLAND_CLOSE = "<!--island:start-->", "<!--island:end-->"
 META_P_RE = re.compile(r'(?s)<p class="meta">.*?</p>')
+# /for-researchers/ (7 Nov): the sell-off study joins its two lists as islands (the frozen words stay as they were)
+RESEARCHERS_DATA_AFTER = "Insider-buying study — interval (CSV)</a></li>"
+RESEARCHERS_STUDIES_END = re.compile(r'(?s)</li>(?=</ul>\s*<h2>Licences and citing</h2>)')
 
 
 def insert_island(fragment, anchor, island, path):
@@ -3521,6 +3663,7 @@ def build():
         with open(fp, "w", encoding="utf-8", newline="") as f:
             f.write(text)
     apply_file_fixes(out)
+    add_study_feed_entries(out)
     for rel in sorted(set(PASSTHROUGH_FIXES) - set(passthrough_pages(owned))):
         # a template owns it (a lifted page carries its fixes in its fragment) or it is not in docs/
         die(f"passthrough fix: {rel} is not a passthrough page (owned by a template, or not in docs/)")
@@ -3566,6 +3709,7 @@ def build():
                 "partners_meta": partners_meta(cfg["partners"], prices),
                 "refund_on": flags["refund_no_result"], "refund_reasons": refund_reasons(),
                 "stripe_promo": cfg["stripe"]["promo_codes_enabled"],
+                "managed_pay": cfg["stripe"]["managed_payments"], "tax_included": cfg["stripe"]["tax_included"],
                 "readers_untested": readers_untested()[0], "readers_all": readers_untested()[1]}
     built, rendered = [], []
     pages_by_path = {pg["path"]: pg for pg in owned.values()}
@@ -3638,6 +3782,11 @@ def build():
             if page["path"] == "/research/":   # the newest study, last in the chronological list, as an island (the frozen words stay as they were)
                 frag = insert_island(frag, RESEARCH_LIST_END, env.get_template("partials/selloff_listing.html").render(
                     sell=selloff_ctx(), mkt=LT.market_view(), page={"path": SELLOFF_PATH, "published": SELLOFF_PUBLISHED}), page["path"])
+            if page["path"] == "/for-researchers/":   # 7 Nov: the sell-off study and its files, after the older studies' entries
+                sell_ = selloff_ctx()
+                frag = insert_island(frag, RESEARCHERS_DATA_AFTER, env.get_template("partials/researchers_data_more.html").render(sell=sell_), page["path"])
+                frag = insert_island(frag, RESEARCHERS_STUDIES_END, env.get_template("partials/researchers_studies_more.html").render(
+                    sell=sell_, page={"path": SELLOFF_PATH, "published": SELLOFF_PUBLISHED}), page["path"])
             if page["path"] == "/code/":   # the site's own table script, which the /learn/ pages cite
                 frag = insert_island(frag, "</table></div>", env.get_template("partials/code_more.html").render(), page["path"])
             extra["lifted_html"] = Markup(frag)

@@ -1,0 +1,12 @@
+{#- A study figure (7 Nov, study-page improvements): the finding as its title, what is drawn as its subtitle, the drawing with its
+    source lines inside it, and (below) the ways to get it. The caller sets f (one of sell.figs) and c (that figure's geometry). -#}
+<figure class="chart sell-chart{% if lead %} sell-lead{% endif %}" id="{{ f.id }}" data-fig>
+  <figcaption class="fig-head"><p class="fig-title">{{ f.title }}</p><p class="fig-sub">{{ f.subtitle }}</p></figcaption>
+  {%- include "partials/selloff_bars.html" %}
+  <ul class="fig-tools" aria-label="Get this chart">
+    <li><a href="/assets/charts/selloff/{{ f.id }}.png" download>PNG image</a></li>
+    <li><a href="/assets/charts/selloff/{{ f.id }}.svg" download>SVG</a></li>
+    <li><a href="{{ f.csv }}" download>Data (CSV)</a></li>
+    <li><a href="#{{ f.id }}">Link to this chart</a></li>
+  </ul>
+</figure>

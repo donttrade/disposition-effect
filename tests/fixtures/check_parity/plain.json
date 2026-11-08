@@ -1,0 +1,44 @@
+{
+  "fixture": "plain",
+  "method_version": "2026-10-23.stats2f",
+  "n_rows": 360,
+  "n_trades": 360,
+  "dates_only": false,
+  "habits": {
+    "hold_gap": {
+      "n_a": 182,
+      "n_b": 178,
+      "dollars": {
+        "n_trades": 99
+      }
+    },
+    "revenge": {
+      "n_a": 142,
+      "n_b": 217,
+      "dollars": {
+        "n_trades": 142
+      }
+    },
+    "size_up": {
+      "n_a": 182,
+      "n_b": 177,
+      "dollars": {
+        "n_trades": 68
+      }
+    },
+    "tilt": {
+      "n_a": 87,
+      "n_b": 272,
+      "dollars": {
+        "n_trades": 87
+      }
+    },
+    "oversized_loss": {
+      "n_a": 20,
+      "n_b": 182,
+      "dollars": {
+        "n_trades": 20
+      }
+    }
+  }
+}

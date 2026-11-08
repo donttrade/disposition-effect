@@ -30,6 +30,7 @@ PACK_FILES = ("README.txt", "ANALYSIS-PLAN.md", "ANALYSIS-PLAN.sha256", "RUN-LOG
               "per_market.py", "markets_verified.py", "MARKETS-VERIFIED.csv", "MARKETS-README.txt")
 PM_CSV = "5-november-2026-per-market.csv"       # served at /data/ like the daily CSV, byte for byte from the pack
 PM_CSV_PATH = "/data/" + PM_CSV
+HOURLY_CSV_PATH = "/data/5-november-2026-hyperliquid-hourly.csv"   # 7 Nov: the third chart's numbers (from the same data file as the page)
 PM_REVISION = "8e0c2f593fdbf324772db734747ccfce597f3b80"   # ironflow/hyperliquid-trades commit the study read (per_market.REVISION)
 # 7 Nov: counts from Ironflow's REPLACED files (main at 23d731e9, 6 Nov 23:24 UTC), made with per_market.py's count step; only
 # these two days changed among the five replaced files (6, 10, 11 Oct; 4, 5 Nov). Builder-listed figures unchanged on all five.
@@ -198,6 +199,13 @@ def ny_time(utc_label):
 # ------------------------------------------------------------------ charts (inline SVG, drawn at build time)
 W, H = 420, 214
 PL, PR, PT, PB = 46, 412, 14, 176
+CREDIT_H = 43                        # 7 Nov: three source lines inside every chart's own image (the page's SVG and the downloads)
+PAGE_URL = "donttrade.ca/research/5-november-2026-sell-off/"
+# 7 Nov 2026: owner approved CC BY 4.0 for charts (chart images, their downloads and the press pack's charts). Study text stays
+# CC BY-NC 4.0; data and code stay CC BY 4.0. The licence is printed in each image, so a re-post carries it.
+CHART_LICENCE = "CC BY 4.0"
+CHART_CREDIT = f"Chart: donttrade.ca ({CHART_LICENCE})"
+CREDIT = ("Source: Ironflow, Hyperliquid Trades and Liquidations (CC BY 4.0).", f"Counts: donttrade. {CHART_CREDIT}", PAGE_URL)
 
 
 def nice_step(top):
@@ -215,7 +223,8 @@ def ticks_for(top, fmt):
 
 
 def bar_chart(items, fmt, alt, label_every=None, highlight=None, shade=None):
-    """items: [(label, value or None, tooltip)]. Returns the geometry the template draws."""
+    """items: [(label, value or None, tooltip)]. Returns the geometry the template draws. The two source lines are part of the
+    drawing (c["credit"]), so a screenshot of the chart still names its source and its address."""
     vals = [v for _, v, _ in items if v is not None]
     hi, ticks = ticks_for(max(vals), fmt)
     n = len(items)
@@ -228,8 +237,9 @@ def bar_chart(items, fmt, alt, label_every=None, highlight=None, shade=None):
         bars.append({"x": round(x, 1), "w": round(bw, 1), "y": round(y_of(v), 1) if v is not None else PB,
                      "h": round(PB - y_of(v), 1) if v is not None else 0, "tip": tip, "event": k == highlight,
                      "cx": round(x + bw / 2, 1), "label": label if (label_every and (k % label_every == 0 or k == n - 1) and not (k == n - 1 and (n - 1) % label_every and (n - 1) % label_every < 3)) else None})
-    return {"w": W, "h": H, "pl": PL, "pr": PR, "pt": PT, "pb": PB, "ticks": [{"y": round(y_of(t["v"]), 1), "label": t["label"]} for t in ticks],
-            "bars": bars, "shade": shade, "ly": PB + 16, "median_y": None, "top": hi, "alt": alt}
+    return {"w": W, "h": H + CREDIT_H, "pl": PL, "pr": PR, "pt": PT, "pb": PB, "ticks": [{"y": round(y_of(t["v"]), 1), "label": t["label"]} for t in ticks],
+            "bars": bars, "shade": shade, "ly": PB + 16, "median_y": None, "top": hi, "alt": alt,
+            "credit": [{"y": H + 4 + 13 * k, "t": t} for k, t in enumerate(CREDIT)]}
 
 
 def hours_shade(first, last_end):
@@ -338,6 +348,21 @@ def context(data=None):
     c1["median_y"] = round(PB - (PB - PT) * P1["median"] / c1["top"], 1)
     c2["median_y"] = round(PB - (PB - PT) * S1w["median"] / c2["top"], 1)
     suppressed = [h["hour_utc"] for h in hours if h["suppressed"]]
+    # 7 Nov: each chart's title states its finding, in the page's own numbers (F); the subtitle says what is drawn. Only words and
+    # figures the page already prints are used here.
+    mark = f"{F['event_short']} in orange; dashed line: median of the 30 days before."
+    figs = [
+        {"id": "fig-hip3-daily", "key": "c2", "csv": CSV_PATH, "csv_name": os.path.basename(CSV_PATH),
+         "title": f"{F['hip3']} wallets were force-closed on builder-listed markets on {F['event_short']}, the most of 31 days",
+         "subtitle": f"Wallets force-closed each UTC day on builder-listed (HIP-3) markets, {F['base_first']} to {F['event_short']} 2026. {mark} A wallet is an address, not a person."},
+        {"id": "fig-all-daily", "key": "c1", "csv": CSV_PATH, "csv_name": os.path.basename(CSV_PATH),
+         "title": f"{F['wallets']} wallets were force-closed across all markets on {F['event_short']}, the most of 31 days but a near-tie with {runner[0]['day']}",
+         "subtitle": f"Wallets force-closed each UTC day, all markets, {F['base_first']} to {F['event_short']} 2026. {mark} A wallet is an address, not a person."},
+        {"id": "fig-hourly", "key": "c3", "csv": HOURLY_CSV_PATH, "csv_name": os.path.basename(HOURLY_CSV_PATH),
+         "title": f"{F['session_share']} of the value force-closed on {F['event_short']} fell inside US stock-market hours",
+         "subtitle": f"Value force-closed in each hour of {F['event_short']} (UTC), in millions of US dollars. The shaded band is the US stock-market session, {F['cash_utc']} ({F['cash_open']} to {F['cash_close']} New York time)."
+                     + (f" Hour {suppressed[0]:02d} UTC had fewer than 10 wallets and is not shown." if suppressed else "")},
+    ]
 
     top5 = []
     for name, wallets, value in data["summary"]["S1_top5_E"]:
@@ -354,10 +379,11 @@ def context(data=None):
     hour_rows = [{"hour": f"{h['hour_utc']:02d}", "value": musd(h["value"]) if h["value"] is not None else "fewer than 10 wallets",
                   "wallets": i(h["wallets"]) if h["wallets"] is not None else "–"} for h in hours]
 
-    return {"F": F, "rows": rows, "runner": runner, "top5": top5, "top5_names": top5_names, "top5_share": top5_share, "c1": c1, "c2": c2, "c3": c3, "suppressed": suppressed,
-            "day_rows": day_rows, "hour_rows": hour_rows, "prov": data["provenance"], "source": data["source"],
+    press = press_facts(F, runner)
+    return {"press": press, "F": F, "rows": rows, "runner": runner, "top5": top5, "top5_names": top5_names, "top5_share": top5_share, "c1": c1, "c2": c2, "c3": c3, "suppressed": suppressed,
+            "figs": figs, "day_rows": day_rows, "hour_rows": hour_rows, "prov": data["provenance"], "source": data["source"],
             "plan_sha": data["provenance"]["analysis_plan"]["sha256"], "plan_logged": data["provenance"]["analysis_plan"]["logged_utc"],
-            "csv_url": CSV_PATH, "pack_url": PACK_URL, "pack_files": PACK_FILES, "n_inputs": len(data["provenance"]["inputs"]),
+            "csv_url": CSV_PATH, "hourly_csv_url": HOURLY_CSV_PATH, "press_zip_url": PRESS_ZIP_PATH, "press_email": PRESS_EMAIL, "pack_url": PACK_URL, "pack_files": PACK_FILES, "n_inputs": len(data["provenance"]["inputs"]),
             "event_input_sha": next(x["sha256"] for x in data["provenance"]["inputs"] if x["day"] == ev),
             "pm": permarket(E, ev, {d["day"]: d for d in days}), "S": S}
 
@@ -440,6 +466,127 @@ def csv_text(data=None):
                     d["hip3_liq_wallets"], f"{d['hip3_liq_notional']:.2f}", f"{d['liq_notional_long'] / d['liq_notional']:.6f}",
                     d["s2_retrade_15"], d["s2_retrade_60"], d["s2_denominator"],
                     f"{d['s2_retrade_15'] / d['s2_denominator']:.6f}", f"{d['s2_retrade_60'] / d['s2_denominator']:.6f}"])
+    return out.getvalue()
+
+
+# ------------------------------------------------------------------ the chart as a file (7 Nov): SVG with its title and source inside
+# Colours are the light theme's tokens as plain hex (site.css :root), set as presentation attributes: no <style>, no CSS variable,
+# no external reference, so the file draws the same in any viewer and under the site's own CSP when opened directly.
+SVG_INK, SVG_MUTED, SVG_GRID, SVG_BAR, SVG_EVENT, SVG_BAND = "#16181C", "#5B606A", "#DADCE0", "#4A6A94", "#9A3B1C", "#F4F5F7"
+SVG_FONT = "Plex Sans, IBM Plex Sans, Arial, Helvetica, sans-serif"
+SVG_W, SVG_MARGIN, SVG_K = 1000, 38, 2.2          # canvas width, side margin, scale of the chart drawing
+SVG_TITLE_PX, SVG_SUB_PX = 28, 18
+
+
+def _wrap(text, width):
+    import textwrap
+    return textwrap.wrap(text, width=width, break_long_words=False, break_on_hyphens=False)
+
+
+def standalone_svg(c, f):
+    """One chart as a self-contained SVG: the finding as its title, what is drawn as its subtitle, the drawing, and the source,
+    the address and the licence at the foot. f is one of context()["figs"]; c its geometry."""
+    from xml.sax.saxutils import escape as x
+    t_lines, s_lines = _wrap(f["title"], 54), _wrap(f["subtitle"], 92)
+    y = SVG_MARGIN + SVG_TITLE_PX
+    head = []
+    for k, ln in enumerate(t_lines):
+        head.append(f'<text x="{SVG_MARGIN}" y="{y + k * 36}" font-size="{SVG_TITLE_PX}" font-weight="600" fill="{SVG_INK}">{x(ln)}</text>')
+    y += (len(t_lines) - 1) * 36 + 14 + SVG_SUB_PX
+    for k, ln in enumerate(s_lines):
+        head.append(f'<text x="{SVG_MARGIN}" y="{y + k * 25}" font-size="{SVG_SUB_PX}" fill="{SVG_MUTED}">{x(ln)}</text>')
+    y += (len(s_lines) - 1) * 25 + 22
+    h = int(y + c["h"] * SVG_K + SVG_MARGIN * 0.5)
+    g = [f'<g transform="translate({SVG_MARGIN} {y}) scale({SVG_K})">']
+    if c["shade"]:
+        g.append(f'<rect x="{c["shade"]["x"]}" y="{c["pt"]}" width="{c["shade"]["w"]}" height="{c["pb"] - c["pt"]}" fill="{SVG_BAND}"/>')
+    for t in c["ticks"]:
+        g.append(f'<line x1="{c["pl"]}" x2="{c["pr"]}" y1="{t["y"]}" y2="{t["y"]}" stroke="{SVG_GRID}" stroke-width="1"/>')
+        g.append(f'<text x="{c["pl"] - 6}" y="{round(t["y"] + 4, 1)}" text-anchor="end" font-size="11" fill="{SVG_MUTED}">{x(t["label"])}</text>')
+    for b in c["bars"]:
+        if b["h"] > 0:
+            g.append(f'<rect x="{b["x"]}" y="{b["y"]}" width="{b["w"]}" height="{b["h"]}" rx="1.5" fill="{SVG_EVENT if b["event"] else SVG_BAR}"><title>{x(b["tip"])}</title></rect>')
+        if b["label"]:
+            g.append(f'<text x="{b["cx"]}" y="{c["ly"]}" text-anchor="middle" font-size="11" fill="{SVG_MUTED}">{x(b["label"])}</text>')
+    if c["median_y"]:
+        g.append(f'<line x1="{c["pl"]}" x2="{c["pr"]}" y1="{c["median_y"]}" y2="{c["median_y"]}" stroke="{SVG_INK}" stroke-width="1.5" stroke-dasharray="5 4"/>')
+    if c["shade"]:
+        g.append(f'<text x="{c["shade"]["x"] + 4}" y="{c["pt"] + 12}" font-size="11" fill="{SVG_MUTED}">US stock hours</text>')
+    for l in c["credit"]:
+        g.append(f'<text x="8" y="{l["y"]}" font-size="11" fill="{SVG_MUTED}">{x(l["t"])}</text>')
+    g.append("</g>")
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {SVG_W} {h}" width="{SVG_W}" height="{h}" font-family="{SVG_FONT}" '
+            f'role="img" aria-labelledby="t d">\n<title id="t">{x(f["title"])}</title>\n<desc id="d">{x(c["alt"])}</desc>\n'
+            f'<rect width="{SVG_W}" height="{h}" fill="#FFFFFF"/>\n' + "\n".join(head) + "\n" + "\n".join(g) + "\n</svg>\n")
+
+
+def short_title(F):
+    """The share card's headline (7 Nov): the finding in the page's own figures, no wider than three lines on the card."""
+    return (f"{F['hip3']} wallets were force-closed on builder-listed markets on {F['event_short']}, "
+            f"about {F['hip3_wd_ratio']} times the median weekday")
+
+
+PRESS_EMAIL = "research@donttrade.ca"
+PRESS_ZIP_PATH = "/assets/press/selloff.zip"
+PRESS_ZIP_FILES = ("ONE-PAGE-SUMMARY.txt", "README.txt", "ANALYSIS-PLAN.md",
+                   "charts/fig-hip3-daily.png", "charts/fig-all-daily.png", "charts/fig-hourly.png",
+                   "data/5-november-2026-hyperliquid-daily.csv", "data/5-november-2026-hyperliquid-hourly.csv",
+                   "data/5-november-2026-per-market.csv", "data/MARKETS-VERIFIED.csv")
+
+
+def press_facts(F, runner):
+    """The 'For journalists' block (7 Nov): the key facts as plain sentences, in the page's own figures (F), and how to stay accurate.
+    Nothing here is a new figure; every number is one the key numbers section prints."""
+    quotable = [
+        f"On {F['event_long']}, {F['hip3']} wallets were force-closed on Hyperliquid’s builder-listed markets, about {F['hip3_wd_ratio']} times the median weekday of the 30 days before.",
+        f"Across all markets, {F['wallets']} wallets were force-closed on {F['event_short']}, the most of the 31 days studied, but a near-tie: {runner[0]['day']} was {runner[0]['below']} lower.",
+        f"The value force-closed on {F['event_short']} was {F['value']} million US dollars, and {F['long']} of it was long.",
+        f"{F['retrade15']} of the wallets force-closed on {F['event_short']} placed a new market order within 15 minutes, against {F['pooled15']} on the 30 days before; we did not compare with wallets that were not force-closed that day.",
+    ]
+    summary = (f"On {F['event_long']}, {F['hip3']} wallets were force-closed on the builder-listed markets of Hyperliquid, a crypto exchange whose trades are public: "
+               f"about {F['hip3_wd_ratio']} times the median weekday, and the most of the 31 days studied. A wallet is an address, not a person. "
+               "It is one crypto venue, not the US stock market.")
+    notes = ["Say “wallets”, not “traders” or “retail investors”: a wallet is an address, and one person can hold several.",
+             "It is one crypto exchange, not the US stock market, and it says nothing about the stock market’s investors.",
+             "It is a rank among 31 days, not a test of cause.",
+             "Data: Ironflow, Hyperliquid Trades and Liquidations, CC BY 4.0. Ironflow has not endorsed this study."]
+    return {"summary": summary, "quotable": quotable, "notes": notes}
+
+
+def press_texts(ctx, base_url):
+    """(README.txt, ONE-PAGE-SUMMARY.txt) of the press pack, built from the same facts as the page."""
+    F, P = ctx["F"], ctx["press"]
+    url = base_url + "/research/5-november-2026-sell-off/"
+    one = ["The 5 November 2026 sell-off: force-closed wallets on Hyperliquid", "=" * 66, "",
+           P["summary"], "", "Figures you can quote as written", ""] + [f"- {q}" for q in P["quotable"]] + ["", "To stay accurate", ""] + \
+          [f"- {n}" for n in P["notes"]] + ["", f"Full study, method and code: {url}", f"Questions: {PRESS_EMAIL} (subject: Press). Reply within 1 business day; interviews by email only.", ""]
+    readme = ["Press pack: the 5 November 2026 sell-off study (donttrade)", "", f"Study: {url}",
+              f"Published 6 Nov 2026; updated 7 Nov 2026. Cite as: donttrade (2026). The 5 November 2026 sell-off: force-closed wallets on Hyperliquid. {url}", "",
+              "What is in this pack", "  ONE-PAGE-SUMMARY.txt  the key facts as sentences, and how to stay accurate",
+              "  charts/               three charts as PNG images (title, source, address and licence are inside each image)",
+              "  data/                 the CSVs behind the charts, and the market-by-market breakdown with what each market tracks",
+              "  ANALYSIS-PLAN.md      the method, written down and hashed before the data was opened",
+              f"  The plan's SHA-256: {ctx['plan_sha']}", "",
+              "Licences", "  Study text: CC BY-NC 4.0.",
+              "  Charts and the chart files in this pack: CC BY 4.0. Credit: Chart: donttrade.ca (CC BY 4.0).",
+              "  Data counts and code: CC BY 4.0. Source data: Ironflow, Hyperliquid Trades and Liquidations, CC BY 4.0.", "",
+              "Contact", f"  {PRESS_EMAIL}, subject “Press”. Reply within 1 business day; interviews by email only.",
+              f"  SVG versions of each chart and the plan, hash, code and run log are on the study page: {url}", ""]
+    return "\n".join(readme), "\n".join(one)
+
+
+def hourly_csv_text(data=None):
+    """The hourly chart's numbers: the value and the wallets force-closed in each UTC hour of the day studied. An hour with
+    fewer than 10 wallets has no value or count (the plan's minimum cell, section 7), as on the chart."""
+    data = data or load()
+    out = io.StringIO()
+    w = csv.writer(out, lineterminator="\n")
+    w.writerow(("hour_utc", "value_force_closed_usd", "wallets_force_closed", "note"))
+    for h in data["event"]["hourly"]:
+        if h["suppressed"]:
+            w.writerow([f"{h['hour_utc']:02d}", "", "", f"fewer than {MIN_CELL} wallets, not shown"])
+        else:
+            w.writerow([f"{h['hour_utc']:02d}", f"{h['value']:.2f}", h["wallets"], ""])
     return out.getvalue()
 
 

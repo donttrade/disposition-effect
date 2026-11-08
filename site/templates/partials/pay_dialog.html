@@ -13,7 +13,7 @@
 <dialog class="pay-dialog" id="pay-dialog" lang="en" aria-labelledby="pd-h" data-pay-dialog>
   <div class="pd-inner">
     <div class="pd-top">
-      <h2 id="pd-h">Get the {{ r.name|lower }}</h2>
+      <h2 id="pd-h">Get the {{ r.name }}</h2>
       <button class="pd-close no-print" type="button" data-pay-close aria-label="Close"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg></button>
     </div>
     {{ pay_facts(r, prices.rules) }}
@@ -25,6 +25,10 @@
     </details>
     {%- if partners_meta %}
     <p class="small pay-partner no-print" data-partner-note hidden></p>
+    {%- endif %}
+    {#- 7 Nov (Manager S2): said before the click, not only on the payment page. Same wording as the seller row in seller.html. -#}
+    {%- if managed_pay %}
+    <p class="pay-seller small">The payment page is run by Link (Stripe), the seller of record.</p>
     {%- endif %}
     <p class="pay-go no-print">{% if link %}<a class="btn" href="{{ link }}" rel="noopener" data-pay-continue>Continue to secure payment</a>{% else %}<span class="muted">Payment link not set yet</span>{% endif %}</p>
     <p class="small muted pd-links no-print"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a> · <a href="/terms/#seller">Business details</a></p>

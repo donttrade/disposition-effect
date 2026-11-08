@@ -19,9 +19,10 @@
             sub-line keeps it to "total the dollars on those trades" and the example caption below says the totals
             describe what happened. The trust line's last item follows the refund policy (partials/refund_copy.html). -#}
         <h1 id="hero">Is revenge trading costing you? Get the dollar figure.</h1>
-        <p class="lede">Drop in your trade history. We test whether you re-enter after losses more often than chance would explain, then total the dollars on those trades.</p>
-        <p class="btn-row"><a class="btn" href="/pricing/#last-step">Take the test for {{ r.price_usd|usd }}</a> <a href="/sample-report/">See the example report</a></p>
-        <p class="small"><a href="/research/">Pre-registered research</a> · Your file stays in your browser · {{ refund.short() }}</p>
+        {#- 7 Nov (free check, plan G; §4.2): the free check is the primary button; the report is the text link beside it. -#}
+        <p class="lede">Check your trade file free: see how many trades you opened right after a loss or a losing run. The {{ r.price_usd|usd }} report totals the dollars on them and tests whether it’s more than chance.</p>
+        <p class="btn-row"><a class="btn" href="/check/">Check my trades free</a> <a href="/pricing/#last-step">Get the report for {{ r.price_usd|usd }}</a></p>
+        <p class="small"><a href="/research/">Pre-registered research</a> · <a href="/sample-report/">Example report</a> · Your file stays in your browser · {{ refund.short() }}</p>
         <p class="small muted">Needs the time of each trade. A file with dates but no times gets no tested habits.</p>
         <p class="small muted">Not investment advice · <a href="/pricing/#before-you-pay">Before you pay</a></p>
   {% endcall %}
@@ -38,7 +39,7 @@
                   "few": ("pill pill-few", "Not enough trades")} %}
   <section class="section showcase" aria-labelledby="t-measure-h" data-reveal>
     <div class="showcase-copy">
-      <p class="kicker">The donttrade test</p>
+      <p class="kicker">The Revenge Trading Report</p>
       {#- 6 Nov (Round A2): the two numbers come from prices.json rules (habits_measured, habits_tested), as the pricing card's do. -#}
       <h2 id="t-measure-h">Up to {{ prices.rules.habits_measured|numword }} habits measured. Up to {{ prices.rules.habits_tested|numword }} tested against chance.</h2>
       <ul class="ticks">
@@ -103,7 +104,7 @@
         </div>
         <h3><span class="how-n">3</span> See your habits</h3>
         <p>Plus one free re-test, 30 to 60 days later.</p>
-        <details class="how-more"><summary>About the re-test</summary><p>Your re-test runs on the version of the test that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.</p></details>
+        <details class="how-more"><summary>About the re-test</summary><p>Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.</p></details>
       </li>
     </ol>
   </section>
@@ -224,7 +225,7 @@
     {{ answer_box("pg") }}
     {%- endif %}
     <details><summary>Is this advice?</summary><p>No. It describes past trades and past behaviour. It does not tell anyone what to trade, how much, or when to exit.</p></details>
-    <details><summary>Where does my trade file go?</summary><p>The free tools read it inside your browser tab; {% if flags.analytics %}only anonymous counts of visits and finished steps are sent; your file is never sent.{% else %}those pages block every outgoing request, so the file is not uploaded.{% endif %} When the donttrade test launches, the page that runs it will say exactly what it sends.</p></details>
+    <details><summary>Where does my trade file go?</summary><p>The free tools read it inside your browser tab; {% if flags.analytics %}only anonymous counts of visits and finished steps are sent; your file is never sent.{% else %}those pages block every outgoing request, so the file is not uploaded.{% endif %} When the Revenge Trading Report launches, the page that runs it will say exactly what it sends.</p></details>
     <details><summary>What do the free tools cost?</summary><p>Nothing, with no account and no card. They run in your browser, so serving them costs us almost nothing.</p></details>
     <details><summary>Is our firm’s data safe?</summary><p>Your trading records never leave your systems. Your staff run our public script on your own computers, and you can read every line first. Only the totals it prints come back to us: no account IDs, no trades, no names.</p></details>
     <details><summary>What if no effect is found?</summary><p>Then that is your answer, and it is a finished result. The price is published, so you pay the same either way. The result stays private unless you choose to publish it.</p></details>

@@ -1,0 +1,177 @@
+{#- mor.html (7 Nov 2026, ARCHITECT-PLAN-MANAGED-PAYMENTS §6): the words that change when the US$39 Payment Link is sold
+    through Stripe Managed Payments, with Link (Stripe) as merchant of record. [stripe] managed_payments picks them
+    (context: managed_pay); [stripe] tax_included says whether the price's Stripe tax_behavior is inclusive (true) or
+    tax is added on top (false). With managed_payments off every macro gives today's words, so a non-Managed build is
+    unchanged. Sources (Stripe docs, read 7 Nov): payments/managed-payments/how-it-works ("Sold through Link",
+    LINK.COM* statement descriptor, Link support, refunds within 60 days), /eligibility (cooling-off periods applied by
+    Stripe), /use-payment-links (tax behaviour of the price). LAWYER: every sentence here (plan §6.3).
+    French: every French macro is TODO-FR-REVIEW (a legal translator checks it before or soon after go-live).
+    Use: {% import "partials/mor.html" as mor with context %} -#}
+
+{#- Before you pay, Price row (EN): the sentence after "one time (…)." and the Total. -#}
+{%- macro byp_price_tail(r) -%}
+{%- if managed_pay and tax_included -%}
+Any sales tax, VAT or GST is included in this price: Link works it out from your billing address and shows it on your receipt. Total: {{ r.price_usd|usd }} USD
+{%- elif managed_pay -%}
+Sales tax, VAT or GST may be added, depending on where you live: Link works it out from your billing address and shows the total on the payment page before you pay. Total: {{ r.price_usd|usd }} USD plus any such tax
+{%- else -%}
+No sales tax is charged. Total: {{ r.price_usd|usd }} USD
+{%- endif -%}
+{%- endmacro %}
+
+{%- macro byp_currency() -%}
+{%- if managed_pay -%}
+Priced in US dollars. Link’s payment page may show and charge the price in your own currency instead, at Stripe’s exchange rate, which includes a 2–4% conversion fee. If you pay in US dollars, your card issuer may charge a currency conversion fee. donttrade receives neither fee.
+{%- else -%}
+Priced in US dollars. Stripe’s payment page may offer to charge you in your own currency instead, at
+      Stripe’s exchange rate, which includes a 2–4% conversion fee. If you pay in US dollars, your card issuer may
+      charge a currency conversion fee. donttrade receives neither fee.
+{%- endif -%}
+{%- endmacro %}
+
+{%- macro byp_payment() -%}
+{%- if managed_pay -%}
+In full at checkout, on Link’s secure payment page, run by Stripe: card, Apple Pay, Google Pay, Link or another method it offers where you live. donttrade never sees your card number.
+{%- else -%}
+Card, through Stripe's checkout page.
+{%- endif -%}
+{%- endmacro %}
+
+{#- Terms: the tax sentence of the Price item (replaces "No sales tax is charged."). -#}
+{%- macro terms_tax() -%}
+{%- if managed_pay and tax_included -%}
+Any sales tax, VAT or GST is included in the price: Link, the merchant of record, charges it and pays it to the tax authorities.
+{%- elif managed_pay -%}
+Sales tax, VAT or GST may be added on top, depending on where you live: Link, the merchant of record, works it out from your billing address and shows it on the payment page before you pay.
+{%- else -%}
+No sales tax is charged.
+{%- endif -%}
+{%- endmacro %}
+
+{%- macro terms_payment() -%}
+{%- if managed_pay -%}
+in full at checkout, on Link’s secure payment page (run by Stripe), by card or another method it offers.
+{%- else -%}
+in full at checkout, by card, on Stripe’s payment page.
+{%- endif -%}
+{%- endmacro %}
+
+{#- Terms: who sells and who provides (a paragraph under the traders' intro). Empty when managed_payments is off. -#}
+{%- macro terms_reseller() -%}
+{%- if managed_pay -%}
+<p id="reseller"><strong>Who sells it:</strong> you order the Revenge Trading Report through Link, Stripe’s checkout service, which sells it to you as merchant of record. Link takes the payment and handles sales tax, receipts and payment questions under its own terms, shown on the payment page. donttrade provides the report, and these terms govern the report and your use of it.</p>
+{%- endif -%}
+{%- endmacro %}
+
+{%- macro terms_link_support() -%}
+{%- if managed_pay -%}
+<li id="link-support"><strong>Payment questions:</strong> for a receipt, a charge you don’t recognise or another payment problem, you can also contact Link’s support at <a href="https://support.link.com/">support.link.com</a>. Link may refund an order itself in some cases; your access key then stops working, as above.</li>
+{%- endif -%}
+{%- endmacro %}
+
+{#- Terms: Right of withdrawal (EU and UK) under Managed Payments. No waiver is collected at checkout any more. -#}
+{%- macro eu_uk() -%}
+{%- if refund_on -%}
+If you live in the European Union or the United Kingdom, you keep your 14-day legal right of withdrawal: a full refund if you ask within 14 days of buying, even after your result is supplied. Link, as the merchant of record, applies the cooling-off rules where you live. “No result, no charge” applies to you as well; the goodwill refund does not use up your legal rights.
+{%- else -%}
+If you live in the European Union or the United Kingdom, you may have a 14-day legal right of withdrawal. Link, as the merchant of record, applies the cooling-off rules where you live. In any case, donttrade’s voluntary {{ prices.rules.trader_refund_days }}-day full refund applies to you, even after the report has run.
+{%- endif -%}
+{%- endmacro %}
+
+{#- Privacy (EN): the payments item and the buyer-details opening. -#}
+{%- macro privacy_payments() -%}
+{%- if managed_pay and flags.paid_report -%}
+<strong>Payments.</strong> The Revenge Trading Report is sold through Link, Stripe’s checkout service, as merchant of record: Link processes your payment details, name, email and billing address as an independent controller, keeps them for its tax and payment records, and sends your receipt; see <a href="https://stripe.com/privacy">Stripe’s privacy policy</a>. Card payments for the firm {{ products.pilot.name }} are handled by Stripe, also as an independent controller. donttrade never sees full card numbers.
+{%- else -%}
+<strong>Card payments</strong> (the firm {{ products.pilot.name }}{% if flags.paid_report %}, and the Revenge Trading Report{% endif %}) are handled by Stripe; donttrade never sees full card numbers. For payment data Stripe acts as an independent controller; see <a href="https://stripe.com/privacy">Stripe’s privacy policy</a>.
+{%- endif -%}
+{%- endmacro %}
+
+{%- macro privacy_buyer_opening() -%}
+{%- if managed_pay -%}
+Link (Stripe) shows us the name, email address and billing address you enter at checkout. We do not use your billing address. We use your name and email only to send you the copy of your agreement, to answer your emails (a refund, a new access link) and to deal with a payment dispute.
+{%- else -%}
+Stripe shows us the name and email address you enter at checkout. We use them only to send you the copy of your agreement, to answer your emails (a refund, a new access link) and to deal with a payment dispute.
+{%- endif -%}
+{%- endmacro %}
+
+{#- ================================================================== French (TODO-FR-REVIEW, every macro below) -#}
+{%- macro fr_taxes() -%}
+{%- if managed_pay and tax_included -%}
+Les taxes de vente, la TVA ou la TPS applicables sont comprises dans le prix : Link les calcule d’après votre adresse de facturation et les indique sur votre reçu.
+{%- elif managed_pay -%}
+Des taxes de vente, la TVA ou la TPS peuvent s’ajouter selon votre lieu de résidence : Link les calcule d’après votre adresse de facturation et affiche le total sur la page de paiement avant que vous payiez.
+{%- else -%}
+Aucune taxe de vente n’est facturée.
+{%- endif -%}
+{%- endmacro %}
+
+{%- macro fr_total(r) -%}
+{%- if managed_pay and not tax_included -%}
+<strong>{{ r.price_usd|usd_fr }} au total</strong>, plus les taxes applicables{% if stripe_promo %}, avant tout code promotionnel que vous entrez{% endif %}; la page de paiement de Link affiche le total exact.
+{%- elif stripe_promo -%}
+<strong>{{ r.price_usd|usd_fr }} au total</strong>, avant tout code promotionnel que vous entrez; la page de paiement de {% if managed_pay %}Link{% else %}Stripe{% endif %} affiche le total exact.
+{%- else -%}
+<strong>{{ r.price_usd|usd_fr }} au total.</strong>
+{%- endif -%}
+{%- endmacro %}
+
+{%- macro fr_currency() -%}
+{%- if managed_pay -%}
+Prix en dollars américains (USD). La page de paiement de Link peut afficher et facturer le prix dans votre propre devise, au taux de change de Stripe, qui comprend des frais de conversion de 2 à 4 %. Si vous payez en USD, l’émetteur de votre carte peut ajouter ses propres frais de conversion. donttrade ne reçoit aucun de ces frais.
+{%- else -%}
+Prix en dollars américains (USD). La page de paiement de Stripe peut vous proposer de payer dans votre propre devise, au taux de change de Stripe, qui comprend des frais de conversion de 2 à 4 %. Si vous payez en USD, l’émetteur de votre carte peut ajouter ses propres frais de conversion. donttrade ne reçoit aucun de ces frais.
+{%- endif -%}
+{%- endmacro %}
+
+{%- macro fr_payment() -%}
+{%- if managed_pay -%}
+Payable en entier au moment de l’achat, sur la page de paiement sécurisée de Link, exploitée par Stripe : par carte de crédit ou de débit, Apple Pay, Google Pay, Link ou un autre moyen offert dans votre pays. donttrade ne voit jamais le numéro complet de votre carte.
+{%- else -%}
+Payable en entier au moment de l’achat, par carte de crédit ou de débit, sur la page de paiement sécurisée de Stripe. donttrade ne voit jamais le numéro complet de votre carte.
+{%- endif -%}
+{%- endmacro %}
+
+{%- macro fr_terms_payment() -%}
+{%- if managed_pay -%}
+Le paiement se fait en entier au moment de l’achat, sur la page de paiement sécurisée de Link (exploitée par Stripe), par carte ou par un autre moyen qu’elle offre.
+{%- else -%}
+Le paiement se fait en entier au moment de l’achat, par carte, sur la page sécurisée de Stripe.
+{%- endif -%}
+{%- endmacro %}
+
+{%- macro fr_terms_reseller() -%}
+{%- if managed_pay -%}
+<p id="revendeur"><strong>Qui vous le vend :</strong> vous commandez le rapport donttrade sur le revenge trading par l’intermédiaire de Link, le service de paiement de Stripe, qui vous le vend à titre de marchand officiel (merchant of record). Link encaisse le paiement et s’occupe des taxes de vente, des reçus et des questions de paiement selon ses propres conditions, affichées sur la page de paiement. donttrade fournit le rapport, et ces conditions régissent le rapport et l’usage que vous en faites.</p>
+{%- endif -%}
+{%- endmacro %}
+
+{%- macro fr_link_support() -%}
+{%- if managed_pay -%}
+<p id="soutien-link"><strong>Questions de paiement :</strong> pour un reçu, un débit que vous ne reconnaissez pas ou un autre problème de paiement, vous pouvez aussi joindre le soutien de Link à <a href="https://support.link.com/" hreflang="en">support.link.com</a>. Link peut lui-même rembourser une commande dans certains cas; votre clé d’accès cesse alors de fonctionner, comme ci-dessus.</p>
+{%- endif -%}
+{%- endmacro %}
+
+{%- macro fr_eu_uk() -%}
+{%- if refund_on -%}
+Si vous habitez dans l’Union européenne ou au Royaume-Uni, vous conservez votre droit légal de rétractation de 14 jours : un remboursement complet si vous le demandez dans les 14 jours suivant l’achat, même après la remise de votre résultat. Link, à titre de marchand officiel, applique les règles de délai de réflexion de votre lieu de résidence. « Pas de résultat, pas de frais » s’applique aussi à vous; le remboursement gracieux n’entame pas vos droits légaux.
+{%- else -%}
+Si vous habitez dans l’Union européenne ou au Royaume-Uni, vous pouvez avoir un droit légal de rétractation de 14 jours. Link, à titre de marchand officiel, applique les règles de délai de réflexion de votre lieu de résidence. Dans tous les cas, le remboursement complet volontaire de {{ prices.rules.trader_refund_days }} jours de donttrade s’applique à vous, même après que votre rapport a été produit.
+{%- endif -%}
+{%- endmacro %}
+
+{%- macro fr_privacy_payments() -%}
+{%- if managed_pay -%}
+<strong>Paiements :</strong> le rapport donttrade sur le revenge trading est vendu par l’intermédiaire de Link, le service de paiement de Stripe, à titre de marchand officiel. Link traite votre nom, votre courriel, votre adresse de facturation et les données de votre carte comme responsable indépendant, les conserve pour ses dossiers fiscaux et de paiement et vous envoie votre reçu; la politique de confidentialité de Stripe s’applique. donttrade ne voit jamais le numéro complet de votre carte.
+{%- else -%}
+<strong>Paiements :</strong> Stripe traite votre nom, votre courriel, votre pays de facturation et les données de votre carte. donttrade ne voit jamais le numéro complet de votre carte. Pour les données de paiement, Stripe agit comme responsable indépendant; sa politique de confidentialité s’applique.
+{%- endif -%}
+{%- endmacro %}
+
+{%- macro fr_privacy_buyer_opening() -%}
+{%- if managed_pay -%}
+Link (Stripe) nous montre le nom, l’adresse courriel et l’adresse de facturation que vous indiquez au paiement. Nous n’utilisons pas votre adresse de facturation. Nous utilisons votre nom et votre courriel seulement pour vous envoyer la copie de votre contrat, répondre à vos courriels (un remboursement, un nouveau lien d’accès) et traiter une contestation de paiement.
+{%- else -%}
+Stripe nous montre le nom et l’adresse courriel que vous indiquez au paiement. Nous les utilisons seulement pour vous envoyer la copie de votre contrat, répondre à vos courriels (un remboursement, un nouveau lien d’accès) et traiter une contestation de paiement.
+{%- endif -%}
+{%- endmacro %}

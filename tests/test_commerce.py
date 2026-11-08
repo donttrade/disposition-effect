@@ -64,8 +64,11 @@ def test_flag_on_build_passes_lint(paid_site):
 
 def test_before_you_pay_has_every_l1_item(paid_site):
     html = (paid_site["out"] / "pricing/index.html").read_text()
-    for item in ["Seller", "Business address", "Phone", "Email", "Technical requirements", "No sales tax is charged",
-                 "currency conversion fee", "Card, through Stripe", "Right after payment", "re-test", "20,000 rows",
+    # 7 Nov (Managed Payments, committed [stripe] managed_payments = true): Link is the seller of record, donttrade the
+    # service provider, tax included (tests/test_managed_payments.py covers both settings word for word)
+    for item in ["Seller", "Service provider", "Business address", "Phone", "Email", "Technical requirements",
+                 "Any sales tax, VAT or GST is included in this price", "currency conversion fee",
+                 "secure payment page, run by Stripe", "Right after payment", "re-test", "20,000 rows",
                  "Refunds", "$39 USD", FAKE["seller_legal_name"], FAKE["phone"]]:
         assert item in html, item
     for pid in ["firms", "copy-leader", "claims-test", "platforms", "traders", "researchers", "payment", "refunds",

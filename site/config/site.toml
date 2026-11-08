@@ -47,6 +47,13 @@ umami_website_id = "16c5fa53-e8fc-4c55-892a-5546e7d51830"
 mode = "live"              # which prices.json link the paid build renders: "test" or "live"
 # The owner's tick (6 Nov, Round A6) that the Payment Link takes promotion codes. partners.json must stay empty until true.
 promo_codes_enabled = false
+# 7 Nov (owner decision; ARCHITECT-PLAN-MANAGED-PAYMENTS-2026-11-07): the US$39 link is sold through Stripe Managed
+# Payments, Link (Stripe) being the merchant of record, so no personal name is published. true: the seller rows,
+# price/tax, payment, withdrawal and privacy words name Link, and a live build refuses the old non-Managed link and the
+# prices.json placeholder. tax_included: the US$39 price's Stripe tax_behavior is "inclusive" (true: the buyer pays
+# US$39 with any tax inside) or tax is added on top (false). Set it to what the owner did in Stripe (go-live step 1).
+managed_payments = true
+tax_included = true
 
 # IndexNow (Round A5): the key is public by design; the build writes docs/<key>.txt holding the key and nothing else.
 # site/tools/indexnow_ping.py announces changed URLs after a deploy.
@@ -82,7 +89,7 @@ launch_date = "2026-10-29"
 # YYYY-MM-DD (29 Oct, one product). Set it to the day of any later legal edit; launch_date stays as it is, so
 # "called 'Trial' before <launch_date>" never moves. On or after launch_date, not after the build date;
 # empty = the build date, and ./site/run.sh bundle refuses an empty one.
-terms_date = "2026-11-06"
+terms_date = "2026-11-08"
 # T0: the day the site moved from GitHub Pages to Cloudflare Pages (the zone became Active, runbook
 # step 83), YYYY-MM-DD. Stated on /privacy/ and /fr/confidentialite/. Required: empty or a date after
 # the build date fails the build. The privacy notice's version is the later of this and launch_date.
@@ -95,7 +102,7 @@ cloudflare_pages_since = "2026-10-24"
 # price", partner and free-test lines in the privacy notice: terms_date and privacy_date = 2026-11-06. Build ahead of
 # that day with DT_TODAY=2026-11-06; on the day itself no variable is needed. When refund_no_result goes on, set
 # refund_effective = "YYYY-MM-DD" under [legal] to the push day and move terms_date to that day or later.
-privacy_date = "2026-11-06"
+privacy_date = "2026-11-08"
 # Verbatim from NON-ADVISER-DESIGN-AND-AUTORENEW A3 (the only approved wording).
 disclaimer_short = "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results."
 disclaimer_long = "donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results."
@@ -202,7 +209,7 @@ rel_me = true
 # 25 Oct sweep (owner: "way too much writing"): four short columns
 [[footer]]
 heading = "Traders"
-links = [["Example report", "/sample-report/"], ["Pricing", "/pricing/"], ["Free tools", "/tools/"], ["For traders", "/for-traders/"]]
+links = [["Example report", "/sample-report/"], ["Free check", "/check/", "paid_report"], ["Pricing", "/pricing/"], ["Free tools", "/tools/"], ["For traders", "/for-traders/"]]
 [[footer]]
 heading = "Firms"
 links = [["For firms", "/for-firms/"], ["Journals & platforms", "/for-platforms/"], ["Sample memo", "/sample-memo/"]]

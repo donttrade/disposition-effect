@@ -898,9 +898,11 @@ def test_code_description_claims_nothing_untrue(site):
 
 def test_sitemap_lastmod_moves_for_changed_pages(site):
     sm = (site / "sitemap.xml").read_text(encoding="utf-8")
-    for p in ["/glossary/", "/code/", "/research/", "/for-researchers/", "/tools/trade-stats/", "/tools/drawdown-calculator/",
+    for p in ["/glossary/", "/code/", "/research/", "/tools/trade-stats/", "/tools/drawdown-calculator/",
               "/research/disposition-effect/", "/research/strategy-tests/", "/tools/disposition-calculator/"]:
         assert f"<loc>{BASE}{p}</loc><lastmod>2026-11-06</lastmod>" in sm, p
+    # 7 Nov: the press page gained the sell-off study's entries (build.LIFTED_UPDATED), so its content date moved with them
+    assert f"<loc>{BASE}/for-researchers/</loc><lastmod>2026-11-07</lastmod>" in sm
 
 
 def test_glossary_lede_does_not_overclaim_sources(site):
@@ -948,7 +950,7 @@ def test_plan_gap_fix_is_logged_on_corrections_and_in_the_feed(site):
     row = re.search(r"(?s)<tr><td>6 Nov 2026</td><td><a href=\"/plan-gap/\">.*?</tr>", c).group(0)
     assert "Author, site review" in row and "not yet public" in row
     feed = (site / "feed.xml").read_text(encoding="utf-8")
-    assert "tag:donttrade.github.io,2026-11-06:correction-7" in feed and "<updated>2026-11-06T00:00:00Z</updated>\n  <author>" in feed
+    assert "tag:donttrade.github.io,2026-11-06:correction-7" in feed and "<updated>2026-11-07T00:00:00Z</updated>\n  <author>" in feed   # 7 Nov: the feed's date is its newest entry's (the sell-off study)
 
 
 # ------------------------------------------------------------------ fix round 4

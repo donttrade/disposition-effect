@@ -5,7 +5,7 @@
 // worker parse path. Nothing is stored, logged or sent: these pages' CSP is connect-src 'none'.
 // No noise checks run here (noise: false), whatever the build's free_badges flag.
 
-import { createFileSlot, renderReadError } from './tool-state.js?v=af9a3c71';
+import { createFileSlot, renderReadError } from './tool-state.js?v=bc577236';
 import { el, unitNote, day, intText } from './format.js?v=35164924';
 
 // 6 Nov (owner: real public data, no worked examples): the button loads the real public-data account
@@ -20,8 +20,8 @@ export const FORMAT_NAMES = {
 
 export const plural = (n, one, many) => `${intText(n)} ${n === 1 ? one : many}`;
 
-// "We're building a test that" / "The donttrade test" (partials/trader_offer.html lead()).
-export const reportLead = (teaser) => (teaser.dataset.onSale === 'true' ? 'The donttrade test' : "We're building a test that");
+// "We're building a test that" / "The Revenge Trading Report" (partials/trader_offer.html lead()).
+export const reportLead = (teaser) => (teaser.dataset.onSale === 'true' ? 'The Revenge Trading Report' : "We're building a test that");
 
 export function tableWrap(label, table) {
   return el('div', { class: 'table-wrap', tabindex: '0', role: 'region', 'aria-label': label }, table);

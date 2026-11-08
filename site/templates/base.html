@@ -32,7 +32,8 @@
 {%- elif page.get("noindex") %}
 <meta name="robots" content="noindex">
 {%- endif %}
-<meta property="og:type" content="website">
+{%- set art_pub = page.get("published") or (study.published if study else "") %}
+<meta property="og:type" content="{{ "article" if art_pub else "website" }}">
 <meta property="og:site_name" content="{{ site.name }}">
 <meta property="og:title" content="{{ page.title }}">
 <meta property="og:description" content="{{ page.description }}">
@@ -40,8 +41,15 @@
 <meta property="og:image" content="{{ site.base_url }}{{ page.og_image }}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="{{ page.title }}">
+<meta property="og:image:alt" content="{{ page.get("og_alt") or page.title }}">
+{%- if art_pub %}
+<meta property="article:published_time" content="{{ art_pub }}">
+<meta property="article:modified_time" content="{{ (page.get("article") or {}).get("dateModified") or page.get("updated") or art_pub }}">
+{%- endif %}
 <meta name="twitter:card" content="summary_large_image">
+{%- if page.get("og_alt") %}
+<meta name="twitter:image:alt" content="{{ page.og_alt }}">
+{%- endif %}
 <meta name="twitter:description" content="{{ page.description }}">
 {%- for name, content in page.get("citation", []) %}
 <meta name="{{ name }}" content="{{ content }}">

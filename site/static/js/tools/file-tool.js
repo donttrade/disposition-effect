@@ -20,8 +20,8 @@ export const FORMAT_NAMES = {
 
 export const plural = (n, one, many) => `${intText(n)} ${n === 1 ? one : many}`;
 
-// "We're building a test that" / "The donttrade test" (partials/trader_offer.html lead()).
-export const reportLead = (teaser) => (teaser.dataset.onSale === 'true' ? 'The donttrade test' : "We're building a test that");
+// "We're building a test that" / "The Revenge Trading Report" (partials/trader_offer.html lead()).
+export const reportLead = (teaser) => (teaser.dataset.onSale === 'true' ? 'The Revenge Trading Report' : "We're building a test that");
 
 export function tableWrap(label, table) {
   return el('div', { class: 'table-wrap', tabindex: '0', role: 'region', 'aria-label': label }, table);

@@ -140,7 +140,7 @@ def test_home_numbers_come_from_data(built_site):
 
 def test_home_has_no_firm_prices_and_the_trader_cta(built_site):
     html = html_of(built_site, "/")
-    prices = __import__("json").load(open(os.path.join(REPO, "site", "config", "prices.json")))
+    prices = __import__("json").load(open((os.environ.get("DT_PRICES_JSON") or os.path.join(REPO, "site", "config", "prices.json"))))
     for p in prices["products"]:
         if p["audience"] == "firm":
             assert B.usd(p["price_usd"]) not in html, p["id"]
@@ -305,7 +305,7 @@ def test_for_traders_waitlist_and_privacy_wording(built_site):
 # ------------------------------------------------------------------ step 15: pricing
 def test_pricing_prices_match_prices_json(built_site):
     import json
-    prices = json.load(open(os.path.join(REPO, "site", "config", "prices.json")))
+    prices = json.load(open((os.environ.get("DT_PRICES_JSON") or os.path.join(REPO, "site", "config", "prices.json"))))
     html = html_of(built_site, "/pricing/")
     plan = next(p for p in prices["products"] if p["id"] == "plan")   # 29 Oct (one product): the firm card
     text = visible(html)

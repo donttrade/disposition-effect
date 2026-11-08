@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{#- /pricing/ (plan step 15; 29 Oct, one product). Every price from prices.json. paid_report on: the donttrade
-    test's two packages side by side (Traders, Firms), then "Free for everyone". Off: the firm package, then the
+{#- /pricing/ (plan step 15; 29 Oct, one product). Every price from prices.json. paid_report on: the Revenge Trading
+    Report's two packages side by side (Traders, Firms), then "Free for everyone". Off: the firm package, then the
     trader waitlist, stacked. All of today's ids are kept: firms copy-leader claims-test platforms traders
     researchers payment refunds history questions. #}
 {% block content %}
@@ -9,14 +9,14 @@
 {%- import "partials/refund_copy.html" as refund with context %}
 {%- from "partials/price_line.html" import price_line %}
 {%- set pilot = products["pilot"] %}{%- set plan = products["plan"] %}{%- set r = products["report39"] %}
-{%- set RETEST = 'Your re-test runs on the version of the test that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.' %}
+{%- set RETEST = 'Your re-test runs on the version of the report that is live when you run it; every change is dated on the <a href="/corrections/">corrections page</a>.' %}
 
-{#- 29 Oct (owner: one product): the firm package of the donttrade test, the same card in both builds. Invoiced, so no
+{#- 29 Oct (owner: one product): the firm package of the Revenge Trading Report, the same card in both builds. Invoiced, so no
     Stripe link. Every amount and rule from prices.json. The old firm ids are anchors inside it, so old links land. -#}
 {%- macro firm_card(anchors=("copy-leader", "claims-test", "platforms", "researchers", "payment")) %}
     <section class="price-card" id="firms" aria-labelledby="pc-firm-h">{% for a in anchors %}<span id="{{ a }}"></span>{% endfor %}
       <h2 id="pc-firm-h">Firms</h2>
-      <p class="pc-value">The test on your whole book. One habit today, more being added.</p>
+      <p class="pc-value">The report on your whole book. One habit today, more being added.</p>
       <p class="price-big"><span class="num">{{ plan.price_usd|usd }}</span> <span class="muted">per trader account a month</span></p>
       <ul class="ticks">
         <li>{{ plan.minimum_usd|usd }} monthly minimum</li>
@@ -55,26 +55,28 @@
   <section class="section" aria-labelledby="traders">
     <h2 id="traders">Individual traders</h2>
     <p><strong>Coming soon, not on sale yet.</strong> No money is taken now. The free tools cost nothing: <a href="/tools/">open the tools</a>.</p>
-    <p>{{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers of the {{ r.name|lower }}, one time, including one re-test. Prices in USD. Nothing is charged now.</p>
+    <p>{{ r.price_usd|usd }} founding price for the first {{ prices.rules.founding_limit }} buyers of the {{ r.name }}, one time, including one re-test. Prices in USD. Nothing is charged now.</p>
     <p>When it launches: a full refund if you ask within {{ prices.rules.trader_refund_days }} days of buying. The seller’s details and the full terms are shown before anyone pays. <a href="/terms/#traders">Trader terms</a></p>
     <p class="btn-row"><a class="btn" href="/for-traders/#waitlist">Join the waitlist — {{ r.price_usd|usd }} founding price</a> <a href="/sample-report/">See the example report</a></p>
   </section>
 {%- endmacro %}
 
 {%- if flags.paid_report %}
-{#- 29 Oct (owner: one product). The donttrade test in two packages side by side: Traders (the pay step #last-step,
+{#- 29 Oct (owner: one product). The Revenge Trading Report in two packages side by side: Traders (the pay step #last-step,
     the only Stripe link on the page) and Firms (invoiced: no card link; its button goes to the Pilot request). Then
     the "Free for everyone" strip. No sample figure and no study finding on this page, so none sits beside a buy
     button. Every old id stays as an anchor (the firm ones inside the Firms card), so old links still land. -#}
 {%- set link = pay_link %}
 <div class="wrap">
   {% include "partials/crumbs.html" %}
-  <h1>One test. Two ways to buy it.</h1>
-  <p class="lede">The donttrade test is the one thing we sell. Everything else is free.</p>
+  <h1>One report. Two ways to buy it.</h1>
+  <p class="lede">The Revenge Trading Report is the one thing we sell. Everything else is free.</p>
   <div class="price-cards price-cards-2" id="traders">
     <section class="price-card price-card-main" aria-labelledby="pc-report-h">
-      <h2 id="pc-report-h">Traders</h2>
+      <h2 id="pc-report-h">The {{ r.name }}</h2>
+      <p class="pc-scope">Re-entering after a loss and trading after a losing run, tested against chance, plus {{ (prices.rules.habits_measured - prices.rules.habits_tested)|numword }} more habits around losses, totalled in dollars.</p>
       <p class="pc-value">Is your habit real, or luck? Test your own trades.</p>
+      <p class="small pc-check"><a href="/check/">Run the free check first</a>: it counts the trades the report would work on, in your browser, before you pay.</p>
       <p class="price-big"><span class="num">{{ r.price_usd|usd }}</span> <span class="muted">USD, once · re-test included</span></p>
       <p class="small" id="founding-line">{{ price_line(r, prices.rules) }}</p>
       <ul class="ticks">
@@ -82,14 +84,14 @@
         <li>Up to {{ prices.rules.habits_tested|numword }} tested against chance</li>
         <li>The dollar total for each habit</li>
         <li>One free re-test, 30 to 60 days later</li>
-        <li>Pay by card on Stripe’s page</li>
+        <li>Pay by card on {% if managed_pay %}Link’s secure page (Stripe){% else %}Stripe’s page{% endif %}</li>
       </ul>
       {#- 29 Oct (Tester sweep 3 #4): #last-step and #byp-more are open in the HTML, so a visitor without JavaScript
           who follows a buy link to #last-step lands on the open pay step with the full details. pay.js closes each at
           load unless the URL targets it or something inside it, and site.css paints them closed until then (theme.js
           .dt-pay-hash / .dt-byp-hash when the URL names them), so with JavaScript nothing changes and nothing shifts. -#}
       <details class="pay-step" id="last-step" open>
-        <summary class="btn">Take the test for {{ r.price_usd|usd }}</summary>
+        <summary class="btn">Get the report for {{ r.price_usd|usd }}</summary>
         {#- 29 Oct (owner): one click. Three facts, the complete Before-you-pay block one tap away (unchanged, on
             this page, before the Stripe button, printable: Ontario CPA s. 38 / O. Reg. 17/05 s. 32), then the button.
             The binding acceptance is the terms tick on Stripe's checkout; no second required tick here (Baymard). -#}
@@ -107,7 +109,7 @@
           <p class="small muted pay-links no-print"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a> · <a href="/terms/#seller">Business details</a></p>
         </div>
       </details>
-      <p class="small muted">Total {{ r.price_usd|usd }} USD, paid on Stripe’s page.</p>
+      <p class="small muted">Total {{ r.price_usd|usd }} USD{% if managed_pay and not tax_included %} plus any sales tax, VAT or GST{% elif managed_pay %}, any tax included{% endif %}, paid on {% if managed_pay %}Link’s secure page (Stripe){% else %}Stripe’s page{% endif %}.</p>
       <p class="small" id="refunds">{{ refund.pricing_line() }}</p>
       <p class="small"><a href="/sample-report/">See the example report</a> · <a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a></p>
       {% if stripe_mode == "test" %}<p class="notice notice-caution"><strong>Test mode</strong> Payments here use Stripe's test mode. No real card is charged.</p>{% endif %}

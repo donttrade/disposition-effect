@@ -45,12 +45,16 @@ one_product = ["improve", "improves", "improving", "signal", "score", "scores", 
 ignore_case = ['\bb[eê]ta\b', '\bhabit[\s-]+reports?\b', '\bhabit[\s-]+trackers?\b', '\boutcomes[\s-]+packs?\b', '\bdemo\b', '\bfake\b',
                '\bmade-up\b', '\bnot\s+a\s+real\s+trader\b', '\bnot\s+tested\b', '\bdescribed,\s+not\b', '\bdescribed\s+only\b',
                '\bonly\s+described\b', '\bdescribed\s+(?:here\s+|below\s+)?without\s+a\s+verdict\b', '\(described\b',
-               '\b(?:is|are)\s+described\s+(?:here|below)\b']
+               '\b(?:is|are)\s+described\s+(?:here|below)\b',
+               # 7 Nov (free check, R1b): the product is "The Revenge Trading Report"; its two retired names and the old button
+               '\bdonttrade\s+test\b', '\btest\s+donttrade\b', '\btake\s+the\s+test\b']
 # case-sensitive: the product names, not the words ("a one-page memo", "a data snapshot")
 match_case = ['\bSnapshots?\b', '\bMemos?\b']
 allow = ['Fixed-price firm engagements \(Snapshot, Memo, Outcomes pack\) were withdrawn on \d{1,2} [A-Z][a-z]{2} \d{4}',
          # /corrections/#report-method: the dated method entry and the dated rename line (history, written as it was)
-         'First version of the habit report\.', 'The habit report is renamed the donttrade test']
+         'First version of the habit report\.', 'The habit report is renamed the donttrade test',
+         # 7 Nov: the second dated rename line (history, written as it was)
+         'The donttrade test was renamed the Revenge Trading Report']
 
 [allow]
 # the one place the old product name may appear: "called “Trial” before <[legal] launch_date>" (Manager C3)

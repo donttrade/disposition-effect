@@ -16,7 +16,7 @@
     <p class="kicker">Study · Method written down first · {{ page.published|longdate }}</p>
     <h1>{{ page.h1 }}</h1>
     <p class="lede">{{ page.dek }}</p>
-    <p class="meta">Published {{ page.published|longdate }} · Data: <a href="{{ sell.source.trades_url }}" rel="noopener">Ironflow</a>, <a href="{{ sell.source.licence_url }}" rel="noopener">{{ sell.source.licence }}</a> · Method written down and hashed before the data was opened (our own clock; the hash is published): <a href="#sell-method">plan, hash and code</a></p>
+    <p class="meta">Published {{ page.published|longdate }}{% if page.updated and page.updated != page.published %} · Updated {{ page.updated|longdate }}{% endif %} · Data: <a href="{{ sell.source.trades_url }}" rel="noopener">Ironflow</a>, <a href="{{ sell.source.licence_url }}" rel="noopener">{{ sell.source.licence }}</a> · Method written down and hashed before the data was opened (our own clock; the hash is published): <a href="#sell-method">plan, hash and code</a> · <a href="#press">For journalists: figures and files</a></p>
   </header>
 
   <section class="sell-sec" aria-labelledby="sell-keys-h">
@@ -28,6 +28,8 @@
       <div class="stat"><dt>Placed a new market order within 15 minutes</dt><dd>{{ F.retrade15 }}</dd><dd class="stat-note">Of force-closed wallets. The 30 days before: {{ F.pooled15 }}. We did not compare with wallets that were not force-closed on the same day, so a busier day may explain part of this gap.</dd></div>
     </dl>
     <p class="small">UTC days, {{ F.event_short }} against the 30 days {{ F.base_first }} to {{ F.base_last }}. A wallet is an address, not a person. One crypto exchange, not the US stock market.</p>
+    {#- the lead chart, directly under the key numbers (7 Nov): the same figure the study turns on, with its finding as the title -#}
+    {%- set f = sell.figs[0] %}{% set c = sell[f.key] %}{% set lead = True %}{% include "partials/study_figure.html" %}
   </section>
 
   <section class="sell-sec" aria-labelledby="sell-what-h">
@@ -64,18 +66,8 @@
     <p class="small">Rank 1 is the highest of the 31 days. Ranks describe the 31 days; they are not a test of cause, and the days are not independent draws. The share rows use the daily median; pooled over all wallets in the 30 days the 15-minute share is {{ F.pooled15 }} and the 60-minute share {{ F.pooled60 }}. “Middle half” is the first to third quartile of the 30 daily values by the exclusive method (Python <code>statistics.quantiles</code>); a spreadsheet’s QUARTILE.INC gives slightly different ends.</p>
     <p><strong>Two ways to say “a normal day”.</strong> The table’s “times the median” is the plan’s measure, fixed before the data was opened: the median of all 30 days before, weekends included. {{ F.event_short }} was a {{ F.event_weekday }}, and the builder-listed markets are much quieter at weekends: on the {{ F.we_n }} weekend days among the 30, the median was {{ F.hip3_we_median }} wallets, against {{ F.hip3_wd_median }} on weekdays, though the busiest, {{ F.hip3_we_max_day }}, had {{ F.hip3_we_max }}. So we also show, as an extra that is not in the plan, the median of the {{ F.wd_n }} weekdays among them: builder-listed wallets {{ F.hip3_wd_ratio }} times that median ({{ F.hip3_wd_median }}), value {{ F.hip3_value_wd_ratio }} times; all wallets {{ F.wallets_wd_ratio }} times ({{ F.wallets_wd_median }}), value {{ F.value_wd_ratio }} times. Headlines use the weekday figure because it is the smaller. {{ F.event_short }} still ranks {{ F.hip3_wd_rank }} of the {{ F.wd_n + 1 }} weekdays for builder-listed wallets.</p>
 
-    <figure class="chart sell-chart">
-      <figcaption class="chart-title">Wallets force-closed each day, all markets (UTC days). {{ F.event_short }} in orange; dashed line: median of the 30 days before.</figcaption>
-      {%- set c = sell.c1 %}{% include "partials/selloff_bars.html" %}
-    </figure>
-    <figure class="chart sell-chart">
-      <figcaption class="chart-title">Wallets force-closed each day on builder-listed (HIP-3) markets. {{ F.event_short }} in orange; dashed line: median of the 30 days before.</figcaption>
-      {%- set c = sell.c2 %}{% include "partials/selloff_bars.html" %}
-    </figure>
-    <figure class="chart sell-chart">
-      <figcaption class="chart-title">Value force-closed in each hour of {{ F.event_short }} (UTC), in millions of US dollars. The shaded band is the US stock-market session, {{ F.cash_utc }} ({{ F.cash_open }} to {{ F.cash_close }} New York time).{% if sell.suppressed %} Hour {{ "%02d"|format(sell.suppressed[0]) }} UTC had fewer than 10 wallets and is not shown.{% endif %}</figcaption>
-      {%- set c = sell.c3 %}{% include "partials/selloff_bars.html" %}
-    </figure>
+    {%- set f = sell.figs[1] %}{% set c = sell[f.key] %}{% set lead = False %}{% include "partials/study_figure.html" %}
+    {%- set f = sell.figs[2] %}{% set c = sell[f.key] %}{% include "partials/study_figure.html" %}
     <details class="sell-numbers">
       <summary>The numbers behind the charts, as tables</summary>
       <div class="table-wrap" tabindex="0" role="region" aria-label="Daily counts">
@@ -188,13 +180,50 @@ python3 -I per_market.py build per-market-days {{ pm.csv_url.rsplit("/", 1)[1] }
       <li><strong>Counts.</strong> Perpetual futures only, spot excluded; the exchange’s placeholder address is left out. Counts are exact; values are given to three significant figures. The statistics are the plan’s: the median and the middle half (first to third quartile, exclusive method) of the 30 days before, the lowest and highest, and the rank among the 31 days. The weekday median is an added descriptive extra, not in the plan. No other test was run.</li>
       <li><strong>Download.</strong> <a href="{{ sell.csv_url }}" download>Daily counts as a CSV</a>, 31 rows. Added after the plan: <a href="{{ sell.pm.csv_url }}" download>every market, every day</a> (made by <a href="{{ sell.pm.script_url }}">per_market.py</a>) and <a href="{{ sell.pm.verified_url }}" download>what each large market tracks</a>; see <a href="#sell-pm-h">Market by market</a>.</li>
     </ul>
-    <p>Cite this page as: donttrade ({{ page.published[:4] }}). {{ page.h1 }}. {{ site.base_url }}{{ page.path }}. A permanent copy with a DOI is being deposited; this page will link it when it exists. Text: CC BY-NC 4.0. Counts and code: CC BY 4.0. Corrections go on <a href="/corrections/">the corrections page</a>.</p>
+    <p>Cite this page as: donttrade ({{ page.published[:4] }}). {{ page.h1 }}. {{ site.base_url }}{{ page.path }}. A permanent copy with a DOI is being deposited; this page will link it when it exists. Text: CC BY-NC 4.0. Charts, counts and code: CC BY 4.0. Corrections go on <a href="/corrections/">the corrections page</a>.</p>
   </section>
 
   <section class="sell-sec" aria-labelledby="sell-own-h">
     <h2 id="sell-own-h">8. See your own {{ F.event_short }}</h2>
     <p>These are counts across many wallets. Your own file can show what you did that day, next to your typical day. The <a href="{{ page.check_path }}?d={{ page.check_days }}">Bad-day check</a> runs in your browser: the file is not uploaded. It counts and does not judge.</p>
     <p class="small">Related: <a href="/learn/drawdown-recovery-table/">how much gain a fall takes to undo</a> · <a href="/learn/losing-streak-probability/">losing streak probability</a></p>
+  </section>
+
+  <section class="sell-sec" id="press" aria-labelledby="sell-press-h">
+    {#- 7 Nov: for journalists. Plain sentences in the page's own figures (sell.press, from site/selloff.py), the chart files, the press pack. No price, no offer. -#}
+    <h2 id="sell-press-h">For journalists</h2>
+    <p>{{ sell.press.summary }}</p>
+    <h3>Figures you can quote as written</h3>
+    <ul>
+    {%- for q in sell.press.quotable %}
+      <li>{{ q }}</li>
+    {%- endfor %}
+    </ul>
+    <h3>To stay accurate</h3>
+    <ul>
+    {%- for n in sell.press.notes %}
+      <li>{{ n }}</li>
+    {%- endfor %}
+    </ul>
+    <h3>Files you can use</h3>
+    <p><a href="{{ sell.press_zip_url }}" download>Press pack (ZIP): the charts as PNG, the CSVs, the method and a one-page summary</a>. Charts are CC BY 4.0: credit “Chart: donttrade.ca (CC BY 4.0)”.</p>
+    <ul class="press-files">
+    {%- for f in sell.figs %}
+      <li>{{ f.title }}: <a href="/assets/charts/selloff/{{ f.id }}.png" download>PNG</a> · <a href="/assets/charts/selloff/{{ f.id }}.svg" download>SVG</a> · <a href="{{ f.csv }}" download>CSV</a></li>
+    {%- endfor %}
+    </ul>
+    <p>Questions: <a href="mailto:{{ sell.press_email }}?subject=Press%3A%205%20November%20sell-off">{{ sell.press_email }}</a>, subject “Press”. We reply within 1 business day; interviews by email only.</p>
+  </section>
+
+  <section class="sell-sec study-subscribe" aria-labelledby="sell-mail-h">
+    {#- 7 Nov: the same box and wording as /research/ and the older studies (Substack, a plain GET form); no price, no figure, no offer -#}
+    <h2 id="sell-mail-h">Get the next study by email</h2>
+    <p>Get the next study by email the day it’s published — with the script, and whichever way the result goes.</p>
+    <form action="https://donttrade.substack.com/subscribe" method="get">
+      <label class="visually-hidden" for="study-em">Email address</label>
+      <input id="study-em" type="email" name="email" placeholder="you@example.com" required autocomplete="email">
+      <button type="submit">Email me the next study</button>
+    </form>
   </section>
 
   <section class="sell-sec" aria-labelledby="sell-refs-h">

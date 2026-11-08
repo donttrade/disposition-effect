@@ -12,7 +12,7 @@
   <section class="section" aria-labelledby="pr-h">
     <div class="grid"><div class="span-8 prose">
       <h1 id="pr-h">Do early trading habits predict prop-challenge rule breaches?</h1>
-      <p class="lede">We take each account’s first 30 trades and compute the DT-1 habit index from them: one number built from the habits the donttrade test measures. Then we ask whether accounts with a higher index went on to break a daily-loss or max-loss rule in the next 30 days more often than accounts with a lower index, and whether the index adds anything beyond size, volatility, P&amp;L so far and how close the account already was to its limit.</p>
+      <p class="lede">We take each account’s first 30 trades and compute the DT-1 habit index from them: one number built from the habits the Revenge Trading Report measures. Then we ask whether accounts with a higher index went on to break a daily-loss or max-loss rule in the next 30 days more often than accounts with a lower index, and whether the index adds anything beyond size, volatility, P&amp;L so far and how close the account already was to its limit.</p>
       <p>The plan was registered before any data was analysed: <a href="{{ st.osf_url }}" rel="noopener">the OSF registration</a>, timestamped {{ st.registered_on }}. The result is published whatever it shows, including a result that says the habits add nothing.</p>
 
       {%- if not res %}
@@ -23,7 +23,7 @@
       <p>After the exclusions, fewer than 100 accounts broke a rule, or fewer than 100 did not. That is too few for any verdict. Nothing is claimed either way, and the study keeps collecting under the same registration.</p>
       {%- elif v == "FAIL: does not predict usefully" %}
       <h2 id="pr-status">Result: the habit index did not predict breaches usefully</h2>
-      <p>Accounts with a higher habit index were not usefully more likely to break a loss rule in the next 30 days. Either the ranking accuracy (AUC) was below 0.55, or its whole 95% interval was below 0.60. donttrade does not offer the habit index as a risk measure. The donttrade test still describes past habits, with no claim about what happens next.</p>
+      <p>Accounts with a higher habit index were not usefully more likely to break a loss rule in the next 30 days. Either the ranking accuracy (AUC) was below 0.55, or its whole 95% interval was below 0.60. donttrade does not offer the habit index as a risk measure. The Revenge Trading Report still describes past habits, with no claim about what happens next.</p>
       {%- elif v == "FAIL: adds nothing" %}
       <h2 id="pr-status">Result: habits rank risk, but add nothing beyond size, volatility and headroom</h2>
       <p>Accounts with a higher habit index did break loss rules more often. But a simple model with no habits in it (activity, volatility, P&amp;L so far and headroom) ranked them just as well, so the habit index added nothing to it. donttrade makes no claim that habits add predictive value.</p>
@@ -168,7 +168,7 @@
       </ul>
       <h2 id="pr-code">Check the code yourself</h2>
       <p>The firm runs the open-source script <code>prediction_test.py</code> on its own machine. The script has no network access and prints only group totals. Its SHA-256 fingerprints are listed in the registration, in the code’s licensing file and in the <a href="{{ st.code_url }}" rel="noopener">release {{ st.release_tag }}</a>. Anyone can run it on the published synthetic file and compare the output byte for byte.</p>
-      <p class="small">donttrade sells the donttrade test and gains from a positive result. That is why the plan was registered first, the code is public and every result is published. If anything here is found to be wrong, it is listed on <a href="/corrections/">corrections</a>. Not investment advice.</p>
+      <p class="small">donttrade sells the Revenge Trading Report and gains from a positive result. That is why the plan was registered first, the code is public and every result is published. If anything here is found to be wrong, it is listed on <a href="/corrections/">corrections</a>. Not investment advice.</p>
     </div></div>
   </section>
 </div>

@@ -1,7 +1,7 @@
 """Tester merge re-check (24 Oct, report §11) on the preview-combined merge: the wording items MR-1..MR-5.
 
 MR-1: the /for-traders/ comparison row says which code is public (the study scripts, as /code/ counts them) and
-that the donttrade test's engine is not.
+that the Revenge Trading Report's engine is not.
 MR-5: a paid build names the seller, so its /about/ and /code/ no longer say "there is no name"; a free build keeps
 the old line word for word, and the paid swap is the only frozen-body difference compare.py and lint accept."""
 import os
@@ -73,7 +73,7 @@ def test_mr1_comparison_row_names_the_public_scripts_and_the_private_engine(buil
 # ------------------------------------------------------------------ MR-5
 FREE_ABOUT = "There’s no name on it on purpose: every study names the script"
 FREE_CODE = "There is no name on this site; the scripts are what you check instead."
-SELLER = ("the seller’s legal name is given for buyers in Before you pay, the terms and the privacy notice")
+SELLER = ("the seller block in Before you pay, the terms and the privacy notice gives who sells the report and a business address, phone and email, and prints no personal name")
 PAID_ABOUT = "No author name is published here, on purpose (" + SELLER + "): every study names the script"
 PAID_CODE = "No author name is published on this site (" + SELLER + "); the scripts are what you check instead."
 

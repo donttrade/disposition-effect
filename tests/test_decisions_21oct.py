@@ -215,7 +215,7 @@ def refund_sentence(price):
             f"full US${price:,} by the end of the next business day, without being asked.")
 
 
-PRICES = __import__("json").load(open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8"))
+PRICES = __import__("json").load(open((os.environ.get("DT_PRICES_JSON") or os.path.join(REPO, "site", "config", "prices.json")), encoding="utf-8"))
 PILOT_PRICE = next(p for p in PRICES["products"] if p["id"] == "pilot")["price_usd"]
 SENTENCE = refund_sentence(PILOT_PRICE)
 

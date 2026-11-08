@@ -436,7 +436,7 @@ def test_owner_launch_pricing_is_gone_from_every_build_and_prices_json(both_buil
             h = p.read_text(encoding="utf-8")
             t = L.visible_text(h)
             assert not re.search(r"(?i)launch pric|31 March 2027|priceValidUntil", h + t), p
-    prices = json.load(open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8"))
+    prices = json.load(open((os.environ.get("DT_PRICES_JSON") or os.path.join(REPO, "site", "config", "prices.json")), encoding="utf-8"))
     assert "launch_valid_until" not in prices and "2027-03-31" not in json.dumps(prices)
     pricing = (off / "pricing" / "index.html").read_text(encoding="utf-8")
     assert "Firm prices are in US dollars (USD), before any applicable sales tax." in L.visible_text(pricing)
@@ -559,7 +559,7 @@ def test_n2_lint_warns_when_it_cannot_check_the_address(tmp_path):
 
 
 def test_n3_lint_reads_the_builds_prices_json(tmp_path, monkeypatch):
-    p = json.load(open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8"))
+    p = json.load(open((os.environ.get("DT_PRICES_JSON") or os.path.join(REPO, "site", "config", "prices.json")), encoding="utf-8"))
     for x in p["products"]:
         if x["id"] == "pilot":
             x["price_usd"] = 845

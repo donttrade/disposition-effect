@@ -8,8 +8,14 @@
    "name": "DT-1"
   }
  ],
- "renamed": {
-  "date": "2026-10-29",
-  "text": "The habit report is renamed the donttrade test, and its first method is named DT-1. Method, engine and wording are unchanged."
- }
+ "renamed": [
+  {
+   "date": "2026-10-29",
+   "text": "The habit report is renamed the donttrade test, and its first method is named DT-1. Method, engine and wording are unchanged."
+  },
+  {
+   "date": "2026-11-07",
+   "text": "The donttrade test was renamed the Revenge Trading Report. Method, engine and price are unchanged."
+  }
+ ]
 }

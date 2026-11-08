@@ -54,7 +54,9 @@ export function randomPerm(n) {
 }
 
 // trades: ParseResult.trades (close-time order). perm(n) is injectable for tests.
-export async function stripRows(trades, salt, perm = randomPerm) {
+// toRows: the rows of stripRows without the fingerprint (o, h, d, q, p, s), and nothing that identifies a trade. It applies
+// the 10-year span and the 20,000-row cap. `used` (the trades kept, row for row) is for stripRows only; the free check ignores it.
+export function toRows(trades, perm = randomPerm) {
   let maxOpen = -Infinity;
   for (const t of trades) if (t.open_ts > maxOpen) maxOpen = t.open_ts;
   const inSpan = trades.filter((t) => t.open_ts >= maxOpen - SPAN_KEEP_MS && t.hold_s <= MAX_HOLD_S);
@@ -72,10 +74,14 @@ export async function stripRows(trades, salt, perm = randomPerm) {
   const p = perm(symbols.length);
   const index = new Map(symbols.map((s, i) => [s, p[i]]));
   const med = new Map([...qtyBySym].map(([s, qs]) => [s, median(qs)]));
+  const rows = used.map((t) => ({ o: Math.floor((t.open_ts - anchor) / 60000), h: t.hold_s, d: t.dir === 'long' ? 1 : -1,
+    q: round3(t.qty / med.get(t.symbol)), p: round2(t.pnl), s: index.get(t.symbol) }));
+  return { rows, used, limited: inSpan.length > MAX_ROWS, anchor, span_left_out: trades.length - inSpan.length };
+}
+
+export async function stripRows(trades, salt, perm = randomPerm) {
+  const r = toRows(trades, perm);
   const rows = [];
-  for (const t of used) {
-    rows.push({ o: Math.floor((t.open_ts - anchor) / 60000), h: t.hold_s, d: t.dir === 'long' ? 1 : -1,
-      q: round3(t.qty / med.get(t.symbol)), p: round2(t.pnl), s: index.get(t.symbol), f: await fingerprint(salt, t) });
-  }
-  return { rows, limited: inSpan.length > MAX_ROWS, anchor, span_left_out: trades.length - inSpan.length };
+  for (let i = 0; i < r.rows.length; i++) rows.push({ ...r.rows[i], f: await fingerprint(salt, r.used[i]) });
+  return { rows, limited: r.limited, anchor: r.anchor, span_left_out: r.span_left_out };
 }

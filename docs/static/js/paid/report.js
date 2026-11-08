@@ -6,15 +6,15 @@
 // Every number on the page comes from the server's Report or from the file in this
 // tab; the wording only describes past trades (NON-ADVISER A3).
 
-import { runFile } from '../engine/index.js?v=2c9dccbc';
+import { runFile } from '../engine/index.js?v=4424ac06';
 import { ics, retestLine, RETEST_LINE } from './retest-copy.js?v=b3748546';
-import { pgrPlrCounts } from '../engine/pgr.js?v=ad82f547';
-import { stripRows, spanLine } from './strip.js?v=03137080';
+import { pgrPlrCounts } from '../engine/pgr.js?v=528c8fa1';
+import { stripRows, spanLine } from './strip.js?v=ae765086';
 import { api, loadToken, saveToken, tokenFromHash, decodeToken, downloadRestoreFile, OUTAGE } from './token.js?v=16f6dd26';
 import { habitSentences, methodLine, page1Lines, coverageLines, mergedLine, checkReport, SENTENCE_HABITS, RESEARCH, RESEARCH_PREFIX, holdDays,
   V_LAUNCH, V_LAUNCH_SIZE, V_NO, moreTrades } from './wording.js?v=0cb7d61e';
-import { factsSection, challengeSection, smallLayout, presetsFromPage } from './small-facts-view.js?v=ef31dc5c';
-import { reportTrades } from './small-facts.js?v=78faeb32';
+import { factsSection, challengeSection, smallLayout, presetsFromPage } from './small-facts-view.js?v=3ea00dc2';
+import { reportTrades } from './small-facts.js?v=09a964b9';
 
 // Off until "N more trades" can be shown without ever understating N (Tester slice 1 re-test: worlds
 // with too few files per share band were ignored, so some files were told too few). Backlog item.
@@ -444,7 +444,7 @@ export function renderReport(report, out, meta) {
   }
   const print = el('button', { class: 'btn btn-secondary', type: 'button', text: 'Print or save as PDF' });
   print.addEventListener('click', () => window.print());
-  const body = 'I took the donttrade test on my own trades. Firms can test their own records too: https://donttrade.ca/for-firms/?ref=report';
+  const body = 'I ran the Revenge Trading Report on my own trades. Firms can test their own records too: https://donttrade.ca/for-firms/?ref=report';
   const mail = el('a', { class: 'btn btn-secondary', href: 'mailto:?subject=' + encodeURIComponent('A trading-habit measurement for your firm') + '&body=' + encodeURIComponent(body), text: 'Send to your firm' });
   out.append(el('section', { class: 'section no-print' }, el('h2', { text: 'Next' }),
     firstReport ? el('p', { id: 'rp-retest', text: win ? retestLine(win) : RETEST_LINE }) : null,
@@ -488,13 +488,40 @@ function status(msg, kind = '') {
   s.hidden = false;
 }
 
-async function run(file) {
-  if (!token) { status('No access found on this device. Open the restore link or restore file you saved after paying.', 'error'); return; }
+// The free check (/check/) leaves the file it read in this tab (sessionStorage), for a day at most, so the report can read it again with this
+// same engine and start from it with no second upload: the rows, fingerprints and counts are those of a dropped file.
+const HANDOFF = 'dt_check_v1';
+function checked() {
+  try {
+    const j = JSON.parse(sessionStorage.getItem(HANDOFF));
+    if (j && j.v === 1 && Date.now() - j.ts < 86400000 && typeof j.b64 === 'string' && j.n_trades > 0) return j;
+    sessionStorage.removeItem(HANDOFF);
+  } catch (e) { /* storage blocked or the key is damaged: the drop zone works as before */ }
+  return null;
+}
+const forget = () => { try { sessionStorage.removeItem(HANDOFF); } catch (e) { /* nothing to clear */ } };
+
+function access() {
+  if (!token) { status('No access found on this device. Open the restore link or restore file you saved after paying.', 'error'); return null; }
   const payload = decodeToken(token);
-  if (!payload) { status('This access link is damaged. Use your restore link.', 'error'); return; }
+  if (!payload) status('This access link is damaged. Use your restore link.', 'error');
+  return payload;
+}
+
+async function run(file) {
+  if (!access()) return;
+  await runBytes(new Uint8Array(await file.arrayBuffer()));
+}
+
+async function runBytes(bytes) {
   status('Reading your file in this tab…');
-  const parsed = runFile(new Uint8Array(await file.arrayBuffer()));
+  const parsed = runFile(bytes);
   if (parsed.error) { status(parsed.error.message, 'error'); return; }
+  await analyse(parsed);
+}
+
+async function analyse(parsed) {
+  const payload = decodeToken(token);   // access() has passed
   const trades = parsed.result.trades;
   const stripped = await stripRows(trades, payload.salt);
   const counts = pgrPlrCounts(parsed.result.executions);
@@ -507,6 +534,7 @@ async function run(file) {
   if (r.status === 0 || r.status >= 500) { status(OUTAGE, 'error'); return; }
   if (!r.ok) { status(r.json && r.json.error ? r.json.error.message : 'The report could not be made.', 'error'); return; }
   $('rp-status').hidden = true;
+  forget();   // the checked file has been used (or a file was chosen instead): nothing is left in the tab
   try {
     renderReport(r.json.report, $('rp-out'), { limited: stripped.limited, span_left_out: stripped.span_left_out, retest: r.json.retest || null, uses_left: r.json.uses_left,
       trades, format: parsed.result.format });
@@ -524,6 +552,14 @@ async function init() {
   if (fromHash) { token = fromHash; await saveToken(fromHash); } else token = await loadToken();
   $('rp-restore-file').addEventListener('click', () => { if (token) downloadRestoreFile(token); });
   $('rp-access').textContent = token ? 'Access found on this device.' : 'No access found on this device yet.';
+  const kept = checked();
+  if (kept) {
+    const day = (ts) => new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+    $('rp-hand-what').textContent = `${kept.n_trades} trades, ${day(kept.first)} – ${day(kept.last)}`;
+    $('rp-handoff').hidden = false;
+    $('rp-hand-use').addEventListener('click', () => { if (!access()) return; $('rp-handoff').hidden = true; runBytes(Uint8Array.from(atob(kept.b64), (ch) => ch.charCodeAt(0))); });
+    $('rp-hand-other').addEventListener('click', () => { $('rp-handoff').hidden = true; forget(); $('rp-file').focus(); });
+  }
   $('rp-file').addEventListener('change', (ev) => { if (ev.target.files[0]) run(ev.target.files[0]); });
   const dz = $('rp-drop');
   dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('is-over'); });

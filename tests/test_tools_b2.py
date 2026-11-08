@@ -272,7 +272,7 @@ def test_csp_unchanged_and_no_inline_style_or_script(built_site):
 
 
 def test_firms_study_sentence_only_with_prices_study(tmp_path):
-    prices = json.load(open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8"))
+    prices = json.load(open((os.environ.get("DT_PRICES_JSON") or os.path.join(REPO, "site", "config", "prices.json")), encoding="utf-8"))
     # once forfirms is merged, /for-firms/ itself needs prices.study, so a build without it is only made before that
     needs = "prices.study" in open(os.path.join(REPO, "site", "templates", "pages", "for-firms.html"), encoding="utf-8").read()
     out = {}
@@ -833,9 +833,22 @@ def test_r2_non_tools_docs_pages_differ_from_main_only_by_asset_hashes():
     selloff = ("docs/help/index.html", "docs/learn/drawdown-recovery-table/index.html",
                "docs/learn/losing-streak-probability/index.html", "docs/research/index.html",
                # 6 Nov: the study page itself gains the "Market by market" section (tests/test_selloff.py holds it)
-               "docs/research/5-november-2026-sell-off/index.html")
+               "docs/research/5-november-2026-sell-off/index.html",
+               # 7 Nov (study-page improvements): the press page lists the sell-off study and its files, and the four studies with a DOI gain
+               # og:type article and article:published_time / modified_time in their head (tests/test_study_pages_v2.py holds each change)
+               "docs/for-researchers/index.html", "docs/research/disposition-effect/index.html",
+               "docs/research/insider-buying-edge/index.html", "docs/research/portfolio-driven-disposition-effect/index.html",
+               "docs/research/volatility-scaled-momentum/index.html")
+    # free-check release, 7 Nov: rename, seller block, check-first copy; each change held by test_one_product,
+    # test_c14_legal_copy and test_free_check. Only needed until this branch is merged and the base moves.
+    freecheck = tuple(f"docs/{p}/index.html" for p in (
+        "about", "before-you-pay", "corrections", "for-firms", "for-traders", "for-traders/thanks",
+        "fr/avant-de-payer", "fr/conditions", "fr/confidentialite", "glossary", "independence", "pricing",
+        "privacy", "report", "restore", "sample-report", "start", "terms", "thanks", "welcome"))
+    main = lambda t: (re.search(r"(?s)<main\b.*?</main>", t) or re.search(r"(?s)^.*$", t)).group(0)   # noqa: E731
     for n in names:
-        if n.startswith(("docs/tools/", "docs/static/")) or not n.endswith(".html") or n == "docs/index.html" or n in selloff:
+        if n.startswith(("docs/tools/", "docs/static/")) or not n.endswith(".html") or n == "docs/index.html" or n in selloff \
+                or n in freecheck or n == "docs/check/index.html":
             continue
         try:
             was = subprocess.run(["git", "-C", REPO, "show", f"{BASE}:{n}"], capture_output=True, text=True,
@@ -843,7 +856,8 @@ def test_r2_non_tools_docs_pages_differ_from_main_only_by_asset_hashes():
         except subprocess.CalledProcessError:
             continue
         now = open(os.path.join(REPO, n), encoding="utf-8").read()
-        assert norm(now) == norm(was), n
+        # the site chrome (header button, footer hook line, storage line) changed on purpose: compare <main> only
+        assert norm(main(now)) == norm(main(was)), n
 
 
 def test_r2_disposition_sample_memo_link_is_a_dated_lift_fix(built_site):

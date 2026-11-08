@@ -17,4 +17,7 @@
   <line class="line-median" x1="{{ c.pl }}" x2="{{ c.pr }}" y1="{{ c.median_y }}" y2="{{ c.median_y }}"/>
   {%- endif %}
   {%- if c.shade %}<text class="axis" x="{{ c.shade.x + 4 }}" y="{{ c.pt + 12 }}">US stock hours</text>{% endif %}
+  {%- for l in c.credit %}
+  <text class="fig-credit" x="8" y="{{ l.y }}">{{ l.t }}</text>
+  {%- endfor %}
 </svg>

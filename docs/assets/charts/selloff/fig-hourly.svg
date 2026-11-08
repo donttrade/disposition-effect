@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 790" width="1000" height="790" font-family="Plex Sans, IBM Plex Sans, Arial, Helvetica, sans-serif" role="img" aria-labelledby="t d">
+<title id="t">73% of the value force-closed on 5 Nov fell inside US stock-market hours</title>
+<desc id="d">Bar chart of the value force-closed in each hour of 5 Nov (UTC), in millions of US dollars. The busiest hours are inside the US stock-market session, which is shaded: 73% of the day's value fell inside it. The same numbers are in the table below.</desc>
+<rect width="1000" height="790" fill="#FFFFFF"/>
+<text x="38" y="66" font-size="28" font-weight="600" fill="#16181C">73% of the value force-closed on 5 Nov fell inside US</text>
+<text x="38" y="102" font-size="28" font-weight="600" fill="#16181C">stock-market hours</text>
+<text x="38" y="134" font-size="18" fill="#5B606A">Value force-closed in each hour of 5 Nov (UTC), in millions of US dollars. The shaded band</text>
+<text x="38" y="159" font-size="18" fill="#5B606A">is the US stock-market session, 14:30 to 21:00 UTC (9:30 a.m. to 4 p.m. New York time). Hour</text>
+<text x="38" y="184" font-size="18" fill="#5B606A">07 UTC had fewer than 10 wallets and is not shown.</text>
+<g transform="translate(38 206) scale(2.2)">
+<rect x="267.1" y="14" width="99.1" height="162" fill="#F4F5F7"/>
+<line x1="46" x2="412" y1="176.0" y2="176.0" stroke="#DADCE0" stroke-width="1"/>
+<text x="40" y="180.0" text-anchor="end" font-size="11" fill="#5B606A">0</text>
+<line x1="46" x2="412" y1="122.0" y2="122.0" stroke="#DADCE0" stroke-width="1"/>
+<text x="40" y="126.0" text-anchor="end" font-size="11" fill="#5B606A">50</text>
+<line x1="46" x2="412" y1="68.0" y2="68.0" stroke="#DADCE0" stroke-width="1"/>
+<text x="40" y="72.0" text-anchor="end" font-size="11" fill="#5B606A">100</text>
+<line x1="46" x2="412" y1="14.0" y2="14.0" stroke="#DADCE0" stroke-width="1"/>
+<text x="40" y="18.0" text-anchor="end" font-size="11" fill="#5B606A">150</text>
+<rect x="47.0" y="173.8" width="13.2" height="2.2" rx="1.5" fill="#4A6A94"><title>00:00 to 00:59 UTC: 2.04 million US dollars force-closed, 236 wallets</title></rect>
+<text x="53.6" y="192" text-anchor="middle" font-size="11" fill="#5B606A">00</text>
+<rect x="62.2" y="168.7" width="13.2" height="7.3" rx="1.5" fill="#4A6A94"><title>01:00 to 01:59 UTC: 6.73 million US dollars force-closed, 831 wallets</title></rect>
+<rect x="77.5" y="175.7" width="13.2" height="0.3" rx="1.5" fill="#4A6A94"><title>02:00 to 02:59 UTC: 0.237 million US dollars force-closed, 69 wallets</title></rect>
+<rect x="108.0" y="175.9" width="13.2" height="0.1" rx="1.5" fill="#4A6A94"><title>04:00 to 04:59 UTC: 0.100 million US dollars force-closed, 33 wallets</title></rect>
+<rect x="123.2" y="172.2" width="13.2" height="3.8" rx="1.5" fill="#4A6A94"><title>05:00 to 05:59 UTC: 3.55 million US dollars force-closed, 225 wallets</title></rect>
+<rect x="138.5" y="175.8" width="13.2" height="0.2" rx="1.5" fill="#4A6A94"><title>06:00 to 06:59 UTC: 0.142 million US dollars force-closed, 196 wallets</title></rect>
+<text x="145.1" y="192" text-anchor="middle" font-size="11" fill="#5B606A">06</text>
+<rect x="199.5" y="175.9" width="13.2" height="0.1" rx="1.5" fill="#4A6A94"><title>10:00 to 10:59 UTC: 0.0937 million US dollars force-closed, 35 wallets</title></rect>
+<rect x="214.8" y="175.3" width="13.2" height="0.7" rx="1.5" fill="#4A6A94"><title>11:00 to 11:59 UTC: 0.642 million US dollars force-closed, 72 wallets</title></rect>
+<rect x="230.0" y="166.1" width="13.2" height="9.9" rx="1.5" fill="#4A6A94"><title>12:00 to 12:59 UTC: 9.19 million US dollars force-closed, 1,178 wallets</title></rect>
+<text x="236.6" y="192" text-anchor="middle" font-size="11" fill="#5B606A">12</text>
+<rect x="245.2" y="173.6" width="13.2" height="2.4" rx="1.5" fill="#4A6A94"><title>13:00 to 13:59 UTC: 2.24 million US dollars force-closed, 138 wallets</title></rect>
+<rect x="260.5" y="114.3" width="13.2" height="61.7" rx="1.5" fill="#4A6A94"><title>14:00 to 14:59 UTC: 57.1 million US dollars force-closed, 5,793 wallets</title></rect>
+<rect x="275.8" y="34.4" width="13.2" height="141.6" rx="1.5" fill="#4A6A94"><title>15:00 to 15:59 UTC: 131 million US dollars force-closed, 8,980 wallets</title></rect>
+<rect x="291.0" y="172.5" width="13.2" height="3.5" rx="1.5" fill="#4A6A94"><title>16:00 to 16:59 UTC: 3.25 million US dollars force-closed, 349 wallets</title></rect>
+<rect x="306.2" y="172.8" width="13.2" height="3.2" rx="1.5" fill="#4A6A94"><title>17:00 to 17:59 UTC: 3.00 million US dollars force-closed, 581 wallets</title></rect>
+<rect x="321.5" y="166.7" width="13.2" height="9.3" rx="1.5" fill="#4A6A94"><title>18:00 to 18:59 UTC: 8.59 million US dollars force-closed, 780 wallets</title></rect>
+<text x="328.1" y="192" text-anchor="middle" font-size="11" fill="#5B606A">18</text>
+<rect x="336.8" y="173.9" width="13.2" height="2.1" rx="1.5" fill="#4A6A94"><title>19:00 to 19:59 UTC: 1.91 million US dollars force-closed, 98 wallets</title></rect>
+<rect x="352.0" y="169.4" width="13.2" height="6.6" rx="1.5" fill="#4A6A94"><title>20:00 to 20:59 UTC: 6.13 million US dollars force-closed, 781 wallets</title></rect>
+<rect x="367.2" y="165.7" width="13.2" height="10.3" rx="1.5" fill="#4A6A94"><title>21:00 to 21:59 UTC: 9.53 million US dollars force-closed, 1,019 wallets</title></rect>
+<rect x="382.5" y="172.4" width="13.2" height="3.6" rx="1.5" fill="#4A6A94"><title>22:00 to 22:59 UTC: 3.35 million US dollars force-closed, 299 wallets</title></rect>
+<rect x="397.8" y="139.1" width="13.2" height="36.9" rx="1.5" fill="#4A6A94"><title>23:00 to 23:59 UTC: 34.2 million US dollars force-closed, 2,828 wallets</title></rect>
+<text x="404.4" y="192" text-anchor="middle" font-size="11" fill="#5B606A">23</text>
+<text x="271.1" y="26" font-size="11" fill="#5B606A">US stock hours</text>
+<text x="8" y="218" font-size="11" fill="#5B606A">Source: Ironflow, Hyperliquid Trades and Liquidations (CC BY 4.0).</text>
+<text x="8" y="231" font-size="11" fill="#5B606A">Counts: donttrade. Chart: donttrade.ca (CC BY 4.0)</text>
+<text x="8" y="244" font-size="11" fill="#5B606A">donttrade.ca/research/5-november-2026-sell-off/</text>
+</g>
+</svg>

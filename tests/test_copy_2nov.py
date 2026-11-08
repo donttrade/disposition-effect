@@ -1,4 +1,4 @@
-"""2 Nov owner-approved copy fixes: /independence/ no longer says "Readers pay nothing" (the donttrade test is on
+"""2 Nov owner-approved copy fixes: /independence/ no longer says "Readers pay nothing" (the Revenge Trading Report is on
 sale); /about/ lists Bluesky, Threads and Mastodon among the official channels, Mastodon as rel="me"."""
 import os
 import re
@@ -18,7 +18,7 @@ def test_independence_names_the_one_paid_product(built_site):
     assert "Readers pay nothing" not in html and "the one paid product" not in html
     assert ('<p>Two sources. Firms and brokers pay for fixed-scope measurements of their own data. The research, the '
             'newsletter and the free tools cost readers nothing; for traders, the only paid product is '
-            '<a href="/pricing/#traders">the donttrade test</a>. No affiliate links, no sponsorships, no referral fees '
+            '<a href="/pricing/#traders">the Revenge Trading Report</a>. No affiliate links, no sponsorships, no referral fees '
             'from any firm, broker or platform.</p>') in html
     assert 'id="traders"' in _read(built_site, "/pricing/")   # the link lands
 
@@ -43,5 +43,5 @@ def test_about_names_the_one_paid_product(built_site):
     assert "the one paid product" not in html   # 3 Nov: untrue for firms, who pay for measurements
     assert "Firms pay for measurements. The research and free tools cost readers nothing." in html
     assert ("Firms pay for fixed-scope measurements of their own data; the research and free tools cost readers nothing, "
-            'and for traders the only paid product is <a href="/pricing/#traders">the donttrade test</a>; no firm can change a '
+            'and for traders the only paid product is <a href="/pricing/#traders">the Revenge Trading Report</a>; no firm can change a '
             "number.") in html

@@ -406,9 +406,10 @@ def retired_name_claims(text, where):
 
 
 # 29 Oct (owner: one product): the method's version name (DT-1, DT-2 …) is never shown alone. Each mention has
-# the descriptor, "the donttrade test" (or « test donttrade »), within the same passage (250 characters either side).
+# the descriptor, "the Revenge Trading Report" (or « rapport donttrade sur le revenge trading »; the retired names still count
+# in the frozen pages), within the same passage (250 characters either side).
 DT_NAME = re.compile(r"\bDT-[0-9]+\b")
-DT_DESCRIPTOR = re.compile(r"(?i)\bdonttrade test\b|\btest donttrade\b")
+DT_DESCRIPTOR = re.compile(r"(?i)\bdonttrade test\b|\btest donttrade\b|\brevenge trading report\b|\brapport donttrade sur le revenge trading\b")
 DT_WINDOW = 250
 
 
@@ -418,7 +419,7 @@ def dt_name_claims(text, where):
         win = text[max(0, m.start() - DT_WINDOW):m.end() + DT_WINDOW]
         if not DT_DESCRIPTOR.search(win):
             ctx = text[max(0, m.start() - 40):m.end() + 40].replace("\n", " ")
-            out.append(("claim:dt_name_alone", where, f"“{m.group(0)}” without “the donttrade test” nearby: …{ctx}…"))
+            out.append(("claim:dt_name_alone", where, f"“{m.group(0)}” without “the Revenge Trading Report” nearby: …{ctx}…"))
     return out
 
 
@@ -577,7 +578,9 @@ REFUND_CLAIM = re.compile(r"No result, no charge|Pas de résultat, pas de frais"
 REFUND_LIMIT = re.compile(r"trader-refunds|remboursements-traders|goodwill|à titre gracieux", re.IGNORECASE)
 REFUND_RETIRED = [re.compile(p, re.IGNORECASE) for p in (
     r"even if you have already run your test", r"even after your test runs", r"voluntary\s+14-day\s+refund",
-    r"même si vous avez déjà fait le test", r"remboursement volontaire de \d+ jours")]
+    r"même si vous avez déjà fait le test", r"remboursement volontaire de \d+ jours",
+    # 7 Nov (D5): the same retired promise in the report's own words
+    r"even if you have already run the report", r"even after you have run the report", r"même si vous avez déjà fait le rapport")]
 FULL_REFUND = re.compile(r"full refund|remboursement complet|remboursé en totalité", re.IGNORECASE)
 FULL_REFUND_CONDITION = re.compile(r"\bresult\b|résultat|could not be read|can[’']t be read|n’a pas pu|can[’']t run|could not run|"
                                    r"no habit|aucune habitude|outage|server is down|hors service|reproduce|reproduit|extract|"

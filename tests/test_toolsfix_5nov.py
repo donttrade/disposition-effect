@@ -339,7 +339,7 @@ def test_other_tools_keep_the_trader_offer_first_and_typed_ones_say_what_to_brin
                        ("tools/disposition-calculator", True), ("tools/trade-stats", False), ("tools/trading-heatmap", False),
                        ("tools/prop-challenge-simulator", False)]:
         t = card(built(built_site, rel))
-        assert t.startswith("Is this habit real, or luck?") and "Take the test for $39" in t, rel
+        assert t.startswith("Is this habit real, or luck?") and "Get the report for $39" in t, rel
         assert ("Bring an export of your trade history" in t) == typed, rel
 
 

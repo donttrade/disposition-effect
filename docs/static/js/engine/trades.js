@@ -19,6 +19,9 @@ function roundHalfAway(x) {
 
 // The instant of a fill: its time less its UTC offset when the file gives one on every row
 // (mapped.js, Tester F6); otherwise its time as written, as for every other format.
+// The reader's note says how many rows or trades a note is about ("Affected: 1 row."): a count, with its own plural.
+const affected = (n, one) => `Affected: ${n} ${one}${n === 1 ? '' : 's'}.`;
+
 export function instOf(e) {
   return e._inst !== undefined ? e._inst : e.ts;
 }
@@ -494,11 +497,11 @@ export function finish(fmt, verified, res, mode, tzLabel) {
     for (const k of skipKeys) n += skipped[k];
     warnings.push(warning('W_SKIPPED_ROWS', n, skipKeys.map((k) => `${k.replace(/_/g, ' ')}: ${skipped[k]}`).join(', ') + '.'));
   }
-  if (extra.duplicate_rows) warnings.push(warning('W_DUPLICATE_ROWS', extra.duplicate_rows, `${extra.duplicate_rows} found.`));
-  if (extra.overlap_rows) warnings.push(warning('W_OVERLAP_ROWS', extra.overlap_rows, `${extra.overlap_rows} found.`));
+  if (extra.duplicate_rows) warnings.push(warning('W_DUPLICATE_ROWS', extra.duplicate_rows, affected(extra.duplicate_rows, 'row')));
+  if (extra.overlap_rows) warnings.push(warning('W_OVERLAP_ROWS', extra.overlap_rows, affected(extra.overlap_rows, 'row')));
   if (extra.currency_ignored) warnings.push(warning('W_CURRENCY_IGNORED', 0));
-  if (extra.negative_qty) warnings.push(warning('W_NEGATIVE_QTY', extra.negative_qty, `${extra.negative_qty} found.`));
-  if (extra.wide_rows) warnings.push(warning('W_WIDE_ROWS', extra.wide_rows, `${extra.wide_rows} found.`));
+  if (extra.negative_qty) warnings.push(warning('W_NEGATIVE_QTY', extra.negative_qty, affected(extra.negative_qty, 'row')));
+  if (extra.wide_rows) warnings.push(warning('W_WIDE_ROWS', extra.wide_rows, affected(extra.wide_rows, 'row')));
   let executions = res.executions;
   let openN = extra.open_positions || 0;
   let hedging = 0;
@@ -537,7 +540,7 @@ export function finish(fmt, verified, res, mode, tzLabel) {
   if (openAtStart) warnings.push(warning('W_OPEN_AT_START', openAtStart, `${openAtStart} left out.`));
   if (refusedN) warnings.push(warning('W_REFUSED_FILLS', refusedN, `${refusedN} left out.`));
   if (ambiguous) warnings.push(warning('W_AMBIGUOUS_FILLS', ambiguous, `${ambiguous} ${ambiguous === 1 ? 'symbol' : 'symbols'} affected.`));
-  if (extra.pnl_sign) warnings.push(warning('W_PNL_SIGN', extra.pnl_sign, `${extra.pnl_sign} found.`));
+  if (extra.pnl_sign) warnings.push(warning('W_PNL_SIGN', extra.pnl_sign, affected(extra.pnl_sign, 'row')));
   if (fmt === 'tradovate_orders' || extra.futures_sizes) {
     let pts = 0;
     for (const t of trades) if (t.pnl_unit === 'points') pts++;
@@ -566,14 +569,14 @@ export function finish(fmt, verified, res, mode, tzLabel) {
     const keep = keys.slice().sort((a, b) => (groups[b] - groups[a]) || cmpStr(a, b))[0];
     const excluded = trades.length - groups[keep];
     trades = trades.filter((t) => t.pnl_unit === keep);
-    warnings.push(warning('W_MIXED_CURRENCY', excluded, `Only the ${keep} trades are analysed; ${excluded} trades in other currencies were left out.`));
+    warnings.push(warning('W_MIXED_CURRENCY', excluded, `Only the ${keep} ${keep === 1 ? 'trade is' : 'trades are'} analysed; ${excluded} ${excluded === 1 ? 'trade' : 'trades'} in other currencies ${excluded === 1 ? 'was' : 'were'} left out.`));
   }
   let dst = 0;
   for (const t of trades) if (spansDstNight(t.open_ts, t.close_ts)) dst++;
-  if (dst) warnings.push(warning('W_DST', dst, `${dst} found.`));
+  if (dst) warnings.push(warning('W_DST', dst, affected(dst, 'trade')));
   let reordered = 0;
   for (const t of trades) if (t._reordered) reordered++;
-  if (reordered) warnings.push(warning('W_CLOSE_BEFORE_OPEN', reordered, `${reordered} found.`));
+  if (reordered) warnings.push(warning('W_CLOSE_BEFORE_OPEN', reordered, affected(reordered, 'trade')));
   trades.sort((a, b) => (a.close_ts - b.close_ts) || (a.open_ts - b.open_ts) || cmpStr(a.symbol, b.symbol) || (a._seq - b._seq));
   if (!trades.length) fail('E_NO_CLOSED_TRADES', noTradesReason(openN, openAtStart, ambiguous, skipped));
   // Dates but no times: the paid server's rule (habits.mjs isDateOnlyRow, DATES_ONLY_SHARE): a trade
@@ -583,7 +586,7 @@ export function finish(fmt, verified, res, mode, tzLabel) {
   const datesOnly = 20 * nDateOnly >= trades.length;
   let marked = 0;
   for (const t of trades) if (t._dateonly) marked++;
-  if (partDates && marked < trades.length && marked) warnings.push(warning('W_SOME_DATES_ONLY', marked, `${marked} found.`));
+  if (partDates && marked < trades.length && marked) warnings.push(warning('W_SOME_DATES_ONLY', marked, affected(marked, 'trade')));
   if (datesOnly) warnings.push(warning('W_DATES_ONLY', nDateOnly));
   const out = {
     format: fmt,

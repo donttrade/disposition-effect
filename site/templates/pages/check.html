@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block content %}
+{%- import "partials/refund_copy.html" as refund with context %}
+{%- from "partials/price_line.html" import price_line %}
+{%- set r = products["report39"] %}
+{#- /check/ (free-check plan C2, 7 Nov 2026; ARCHITECT-PLAN-FREE-CHECK-AND-HOOK §5). The visitor's trade file, counted with the report's own
+    rules (check-core.js): what was read, the number of trades in each of the five habits, and whether a habit has enough trades to
+    test. Never a dollar amount, the matching trades, a comparison or a verdict: those are the report's. Every number is filled in the
+    browser from the file; the price, founding sentence and refund line are config, kept in the <template> blocks below and cloned
+    into the result by check.js. The page exists only in a paid_report build. -#}
+<div class="wrap">
+  <p class="crumb small"><a href="/tools/">Free tools</a></p>
+  <h1>Free revenge trading check</h1>
+  <p class="lede">Drop in your trade export and see how many of your trades came right after a loss. Your file is read in this browser and is never sent.</p>
+  {% include "partials/disclaimer.html" %}
+
+  <section class="tool" aria-labelledby="ck-tool-h">
+    <h2 id="ck-tool-h">Your file</h2>
+    <p id="ck-js-needed" class="notice notice-caution" data-js-hide>This check runs in your browser and needs JavaScript turned on.</p>
+    <div id="ck-controls" hidden data-js-show>
+      <div class="dropzone" id="ck-drop">
+        <p><strong>Drop your trade file here</strong>, or choose a file.</p>
+        <p class="small muted">MetaTrader 5 or 4, IBKR Flex Query, Tradovate, TradingView or CSV. Up to 50 MB and 200,000 rows.</p>
+        <div class="file-pick">
+          <label for="ck-file">Your trade file</label>
+          <input id="ck-file" type="file" accept=".csv,.htm,.html,.txt">
+        </div>
+        <p class="btn-row"><span class="muted">No file to hand?</span> <button class="btn btn-secondary" id="ck-sample-btn" type="button">Try it on real public data</button></p>
+        <p class="small muted">No account, no email. Needs the time of each trade.</p>
+      </div>
+    </div>
+    <p id="ck-filebar" class="ck-filebar" hidden><span aria-hidden="true">✓</span> <strong id="ck-fname"></strong> · <span id="ck-fwhat"></span> <button class="btn btn-secondary" id="ck-another" type="button">Check another file</button></p>
+    <p id="ck-status" class="muted" role="status" hidden></p>
+    <p id="ck-progress" class="progress-line small muted" hidden><progress aria-label="Reading your file"></progress> <span data-elapsed aria-hidden="true"></span></p>
+    <div id="ck-error" class="notice notice-error" role="alert" tabindex="-1" hidden></div>
+    <p id="ck-error-note" class="small muted" hidden>No charge, nothing sent. The CSV template reads any broker.</p>
+    <div id="ck-notes" hidden></div>
+    <div id="ck-map" class="notice rc-map" role="group" aria-labelledby="ck-map-h" tabindex="-1" hidden></div>
+    <details class="ck-example" id="ck-example" hidden>
+      <summary>See the check on real public data (one anonymous investor)</summary>
+      <p class="small muted" id="ck-source">Source: Mendeley Stock Transactions Dataset, CC BY 4.0 (Laramee, 2025), <a href="https://doi.org/10.17632/k4tnk2nggv.1">doi:10.17632/k4tnk2nggv.1</a>. We kept its market buys and sells and replaced ticker names with codes. Its authors do not endorse donttrade.</p>
+      <div id="ck-ex" class="tool-out"></div>
+    </details>
+  </section>
+
+  <div id="ck-out" class="tool-out" hidden></div>
+
+  <section class="section" aria-labelledby="ck-how-h">
+    <h2 id="ck-how-h">What is counted</h2>
+    <p>Each count uses the same rules as the {{ r.name }}, so the number here is the number the report starts from. A count says how often something happened. It does not say whether it cost you money or whether it is more than chance.</p>
+    <ul>
+      <li><strong>Trades:</strong> closed trades, flat to flat. Closed trades that share a symbol, a direction and an open minute are counted as one trade, as the report does.</li>
+      <li><strong>Re-entering within 15 minutes of a loss:</strong> trades opened up to 15 minutes after a losing trade closed.</li>
+      <li><strong>Trading after 2 or more losses in a row:</strong> trades opened when the last trade closed before them was the second or later loss in a row.</li>
+      <li><strong>Bigger size right after a loss:</strong> trades opened after a loss at 1.5 times your usual size for that symbol, or more.</li>
+      <li><strong>Losing trades held longer than your median win:</strong> losing trades held longer than the median hold of your winning trades.</li>
+      <li><strong>Losses over 2 times your median loss:</strong> losing trades whose loss is more than twice your median loss.</li>
+      <li><strong>Enough to test:</strong> the report tests the first two habits against chance, and only when both groups of trades, those that follow a loss and those that do not, have at least 30 trades.</li>
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="ck-faq-h">
+    <h2 id="ck-faq-h">Questions</h2>
+    <details><summary>Is my file uploaded?</summary><p>No. The check runs in your browser tab. {% if flags.analytics %}Only anonymous counts of visits and finished steps are sent; your file is never sent.{% else %}Nothing is sent.{% endif %} If you go on to the report in the same tab, it can start from the file you just checked: the file stays in this tab until you close it or the report uses it, and the check never sends it.</p></details>
+    <details><summary>Does a high count mean I did something wrong?</summary><p>No. The counts describe what is in your file. After a loss, some trades follow soon by design of the day, and a long run of losses brings more trades after losses almost by construction. The check does not say why a trade was opened.</p></details>
+    <details><summary>Why does the check not show dollars?</summary><p>The dollar total of each group, how those trades compare with your other trades, and the test against chance are the {{ r.name }}. The check shows what the report would work on in your file.</p></details>
+    <details><summary>Is this investment advice?</summary><p>No. It counts your own past trades and does not recommend any security, trade, size or exit. Past results do not predict future results.</p></details>
+  </section>
+
+  <p class="small muted">MetaTrader is a trademark of MetaQuotes Ltd. IBKR, Tradovate and TradingView are trademarks of their owners. donttrade is not affiliated with any of them.</p>
+</div>
+
+{#- The four offers. check.js clones one into #ck-out and fills the data-k spans. The price, the founding sentence and the refund line
+    are the site's own macros, so they follow prices.json and the refund flag. -#}
+<template id="ck-t-normal">
+  <section class="ck-offer" id="offer" data-offer aria-labelledby="ck-offer-h">
+    <h3 id="ck-offer-h">What the {{ r.price_usd|usd }} report adds for this file</h3>
+    <ul class="ticks">
+      <li data-k="gap1"></li>
+      <li data-k="gap2"></li>
+      <li>The dollar total on all <span data-k="groups"></span> groups, next to your other trades</li>
+      <li>One free re-test, 30 to 60 days later</li>
+    </ul>
+    <p class="btn-row"><a class="btn" href="/pricing/#last-step" data-pay>Get the report for {{ r.price_usd|usd }}</a></p>
+    <p class="small" data-handoff hidden></p>
+    <p class="small">{{ price_line(r, prices.rules) }}</p>
+    <p class="small">{{ refund.chip() }} · Not investment advice</p>
+  </section>
+</template>
+<template id="ck-t-no_test">
+  <section class="ck-offer" id="offer" data-offer aria-labelledby="ck-offer-h">
+    <h3 id="ck-offer-h">What the report would show for this file</h3>
+    <p>Neither testable habit has 30 trades in each group, so the report would not test anything against chance on this file. It would total the dollars on <span data-k="groups"></span> groups. A longer export (more weeks) may reach 30.</p>
+    <p><a href="/pricing/#last-step" data-pay>Get the report for {{ r.price_usd|usd }}</a> · {{ refund.chip() }}</p>
+    <p class="small" data-handoff hidden></p>
+  </section>
+</template>
+<template id="ck-t-dates_only">
+  <section class="ck-offer" id="offer" data-offer aria-labelledby="ck-offer-h">
+    <h3 id="ck-offer-h">What the report would show for this file</h3>
+    <p>Your file has dates but no times of day. Re-entries and size after a loss cannot be counted, and nothing can be tested against chance. The report would total the dollars on <span data-k="groups"></span> groups.</p>
+    <p><a href="/pricing/#last-step" data-pay>Get the report for {{ r.price_usd|usd }}</a> · {{ refund.chip() }}</p>
+    <p class="small" data-handoff hidden></p>
+  </section>
+</template>
+<template id="ck-t-dates_none">
+  <section class="ck-offer" id="offer" data-offer aria-labelledby="ck-offer-h">
+    <h3 id="ck-offer-h">What the report would show for this file</h3>
+    <p>Your file has dates but no times of day. Re-entries and size after a loss cannot be counted, and nothing can be tested against chance. There is nothing for the report to total here, so we are not offering it for this file.</p>
+    <p><a href="/tools/trade-stats/">Try the free trade stats</a></p>
+  </section>
+</template>
+<template id="ck-t-zero">
+  <section class="ck-offer" id="offer" data-offer aria-labelledby="ck-offer-h">
+    <h3 id="ck-offer-h">What the report would show for this file</h3>
+    <p>None of your trades matched these five habits in this file. There is nothing for the report to total, so we are not offering it for this file.</p>
+    <p><a href="/tools/trade-stats/">Try the free trade stats</a></p>
+  </section>
+</template>
+<template id="ck-t-too_few">
+  <section class="ck-offer" id="offer" data-offer aria-labelledby="ck-offer-h">
+    <h3 id="ck-offer-h">What the report would show for this file</h3>
+    <p>This file has fewer than 30 trades, and the report runs on 30 or more, so we are not offering it for this file. A longer export (more weeks) may reach 30.</p>
+    <p><a href="/tools/trade-stats/">Try the free trade stats</a></p>
+  </section>
+</template>
+<script type="text/csv" id="ck-sample">
+{{ sample_csv|safe }}</script>
+{% endblock %}

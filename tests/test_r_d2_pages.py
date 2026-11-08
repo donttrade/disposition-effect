@@ -114,9 +114,9 @@ def test_sample_report_lead_and_fr_page(builds):
 # Each value line states: five habits measured and described in your own file with the dollar totals of the matching
 # trades; up to two tested against chance in this version; one re-test 30 to 60 days after the first report. Where the
 # re-test is described, the version sentence follows, its "corrections page" linked to /corrections/.
-RETEST = ("Your re-test runs on the version of the test that is live when you run it; every change is dated on the "
+RETEST = ("Your re-test runs on the version of the report that is live when you run it; every change is dated on the "
           "corrections page.")
-RETEST_HTML = ('Your re-test runs on the version of the test that is live when you run it; every change is dated on the '
+RETEST_HTML = ('Your re-test runs on the version of the report that is live when you run it; every change is dated on the '
                '<a href="/corrections/">corrections page</a>.')
 # QA 25 Oct: "plan" and "tested against chance" glossed on first use
 HOME_LEDE = ("Drop your broker export. Test up to five habits in your trades, with the dollar total of each.")   # sweep 2 hero
@@ -132,7 +132,7 @@ BYP = ("a report on habits in your own past trades, built from a trade file you 
        "habits, with the dollar totals of the matching trades, and tests up to two of them against chance in this version. "
        "It includes one re-test 30 to 60 days after your first result. It describes what happened; it does not tell you "
        "what to trade.")
-LOT = ("Sizing on paper is one thing. The donttrade test describes, from your own trade file when it has times of day, your median size after a loss "
+LOT = ("Sizing on paper is one thing. The Revenge Trading Report describes, from your own trade file when it has times of day, your median size after a loss "
        "and after a win, and what trades after a loss at 1.5 times your usual size or more totalled. It measures and "
        "describes up to five habits with the dollar totals of the matching trades, tests up to two of them against chance in this "
        "version, and includes one re-test 30 to 60 days after your first result.")
@@ -155,7 +155,7 @@ def raw(out, rel):
     return open(os.path.join(out, rel), encoding="utf-8").read()
 
 
-NEXT_TYPED = ("Is this habit real, or luck? The donttrade test checks your own trades against chance. "   # 29 Oct (one product)
+NEXT_TYPED = ("Is this habit real, or luck? The Revenge Trading Report checks your own trades against chance. "   # 29 Oct (one product)
               "$39, re-test included.")
 
 

@@ -30,7 +30,7 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=3ab0ff63">
+<link rel="stylesheet" href="/static/css/site.css?v=8414f36d">
 <script src="/static/js/theme.js?v=7e47c1a9"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
 <script src="/static/js/pay.js?v=169a9640" defer></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "6ed43d34957a49fcb90ec8e43f7db523"}'></script>
@@ -60,10 +60,10 @@
         <li><a href="/pricing/">Pricing</a></li>
         <li><a href="/for-firms/">For firms</a></li>
       </ul>
-      <p class="nav-cta"><a class="btn " href="/pricing/#last-step" data-pay>Take the test for $39</a></p>
+      <p class="nav-cta"><a class="btn " href="/pricing/#last-step" data-pay>Get the report for $39</a></p>
     </div>
   </details></nav>
-  <a class="btn hdr-cta" href="/pricing/#last-step" data-pay>Take the test for $39</a>
+  <a class="btn hdr-cta" href="/pricing/#last-step" data-pay>Get the report for $39</a>
   <button class="theme-toggle" type="button" data-theme-toggle hidden><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg><span class="tt-label">Dark mode</span></button>
 </div></header>
 
@@ -76,7 +76,7 @@
 
   <h2 id="qui">Qui nous sommes</h2>
   <dl class="byp">
-    <dt data-seller-block>Vendeur</dt><dd>donttrade, faisant affaire sous le nom donttrade (Ontario, Canada)</dd>
+    <dt data-seller-block>Vendeur</dt><dd>donttrade, entreprise individuelle (Ontario, Canada). Le nom légal du propriétaire figure sur la page de paiement sécurisée, avant que vous payiez.</dd>
     <dt>Adresse de l’établissement</dt><dd>2482 Yonge Street #1216, Toronto, ON M4P 2H5, Canada</dd>
     <dt>Téléphone</dt><dd>+1 437-600-3946</dd>
     <dt>Courriel</dt><dd><a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a>. Réponse en 1 jour ouvrable (heure de l’Est, du lundi au vendredi).</dd></dl>
@@ -84,7 +84,8 @@
 
   <h2 id="fichier">Votre fichier de transactions</h2>
   <p><strong>Outils gratuits :</strong> votre fichier est ouvert dans votre navigateur et n’est jamais téléversé.</p>
-  <p><strong>Test donttrade (payant) :</strong> votre navigateur envoie à notre serveur seulement une liste épurée de chiffres : heures d’ouverture et de fermeture, achat ou vente, taille relative, gain ou perte réalisé, un numéro de symbole tiré au hasard et une empreinte brouillée de chaque ligne. Cette liste ne contient ni nom, ni numéro de compte, ni symbole boursier. Notre serveur fonctionne sur Cloudflare et peut se trouver hors du Canada. Il utilise ces chiffres pour produire votre résultat, vous renvoie le résultat et ne conserve pas ces chiffres : il n’en garde que des empreintes brouillées, celles des transactions de votre premier résultat, décrites ci-dessous. La journalisation des requêtes est désactivée.</p>
+  <p id="verification-gratuite">L’outil gratuit garde le fichier lu dans cet onglet du navigateur jusqu’à ce que vous le fermiez ou que le rapport l’utilise. Il n’est jamais envoyé.</p>
+  <p><strong>Rapport donttrade sur le revenge trading (payant) :</strong> votre navigateur envoie à notre serveur seulement une liste épurée de chiffres : heures d’ouverture et de fermeture, achat ou vente, taille relative, gain ou perte réalisé, un numéro de symbole tiré au hasard et une empreinte brouillée de chaque ligne. Cette liste ne contient ni nom, ni numéro de compte, ni symbole boursier. Notre serveur fonctionne sur Cloudflare et peut se trouver hors du Canada. Il utilise ces chiffres pour produire votre résultat, vous renvoie le résultat et ne conserve pas ces chiffres : il n’en garde que des empreintes brouillées, celles des transactions de votre premier résultat, décrites ci-dessous. La journalisation des requêtes est désactivée.</p>
   <p><strong>Ce que notre serveur conserve :</strong></p>
   <ul>
     <li>une fiche d’achat sous un code brouillé : le produit, le nombre d’analyses utilisées, les dates et l’état de remboursement, sans votre nom ni votre courriel;</li>
@@ -94,23 +95,23 @@
   </ul>
 
   <h2 id="profilage">Profilage</h2>
-  <p>Le test donttrade analyse vos habitudes de négociation, ce qui peut constituer du profilage au sens de la loi québécoise. Cette analyse a lieu seulement quand vous lancez vous-même une analyse avec votre fichier; rien n’est analysé par défaut. Les résultats servent uniquement à vous être affichés. Ils ne servent pas à la publicité, ne vous comparent pas à d’autres personnes et ne servent à prendre aucune décision à votre sujet.</p>
+  <p>Le rapport donttrade sur le revenge trading analyse vos habitudes de négociation, ce qui peut constituer du profilage au sens de la loi québécoise. Cette analyse a lieu seulement quand vous lancez vous-même une analyse avec votre fichier; rien n’est analysé par défaut. Les résultats servent uniquement à vous être affichés. Ils ne servent pas à la publicité, ne vous comparent pas à d’autres personnes et ne servent à prendre aucune décision à votre sujet.</p>
 
   <h2 id="fournisseurs">Paiements, formulaires, courriel, infolettre</h2>
   <ul>
     <li><strong>Paiements :</strong> Stripe traite votre nom, votre courriel, votre pays de facturation et les données de votre carte. donttrade ne voit jamais le numéro complet de votre carte. Pour les données de paiement, Stripe agit comme responsable indépendant; sa politique de confidentialité s’applique.</li>
-    <li id="donnees-acheteur"><strong>Si vous achetez le test donttrade :</strong> Stripe nous montre le nom et l’adresse courriel que vous indiquez au paiement. Nous les utilisons seulement pour vous envoyer la copie de votre contrat, répondre à vos courriels (un remboursement, un nouveau lien d’accès) et traiter une contestation de paiement. Si vous contestez le paiement auprès de l’émetteur de votre carte, nous pouvons remettre à Stripe, comme preuve, les dates de votre achat et de vos analyses et le nombre d’analyses utilisées. Nos courriels avec vous restent dans notre boîte Gmail, et une liste privée des ventes (le code du paiement, la date, votre nom et votre courriel, et les dates d’envoi de la copie de votre contrat ou d’un remboursement) est gardée sur notre propre ordinateur, pas sur notre serveur. Les deux sont conservés aussi longtemps que les dossiers d’achat (ci-dessous).</li><li id="partenaires"><strong>Si vous êtes partenaire ou recevez un test gratuit :</strong> nous gardons votre nom et votre courriel, votre code de partenaire ou de test gratuit et, pour un partenaire, vos coordonnées de paiement et les montants des ventes faites avec votre code. Nous les utilisons pour verser les commissions, pour indiquer le lien avec vous, pour vous répondre et pour les registres fiscaux, et les gardons aussi longtemps que les règles fiscales l’exigent (six ans). Un test gratuit est gardé avec le dossier de la commande.</li>
+    <li id="donnees-acheteur"><strong>Si vous achetez le rapport donttrade sur le revenge trading :</strong> Stripe nous montre le nom et l’adresse courriel que vous indiquez au paiement. Nous les utilisons seulement pour vous envoyer la copie de votre contrat, répondre à vos courriels (un remboursement, un nouveau lien d’accès) et traiter une contestation de paiement. Si vous contestez le paiement auprès de l’émetteur de votre carte, nous pouvons remettre à Stripe, comme preuve, les dates de votre achat et de vos analyses et le nombre d’analyses utilisées. Nos courriels avec vous restent dans notre boîte Gmail, et une liste privée des ventes (le code du paiement, la date, votre nom et votre courriel, et les dates d’envoi de la copie de votre contrat ou d’un remboursement) est gardée sur notre propre ordinateur, pas sur notre serveur. Les deux sont conservés aussi longtemps que les dossiers d’achat (ci-dessous).</li><li id="partenaires"><strong>Si vous êtes partenaire ou recevez un test gratuit :</strong> nous gardons votre nom et votre courriel, votre code de partenaire ou de test gratuit et, pour un partenaire, vos coordonnées de paiement et les montants des ventes faites avec votre code. Nous les utilisons pour verser les commissions, pour indiquer le lien avec vous, pour vous répondre et pour les registres fiscaux, et les gardons aussi longtemps que les règles fiscales l’exigent (six ans). Un test gratuit est gardé avec le dossier de la commande.</li>
     <li><strong>Formulaires :</strong> nos formulaires passent par Web3Forms, qui nous transmet votre message par courriel. Ils demandent seulement ce qui est indiqué sur chaque formulaire.</li>
     <li><strong>Courriel :</strong> notre boîte de réception est hébergée par Google (Gmail).</li>
     <li><strong>Infolettre :</strong> si vous vous y abonnez, elle est envoyée par Substack; sa politique de confidentialité s’applique.</li>
     <li><strong>Hébergement :</strong> le site est hébergé sur Cloudflare Pages; avant le 24 octobre 2026, il l’était sur GitHub Pages. Cloudflare reçoit l’adresse IP des visiteurs pour livrer les pages et protéger le site; voir la <a href="https://www.cloudflare.com/privacypolicy/">politique de confidentialité de Cloudflare</a>.</li>
     <li><strong>Mesure d’audience :</strong> Cloudflare Web Analytics compte les visites sans déposer de témoin et sans vous suivre d’un site à l’autre. Sur le Challenge Readiness Check, une étape terminée (une vérification, une règle essayée, les détails ouverts, une exportation ou une carte) est aussi comptée, une fois par visite, comme la visite d’une petite page de comptage; rien de votre fichier n’y est joint.</li>
-    <li><strong>Mesure d’audience (Umami Cloud) :</strong> Umami Cloud compte aussi les pages vues et certains clics sur des boutons, sans déposer de témoin et sans vous suivre d’un site à l’autre. Il enregistre l’adresse de la page (sans ce qui suit « # », et de ce qui suit « ? » seulement les étiquettes de campagne utm_source, utm_medium, utm_campaign et utm_content, qui indiquent de quelle publication ou de quel courriel de notre part vient un lien), le titre de la page, le site d’où vous venez, votre navigateur, le type d’appareil, la taille de l’écran et la langue, ainsi que le bouton compté sur lequel vous avez appuyé (un bouton « Take the test », le lien de paiement, ou le bouton qui lance un outil gratuit ou un calcul). À partir de votre adresse IP, il déduit un emplacement approximatif (pays, région et ville). Ses données de mesure d’audience contiennent cet emplacement, pas l’adresse IP, mais les journaux de sécurité et d’exploitation d’Umami peuvent enregistrer l’adresse. Il ne reçoit jamais votre fichier ni rien de son contenu, et il ne fonctionne pas sur /report/, la page qui lit votre fichier pour le test donttrade. Si votre navigateur envoie la demande « Do Not Track » (ne pas suivre), Umami ne compte rien. Umami Cloud peut conserver ces données hors du Canada; voir la <a href="https://umami.is/privacy">politique de confidentialité d’Umami</a>.</li>
+    <li><strong>Mesure d’audience (Umami Cloud) :</strong> Umami Cloud compte aussi les pages vues et certains clics sur des boutons, sans déposer de témoin et sans vous suivre d’un site à l’autre. Il enregistre l’adresse de la page (sans ce qui suit « # », et de ce qui suit « ? » seulement les étiquettes de campagne utm_source, utm_medium, utm_campaign et utm_content, qui indiquent de quelle publication ou de quel courriel de notre part vient un lien), le titre de la page, le site d’où vous venez, votre navigateur, le type d’appareil, la taille de l’écran et la langue, ainsi que le bouton compté sur lequel vous avez appuyé (un bouton « Get the report », le lien de paiement, ou le bouton qui lance un outil gratuit ou un calcul). À partir de votre adresse IP, il déduit un emplacement approximatif (pays, région et ville). Ses données de mesure d’audience contiennent cet emplacement, pas l’adresse IP, mais les journaux de sécurité et d’exploitation d’Umami peuvent enregistrer l’adresse. Il ne reçoit jamais votre fichier ni rien de son contenu, et il ne fonctionne pas sur /report/, la page qui lit votre fichier pour le rapport donttrade sur le revenge trading. Si votre navigateur envoie la demande « Do Not Track » (ne pas suivre), Umami ne compte rien. Umami Cloud peut conserver ces données hors du Canada; voir la <a href="https://umami.is/privacy">politique de confidentialité d’Umami</a>.</li>
   </ul>
   <p>Nous ne vendons aucun renseignement. Nous n’utilisons ces fournisseurs que pour faire fonctionner le site, les paiements, les formulaires, le courriel et l’infolettre.</p>
 
   <h2 id="navigateur">Stockage dans votre navigateur (aucun témoin)</h2>
-  <p>Ce site ne dépose aucun témoin. Il enregistre dans votre propre navigateur votre choix de thème clair ou foncé et, si vous achetez, votre clé d’accès au test donttrade. Ces données restent sur votre appareil, et nous n’y avons pas accès. Pour les effacer, supprimez les données du site dans votre navigateur. Conservez d’abord votre lien de restauration, sinon vous perdrez l’accès.</p>
+  <p>Ce site ne dépose aucun témoin. Il enregistre dans votre propre navigateur votre choix de thème clair ou foncé et, si vous achetez, votre clé d’accès au rapport donttrade sur le revenge trading. Ces données restent sur votre appareil, et nous n’y avons pas accès. Pour les effacer, supprimez les données du site dans votre navigateur. Conservez d’abord votre lien de restauration, sinon vous perdrez l’accès.</p>
 
   <h2 id="hors-quebec">Communication hors du Québec et hors du Canada</h2>
   <p>Nos fournisseurs (Cloudflare, Stripe, Web3Forms, GitHub, Google et Substack) sont situés hors du Québec et, pour la plupart, aux États-Unis. Vos renseignements peuvent y être conservés et traités, et les autorités de ces pays peuvent y avoir accès selon leurs lois.</p>
@@ -128,7 +129,7 @@
   <p id="desabonnement"><strong>Désabonnement :</strong> tout courriel que nous envoyons pour offrir quelque chose à la vente (comme le courriel de lancement) nomme donttrade, donne notre adresse postale et indique comment vous désabonner. Pour vous désabonner, répondez « désabonnement » ou écrivez à <a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a>; nous cessons de vous écrire dans les 10 jours ouvrables. Les courriels de l’infolettre contiennent le lien de désabonnement de Substack.</p>
 
   <h2 id="droits">Vos droits</h2>
-  <p>Vous pouvez nous demander en tout temps l’accès à vos renseignements, leur rectification ou leur suppression, ainsi qu’une copie dans un format courant, sans attendre les délais de suppression indiqués ci-dessus. Écrivez à <a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a>; si vous avez acheté le test donttrade, écrivez depuis l’adresse utilisée pour payer, pour que nous puissions retrouver votre achat. Nous répondons dans les 30 jours. Les dossiers que la loi fiscale canadienne nous oblige à garder (six ans) sont supprimés à la fin de cette période. Vous pouvez aussi porter plainte auprès du Commissariat à la protection de la vie privée du Canada et, au Québec, de la Commission d’accès à l’information. Dans l’Union européenne, vous pouvez vous adresser à l’autorité de protection des données de votre pays, et au Royaume-Uni, à l’Information Commissioner’s Office. Si un incident de confidentialité présente un risque de préjudice sérieux pour vous, nous vous en avisons.</p>
+  <p>Vous pouvez nous demander en tout temps l’accès à vos renseignements, leur rectification ou leur suppression, ainsi qu’une copie dans un format courant, sans attendre les délais de suppression indiqués ci-dessus. Écrivez à <a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a>; si vous avez acheté le rapport donttrade sur le revenge trading, écrivez depuis l’adresse utilisée pour payer, pour que nous puissions retrouver votre achat. Nous répondons dans les 30 jours. Les dossiers que la loi fiscale canadienne nous oblige à garder (six ans) sont supprimés à la fin de cette période. Vous pouvez aussi porter plainte auprès du Commissariat à la protection de la vie privée du Canada et, au Québec, de la Commission d’accès à l’information. Dans l’Union européenne, vous pouvez vous adresser à l’autorité de protection des données de votre pays, et au Royaume-Uni, à l’Information Commissioner’s Office. Si un incident de confidentialité présente un risque de préjudice sérieux pour vous, nous vous en avisons.</p>
 
   <h2 id="firmes">Clients d’affaires</h2>
   <p>Pour les mandats auprès de firmes, nous ne recevons jamais de dossiers de comptes, seulement les totaux agrégés produits par le script.</p>
@@ -138,8 +139,10 @@
 </div></div>
 
 </main>
-<footer class="site-footer"><div class="wrap"><div class="cols">
-    <nav aria-label="Traders"><h2>Traders</h2><ul><li><a href="/sample-report/">Example report</a></li><li><a href="/pricing/">Pricing</a></li><li><a href="/tools/">Free tools</a></li><li><a href="/for-traders/">For traders</a></li>
+<footer class="site-footer"><div class="wrap">
+  <p class="footer-hook">Revenge trading, measured in your own trades.</p>
+  <div class="cols">
+    <nav aria-label="Traders"><h2>Traders</h2><ul><li><a href="/sample-report/">Example report</a></li><li><a href="/check/">Free check</a></li><li><a href="/pricing/">Pricing</a></li><li><a href="/tools/">Free tools</a></li><li><a href="/for-traders/">For traders</a></li>
     </ul></nav>
     <nav aria-label="Firms"><h2>Firms</h2><ul><li><a href="/for-firms/">For firms</a></li><li><a href="/for-platforms/">Journals &amp; platforms</a></li><li><a href="/sample-memo/">Sample memo</a></li>
     </ul></nav>
@@ -155,7 +158,7 @@
   <p class="legal" data-business-id="full">donttrade · Ontario, Canada · 2482 Yonge Street #1216, Toronto, ON M4P 2H5, Canada · <a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a></p>
   <p class="legal">donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.</p>
   <details class="legal legal-more"><summary>No cookies. What this site stores and sends</summary>
-    <p>This site sets no cookies. Visits are counted with Cloudflare Web Analytics and Umami Cloud, which also counts some button clicks; neither sets a cookie. It stores your light/dark choice in your own browser and, if you buy the donttrade test, your access key there too. For that test your browser sends our server only stripped trade numbers. The server does not keep them: of those numbers it keeps only a scrambled fingerprint of each trade row from your first result, to match a re-test to the same history. Your file itself is not uploaded. Card payments are handled by Stripe. Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; their privacy policies apply. <a href="/privacy/">Privacy</a></p>
+    <p>This site sets no cookies. Visits are counted with Cloudflare Web Analytics and Umami Cloud, which also counts some button clicks; neither sets a cookie. It stores your light/dark choice in your own browser and, if you buy the Revenge Trading Report, your access key there too. For the report your browser sends our server only stripped trade numbers. The server does not keep them: of those numbers it keeps only a scrambled fingerprint of each trade row from your first result, to match a re-test to the same history. Your file itself is not uploaded. Card payments are handled by Stripe. Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; their privacy policies apply. <a href="/privacy/">Privacy</a></p>
   </details>
   <p class="legal">&copy; 2026 donttrade · <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
 </div></footer>
@@ -164,7 +167,7 @@
 <dialog class="pay-dialog" id="pay-dialog" lang="en" aria-labelledby="pd-h" data-pay-dialog>
   <div class="pd-inner">
     <div class="pd-top">
-      <h2 id="pd-h">Get the donttrade test</h2>
+      <h2 id="pd-h">Get the Revenge Trading Report</h2>
       <button class="pd-close no-print" type="button" data-pay-close aria-label="Close"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg></button>
     </div>
     <ul class="pay-facts">

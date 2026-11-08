@@ -2,6 +2,9 @@
   {#- 25 Oct sweep (owner: "way too much writing"): four short columns, the social row as icons, the
       business line and the disclaimer (both required, always visible), and the full privacy sentences
       (footer_privacy, the one wording /privacy/ matches) folded under one short line. -#}
+  {%- if flags.paid_report %}
+  <p class="footer-hook">Revenge trading, measured in your own trades.</p>
+  {%- endif %}
   <div class="cols">
   {%- for col in footer %}
     <nav aria-label="{{ col.heading }}"><h2>{{ col.heading }}</h2><ul>

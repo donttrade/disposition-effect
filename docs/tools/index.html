@@ -27,7 +27,7 @@
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/static/fonts/ibm-plex-sans-latin-600.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/static/css/site.css?v=3ab0ff63">
+<link rel="stylesheet" href="/static/css/site.css?v=8414f36d">
 <link rel="stylesheet" href="/static/css/tools.css?v=2117013f">
 <script src="/static/js/theme.js?v=7e47c1a9"></script>
 <script src="/static/js/nav.js?v=9c8cacb8" defer></script>
@@ -59,10 +59,10 @@
         <li><a href="/pricing/">Pricing</a></li>
         <li><a href="/for-firms/">For firms</a></li>
       </ul>
-      <p class="nav-cta"><a class="btn " href="/pricing/#last-step" data-pay>Take the test for $39</a></p>
+      <p class="nav-cta"><a class="btn " href="/pricing/#last-step" data-pay>Get the report for $39</a></p>
     </div>
   </details></nav>
-  <a class="btn hdr-cta" href="/pricing/#last-step" data-pay>Take the test for $39</a>
+  <a class="btn hdr-cta" href="/pricing/#last-step" data-pay>Get the report for $39</a>
   <button class="theme-toggle" type="button" data-theme-toggle hidden><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="currentColor"/></svg><span class="tt-label">Dark mode</span></button>
 </div></header>
 
@@ -163,17 +163,17 @@
 <section class="tx-offer" aria-labelledby="of-h">
   <div class="of-copy">
     <h2 id="of-h">Is a habit in your trades real, or luck?</h2>
-    <p>The donttrade test checks five habits in your own trade file, tests up to two of them against chance, and totals the dollars on the matching trades.</p>
+    <p>The Revenge Trading Report checks five habits in your own trade file, tests up to two of them against chance, and totals the dollars on the matching trades.</p>
     <p class="of-note">$39, one time, in US dollars, with one free re-test 30 to 60 days after your first result. A full refund if you ask within 14 days of buying.</p>
   </div>
-  <div class="of-act"><p class="of-btns"><a class="btn" href="/pricing/#last-step">Take the test for $39</a></p>
+  <div class="of-act"><p class="of-btns"><a class="btn" href="/pricing/#last-step">Get the report for $39</a></p>
     <p class="of-small">The test sends our server stripped trade numbers, not your file. <a href="/privacy/">What is sent and kept</a></p>
   </div>
   <!--real-data--><figure class="of-art" aria-labelledby="of-art-cap">
   <div class="of-bar"><span>The test’s summary, run on a real account</span><span class="chip">Real public data</span></div>
   <table><thead><tr><th scope="col">Habit</th><th scope="col">Result</th><th scope="col">Total</th><th scope="col">Trades</th></tr></thead>
   <tbody><tr><th scope="row">Holding losers longer than winners</th><td><span class="v">Your numbers</span></td><td class="neg">−$39,655.09</td><td>32</td></tr><tr><th scope="row">Re-entering soon after a loss</th><td><span class="v">Not enough trades to tell</span></td><td class="">$0.00</td><td>0</td></tr><tr><th scope="row">Size after a loss</th><td><span class="v">Luck check coming</span></td><td class="">$0.00</td><td>0</td></tr><tr><th scope="row">Trading after a losing streak</th><td><span class="v">Not enough trades to tell</span></td><td class="neg">−$1,108.97</td><td>4</td></tr><tr><th scope="row">Large losses</th><td><span class="v">Your numbers</span></td><td class="neg">−$32,489.81</td><td>14</td></tr></tbody></table>
-  <figcaption id="of-art-cap" class="of-cap">The donttrade test’s own engine (method 2026-10-23.stats2f) on the same investor’s 64 closed trades. No habit was tested against chance on this file, so every total is a fact from the file. Why, habit by habit: holding losers longer than winners: the test has no fair luck check for this habit yet, so it shows the facts; re-entering soon after a loss: the check compares two groups of at least 30 trades each, and this file has 0 and 63; size after a loss: its luck check is still being calibrated; trading after a losing streak: the check compares two groups of at least 30 trades each, and this file has 4 and 34; large losses: the test has no fair luck check for this habit yet, so it shows the facts. One investor, not a typical result.</figcaption>
+  <figcaption id="of-art-cap" class="of-cap">The report’s own engine (method 2026-10-23.stats2f) on the same investor’s 64 closed trades. No habit was tested against chance on this file, so every total is a fact. Why: holding losers longer than winners: the test has no fair luck check for this habit yet, so it shows the facts; re-entering soon after a loss: the check compares two groups of at least 30 trades each, and this file has 0 and 63; size after a loss: its luck check is still being calibrated; trading after a losing streak: the check compares two groups of at least 30 trades each, and this file has 4 and 34; large losses: the test has no fair luck check for this habit yet, so it shows the facts. One investor, not a typical result.</figcaption>
 </figure><!--/real-data-->
 </section>
 
@@ -212,8 +212,10 @@
 </div>
 
 </main>
-<footer class="site-footer"><div class="wrap"><div class="cols">
-    <nav aria-label="Traders"><h2>Traders</h2><ul><li><a href="/sample-report/">Example report</a></li><li><a href="/pricing/">Pricing</a></li><li><a href="/tools/">Free tools</a></li><li><a href="/for-traders/">For traders</a></li>
+<footer class="site-footer"><div class="wrap">
+  <p class="footer-hook">Revenge trading, measured in your own trades.</p>
+  <div class="cols">
+    <nav aria-label="Traders"><h2>Traders</h2><ul><li><a href="/sample-report/">Example report</a></li><li><a href="/check/">Free check</a></li><li><a href="/pricing/">Pricing</a></li><li><a href="/tools/">Free tools</a></li><li><a href="/for-traders/">For traders</a></li>
     </ul></nav>
     <nav aria-label="Firms"><h2>Firms</h2><ul><li><a href="/for-firms/">For firms</a></li><li><a href="/for-platforms/">Journals &amp; platforms</a></li><li><a href="/sample-memo/">Sample memo</a></li>
     </ul></nav>
@@ -229,7 +231,7 @@
   <p class="legal" data-business-id="short">donttrade · Ontario, Canada · <a href="mailto:donttrade.research@gmail.com">donttrade.research@gmail.com</a> · <a href="/terms/#seller">Business details</a></p>
   <p class="legal">donttrade measures your own past trades. It is not investment advice, does not recommend any security, trade, size or exit, and is not registered as an adviser. Past results do not predict future results.</p>
   <details class="legal legal-more"><summary>No cookies. What this site stores and sends</summary>
-    <p>This site sets no cookies. Visits are counted with Cloudflare Web Analytics and Umami Cloud, which also counts some button clicks; neither sets a cookie. It stores your light/dark choice in your own browser and, if you buy the donttrade test, your access key there too. For that test your browser sends our server only stripped trade numbers. The server does not keep them: of those numbers it keeps only a scrambled fingerprint of each trade row from your first result, to match a re-test to the same history. Your file itself is not uploaded. Card payments are handled by Stripe. Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; their privacy policies apply. <a href="/privacy/">Privacy</a></p>
+    <p>This site sets no cookies. Visits are counted with Cloudflare Web Analytics and Umami Cloud, which also counts some button clicks; neither sets a cookie. It stores your light/dark choice in your own browser and, if you buy the Revenge Trading Report, your access key there too. For the report your browser sends our server only stripped trade numbers. The server does not keep them: of those numbers it keeps only a scrambled fingerprint of each trade row from your first result, to match a re-test to the same history. Your file itself is not uploaded. Card payments are handled by Stripe. Forms send what you type to Web3Forms, which emails it to us, and subscribing opens Substack; their privacy policies apply. <a href="/privacy/">Privacy</a></p>
   </details>
   <p class="legal">&copy; 2026 donttrade · <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a></p>
 </div></footer>
@@ -238,7 +240,7 @@
 <dialog class="pay-dialog" id="pay-dialog" lang="en" aria-labelledby="pd-h" data-pay-dialog>
   <div class="pd-inner">
     <div class="pd-top">
-      <h2 id="pd-h">Get the donttrade test</h2>
+      <h2 id="pd-h">Get the Revenge Trading Report</h2>
       <button class="pd-close no-print" type="button" data-pay-close aria-label="Close"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg></button>
     </div>
     <ul class="pay-facts">

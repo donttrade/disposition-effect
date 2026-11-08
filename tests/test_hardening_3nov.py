@@ -2,7 +2,7 @@
 
 1 security headers (site/build.py headers_file -> _headers), 2 /favicon.ico, 3 the age clause (EN + FR),
 4 the CASL unsubscribe lines (EN + FR) and the waitlist's withdrawal line, 5 early deletion or a copy (EN + FR),
-6 one button label "Take the test for $39", 7 campaign tags through the umami-clean.js before-send hook, with
+6 one button label "Get the report for $39", 7 campaign tags through the umami-clean.js before-send hook, with
 data-exclude-search kept on the pages whose address can carry a secret.
 A the footer's analytics sentence per page, B Threads on www.threads.com, C no data-umami-event-* property
 (lint), D "for traders, the only paid product" on /about/ and /independence/.
@@ -193,10 +193,10 @@ def test_favicon_in_baseline_build_head_and_check_live(built_site):
 
 
 # ================================================================== 3. age clause
-AGE_EN = ("<li id=\"age\"><strong>Age:</strong> only adults can buy the donttrade test. By paying, you confirm that you "
+AGE_EN = ("<li id=\"age\"><strong>Age:</strong> only adults can buy the Revenge Trading Report. By paying, you confirm that you "
           "are at least 18, and at least the age of majority where you live if that is higher (19 in some Canadian "
           "provinces and territories).</li>")
-AGE_FR = ("<p id=\"majorite\"><strong>Âge :</strong> seules les personnes majeures peuvent acheter le test donttrade. En "
+AGE_FR = ("<p id=\"majorite\"><strong>Âge :</strong> seules les personnes majeures peuvent acheter le rapport donttrade sur le revenge trading. En "
           "payant, vous confirmez avoir au moins 18 ans et avoir atteint l’âge de la majorité de votre lieu de "
           "résidence s’il est plus élevé (19 ans dans certaines provinces et certains territoires du Canada).</p>")
 
@@ -261,7 +261,7 @@ def test_rights_any_time_en_fr(built_site):
     rights = rights[:rights.index("</details>")]
     assert "You can ask us at any time to see, correct or delete your information" in rights
     assert "you do not have to wait for the deletion dates above" in rights
-    assert f'<a href="mailto:{email}">{email}</a>, from the address you paid with if you bought the donttrade test' in rights
+    assert f'<a href="mailto:{email}">{email}</a>, from the address you paid with if you bought the Revenge Trading Report' in rights
     assert "deleted when that period ends" in rights
     fr = _read(built_site, "/fr/confidentialite/")
     droits = fr[fr.index('id="droits"'):]
@@ -278,7 +278,7 @@ def test_button_label_without_a_dash(built_site):
         assert "Take the test —" not in html and "Take the test &mdash;" not in html, path
     home = _read(built_site, "/")
     header = re.search(r"(?s)<header\b.*?</header>", home).group(0)
-    assert header.count("Take the test for $39") == 2   # the bar + the Menu
+    assert header.count("Get the report for $39") == 2   # the bar + the Menu
     for t in ("partials/header.html", "partials/trader_offer.html", "partials/tool_next_step.html",
               "partials/value_ladder.html", "pages/home.html", "pages/pricing.html"):
         assert "Take the test —" not in _tpl(*t.split("/")), t
@@ -487,7 +487,7 @@ def test_paid_product_sentence_is_true_for_firms_too(built_site):
     for path in ("/about/", "/independence/"):
         html = _read(built_site, path)
         assert "the one paid product" not in html, path
-        assert "the only paid product is <a href=\"/pricing/#traders\">the donttrade test</a>" in html, path
+        assert "the only paid product is <a href=\"/pricing/#traders\">the Revenge Trading Report</a>" in html, path
         assert re.search(r"[Ff]or traders,? the only paid product", html), path
     assert not os.path.exists(os.path.join(SITE, "templates", "pages", "fr", "a-propos.html"))
     assert not [n for n in os.listdir(os.path.join(SITE, "templates", "pages", "fr"))

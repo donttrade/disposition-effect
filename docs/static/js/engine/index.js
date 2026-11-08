@@ -15,7 +15,7 @@ import { parseGeneric, parseGenericRoundtrip } from './generic.js?v=a1ca3bb7';
 import { parseIbkr } from './ibkr.js?v=9c22bb1a';
 import { parseTradovate } from './tradovate.js?v=3d8db472';
 import { parseTradingView, stripCurrencyCells } from './tradingview.js?v=cfd7a163';
-import { finish } from './trades.js?v=f31880fd';
+import { finish } from './trades.js?v=db83fb77';
 
 export { EngineError } from './errors.js?v=8e828461';
 

@@ -27,7 +27,7 @@ import indexnow_ping as IX  # noqa: E402
 
 os.environ.setdefault("DT_TODAY", "2026-11-06")
 TOML = open(os.path.join(SITE, "config", "site.toml"), encoding="utf-8").read()
-PRICES = json.load(open(os.path.join(SITE, "config", "prices.json"), encoding="utf-8"))
+PRICES = json.load(open((os.environ.get("DT_PRICES_JSON") or os.path.join(SITE, "config", "prices.json")), encoding="utf-8"))
 REASONS = json.load(open(os.path.join(SITE, "config", "refund_reasons.json"), encoding="utf-8"))["reasons"]
 KEY = re.search(r'\[indexnow\]\s*key = "([^"]+)"', TOML).group(1)
 
@@ -137,7 +137,9 @@ def test_open_state_words_the_next_price_only_with_the_first_100(off):
     assert "US$39 for the first 100 buyers, then US$49." in text_of(off / "pricing" / "index.html")
     assert "39,00 $ US pour les 100 premiers acheteurs" not in text_of(off / "pricing" / "index.html")
     byp = text_of(off / "before-you-pay" / "index.html")
-    assert "$39 USD, one time (founding price: for the first 100 buyers, then US$49). No sales tax is charged. Total: $39 USD" in byp
+    # 7 Nov: the committed site is Managed Payments with tax included (tests/test_managed_payments.py has both settings)
+    assert ("$39 USD, one time (founding price: for the first 100 buyers, then US$49). Any sales tax, VAT or GST is included in "
+            "this price: Link works it out from your billing address and shows it on your receipt. Total: $39 USD") in byp
     fr = text_of(off / "fr" / "avant-de-payer" / "index.html")
     assert "paiement unique (prix de fondateur : pour les 100 premiers acheteurs, puis 49,00 $ US)" in fr.replace(" ", " ")
     assert lint_ok(off) == []
@@ -173,7 +175,7 @@ def test_ended_state_shows_49_as_the_price_and_passes_lint(ended, monkeypatch):
     monkeypatch.setenv("DT_PRICES_JSON", str(ended.parent / "e.prices.json"))   # lint reads the prices file the build used
     pr = text_of(ended / "pricing" / "index.html")
     assert "$49 USD, once" in pr and "for the first 100 buyers" not in pr
-    assert "Take the test for $49" in pr
+    assert "Get the report for $49" in pr
     terms = text_of(ended / "terms" / "index.html")
     assert "Price: $49 USD, one time. The founding price of $39 ended with the 100th paid order." in terms
     assert "39,00" not in text_of(ended / "fr" / "avant-de-payer" / "index.html").split("Prix détaillé")[1][:60]
@@ -205,7 +207,7 @@ def test_terms_count_rule_is_the_owners(off):
     assert "comptées ensemble sur les pages de paiement en français et en anglais" in f and "Une commande remboursée garde son rang." in f
     # EN and FR carry the same numbers
     nums = lambda s: sorted(set(re.findall(r"\b(?:100|39|49)\b", s.replace(",00", ""))))
-    assert nums(t[t.index("Price: $39"):][:900]) == nums(f[f.index("Test donttrade : "):][:900])
+    assert nums(t[t.index("Price: $39"):][:900]) == nums(f[f.index("Rapport donttrade sur le revenge trading : "):][:900])
 
 
 def test_promotion_wording_appears_only_when_codes_are_switched_on(off, on):
@@ -221,17 +223,18 @@ def test_home_hero_and_trust_line(off):
     assert len(re.findall(r"<h1\b", h)) == 1
     t = text_of(off / "index.html")
     assert "Is revenge trading costing you? Get the dollar figure." in t
-    assert ("Drop in your trade history. We test whether you re-enter after losses more often than chance would explain, "
-            "then total the dollars on those trades.") in t
-    assert "Pre-registered research · Your file stays in your browser · 14-day refund" in t
+    # 7 Nov (free-check release): the hero leads with the free check; the trust line gains "Example report"
+    assert ("Check your trade file free: see how many trades you opened right after a loss or a losing run. The $39 report "
+            "totals the dollars on them and tests whether it’s more than chance.") in t
+    assert "Pre-registered research · Example report · Your file stays in your browser · 14-day refund" in t
     assert "Needs the time of each trade. A file with dates but no times gets no tested habits." in t
-    assert "Take the test for $39" in t and "See the example report" in t
+    assert "Get the report for $39" in t and "See the full example report" in t
     assert 'href="/research/">Pre-registered research</a>' in h
     assert "Dollar totals describe what happened in your file." in t
 
 
 def test_home_button_price_is_the_pricing_price(ended):
-    assert "Take the test for $49" in text_of(ended / "index.html")
+    assert "Get the report for $49" in text_of(ended / "index.html")
 
 
 def test_habit_counts_agree_on_home_and_pricing_and_come_from_one_place(off, tmp_path):
@@ -412,9 +415,10 @@ def test_refund_flag_defaults_off_and_the_old_wording_stays(off):
         s = p.read_text(encoding="utf-8")
         assert PHRASE not in s and "Pas de résultat, pas de frais" not in s, p
     assert "Full refund within 14 days" in text_of(off / "pricing" / "index.html", main_only=False)
-    assert "even after your test runs" in text_of(off / "pricing" / "index.html")
-    assert "even if you have already run your test" in text_of(off / "terms" / "index.html")
-    assert "Our voluntary 14-day refund still applies." in text_of(off / "terms" / "index.html")
+    assert "even after you have run the report" in text_of(off / "pricing" / "index.html")
+    assert "even if you have already run the report" in text_of(off / "terms" / "index.html")
+    # 7 Nov (Managed Payments): the EU/UK paragraph names Link; the voluntary refund is still there
+    assert "In any case, donttrade’s voluntary 14-day full refund applies to you, even after the report has run." in text_of(off / "terms" / "index.html")
     assert "14-day refund" in text_of(off / "index.html")
     assert not (off / "partners").exists()      # fix round 1: /partners/ exists only while promotion codes are on
 
@@ -464,12 +468,14 @@ def test_refund_on_tier_texts_match_the_addendum_word_for_word(on):
     assert "Traders: No result, no charge. Full refund within 14 days if no result is delivered (details in the refund terms below)." in (on / "terms" / "index.html").read_text(encoding="utf-8").replace("\n", " ")
     assert "If something is wrong with your order, ask us first; we answer faster than a card dispute" in terms
     assert 'id="trader-refunds"' in (on / "terms" / "index.html").read_text(encoding="utf-8")
-    assert ("At checkout you ask for access right away and acknowledge that this right ends once your test result is supplied "
-            "(the field shown at checkout). Until your result is supplied, you can still withdraw within 14 days of buying") in terms
+    # 7 Nov (Managed Payments): no waiver is collected at checkout any more, so EU/UK buyers keep the 14-day right
+    assert ("If you live in the European Union or the United Kingdom, you keep your 14-day legal right of withdrawal: a full "
+            "refund if you ask within 14 days of buying, even after your result is supplied.") in terms
+    assert "the field shown at checkout" not in terms
     assert "Our voluntary" not in terms
     # chips
     home = text_of(on / "index.html")
-    assert "Pre-registered research · Your file stays in your browser · No result, no charge" in home
+    assert "Pre-registered research · Example report · Your file stays in your browser · No result, no charge" in home
     assert 'href="/terms/#trader-refunds">No result, no charge</a>' in (on / "index.html").read_text(encoding="utf-8")
     assert "No result, no charge" in text_of(on / "pricing" / "index.html", main_only=False)
     fr = text_of(on / "fr" / "conditions" / "index.html")
@@ -492,8 +498,9 @@ def test_refund_on_numbers_agree_between_english_and_french(on):
 def test_refund_on_removes_the_retired_phrases_and_json_ld_has_no_return_policy(on):
     for p in on.rglob("*.html"):
         t = text_of(p, main_only=False)
-        for old in ("even if you have already run your test", "even after your test runs", "voluntary 14-day refund",
-                    "même si vous avez déjà fait le test"):
+        for old in ("even if you have already run the report", "even after you have run the report", "voluntary 14-day refund",
+                    "même si vous avez déjà fait le test", "even if you have already run the report",
+                    "even after you have run the report", "même si vous avez déjà fait le rapport"):
             assert old not in t, (p, old)
     assert "Full refund within 14 days" not in text_of(on / "pricing" / "index.html", main_only=False)
     raw = (on / "pricing" / "index.html").read_text(encoding="utf-8")
@@ -508,7 +515,7 @@ def test_refund_on_lint_catches_a_bare_claim_a_retired_phrase_and_a_bare_full_re
     assert any(p[0] == "claim:refund_limits" for p in L.refund_policy_claims(bare, "/x/"))
     assert not any(p[0] == "claim:refund_limits" for p in L.refund_policy_claims(
         '<section><p>No result, no charge. <a href="/terms/#trader-refunds">Refund terms</a></p></section>', "/x/"))
-    assert any(p[0] == "claim:refund_retired" for p in L.refund_policy_claims("<p>even after your test runs</p>", "/x/"))
+    assert any(p[0] == "claim:refund_retired" for p in L.refund_policy_claims("<p>even after you have run the report</p>", "/x/"))
     assert any(p[0] == "claim:full_refund" for p in L.refund_policy_claims("<p>You get a full refund.</p>", "/x/"))
     assert not any(p[0] == "claim:full_refund" for p in L.refund_policy_claims("<p>A full refund if your file could not be read.</p>", "/x/"))
     assert h
@@ -964,7 +971,7 @@ def test_privacy_refund_and_partner_records_have_their_own_section(on, off):
 # ---- M6 Eastern Time
 def test_partners_page_says_eastern_time_and_no_toronto_anywhere(on):
     assert "(Eastern Time)" in text_of(on / "partners" / "index.html") and "Toronto" not in text_of(on / "partners" / "index.html")
-    assert "Toronto" not in open(os.path.join(SITE, "config", "prices.json"), encoding="utf-8").read()
+    assert "Toronto" not in open((os.environ.get("DT_PRICES_JSON") or os.path.join(SITE, "config", "prices.json")), encoding="utf-8").read()
     for p in list(on.rglob("*.html")):
         if p.relative_to(on).parts[0] != "research":
             assert "Toronto" not in p.read_text(encoding="utf-8"), p
@@ -1014,7 +1021,7 @@ def test_the_formats_sentence_changes_when_a_reader_flips(tmp_path):
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(os.path.join(SITE, "templates")), undefined=jinja2.StrictUndefined, autoescape=True)
     env.filters.update(numword=B.numword, numword_fr=B.numword_fr)
     src = '{% import "partials/refund_copy.html" as r with context %}{{ r.formats_caveat() }}'
-    prices = json.load(open(os.path.join(SITE, "config", "prices.json"), encoding="utf-8"))
+    prices = json.load(open((os.environ.get("DT_PRICES_JSON") or os.path.join(SITE, "config", "prices.json")), encoding="utf-8"))
     names = ["MetaTrader 4/5", "IBKR", "Tradovate", "TradingView"]
     out = env.from_string(src).render(prices=prices, refund_on=False, readers_untested=["IBKR", "Tradovate", "TradingView"], readers_all=names)
     assert "These broker file readers are built" in out and "IBKR, Tradovate, TradingView" in out and "MetaTrader 4/5, IBKR" not in out
@@ -1030,7 +1037,7 @@ def test_lint_refuses_the_word_beta_on_a_page(off, plant):
 # ---- 2 "withdrawn on" is the launch date and says why
 def test_withdrawn_on_is_the_launch_date_and_states_the_reason(off, tmp_path):
     sentence = ("Fixed-price firm engagements (Snapshot, Memo, Outcomes pack) were withdrawn on 29 Oct 2026, the day donttrade moved to "
-                "one paid product, the donttrade test; a scope accepted before then keeps its agreed price and terms.")
+                "one paid product, the Revenge Trading Report; a scope accepted before then keeps its agreed price and terms.")
     assert sentence in text_of(off / "terms" / "index.html")
     assert re.search(r'launch_date = "2026-10-29"', TOML)
     r, out = build(tmp_path, "later", toml=TOML.replace('terms_date = "2026-11-06"', 'terms_date = "2026-11-05"').replace('privacy_date = "2026-11-06"', 'privacy_date = "2026-11-05"'))

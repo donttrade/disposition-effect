@@ -17,8 +17,8 @@
 // Without it this page shows only the descriptive numbers, no checks are run, and a neutral
 // line says a check is coming.
 
-import { createFileSlot, renderReadError, fieldError, revealResult } from './tool-state.js?v=af9a3c71';
-import { showMapStep, hideMap, SAMPLE_LABEL } from './file-tool.js?v=be4a8bf8';
+import { createFileSlot, renderReadError, fieldError, revealResult } from './tool-state.js?v=bc577236';
+import { showMapStep, hideMap, SAMPLE_LABEL } from './file-tool.js?v=e714ff11';
 import { freeStats, equityCurve, NO_LOSSES } from '../engine/stats.js?v=b2ec2891';
 import { money, unitNote, pct, ratio, duration, day, intText, el, signClass } from './format.js?v=35164924';
 import { parsePositive, InputError } from './num.js?v=8df99e34';
@@ -297,7 +297,7 @@ function renderNoise(noise, total) {
 }
 
 // R5: the teaser box says data-on-sale="true" when the build sells the report (partials/trader_offer.html).
-const reportLead = () => ($('ts-teaser').dataset.onSale === 'true' ? 'The donttrade test' : "We're building a test that");
+const reportLead = () => ($('ts-teaser').dataset.onSale === 'true' ? 'The Revenge Trading Report' : "We're building a test that");
 
 // The teaser states only figures computed above: the hold gap, never a check result (bundle plan B7).
 function teaser() {

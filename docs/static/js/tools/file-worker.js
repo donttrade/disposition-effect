@@ -25,7 +25,7 @@
 // Nothing here touches the network, storage or the console. Only what the pages render is
 // sent back: the trades and counts, never the raw rows.
 
-import { runFile, runFiles } from '../engine/index.js?v=2c9dccbc';
+import { runFile, runFiles } from '../engine/index.js?v=4424ac06';
 import { decodeBytes, isHtml } from '../engine/csv.js?v=833cffd4';
 import { noiseChecks } from '../engine/noise.js?v=d0f6a787';
 import { inspect, REQUIRED } from '../engine/mapping.js?v=f08bf97c';

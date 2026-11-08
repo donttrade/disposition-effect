@@ -147,7 +147,7 @@
   <div class="of-bar"><span>The test’s summary, run on a real account</span><span class="chip">Real public data</span></div>
   <table><thead><tr><th scope="col">Habit</th><th scope="col">Result</th><th scope="col">Total</th><th scope="col">Trades</th></tr></thead>
   <tbody>{% for r in RP.rows %}<tr><th scope="row">{{ r.habit }}</th><td><span class="v{{ ' v-yes' if r.result.startswith('Distinguishable') }}">{{ r.result }}</span></td><td class="{{ 'neg' if r.total.startswith('−') }}">{{ r.total }}</td><td>{{ r.trades }}</td></tr>{% endfor %}</tbody></table>
-  <figcaption id="of-art-cap" class="of-cap">The donttrade test’s own engine (method {{ RP.method_version }}) on the same investor’s {{ RP.n_trades }} closed trades. {% if RP.n_tested == 0 %}No habit was tested against chance on this file, so every total is a fact from the file. Why, habit by habit: {% for r in RP.rows if r.why %}{{ r.name_lower }}: {{ r.why }}{{ "; " if not loop.last else ". " }}{% endfor %}{% endif %}One investor, not a typical result.</figcaption>
+  <figcaption id="of-art-cap" class="of-cap">The report’s own engine (method {{ RP.method_version }}) on the same investor’s {{ RP.n_trades }} closed trades. {% if RP.n_tested == 0 %}No habit was tested against chance on this file, so every total is a fact. Why: {% for r in RP.rows if r.why %}{{ r.name_lower }}: {{ r.why }}{{ "; " if not loop.last else ". " }}{% endfor %}{% endif %}One investor, not a typical result.</figcaption>
 </figure><!--/real-data-->
 {%- endmacro %}
 

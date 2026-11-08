@@ -90,7 +90,7 @@ def test_passthrough_fix_fails_loudly_when_the_sentence_is_gone(tmp_path, monkey
 
 # ------------------------------------------------------------------ D10b
 def test_prices_json_has_no_standard_price():
-    raw = open(os.path.join(REPO, "site", "config", "prices.json"), encoding="utf-8").read()
+    raw = open((os.environ.get("DT_PRICES_JSON") or os.path.join(REPO, "site", "config", "prices.json")), encoding="utf-8").read()
     assert "standard_price" not in raw
     d = json.loads(raw)
     assert all("standard_price_usd" not in p for p in d["products"])
