@@ -17,8 +17,8 @@
 // Without it this page shows only the descriptive numbers, no checks are run, and a neutral
 // line says a check is coming.
 
-import { createFileSlot, renderReadError, fieldError, revealResult } from './tool-state.js?v=bc577236';
-import { showMapStep, hideMap, SAMPLE_LABEL } from './file-tool.js?v=e714ff11';
+import { createFileSlot, renderReadError, fieldError, revealResult } from './tool-state.js?v=473c7e9d';
+import { showMapStep, hideMap, SAMPLE_LABEL } from './file-tool.js?v=f7fa7d5d';
 import { freeStats, equityCurve, NO_LOSSES } from '../engine/stats.js?v=b2ec2891';
 import { money, unitNote, pct, ratio, duration, day, intText, el, signClass } from './format.js?v=35164924';
 import { parsePositive, InputError } from './num.js?v=8df99e34';

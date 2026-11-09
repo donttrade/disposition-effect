@@ -12,12 +12,12 @@
 // Mirrors parse_mapped(), parse_files() and the helpers around them in tests/reference/engine_ref.py.
 
 import { clean, normHeader, parseNumber, resolveNumberStyle, checkQuoting, parseDateFmt, fallBackClose,
-  numberShape, DATE_FORMATS, wideRows, splitCell, decodeBytes, isHtml, sniffDelimiter, parseCsv, fromPaste } from './csv.js?v=833cffd4';
-import { ISO_CURRENCIES, checkCurrencyColumn } from './detect.js?v=70bd77a4';
+  numberShape, DATE_FORMATS, wideRows, splitCell, decodeBytes, isHtml, sniffDelimiter, parseCsv, fromPaste } from './csv.js?v=70a5eea5';
+import { ISO_CURRENCIES, checkCurrencyColumn } from './detect.js?v=585ddcad';
 import { fail, LIMITS } from './errors.js?v=8e828461';
-import { reqNumber, optNumber, skip, isEmptyRow, htmlRows } from './mt.js?v=e244c8dc';
-import { sideLetter } from './generic.js?v=a1ca3bb7';
-import { CME_MULTIPLIERS } from './tradovate.js?v=3d8db472';
+import { reqNumber, optNumber, skip, isEmptyRow, htmlRows } from './mt.js?v=ef569664';
+import { sideLetter } from './generic.js?v=cb4436bf';
+import { CME_MULTIPLIERS } from './tradovate.js?v=6a33bd20';
 
 // ---------------------------------------------------------------- reading one file or paste
 // An item is the bytes of a file (Uint8Array) or a pasted table ({paste: text}).

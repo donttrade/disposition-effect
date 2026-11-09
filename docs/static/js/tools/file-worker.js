@@ -25,10 +25,10 @@
 // Nothing here touches the network, storage or the console. Only what the pages render is
 // sent back: the trades and counts, never the raw rows.
 
-import { runFile, runFiles } from '../engine/index.js?v=4424ac06';
-import { decodeBytes, isHtml } from '../engine/csv.js?v=833cffd4';
+import { runFile, runFiles } from '../engine/index.js?v=69cd05eb';
+import { decodeBytes, isHtml } from '../engine/csv.js?v=70a5eea5';
 import { noiseChecks } from '../engine/noise.js?v=d0f6a787';
-import { inspect, REQUIRED } from '../engine/mapping.js?v=f08bf97c';
+import { inspect, REQUIRED } from '../engine/mapping.js?v=5d83fd2d';
 import { EngineError, MESSAGES, WARNING_TEXT } from '../engine/errors.js?v=8e828461';
 
 // The errors a short "which column is which" step can answer (ask: true).

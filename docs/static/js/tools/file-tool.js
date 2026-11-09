@@ -5,7 +5,7 @@
 // worker parse path. Nothing is stored, logged or sent: these pages' CSP is connect-src 'none'.
 // No noise checks run here (noise: false), whatever the build's free_badges flag.
 
-import { createFileSlot, renderReadError } from './tool-state.js?v=bc577236';
+import { createFileSlot, renderReadError } from './tool-state.js?v=473c7e9d';
 import { el, unitNote, day, intText } from './format.js?v=35164924';
 
 // 6 Nov (owner: real public data, no worked examples): the button loads the real public-data account

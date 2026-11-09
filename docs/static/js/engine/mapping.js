@@ -13,12 +13,12 @@
 //   preset: a shipped preset whose headings are all in the file, or null.
 // Every string from the file goes to the page as data: the page writes it with textContent.
 
-import { clean, normHeader, numberShape, dateShape, detectDateFormat, wideRows } from './csv.js?v=833cffd4';
-import { ISO_CURRENCIES } from './detect.js?v=70bd77a4';
+import { clean, normHeader, numberShape, dateShape, detectDateFormat, wideRows } from './csv.js?v=70a5eea5';
+import { ISO_CURRENCIES } from './detect.js?v=585ddcad';
 import { isBlocked, moneyClean, normValue, numberQuestion, futuresRoot, STATUS_KEEP, MAP_FIELDS, isNoData,
-  isRagged, dataRowsAfter, readRows } from './mapped.js?v=a4b77cd2';
-import { CME_MULTIPLIERS } from './tradovate.js?v=3d8db472';
-import { matchPreset, presetById } from './presets.js?v=b393777a';
+  isRagged, dataRowsAfter, readRows } from './mapped.js?v=749dcdd0';
+import { CME_MULTIPLIERS } from './tradovate.js?v=6a33bd20';
+import { matchPreset, presetById } from './presets.js?v=2caf7210';
 
 export const HEADER_SEARCH_ROWS = 50;
 export const PEEK_ROWS = 60;

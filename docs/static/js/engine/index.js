@@ -4,18 +4,18 @@
 // cookies or storage, and raw rows are never kept: only whitelisted fields
 // survive into executions and trades.
 
-import { resolveNumberStyle, checkQuoting, normHeader, wideRows, splitCell, parseDate } from './csv.js?v=833cffd4';
-import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS, checkCurrencyColumn, ISO_CURRENCIES } from './detect.js?v=70bd77a4';
+import { resolveNumberStyle, checkQuoting, normHeader, wideRows, splitCell, parseDate } from './csv.js?v=70a5eea5';
+import { detectCsv, detectHtml, SIGNATURES, NUMERIC_FIELDS, checkCurrencyColumn, ISO_CURRENCIES } from './detect.js?v=585ddcad';
 import { fail, inFile, LIMITS } from './errors.js?v=8e828461';
 import { checkMapping, parseMapped, mappedTzLabel, mergeParsed, firstTs, idColumns, idLookup, readRows,
-  isPaste } from './mapped.js?v=a4b77cd2';
-import { matchPreset, presetById, PRESET_AFTER } from './presets.js?v=b393777a';
-import { parseMt, isEmptyRow } from './mt.js?v=e244c8dc';
-import { parseGeneric, parseGenericRoundtrip } from './generic.js?v=a1ca3bb7';
-import { parseIbkr } from './ibkr.js?v=9c22bb1a';
-import { parseTradovate } from './tradovate.js?v=3d8db472';
-import { parseTradingView, stripCurrencyCells } from './tradingview.js?v=cfd7a163';
-import { finish } from './trades.js?v=db83fb77';
+  isPaste } from './mapped.js?v=749dcdd0';
+import { matchPreset, presetById, PRESET_AFTER } from './presets.js?v=2caf7210';
+import { parseMt, isEmptyRow } from './mt.js?v=ef569664';
+import { parseGeneric, parseGenericRoundtrip } from './generic.js?v=cb4436bf';
+import { parseIbkr } from './ibkr.js?v=8288b8f4';
+import { parseTradovate } from './tradovate.js?v=6a33bd20';
+import { parseTradingView, stripCurrencyCells } from './tradingview.js?v=28b8c49e';
+import { finish } from './trades.js?v=c2abe46b';
 
 export { EngineError } from './errors.js?v=8e828461';
 

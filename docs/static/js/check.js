@@ -5,8 +5,8 @@
 
 import { countTrades, MIN_GROUP, MIN_ROWS } from './check-core.js?v=cbfe71cf';
 import { spanLine, MAX_ROWS } from './paid/strip.js?v=ae765086';
-import { createFileSlot, renderReadError, revealResult } from './tools/tool-state.js?v=bc577236';
-import { showMapStep, hideMap, FORMAT_NAMES, SAMPLE_LABEL, tableWrap, warningsNotice, plural } from './tools/file-tool.js?v=e714ff11';
+import { createFileSlot, renderReadError, revealResult } from './tools/tool-state.js?v=473c7e9d';
+import { showMapStep, hideMap, FORMAT_NAMES, SAMPLE_LABEL, tableWrap, warningsNotice, plural } from './tools/file-tool.js?v=f7fa7d5d';
 import { el, intText } from './tools/format.js?v=35164924';
 
 const $ = (id) => document.getElementById(id);
