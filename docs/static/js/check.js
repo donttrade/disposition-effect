@@ -141,10 +141,22 @@ function notesBlock(r) {
   return el('details', { class: 'ck-notes', open: skipped > 0 }, el('summary', { text: `${k} ${k === 1 ? 'note' : 'notes'} about how the file was read` }), n);
 }
 
+// 8 Nov: the largest count by the buy button (memo action 6). Counts only; words in #ck-largest-words. Ties keep the first row.
+function largest(p, c) {
+  let b;
+  for (const r of ROWS) { const n = countOf(r, c); if (n && !(b && b.n >= n)) b = { r, n }; }
+  if (!p || !b) return;
+  const w = $('ck-largest-words').content, d = w.querySelector(`[data-h=${b.r.id}]`).dataset, k = b.n === 1 ? '1' : 'n';
+  p.replaceChildren(el('strong', { text: `${intText(b.n)} ${k === '1' ? d.one : d.many}.` }),
+    ' ' + w.firstElementChild.dataset[(b.r.test && c.habits[b.r.id].enough ? 't' : 'd') + k]);
+  p.hidden = false;
+}
+
 function offerFor(v, c) {
   const t = $('ck-t-' + v.name);
   const node = t.content.firstElementChild.cloneNode(true);
   for (const s of node.querySelectorAll('[data-k="groups"]')) s.textContent = String(v.groups);
+  largest(node.querySelector('[data-k="largest"]'), c);
   const gap1 = node.querySelector('[data-k="gap1"]'), gap2 = node.querySelector('[data-k="gap2"]');
   if (gap1) {
     const [a, b] = c.testable.map(byId);
