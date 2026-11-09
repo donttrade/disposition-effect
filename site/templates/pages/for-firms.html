@@ -1,23 +1,197 @@
 {% extends "base.html" %}
 {% block content %}
 {%- import "partials/pilot_terms.html" as pt with context %}
-{%- set pilot = products["pilot"] %}{%- set plan = products["plan"] %}
+{%- set pilot = products["pilot"] %}{%- set plan = products["plan"] %}{%- set fc = prices.flagcheck %}
+{%- set fc_subject = "Flag Check: [your firm]" %}
+{%- set fc_body = "What was flagged (copy trading, hedging or linked accounts):\nHow many linked accounts:\nYour trading platform:\n\nPlease do not attach trader data to this first email.\n" %}
+{%- set fc_mailto = "mailto:" ~ fc.contact ~ "?subject=" ~ (fc_subject|urlencode) ~ "&body=" ~ (fc_body|urlencode) %}
 <div class="wrap">
   {% include "partials/crumbs.html" %}
-  {#- 1. Hero. 5 Nov 2026 (owner): the page leads with the free pre-registered study (OSF j2ypd), to match the firm
-      outreach emails of Wed 11 Nov. Source for every claim: OUTREACH-WAVE1-FIRMS-V2-2026-11-05.md, section 0 and
-      section 6 (the offer sheet). The paid Pilot and monthly plan stay further down the page. Items the sheet marks
-      [CONFIRM] (publication timing, retention, the payout clause) are deliberately left out. #}
-  <section class="hero" aria-labelledby="ff-h">
+  {#- 1. Hero. 8 Nov 2026 (research memo 00-DECISION-MEMO action 1; 01-FIRM-OFFER s4.1; 04-WEBSITE-CONVERSION s4): the
+      page leads with Flag Check, one flagged payout case. Sold by email reply and invoice for now: no Stripe link, no
+      card checkout. Every amount from prices.json "flagcheck". The free study, the Pilot and the per-account plan
+      moved down, under "Measure your whole book", with every old id kept. The matching rules and the order test are
+      the ones in the Coincidence Baseline analysis plan (written 7 Nov 2026, not yet public); no result from it is
+      shown, because none is published. #}
+  <section class="hero" aria-labelledby="ff-h" id="flagcheck">
     <div class="grid">
       <div class="span-7">
-        <h1 id="ff-h">Run our free study on your past accounts</h1>
+        <h1 id="ff-h">An independent check on a flagged payout</h1>
+        <p class="lede">Does the flag beat coincidence? Send us one flagged case. You get a written report within {{ fc.report_hours }} hours of a complete file.</p>
+        <p class="price-big"><span class="num">{{ fc.case_founding_usd|usd }}</span> <span class="muted">a case for the first {{ fc.case_founding_cases }} cases, then {{ fc.case_list_usd|usd }}</span></p>
+        <p class="btn-row"><a class="btn" href="{{ fc_mailto }}">Send one flagged case</a> <a class="btn btn-secondary" href="#flagcheck-how">How the check works</a></p>
+        <p class="small muted">Email only, no calls, no contract. Paid by invoice. A “Not supported” verdict costs the same as a “Supported” one.</p>
+        <p class="small">Here as a trader? See <a href="/for-traders/">Individual traders</a> or the free <a href="/tools/">tools</a>. We can’t help with disputes about a firm.</p>
+      </div>
+      <div class="span-5">
+        <ol class="pipeline" aria-label="How a Flag Check runs">
+          <li><strong>You send</strong> the flagged account’s trades and the accounts it is linked to, with codes, not names</li>
+          <li><strong>We match</strong> their trades by symbol, side and time</li>
+          <li><strong>We test</strong> who traded first, and how often unlinked accounts match as closely</li>
+          <li><strong>You get</strong> one verdict, the numbers behind it and its limits</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <ul class="evidence" aria-label="What you can check before you pay" data-reveal>
+    <li><a href="/research/">{{ evidence.studies }} published studies</a></li>
+    <li><a href="/code/">Scripts public for {{ evidence.scripts_public }} of {{ evidence.studies }}</a></li>
+    <li><a href="/corrections/">{{ evidence.corrections }} corrections, dated and logged</a></li>
+    <li><a href="/independence/">No firm can pay to change a number</a></li>
+  </ul>
+
+  {#- 1a. Why a second check. No dollar figure: the research's cost of a wrong denial is an estimate, not on this page. #}
+  <section class="section" aria-labelledby="fc-why-h" data-reveal>
+    <h2 id="fc-why-h">Why a flag needs a second check</h2>
+    <p>In a busy market, many unrelated accounts trade the same symbol, the same way, within seconds of each other. On a crowded day there are more of them. A rule that counts shared trades will fire on some of these accounts by chance.</p>
+    <p>So before you deny a payout, one question matters: <strong>does this flag beat coincidence?</strong> Flag Check answers that question for one case, and only that question.</p>
+    <p>We did not raise the flag. We are paid the same whatever the verdict.</p>
+  </section>
+
+  {#- 1b. The method in plain words. Matching, firing rule and order test: coincidence-ANALYSIS-PLAN.md 5.1-5.5. The verdict
+      rule is the one in the report template (brain/flagcheck/REPORT-TEMPLATE.md) and flagcheck.mjs. #}
+  <section class="section" aria-labelledby="flagcheck-how" data-reveal>
+    <h2 id="flagcheck-how">How the check works</h2>
+    <ol class="steps">
+      <li><strong>Match the trades.</strong> A trade of the flagged account and a trade of a linked account match when they are in the same symbol, within 30 seconds of each other. For copy trading they are on the same side. For hedging they are on opposite sides, with sizes within 20% of each other. Each trade is matched once at most.</li>
+      <li><strong>Apply the flag rule.</strong> The rule fires when there are at least 5 matches and they cover at least half of the smaller account’s trades that day.</li>
+      <li><strong>Test the order.</strong> Among the matched trades, who traded first? Coincidence gives about half each way. Copying gives a steady leader. The test needs at least 8 matches that are not tied to the millisecond.</li>
+      <li><strong>Compare with coincidence.</strong> We run the same rule on pairs of accounts from your book with no known link, on the same days. If unlinked pairs match as closely as the flagged pair, the flag does not beat coincidence.</li>
+    </ol>
+    <p>The matching windows, the flag rule and the order test were written down on 7 Nov 2026, before any case. The verdict rule is set out below. They are the same for every firm, and they are not changed after a result.</p>
+    <details class="how-more"><summary>The exact rules</summary>
+    <ul>
+      <li><strong>Trades:</strong> taker fills only. Fills of one account in one symbol, on one side, at the same timestamp count as one trade.</li>
+      <li><strong>Matching:</strong> one-to-one and greedy, earliest pairs first. Copy rule: same symbol, same side, at most 30 seconds apart. Hedge rule: same symbol, opposite sides, at most 30 seconds apart, smaller size at least 80% of the larger.</li>
+      <li><strong>Flag rule:</strong> at least 5 matches, and matches divided by the smaller account’s trade count at least 0.5, on the same UTC day. A pair’s match share is its highest such ratio on any day with at least 5 matches.</li>
+      <li><strong>Order test:</strong> on the days the rule fires, ties dropped; a two-sided exact binomial test of how often the flagged account went first, against one half. “Ordered” if p is below 0.01. Run only with 8 or more untied matches.</li>
+      <li><strong>Coincidence comparison:</strong> every unlinked pair that trades a common symbol on the same days gets the same match share. Rare: counting the flagged pair itself, at most 1% of pairs match at least as closely (split evenly when several linked accounts are tested). Common: more than 5% of the unlinked pairs match at least as closely.</li>
+      <li><strong>Verdict:</strong> “Supported” if the rule fires, the match is rare among unlinked pairs, and (for copy trading) the order test is ordered. “Not supported” if the rule does not fire, or the match is common among unlinked pairs. “Cannot tell” in every other case.</li>
+    </ul>
+    </details>
+  </section>
+
+  {#- 1c. What a firm sends and gets back (RESEARCH-FIRM-MUST-BUY-OFFER s4.3, adapted to the brief). #}
+  <section class="section" aria-labelledby="fc-send-h" data-reveal>
+    <h2 id="fc-send-h">What you send, and what you get back</h2>
+    <dl class="split" data-reveal data-reveal-stagger>
+      <div><dt>You send</dt><dd>One CSV of fills: the flagged account, the accounts it is linked to, and a sample of other accounts from the same days with no known link. Five columns: account code, time in UTC, symbol, side and size.</dd></div>
+      <div><dt>Codes, not people</dt><dd>Replace every login with a code before you send. We never need names, emails, logins, IP addresses or balances.</dd></div>
+      <div><dt>You get back</dt><dd>What was compared (days, symbols, trade counts), every matched trade with its time gap, the order test, the coincidence comparison, one verdict and the limits. Every number points back to rows in your file.</dd></div>
+      <div><dt>When</dt><dd>Within {{ fc.intake_hours }} hours of your file, we tell you if we cannot run it, and you owe nothing. Otherwise the report reaches you within {{ fc.report_hours }} hours of a complete file.</dd></div>
+    </dl>
+    <h3 id="fc-verdicts-h">The three verdicts</h3>
+    <dl class="split">
+      <div><dt>Supported</dt><dd>The flagged accounts match more closely than unlinked accounts do, and the order test agrees.</dd></div>
+      <div><dt>Not supported</dt><dd>The pattern is no stronger than what unlinked accounts show, or the flag rule does not fire.</dd></div>
+      <div><dt>Cannot tell</dt><dd>Too few trades, too small a sample of unlinked accounts, or the tests point different ways.</dd></div>
+    </dl>
+    <p>We promise no verdict. “Not supported” and “Cannot tell” are findings, and they are billed like any other. The verdict covers the trading pattern only. It does not decide why anyone traded, or whether a rule was broken. That decision stays with you. It is not legal advice and not investment advice.</p>
+  </section>
+
+  {#- 1d. Price ladder (01-FIRM-OFFER s4.1; process promises from PRICING-EVIDENCE-FLAG-CHECK-2026-11-07 s6, reworded:
+      the word "guaranteed" is banned). Invoiced: no card link. #}
+  <section class="section" aria-labelledby="flagcheck-price" data-reveal>
+    <h2 id="flagcheck-price">What Flag Check costs</h2>
+    <p><strong>Prices in US$, before any applicable sales tax.</strong> Invoiced by email; no card checkout.</p>
+    <div class="price-cards price-cards-3">
+      <section class="price-card price-card-main" aria-labelledby="fc-pc-case-h">
+        <h3 id="fc-pc-case-h">One flagged case</h3>
+        <p class="price-big"><span class="num">{{ fc.case_founding_usd|usd }}</span> <span class="muted">a case</span></p>
+        <ul class="ticks">
+          <li>Founding price for the first {{ fc.case_founding_cases }} cases, then {{ fc.case_list_usd|usd }}</li>
+          <li>One flagged account and the accounts it is linked to</li>
+          <li>Report within {{ fc.report_hours }} hours of a complete file</li>
+          <li>Invoice sent with the report, due in {{ fc.payment_days }} days</li>
+        </ul>
+      </section>
+      <section class="price-card" aria-labelledby="fc-pc-pilot-h">
+        <h3 id="fc-pc-pilot-h">Founding pilot</h3>
+        <p class="price-big"><span class="num">{{ fc.pilot_usd|usd }}</span> <span class="muted">once</span></p>
+        <ul class="ticks">
+          <li>{{ fc.pilot_cases|numword|capitalize }} cases within {{ fc.pilot_days }} days</li>
+          <li>For the first {{ fc.pilot_firms|numword }} firms</li>
+          <li>All {{ fc.pilot_usd|usd }} credited to the monthly plan if it starts within {{ fc.pilot_credit_days }} days</li>
+          <li>Invoiced when you start, due in {{ fc.payment_days }} days</li>
+        </ul>
+      </section>
+      <section class="price-card" aria-labelledby="fc-pc-month-h">
+        <h3 id="fc-pc-month-h">Monthly</h3>
+        <p class="price-big"><span class="num">{{ fc.monthly_usd|usd }}</span> <span class="muted">a month</span></p>
+        <ul class="ticks">
+          <li>Up to {{ fc.monthly_cases }} cases a month</li>
+          <li>{{ fc.extra_case_usd|usd }} a case after that</li>
+          <li>Invoiced monthly</li>
+        </ul>
+      </section>
+    </div>
+    <h3>What we promise, whatever the verdict</h3>
+    <ul>
+      <li><strong>On time, or that case is free.</strong> If your report is not with you within {{ fc.report_hours }} hours of a complete file, you do not pay for that case.</li>
+      <li><strong>The method as written, or a free re-run.</strong> If a report departs from the method above, or you show us a calculation error, we re-run it at no charge. If we cannot correct it, we refund the case.</li>
+      <li><strong>A free intake check.</strong> If we cannot run your file (we cannot read it, or it is too thin to test), we say so within {{ fc.intake_hours }} hours and you owe nothing.</li>
+      <li><strong>The pilot</strong> is refunded in full if the first report is late or does not follow the method.</li>
+    </ul>
+  </section>
+
+  {#- 1e. How to start. A mailto to research@ with a prefilled subject, and the firm form with product "flagcheck". #}
+  <section class="section" aria-labelledby="flagcheck-send" data-reveal>
+    <h2 id="flagcheck-send">Send one flagged case</h2>
+    <p>Email <a href="{{ fc_mailto }}">{{ fc.contact }}</a> with the subject “{{ fc_subject }}”. Say what was flagged and how many accounts are linked. Do not attach trader data to the first email. We reply within 1 business day with the file layout. You send the file. We run the intake check, then the report.</p>
+    <p class="btn-row"><a class="btn" href="{{ fc_mailto }}">Email {{ fc.contact }}</a></p>
+    <details><summary id="fc-form-h">Prefer a form?</summary>
+    {%- with fid = "fc", product = "flagcheck", fixed = true, heading_id = "fc-form-h", placeholder = "e.g. a copy-trading flag on two accounts, about 300 trades each", message_label = "What was flagged? (no trader data here)", mail_to = fc.contact, mail_subject = fc_subject %}{% include "partials/form_firm.html" %}{% endwith %}
+    </details>
+  </section>
+
+  {#- 1f. Independence rules (RESEARCH-FIRM-MUST-BUY-OFFER s4.3), printed on every report. #}
+  <section class="section" aria-labelledby="fc-indep-h" data-reveal>
+    <h2 id="fc-indep-h">Independence rules, printed on every report</h2>
+    <ul>
+      <li><strong>You pay, and the report says so.</strong></li>
+      <li><strong>The method is fixed before the case,</strong> and it is the same for every firm.</li>
+      <li><strong>You cannot edit the report.</strong> You can ask us to correct a mistake, and every correction is dated.</li>
+      <li><strong>If you publish the report, you publish all of it.</strong></li>
+      <li><strong>The fee does not depend on the verdict.</strong></li>
+    </ul>
+  </section>
+
+  {#- 1g. Honest proof: no logos, no testimonials, no counts. #}
+  <section class="section" aria-labelledby="fc-proof-h" data-reveal>
+    <h2 id="fc-proof-h">What we can show you today</h2>
+    <p><strong>No firm has bought a Flag Check yet.</strong> There is no client list and no case result to show, and there is no specimen report yet. What you can check now is how we work: our published studies, our public scripts and our dated corrections, linked above. Our wider study of how often these rules fire among unlinked accounts is not published.</p>
+  </section>
+
+  {#- 1h. Data and compliance, and the FAQ. #}
+  <section class="section" aria-labelledby="fc-faq-h" data-reveal>
+    <h2 id="fc-faq-h">Questions about Flag Check</h2>
+    <p class="small muted">Our view, not legal advice. Your counsel decides.</p>
+    <details><summary>Do you need our traders’ names?</summary><p>No. Replace every login with a code before you send. The report uses only those codes.</p></details>
+    <details><summary>How is this different from our risk vendor?</summary><p>Your vendor raises the flag. We check whether that flag beats coincidence, using a method fixed in advance, and we are paid the same whatever we find. We do not replace your vendor.</p></details>
+    <details><summary>What if the verdict is not what we wanted?</summary><p>Then that is the verdict. It is billed the same way. That is what makes it worth having.</p></details>
+    <details><summary>Why is it this price?</summary><p>Most of the work is a fixed script, run the same way on every case.</p></details>
+    <details><summary>Can we pay by card?</summary><p>Not yet. We invoice by email, in US$, due in {{ fc.payment_days }} days. Pay by bank transfer, or in Canada the CAD equivalent by Interac e-Transfer.</p></details>
+    <details><summary>Our firm is in the UK or EU.</summary><p>You send pseudonymised trade rows only. Whether those are personal data is for your counsel. Retention and a data processing agreement are agreed in writing before you send any file.</p></details>
+    <details><summary>Can we talk on a call?</summary><p>We work by email only, so every answer is in writing and can go straight to your case file.</p></details>
+  </section>
+
+  {#- 2. Measure your whole book (8 Nov 2026): the earlier firm offers, unchanged below except where marked. The study's
+      hero became this section's first block (h1 to h2); the old ids are all kept. #}
+  <section class="section" aria-labelledby="whole-book-h" id="whole-book" data-reveal>
+    <h2 id="whole-book-h">Measure your whole book</h2>
+    <p>Flag Check looks at one case. The offers below look at all your accounts: a free pre-registered study, the {{ pilot.price_usd|usd }} {{ pilot.name }}, and the monthly plan at {{ plan.price_usd|usd }} per trader account. They are separate from Flag Check and have their own terms.</p>
+  </section>
+
+  <section class="section" aria-labelledby="study-top-h">
+    <div class="grid">
+      <div class="span-7">
+        <h2 id="study-top-h">The free study: run it on your past accounts</h2>
         <p class="lede">Only totals leave your machine, and you see the result first.</p>
         <div class="notice" id="study-status"><strong>Where the study stands</strong>
           <p>The plan is pre-registered on the Open Science Framework: registration <a href="https://osf.io/j2ypd/" rel="noopener">j2ypd</a>, public, 2 Nov 2026. <a href="https://osf.io/j2ypd/" rel="noopener">Amendment 1 to the registration</a>, posted 5 Nov 2026, sets how firm results are counted. No firm has run it yet, so nothing in it is validated. It covers the behaviour-risk half of the question only. Whether a trader’s edge is real or luck is a second test. We have specified it. We have not built it.</p></div>
         <p class="btn-row"><a class="btn" href="#study-request">Ask for the study plan</a> <a class="btn btn-secondary" href="https://osf.io/j2ypd/" rel="noopener">Read the registration</a></p>
         <p class="small muted">Email only, no calls. The study is free. <a href="#study-price">See what comes after</a></p>
-        <p class="small">Here as a trader? See <a href="/for-traders/">Individual traders</a> or the free <a href="/tools/">tools</a>. We can’t help with disputes about a firm.</p>
       </div>
       <div class="span-5">
         <ol class="pipeline" aria-label="How the study runs">
@@ -30,13 +204,6 @@
       </div>
     </div>
   </section>
-
-  <ul class="evidence" aria-label="What you can check before you pay" data-reveal>
-    <li><a href="/research/">{{ evidence.studies }} published studies</a></li>
-    <li><a href="/code/">Scripts public for {{ evidence.scripts_public }} of {{ evidence.studies }}</a></li>
-    <li><a href="/corrections/">{{ evidence.corrections }} corrections, dated and logged</a></li>
-    <li><a href="/independence/">No firm can pay to change a number</a></li>
-  </ul>
 
   {#- 1b. The study. Sheet section 6: "What it is", "What it is not", "Conflict of interest". #}
   <section class="section" aria-labelledby="study-h" data-reveal>
@@ -105,7 +272,7 @@
   <section class="section" aria-labelledby="study-price" data-reveal>
     <h2 id="study-price">What the study costs</h2>
     <p><strong>The study is free.</strong> If the result does not pass, is inconclusive, or is not measured, you owe nothing, and we publish that too.</p>
-    <p>If the result passes the line we registered in advance, we offer to set up a per-evaluation check with the first firms that pass. That check is not built yet. The founding price is <strong>US{{ prices.study.founding_price_usd|usd }} per evaluation</strong> for the first {{ (["zero","one","two","three","four","five"][prices.study.founding_firms]) if prices.study.founding_firms in [0,1,2,3,4,5] else prices.study.founding_firms }} firms that pass. The list price is <strong>US{{ prices.study.list_price_usd|usd }} per evaluation, with a US{{ prices.study.monthly_minimum_usd|usd }} monthly minimum.</strong> Either price is set in writing before you run anything. One evaluation means one trader account checked once. The Pilot and monthly plan further down the page are separate paid tests.</p>
+    <p>If the result passes the line we registered in advance, we offer to set up a per-evaluation check with the first firms that pass. That check is not built yet. The founding price is <strong>{{ prices.study.founding_price_usd|usd }} per evaluation</strong> for the first {{ (["zero","one","two","three","four","five"][prices.study.founding_firms]) if prices.study.founding_firms in [0,1,2,3,4,5] else prices.study.founding_firms }} firms that pass. The list price is <strong>{{ prices.study.list_price_usd|usd }} per evaluation, with a {{ prices.study.monthly_minimum_usd|usd }} monthly minimum.</strong> Either price is set in writing before you run anything. One evaluation means one trader account checked once. The Pilot and monthly plan further down the page are separate paid tests.</p>
   </section>
 
   {#- 1g. The study request. A separate form from the Pilot request further down; its product is fixed to "study". #}
@@ -151,7 +318,7 @@
   <section class="section" aria-labelledby="what-it-costs" data-reveal>
     <h2 id="what-it-costs">The Pilot and the monthly plan: what they cost</h2>
     <p><strong>Prices in USD, before any applicable sales tax.</strong> These are the paid disposition-effect tests. The free study is priced above.</p>
-    <p class="btn-row"><a class="btn" href="#request">Start a {{ pilot.name }}: {{ pilot.price_usd|usd }} USD</a> <a class="btn btn-secondary" href="/sample-memo/">See a sample memo</a></p>
+    <p class="btn-row"><a class="btn" href="#request">Start a {{ pilot.name }}: {{ pilot.price_usd|usd }}</a> <a class="btn btn-secondary" href="/sample-memo/">See a sample memo</a></p>
     <div class="table-wrap" tabindex="0" role="region" aria-label="The Pilot and the monthly plan">
     <table class="price-table">
       <thead><tr><th scope="col">Package</th><th scope="col">What you get</th><th scope="col">Payment</th><th scope="col" class="num">Price (USD)</th></tr></thead>
@@ -321,6 +488,13 @@ a7f3,2026-03-04,p91,1,240.00</pre>
     {%- else %}
     {%- with fid = "ff", product = "pilot", heading_id = "request" %}{% include "partials/form_firm.html" %}{% endwith %}
     {%- endif %}
+  </section>
+
+  {#- 13. Closing call to action (04-WEBSITE-CONVERSION s4, section 10): Flag Check again; no trader offer on this page. #}
+  <section class="section" aria-labelledby="fc-end-h" data-reveal>
+    <h2 id="fc-end-h">Is there a flag on a payout request right now?</h2>
+    <p>Send us that one case. {{ fc.case_founding_usd|usd }} for the first {{ fc.case_founding_cases }} cases, a report within {{ fc.report_hours }} hours of a complete file, and the same fee whatever the verdict.</p>
+    <p class="btn-row"><a class="btn" href="{{ fc_mailto }}">Send one flagged case</a> <a class="btn btn-secondary" href="#flagcheck-price">See all prices</a></p>
   </section>
   {% include "partials/disclaimer.html" %}
 </div>

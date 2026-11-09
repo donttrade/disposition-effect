@@ -256,7 +256,7 @@ def test_a10_no_match_mailto_holds_only_the_question(browser, built_site):
     pg.wait_for_selector("#ask [data-answer-out] a[href^='mailto:']")
     href = pg.get_attribute("#ask [data-answer-out] a[href^='mailto:']", "href")
     from urllib.parse import quote
-    assert href == "mailto:donttrade.research@gmail.com?subject=" + quote(q, safe="-_.!~*'()")
+    assert href == "mailto:research@donttrade.ca?subject=" + quote(q, safe="-_.!~*'()")   # 8 Nov 2026: one contact address
     ctx.close()
 
 

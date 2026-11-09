@@ -13,26 +13,17 @@
 
 {#- 29 Oct (owner: one product): the firm package of the Revenge Trading Report, the same card in both builds. Invoiced, so no
     Stripe link. Every amount and rule from prices.json. The old firm ids are anchors inside it, so old links land. -#}
+{#- 8 Nov 2026 (research memo 00-DECISION-MEMO action 1): the card leads with Flag Check, one flagged payout case
+    (prices.json "flagcheck"), invoiced by email. The whole-book Pilot and per-account plan stay as one line. -#}
+{#- 8 Nov 2026 (owner, research memo action 7, trust fixes): firm prices come off /pricing/. The firm card is now ONE
+    line that links to /for-firms/, where every firm price lives. No firm amount on this page. The old firm ids stay
+    as anchors on the line, so old links still land. -#}
 {%- macro firm_card(anchors=("copy-leader", "claims-test", "platforms", "researchers", "payment")) %}
-    <section class="price-card" id="firms" aria-labelledby="pc-firm-h">{% for a in anchors %}<span id="{{ a }}"></span>{% endfor %}
-      <h2 id="pc-firm-h">Firms</h2>
-      <p class="pc-value">The report on your whole book. One habit today, more being added.</p>
-      <p class="price-big"><span class="num">{{ plan.price_usd|usd }}</span> <span class="muted">per trader account a month</span></p>
-      <ul class="ticks">
-        <li>{{ plan.minimum_usd|usd }} monthly minimum</li>
-        <li>The {{ pilot.price_usd|usd }} {{ pilot.name }} is your first month</li>
-        <li>Its {{ pilot.price_usd|usd }} counts toward your plan’s invoices</li>
-        <li>{{ prices.rules.plan_prepay_discount_percent }}% off when you pay a year upfront</li>
-        <li>Cancel at the end of any month</li>
-        <li>Invoiced; no card checkout</li>
-      </ul>
-      <p class="btn-row"><a class="btn" href="/for-firms/#request">Start the {{ pilot.name }}</a></p>
-      <p class="small"><a href="/for-firms/">How it works for firms</a></p>
-    </section>
+  <p class="firm-line" id="firms">{% for a in anchors %}<span id="{{ a }}"></span>{% endfor %}<strong>Firms:</strong> independent checks of flagged payout cases, and measurement of a whole book, are on <a href="/for-firms/">For firms</a>.</p>
 {%- endmacro %}
 
 {%- macro firms_block() %}
-  <div class="price-cards price-cards-1">{{ firm_card(("copy-leader", "claims-test", "platforms")) }}</div>
+  {{ firm_card(("copy-leader", "claims-test", "platforms")) }}
   <p class="small"><strong>{{ pilot.name }} refunds (from the <a href="/terms/#trial">terms</a>):</strong> {{ pt.both() }}</p>
   <section class="section" aria-labelledby="copy-leader-h">
     <h2 id="copy-leader-h">Copy-trading platforms</h2>
@@ -69,15 +60,16 @@
 {%- set link = pay_link %}
 <div class="wrap">
   {% include "partials/crumbs.html" %}
-  <h1>One report. Two ways to buy it.</h1>
-  <p class="lede">The Revenge Trading Report is the one thing we sell. Everything else is free.</p>
-  <div class="price-cards price-cards-2" id="traders">
+  {#- 8 Nov 2026: one card now (firm prices moved to /for-firms/), so the old "Two ways to buy it" is gone. -#}
+  <h1>One report. One price.</h1>
+  <p class="lede">The Revenge Trading Report is the one thing we sell to traders. Everything else is free.</p>
+  <div class="price-cards price-cards-1" id="traders">
     <section class="price-card price-card-main" aria-labelledby="pc-report-h">
       <h2 id="pc-report-h">The {{ r.name }}</h2>
       <p class="pc-scope">Re-entering after a loss and trading after a losing run, tested against chance, plus {{ (prices.rules.habits_measured - prices.rules.habits_tested)|numword }} more habits around losses, totalled in dollars.</p>
       <p class="pc-value">Is your habit real, or luck? Test your own trades.</p>
       <p class="small pc-check"><a href="/check/">Run the free check first</a>: it counts the trades the report would work on, in your browser, before you pay.</p>
-      <p class="price-big"><span class="num">{{ r.price_usd|usd }}</span> <span class="muted">USD, once · re-test included</span></p>
+      <p class="price-big"><span class="num">{{ r.price_usd|usd }}</span> <span class="muted">once · re-test included</span></p>
       <p class="small" id="founding-line">{{ price_line(r, prices.rules) }}</p>
       <ul class="ticks">
         <li>Up to {{ prices.rules.habits_measured|numword }} habits measured in your trades</li>
@@ -109,13 +101,13 @@
           <p class="small muted pay-links no-print"><a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a> · <a href="/terms/#seller">Business details</a></p>
         </div>
       </details>
-      <p class="small muted">Total {{ r.price_usd|usd }} USD{% if managed_pay and not tax_included %} plus any sales tax, VAT or GST{% elif managed_pay %}, any tax included{% endif %}, paid on {% if managed_pay %}Link’s secure page (Stripe){% else %}Stripe’s page{% endif %}.</p>
+      <p class="small muted">Total {{ r.price_usd|usd }}{% if managed_pay and not tax_included %} plus any sales tax, VAT or GST{% elif managed_pay %}, any tax included{% endif %}, paid on {% if managed_pay %}Link’s secure page (Stripe){% else %}Stripe’s page{% endif %}.</p>
       <p class="small" id="refunds">{{ refund.pricing_line() }}</p>
       <p class="small"><a href="/sample-report/">See the example report</a> · <a href="/fr/avant-de-payer/" hreflang="fr" lang="fr">Avant de payer (français)</a></p>
       {% if stripe_mode == "test" %}<p class="notice notice-caution"><strong>Test mode</strong> Payments here use Stripe's test mode. No real card is charged.</p>{% endif %}
     </section>
-    {{ firm_card() }}
   </div>
+  {{ firm_card() }}
   <div id="history" hidden></div>
   {% include "partials/free_strip.html" %}
 
@@ -133,7 +125,7 @@
     <details><summary>Is this investment advice?</summary><p>No. It describes your own past trades. It does not tell you what to trade, how much, or when to exit.</p></details>
     <details><summary>Can I get a refund?</summary><p>{{ refund.faq_answer(false) }}{% if not refund_on %} <a href="/terms/#traders">Trader terms</a>{% endif %}</p></details>
     <details><summary>Do you take payment by email?</summary><p>No. We never ask for card details by email. <a href="/terms/#cancellation">Cancellation and refund terms</a></p></details>
-    <details><summary>What does a firm pay?</summary><p>{{ plan.price_usd|usd }} per trader account a month, counted from the accounts line that month’s run of the script prints, with a {{ plan.minimum_usd|usd }} monthly minimum, invoiced monthly in arrears. The {{ pilot.name }} is your first month. Its {{ pilot.price_usd|usd }} counts toward your plan’s invoices. <a href="/terms/#plan">Plan terms</a></p></details>
+    <details><summary>What does a firm pay?</summary><p>Firm prices are on <a href="/for-firms/#flagcheck-price">For firms</a>. Firms are invoiced; there is no card checkout for them.</p></details>
   </section>
   {% include "partials/disclaimer.html" %}
 </div>
@@ -144,8 +136,8 @@
   <h1>Pricing</h1>
   <p class="lede">Published prices in USD, the same for everyone, fixed in writing before anyone sees data. Every price on this site comes from one list.</p>
   <p><strong>Firm prices are in US dollars (USD), before any applicable sales tax.</strong></p>
-  {#- v3 (ARCHITECT-V3 §c.4, H6): the value ladder, here with the firm price #}
-  {%- with show_firm_price = true, ladder_id = "ladder-h" %}{% include "partials/value_ladder.html" %}{% endwith %}
+  {#- v3 (ARCHITECT-V3 §c.4, H6): the value ladder. 8 Nov 2026: no firm price on /pricing/ (firm prices live on /for-firms/) #}
+  {%- with show_firm_price = false, ladder_id = "ladder-h" %}{% include "partials/value_ladder.html" %}{% endwith %}
   {{ firms_block() }}
   {{ traders_block() }}
 

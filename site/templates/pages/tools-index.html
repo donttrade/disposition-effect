@@ -67,9 +67,9 @@
     <h2 id="fm-h">Run a prop firm or broker?</h2>
     {%- if prices.get("study") %}
     <p>Run our free, pre-registered study on your past accounts. Only totals leave your machine, and you see the result first. The plan is registered on the Open Science Framework as <a href="https://osf.io/j2ypd/" rel="noopener">j2ypd</a>.</p>
-    <p class="fm-links"><a href="/for-firms/">About the free study</a> <a href="/for-firms/#what-it-costs">The {{ pilot.name }}, US{{ pilot.price_usd|usd }}</a></p>
+    <p class="fm-links"><a href="/for-firms/">About the free study</a> <a href="/for-firms/#what-it-costs">The {{ pilot.name }}, {{ pilot.price_usd|usd }}</a></p>
     {%- else %}
-    <p class="fm-links"><a href="/for-firms/#what-it-costs">The {{ pilot.name }}, US{{ pilot.price_usd|usd }}</a></p>
+    <p class="fm-links"><a href="/for-firms/#what-it-costs">The {{ pilot.name }}, {{ pilot.price_usd|usd }}</a></p>
     {%- endif %}
   </div>
   <ul class="mods mods-firm">{{ d.module(by.pass, 12) }}</ul>

@@ -598,8 +598,9 @@ def founding_claims(html, where):
     with open(prices_path(), encoding="utf-8") as f:   # read each time: a test may build with another prices file
         d = json.load(f)
     r = next(p for p in d["products"] if p["id"] == "report39")
-    _FOUNDING.update(open=d["rules"]["founding_open"], limit=d["rules"]["founding_limit"], after=r["after_founding"]["price_usd"])
-    why = build.founding_problem(html, _FOUNDING["open"], _FOUNDING["limit"], _FOUNDING["after"])
+    _FOUNDING.update(open=d["rules"]["founding_open"], limit=d["rules"]["founding_limit"], after=r["after_founding"]["price_usd"],
+                     shown=d["rules"].get("after_founding_shown", True))   # 8 Nov 2026: false = no page names the next price
+    why = build.founding_problem(html, _FOUNDING["open"], _FOUNDING["limit"], _FOUNDING["after"], _FOUNDING["shown"])
     return [("claim:founding_price", where, why)] if why else []
 
 

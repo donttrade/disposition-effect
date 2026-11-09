@@ -144,7 +144,7 @@ def test_home_has_no_firm_prices_and_the_trader_cta(built_site):
     for p in prices["products"]:
         if p["audience"] == "firm":
             assert B.usd(p["price_usd"]) not in html, p["id"]
-    assert "Join the waitlist — $39 founding price" in html
+    assert "Join the waitlist — US$39 founding price" in html
     assert not re.search(r"\btrial\b", re.sub(r"<[^>]+>", " ", html), re.I)
     assert "standard" not in html.lower() or "after launch" not in html.lower()
 
@@ -192,7 +192,8 @@ def test_wording_rules(built_site, path):
     # "Trial" only in the formerly line; no regular-price wording; no competitor price talk
     for m in re.finditer(r"\btrial\b", text, re.I):
         assert f"called “Trial” before {LAUNCH_HUMAN}" in text[max(0, m.start() - 10):m.end() + 30], text[m.start() - 60:m.end() + 60]
-    assert not re.search(r"standard (prices?|after launch)|regular price|\$99", text, re.I)
+    # 8 Nov 2026: \$99(?!\d), so the Flag Check monthly price "US$990" is not read as the retired $99
+    assert not re.search(r"standard (prices?|after launch)|regular price|\$99(?![\d,])", text, re.I)
 
 
 @pytest.mark.parametrize("path", sorted(OLD_IDS))
@@ -287,7 +288,7 @@ def test_for_firms_pilot_rename_and_prices(built_site):
     html = html_of(built_site, "/for-firms/")
     text = visible(html)
     assert "Trial" not in text   # QA 25 Oct: the rename note is only in the terms
-    assert "Start a Pilot: $745 USD" in text
+    assert "Start a Pilot: US$745" in text   # 8 Nov 2026: one price format
     assert "Card payments are accepted through a secure Stripe link, sent only after you accept the scope." in text
     # pilot_checkout off: no Pilot card link. 29 Oct: the trader pay dialog (paid builds) holds the report's link only
     assert "buy.stripe.com" not in re.sub(r'(?s)<dialog class="pay-dialog".*?</dialog>', "", html)
@@ -295,7 +296,7 @@ def test_for_firms_pilot_rename_and_prices(built_site):
 
 def test_for_traders_waitlist_and_privacy_wording(built_site):
     text = visible(html_of(built_site, "/for-traders/"))
-    assert "Join the waitlist — $39 founding price" in text
+    assert "Join the waitlist — US$39 founding price" in text
     assert "$39 founding price for the first 100 buyers" in text
     assert "beta" not in text.lower() and "tested on a real export" in text and "not uploaded" in text   # 6 Nov: no "beta" wording
     for bad in ("nothing leaves", "never leaves", "anonymous"):
@@ -307,9 +308,11 @@ def test_pricing_prices_match_prices_json(built_site):
     import json
     prices = json.load(open((os.environ.get("DT_PRICES_JSON") or os.path.join(REPO, "site", "config", "prices.json"))))
     html = html_of(built_site, "/pricing/")
-    plan = next(p for p in prices["products"] if p["id"] == "plan")   # 29 Oct (one product): the firm card
+    plan = next(p for p in prices["products"] if p["id"] == "plan")
     text = visible(html)
-    assert f"{B.usd(plan['price_usd'])} per trader account a month" in text and f"{B.usd(plan['minimum_usd'])} monthly minimum" in text
+    # 8 Nov 2026 (owner): firm prices are off /pricing/ and on /for-firms/ only
+    assert f"{B.usd(plan['price_usd'])} per trader account" not in text
+    assert f"{B.usd(plan['price_usd'])} per trader account a month" in visible(html_of(built_site, "/for-firms/"))
     assert "$39 founding price for the first 100 buyers" in text
     assert 'role="tablist"' not in html and "Before you pay" not in text
 

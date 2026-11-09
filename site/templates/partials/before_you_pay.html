@@ -20,7 +20,7 @@
     <dt>Technical requirements</dt><dd>A current version of Chrome, Edge, Firefox or Safari. Files: MetaTrader 5 or 4 HTML report,
       Interactive Brokers Flex Query CSV, Tradovate Orders CSV or TradingView Order History CSV, or the donttrade CSV
       template. {{ refund.formats_caveat() }} Your browser reads the file. {{ strings.p5.long }}</dd>
-    <dt>Price</dt><dd>{{ r.price_usd|usd }} USD, one time{{ byp_note(r, prices.rules) }}. {{ mor.byp_price_tail(r) }}{% if stripe_promo %}, before any promotion code you enter; {% if managed_pay %}Link’s{% else %}Stripe’s{% endif %} payment page shows the exact total{% endif %}.</dd>
+    <dt>Price</dt><dd>{{ r.price_usd|usd }}, one time{{ byp_note(r, prices.rules) }}. {{ mor.byp_price_tail(r) }}{% if stripe_promo %}, before any promotion code you enter; {% if managed_pay %}Link’s{% else %}Stripe’s{% endif %} payment page shows the exact total{% endif %}.</dd>
     <dt>Currency and fees</dt><dd>{{ mor.byp_currency() }}</dd>
     <dt>Payment</dt><dd>{{ mor.byp_payment() }}</dd>
     <dt>When you get it</dt><dd>Right after payment, in your browser. One re-test is included, to run 30 to 60 days after your first result.

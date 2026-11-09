@@ -227,14 +227,24 @@ def build_dated(tmp_path, today):
     return (out / "index.html").read_text(encoding="utf-8")
 
 
-def test_home_band_present_in_the_build(built_site):
+def test_home_band_is_off_by_owner_decision(built_site):
+    """8 Nov 2026 (owner, research memo action 7): the Nasdaq / crypto-wallet band is off the home page (build.SELLOFF_BAND_ON)."""
+    import build as BLD
+    assert BLD.SELLOFF_BAND_ON is False and BLD.dated_band() is None
     h = (built_site["out"] / "index.html").read_text(encoding="utf-8")
-    assert h.count("data-dated-band") == 1 and 'data-expires="2026-11-21"' in h
-    band = re.search(r'(?s)<div class="dated-band".*?</div>\s*</div>', h).group(0)
-    t = text(band)
-    assert "Nasdaq Composite −5.5% on 5 November" in t and "What did your account do that day?" in t
-    assert S in band and "/static/js/band-expiry.js" in h
-    assert "data-motion" not in band and "animation" not in band
+    assert "data-dated-band" not in h and "Nasdaq" not in h and "crypto" not in text(h.split("<main", 1)[-1])
+    assert S in (built_site["out"] / "research" / "index.html").read_text(encoding="utf-8")   # the study stays on /research/
+
+
+def test_home_band_markup_when_switched_back_on():
+    """The band as it was (6 Nov), rendered with the switch on: the FRED figure and a link, no motion."""
+    import datetime as dt
+    import build as BLD
+    d = BLD.dated_band(today=dt.date(2026, 11, 8), on=True)
+    assert d["expires"] == "2026-11-21" and d["date_long"] == "5 November" and d["link"] == BLD.SELLOFF_PATH == S
+    band = open(os.path.join(REPO, "site", "templates", "partials", "dated_band.html"), encoding="utf-8").read()
+    assert "What did your account do that day?" in band and "data-motion" not in band and "animation" not in band
+    assert BLD.dated_band(today=dt.date(2026, 11, 21), on=True) is None
 
 
 def test_no_study_finding_on_the_home_page_or_in_the_band(built_site):
@@ -263,23 +273,10 @@ def build_dated(tmp_path, today):
 
 
 def test_home_band_is_gone_on_21_nov_and_after(tmp_path):
-    assert "data-dated-band" in build_dated(tmp_path / "a", "2026-11-20")
-    for d in ("2026-11-21", "2026-11-22"):
+    # 8 Nov 2026: the band is off (build.SELLOFF_BAND_ON), so no dated build has it; the expiry rule is held by
+    # test_home_band_markup_when_switched_back_on
+    for d in ("2026-11-20", "2026-11-21", "2026-11-22"):
         assert "data-dated-band" not in build_dated(tmp_path / d, d), d
-
-
-def test_band_script_hides_on_the_expiry_day(browser, built_site):
-    ctx = browser.new_context()
-    pg = ctx.new_page()
-    pg.clock.install(time="2026-11-20T23:59:00Z")
-    pg.goto(built_site["url"] + "/")
-    assert pg.locator("[data-dated-band]").is_visible()
-    pg.close()
-    pg = ctx.new_page()
-    pg.clock.install(time="2026-11-21T00:01:00Z")
-    pg.goto(built_site["url"] + "/")
-    assert not pg.locator("[data-dated-band]").is_visible()
-    ctx.close()
 
 
 # ------------------------------------------------------------------ fix round 1
@@ -380,7 +377,8 @@ def test_fix_round_2_wording(built_site):
     assert "our rule matches Ironflow’s own liquidation table" in t
     tool = text(page(built_site, B))
     assert "will usually also have more losses" not in tool and "almost by construction" in tool
-    assert "See what one crypto exchange’s wallets did" in text(page(built_site, "/"))
+    # 8 Nov 2026: the home band is off (build.SELLOFF_BAND_ON); its wording is kept in the partial for the day it returns
+    assert "See what one crypto exchange’s wallets did" in open(os.path.join(REPO, "site", "templates", "partials", "dated_band.html"), encoding="utf-8").read()
 
 
 # ------------------------------------------------------------------ 7 Nov: market by market (descriptive, added after the plan)

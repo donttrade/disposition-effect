@@ -415,7 +415,7 @@ def test_d5_paid_home_has_the_founding_offer(paid_site):
     assert "See the habits in your trade history." in text   # sweep 2 hero
     assert "$39 founding price for the first 100 buyers." in text
     assert "One time, in US dollars, with one free re-test 30 to 60 days after your first result." in text
-    assert "Get the report for $39" in text and "What the report measures" in text and "How it works" in text
+    assert "Get the report for US$39" in text and "What the report measures" in text and "How it works" in text
     assert not FINDING_RE.search(text)  # no study finding anywhere on the page, so none next to an offer
 
 
@@ -717,7 +717,7 @@ def test_nit13_welcome_does_not_rely_on_the_receipt_link(paid_site):
     assert "use the link in your Stripe receipt" not in js and "email us (address below)" in js
     html = (paid_site["out"] / "welcome" / "index.html").read_text(encoding="utf-8")
     err = html[html.index('id="w-error"'):]
-    assert 'href="mailto:donttrade.research@gmail.com?subject=' in err[:err.index("</section>")]
+    assert 'href="mailto:research@donttrade.ca?subject=' in err[:err.index("</section>")]   # 8 Nov 2026: one contact address
 
 
 def test_nit14_15_pilot_thanks_links_and_direct_visit_note(tmp_path):

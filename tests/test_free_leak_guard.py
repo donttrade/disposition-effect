@@ -40,7 +40,7 @@ def test_the_home_hero_leads_with_the_free_check_and_keeps_the_report_beside_it(
     hero = re.search(r'(?s)<h1 id="hero">.*?<p class="small">', h).group(0)
     btns = re.findall(r'<a class="btn" href="([^"]+)"[^>]*>([^<]+)</a>', hero)
     assert btns == [("/check/", "Check my trades free")], btns                       # one primary button
-    assert re.search(r'<a href="/pricing/#last-step">Get the report for \$\d+</a>', hero)   # the report is the text link beside it
+    assert re.search(r'<a href="/pricing/#last-step">Get the report for US\$\d+</a>', hero)   # 8 Nov: "US$39". the report is the text link beside it
     assert "Check your trade file free" in hero
 
 

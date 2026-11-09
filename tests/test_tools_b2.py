@@ -312,7 +312,7 @@ def test_tools_page_weight():
         pytest.skip("no site/_site build")
     h = open(out, encoding="utf-8").read()
     main = re.search(r"(?s)<main.*?</main>", h).group(0)
-    assert len(gzip.compress(main.encode(), 9)) <= 12 * 1024 + 256   # 6 Nov: +256 B after the Round A merge (founding and refund wording in the $39 block); gzip first paint measured 0.87 s against the 1.5 s target
+    assert len(gzip.compress(main.encode(), 9)) <= 12 * 1024 + 256 + 32   # 8 Nov 2026: +32 B, "US$" on every price (owner: one format; was 2 B over). 6 Nov: +256 B after the Round A merge (founding and refund wording in the $39 block); gzip first paint measured 0.87 s against the 1.5 s target
     js = open(os.path.join(REPO, "site", "static", "js", "tools-index.js"), "rb").read()
     assert len(gzip.compress(js, 9)) <= 2 * 1024
 

@@ -442,7 +442,7 @@ def test_js_off_says_so(browser, built_site, path, notices, hidden):
         assert pg.is_visible(n) and "needs JavaScript" in pg.inner_text(n)
     for h in hidden:
         assert pg.is_hidden(h)
-    assert pg.is_visible(".teaser") and "Join the waitlist — $39 founding price" in pg.inner_text(".teaser")
+    assert pg.is_visible(".teaser") and "Join the waitlist — US$39 founding price" in pg.inner_text(".teaser")
     if path == DD:
         assert pg.is_visible("#dd-table") and "25.0%" in pg.inner_text("#dd-table")
     assert L.lint_text(pg.inner_text("main"), path) == []
@@ -545,7 +545,7 @@ def test_paid_build_sells_and_teasers_follow(browser, paid_tools_site):
     # container; the teaser box (which quoted the visitor's figures) is gone, and a run changes nothing in it.
     for path in PATHS:
         h = (paid_tools_site["out"] / path.strip("/") / "index.html").read_text(encoding="utf-8")
-        assert 'href="/pricing/#last-step">Get the report for $39</a>' in h and "/for-traders/#waitlist" not in h, path
+        assert 'href="/pricing/#last-step">Get the report for US$39</a>' in h and "/for-traders/#waitlist" not in h, path
         assert h.count('class="notice notice-gap next-step"') == 1 and "notice-gap teaser" not in h, path
         assert not L.not_on_sale_claims(L.readable_text(h), path), path
     ctx, pg, _ = open_page(browser, paid_tools_site, DD)

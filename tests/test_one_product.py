@@ -1,5 +1,5 @@
-"""29 Oct 2026 (owner): one product, the Revenge Trading Report, in two packages (Traders $39 once; Firms $0.50 per trader
-account a month, $500 minimum, the $745 Pilot as the first month, credited). Everything else is free.
+"""29 Oct 2026 (owner): one product, the Revenge Trading Report, in two packages (Traders US$39 once; Firms US$0.50 per trader
+account a month, US$500 minimum, the US$745 Pilot as the first month, credited). Everything else is free.
 Pins the Architect plan's acceptance checks for batches 1-5 on the live-config build (paid_report on)."""
 import json
 import os
@@ -38,9 +38,9 @@ def all_pages(built_site):
 
 # ------------------------------------------------------------------ names
 def test_usd_renders_cents_and_whole_dollars():
-    assert B.usd(0.5) == "$0.50" and B.usd(745) == "$745" and B.usd(2500) == "$2,500" and B.usd(39) == "$39"
+    assert B.usd(0.5) == "US$0.50" and B.usd(745) == "US$745" and B.usd(2500) == "US$2,500" and B.usd(39) == "US$39"
     assert B.usd_fr(0.5) == "0,50 $ US" and B.usd_fr(39) == "39,00 $ US"
-    assert amounts_in("<p>$0.50</p>") == [0.5] and 0.5 in allowed_amounts(PRICES) and 500 in allowed_amounts(PRICES)
+    assert amounts_in("<p>US$0.50</p>") == [0.5] and 0.5 in allowed_amounts(PRICES) and 500 in allowed_amounts(PRICES)
 
 
 def test_the_old_name_is_gone_except_the_dated_history(built_site):
@@ -79,17 +79,17 @@ def test_dt1_is_always_named_with_its_descriptor(built_site):
 
 # ------------------------------------------------------------------ /pricing/: two packages
 def test_pricing_shows_two_packages_and_one_stripe_link(built_site):
+    # 8 Nov 2026 (owner, trust fixes): firm prices are off /pricing/. One card (the trader report) and one firm line that
+    # links to /for-firms/ (tests/test_owner_8nov.py holds that no firm amount is on the page). The name is kept for history.
     h = html(built_site, "/pricing/")
     main = re.search(r"(?s)<main.*?</main>", h).group(0)
-    assert len(re.findall(r'<section class="price-card[^"]*"', main)) == 2
+    assert len(re.findall(r'<section class="price-card[^"]*"', main)) == 1
     t = text(main)
-    assert "One report. Two ways to buy it." in t and "The Revenge Trading Report" in t and "Firms" in t
-    assert "$0.50 per trader account a month" in t and "$500 monthly minimum" in t
-    assert "The $745 Pilot is your first month" in t and "Its $745 counts toward your plan’s invoices" in t
-    assert "15% off when you pay a year upfront" in t and "credited" not in t   # 30 Oct (Tester #4): one reading only
+    assert "One report. One price." in t and "The Revenge Trading Report" in t and "Firms" in t
+    assert "US$0.50" not in t and "US$745" not in t and "US$149" not in t
     assert len(re.findall(r'href="https://buy\.stripe\.com/', main)) == 1
-    firm = re.search(r'(?s)<section class="price-card" id="firms".*?</section>', main).group(0)
-    assert "buy.stripe.com" not in firm and 'href="/for-firms/#request"' in firm
+    firm = re.search(r'(?s)<p class="firm-line" id="firms">.*?</p>', main).group(0)
+    assert "buy.stripe.com" not in firm and 'href="/for-firms/"' in firm
     for a in ("firms", "copy-leader", "claims-test", "platforms", "researchers", "payment", "traders", "refunds",
               "history", "questions", "last-step"):
         assert f'id="{a}"' in h, a
@@ -123,7 +123,7 @@ def test_every_tool_points_to_the_one_test_with_the_same_words(built_site):
         assert a, path
         t = text(a.group(0))
         seen.add(t)
-        assert t.startswith("Is this habit real, or luck?") and "Get the report for $39" in t
+        assert t.startswith("Is this habit real, or luck?") and "Get the report for US$39" in t
         assert set(amounts_in(t)) == {39.0}
     assert len(seen) == 1, seen
 
@@ -144,7 +144,7 @@ def test_for_firms_says_one_habit_today_and_no_same_test_claim(built_site):
     t = text(html(built_site, "/for-firms/"))
     assert "One habit today, more being added." in t
     assert "the same test" not in t.lower()
-    assert "$0.50 per trader account a month" in t and "$500 minimum" in t
+    assert "US$0.50 per trader account a month" in t and "US$500 minimum" in t
 
 
 def test_start_has_two_firm_choices_and_old_anchors(built_site):
@@ -187,10 +187,10 @@ def test_for_firms_form_maps_old_products_to_the_plan(browser, built_site):
 # ------------------------------------------------------------------ terms
 def test_terms_plan_section_and_versions(built_site):
     t = text(html(built_site, "/terms/"))
-    for s in ("$0.50 per trader account per month, with a minimum of $500 a month",
+    for s in ("US$0.50 per trader account per month, with a minimum of US$500 a month",
               "monthly in arrears, by email, in USD, due within 15 days of the invoice date",
               "It ends at the end of the calendar month in which notice is given.",
-              "Its $745 counts toward your plan’s invoices: if the monthly plan starts within 60 days of Pilot delivery, the $745 is deducted once from the plan’s invoices, starting with the first, until it is used up.",
+              "Its US$745 counts toward your plan’s invoices: if the monthly plan starts within 60 days of Pilot delivery, the US$745 is deducted once from the plan’s invoices, starting with the first, until it is used up.",
               "the Revenge Trading Report, a habit test on your own trades: a one-off measurement"):
         assert s in t, s
     assert "called “Trial” before 29 Oct 2026" in t
@@ -202,7 +202,7 @@ def test_word_budgets_on_new_strings(built_site):
     for v in re.findall(r'<p class="pc-value">(.*?)</p>', h):
         assert len(v.split()) <= 12, v
     for b in set(re.findall(r'class="btn[^"]*"[^>]*>([^<]+)</a>', h)) | set(re.findall(r'<summary class="btn">([^<]+)</summary>', h)):
-        assert len(b.replace("—", "").split()) <= 5, b   # 3 Nov: "Get the report for $39" is 5 words (was 4 with the dash)
+        assert len(b.replace("—", "").split()) <= 5, b   # 3 Nov: "Get the report for US$39" is 5 words (was 4 with the dash)
     strip = text(re.search(r'(?s)<section class="free-strip".*?</section>', h).group(0))
     assert L.lint_text(strip) == []
 

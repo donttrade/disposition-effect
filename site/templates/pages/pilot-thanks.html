@@ -13,7 +13,7 @@
   <section class="section" aria-labelledby="pay-card">
     <h2 id="pay-card">Pay by card now</h2>
     <p id="pilot-refund"><strong>Automatic refund:</strong> {{ pilot_refund(products) }}</p>
-    <p><a class="btn" href="{{ pilot.stripe_link_live }}" rel="noopener">Pay {{ pilot.price_usd|usd }} USD by card (Stripe)</a></p>
+    <p><a class="btn" href="{{ pilot.stripe_link_live }}" rel="noopener">Pay {{ pilot.price_usd|usd }} by card (Stripe)</a></p>
     <p class="small">Paying accepts the <a href="/terms/#pilot-card">{{ pilot.name }} terms for paying by card first</a>.</p>
     <p class="small">The fee is also refunded if your extract can’t be made to run, or if your own re-run of the same script version on the same export does not reproduce the figure. {{ pilot.credit_rule }} of delivery.</p>
   </section>

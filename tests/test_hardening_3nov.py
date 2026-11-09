@@ -2,7 +2,7 @@
 
 1 security headers (site/build.py headers_file -> _headers), 2 /favicon.ico, 3 the age clause (EN + FR),
 4 the CASL unsubscribe lines (EN + FR) and the waitlist's withdrawal line, 5 early deletion or a copy (EN + FR),
-6 one button label "Get the report for $39", 7 campaign tags through the umami-clean.js before-send hook, with
+6 one button label "Get the report for US$39", 7 campaign tags through the umami-clean.js before-send hook, with
 data-exclude-search kept on the pages whose address can carry a secret.
 A the footer's analytics sentence per page, B Threads on www.threads.com, C no data-umami-event-* property
 (lint), D "for traders, the only paid product" on /about/ and /independence/.
@@ -278,7 +278,7 @@ def test_button_label_without_a_dash(built_site):
         assert "Take the test —" not in html and "Take the test &mdash;" not in html, path
     home = _read(built_site, "/")
     header = re.search(r"(?s)<header\b.*?</header>", home).group(0)
-    assert header.count("Get the report for $39") == 2   # the bar + the Menu
+    assert header.count("Get the report for US$39") == 2   # the bar + the Menu
     for t in ("partials/header.html", "partials/trader_offer.html", "partials/tool_next_step.html",
               "partials/value_ladder.html", "pages/home.html", "pages/pricing.html"):
         assert "Take the test —" not in _tpl(*t.split("/")), t

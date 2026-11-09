@@ -5,5 +5,5 @@
     chargeback right (Visa Core Rules 5.4.2.5; lint rule claim:waive_dispute).
     Usage: {% from "partials/pilot_refund.html" import pilot_refund %}{{ pilot_refund(products) }} -#}
 {%- macro pilot_refund(products) -%}
-If the scope is not confirmed in writing by both of us within 10 business days of payment, we refund the full US{{ products["pilot"].price_usd|usd }} by the end of the next business day, without being asked.
+If the scope is not confirmed in writing by both of us within 10 business days of payment, we refund the full {{ products["pilot"].price_usd|usd }} by the end of the next business day, without being asked.
 {%- endmacro %}

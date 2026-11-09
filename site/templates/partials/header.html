@@ -17,7 +17,8 @@
     Decision 29 Oct (coordinator, on Tester sweep 3 #3): everywhere else the button stays, including /sample-report/
     and the tool pages beside example results. It is site navigation in the sticky bar, not an offer placed next
     to page content; the sample's and the tools' figures are example data, not study findings. -#}
-{%- set show_cta = flags.paid_report and not page.path.startswith("/research/") %}
+{#- 8 Nov 2026 (04-WEBSITE-CONVERSION change 3): no trader button on /for-firms/ either: one audience per page. -#}
+{%- set show_cta = flags.paid_report and not page.path.startswith("/research/") and page.path != "/for-firms/" %}
 {%- macro cta(cls) %}<a class="btn {{ cls }}" href="/pricing/#last-step" data-pay>Get the report for {{ products["report39"].price_usd|usd }}</a>{% endmacro %}
 <header class="site-header"><div class="wrap">
   <a class="brand" href="/">{{ site.name }}</a>

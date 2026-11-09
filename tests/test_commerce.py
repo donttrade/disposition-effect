@@ -69,7 +69,7 @@ def test_before_you_pay_has_every_l1_item(paid_site):
     for item in ["Seller", "Service provider", "Business address", "Phone", "Email", "Technical requirements",
                  "Any sales tax, VAT or GST is included in this price", "currency conversion fee",
                  "secure payment page, run by Stripe", "Right after payment", "re-test", "20,000 rows",
-                 "Refunds", "$39 USD", FAKE["seller_legal_name"], FAKE["phone"]]:
+                 "Refunds", "US$39", FAKE["seller_legal_name"], FAKE["phone"]]:   # 8 Nov 2026: one format, "US$39"
         assert item in html, item
     for pid in ["firms", "copy-leader", "claims-test", "platforms", "traders", "researchers", "payment", "refunds",
                 "history", "questions"]:
@@ -110,7 +110,7 @@ def test_pricing_traders_only_axe_and_pay_panel(browser, built_site, color):
     assert axe_violations(page) == []
     for anchor in ("copy-leader", "claims-test", "platforms", "researchers", "payment"):
         assert page.locator(f"#firms #{anchor}").count() == 1, anchor
-    assert page.get_attribute("#firms a.btn", "href") == "/for-firms/#request"
+    assert page.get_attribute("#firms a.btn", "href") == "/for-firms/#flagcheck-send"   # 8 Nov 2026: Flag Check leads
     assert page.locator("#firms a[href*='buy.stripe.com']").count() == 0
     page.goto(built_site["url"] + "/")
     assert "See the habits in your trade history." in page.inner_text("h1")

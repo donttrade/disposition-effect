@@ -11,11 +11,11 @@
 {#- Before you pay, Price row (EN): the sentence after "one time (…)." and the Total. -#}
 {%- macro byp_price_tail(r) -%}
 {%- if managed_pay and tax_included -%}
-Any sales tax, VAT or GST is included in this price: Link works it out from your billing address and shows it on your receipt. Total: {{ r.price_usd|usd }} USD
+Any sales tax, VAT or GST is included in this price: Link works it out from your billing address and shows it on your receipt. Total: {{ r.price_usd|usd }}
 {%- elif managed_pay -%}
-Sales tax, VAT or GST may be added, depending on where you live: Link works it out from your billing address and shows the total on the payment page before you pay. Total: {{ r.price_usd|usd }} USD plus any such tax
+Sales tax, VAT or GST may be added, depending on where you live: Link works it out from your billing address and shows the total on the payment page before you pay. Total: {{ r.price_usd|usd }} plus any such tax
 {%- else -%}
-No sales tax is charged. Total: {{ r.price_usd|usd }} USD
+No sales tax is charged. Total: {{ r.price_usd|usd }}
 {%- endif -%}
 {%- endmacro %}
 

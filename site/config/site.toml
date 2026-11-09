@@ -8,7 +8,7 @@
 [site]
 name = "donttrade"
 base_url = "https://donttrade.ca"
-contact_email = "donttrade.research@gmail.com"
+contact_email = "research@donttrade.ca"
 reply_promise = "We reply within 1 business day (Eastern Time, Monday to Friday)."
 # Manual restore (owner decision 21 Oct ~11:00, Manager review): a buyer whose access link stops working
 # emails us from the address they paid with, and the owner sends a new link by hand, ONLY to the address

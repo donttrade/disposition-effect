@@ -25,8 +25,9 @@ HOST = urlparse(BASE).netloc
 UA = {"User-Agent": "donttrade-content-check/1.0"}
 EXTRA_PATHS = ["/thanks/", "/who-pays/", "/404.html"]  # not in sitemap but published
 
-ALLOWED_EMAIL = "donttrade.research@gmail.com"
-ALLOWED_EMAILS = {ALLOWED_EMAIL, "you@example.com"}  # placeholder in subscribe inputs
+ALLOWED_EMAIL = "research@donttrade.ca"   # 8 Nov 2026: the one public contact address
+# the old gmail address stays allowed: today's live docs/ and the OSF partner files still show it
+ALLOWED_EMAILS = {ALLOWED_EMAIL, "donttrade.research@gmail.com", "you@example.com"}  # you@: placeholder in subscribe inputs
 # Anonymity terms (case-insensitive). The list identifies the owner, so it is NOT in
 # this tracked file: it lives in checks/tests/anon_terms.txt (gitignored, one term per
 # line) or the file named by DT_ANON_TERMS. Without it the anonymity tests SKIP with a

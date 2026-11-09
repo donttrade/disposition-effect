@@ -35,7 +35,7 @@ def rules(html, paid=False, analytics=False, priv=()):
     ("<p>Start the trial today.</p>", "banned:renamed"),
     ("<p>Standard prices after launch apply.</p>", "banned:regular_price"),
     ('<a href="https://tally.so/r/x">form</a>', "tally"),
-    ("<p>Only $59 today.</p>", "price_literal"),
+    ("<p>Only $57 today.</p>", "price_literal"),   # 8 Nov 2026: was $59, now a real price (Flag Check extra case, prices.json)
     ("<p>Then $99 after the founding offer.</p>", "price_literal"),  # retired 20 Oct: allowed nowhere ($49 came back 6 Nov, only in the form build.founding_problem allows)
     ("<p>We help you improve.</p>", "banned:one_product"),           # 29 Oct (one product)
     ("<p>A buy signal.</p>", "banned:one_product"),

@@ -71,7 +71,20 @@
 </div>
 
 {#- The four offers. check.js clones one into #ck-out and fills the data-k spans. The price, the founding sentence and the refund line
-    are the site's own macros, so they follow prices.json and the refund flag. -#}
+    are the site's own macros, so they follow prices.json and the refund flag.
+    8 Nov 2026 (research memo action 6): data-k="largest", right below the one buy button (below, so the button stays within the
+    first screen on a 320 px phone), names the visitor's largest count, e.g. "12 re-entries within 15 minutes of a loss. The report
+    puts a dollar total on these and tests them against chance." Counts only: never a dollar amount, never advice. "tests ... against
+    chance" only when the report would test that habit on this file. The words are in #ck-largest-words; check.js picks one. -#}
+<template id="ck-largest-words">
+  <span data-t1="The report puts a dollar total on it and tests it against chance." data-d1="The report puts a dollar total on it."
+        data-tn="The report puts a dollar total on these and tests them against chance." data-dn="The report puts a dollar total on these."></span>
+  <span data-h="revenge" data-one="re-entry within 15 minutes of a loss" data-many="re-entries within 15 minutes of a loss"></span>
+  <span data-h="tilt" data-one="trade after 2 or more losses in a row" data-many="trades after 2 or more losses in a row"></span>
+  <span data-h="size_up" data-one="trade at 1.5 times your usual size or more, right after a loss" data-many="trades at 1.5 times your usual size or more, right after a loss"></span>
+  <span data-h="hold_gap" data-one="losing trade held longer than your median win" data-many="losing trades held longer than your median win"></span>
+  <span data-h="oversized_loss" data-one="loss over 2 times your median loss" data-many="losses over 2 times your median loss"></span>
+</template>
 <template id="ck-t-normal">
   <section class="ck-offer" id="offer" data-offer aria-labelledby="ck-offer-h">
     <h3 id="ck-offer-h">What the {{ r.price_usd|usd }} report adds for this file</h3>
@@ -82,6 +95,7 @@
       <li>One free re-test, 30 to 60 days later</li>
     </ul>
     <p class="btn-row"><a class="btn" href="/pricing/#last-step" data-pay>Get the report for {{ r.price_usd|usd }}</a></p>
+    <p class="ck-largest" data-k="largest" hidden></p>
     <p class="small" data-handoff hidden></p>
     <p class="small">{{ price_line(r, prices.rules) }}</p>
     <p class="small">{{ refund.chip() }} · Not investment advice</p>
@@ -92,6 +106,7 @@
     <h3 id="ck-offer-h">What the report would show for this file</h3>
     <p>Neither testable habit has 30 trades in each group, so the report would not test anything against chance on this file. It would total the dollars on <span data-k="groups"></span> groups. A longer export (more weeks) may reach 30.</p>
     <p><a href="/pricing/#last-step" data-pay>Get the report for {{ r.price_usd|usd }}</a> · {{ refund.chip() }}</p>
+    <p class="ck-largest" data-k="largest" hidden></p>
     <p class="small" data-handoff hidden></p>
   </section>
 </template>
@@ -100,6 +115,7 @@
     <h3 id="ck-offer-h">What the report would show for this file</h3>
     <p>Your file has dates but no times of day. Re-entries and size after a loss cannot be counted, and nothing can be tested against chance. The report would total the dollars on <span data-k="groups"></span> groups.</p>
     <p><a href="/pricing/#last-step" data-pay>Get the report for {{ r.price_usd|usd }}</a> · {{ refund.chip() }}</p>
+    <p class="ck-largest" data-k="largest" hidden></p>
     <p class="small" data-handoff hidden></p>
   </section>
 </template>

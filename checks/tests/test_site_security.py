@@ -174,7 +174,7 @@ SECRET_RE = re.compile(r"(sk_live_|sk_test_|rk_live_|ghp_[A-Za-z0-9]{10}|github_
                        r"AIza[0-9A-Za-z_-]{30}|-----BEGIN [A-Z ]*PRIVATE KEY|buy\.stripe\.com/|checkout\.stripe\.com/|"
                        r"APCA-API-(KEY|SECRET)-ID\s*[:=]\s*\S{8})")
 EMAIL_RE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
-ALLOWED_EMAILS = {"donttrade.research@gmail.com", "you@example.com", "me@example.com"}
+ALLOWED_EMAILS = {"research@donttrade.ca", "donttrade.research@gmail.com", "you@example.com", "me@example.com"}   # 8 Nov 2026: research@ added
 
 
 def _gh(path, raw=False):

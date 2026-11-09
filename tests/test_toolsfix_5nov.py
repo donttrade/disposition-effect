@@ -326,8 +326,8 @@ def card(html):
 
 def test_pass_rate_calculator_leads_with_the_firm_pilot(built_site):
     t = card(built(built_site, "tools/pass-rate-calculator"))
-    assert t.startswith("Test your whole book") and "Start a Pilot, $745" in t
-    assert t.index("$745") < t.index("$39")                       # the pilot first, the trader test second
+    assert t.startswith("Test your whole book") and "Start a Pilot, US$745" in t
+    assert t.index("US$745") < t.index("US$39")                       # the pilot first, the trader test second
     h = built(built_site, "tools/pass-rate-calculator")
     assert 'href="/for-firms/#request"' in h and 'data-lead="firm"' in h
     # the trader test is still there, as the smaller line
@@ -339,7 +339,7 @@ def test_other_tools_keep_the_trader_offer_first_and_typed_ones_say_what_to_brin
                        ("tools/disposition-calculator", True), ("tools/trade-stats", False), ("tools/trading-heatmap", False),
                        ("tools/prop-challenge-simulator", False)]:
         t = card(built(built_site, rel))
-        assert t.startswith("Is this habit real, or luck?") and "Get the report for $39" in t, rel
+        assert t.startswith("Is this habit real, or luck?") and "Get the report for US$39" in t, rel
         assert ("Bring an export of your trade history" in t) == typed, rel
 
 

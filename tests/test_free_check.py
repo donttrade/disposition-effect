@@ -102,6 +102,45 @@ def n(text):
     return int(text.replace(",", ""))
 
 
+# ------------------------------------------------------------------ 8 Nov 2026: the largest count beside the one buy button
+
+LARGEST_WORDS = {"Re-entered within 15 min of a loss": "within 15 minutes of a loss", "After 2+ losses in a row": "after 2 or more losses in a row",
+                 "Bigger size after a loss": "1.5 times your usual size or more, right after a loss",
+                 "Losers held longer than your median win": "held longer than your median win",
+                 "Losses over 2× your median loss": "over 2 times your median loss"}
+
+
+@pytest.mark.parametrize("name", NAMES)
+def test_the_largest_count_sits_beside_the_one_buy_button(browser, built_site, csvs, name):
+    """Research memo action 6 (owner, 8 Nov 2026): on the result screen, the visitor's largest count, named, right below the one buy
+    button. Its number equals the largest count in the page's own table; "tests ... against chance" only when that habit would be tested;
+    no currency amount and no advice."""
+    ctx, pg, log = open_page(browser, built_site)
+    read_file(pg, csvs[name])
+    offer = pg.locator("#ck-out [data-offer]")
+    pays = offer.locator("[data-pay]")
+    line = offer.locator("[data-k='largest']")
+    if pays.count() == 0:
+        assert line.count() == 0 or not line.is_visible(), name
+        ctx.close()
+        return
+    assert pays.count() == 1, name
+    assert line.is_visible(), name
+    t = line.inner_text()
+    rows = {k: v for k, v in table(pg).items() if v[0] not in ("—", "0")}
+    top = max(rows, key=lambda k: n(rows[k][0]))
+    assert t.startswith(f"{rows[top][0]} "), (t, rows)
+    k = next(k for k in LARGEST_WORDS if k in rows and n(rows[k][0]) == n(rows[top][0]))   # ties: the first row in table order
+    assert LARGEST_WORDS[k] in t, (t, k)
+    assert ("against chance" in t) == ("test against chance" in rows[k][2]), (t, rows[k])
+    assert "The report puts a dollar total on" in t
+    assert not CURRENCY.search(t) and not BANNED.search(t), t
+    assert not re.search(r"\b(should|must|need to|recommend|advice|stop|avoid)\b", t, re.I), t
+    # the line is the block's element right after the buy button's paragraph (after, so the button stays high on a phone)
+    assert pg.evaluate("() => { const l = document.querySelector('#ck-out [data-k=largest]'); const p = document.querySelector('#ck-out [data-offer] [data-pay]').closest('p'); return p.nextElementSibling === l; }"), name
+    ctx.close()
+
+
 # ------------------------------------------------------------------ 3 and 4: counts and variants through the page
 
 @pytest.mark.parametrize("name", NAMES)
@@ -281,7 +320,12 @@ def test_the_offer_click_is_counted_without_data(browser, built_site, csvs):
 
 def test_the_founding_sentence_is_verbatim_and_the_refund_line_is_in_the_same_block(built_site):
     h = (built_site["out"] / "check" / "index.html").read_text(encoding="utf-8")
-    founding = f"US${R['price_usd']} for the first {PRICES['rules']['founding_limit']} buyers, then US${R['after_founding']['price_usd']}."
+    # 8 Nov 2026 (owner): prices.json rules.after_founding_shown picks the sentence; false = no next price
+    if PRICES["rules"].get("after_founding_shown", True):
+        founding = f"US${R['price_usd']} for the first {PRICES['rules']['founding_limit']} buyers, then US${R['after_founding']['price_usd']}."
+    else:
+        founding = f"US${R['price_usd']} founding price for the first {PRICES['rules']['founding_limit']} buyers."
+        assert f"${R['after_founding']['price_usd']}" not in h
     blocks = [(b, t) for b, t in re.findall(r'(?s)<template id="ck-t-(\w+)">(.*?)</template>', h) if b != "lock"]   # "lock" is the small inline icon
     assert {b for b, _ in blocks} == {"normal", "no_test", "dates_only", "dates_none", "zero", "too_few"}
     for name, body in blocks:
@@ -290,7 +334,7 @@ def test_the_founding_sentence_is_verbatim_and_the_refund_line_is_in_the_same_bl
         if name == "normal":
             assert founding in text, text
         if "data-pay" in body:
-            assert f"Get the report for ${R['price_usd']}" in text and "Full refund within 14 days" in text, (name, text)
+            assert f"Get the report for US${R['price_usd']}" in text and "Full refund within 14 days" in text, (name, text)   # 8 Nov: "US$39"
         else:
             assert "$" not in text and "refund" not in text.lower(), (name, text)   # nothing is offered, so no price either
 
@@ -394,7 +438,9 @@ def test_check_js_stays_within_the_budget_of_the_7_nov_improvements():
     """check.js was 3,878 B gzip at C2; the improvements may add 2 KB (RESEARCH-IMPROVE-FREE-CHECK §3)."""
     import gzip
     raw = open(os.path.join(REPO, "site", "static", "js", "check.js"), "rb").read()
-    assert len(gzip.compress(raw, 9)) <= 3878 + 2048, len(gzip.compress(raw, 9))
+    # 8 Nov 2026: +256 B for the largest-count line beside the buy button (owner decision, research memo action 6); its words
+    # live in check.html (#ck-largest-words), not in the script. main was 5,890 B, this branch about 6,142 B.
+    assert len(gzip.compress(raw, 9)) <= 3878 + 2048 + 256, len(gzip.compress(raw, 9))
 
 
 def test_the_public_sample_is_credited_with_its_licence_and_doi(browser, built_site):

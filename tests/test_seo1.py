@@ -108,7 +108,7 @@ def test_tools_index_has_no_related_block_and_stays_in_budget(site):
     import gzip
     h = page(site, "/tools/")
     assert 'class="wrap related"' not in h
-    assert len(gzip.compress(main_of(h).encode(), 9)) <= 12 * 1024 + 256
+    assert len(gzip.compress(main_of(h).encode(), 9)) <= 12 * 1024 + 256 + 32   # 8 Nov 2026: +32 B, "US$" on every price (owner: one format)
 
 
 def test_disposition_calculator_is_linked_from_its_study(site):

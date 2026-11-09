@@ -574,11 +574,11 @@ PAGES += [
      "if_paid": {"title": "The Revenge Trading Report for Traders",
                  "description": "The Revenge Trading Report, a habit test on your own MT5, IBKR, Tradovate or TradingView file, "
                                 "with a real-or-noise check. One price, re-test included."}},
-    {"template": "pages/for-firms.html", "path": "/for-firms/", "requires_flag": None, "updated": "2026-11-05",
+    {"template": "pages/for-firms.html", "path": "/for-firms/", "requires_flag": None, "updated": "2026-11-08",
      "crumb": "Prop firms & brokers", "og_image": "/assets/og/default.png", "scripts": [FORM_JS, MOTION_JS],
-     "title": "Free Study for Prop Firms and Brokers",
-     "description": "Run our free, pre-registered study on your past accounts. Only totals leave your machine, and "
-                    "you see the result first. No firm has run it yet."},
+     "title": "Flag Check: an Independent Check on a Flagged Payout",
+     "description": "Does a copy-trading or hedging flag beat coincidence? Send one flagged case: a written report "
+                    "within 48 hours, US$149, paid by invoice."},
 ]
 
 # Forms and the pages around them (step 16). Thank-you pages are noindex and stay out of the sitemap.
@@ -891,12 +891,18 @@ def selloff_ctx():
 
 
 SELLOFF_BAND_EXPIRES = "2026-11-21"   # the home band's last day (owner decision, plan section d)
+# 8 Nov 2026 (owner, research memo action 7): the Nasdaq / crypto-wallet band is off-topic for a trader arriving cold on
+# the home page, so it is off. The study stays on /research/. True brings it back until SELLOFF_BAND_EXPIRES.
+SELLOFF_BAND_ON = False
 
 
-def dated_band(today=None):
+def dated_band(today=None, on=None):
     """The home band's text, or None on SELLOFF_BAND_EXPIRES and after (fix round 1, F4: gone in a build dated 21 Nov and later).
-    It holds the FRED market figure only; no study figure may sit on the home page (tests/test_selloff.py)."""
+    It holds the FRED market figure only; no study figure may sit on the home page (tests/test_selloff.py).
+    None while SELLOFF_BAND_ON is false (8 Nov 2026); on= overrides the switch (tests)."""
     import datetime as dt
+    if not (SELLOFF_BAND_ON if on is None else on):
+        return None
     today = today or _today()
     if today >= dt.date.fromisoformat(SELLOFF_BAND_EXPIRES):
         return None
@@ -1499,10 +1505,11 @@ PAGES.append({"template": "pages/pricing.html", "path": "/pricing/", "requires_f
               "scripts_if_paid": ["/static/js/print.js"], "product": PRODUCT_TEXT,
               # 6 Nov (SEO round 1): /pricing/ no longer declares the French page as its alternate. The French "Avant de
               # payer" is the twin of /before-you-pay/ (below), not of /pricing/; the old pair named the wrong English page.
-              "crumb": "Pricing", "updated": "2026-11-06", "og_image": "/assets/og/pricing.png",
-              "title": "Pricing: Published Prices for Firms and Traders",
-              "description": "Published prices in USD for prop firms, brokers, trading platforms and traders, the "
-                             "same for everyone and fixed in writing before anyone sees data."})
+              # 8 Nov 2026 (owner, trust fixes): firm prices moved to /for-firms/; this page prices the trader report only
+              "crumb": "Pricing", "updated": "2026-11-08", "og_image": "/assets/og/pricing.png",
+              "title": "Pricing: The Revenge Trading Report",
+              "description": "The Revenge Trading Report: one published price in USD, the same for everyone, with a "
+                             "re-test included. Firm prices are on the For firms page."})
 # /before-you-pay/ (29 Oct): the pay dialog's "Full details before you pay" is copied from this page (static/js/pay.js,
 # a hidden same-origin frame), not from /pricing/, so opening it is not counted as a /pricing/ pageview. No analytics
 # (as the journal), noindex (not disallowed in robots.txt since 6 Nov: see write_sitemap_and_robots), on ADDRESS_LINE_PATHS (the block names the
@@ -2380,6 +2387,10 @@ def apply_founding(prices, toml_path):
     open_ = rules.get("founding_open")
     if type(open_) is not bool:
         die("prices.json rules.founding_open must be true or false without quotes")
+    # 8 Nov 2026 (owner): "then US$49" is off the site until about 80 buyers. Absent = shown (older prices files).
+    rules.setdefault("after_founding_shown", True)
+    if type(rules["after_founding_shown"]) is not bool:
+        die("prices.json rules.after_founding_shown must be true or false without quotes")
     af = r.get("after_founding")
     if not isinstance(af, dict) or type(af.get("price_usd")) not in (int, float) or isinstance(af.get("price_usd"), bool):
         die("prices.json report39.after_founding.price_usd (the price after the first founding buyers) is missing")
@@ -2748,11 +2759,13 @@ def _cents(n):
 
 
 def usd(n):
-    """$745, $2,500 — whole dollars without cents; $0.50 — a price with cents keeps both digits."""
+    """US$745, US$2,500 — whole dollars without cents; US$0.50 — a price with cents keeps both digits.
+    8 Nov 2026 (owner, trust fixes): ONE price format on every English page, "US$39". Templates never add "US" before
+    this filter or "USD" after it (tests/test_owner_8nov.py holds that)."""
     c = _cents(n)
     if c % 100 == 0:
-        return "${:,}".format(c // 100)
-    return "${:,}.{:02d}".format(c // 100, c % 100)
+        return "US${:,}".format(c // 100)
+    return "US${:,}.{:02d}".format(c // 100, c % 100)
 
 
 def isodate(human):
@@ -3142,8 +3155,10 @@ def spelled_amount(n):
     return rf"\b(?:{n}|{en}|{fr}){cur}(?![\w])"
 
 
-def founding_problem(html, open_, limit, after=49):
+def founding_problem(html, open_, limit, after=49, shown=True):
     """None, or why a rendered page words the price after the founding price wrongly (Round A1, fix round 1).
+    8 Nov 2026 (owner): shown = prices.json rules.after_founding_shown. While it is false the next price is not on the
+    site at all (it comes back at about 80 buyers), so even the approved form fails: no page may name it.
     While the founding price is open there is ONE approved form: "for the first N buyers, then US$49" (French: "pour les
     N premiers acheteurs, puis 49,00 $ US"). The check removes every use of that exact phrase and then fails on ANY other
     mention of the next price: a sentence-final "$49.", a bare "$49", "US$49 after that", "49 $ US", "49 USD", "was $49".
@@ -3158,8 +3173,11 @@ def founding_problem(html, open_, limit, after=49):
     text = _text(body)
     approved = (rf"for the first {limit} buyers, then US\$[\s\u00a0]?{after}(?!\d)"
                 rf"|pour les {limit} premiers acheteurs, puis {after},00[\s\u00a0]*\$[\s\u00a0]*US")
-    rest = re.sub(approved, " ", text)
+    rest = re.sub(approved, " ", text) if shown else text
     m = re.search(n, rest) or re.search(spelled_amount(after), rest, re.I)
+    if m and not shown:
+        return (f"the next price (US${after}) is hidden: prices.json rules.after_founding_shown = false, so no page may "
+                f"name it, not even in the approved form: …{rest[max(0, m.start() - 50):m.end() + 40].strip()}…")
     if m:
         return (f"the next price appears outside the one approved form \"for the first {limit} buyers, then US${after}\" "
                 f"(French: \"pour les {limit} premiers acheteurs, puis {after},00 $ US\"): …{rest[max(0, m.start() - 50):m.end() + 40].strip()}…")
@@ -3807,7 +3825,8 @@ def build():
             if off:
                 die(f"{page['path']}: refund_no_result is off but the page says the new policy: " + "; ".join(off))
         why = founding_problem(html, prices["rules"]["founding_open"], prices["rules"]["founding_limit"],
-                               products["report39"]["after_founding"]["price_usd"])
+                               products["report39"]["after_founding"]["price_usd"],
+                               prices["rules"]["after_founding_shown"])
         if why:
             die(f"{page['path']}: {why}")
         fp = os.path.join(out, rel)

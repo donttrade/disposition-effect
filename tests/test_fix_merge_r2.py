@@ -336,7 +336,7 @@ def _html_files(out):
 
 
 def test_r5_no_page_of_a_paid_build_says_not_on_sale(paid_site):
-    # the Tester's grep: "Not on sale yet\|Coming soon; join the waitlist\|Join the waitlist — $39", widened
+    # the Tester's grep: "Not on sale yet\|Coming soon; join the waitlist\|Join the waitlist — US$39", widened
     hits = [(rel, d) for rel, h in _html_files(paid_site["out"]) for _, _, d in L.not_on_sale_claims(L.readable_text(h), rel)]
     assert hits == []
 
@@ -345,7 +345,7 @@ def test_r5_no_page_of_a_paid_build_says_not_on_sale(paid_site):
                                   "/for-traders/", "/start/", "/for-traders/thanks/"])
 def test_r5_trader_blocks_sell_in_a_paid_build(paid_site, path):
     h = open(os.path.join(paid_site["out"], path.strip("/"), "index.html"), encoding="utf-8").read()
-    assert 'href="/pricing/#last-step">Get the report for $39</a>' in h   # af52207: buy buttons open the pay panel
+    assert 'href="/pricing/#last-step">Get the report for US$39</a>' in h   # af52207: buy buttons open the pay panel
     assert 'product" value="waitlist"' not in h and 'id="wl"' not in h   # the waitlist form is gone
     assert "/for-traders/#waitlist" not in h
 
@@ -353,7 +353,7 @@ def test_r5_trader_blocks_sell_in_a_paid_build(paid_site, path):
 def test_r5_flag_off_build_keeps_the_waitlist(built_site):
     for path in ("tools/trade-stats", "tools/lot-size-calculator", "tools/prop-challenge-simulator", "for-traders"):
         h = open(os.path.join(built_site["out"], path, "index.html"), encoding="utf-8").read()
-        assert "Join the waitlist — $39 founding price" in h and "Not on sale yet" in h, path
+        assert "Join the waitlist — US$39 founding price" in h and "Not on sale yet" in h, path
         assert 'data-on-sale="false"' in h or path == "for-traders"
 
 

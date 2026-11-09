@@ -169,9 +169,10 @@ def test_no_page_points_to_the_owners_legal_name_or_says_no_sales_tax(mp):
 
 def test_price_rows_tax_included(mp):
     byp = text(read(mp, "pricing/index.html"))
-    assert ("one time (founding price: for the first 100 buyers, then US$49). Any sales tax, VAT or GST is included in this price: "
-            "Link works it out from your billing address and shows it on your receipt. Total: $39 USD.") in byp
-    assert "Total $39 USD, any tax included, paid on Link’s secure page (Stripe)." in byp
+    # 8 Nov 2026 (owner): "then US$49" is hidden (prices.json rules.after_founding_shown = false)
+    assert ("one time (founding price for the first 100 buyers). Any sales tax, VAT or GST is included in this price: "
+            "Link works it out from your billing address and shows it on your receipt. Total: US$39.") in byp
+    assert "Total US$39, any tax included, paid on Link’s secure page (Stripe)." in byp
     assert "Payment In full at checkout, on Link’s secure payment page, run by Stripe" in byp
     fr = text(read(mp, "fr/avant-de-payer/index.html"))
     assert "Taxes Les taxes de vente, la TVA ou la TPS applicables sont comprises dans le prix" in fr
@@ -182,8 +183,8 @@ def test_price_rows_tax_included(mp):
 
 def test_price_rows_tax_added(mp_added):
     byp = text(read(mp_added, "pricing/index.html"))
-    assert "Sales tax, VAT or GST may be added, depending on where you live" in byp and "Total: $39 USD plus any such tax." in byp
-    assert "Total $39 USD plus any sales tax, VAT or GST, paid on Link’s secure page (Stripe)." in byp
+    assert "Sales tax, VAT or GST may be added, depending on where you live" in byp and "Total: US$39 plus any such tax." in byp
+    assert "Total US$39 plus any sales tax, VAT or GST, paid on Link’s secure page (Stripe)." in byp
     fr = text(read(mp_added, "fr/avant-de-payer/index.html"))
     assert "peuvent s’ajouter selon votre lieu de résidence" in fr and "plus les taxes applicables" in fr
     assert "may be added on top" in text(read(mp_added, "terms/index.html"))
@@ -244,10 +245,10 @@ def test_managed_build_lints_clean(mp, monkeypatch, tmp_path):
 
 def test_non_managed_build_keeps_todays_words(plain):
     byp = text(read(plain, "pricing/index.html"))
-    assert "No sales tax is charged. Total: $39 USD." in byp and "Payment Card, through Stripe's checkout page." in byp
+    assert "No sales tax is charged. Total: US$39." in byp and "Payment Card, through Stripe's checkout page." in byp
     assert f"Seller {FAKE['seller_legal_name']}, doing business as donttrade (Ontario, Canada)" in byp
     assert "Service provider" not in byp and "Link’s" not in byp
-    assert "Total $39 USD, paid on Stripe’s page." in byp
+    assert "Total US$39, paid on Stripe’s page." in byp
     terms = read(plain, "terms/index.html")
     assert 'id="reseller"' not in terms and 'id="link-support"' not in terms
     assert "the field shown at checkout" in text(terms)

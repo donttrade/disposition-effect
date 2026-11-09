@@ -23,7 +23,7 @@ import lint as L  # noqa: E402
 from test_legal import FAKE, all_html, build, paid_env, private_with, same_tree, toml_with  # noqa: E402
 
 BOX = "PO Box 4417 STN Main, Zzqxville ON K9Z 9Z9"   # Canada Post style, with a station qualifier
-EMAIL = "donttrade.research@gmail.com"                # [site] contact_email, the business email
+EMAIL = "research@donttrade.ca"                       # [site] contact_email, the business email (8 Nov 2026: was the gmail address)
 LINE_TEXT = f"donttrade · Ontario, Canada · {BOX} · {EMAIL}"
 SHORT_TEXT = f"donttrade · Ontario, Canada · {EMAIL} · Business details"   # 25 Oct: every page off ADDRESS_LINE_PATHS
 

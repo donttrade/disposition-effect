@@ -101,7 +101,7 @@ def test_sample_matches_reference_and_sends_nothing(browser, built_site):
     assert page.is_visible("#ts-teaser")
     assert "Example data" in body   # 29 Oct (owner): the one word "Example" labels sample data
     assert page.get_attribute("#ts-teaser a.btn", "href") == "/for-traders/#waitlist"
-    assert "Join the waitlist — $39 founding price" in page.inner_text("#ts-teaser")
+    assert "Join the waitlist — US$39 founding price" in page.inner_text("#ts-teaser")
     ctx.close()
 
 

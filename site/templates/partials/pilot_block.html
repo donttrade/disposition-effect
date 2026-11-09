@@ -24,6 +24,6 @@
     <label for="pc-read">I’ve read the {{ pilot.name }} scope and terms. <span class="req">(required)</span></label></div>
   <p class="small" id="pc-read-links">Read them first: <a href="/for-firms/#what-it-costs">the {{ pilot.name }} scope</a> and <a href="/terms/#trial">the {{ pilot.name }} terms</a>.</p>
   <p><button class="btn" type="submit">Send and see the payment options</button></p>
-  <p class="small muted">{{ pilot.name }}: {{ pilot.price_usd|usd }} USD, one per firm. The next page shows a card link and an email option; paying now is optional. We use these details only to reply. <a href="/privacy/">Privacy notice</a></p>
+  <p class="small muted">{{ pilot.name }}: {{ pilot.price_usd|usd }}, one per firm. The next page shows a card link and an email option; paying now is optional. We use these details only to reply. <a href="/privacy/">Privacy notice</a></p>
 </form>
 <p class="mailto-line">Prefer email? Write to <a href="mailto:{{ site.contact_email }}?subject={{ ('Pilot request — [your firm]')|urlencode }}">{{ site.contact_email }}</a>.</p>

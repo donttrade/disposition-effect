@@ -104,6 +104,21 @@ def on(tmp_path_factory):
 
 
 @pytest.fixture(scope="module")
+def shown(tmp_path_factory):
+    """8 Nov 2026 (owner): the committed prices.json hides "then US$49" (rules.after_founding_shown = false) until about
+    80 buyers. This build flips the switch back on, so the 6 Nov approved-form tests still hold for the day it returns."""
+    r, out = build(tmp_path_factory.mktemp("shown"), "s", prices=prices_with(after_founding_shown=True))
+    assert r.returncode == 0, r.stderr
+    return out
+
+
+@pytest.fixture
+def shown_prices(shown, monkeypatch):
+    monkeypatch.setenv("DT_PRICES_JSON", str(shown.parent / "s.prices.json"))   # lint reads the prices file the build used
+    return shown
+
+
+@pytest.fixture(scope="module")
 def ended(tmp_path_factory):
     r, out = build(tmp_path_factory.mktemp("ended"), "e", prices=prices_ended())
     assert r.returncode == 0, r.stderr
@@ -135,7 +150,8 @@ def test_a_future_terms_date_still_fails_without_dt_today(tmp_path):
 
 
 # ===================================================================== A1 founding price
-def test_open_state_words_the_next_price_only_with_the_first_100(off):
+def test_open_state_words_the_next_price_only_with_the_first_100(shown_prices):
+    off = shown_prices   # 8 Nov: the switch is on in this build only
     for rel in ("pricing", "terms", "before-you-pay", "fr/conditions", "fr/avant-de-payer"):
         t = text_of(off / rel / "index.html")
         assert re.search(r"\$\s?49|49,00", t), rel
@@ -144,8 +160,8 @@ def test_open_state_words_the_next_price_only_with_the_first_100(off):
     assert "39,00 $ US pour les 100 premiers acheteurs" not in text_of(off / "pricing" / "index.html")
     byp = text_of(off / "before-you-pay" / "index.html")
     # 7 Nov: the committed site is Managed Payments with tax included (tests/test_managed_payments.py has both settings)
-    assert ("$39 USD, one time (founding price: for the first 100 buyers, then US$49). Any sales tax, VAT or GST is included in "
-            "this price: Link works it out from your billing address and shows it on your receipt. Total: $39 USD") in byp
+    assert ("US$39, one time (founding price: for the first 100 buyers, then US$49). Any sales tax, VAT or GST is included in "
+            "this price: Link works it out from your billing address and shows it on your receipt. Total: US$39") in byp
     fr = text_of(off / "fr" / "avant-de-payer" / "index.html")
     assert "paiement unique (prix de fondateur : pour les 100 premiers acheteurs, puis 49,00 $ US)" in fr.replace(" ", " ")
     assert lint_ok(off) == []
@@ -159,6 +175,42 @@ def test_49_appears_nowhere_else_in_the_open_state(off):
         if re.search(r"\$\s?49(?![\d,.])|49,00", t):
             assert re.search(r"first 100|100 premiers", t), p
         assert not re.search(r"regular price|standard price|was \$|instead of \$", t, re.I), p
+
+
+def test_hidden_next_price_is_on_no_page_and_the_founding_line_stays(off):
+    """8 Nov 2026 (owner): rules.after_founding_shown = false. No page names US$49, not even in the approved form;
+    the founding price and its first-100 limit stay, with no next price beside them."""
+    assert PRICES["rules"]["after_founding_shown"] is False and PRICES["rules"]["founding_open"] is True
+    for p in off.rglob("index.html"):
+        if p.relative_to(off).parts[0] == "research":      # frozen study text
+            continue
+        t = text_of(p, main_only=False)
+        assert not re.search(r"\$\s?49(?![\d,.])|49,00|forty-nine|quarante-neuf", t, re.I), p   # "then US$249" (Flag Check) is fine
+    assert "US$39 founding price for the first 100 buyers." in text_of(off / "pricing" / "index.html")
+    assert "US$39, one time (founding price for the first 100 buyers). Any sales tax" in text_of(off / "before-you-pay" / "index.html")
+    terms = text_of(off / "terms" / "index.html")
+    assert "US$39, one time, for the first 100 buyers. This is the founding price." in terms
+    assert "The founding price ends with the 100th paid order" in terms
+    fr = text_of(off / "fr" / "conditions" / "index.html").replace(" ", " ").replace(" ", " ")
+    assert "paiement unique, pour les 100 premiers acheteurs. C’est le prix de fondateur." in fr
+    assert "(prix de fondateur pour les 100 premiers acheteurs)" in text_of(off / "fr" / "avant-de-payer" / "index.html")
+    assert lint_ok(off) == []
+
+
+def test_hidden_next_price_fails_even_in_the_approved_form():
+    ok = "<p>US$39 for the first 100 buyers, then US$49.</p>"
+    assert "hidden" in B.founding_problem(ok, True, 100, 49, shown=False)
+    assert "hidden" in B.founding_problem("<p>forty-nine dollars later</p>", True, 100, 49, shown=False)
+    assert B.founding_problem("<p>US$39 founding price for the first 100 buyers.</p>", True, 100, 49, shown=False) is None
+    assert B.founding_problem("<p>US$490 pilot, US$149 a case.</p>", True, 100, 49, shown=False) is None
+    assert "crossed out" in B.founding_problem("<p><s>$49</s></p>", True, 100, 49, shown=False)
+    # lint reads the switch from the committed prices.json (false): the approved form is a lint problem now
+    assert any(p[0] == "claim:founding_price" for p in L.founding_claims(ok, "/x/"))
+
+
+def test_after_founding_shown_must_be_a_boolean(tmp_path):
+    r, _ = build(tmp_path, "x", prices=prices_with(after_founding_shown="no"))
+    assert r.returncode == 1 and "after_founding_shown" in r.stderr
 
 
 def test_founding_problem_catches_wrong_forms():
@@ -180,10 +232,10 @@ def test_the_old_retired_list_no_longer_holds_49_but_99_stays():
 def test_ended_state_shows_49_as_the_price_and_passes_lint(ended, monkeypatch):
     monkeypatch.setenv("DT_PRICES_JSON", str(ended.parent / "e.prices.json"))   # lint reads the prices file the build used
     pr = text_of(ended / "pricing" / "index.html")
-    assert "$49 USD, once" in pr and "for the first 100 buyers" not in pr
-    assert "Get the report for $49" in pr
+    assert "US$49 once" in pr and "for the first 100 buyers" not in pr   # 8 Nov: "US$49 once · re-test included"
+    assert "Get the report for US$49" in pr
     terms = text_of(ended / "terms" / "index.html")
-    assert "Price: $49 USD, one time. The founding price of $39 ended with the 100th paid order." in terms
+    assert "Price: US$49, one time. The founding price of US$39 ended with the 100th paid order." in terms
     assert "39,00" not in text_of(ended / "fr" / "avant-de-payer" / "index.html").split("Prix détaillé")[1][:60]
     assert lint_ok(ended) == []
     # JSON-LD price = the button price, and it is the next price
@@ -213,7 +265,7 @@ def test_terms_count_rule_is_the_owners(off):
     assert "comptées ensemble sur les pages de paiement en français et en anglais" in f and "Une commande remboursée garde son rang." in f
     # EN and FR carry the same numbers
     nums = lambda s: sorted(set(re.findall(r"\b(?:100|39|49)\b", s.replace(",00", ""))))
-    assert nums(t[t.index("Price: $39"):][:900]) == nums(f[f.index("Rapport donttrade sur le revenge trading : "):][:900])
+    assert nums(t[t.index("Price: US$39"):][:900]) == nums(f[f.index("Rapport donttrade sur le revenge trading : "):][:900])
 
 
 def test_promotion_wording_appears_only_when_codes_are_switched_on(off, on):
@@ -230,17 +282,17 @@ def test_home_hero_and_trust_line(off):
     t = text_of(off / "index.html")
     assert "Is revenge trading costing you? Get the dollar figure." in t
     # 7 Nov (free-check release): the hero leads with the free check; the trust line gains "Example report"
-    assert ("Check your trade file free: see how many trades you opened right after a loss or a losing run. The $39 report "
+    assert ("Check your trade file free: see how many trades you opened right after a loss or a losing run. The US$39 report "
             "totals the dollars on them and tests whether it’s more than chance.") in t
     assert "Pre-registered research · Example report · Your file stays in your browser · 14-day refund" in t
     assert "Needs the time of each trade. A file with dates but no times gets no tested habits." in t
-    assert "Get the report for $39" in t and "See the full example report" in t
+    assert "Get the report for US$39" in t and "See the full example report" in t
     assert 'href="/research/">Pre-registered research</a>' in h
     assert "Dollar totals describe what happened in your file." in t
 
 
 def test_home_button_price_is_the_pricing_price(ended):
-    assert "Get the report for $49" in text_of(ended / "index.html")
+    assert "Get the report for US$49" in text_of(ended / "index.html")
 
 
 def test_habit_counts_agree_on_home_and_pricing_and_come_from_one_place(off, tmp_path):
@@ -597,7 +649,7 @@ def test_partners_page_numbers_come_from_prices_json(on):
     t = text_of(on / "partners" / "index.html")
     p = PRICES["partner"]
     assert f"{p['discount_percent']}% off" in t and f"{p['commission_percent']}%" in t and "31 January 2027" in t
-    assert "$25" in t and "14 days after the order" in t
+    assert "US$25" in t and "14 days after the order" in t
     for word in ("beta", "fake", "demo"):
         assert word not in t.lower()
 
@@ -777,7 +829,7 @@ APPROVED_FR = "pour les 100 premiers acheteurs, puis 49,00\u00a0$\u00a0US"
     "<p>Then 49 USD.</p>", "<p>Then 49,00\u00a0$\u00a0US.</p>", "<p>Then 49 $ US.</p>", "<p>Was $49 before.</p>",
     "<p>for the first 100 buyers, thereafter US$49</p>", "<p>launch offer, first 100 buyers: US$49</p>",
     "<p>pour les 100 premiers acheteurs, ensuite 49,00\u00a0$\u00a0US</p>"])
-def test_any_other_mention_of_the_next_price_fails_while_the_founding_price_is_open(plant):
+def test_any_other_mention_of_the_next_price_fails_while_the_founding_price_is_open(plant, shown_prices):
     ok = f"<p>US$39 {APPROVED_EN}.</p><p>{APPROVED_FR}.</p>"
     assert B.founding_problem(ok, True, 100) is None
     assert "approved form" in B.founding_problem(ok + plant, True, 100), plant
@@ -792,7 +844,8 @@ def test_a_crossed_out_next_price_fails_open_or_ended(plant):
     assert "crossed out" in B.founding_problem(plant, False, 100)
 
 
-def test_every_page_that_shows_the_next_price_uses_the_approved_wording(off):
+def test_every_page_that_shows_the_next_price_uses_the_approved_wording(shown_prices):
+    off = shown_prices   # 8 Nov: the switch is on in this build only
     shown = []
     for rel, phrase in (("pricing", APPROVED_EN), ("terms", APPROVED_EN), ("before-you-pay", APPROVED_EN),
                         ("fr/conditions", APPROVED_FR), ("fr/avant-de-payer", APPROVED_FR)):
@@ -806,12 +859,14 @@ def test_every_page_that_shows_the_next_price_uses_the_approved_wording(off):
         assert B.founding_problem(p.read_text(encoding="utf-8"), True, 100) is None, p
 
 
-def test_the_approved_phrase_is_pinned_in_the_macro_and_the_terms(off):
+def test_the_approved_phrase_is_pinned_in_the_macro_and_the_terms(shown):
+    off = shown   # 8 Nov: the switch is on in this build only
     macro = open(os.path.join(SITE, "templates", "partials", "price_line.html"), encoding="utf-8").read()
-    assert "for the first {{ rules.founding_limit }} buyers, then US{{ r.after_price_usd|usd }}" in macro
+    # 8 Nov 2026: build.usd writes "US$49" itself, so the macro no longer adds "US"
+    assert "for the first {{ rules.founding_limit }} buyers, then {{ r.after_price_usd|usd }}" in macro
     assert "pour les {{ rules.founding_limit }} premiers acheteurs, puis {{ r.after_price_usd|usd_fr }}" in macro
     terms = text_of(off / "terms" / "index.html")
-    assert "$39 USD, one time, for the first 100 buyers, then US$49, one time, for every buyer after that. The first price is the founding price." in terms
+    assert "US$39, one time, for the first 100 buyers, then US$49, one time, for every buyer after that. The first price is the founding price." in terms
     fr = text_of(off / "fr" / "conditions" / "index.html").replace("\u00a0", " ")
     assert "39,00 $ US, paiement unique, pour les 100 premiers acheteurs, puis 49,00 $ US, paiement unique, pour chaque acheteur suivant. Le premier prix est le prix de fondateur." in fr
 
@@ -1084,7 +1139,7 @@ def test_misuse_bullet_is_unambiguous_flag_on_only(on, off):
 @pytest.mark.parametrize("plant", ["<p>The test costs 49 dollars.</p>", "<p>forty-nine dollars after launch</p>", "<p>Forty nine US dollars.</p>",
                                    "<p>49 dollars US</p>", "<p>quarante-neuf dollars après.</p>", "<p>quarante-neuf dollars américains</p>",
                                    "<p>49 dollars américains</p>"])
-def test_spelled_out_next_price_fails_while_the_founding_price_is_open(plant):
+def test_spelled_out_next_price_fails_while_the_founding_price_is_open(plant, shown_prices):
     ok = f"<p>US$39 {APPROVED_EN}.</p><p>{APPROVED_FR}.</p>"
     assert B.founding_problem(ok, True, 100) is None
     assert "approved form" in B.founding_problem(ok + plant, True, 100), plant

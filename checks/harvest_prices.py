@@ -14,6 +14,8 @@ import re
 import sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# prices.json "flagcheck": the dollar amounts a page may show (counts, hours and days are not amounts)
+FLAGCHECK_AMOUNT_KEYS = ("case_founding_usd", "case_list_usd", "pilot_usd", "monthly_usd", "extra_case_usd")
 
 
 def allowed_amounts(prices, include_retired=False):
@@ -34,6 +36,10 @@ def allowed_amounts(prices, include_retired=False):
     for k in ("founding_price_usd", "list_price_usd", "monthly_minimum_usd"):
         if study.get(k) is not None:
             out.add(study[k])
+    fc = prices.get("flagcheck") or {}   # 8 Nov 2026: Flag Check, invoiced (no product entry: no Stripe link)
+    for k in FLAGCHECK_AMOUNT_KEYS:
+        if fc.get(k) is not None:
+            out.add(fc[k])
     recheck = prices["rules"].get("recheck")
     if recheck:   # retired 29 Oct (one product); kept for an older prices.json
         pct = recheck["percent_of_engagement"]
