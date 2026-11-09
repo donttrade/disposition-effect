@@ -37,6 +37,11 @@ export function decodeBytes(bytes) {
     if (isXlsx(bytes)) fail('E_ENCODING', 'It is an Excel (.xlsx) file. Save it as CSV (File → Save as → CSV), then drop it here.');
     fail('E_ENCODING', 'It is a zip file. Open it and drop the CSV inside.');
   }
+  const b0 = bytes[0], b1 = bytes[1], b2 = bytes[2], b3 = bytes[3];
+  const pic = (b0 === 0x89 && b1 === 0x50) || (b0 === 0xff && b1 === 0xd8) || (b0 === 0x47 && b1 === 0x49 && b2 === 0x46)
+    || (n >= 12 && bytes[4] === 0x66 && bytes[5] === 0x74 && bytes[6] === 0x79 && bytes[7] === 0x70);
+  if (pic) fail('E_ENCODING', 'It is a picture. The check reads the trade history file your platform exports (CSV or HTML report): look for Export or Report in its history page.');
+  if (b0 === 0x25 && b1 === 0x50 && b2 === 0x44 && b3 === 0x46) fail('E_ENCODING', 'It is a PDF. Export the trade history as CSV or as an HTML report instead, then drop that file here.');
   let enc = null;
   let start = 0;
   if (n >= 3 && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) { enc = 'utf-8'; start = 3; }
